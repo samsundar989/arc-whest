@@ -46916,3 +46916,21 @@ nonlinear engine with a compact equivalent are subsequent discriminators,
 not claims from this identity-storage check. Run only tiny CPU work directly;
 default preflight and fresh Skeptic review are required before accepting the
 new IMPORTANT probe. It does not gate F21 DESIGN, DECIDE or release.
+
+**B1 tiny storage result, pending independent review.** New isolated
+`local_sim/p2_compact_fullrank_bridge_b1.py` SHA256
+`21bf86f859554bb43a23bcd07dbcf6c53ffc8a0a99ea71ad2482a5a26f43e154`
+produced `experiments/2026-09-12_b1_fullrank_bridge.json` SHA256
+`4833ace417fd02ca35e1a6a1681772eafa326cb02ad60e1f4cdef57c8881b36b`.
+The fixed n4/depth4 full-rank identity-source storage pass has **318/318**
+checks within `1e-6`; largest normalized entry error is **3.35512e-8**.
+Layer 2 reads two live ages with nonzero D21, incoming scalar c4 is nonzero,
+and layer 3 exercises final mean-only pruning. Direct compact/dense D3 and
+masked D21 slices, linear transport, all stored ages, births, pre/post state,
+and final output are compared to the frozen L2 path. The source pins L2 SHA
+`390bc226bbf517df0110facfc0dc91c78ef670e8a49368a536cabf630057d1db`.
+This is **storage-boundary parity with frozen `_layer` still executing all
+nonlinear Wick/centering/K4 steps**, not an independently implemented compact
+nonlinear engine, actual full-rank QR, compression cost or score. No
+registered data or candidate file was touched. The corrected Full preflight
+1090 is queued; a fresh Skeptic must review this scoped result before use.

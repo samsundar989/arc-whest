@@ -1,0 +1,3348 @@
+{
+  "fixture": "explicit_asymmetric_n4_depth4_fullrank_identity_source",
+  "scope": "storage bridge only; frozen L2 nonlinear engine; no QR/compression/score/truth",
+  "tolerance": 1e-06,
+  "normalization": "abs(got-want)/max(1,abs(want)) elementwise",
+  "source_sha256": {
+    "probe": "21bf86f859554bb43a23bcd07dbcf6c53ffc8a0a99ea71ad2482a5a26f43e154",
+    "frozen_L2": "390bc226bbf517df0110facfc0dc91c78ef670e8a49368a536cabf630057d1db",
+    "compact_reference": "81f8bbbbe60a617cf0533f13657440ed35feb9bb5d0bc0fbf8956ef002febdd2"
+  },
+  "weights": [
+    [
+      [
+        0.85,
+        -0.31,
+        0.22,
+        0.14
+      ],
+      [
+        0.16,
+        0.74,
+        -0.28,
+        0.39
+      ],
+      [
+        -0.24,
+        0.18,
+        0.91,
+        -0.17
+      ],
+      [
+        0.37,
+        -0.13,
+        0.26,
+        0.68
+      ]
+    ],
+    [
+      [
+        0.72,
+        0.25,
+        -0.34,
+        0.19
+      ],
+      [
+        -0.21,
+        0.88,
+        0.17,
+        -0.27
+      ],
+      [
+        0.33,
+        -0.16,
+        0.79,
+        0.23
+      ],
+      [
+        0.11,
+        0.29,
+        -0.25,
+        0.84
+      ]
+    ],
+    [
+      [
+        0.93,
+        -0.19,
+        0.13,
+        -0.22
+      ],
+      [
+        0.27,
+        0.67,
+        -0.31,
+        0.12
+      ],
+      [
+        -0.14,
+        0.36,
+        0.82,
+        0.21
+      ],
+      [
+        0.25,
+        -0.23,
+        0.18,
+        0.77
+      ]
+    ],
+    [
+      [
+        0.76,
+        0.17,
+        -0.29,
+        0.31
+      ],
+      [
+        -0.26,
+        0.94,
+        0.16,
+        -0.11
+      ],
+      [
+        0.21,
+        -0.24,
+        0.71,
+        0.38
+      ],
+      [
+        0.18,
+        0.32,
+        -0.13,
+        0.86
+      ]
+    ]
+  ],
+  "activity": [
+    {
+      "layer": 0,
+      "incoming_ages": 0,
+      "incoming_c4_abs": 0.0,
+      "D3_max_abs": 0.0,
+      "D21_max_abs": 0.0
+    },
+    {
+      "layer": 1,
+      "incoming_ages": 1,
+      "incoming_c4_abs": 0.11055822670459747,
+      "D3_max_abs": 0.15904702246189117,
+      "D21_max_abs": 0.12627479434013367
+    },
+    {
+      "layer": 2,
+      "incoming_ages": 2,
+      "incoming_c4_abs": 0.2045392394065857,
+      "D3_max_abs": 0.3781753480434418,
+      "D21_max_abs": 0.1182260736823082
+    },
+    {
+      "layer": 3,
+      "incoming_ages": 3,
+      "incoming_c4_abs": 0.4124600291252136,
+      "D3_max_abs": 0.5408857464790344,
+      "D21_max_abs": null
+    }
+  ],
+  "checks": [
+    {
+      "layer": 0,
+      "field": "incoming_tower.presence",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "incoming_mu",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "incoming_cov",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "incoming_c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "preactivation_mu",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "preactivation_cov",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "preactivation_c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "linear_transport.count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "D3_compact",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "D3_dense",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "D21_compact_masked",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "D21_dense_masked",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "postactivation_mu",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "postactivation_c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "postactivation_cov",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "postactivation_tower.k",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "postactivation_tower.A_D",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "postactivation_tower.A_L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "postactivation_tower.w2b",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "postactivation_tower.M_presence",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "postactivation_tower.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "postactivation_tower.age0.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "postactivation_tower.age0.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "postactivation_tower.age0.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "postactivation_tower.age0.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "postactivation_tower.age0.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "postactivation_tower.age0.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "postactivation_tower.age0.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "postactivation_tower.age0.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "birth.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "birth.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "birth.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "birth.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "storage_roundtrip.k",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "storage_roundtrip.A_D",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "storage_roundtrip.A_L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "storage_roundtrip.w2b",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "storage_roundtrip.M_presence",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "storage_roundtrip.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "storage_roundtrip.age0.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "storage_roundtrip.age0.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "storage_roundtrip.age0.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "storage_roundtrip.age0.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "storage_roundtrip.age0.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "storage_roundtrip.age0.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "storage_roundtrip.age0.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "storage_roundtrip.age0.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "incoming_tower.k",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "incoming_tower.A_D",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "incoming_tower.A_L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "incoming_tower.w2b",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "incoming_tower.M_presence",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "incoming_tower.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "incoming_tower.age0.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "incoming_tower.age0.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "incoming_tower.age0.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "incoming_tower.age0.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "incoming_tower.age0.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "incoming_tower.age0.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "incoming_tower.age0.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "incoming_tower.age0.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "incoming_mu",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "incoming_cov",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "incoming_c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "preactivation_mu",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "preactivation_cov",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "preactivation_c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "linear_transport.count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "linear_transport.age1.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "linear_transport.age1.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 1.2466162491175936e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "linear_transport.age1.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "linear_transport.age1.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 1.3026655643066931e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "linear_transport.age1.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "linear_transport.age1.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "linear_transport.age1.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "linear_transport.age1.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "D3_compact",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 8.584333827110768e-09,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "D3_dense",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 8.584333827110768e-09,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "D21_compact_masked",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 8.372010820711928e-09,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "D21_dense_masked",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 8.372010820711928e-09,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_mu",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_cov",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.k",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.A_D",
+      "shape": [
+        4,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.A_L",
+      "shape": [
+        4,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.w2b",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.M",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.age1.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.age1.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.age1.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.age1.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.age1.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.age1.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.age1.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.age1.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.age0.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.age0.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.age0.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.age0.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.age0.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.age0.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.age0.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "postactivation_tower.age0.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "birth.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "birth.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "birth.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "birth.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.k",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.A_D",
+      "shape": [
+        4,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.A_L",
+      "shape": [
+        4,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.w2b",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.M",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.age1.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.age1.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.age1.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.age1.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.age1.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.age1.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.age1.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.age1.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.age0.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.age0.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.age0.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.age0.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.age0.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.age0.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.age0.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "storage_roundtrip.age0.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.k",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.A_D",
+      "shape": [
+        4,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.A_L",
+      "shape": [
+        4,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.w2b",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.M",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.age1.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.age1.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.age1.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.age1.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.age1.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.age1.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.age1.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.age1.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.age0.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.age0.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.age0.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.age0.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.age0.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.age0.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.age0.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_tower.age0.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_mu",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_cov",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming_c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "preactivation_mu",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "preactivation_cov",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "preactivation_c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "linear_transport.count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "linear_transport.age2.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "linear_transport.age2.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 5.705478312023615e-09,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "linear_transport.age2.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 1.858580289670897e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "linear_transport.age2.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 1.3635819362534107e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "linear_transport.age2.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "linear_transport.age2.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "linear_transport.age2.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "linear_transport.age2.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "linear_transport.age1.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "linear_transport.age1.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 7.551117675586028e-09,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "linear_transport.age1.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "linear_transport.age1.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 1.2164180551721415e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "linear_transport.age1.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "linear_transport.age1.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "linear_transport.age1.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "linear_transport.age1.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "D3_compact",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 1.765946899823234e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "D3_dense",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 1.765946899823234e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "D21_compact_masked",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 4.578585774406285e-09,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "D21_dense_masked",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 4.578585774406285e-09,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_mu",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_cov",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.k",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.A_D",
+      "shape": [
+        4,
+        12
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.A_L",
+      "shape": [
+        4,
+        12
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.w2b",
+      "shape": [
+        12
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.M",
+      "shape": [
+        4,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age2.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age2.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age2.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age2.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age2.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age2.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age2.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age2.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age1.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age1.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age1.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age1.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age1.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age1.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age1.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age1.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age0.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age0.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age0.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age0.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age0.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age0.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age0.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "postactivation_tower.age0.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "birth.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "birth.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "birth.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "birth.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.k",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.A_D",
+      "shape": [
+        4,
+        12
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.A_L",
+      "shape": [
+        4,
+        12
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.w2b",
+      "shape": [
+        12
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.M",
+      "shape": [
+        4,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age2.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age2.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age2.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age2.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age2.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age2.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age2.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age2.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age1.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age1.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age1.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age1.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age1.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age1.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age1.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age1.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age0.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age0.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age0.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age0.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age0.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age0.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age0.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "storage_roundtrip.age0.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.k",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.A_D",
+      "shape": [
+        4,
+        12
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.A_L",
+      "shape": [
+        4,
+        12
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.w2b",
+      "shape": [
+        12
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.M",
+      "shape": [
+        4,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age2.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age2.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age2.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age2.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age2.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age2.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age2.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age2.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age1.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age1.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age1.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age1.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age1.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age1.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age1.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age1.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age0.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age0.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age0.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age0.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age0.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age0.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age0.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_tower.age0.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_mu",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_cov",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming_c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "preactivation_mu",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "preactivation_cov",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "preactivation_c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age3.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age3.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 7.779557664733261e-09,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age3.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 1.8143613056409436e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age3.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 1.4253989932822009e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age3.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age3.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age3.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age3.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age2.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age2.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 3.80460327131793e-09,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age2.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 3.355123046056008e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age2.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 8.276396290529675e-09,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age2.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age2.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age2.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age2.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age1.age",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age1.A",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 7.009303637506292e-09,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age1.P",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age1.Z",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 2.5164400119237484e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age1.L",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age1.s",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age1.e",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "linear_transport.age1.w2",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "D3_compact",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 3.0894311109364025e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "D3_dense",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 3.0894311109364025e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "postactivation_mu",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "postactivation_c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "final_tower_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "all_layer_means",
+      "shape": [
+        4,
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "final_output",
+      "shape": [
+        4
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "two_ages_at_nonfinal_D21",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "nonzero_two_age_D21",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "nonzero_carried_scalar_K4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    }
+  ],
+  "check_count": 318,
+  "failed_count": 0,
+  "max_normalized_error": 3.355123046056008e-08,
+  "last_layer_D21": "intentionally absent under frozen final mean-only shortcut"
+}
