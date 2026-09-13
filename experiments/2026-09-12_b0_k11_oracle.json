@@ -1,0 +1,113 @@
+{
+  "status": "PASS",
+  "scope": "one-step off-diagonal D21 covariance only",
+  "arithmetic": "exact fractions; finite signed polynomial moment enumeration",
+  "source_comparison": {
+    "frozen_L2": "estimator_k3_strassen_L2.py:843-927, table D21 scalar 1 then symmetrization",
+    "compact": "local_sim/p2_compact_reference.py:815-817, D21 scalar 1/4"
+  },
+  "finding": "frozen L2 contributes 1/2 of each orientation; current compact contributes 1/4",
+  "fixtures": [
+    {
+      "fixture": "forward_only",
+      "signed_atoms": 7,
+      "oracle_K11_D21": [
+        [
+          "0",
+          "63/200",
+          "0"
+        ],
+        [
+          "63/200",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0"
+        ]
+      ],
+      "L2_table_is_oracle": true,
+      "current_compact_is_half_oracle": true,
+      "compact_disagrees_where_expected": true,
+      "diagonal_mask_zero": true
+    },
+    {
+      "fixture": "reverse_only",
+      "signed_atoms": 7,
+      "oracle_K11_D21": [
+        [
+          "0",
+          "-8/63",
+          "0"
+        ],
+        [
+          "-8/63",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0"
+        ]
+      ],
+      "L2_table_is_oracle": true,
+      "current_compact_is_half_oracle": true,
+      "compact_disagrees_where_expected": true,
+      "diagonal_mask_zero": true
+    },
+    {
+      "fixture": "signed_both_orientations",
+      "signed_atoms": 15,
+      "oracle_K11_D21": [
+        [
+          "0",
+          "2369/12600",
+          "0"
+        ],
+        [
+          "2369/12600",
+          "0",
+          "637/3564"
+        ],
+        [
+          "0",
+          "637/3564",
+          "0"
+        ]
+      ],
+      "L2_table_is_oracle": true,
+      "current_compact_is_half_oracle": true,
+      "compact_disagrees_where_expected": true,
+      "diagonal_mask_zero": true
+    },
+    {
+      "fixture": "zero_offdiagonal_and_mask",
+      "signed_atoms": 1,
+      "oracle_K11_D21": [
+        [
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0"
+        ]
+      ],
+      "L2_table_is_oracle": true,
+      "current_compact_is_half_oracle": true,
+      "compact_disagrees_where_expected": true,
+      "diagonal_mask_zero": true
+    }
+  ],
+  "limits": "No full recurrence, source birth, scalar K4, rank compression, score, or deployment claim."
+}

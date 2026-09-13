@@ -46825,3 +46825,35 @@ or compress yet. A later full-rank bridge must separately reproduce parent
 Wick tables, scalar K4, centering, birth subtraction and all ages. Require
 default preflight and independent Skeptic before treating this probe as an
 accepted instrument; it does not gate F21 DESIGN or DECIDE.
+
+**B0 tiny result, pending independent review.** The standalone exact-rational
+`local_sim/test_p2_compact_k11_oracle.py` (SHA256
+`92fcb0ec4cd83d154c6faae02ca34bc58343c475ba43dd9dc1b32195096a0d90`)
+ran directly in 0.108 s and wrote
+`experiments/2026-09-12_b0_k11_oracle.json` (SHA256
+`8cf8733cbb860c2138b33c13a93caf913e33a6c15846aeb0b082c921e62a8644`).
+Four signed/zero/off-mask fixtures passed: independent finite signed moment
+enumeration gives `1/2` per oriented D21 derivative product, matching the
+inspected frozen L2 table; compact's present `1/4` yields half that isolated
+contribution. The signed atoms are an algebraic moment functional, not a
+probability law or a full network. **Knowledge delta:** this is a concrete
+one-step mismatch to address in the full-rank bridge, not evidence that a
+coefficient-only patch restores the recurrence. Scalar K4, Wick/centering,
+births and full-age state remain to bridge. No compact source was edited and
+no compression or score was measured. Default preflight and Skeptic remain
+required before accepting the IMPORTANT probe.
+
+**Pre-submission optimization review — required Full preflight.** Run the
+accepted 16-step repository gate once after committing B0, because F21
+promotion and the new IMPORTANT probe require the Full/default checks. Reuse
+all existing immutable fixtures and official stack; no duplicate new dataset
+loader, training pass, custom worker pool, cache, prefetch or batching is
+introduced. Keep shape parity, carrier, envelope and official subprocess
+smoke steps; skipping them would omit the specified Full evidence. CPU-only,
+no GPU. Prior local default jobs peaked 3.0-3.3 GiB; allow the extra Full
+tests by declaring **6 GiB RAM, 0 VRAM, 2 CPUs**. The gate writes a complete
+workerq transcript plus its separate `-Log` verdict file; if interrupted,
+rerun the entire gate from a clean committed tree rather than reusing a
+partial verdict. This is baseline/instrument validation, not certification
+of the F21 candidate bytes. Queue on the local live worktree to preserve
+source hashes and capture the process-local PowerShell execution policy.
