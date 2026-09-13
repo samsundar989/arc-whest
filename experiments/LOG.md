@@ -47621,3 +47621,19 @@ arms/rows are sequential, but takes roughly fivefold longer. Declare
 peak, on local live-worktree with absolute live register/output paths.
 Observe all score rows and the binding `gate=1.05`, t interval; no
 coefficient fitting, score-model change or variant selection is allowed.
+
+**F21 own-parent provenance review during P09 mint.** Independent read-only
+`experiments/2026-09-12_f21/f21_provenance_audit.md` SHA256
+`2a3e574e27ab8d11c30043561afb23f1eaad8ce9df72bde3f53202a36a6cec17`
+recomputed the L4 archive/member, F21 candidate, exact single `_dslice21`
+diff, staged file, tar and every member hash. It ACCEPTS the narrow
+own-team-parent derivation with no added participant compact code, while
+explicitly not certifying upstream L4 ancestry or organizer eligibility.
+The prepared submission tar SHA `4f3cc6...` contains the full ARC MIT notice
+and matching manifest, but its receipt still says
+`validated_for_submission: false`. If the same tar later becomes a public
+prize release, a separate explicit participant license/grant for team-authored
+parts is needed in addition to ARC's notice; that later release is not
+authorized here. The auditor read the official L4 submission page only for
+account/round metadata, not its scoring rows. No P09/public F21 labels or
+vault were used for this provenance verdict.
