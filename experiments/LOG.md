@@ -47698,3 +47698,27 @@ the NPZ arrays unopened. It disclosed its extra ledger-integrity archive
 hash, which did not expose labels or reserve a scored read. The exact
 allowed scorer argv is copied into the Skeptic verdict. Any abort after
 reservation spends P09; no second attempt on those networks is authorized.
+
+**P09 single DECIDE score read launched and exhausted.** Immediately before
+workerq submission, `truth_reads.py --block P09 --json` showed cap 1,
+spent 0, reads `[]`; `decide_P09.json` did not exist and all three source
+hashes plus scorer SHA matched the frozen values. Workerq **1099** started
+`f21_score.py --tier decide` on the **local live worktree** with the exact
+Skeptic-reviewed argv, original L4 primary, frozen F21 candidate, original
+L2 context, absolute live register/output, and repo-relative finalized P09
+truth. The previously recorded optimization review governs this heavy,
+nonpreemptible job: **8 GiB RAM, 0 VRAM, 2 CPUs**, no priority override.
+The live `truth_reads` register now contains exactly one P09 reservation
+`d1d706695e69404e` and its completed counterpart, both bound to artifact
+SHA `82229948c1b2ca4373901f63664dd6c98f112ec45130b7642bfb652dd4d4825c`,
+instrument SHA `68b162ef20562cfed423f0105df98ad7a4f45f65058025834ba25bb446d5fedb`,
+consumer `local_sim/f21_score.py`, and the absolute intended output.
+The cap is now **spent 1/1, exhausted**; no retry on P09 is permitted.
+The saved live receipt JSON SHA256 is
+`0c73b6a17288e4732828c32757e26aaf5a6a27f218c54e03f61cffe202bcaaee`;
+initial workerq receipt SHA256
+`6ea4df3c851c461ecba6c8338873cbef38f28c0893bf6d843a5b0d16c9437104`.
+Job 1099 is still running the first original-L4 arm. No P09 score or
+promotion verdict exists at this entry. An independent live-receipt audit
+is in progress; final statistical Skeptic will review only the complete
+terminal raw report.

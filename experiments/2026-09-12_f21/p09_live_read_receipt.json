@@ -1,0 +1,46 @@
+﻿{
+  "block": "P09",
+  "tier": "SINGLE_USE",
+  "cap": 1,
+  "spent": 1,
+  "remaining": 0,
+  "exhausted": true,
+  "reads": [
+    {
+      "block": "P09",
+      "artifact": "experiments/2026-09-12_f21/truth_P09.npz",
+      "artifact_sha256": "82229948c1b2ca4373901f63664dd6c98f112ec45130b7642bfb652dd4d4825c",
+      "consumer": "local_sim/f21_score.py",
+      "instrument_sha256": "68b162ef20562cfed423f0105df98ad7a4f45f65058025834ba25bb446d5fedb",
+      "purpose": "F21 fresh DECIDE truth",
+      "ts": "2026-09-13T03:33:28Z",
+      "status": "reserved",
+      "reservation": "d1d706695e69404e",
+      "result_artifact": "C:\\Users\\samsu\\Documents\\arc-whest\\experiments\\2026-09-12_f21\\decide_P09.json",
+      "note": "",
+      "backfilled": false,
+      "timestamp_source": "automatic_runtime",
+      "receipt_created_utc": "2026-09-13T03:33:28Z",
+      "receipt_completed_utc": "",
+      "elapsed_seconds": null
+    },
+    {
+      "block": "P09",
+      "artifact": "experiments/2026-09-12_f21/truth_P09.npz",
+      "artifact_sha256": "82229948c1b2ca4373901f63664dd6c98f112ec45130b7642bfb652dd4d4825c",
+      "consumer": "local_sim/f21_score.py",
+      "instrument_sha256": "68b162ef20562cfed423f0105df98ad7a4f45f65058025834ba25bb446d5fedb",
+      "purpose": "F21 fresh DECIDE truth",
+      "ts": "2026-09-13T03:33:28Z",
+      "status": "completed",
+      "reservation": "d1d706695e69404e",
+      "result_artifact": "C:\\Users\\samsu\\Documents\\arc-whest\\experiments\\2026-09-12_f21\\decide_P09.json",
+      "note": "",
+      "backfilled": false,
+      "timestamp_source": "automatic_runtime",
+      "receipt_created_utc": "2026-09-13T03:33:28Z",
+      "receipt_completed_utc": "2026-09-13T03:33:28Z",
+      "elapsed_seconds": 0.17828269995516166
+    }
+  ]
+}

@@ -33,8 +33,10 @@ passed 12/12, and P09-registry default preflight 1097 passed 12/12. P09 is
 registered and claimed exactly once (128 seeds); workerq **1098** completed
 the two-`2**24`-replica truth mint and its SHA is host-finalized. Replica
 disagreement ratio is 1.0102 and predicted midpoint truth floor about
-`2.2442e-9`, below the 10% noise bar against exposed L4 error. No P09
-score read exists. The frozen selection
+`2.2442e-9`, below the 10% noise bar against exposed L4 error. Workerq
+**1099** is now running the sole fresh three-arm DECIDE scorer; the live P09
+read receipt is completed and the block is exhausted, with no score result
+yet. The frozen selection
 is solely F21 SHA `d77dab0e...` against original L4. The separate compact
 B0/B1/B2/B3 probes establish tiny full-rank recurrence parity only, not
 compression or score. P08 remains exhausted. No vault/public F21 labels,
@@ -44,7 +46,8 @@ fresh DECIDE result or submission approval exists.
 
 ## Next measured action: fresh P09 DECIDE
 
-Make the single protected score read on finalized P09 truth.
+When workerq 1099 finishes, audit all 128 paired rows, per-arm failures,
+truth floors, source hashes and the live receipt. The precommitted
 `competition_score.decide(gate=1.05,
 interval="t")` on paired arithmetic F21-versus-original-L4 scores is the
 promotion gate. L2 is robustness context, not the primary comparator. Do
