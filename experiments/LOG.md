@@ -48329,3 +48329,40 @@ receipt SHA256
 This is affected-path preparation, not a candidate certificate. P10 remains
 unclaimed; Samuel's new predictions remain pending, so **no P10 truth or
 scorer workload may start yet**.
+
+**Pre-submission optimization review — conditional P10 two-replica truth
+producer.** After Samuel's new predictions are recorded, claim P10 exactly
+once and run the accepted `local_sim/p2_truth.py` on the same 128-network,
+two-`2**24`-replica shape as successful P09 workerq 1098. P10 truth cannot
+reuse P09's labels because the networks must be fresh; the implementation,
+mint, sample chunk `2**16`, single canonical weight generator, one GPU
+stream and final/all-layer variance accumulation can be reused without a
+second loader. Both replicas and all 128 networks are required by the fixed
+noise/statistical gate; reducing passes, batch or precision would change
+the evidence. No additional workers, cache, prefetch or host/GPU transfer
+optimization has established equivalence, so retain the successful P09
+defaults. Run on RTX 5090 through workerq with **8 GiB RAM, 6 GiB VRAM,
+4 CPUs, 1 GPU**: identical P09 producer peaked 4,557.46 MiB host and
+2,528 MiB VRAM in 5,084.84 s. Use the already-claimed host-ledger mode and
+an exclusive fresh output path; finalize exact NPZ SHA on the host only after
+successful completion. If interrupted, do not score a partial file; recover
+with the same claimed span and a distinct diagnostic path, never claim again.
+No protected P10 read occurs until the floor screen and finalization pass.
+
+**Pre-submission optimization review — conditional P10 fresh scorer.** After
+truth finalization and the pre-score floor check, run the pinned P10 scorer
+once under workerq on three fixed arms. Reuse its one NPZ load, canonical
+weight regeneration and existing `lifecycle_eval`/`competition_score`
+functions; no duplicate truth loader, model fitting, cache, prefetch, worker
+pool or coefficient sweep. The three passes are necessary for original L4,
+F21 and L2 on common random networks; sharing large weight arrays across
+arms risks extra RAM without a proved equivalent evaluator, so keep the
+accepted sequential program. CPU-only with **10 GiB RAM, 0 VRAM, 2 CPUs,
+0 GPUs**: P09 scorer reached 5,851.27 MiB after its first two arms; allow
+additional L2/materialization headroom rather than underdeclaring to get
+admitted. Output is exclusive-create and P10's protected truth read is
+single-use, so an interruption/failure is preserved, not retried on P10.
+Do not checkpoint partial scores or suppress failure categories. Local
+timing caps are disabled only as preregistered accuracy-domain deviations;
+candidate-specific official subprocess and op-count deployment checks remain
+after a valid decision.
