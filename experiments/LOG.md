@@ -47938,3 +47938,34 @@ read is authorized by this repair. Future heavy checks require the separate
 optimization review and workerq submission. Baseline is the pinned P09 scorer
 SHA above and terminal workerq 1099 log/receipt; the candidate remains SHA
 `d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`.
+
+**P09 terminal synthesis and instrument implementation.** Independent
+`p09_result_skeptic.md` is REJECT for promotion evidence, not a statistical
+loss or scientific kill. The terminal workerq log SHA is
+`95f322e9514f9687be5d6bf140c8947c702ce13842420d468ba627deec32bf14`;
+receipt SHA is
+`78ede92ea62793d30629a426576976ff9ea0f4c22671ead502028dfe53b0370e`.
+Workerq 1099 failed exit 1 after 17,713.76 s and 5,851.27 MiB peak RAM,
+under the declared 8,192 MiB. Original L4 and fused L4 reached 128/128;
+the fused arm contained at least one failed lifecycle row, and the scorer
+aborted before L2, score vectors and `decide()`. P09 spent 1/1; no result JSON
+exists. The P09 truth and public split were not reopened. The read-only
+`p09_failure_forensics.md` pins the irrecoverable category. The minimal repair
+now prints arm, row index, input seed, four failure flags, error type and wall
+timings to stderr before the unchanged raise; no MSE, truth floor, prediction
+or score is printed. A synthetic failed row with sentinel MSE/noise emitted
+the expected flags and neither sentinel; a synthetic clear row emitted nothing.
+`py_compile`, `git diff --check` and portability 103/103 passed. Candidate
+SHA remains `d77dab0e...`.
+
+**Pre-submission optimization review — affected default preflight for failure
+diagnostic.** The only affected source is the F21 diagnostic branch. Reuse
+Full 1092's unaffected Full-only steps and the existing F21 cap evidence;
+run one 12-step default preflight on current committed bytes. This reuses the
+existing small test fixtures and loaders without duplicating the large P09
+truth, adds no workers, prefetch, caches or batch changes, and makes no GPU
+placement or checkpoint change. The prior comparable default 1100 took
+365.94 s with 3,848.73 MiB peak. Request **6 GiB RAM, 0 VRAM, 2 CPUs** via
+workerq, CPU-only. Preserve a complete transcript; if interrupted, restart
+to a new transcript path. No protected labels, public split or vault are read
+by this preflight. Do not bypass the queue.

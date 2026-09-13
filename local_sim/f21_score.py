@@ -210,6 +210,27 @@ def _pair(a: np.ndarray, b: np.ndarray) -> dict:
     }
 
 
+def _report_lifecycle_failures(name: str, evidence: list[le.EvidenceRow]) -> bool:
+    """Emit only failure metadata, never labels or partial score rows."""
+    failed = [row for row in evidence if row.failed]
+    for row in failed:
+        diagnostic = {
+            "arm": name,
+            "index": row.index,
+            "input_seed": row.input_seed,
+            "budget_exhausted": row.budget_exhausted,
+            "time_exhausted": row.time_exhausted,
+            "residual_exhausted": row.residual_exhausted,
+            "combined_exhausted": row.combined_exhausted,
+            "error_code": row.error_code,
+            "wall_time_s": row.wall_time_s,
+            "residual_wall_time_s": row.residual_wall_time_s,
+        }
+        print("lifecycle failure " + json.dumps(diagnostic, sort_keys=True),
+              file=sys.stderr, flush=True)
+    return bool(failed)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--tier", choices=("design", "decide"), required=True)
@@ -287,7 +308,7 @@ def main() -> int:
         if _sha(path) != expected_sha:
             raise ValueError(f"{name} source changed during evaluation")
         rows = [r.to_row() for r in evidence]
-        if any(r.failed for r in evidence):
+        if _report_lifecycle_failures(name, evidence):
             raise ValueError(f"{name} had a local non-residual lifecycle failure")
         vectors = _score_vectors(rows, truth_prov["local_samples_total"])
         arms[name] = {"evidence": evidence, "provenance": prov, "rows": rows,
