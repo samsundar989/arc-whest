@@ -196,6 +196,12 @@ DECISION_BLOCKS = [
                                  "robustness context only; no fitting or selection. "
                                  "Register after exposed P01 DESIGN passed and "
                                  "independent Skeptic accepted; claim once before mint."),
+    ("P10", 40_913_010_000, 128, "PHASE-2 fresh single-use DECIDE block for "
+                                 "the preregistered post-P09 F21 versus original-L4 "
+                                 "paired arithmetic score gate. Original L2 is "
+                                 "robustness context only; no fitting or selection. "
+                                 "Claim once before mint; local score-only wall "
+                                 "and residual limits are disabled per the P10 contract."),
 ]
 
 # --- single-use blocks -------------------------------------------------------
@@ -217,6 +223,7 @@ SINGLE_USE_BLOCKS = {
     # below.
     "P08": "the one Phase-2 T2 held-out read — allocated and claimed 2026-09-10, SPENT",
     "P09": "the one fresh Phase-2 F21 DECIDE read — registered 2026-09-12, unspent",
+    "P10": "the one fresh Phase-2 F21 DECIDE read — registered 2026-09-13, unspent",
 }
 
 # --- READ-COUNTED ARTIFACTS, owed --------------------------------------------
