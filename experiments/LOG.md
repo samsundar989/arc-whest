@@ -47059,3 +47059,18 @@ use the frozen L2 nonlinear `_layer`; the result does not establish an
 independent compact nonlinear recurrence, compression, cost, or score.
 The IMPORTANT verdict remains provisional pending Full preflight and an
 independent Skeptic review of this source, contract, and raw artifact.
+
+**Pre-submission optimization review — Full preflight requeue after B2.**
+The source tree is now committed at `4e75bea`; job 1090 was cancelled while
+queued and never ran. Reuse the existing official stack, cached immutable
+fixtures, and the accepted 16-step gate. There is one normal loader per test;
+no duplicate dataset, worker pool, prefetch, extra batch or GPU pass is
+needed. Do not skip the shape, envelope, carrier or subprocess checks:
+those are required evidence. Full preflight has no checkpoint; restart the
+whole gate and retain a new transcript/verdict path. Prior comparable Full
+job 628 measured 10,580.75 MiB process-tree RAM and the cancelled 1089
+reached 7,713.76 MiB during shape parity. Request **16 GiB RAM, 0 VRAM,
+2 CPUs** on local workerq, leaving about 5.7 GiB margin over the known
+Full peak. Current queue shows enough capacity for admission while DESIGN
+1091 runs; workerq remains the admission authority. This checks shared
+instruments and shipped baseline, not candidate F21 bytes.
