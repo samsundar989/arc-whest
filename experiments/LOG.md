@@ -47883,3 +47883,14 @@ are saved. B4 source/raw hashes remain `748e72ce...`/`a5c6295c...`.
 independent B4 Skeptic is checking this terminal gate before its final
 scoped verdict. The original B4 numeric parity result remains **FAIL**;
 preflight does not convert it to a pass. F21 P09 scorer remains separate.
+
+**B4 final scoped independent verdict.** The fresh Skeptic updated
+`experiments/2026-09-12_b4_skeptic.md` SHA256
+`dc278f2496920c497dc9fd62ec2f3473b3ddb1f80065aa916240ca27555eaeb3`
+to **ACCEPT the fixed n8/depth6 parity-gate failure**, after independently
+checking 1100's 12/12 default pass and unchanged source/raw hashes.
+It does not identify whether deeper numeric drift comes from mixed f32/f64
+arithmetic or recurrence logic. The full-rank bridge is therefore not
+validated for compression at this deeper fixture; no compression was tested
+and no general scientific kill is claimed. B4 is closed at that scope and
+does not block the F21 first candidate.
