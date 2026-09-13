@@ -47390,3 +47390,40 @@ and receipt SHA256
 No local absolute wall time is generalized from that host. Workerq 1074,
 the duplicate remote quick job, still shows cancellation requested/running
 without a log; it must not be mistaken for a current candidate check.
+
+**Corrected affected-tree default preflight 1095 GREEN.** The committed
+B3/LMG6/renamed-artifact tree passed **12/12** default steps under workerq,
+exit 0, runtime 370.16 s, peak 3,080.13 MiB with 6 GiB RAM/0 VRAM/2 CPUs
+declared. Step 11's candidate-memory consumer mutation/replay battery,
+including unexpected-stderr refusal, passed after the report-name fix.
+The `-Log` verdict transcript is
+`experiments/2026-09-13_lmg6_preflight_default_verdicts.txt` SHA256
+`d1159d1e42aba56e5a85f1b6b2117c6967036275f70f4f305c218eba6f23fdc3`,
+workerq log SHA256
+`6b1699f6de489c8188f66137a5d6b76adbd90f1178dff64d490ffaf7f6cfe892`,
+workerq receipt SHA256
+`a9f8e3c87dc80bbd98b91eb3d84ea3443ffaeee102d15f1b332f87134390dbbe`.
+Together with Full 1092 on the unchanged baseline/Full-only paths, this
+closes the required preflight process gate for B0/B1/B2/B3 and LMG6 within
+their previously scoped tiny claims. It still does not certify F21 candidate
+bytes or a fresh Linux cap result.
+
+**Pre-submission optimization review — fresh LMG6 Linux cap run.** Rerun
+the same no-label F21 `f64_readonly` 1024x16, 8,192 MiB WSL gate under the
+new committed warning filter to a distinct `f21_linux_cap_v6.json` path
+outside the historical replay glob. Reuse the installed Linux packages,
+one canonical weight mint, three same-worker predictions and the necessary
+9 GiB capped/uncapped allocation controls. There is no duplicate data
+loader, worker pool, cache, prefetch, changeable batch, GPU use or
+unnecessary scoring pass. The three repeats and controls are required
+evidence, not removable throughput overhead; this instrument has no
+checkpoint, so failure restarts to another immutable path. Prior job 1093
+completed in 341 s and measured candidate child peak RSS 3,676,954,624
+bytes/VmPeak 5,644,836,864 bytes, but workerq's Windows-parent meter saw
+only about 42 MiB and misses the WSL child. The positive control allocates
+9 GiB. Retain the conservative **16 GiB RAM, 0 VRAM, 2 CPUs** workerq
+request; no queue-time underdeclaration. Keep candidate SHA
+`d77dab0e...`, instrument SHA `463b8560...`, package versions, cap,
+weights, repeat count and all 23 existing checks fixed. An independent
+post-run Skeptic must examine the actual Linux artifact before any formal
+memory claim.
