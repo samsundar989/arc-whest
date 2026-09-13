@@ -48376,3 +48376,14 @@ Do not checkpoint partial scores or suppress failure categories. Local
 timing caps are disabled only as preregistered accuracy-domain deviations;
 candidate-specific official subprocess and op-count deployment checks remain
 after a valid decision.
+
+**2026-09-13 P10 host claim, after Samuel predictions and before mint.** Commit
+`ce853f7` recorded Samuel's three new "I don't know" predictions before any
+P10 result. `seed_ledger.claim_range` then wrote exactly one SINGLE_USE claim
+for `P10[40_913_010_000..40_913_010_127]`, consumer
+`local_sim/p2_truth.py`, artifact
+`experiments/2026-09-13_p10/truth_P10.npz`, date 2026-09-13. No P10 truth
+file or score/read exists yet. The temporary ledger `--check` complaint that
+this new artifact lacks a finalized hash is expected until the workerq truth
+producer succeeds; it is not a completed validation pass. The claim is
+one-way and will be committed before submitting the producer.
