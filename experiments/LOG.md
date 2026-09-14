@@ -48615,3 +48615,17 @@ No mini result exists yet. The Full local refusal is retained regardless
 of this run's outcome; a clean `n_failed_mlps: 0` is required for the
 normal submission-approval path. An independent Full-certificate Skeptic
 is reviewing its terminal evidence while mini runs.
+
+**Independent Full-certificate Skeptic ACCEPTS scoped refusal.** The
+fresh-context verdict
+`experiments/2026-09-13_p10/f21_full_cert_skeptic.md`, commit `d66d0fe`,
+rehashed the report/log/receipt, exact F21 source and Linux v6 memory report,
+reconciled all 64 Full checks, 41/41 math, 20/22 local, 1/1 modeled-server,
+and the two official capped smoke rows. It ACCEPTS the exact-byte Full
+**REFUSED** disposition and REJECTS normal release certification at this
+gate. It notes the smoke's f32 `928,424,083,046` FLOPs must not be confused
+with the f64-readonly `928,457,637,478` grader-twin ledger. The two failed
+zeroed outputs carry no accuracy claim; local residual seconds do not prove
+graded-server failure, and the 14,091-op forecast cannot erase the local
+refusal. The separate registered capped 100-row mini is running; no waiver,
+submission or designation follows from this review.
