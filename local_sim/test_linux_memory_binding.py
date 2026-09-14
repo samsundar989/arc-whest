@@ -324,8 +324,12 @@ def test_replay():
           replay["n_reports"] >= 7, str(replay["n_reports"]))
     check("every historical source artifact remained byte-identical",
           replay["source_reports_unchanged"], "sha256 before == after")
+    legacy_dirs = ("experiments/2026-08-31_wp0cd_certify/",
+                   "experiments/2026-08-31_wp1_carrier/",
+                   "experiments/2026-09-03_wp18_canary/",
+                   "experiments/2026-09-05_slice1/")
     legacy_rows = [row for row in replay["reports"]
-                   if "2026-09-10_stage0_cert_memory" not in row["report"]]
+                   if row["report"].startswith(legacy_dirs)]
     verdicts = [row["consumer_verdict"] for row in legacy_rows]
     check("all seven pre-repair reports are incomplete under the v5 consumer",
           len(legacy_rows) == 7 and verdicts == ["INCOMPLETE"] * 7,
