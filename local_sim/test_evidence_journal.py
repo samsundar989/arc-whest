@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import dataclasses
 import io
 import json
 import os
@@ -58,6 +59,16 @@ def _journal(root, fixture):
         instrument_files=[ej.__file__, scorer.__file__, le.__file__],
         truth_files=prov["files"], expected_per_arm=4,
         config={"test_only": True, "no_protected_truth": True})
+
+
+def _valid_row(fixture, arm='L4', index=0):
+    paths, prov, seeds, truth, noise = fixture
+    return dataclasses.asdict(le.EvidenceRow(
+        index=index, input_seed=seeds[index], estimator_seed=0,
+        candidate=str(paths[arm][0]), candidate_sha256=paths[arm][1],
+        truth_sha256=le._array_sha(truth), width=2, depth=1, budget=1e8,
+        flops_used=0., n_ops=0., mse=.01, zero_prediction_mse=.01,
+        gt_noise=1e-6, residual_wall_time_s=0., wall_time_s=0.))
 
 
 def run_synthetic(root, mode="ok"):
@@ -162,8 +173,7 @@ class JournalTests(unittest.TestCase):
     def test_duplicate_incomplete_and_binding_mismatches(self):
         fixture = _fixture(self.root)
         paths, prov, seeds, truth, noise = fixture
-        row = {"index": 0, "input_seed": 0, "candidate_sha256": paths["L4"][1],
-               "truth_sha256": le._array_sha(truth)}
+        row = _valid_row(fixture)
         with _journal(self.root, fixture) as journal:
             journal.bind(seeds, le._array_sha(truth), prov)
             journal.append_row("L4", row)
@@ -207,8 +217,7 @@ class JournalTests(unittest.TestCase):
             journal.bind(seeds, le._array_sha(truth), prov)
             for arm in paths:
                 for i, seed in enumerate(seeds):
-                    journal.append_row(arm, {"index": i, "input_seed": seed,
-                        "candidate_sha256": paths[arm][1], "truth_sha256": le._array_sha(truth)})
+                    journal.append_row(arm, _valid_row(fixture, arm, i))
             instrument = next(iter(journal.header["instrument_hashes"]))
             journal.header["instrument_hashes"][instrument] = "0" * 64
             with self.assertRaisesRegex(ValueError, "instrument hash"):
@@ -220,8 +229,7 @@ class JournalTests(unittest.TestCase):
         paths, prov, seeds, truth, noise = fixture
         with _journal(self.root, fixture) as journal:
             journal.bind(seeds, le._array_sha(truth), prov)
-            row = {"index": 0, "input_seed": 0, "candidate_sha256": paths["L4"][1],
-                   "truth_sha256": le._array_sha(truth)}
+            row = _valid_row(fixture)
             journal.append_row("L4", row)
             # Corrupt writer bypasses the API but computes a valid chain.
             journal._append("row", {"arm": "L4", "row": row, "failure_categories": []})
@@ -244,6 +252,39 @@ class JournalTests(unittest.TestCase):
             journal.bind(seeds, le._array_sha(truth), prov)
             self.assertEqual(journal.binding["truth_provenance"]["files"][0]["sha256"],
                              prov["files"][0]["sha256"])
+
+    def test_complete_row_schema_mutations_refused(self):
+        fixture = _fixture(self.root)
+        paths, prov, seeds, truth, noise = fixture
+        for index, mutation in enumerate(('missing_flags', 'identity_only', 'tagged_nan', 'int_flag', 'nan', 'negative')):
+            root = self.root / mutation
+            changed_fixture = _fixture(root)
+            with _journal(root, changed_fixture) as journal:
+                paths, prov, seeds, truth, noise = changed_fixture
+                journal.bind(seeds, le._array_sha(truth), prov)
+                for arm in paths:
+                    for i in range(4):
+                        row = _valid_row(changed_fixture, arm, i)
+                        if i == 0 and arm == 'L4':
+                            if mutation == 'missing_flags': del row['nonfinite']
+                            elif mutation == 'identity_only': row = {k: row[k] for k in ('index','input_seed','candidate_sha256','truth_sha256')}
+                            elif mutation == 'tagged_nan': row['mse'] = {'nonfinite_float': 'nan'}
+                            elif mutation == 'int_flag': row['time_exhausted'] = 0
+                            elif mutation == 'nan': row['mse'] = float('nan')
+                            elif mutation == 'negative': row['flops_used'] = -1
+                        # Simulate a corrupted writer with a valid hash chain.
+                        journal._append('row', {'arm': arm, 'row': row, 'failure_categories': []})
+                with self.assertRaises(ValueError): journal.assert_complete()
+
+    def test_decide_checks_spent_read_before_any_truth_hash(self):
+        args = argparse.Namespace(tier='decide', truth='synthetic-no-file.npz', out=str(self.root/'out.json'))
+        final = argparse.Namespace(block='P10', artifact=args.truth, artifact_sha256='1'*64)
+        with mock.patch.object(scorer.seed_ledger, 'finalizations', return_value=[final]), \
+             mock.patch.object(scorer, '_sha', side_effect=AssertionError('premature truth hash')), \
+             mock.patch.object(scorer, '_read', side_effect=PermissionError('SPENT')) as read:
+            with self.assertRaisesRegex(PermissionError, 'SPENT'):
+                scorer._labels(args, self.root, self.root/'reads', self.root/'ledger')
+            read.assert_called_once()
 
 
 def write_artifacts(directory):

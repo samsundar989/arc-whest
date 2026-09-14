@@ -1,6 +1,20 @@
 # CURRENT_STATE.md — read this first
 
-## Current decision — September 14 research review
+## Current execution — September 14 E14 prerequisites
+
+Samuel authorized implementing the reviewed plan, including parallel bounded
+tasks and local commits, while preserving new strategic predictions and per-entry
+submission approval. See [E14 stage/status record](E14_EXECUTION_STATUS.md).
+Stage0 repairs are implemented and undergoing fresh independent review and
+queued validation. B4 f64 passed841/841 on its existing fixed fixture; its
+Skeptic found nonfinite failure serialization incomplete, so acceptance is
+pending repair. Actual-f32 output conformance failed3/4 declared tiny cases;
+QR versus operation-order localization is underway. No compression or new
+accuracy measurement may rely on that failed prerequisite. No new candidate
+has earned promotion. Root estimator.py, frozen archives, HUMAN_MODEL, spent
+blocks and vault touch state are unchanged. F21#330950 remains primary control.
+
+## Reviewed strategy — September 14 research review
 
 Samuel requested and received a multi-agent repository/validation/literature review
 and a live competition review through his Chrome. The returned

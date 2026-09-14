@@ -49131,3 +49131,45 @@ Command: `workerq submit --project arc-whest --gpus 0 --ram 6 --vram 0 --cpus 2
 powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File
 scripts/preflight.ps1 -Log
 C:/Users/samsu/Documents/arc-whest/experiments/2026-09-14_e14/preflight_default.txt`.
+
+**E14 independent infrastructure review, REJECT then repair underway.** Fresh
+Skeptic atfd3bd0f reconstructed the release index and verified stored crash
+outcomes, but successfully passed identity-only rows, missing flags, nonfinite
+MSE tags and integer-zero flags through the journal's COMPLETE validator. It
+also found the older DECIDE `_labels` prehash before the protected-read cap.
+Schema/type/finite-success checks now reject those mutations while retaining
+failed diagnostics; `_labels` uses only ledger metadata before `_read`, then
+compares the authorized receipt hash. Eleven tests pass in
+`journal_tests_skeptic_fix.log`, including real DECIDE-entry ordering with reads
+and hashes forbidden. These fixes still require independent recheck.
+
+**Queue evidence and snapshot failure.** Job1217 completed all3 fixed F21
+target-branch numerical cases (layers4,10,14) at committed bar2e-10; printed worst
+output drift MSEs are3.44e-13,2.55e-13,1.06e-13. These are numerical
+differences without truth, not prediction errors or score gains. Job1219 remains
+queued under shared resources. The truth pilot actually implements two independent
+NumPy reference passes (one per declared chunk) as well as two production passes;
+the earlier review's wording of one reference pass was inaccurate. Both are
+needed for per-chunk arithmetic comparison; resource peak is unchanged, expected
+runtime higher, thresholds and samples unchanged, no adaptive observations.
+
+Job1220 default preflight REFUSED steps7/9/12: git snapshot normalized historical
+CRLF source/artifacts. Live estimator SHA00240eb1e60810f5e9a6f743b8ad89a1533cfd8671c08e07525f1ed1de54d9ec
+became snapshot SHA1caa3752be56e8625ddb8b163ff8ffa853b110b18c2b25c71a53f261f42c9fb8;
+the bytes agree exactly after newline normalization. Historical ledger artifacts
+likewise changed only in the queue checkout. The live sources/artifacts were
+not changed to match the bad snapshot. Preserve transcript and terminal log.
+Rerun the same gate via workerq `--live-worktree` after freezing relevant source,
+with the same6/0/2GiB/CPU optimization review; record before/after source hashes.
+This changes execution location to preserve exact bytes, not a test or gate.
+No data claim/read or historical hash/anchor is modified to obtain a pass.
+
+**B4 backend provenance correction.** The initial f64 and f32 diagnostic runners
+resolved the historical local flopscope shim while reporting the installed package
+version. The f32 results are actual NumPy f32 arithmetic but not installed-backend
+proof. Initial source/raw artifacts remain committed7491d72 and2c6c503. New
+runners fail closed on shim import and record actual module paths. Real-f64
+v2 passed841/841; real-f32 still fails the output gate. QR/reference-order
+localization separately fails3/4 output cases while identity/reference-order
+controls are bit-identical4/4. These remain pending independent review; neither
+the failed QR path nor an identity-only dense wrapper licenses compression.

@@ -249,6 +249,34 @@ class EvidenceJournal:
 
 
 def _validate_row(header, binding, arm, row, seen):
+    # Identity alone is not evidence: absent flags and unavailable numerical
+    # telemetry must never be interpreted as a successful observation.
+    required = {
+        "index", "input_seed", "estimator_seed", "candidate", "candidate_sha256",
+        "truth_sha256", "width", "depth", "budget", "flops_used", "n_ops", "mse",
+        "zero_prediction_mse", "gt_noise", "residual_wall_time_s", "wall_time_s",
+        "budget_exhausted", "time_exhausted", "residual_exhausted",
+        "combined_exhausted", "error_code", "nonfinite",
+    }
+    if set(row) != required:
+        raise ValueError("incomplete or unknown EvidenceRow schema")
+    for key in ("budget_exhausted", "time_exhausted", "residual_exhausted",
+                "combined_exhausted", "nonfinite"):
+        if type(row[key]) is not bool:
+            raise ValueError("failure flags require exact booleans")
+    for key in ("index", "input_seed", "estimator_seed", "width", "depth"):
+        if type(row[key]) is not int or row[key] < 0:
+            raise ValueError("row identity/shape requires nonnegative integers")
+    if row['width'] == 0 or row['depth'] == 0:
+        raise ValueError("empty row shape")
+    if not isinstance(row['candidate'], str) or not isinstance(row['error_code'], str):
+        raise ValueError("row candidate/error requires strings")
+    if not failure_categories(row):
+        for key in ("budget", "flops_used", "n_ops", "mse", "zero_prediction_mse",
+                    "gt_noise", "residual_wall_time_s", "wall_time_s"):
+            value = row[key]
+            if type(value) not in (int, float) or not math.isfinite(value) or value < 0:
+                raise ValueError("successful row requires finite nonnegative " + key)
     if arm not in header["candidates"]:
         raise ValueError("unknown arm")
     seed = row["input_seed"]

@@ -142,13 +142,15 @@ def _labels(a: argparse.Namespace, live_root: Path, live_reads: Path,
     else:
         truth_path = Path(os.path.abspath(_ROOT / a.truth))
         truth_rel = os.path.relpath(truth_path, _ROOT).replace("\\", "/")
-        truth_sha = _sha(truth_path)
-        if not any(c.block == "P10" and c.artifact == truth_rel
-                   and c.artifact_sha256 == truth_sha
-                   for c in seed_ledger.finalizations(path=str(live_ledger))):
+        finalized = {c.artifact_sha256
+                     for c in seed_ledger.finalizations(path=str(live_ledger))
+                     if c.block == "P10" and c.artifact == truth_rel}
+        if not finalized:
             raise ValueError("P10 truth must be finalized in the seed ledger before reading")
         d, p = _read(a.truth, "P10", "F21 fresh DECIDE truth", a.out,
                      live_reads, live_ledger)
+        if p['sha256'] not in finalized:
+            raise ValueError("authorized P10 receipt differs from finalized truth hash")
         required = {"seeds", "means_r1", "means_r2", "gt_noise", "n_samples"}
         if required - d.keys():
             raise ValueError("P10 truth lacks required arrays")
