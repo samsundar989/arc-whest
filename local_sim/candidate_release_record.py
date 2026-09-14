@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 import tarfile
 
@@ -34,6 +35,52 @@ def pinned(ref, root):
     if sha(path) != ref['sha256']:
         raise ValueError('artifact hash mismatch: ' + ref['path'])
     return path
+
+
+def numerical_passes(summary, identity, scale, root):
+    """Reuse the canonical receipt consumer and bind every referenced byte."""
+    import certify_candidate as cert
+    old_scale = os.environ.get('ARC_WHEST_RAW_MSE')
+    try:
+        cases = summary['cases']
+        if not (summary['candidate_sha256'] == identity
+                and summary['instrument_sha256'] == sha(root / 'local_sim/candidate_numerical_e14.py')
+                and summary['raw_mse_scale'] == scale
+                and summary['bar'] == .01 * scale and summary['passed'] is True
+                and len(cases) == 3 and {r['case'] for r in cases} == {0, 1, 3}):
+            return False
+        candidate = pinned({'path': summary['candidate'], 'sha256': identity}, root)
+        candidate_name = str(candidate.relative_to(root)).replace('\\', '/')
+        edge_sha = sha(root / 'local_sim/edge_cases.py')
+        for row in cases:
+            if not (type(row['case']) is int and type(row['returncode']) is int
+                    and row['returncode'] == 0 and row['source_unchanged'] is True
+                    and row['receipt_errors'] == [] and row['declared_bar'] == .01 * scale
+                    and row['raw_mse_scale'] == scale):
+                return False
+            path = pinned({'path': row['receipt_path'], 'sha256': row['receipt_sha256']}, root)
+            payload = json.loads(path.read_text(encoding='utf-8'))
+            # Compare JSON types too: Python's True == 1 must not hide mutations.
+            if json.dumps(payload, sort_keys=True) != json.dumps(row['receipt'], sort_keys=True):
+                return False
+            raw_env = payload['details']['raw_mse_env']
+            if type(raw_env) is not str or float(raw_env) != scale:
+                return False
+            os.environ['ARC_WHEST_RAW_MSE'] = raw_env
+            errors = cert.validate_edge_case_receipt(
+                payload, case='permutation:%d' % row['case'], group='permutation',
+                case_index=row['case'], candidate=candidate_name, candidate_sha256=identity,
+                edge_cases_sha256=edge_sha, weights_mode='f64_readonly')
+            if errors or payload['all_passed'] is not True:
+                return False
+        return True
+    except (KeyError, TypeError, ValueError, OSError):
+        return False
+    finally:
+        if old_scale is None:
+            os.environ.pop('ARC_WHEST_RAW_MSE', None)
+        else:
+            os.environ['ARC_WHEST_RAW_MSE'] = old_scale
 
 
 def build(recipe, root=ROOT):
@@ -119,6 +166,10 @@ def build(recipe, root=ROOT):
             'runtime_environment': ev.get('runtime_environment'),
         }
     inv = cert['sections'].get('invariants', {})
+    numerical = docs.get('numerical')
+    numerical_ok = False
+    if numerical:
+        numerical_ok = numerical_passes(numerical, identity, scale, root)
     memory = docs.get('linux_memory')
     if memory and memory['candidate_sha256'] != identity:
         raise ValueError('memory candidate mismatch')
@@ -127,7 +178,10 @@ def build(recipe, root=ROOT):
             'package_verified': package, 'domains': domains, 'local_mini': local_mini,
             'numerical_requirement': {'raw_mse_scale': scale, 'bar': .01 * scale,
                                       'historical_invariant_metadata': inv.get('permutation_bar'),
-                                      'status': 'REQUIRES_CANDIDATE_SPECIFIC_EVIDENCE_AT_DECLARED_SCALE'},
+                                      'status': ('THREE_TARGET_PERMUTATION_CASES_PASS' if numerical_ok else
+                                                 'REQUIRES_CANDIDATE_SPECIFIC_EVIDENCE_AT_DECLARED_SCALE'),
+                                      'evidence': refs.get('numerical'),
+                                      'scope': 'Only the declared target-shape permutation cases; not full numerical/contract certification'},
             'official_packages': cert['sections']['package_identity']['distribution_versions'],
             'counted_ledger': cert['sections'].get('grader_twin_arm'),
             'linux_memory': {'historical_consumer': cert['sections'].get('linux_memory_gate'),

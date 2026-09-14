@@ -1,0 +1,8 @@
+worker-q: job #1217 starting at 2026-09-14T07:55:30.226463+00:00
+worker-q: cwd=C:\Users\samsu\.local\state\gpuq\snapshots\1217\job-1217
+worker-q: snapshot=git 5836f8cb9e9e7aeab53a79551ad9b1a8e0a700be
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['C:/Users/samsu/Documents/arc-whest/.venv/Scripts/python.exe', 'local_sim/candidate_numerical_e14.py', '--candidate', 'estimator_k3_strassen_L4_f21.py', '--sha256', 'd77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94', '--out-dir', 'C:/Users/samsu/Documents/arc-whest/experiments/2026-09-14_e14/f21_numerical']
+worker-q: ------------------------------------------------------------
+worker-q: ------------------------------------------------------------
+worker-q: job #1217 SUCCEEDED (exit code 0) at 2026-09-14T08:03:33.941140+00:00

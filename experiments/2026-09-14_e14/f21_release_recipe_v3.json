@@ -1,0 +1,41 @@
+{
+  "candidate": {
+    "path": "estimator_k3_strassen_L4_f21.py",
+    "sha256": "d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94"
+  },
+  "baseline": {
+    "path": "experiments/2026-09-12_f21/estimator_L4_parent.py",
+    "sha256": "052dd768e970c4bae831cff26f8ff15b0487f3b95eadf2fd3578e542aec34d58"
+  },
+  "recurrence": "F21 fused D21; persistent full Wick K3 and existing scalar K4",
+  "representation": "uncompressed full history; L4 Strassen schedule",
+  "backend": "legal flopscope f32 arithmetic, f64_readonly grader-twin weight control",
+  "numerical_raw_mse_scale": 2e-08,
+  "evidence": {
+    "certificate": {
+      "path": "experiments/2026-09-13_p10/cert_F21_full.json",
+      "sha256": "bcc76ea02b2e7169e547eeae1b86bf2410b220388c3f39f0c871d7e4b473a5d4"
+    },
+    "package": {
+      "path": "experiments/2026-09-12_f21/package_receipt.json",
+      "sha256": "cb3ce2b2b02ec767e21e286e3c046ae30ec2338b63cc57653e10e17d9840ea7c"
+    },
+    "local_mini": {
+      "path": "experiments/2026-09-13_p10/mini_F21_capped_official.json",
+      "sha256": "c43eb8104047a2d2d0967c73d39f30b205bbe2389da5f66d2d81b28203d33808"
+    },
+    "server_report": {
+      "path": "experiments/run_reports/f21_diagnostic_330950_graded_report.json",
+      "sha256": "4dc5c2f6f1d06220921efb74b71a3b5bee930e141e7319af0e0d55028100e5f3"
+    },
+    "linux_memory": {
+      "path": "experiments/2026-09-12_f21/f21_linux_cap_v6.json",
+      "sha256": "f48516139b8ef99109a89b342e3808f15879bf8fb3e1e3aa3f8005e631f344ab"
+    },
+    "numerical": {
+      "path": "experiments/2026-09-14_e14/f21_numerical/summary.json",
+      "sha256": "1cbbbd51e8914a00549cc5536a2ad55eeaf38499677dbb71056b5d8d605c286d"
+    }
+  },
+  "server_submission_id": 330950
+}

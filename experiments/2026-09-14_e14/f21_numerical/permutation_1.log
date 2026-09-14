@@ -1,0 +1,40 @@
+world: 1024x16  B = 2,199,023,255,552  weights = flopscope/f64_readonly   [LIVE PHASE-2 WORLD]
+candidate: tau=n/a  target C/B=n/a  chunk=n/a
+
+
+9. PERMUTATION EQUIVARIANCE  (hidden-layer relabelling)
+  bar: every row MSE <= 1% of raw MSE = 2.000e-10   [candidate raw MSE 2.0000e-08]
+  1024x16 permute layer 10           row-k 1.43e-06  other-rows 3.81e-06  final 2.56e-06
+                                     MSE row-k 6.36e-14  other 7.16e-14  final 2.55e-13
+                                     worst 2.55e-13 = 0.0013% of raw MSE   ok
+
+1/1 checks passed
+
+C:\Users\samsu\.local\state\gpuq\snapshots\1217\job-1217\estimator_k3_strassen_L4_f21.py:535: SymmetryLossWarning: Symmetry lost along dims (1, 2): slicing removed all symmetric dim groups. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  b11 = B[:, :kh, :nh]
+C:\Users\samsu\.local\state\gpuq\snapshots\1217\job-1217\estimator_k3_strassen_L4_f21.py:536: SymmetryLossWarning: Symmetry lost along dims (1, 2): slicing removed all symmetric dim groups. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  b12 = B[:, :kh, nh:]
+C:\Users\samsu\.local\state\gpuq\snapshots\1217\job-1217\estimator_k3_strassen_L4_f21.py:537: SymmetryLossWarning: Symmetry lost along dims (1, 2): slicing removed all symmetric dim groups. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  b21 = B[:, kh:, :nh]
+C:\Users\samsu\.local\state\gpuq\snapshots\1217\job-1217\estimator_k3_strassen_L4_f21.py:538: SymmetryLossWarning: Symmetry lost along dims (1, 2): slicing removed all symmetric dim groups. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  b22 = B[:, kh:, nh:]
+C:\Users\samsu\.local\state\gpuq\snapshots\1217\job-1217\estimator_k3_strassen_L4_f21.py:303: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\.local\state\gpuq\snapshots\1217\job-1217\estimator_k3_strassen_L4_f21.py:304: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\.local\state\gpuq\snapshots\1217\job-1217\estimator_k3_strassen_L4_f21.py:822: SymmetryLossWarning: Symmetry lost along dims (0, 1): multiply â€” no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  C11 = cov_pre * off_mask
+C:\Users\samsu\.local\state\gpuq\snapshots\1217\job-1217\estimator_k3_strassen_L4_f21.py:869: SymmetryLossWarning: Symmetry lost along dims (1, 0): multiply â€” no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  term = term * (wk if d == 1 else (wk[:, None] if axis == 0 else wk[None, :]))
+C:\Users\samsu\.local\state\gpuq\snapshots\1217\job-1217\estimator_k3_strassen_L4_f21.py:869: SymmetryLossWarning: Symmetry lost along dims (0, 1): multiply â€” no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  term = term * (wk if d == 1 else (wk[:, None] if axis == 0 else wk[None, :]))
+C:\Users\samsu\.local\state\gpuq\snapshots\1217\job-1217\estimator_k3_strassen_L4_f21.py:898: SymmetryLossWarning: Symmetry lost along dims (0, 1): multiply â€” no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  p111_21 = ((w1_sq[:, None] * w1[None, :]) * D21
+C:\Users\samsu\.local\state\gpuq\snapshots\1217\job-1217\estimator_k3_strassen_L4_f21.py:899: SymmetryLossWarning: Symmetry lost along dims (0, 1): multiply â€” no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  + ((fac1 * fac1) * w2b) * off_mask)
+C:\Users\samsu\.local\state\gpuq\snapshots\1217\job-1217\estimator_k3_strassen_L4_f21.py:927: SymmetryLossWarning: Symmetry lost along dims (0, 1): add â€” no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  cov_out = fnp.diag(K[(2,)]) + K[(1, 1)]
+C:\Users\samsu\.local\state\gpuq\snapshots\1217\job-1217\estimator_k3_strassen_L4_f21.py:944: SymmetryLossWarning: Symmetry lost along dims (0, 1): add â€” no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  out_tw = _append(adv, fnp.diag(S3) + 3.0 * S21.T, fac1, w2b_vec, n)
+C:\Users\samsu\.local\state\gpuq\snapshots\1217\job-1217\estimator_k3_strassen_L4_f21.py:669: SymmetryLossWarning: Symmetry lost along dims (0, 1): multiply â€” no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  return (acc / 3.0) * off_mask

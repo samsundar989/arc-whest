@@ -1,0 +1,369 @@
+{
+  "case": 3,
+  "returncode": 0,
+  "receipt_path": "C:\\Users\\samsu\\Documents\\arc-whest\\experiments\\2026-09-14_e14\\f21_numerical\\permutation_3.json",
+  "receipt_sha256": "ef2ece497c03f0f9303ec7cb140bcc7cef2884089d3c0ac1ff85c65850d6a65d",
+  "receipt_errors": [],
+  "declared_bar": 2e-10,
+  "raw_mse_scale": 2e-08,
+  "source_unchanged": true,
+  "receipt": {
+    "all_passed": true,
+    "artifact": "edge_cases_case",
+    "artifact_version": 5,
+    "candidate": "estimator_k3_strassen_L4_f21.py",
+    "candidate_sha256_after": "d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94",
+    "candidate_sha256_before": "d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94",
+    "case": "permutation:3",
+    "case_index": 3,
+    "case_registry": [
+      {
+        "case": "normal:0",
+        "case_index": 0,
+        "group": "normal"
+      },
+      {
+        "case": "degenerate:0",
+        "case_index": 0,
+        "group": "degenerate"
+      },
+      {
+        "case": "degenerate:1",
+        "case_index": 1,
+        "group": "degenerate"
+      },
+      {
+        "case": "degenerate:2",
+        "case_index": 2,
+        "group": "degenerate"
+      },
+      {
+        "case": "dynamic_range:0",
+        "case_index": 0,
+        "group": "dynamic_range"
+      },
+      {
+        "case": "dynamic_range:1",
+        "case_index": 1,
+        "group": "dynamic_range"
+      },
+      {
+        "case": "dynamic_range:2",
+        "case_index": 2,
+        "group": "dynamic_range"
+      },
+      {
+        "case": "dynamic_range:3",
+        "case_index": 3,
+        "group": "dynamic_range"
+      },
+      {
+        "case": "seed_extremes:0",
+        "case_index": 0,
+        "group": "seed_extremes"
+      },
+      {
+        "case": "seed_extremes:1",
+        "case_index": 1,
+        "group": "seed_extremes"
+      },
+      {
+        "case": "seed_extremes:2",
+        "case_index": 2,
+        "group": "seed_extremes"
+      },
+      {
+        "case": "seed_extremes:3",
+        "case_index": 3,
+        "group": "seed_extremes"
+      },
+      {
+        "case": "seed_extremes:4",
+        "case_index": 4,
+        "group": "seed_extremes"
+      },
+      {
+        "case": "shape_generality:0",
+        "case_index": 0,
+        "group": "shape_generality"
+      },
+      {
+        "case": "shape_generality:1",
+        "case_index": 1,
+        "group": "shape_generality"
+      },
+      {
+        "case": "shape_generality:2",
+        "case_index": 2,
+        "group": "shape_generality"
+      },
+      {
+        "case": "shape_generality:3",
+        "case_index": 3,
+        "group": "shape_generality"
+      },
+      {
+        "case": "shape_generality:4",
+        "case_index": 4,
+        "group": "shape_generality"
+      },
+      {
+        "case": "budget_edges:0",
+        "case_index": 0,
+        "group": "budget_edges"
+      },
+      {
+        "case": "budget_edges:1",
+        "case_index": 1,
+        "group": "budget_edges"
+      },
+      {
+        "case": "budget_edges:2",
+        "case_index": 2,
+        "group": "budget_edges"
+      },
+      {
+        "case": "budget_edges:3",
+        "case_index": 3,
+        "group": "budget_edges"
+      },
+      {
+        "case": "budget_edges:4",
+        "case_index": 4,
+        "group": "budget_edges"
+      },
+      {
+        "case": "immutability:0",
+        "case_index": 0,
+        "group": "immutability"
+      },
+      {
+        "case": "layer1:0",
+        "case_index": 0,
+        "group": "layer1"
+      },
+      {
+        "case": "layer1:1",
+        "case_index": 1,
+        "group": "layer1"
+      },
+      {
+        "case": "layer1:2",
+        "case_index": 2,
+        "group": "layer1"
+      },
+      {
+        "case": "layer1:3",
+        "case_index": 3,
+        "group": "layer1"
+      },
+      {
+        "case": "permutation:0",
+        "case_index": 0,
+        "group": "permutation"
+      },
+      {
+        "case": "permutation:1",
+        "case_index": 1,
+        "group": "permutation"
+      },
+      {
+        "case": "permutation:2",
+        "case_index": 2,
+        "group": "permutation"
+      },
+      {
+        "case": "permutation:3",
+        "case_index": 3,
+        "group": "permutation"
+      },
+      {
+        "case": "budget_monotone:0",
+        "case_index": 0,
+        "group": "budget_monotone"
+      },
+      {
+        "case": "budget_monotone:1",
+        "case_index": 1,
+        "group": "budget_monotone"
+      },
+      {
+        "case": "budget_monotone:2",
+        "case_index": 2,
+        "group": "budget_monotone"
+      },
+      {
+        "case": "budget_monotone:3",
+        "case_index": 3,
+        "group": "budget_monotone"
+      },
+      {
+        "case": "budget_monotone:4",
+        "case_index": 4,
+        "group": "budget_monotone"
+      },
+      {
+        "case": "budget_monotone:5",
+        "case_index": 5,
+        "group": "budget_monotone"
+      },
+      {
+        "case": "budget_monotone:6",
+        "case_index": 6,
+        "group": "budget_monotone"
+      },
+      {
+        "case": "budget_monotone:7",
+        "case_index": 7,
+        "group": "budget_monotone"
+      },
+      {
+        "case": "budget_monotone:8",
+        "case_index": 8,
+        "group": "budget_monotone"
+      },
+      {
+        "case": "budget_monotone:9",
+        "case_index": 9,
+        "group": "budget_monotone"
+      },
+      {
+        "case": "determinism:0",
+        "case_index": 0,
+        "group": "determinism"
+      },
+      {
+        "case": "seed_hygiene:0",
+        "case_index": 0,
+        "group": "seed_hygiene"
+      },
+      {
+        "case": "gt_noise:0",
+        "case_index": 0,
+        "group": "gt_noise"
+      }
+    ],
+    "correctness_budget_policy": "Phase2 implicit off-shape: min(B_live, floor(B_live*d*w^2/(D_live*W_live^2))); live-shape, explicit-budget, and historical calls unchanged; v1",
+    "details": {
+      "bar": 2e-10,
+      "case_index": 3,
+      "denom": 2e-08,
+      "denom_source": "candidate raw MSE 2.0000e-08",
+      "depth": 16,
+      "layer": 14,
+      "permutation_sha256": "f4eaeb9d947fff5790d3a03d78c7f167899b29ae28d8949849fdd405a639d249",
+      "raw_mse_env": "2e-8",
+      "seed": 30806006014,
+      "width": 1024
+    },
+    "edge_cases_sha256": "4265bbd2c9922622934cd07241277639b4abcfe71a528f7c260059dda5875628",
+    "group_registry": [
+      {
+        "expected_result_count": 1,
+        "group": "normal"
+      },
+      {
+        "expected_result_count": 3,
+        "group": "degenerate"
+      },
+      {
+        "expected_result_count": 4,
+        "group": "dynamic_range"
+      },
+      {
+        "expected_result_count": 5,
+        "group": "seed_extremes"
+      },
+      {
+        "expected_result_count": 5,
+        "group": "shape_generality"
+      },
+      {
+        "expected_result_count": 5,
+        "group": "budget_edges"
+      },
+      {
+        "expected_result_count": 1,
+        "group": "immutability"
+      },
+      {
+        "expected_result_count": 1,
+        "group": "layer1"
+      },
+      {
+        "expected_result_count": 1,
+        "group": "permutation"
+      },
+      {
+        "expected_result_count": 1,
+        "group": "budget_monotone"
+      },
+      {
+        "expected_result_count": 1,
+        "group": "determinism"
+      },
+      {
+        "expected_result_count": 1,
+        "group": "seed_hygiene"
+      },
+      {
+        "expected_result_count": 1,
+        "group": "gt_noise"
+      }
+    ],
+    "logical_group": "permutation",
+    "meter_reset_policy": "real-flopscope: fresh explicit context at captured implicit-global cap, capture ledger/output after every candidate predict, then drop context, collect, reset accumulator, and trim; historical numpy mode: direct predict; Phase2 off-shape correctness budgets scale with dense work; v4",
+    "metered_predictions": [
+      {
+        "allocator_release": {
+          "available": true,
+          "gc_collected": 220,
+          "mechanism": "ucrtbase._heapmin",
+          "platform": "win32",
+          "returncode": 0,
+          "succeeded": true
+        },
+        "candidate_budget": 2199023255552,
+        "flop_budget": 1000000000000000,
+        "flops_used": 928457604710,
+        "mlp_depth": 16,
+        "mlp_width": 1024,
+        "n_ops": 14090,
+        "output_sha256": "2d5d15f4acee5f8cd4168b268dcf47104dabdfaae9ece4f5193186590adf0836",
+        "status": "returned"
+      },
+      {
+        "allocator_release": {
+          "available": true,
+          "gc_collected": 310,
+          "mechanism": "ucrtbase._heapmin",
+          "platform": "win32",
+          "returncode": 0,
+          "succeeded": true
+        },
+        "candidate_budget": 2199023255552,
+        "flop_budget": 1000000000000000,
+        "flops_used": 928457604710,
+        "mlp_depth": 16,
+        "mlp_width": 1024,
+        "n_ops": 14090,
+        "output_sha256": "025a032cc0eac6073872eff44cd531cdb966b989767b9bde415bf8bb26ed1059",
+        "status": "returned"
+      }
+    ],
+    "passed": 1,
+    "results": [
+      true
+    ],
+    "world": {
+      "budget": 2199023255552,
+      "depth": 16,
+      "flopscope_file": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\flopscope\\__init__.py",
+      "flopscope_version": "0.12.1",
+      "phase2": true,
+      "real_flopscope": true,
+      "weights_mode": "f64_readonly",
+      "width": 1024
+    }
+  }
+}

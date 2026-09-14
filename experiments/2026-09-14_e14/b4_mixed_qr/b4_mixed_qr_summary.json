@@ -1,0 +1,102 @@
+{
+  "schema": "e14.b4_mixed_qr.v1",
+  "prediction_commit": "832c0d6",
+  "cases": [
+    {
+      "fixture": "b4",
+      "control": "l2",
+      "final_output": {
+        "prediction_squared_drift": 0.0,
+        "allowance": 2e-10,
+        "passed": true
+      },
+      "exact_consumed_roundtrip": false,
+      "consumed_bit_mismatches": 121,
+      "consumed_zero_mismatches": 48,
+      "original_tolerance_failures": 0,
+      "encoder_counted_flops": 208020,
+      "decoder_counted_flops": 106720,
+      "candidate_operator_counted_flops": 147648,
+      "reference_operator_counted_flops": 147648,
+      "max_unique_wrapper_payload_bytes": 9664,
+      "artifact": "experiments\\2026-09-14_e14\\b4_mixed_qr\\b4_l2_mixed_qr.json",
+      "sha256": "efaf9306628fa5417a072033b9583dc8ad6493acc742e2ac6a0105eb6fc86d4a"
+    },
+    {
+      "fixture": "b4",
+      "control": "f21_forced",
+      "final_output": {
+        "prediction_squared_drift": 0.0,
+        "allowance": 2e-10,
+        "passed": true
+      },
+      "exact_consumed_roundtrip": false,
+      "consumed_bit_mismatches": 121,
+      "consumed_zero_mismatches": 48,
+      "original_tolerance_failures": 0,
+      "encoder_counted_flops": 208020,
+      "decoder_counted_flops": 106720,
+      "candidate_operator_counted_flops": 342484,
+      "reference_operator_counted_flops": 342484,
+      "max_unique_wrapper_payload_bytes": 9664,
+      "artifact": "experiments\\2026-09-14_e14\\b4_mixed_qr\\b4_f21_forced_mixed_qr.json",
+      "sha256": "bf5a16e361cb2e2addb3f39246aba6a56b7d6a9720d310939919028fda73af04"
+    },
+    {
+      "fixture": "b3",
+      "control": "l2",
+      "final_output": {
+        "prediction_squared_drift": 0.0,
+        "allowance": 2e-10,
+        "passed": true
+      },
+      "exact_consumed_roundtrip": false,
+      "consumed_bit_mismatches": 12,
+      "consumed_zero_mismatches": 12,
+      "original_tolerance_failures": 0,
+      "encoder_counted_flops": 11316,
+      "decoder_counted_flops": 6048,
+      "candidate_operator_counted_flops": 14758,
+      "reference_operator_counted_flops": 14758,
+      "max_unique_wrapper_payload_bytes": 1696,
+      "artifact": "experiments\\2026-09-14_e14\\b4_mixed_qr\\b3_l2_mixed_qr.json",
+      "sha256": "0ed5040740afb1abf7aa38d166f951f911000d496c4131eda41e20b21de918a6"
+    },
+    {
+      "fixture": "b3",
+      "control": "f21_forced",
+      "final_output": {
+        "prediction_squared_drift": 0.0,
+        "allowance": 2e-10,
+        "passed": true
+      },
+      "exact_consumed_roundtrip": false,
+      "consumed_bit_mismatches": 12,
+      "consumed_zero_mismatches": 12,
+      "original_tolerance_failures": 0,
+      "encoder_counted_flops": 11316,
+      "decoder_counted_flops": 6048,
+      "candidate_operator_counted_flops": 25165,
+      "reference_operator_counted_flops": 25165,
+      "max_unique_wrapper_payload_bytes": 1696,
+      "artifact": "experiments\\2026-09-14_e14\\b4_mixed_qr\\b3_f21_forced_mixed_qr.json",
+      "sha256": "6d4b8e3c5c71a1bf0e22eaf589b665773e5460b408f94fa12828e8001cc0fa2f"
+    }
+  ],
+  "flopscope_import_path": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\flopscope\\__init__.py",
+  "fnp_import_path": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\flopscope\\numpy\\__init__.py",
+  "threadpools": [
+    {
+      "user_api": "blas",
+      "internal_api": "openblas",
+      "num_threads": 1,
+      "prefix": "libscipy_openblas",
+      "filepath": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\Lib\\site-packages\\numpy.libs\\libscipy_openblas64_-13e2df515630b4a41f92893938845698.dll",
+      "version": "0.3.29",
+      "threading_layer": "pthreads",
+      "architecture": "SkylakeX"
+    }
+  ],
+  "scope": "Fullrank mixed-f64 QR/dense-reference wrapper only; no zero masking, compression, production L4 or accuracy claim.",
+  "original_B4_unchanged": true
+}

@@ -1,0 +1,1 @@
+reusable tiny synthetic inputs, no protected truth

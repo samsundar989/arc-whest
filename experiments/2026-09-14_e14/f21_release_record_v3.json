@@ -1,0 +1,388 @@
+{
+  "artifact": "candidate_release_evidence_index",
+  "version": 1,
+  "recipe": {
+    "candidate": {
+      "path": "estimator_k3_strassen_L4_f21.py",
+      "sha256": "d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94"
+    },
+    "baseline": {
+      "path": "experiments/2026-09-12_f21/estimator_L4_parent.py",
+      "sha256": "052dd768e970c4bae831cff26f8ff15b0487f3b95eadf2fd3578e542aec34d58"
+    },
+    "recurrence": "F21 fused D21; persistent full Wick K3 and existing scalar K4",
+    "representation": "uncompressed full history; L4 Strassen schedule",
+    "backend": "legal flopscope f32 arithmetic, f64_readonly grader-twin weight control",
+    "numerical_raw_mse_scale": 2e-08,
+    "evidence": {
+      "certificate": {
+        "path": "experiments/2026-09-13_p10/cert_F21_full.json",
+        "sha256": "bcc76ea02b2e7169e547eeae1b86bf2410b220388c3f39f0c871d7e4b473a5d4"
+      },
+      "package": {
+        "path": "experiments/2026-09-12_f21/package_receipt.json",
+        "sha256": "cb3ce2b2b02ec767e21e286e3c046ae30ec2338b63cc57653e10e17d9840ea7c"
+      },
+      "local_mini": {
+        "path": "experiments/2026-09-13_p10/mini_F21_capped_official.json",
+        "sha256": "c43eb8104047a2d2d0967c73d39f30b205bbe2389da5f66d2d81b28203d33808"
+      },
+      "server_report": {
+        "path": "experiments/run_reports/f21_diagnostic_330950_graded_report.json",
+        "sha256": "4dc5c2f6f1d06220921efb74b71a3b5bee930e141e7319af0e0d55028100e5f3"
+      },
+      "linux_memory": {
+        "path": "experiments/2026-09-12_f21/f21_linux_cap_v6.json",
+        "sha256": "f48516139b8ef99109a89b342e3808f15879bf8fb3e1e3aa3f8005e631f344ab"
+      },
+      "numerical": {
+        "path": "experiments/2026-09-14_e14/f21_numerical/summary.json",
+        "sha256": "1cbbbd51e8914a00549cc5536a2ad55eeaf38499677dbb71056b5d8d605c286d"
+      }
+    },
+    "server_submission_id": 330950
+  },
+  "candidate_source_verified": "estimator_k3_strassen_L4_f21.py",
+  "package_verified": {
+    "path": "experiments/2026-09-12_f21/f21-with-notice.tar.gz",
+    "sha256": "4f3cc6f440e4cb66ea86a0904c00e182eb7ecf5aaab0ee64c73efb7d22904775"
+  },
+  "domains": {
+    "MATH": {
+      "checks": 41,
+      "failed": [],
+      "skipped": [],
+      "verdict": "CERTIFIED"
+    },
+    "LOCAL": {
+      "checks": 22,
+      "failed": [
+        "10: zero failed MLPs",
+        "10: worst GRADED-PATH residual is under the cliff"
+      ],
+      "skipped": [],
+      "verdict": "REFUSED"
+    },
+    "SERVER_PREDICTED": {
+      "checks": 1,
+      "failed": [],
+      "skipped": [],
+      "verdict": "CERTIFIED"
+    },
+    "SERVER_MEASURED": {
+      "verdict": "PASS",
+      "submission_id": "330950",
+      "rows": 100,
+      "failed_rows": 0,
+      "exact_byte_binding": "PROVISIONAL",
+      "binding_limit": "Pinned local package and attributed report; no independently verified server archive hash.",
+      "worst_residual_s": 0.15623225000000218,
+      "residual_headroom": 2.5602908490404155,
+      "worst_predict_wall_s": 93.15971529699993,
+      "wall_headroom": 1.288110420018259,
+      "counted_flops_values": [
+        928457637478.0
+      ],
+      "runtime_environment": {
+        "whestbench_version": "0.16.1",
+        "flopscope_version": "0.12.1",
+        "flopscope_server_version": "0.12.1",
+        "numpy_version": "2.2.6",
+        "python_version": "3.10.21",
+        "flopscope_patches": [],
+        "flopscope_client_version": "0.12.1",
+        "participant_shim_version": "0.1.0",
+        "participant_python_version": "3.10.21"
+      }
+    }
+  },
+  "local_mini": {
+    "capped": true,
+    "complete": true,
+    "failed_rows": 100,
+    "reported_failed_rows": 100,
+    "source_binding": "RECIPE_PINNED_REPORT; report itself lacks source hash",
+    "verdict": "REFUSED"
+  },
+  "numerical_requirement": {
+    "raw_mse_scale": 2e-08,
+    "bar": 2e-10,
+    "historical_invariant_metadata": {
+      "raw_mse_env": null,
+      "denom": 1.4e-06,
+      "bar": 1.4e-08,
+      "denom_source": "frozen decision signal"
+    },
+    "status": "THREE_TARGET_PERMUTATION_CASES_PASS",
+    "evidence": {
+      "path": "experiments/2026-09-14_e14/f21_numerical/summary.json",
+      "sha256": "1cbbbd51e8914a00549cc5536a2ad55eeaf38499677dbb71056b5d8d605c286d"
+    },
+    "scope": "Only the declared target-shape permutation cases; not full numerical/contract certification"
+  },
+  "official_packages": {
+    "whestbench": "0.16.1",
+    "flopscope": "0.12.1"
+  },
+  "counted_ledger": {
+    "seed": 90000000201,
+    "certified_under": "f64_readonly",
+    "f32_tolerance": 9.5367431640625e-07,
+    "weight_pass_flops": 33554432,
+    "arms": {
+      "f32": {
+        "error": "",
+        "flops_used": 928424083046.0,
+        "n_ops": 14075,
+        "finite": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "output_sha256": "db3e6f41f619f41e5b8215a397029895ae0fc7ff5a72827c5c24bfd6908ecda0",
+        "mean_square_final_row": 0.4750628242516847,
+        "allocator_release": {
+          "platform": "win32",
+          "gc_collected": 351,
+          "mechanism": "ucrtbase._heapmin",
+          "available": true,
+          "returncode": 0,
+          "succeeded": true
+        }
+      },
+      "f64": {
+        "error": "",
+        "flops_used": 928457637478.0,
+        "n_ops": 14091,
+        "finite": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "output_sha256": "db3e6f41f619f41e5b8215a397029895ae0fc7ff5a72827c5c24bfd6908ecda0",
+        "mean_square_final_row": 0.4750628242516847,
+        "allocator_release": {
+          "platform": "win32",
+          "gc_collected": 451,
+          "mechanism": "ucrtbase._heapmin",
+          "available": true,
+          "returncode": 0,
+          "succeeded": true
+        }
+      },
+      "f64_readonly": {
+        "error": "",
+        "flops_used": 928457637478.0,
+        "n_ops": 14091,
+        "finite": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "output_sha256": "db3e6f41f619f41e5b8215a397029895ae0fc7ff5a72827c5c24bfd6908ecda0",
+        "mean_square_final_row": 0.4750628242516847,
+        "allocator_release": {
+          "platform": "win32",
+          "gc_collected": 451,
+          "mechanism": "ucrtbase._heapmin",
+          "available": true,
+          "returncode": 0,
+          "succeeded": true
+        }
+      },
+      "f64_listconstructed": {
+        "error": "",
+        "flops_used": 928457637478.0,
+        "n_ops": 14091,
+        "finite": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "output_sha256": "db3e6f41f619f41e5b8215a397029895ae0fc7ff5a72827c5c24bfd6908ecda0",
+        "mean_square_final_row": 0.4750628242516847,
+        "allocator_release": {
+          "platform": "win32",
+          "gc_collected": 891,
+          "mechanism": "ucrtbase._heapmin",
+          "available": true,
+          "returncode": 0,
+          "succeeded": true
+        }
+      }
+    }
+  },
+  "linux_memory": {
+    "historical_consumer": {
+      "report": "experiments\\2026-09-12_f21\\f21_linux_cap_v6.json",
+      "matched_on": "sha256",
+      "artifact_version": 5,
+      "instrument_sha256": "463b8560aa5be78bd18270a3507b80edb552ee8b1b7929d4089f7624a7261e8f",
+      "instrument_policy": "current-source-sha256",
+      "consumer_verdict": "CERTIFIED",
+      "applicable": true,
+      "binding_checks": [
+        {
+          "name": "artifact kind",
+          "ok": true,
+          "detail": "'linux_memory_gate'"
+        },
+        {
+          "name": "instrument path",
+          "ok": true,
+          "detail": "'local_sim/linux_memory_gate.py'"
+        },
+        {
+          "name": "instrument verification policy",
+          "ok": true,
+          "detail": "'current-source-sha256'"
+        },
+        {
+          "name": "instrument sha256",
+          "ok": true,
+          "detail": "463b8560aa5be78b... vs 463b8560aa5be78b..."
+        },
+        {
+          "name": "certified shape",
+          "ok": true,
+          "detail": "1024x16 vs 1024x16"
+        },
+        {
+          "name": "certified budget",
+          "ok": true,
+          "detail": "2199023255552 vs 2199023255552"
+        },
+        {
+          "name": "suite lifecycle size",
+          "ok": true,
+          "detail": "100 / child 100"
+        },
+        {
+          "name": "full memory cap",
+          "ok": true,
+          "detail": "8192 MB vs 8192 MB"
+        },
+        {
+          "name": "deployment weight representation",
+          "ok": true,
+          "detail": "f64_readonly / child f64_readonly"
+        },
+        {
+          "name": "distribution version source",
+          "ok": true,
+          "detail": "'importlib.metadata.version'"
+        },
+        {
+          "name": "installed distribution whestbench",
+          "ok": true,
+          "detail": "'0.16.1' vs '0.16.1'"
+        },
+        {
+          "name": "installed distribution flopscope",
+          "ok": true,
+          "detail": "'0.12.1' vs '0.12.1'"
+        },
+        {
+          "name": "lifecycle controls are present",
+          "ok": true,
+          "detail": "dict"
+        },
+        {
+          "name": "stateless lifecycle positive control",
+          "ok": true,
+          "detail": "growth=0 threshold=67108864"
+        },
+        {
+          "name": "retaining lifecycle negative control",
+          "ok": true,
+          "detail": "growth=201334784 threshold=67108864"
+        },
+        {
+          "name": "all child stderr streams are recorded",
+          "ok": true,
+          "detail": "['candidate', 'lifecycle_retaining', 'lifecycle_stateless', 'negative', 'positive']"
+        }
+      ],
+      "bound_to": {
+        "width": 1024,
+        "depth": 16,
+        "budget": 2199023255552,
+        "cap_mb": 8192,
+        "weights_mode": "f64_readonly",
+        "stack": {
+          "whestbench": "0.16.1",
+          "flopscope": "0.12.1"
+        },
+        "instrument_sha256": "463b8560aa5be78bd18270a3507b80edb552ee8b1b7929d4089f7624a7261e8f"
+      },
+      "degraded": "",
+      "checks": [
+        {
+          "name": "9: the report is bound to the current instrument and workload",
+          "ok": true,
+          "detail": "v5, current-source-sha256"
+        },
+        {
+          "name": "9: every child completed without unexpected stderr",
+          "ok": true,
+          "detail": "{}"
+        },
+        {
+          "name": "9: the cap read back exactly",
+          "ok": true,
+          "detail": "soft=8589934592"
+        },
+        {
+          "name": "9: the negative control died under the cap",
+          "ok": true,
+          "detail": "an enforcement claim needs a dying over-cap control"
+        },
+        {
+          "name": "9: the positive control survived uncapped",
+          "ok": true,
+          "detail": "distinguishes the cap from host exhaustion"
+        },
+        {
+          "name": "9: predict completed under the applied cap",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "9: the deployment arrays are read-only float64",
+          "ok": true,
+          "detail": "float64, writeable=False"
+        },
+        {
+          "name": "9: the real packages loaded, not local_sim shims",
+          "ok": true,
+          "detail": "ython3.12/site-packages/whestbench/__init__.py"
+        },
+        {
+          "name": "9: at least three predictions ran in one worker",
+          "ok": true,
+          "detail": "3 predictions"
+        },
+        {
+          "name": "9: settled address space did not grow across candidate predictions",
+          "ok": true,
+          "detail": "+39.2 MB"
+        },
+        {
+          "name": "9: peak address space is under the cap",
+          "ok": true,
+          "detail": "VmPeak 5381.7 MB"
+        }
+      ]
+    },
+    "report_status": "PASS",
+    "scope": "Stored evidence applicability; no new process cap test"
+  },
+  "normal_release_ready": false,
+  "release_scope": "Evidence index only; complete candidate-specific release checks and human approval still required.",
+  "unknowns": [
+    "fresh private accuracy",
+    "prize eligibility",
+    "exact server-byte attribution"
+  ],
+  "protected_truth_read": false
+}

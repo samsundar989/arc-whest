@@ -79,6 +79,37 @@ class ReleaseTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'submission identity mismatch'):
             release.build(recipe)
 
+    def test_numerical_supplement_is_candidate_and_regime_bound(self):
+        recipe = json.loads((release.ROOT / 'experiments/2026-09-14_e14/f21_release_recipe_v3.json').read_text())
+        self.assertEqual(release.build(recipe)['numerical_requirement']['status'], 'THREE_TARGET_PERMUTATION_CASES_PASS')
+        original = json.loads((release.ROOT / recipe['evidence']['numerical']['path']).read_text())
+        for mode in ('source', 'bar', 'case', 'dtype', 'shape', 'runner_hash', 'edge_hash', 'backend', 'integer_result', 'receipt_hash', 'receipt_case', 'meter'):
+            with tempfile.TemporaryDirectory(dir=release.ROOT / 'experiments') as tmp:
+                changed = copy.deepcopy(original)
+                if mode == 'source': changed['candidate_sha256'] = '0' * 64
+                elif mode == 'bar': changed['bar'] = 1.4e-8
+                elif mode == 'case': changed['cases'].pop()
+                elif mode == 'dtype': changed['cases'][0]['receipt']['world']['weights_mode'] = 'f32'
+                elif mode == 'shape': changed['cases'][0]['receipt']['world']['width'] = 8
+                elif mode == 'runner_hash': changed['instrument_sha256'] = '0' * 64
+                elif mode == 'edge_hash': changed['cases'][0]['receipt']['edge_cases_sha256'] = '0' * 64
+                elif mode == 'backend': changed['cases'][0]['receipt']['world']['real_flopscope'] = False
+                elif mode == 'integer_result': changed['cases'][0]['receipt']['results'] = [1]
+                elif mode == 'receipt_hash': changed['cases'][0]['receipt_sha256'] = '0' * 64
+                elif mode == 'receipt_case': changed['cases'][0]['receipt']['case'] = 'permutation:1'
+                elif mode == 'meter': del changed['cases'][0]['receipt']['metered_predictions']
+                # Also bind a matching mutated receipt, exercising semantic checks
+                # beyond the embedded-versus-file equality check.
+                if mode in ('edge_hash', 'backend', 'integer_result', 'receipt_case', 'meter'):
+                    receipt_path = Path(tmp) / 'receipt.json'
+                    receipt_path.write_text(json.dumps(changed['cases'][0]['receipt']))
+                    changed['cases'][0]['receipt_path'] = str(receipt_path)
+                    changed['cases'][0]['receipt_sha256'] = release.sha(receipt_path)
+                path = Path(tmp) / 'numerical.json'; path.write_text(json.dumps(changed))
+                mutated = copy.deepcopy(recipe)
+                mutated['evidence']['numerical'] = {'path': str(path.relative_to(release.ROOT)), 'sha256': release.sha(path)}
+                self.assertEqual(release.build(mutated)['numerical_requirement']['status'], 'REQUIRES_CANDIDATE_SPECIFIC_EVIDENCE_AT_DECLARED_SCALE')
+
     def test_scale_is_explicit_tighten_only(self):
         for bad in (0, -1, float('nan'), float('inf'), 1e-3):
             recipe = copy.deepcopy(self.recipe); recipe['numerical_raw_mse_scale'] = bad

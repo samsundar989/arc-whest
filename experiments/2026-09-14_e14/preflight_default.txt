@@ -1,0 +1,82 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260914030011
+Username: SAM_MEGA_PC\samsu
+RunAs User: SAM_MEGA_PC\samsu
+Configuration Name: 
+Machine: SAM_MEGA_PC (Microsoft Windows NT 10.0.26200.0)
+Host Application: powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File scripts/preflight.ps1 -Log C:/Users/samsu/Documents/arc-whest/experiments/2026-09-14_e14/preflight_default.txt
+Process ID: 39884
+PSVersion: 5.1.26100.9444
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9444
+BuildVersion: 10.0.26100.9444
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+preflight -- arc-whest
+repo:    C:\Users\samsu\.local\state\gpuq\snapshots\1220\job-1220
+shipped: estimator.py   archive: estimator_v2_6_1.py
+HEAD:    062e37a856be7fe14dd40dfccd40b413b2ffb508
+worktree: clean at start
+
+=== 1. official stack + round configuration ===
+
+  PASS  1. official stack + round configuration
+
+=== 2. mint provenance + dataset pin ===
+
+
+  PASS  2. mint provenance + dataset pin
+
+=== 3. invariant suite ===
+
+
+  PASS  3. invariant suite
+
+=== 4. whest validate ===
+  child stdout encoding: utf-8
+
+  PASS  4. whest validate
+
+=== 5. ship-file identity vs estimator_v2_6_1.py ===
+
+  PASS  5. ship-file identity vs estimator_v2_6_1.py
+
+=== 6. vault seal (counter vs log) ===
+
+  PASS  6. vault seal (counter vs log)
+
+=== 7. seed ledger (consumption + source scan) + enforcement labels ===
+
+  FAIL  7. seed ledger (consumption + source scan) + enforcement labels -- exit code 1
+
+=== 8. canonical scorer + the binding gate ===
+
+  PASS  8. canonical scorer + the binding gate
+
+=== 9. seed-ledger refusals + the truth-read register ===
+
+  FAIL  9. seed-ledger refusals + the truth-read register -- exit code 1
+
+=== 10. vault integrity (array hashes + seed->weights) ===
+
+  PASS  10. vault integrity (array hashes + seed->weights)
+
+=== 11. lifecycle evaluator + the certification consumers' mutation battery ===
+
+
+  PASS  11. lifecycle evaluator + the certification consumers' mutation battery
+
+=== 12. counted-FLOP anchor vs the official runner ===
+
+  FAIL  12. counted-FLOP anchor vs the official runner -- exit code 4
+
+PREFLIGHT RED -- failed: 7. seed ledger (consumption + source scan) + enforcement labels, 9. seed-ledger refusals + the truth-read register, 12. counted-FLOP anchor vs the official runner
+Do not promote, do not submit, do not spend a decision block.
+**********************
+Windows PowerShell transcript end
+End time: 20260914030433
+**********************

@@ -1,0 +1,18 @@
+{
+  "returncode": 0,
+  "source_frozen": true,
+  "changed_sources": [],
+  "passed": true,
+  "command": [
+    "powershell.exe",
+    "-NoProfile",
+    "-NonInteractive",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "scripts/preflight.ps1",
+    "-Log",
+    "C:\\Users\\samsu\\Documents\\arc-whest\\experiments\\2026-09-14_e14\\preflight_live\\verdicts.txt"
+  ],
+  "scope": "Default12/16 infrastructure preflight; not candidate Full certification"
+}

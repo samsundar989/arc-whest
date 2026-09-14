@@ -49222,3 +49222,61 @@ spelling, stop that spelling and give the exact unresolved work, without
 claiming the entire compression family is closed. Do not run reduced-rank
 probes, new fixture trajectories, additional K4, or fresh data in this slice.
 No gate or experimental threshold changes. Independent review follows.
+
+
+**E14 accepted prerequisite evidence and targeted review repairs.**
+Installed-backend f64 B4 v2 passes 841/841 (worst normalized discrepancy
+9.738773765525043e-13 at unchanged 1e-5); independent Skeptic ACCEPT includes
+nonfinite diagnostic mutations. Actual-f32 failures remain archived. The
+mixed-f64 QR representation/reference-order control passes all four outputs
+with zero drift, but exact consumed source recovery fails at tiny structural
+zeros. Independent mixed-QR review ACCEPT is restricted to that control,
+not autonomous compact parity, production L4, compression or savings.
+
+Production-truth workerq1219 passes both declared chunk arithmetic comparisons
+on the single fixed unprotected1024x16 fixture. Conditional score-error bounds
+are6.4183421022616676e-12 and4.505399565064212e-12 versus1e-10, maximum normalized
+moment difference3.251237947529464e-8 versus2e-6. These are arithmetic-error
+bounds at assumed error2e-8/multiplier<=1, not measured estimator MSE or a
+population accuracy result. No historical truth-mode equivalence inferred.
+Workerq1222 exact-live-byte default preflight passes12/16,4skipped; all307
+source hashes unchanged. Reserve6GiBRAM/0VRAM/2CPU, observed peak2076.93MiB.
+Fresh infrastructure review accepted Stage0 at that source freeze.
+
+The optional numerical supplement subsequently failed independent mutation
+review: it accepted seven malformed evidence variants. Replaced its partial
+validator with the canonical receipt validator, pinned runner/edge hashes and
+referenced receipt-byte verification. Ten test methods now pass, including
+rehash-bound semantic receipt mutations; fresh independent recheck reproduces
+ten refusals and the unchanged valid index. Its final affected preflight is
+still required. Prior actual F21 numerical evidence remains accepted.
+
+The independently defined connected-tree accuracy closure now includes
+regeneration, scalar overlap removal, exact two-metric linear transport and
+all-age induced K3 feed. Its literal uncompressed program needs1069 added
+square products after exact pruning; symbolic ideal-depth4 arithmetic plus
+F21 totals2,319,971,208,806>2**41 before copy/elementwise overhead. This rejects
+that spelling, not the family. Static Skeptic confirmed algebra/counts but
+required a symmetric new K22 anchor and explicit frozen scalar evaluation
+order; both are now specified, pending recheck. No K4 probe or fresh score
+measurement occurred. Raw reports under experiments/2026-09-14_e14 retain
+rejections, source hashes and scope.
+
+
+**Final affected preflight optimization review, before submission.**
+The numerical index consumer and two new tiny mixed-QR source files postdate
+job1222. Run the same complete default12-step gate with exact live bytes and
+before/after source freeze, new output directory preflight_final. Measured
+job1222 peak2.03GiB and340seconds support unchanged conservative6GiBRAM,
+0VRAM,2CPU, BLAS/OMP/MKL2. No dataset duplication, workers, prefetch, cache,
+checkpoint or batch changes; no protected truth read or omitted check.
+Reuse the passing truth pilot and numerical artifacts rather than rerun them.
+No source edits are permitted during this final gate. Command:
+`workerq submit --project arc-whest --live-worktree --gpus 0 --ram 6 --vram 0
+--cpus 2 --env OPENBLAS_NUM_THREADS=2 --env OMP_NUM_THREADS=2
+--env MKL_NUM_THREADS=2 --env PYTHONIOENCODING=utf-8 --label e14-preflight-final
+--eta 10m -- C:/Users/samsu/Documents/arc-whest/.venv/Scripts/python.exe
+local_sim/preflight_e14.py --out-dir
+C:/Users/samsu/Documents/arc-whest/experiments/2026-09-14_e14/preflight_final`.
+The gate concerns instrument changes; root default checks still cannot confer
+a new candidate Full release, local capped-mini pass or private improvement.

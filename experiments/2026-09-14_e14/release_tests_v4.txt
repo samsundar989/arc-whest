@@ -1,0 +1,15 @@
+test_changed_evidence_rejected (__main__.ReleaseTests) ... ok
+test_different_valid_candidate_rejected (__main__.ReleaseTests) ... ok
+test_numerical_supplement_is_candidate_and_regime_bound (__main__.ReleaseTests) ... ok
+test_permutation_identity_and_excessive_drift (__main__.ReleaseTests) ... ok
+test_scale_is_explicit_tighten_only (__main__.ReleaseTests) ... ok
+test_server_semantic_mutations_refused (__main__.ReleaseTests) ... ok
+test_stored_domains_remain_separate (__main__.ReleaseTests) ... ok
+test_unknown_server_is_not_pass (__main__.ReleaseTests) ... ok
+test_wrong_candidate_hash_rejected (__main__.ReleaseTests) ... ok
+test_wrong_server_submission_rejected (__main__.ReleaseTests) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.267s
+
+OK
