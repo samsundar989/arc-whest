@@ -1,7 +1,8 @@
 # CURRENT_STATE.md — read this first
 
 **September 14 P10 fresh DECIDE and independent result Skeptic pass;
-Full candidate certificate REFUSED on its local capped subprocess smoke.**
+Full candidate certificate REFUSED locally; capped official mini workerq
+1201 is running.**
 Samuel's three new
 "I don't know" predictions were committed at `ce853f7` before any P10 data.
 The fresh SINGLE_USE 128-network truth claim was committed at `883bd45`;
@@ -31,8 +32,8 @@ this score is not a deployment pass. Workerq 1200's full exact-byte
 certificate reported MATH 41/41 and an applicable Linux v6 memory pass,
 but LOCAL REFUSED: its two-row capped official subprocess smoke failed 2/2
 on local residual-cap exhaustion. The 14,091-op server-residual model
-passed only as a forecast. A separate **clean capped** 100-row official
-subprocess mini remains the required release check;
+passed only as a forecast. The separate **clean capped** 100-row official
+subprocess mini is now workerq 1201, with no result yet;
 a no-cap mini cannot substitute. F21 is not yet submission-ready, and no
 submission or designation is authorized.
 

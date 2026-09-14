@@ -48600,3 +48600,18 @@ MLP score/zero-output MSE is not accuracy evidence. Keep P10's score
 promotion separate from this deployment gate. The separately registered
 full 100-row capped official mini is still required for the normal release
 path and will run next without simultaneous heavy work.
+
+**Clean capped official F21 mini submitted.** After Full workerq 1200
+terminated, workerq **1201** launched the installed `whest run` on exact
+frozen F21 source, dataset
+`hf://aicrowd/arc-whestbench-public-2026@v2-phase2`, split `mini`,
+`--runner subprocess --detail full --json`, with **default** 0.4-second
+residual/120-second wall caps. The independent pre-submission optimization
+review immediately above governs this job. It uses local live worktree,
+nonpreemptible, **20 GiB RAM, 0 VRAM, 6 CPUs, 0 GPUs**,
+`PYTHONIOENCODING=utf-8`/`PYTHONUTF8=1`, no priority override. Receipt
+shows RUNNING and the intended argv; cached HF mini files were found.
+No mini result exists yet. The Full local refusal is retained regardless
+of this run's outcome; a clean `n_failed_mlps: 0` is required for the
+normal submission-approval path. An independent Full-certificate Skeptic
+is reviewing its terminal evidence while mini runs.
