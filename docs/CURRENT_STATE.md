@@ -48,6 +48,10 @@ the [workerq receipt](../experiments/2026-09-13_p10/workerq_1201_receipt.json)
 and full terminal log are retained. F21 is a demonstrated score improvement,
 but **not submission-ready** under the normal release contract. A no-cap mini
 cannot substitute. No submission, external message or designation is authorized.
+The fresh independent [mini Skeptic](../experiments/2026-09-13_p10/f21_mini_skeptic.md)
+ACCEPTS the 100/100 local refusal and REJECTS normal release certification;
+its verdict is commit `021f643`. The graded-server F21 residual and private
+success remain unknown.
 Next action: retain this scoped refusal. Any one-off release exception would
 require Samuel's explicit decision on the exact evidence; otherwise use
 standing L4/L2 while investigating a bounded residual-time remedy. No further

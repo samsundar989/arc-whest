@@ -48670,3 +48670,22 @@ Own-parent provenance and a prepared exact-byte tar remain documented in
 `validated_for_submission: false`. Await independent mini Skeptic, then
 retain a scoped refusal. A one-off exception would require Samuel's explicit
 decision on these exact bytes and evidence; none is implied here.
+
+**Independent capped-mini Skeptic ACCEPTS the result, REJECTS normal
+release.** Fresh-context verdict
+`experiments/2026-09-13_p10/f21_mini_skeptic.md`, commit `021f643`,
+SHA256 `d6c3888955e14500298b1c20229284901ccca76db7ff95c449ca9235fe2f0799`,
+independently matched standalone JSON to the terminal-embedded report,
+enumerated 100 unique rows/indices and all failure flags, checked exact
+source/runner/default-cap receipt, operation-family totals and resource
+use, and reconciled f32-mini 14,075 calls/928,424,083,046 FLOPs to the
+f64 grader twin by 16 opening casts/33,554,432 FLOPs. It ACCEPTS the
+100/100 **local** residual-cap refusal and REJECTS normal release
+certification. It explicitly leaves graded F21 timing and private success
+unknown: the 0.1888 s server-residual forecast extrapolates a sparse
+graded anchor law, and a no-cap public CONFIRM would not repair the cap
+gate. The registered score PASS remains valid only in its separate
+cap-disabled fresh P10 domain. No further mandatory candidate work is
+unblocked within the normal release path; F21 remains frozen and
+unsubmitted. This is an operational gate refusal, not a general scientific
+kill of the fusion or compact-representation research.
