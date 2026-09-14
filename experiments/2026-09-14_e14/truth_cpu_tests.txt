@@ -1,0 +1,12 @@
+﻿test_actual_producer_common_inputs_and_ragged_chunk (__main__.TruthMathTests) ... ok
+test_autocast_refused (__main__.TruthMathTests) ... ok
+test_bad_input_shape_and_dtype_refused (__main__.TruthMathTests) ... ok
+test_changed_bindings_refused (__main__.TruthMathTests) ... ok
+test_default_rng_route_matches_shared_inputs (__main__.TruthMathTests) ... ok
+test_export_and_sidecar_binding (__main__.TruthMathTests) ... ok
+test_mid_forward_backend_mutation_refused (__main__.TruthMathTests) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.132s
+
+OK

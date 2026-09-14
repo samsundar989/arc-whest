@@ -55,6 +55,7 @@ import argparse
 import hashlib
 import json
 import os
+import platform
 import sys
 import time
 
@@ -71,6 +72,89 @@ from mint_provenance import canonical_mint, seed_streams  # noqa: E402
 
 WIDTH, DEPTH = 1024, 16
 FWD_FLOPS = 2 * DEPTH * WIDTH * WIDTH
+
+
+def _sha256_file(path):
+    digest = hashlib.sha256()
+    with open(path, "rb") as f:
+        for block in iter(lambda: f.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _pin_truth_math():
+    """E14 policy for NEW computations; historical artifact modes are unknown."""
+    import torch
+
+    if os.environ.get("NVIDIA_TF32_OVERRIDE") == "1":
+        raise RuntimeError("REFUSED: NVIDIA_TF32_OVERRIDE=1 conflicts with IEEE f32")
+    torch.set_float32_matmul_precision("highest")
+    torch.backends.cuda.matmul.allow_tf32 = False
+    torch.backends.cudnn.allow_tf32 = False
+    _assert_truth_math()
+
+
+def _assert_truth_math():
+    import torch
+
+    if (torch.get_float32_matmul_precision() != "highest"
+            or torch.backends.cuda.matmul.allow_tf32
+            or torch.backends.cudnn.allow_tf32
+            or torch.is_autocast_enabled("cuda")
+            or torch.is_autocast_enabled("cpu")
+            or os.environ.get("NVIDIA_TF32_OVERRIDE") == "1"):
+        raise RuntimeError("REFUSED: truth arithmetic policy changed or autocast enabled")
+
+
+def truth_provenance(device, chunk, *, width=WIDTH, depth=DEPTH):
+    """Runtime binding embedded in new NPZs and in a hash-bound sidecar."""
+    import torch
+
+    _assert_truth_math()
+    dev = torch.device(device)
+    cuda = dev.type == "cuda"
+    idx = (dev.index if dev.index is not None else torch.cuda.current_device()) if cuda else None
+    return {
+        "schema": "p2_truth_math_e14_v1", "python": platform.python_version(),
+        "numpy": np.__version__, "torch": str(torch.__version__),
+        "torch_git": torch.version.git_version, "cuda_runtime": torch.version.cuda,
+        "device": str(dev), "device_index": idx,
+        "device_name": torch.cuda.get_device_name(idx) if cuda else platform.processor(),
+        "device_capability": list(torch.cuda.get_device_capability(idx)) if cuda else None,
+        "cudnn_version": torch.backends.cudnn.version(),
+        "backend": {
+            "float32_matmul_precision": torch.get_float32_matmul_precision(),
+            "cuda_matmul_allow_tf32": torch.backends.cuda.matmul.allow_tf32,
+            "cudnn_allow_tf32": torch.backends.cudnn.allow_tf32,
+            "cudnn_deterministic": torch.backends.cudnn.deterministic,
+            "cudnn_benchmark": torch.backends.cudnn.benchmark,
+            "deterministic_algorithms": torch.are_deterministic_algorithms_enabled(),
+            "fp16_reduced_precision_reduction": torch.backends.cuda.matmul.allow_fp16_reduced_precision_reduction,
+            "bf16_reduced_precision_reduction": torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction,
+            "autocast_cuda": torch.is_autocast_enabled("cuda"),
+            "autocast_cpu": torch.is_autocast_enabled("cpu"),
+            "cublas_workspace_config": os.environ.get("CUBLAS_WORKSPACE_CONFIG"),
+            "nvidia_tf32_override": os.environ.get("NVIDIA_TF32_OVERRIDE"),
+            "torch_threads": torch.get_num_threads(),
+        },
+        "chunk_size": int(chunk), "width": int(width), "depth": int(depth),
+        "producer_sha256": _sha256_file(__file__),
+        "mint_sha256": _sha256_file(os.path.join(_HERE, "mint_provenance.py")),
+        "precision": {"weights": "float32", "samples": "float32",
+                      "forward": "float32 IEEE (TF32 and autocast disabled)",
+                      "sums_and_squared_sums": "float64",
+                      "returned_means": "float64", "npz_means_export": "float32",
+                      "variance": "float64, centered on pre-export float64 means; clipped at zero"},
+        "historical_precision_equivalence": "not established; no retroactive provenance",
+    }
+
+
+def _write_truth_sidecar(path, provenance):
+    record = {"artifact_sha256": _sha256_file(path),
+              "math_provenance": provenance}
+    with open(path + ".producer.json", "x", encoding="utf-8") as f:
+        json.dump(record, f, indent=2, sort_keys=True)
+        f.write("\n")
 
 
 def _replica_seeds(input_seed: int):
@@ -119,11 +203,16 @@ def _truth_one_final_only_LEGACY(weights, seed64, n_samples, device, chunk):
     return means.astype(np.float64), var.astype(np.float64)
 
 
-def _truth_one(weights, seed64, n_samples, device, chunk):
+def _truth_one(weights, seed64, n_samples, device, chunk, *, input_chunks=None,
+               expected_provenance=None):
     """All-layer post-ReLU means AND all-layer post-ReLU variances, on the GPU.
 
-    float64 accumulation, float32 arithmetic -- the same choice the organisers'
-    bake documents, so the label's numerical character matches theirs.
+    E14 pins IEEE float32 arithmetic and float64 accumulation, with separate
+    float32 NPZ mean export. Matching documented official dtype roles does not
+    establish identical arithmetic or historical precision equivalence. Our
+    variances use pre-export f64 means; the official bake uses f32 export means.
+    Diagnostic input_chunks supplies common inputs through the actual producer;
+    without it the original RNG and seed protocol are unchanged.
 
     EXTENDED 2026-09-01 under CONTRACT WP9. This used to accumulate the second
     moment at the FINAL layer only, because the only consumer was a
@@ -135,29 +224,49 @@ def _truth_one(weights, seed64, n_samples, device, chunk):
 
     The extra work is one square-and-sum per layer per chunk -- `m * n` against
     the layer's `m * n^2` matmul, so `1/n` = 0.1% at width 1024. The returned
-    final-layer variance is BIT-IDENTICAL to what this function returned
-    before: it is still `acc_sq[-1]/N - means[-1]^2`, the same accumulator in
-    the same order, and `--check-allvar` asserts exactly that.
+    final-layer variance uses the same accumulator formula and ordering as the
+    legacy function. --check-allvar only tests equality under the CURRENT pinned
+    mode; it cannot recover unrecorded historical backend settings.
     """
     import torch
 
+    _pin_truth_math()
+    if n_samples <= 0 or chunk <= 0 or not len(weights):
+        raise ValueError("positive sample/chunk counts and nonempty weights required")
+    width, depth = weights[0].shape[0], len(weights)
+    if any(x.shape != (width, width) or x.dtype != np.float32 for x in weights):
+        raise ValueError("truth requires square float32 weights")
+    provenance = truth_provenance(device, chunk, width=width, depth=depth)
+    if expected_provenance is not None and provenance != expected_provenance:
+        raise RuntimeError("REFUSED: truth runtime/producer binding changed")
+    supplied = iter(input_chunks) if input_chunks is not None else None
     w = [torch.from_numpy(np.ascontiguousarray(x)).to(device) for x in weights]
     gen = torch.Generator(device=device)
-    gen.manual_seed(seed64 % (2 ** 63 - 1))          # torch caps at int64
-    acc = [torch.zeros(WIDTH, dtype=torch.float64, device=device)
-           for _ in range(DEPTH)]
-    acc_sq = [torch.zeros(WIDTH, dtype=torch.float64, device=device)
-              for _ in range(DEPTH)]
+    gen.manual_seed(seed64 % (2 ** 63 - 1))          # unchanged production seed
+    acc = [torch.zeros(width, dtype=torch.float64, device=device)
+           for _ in range(depth)]
+    acc_sq = [torch.zeros(width, dtype=torch.float64, device=device)
+              for _ in range(depth)]
     done = 0
     while done < n_samples:
         m = min(chunk, n_samples - done)
-        h = torch.randn((m, WIDTH), generator=gen, device=device,
-                        dtype=torch.float32)
-        for k in range(DEPTH):
+        if supplied is None:
+            h = torch.randn((m, width), generator=gen, device=device, dtype=torch.float32)
+        else:
+            x = next(supplied)
+            if x.shape != (m, width) or x.dtype != np.float32:
+                raise ValueError("shared input chunk shape/dtype mismatch")
+            h = torch.from_numpy(np.ascontiguousarray(x)).to(device)
+        _assert_truth_math()
+        for k in range(depth):
             h = torch.relu(h @ w[k])
             acc[k] += h.sum(dim=0, dtype=torch.float64)
             acc_sq[k] += (h.to(torch.float64) ** 2).sum(dim=0)
         done += m
+    if supplied is not None and next(supplied, None) is not None:
+        raise ValueError("extra shared input chunks")
+    if truth_provenance(device, chunk, width=width, depth=depth) != provenance:
+        raise RuntimeError("REFUSED: truth runtime/producer changed during computation")
     means = np.stack([(a / n_samples).cpu().numpy() for a in acc])
     ez2 = np.stack([(a / n_samples).cpu().numpy() for a in acc_sq])
     allvar = np.maximum(ez2 - means ** 2, 0.0)
@@ -220,6 +329,8 @@ def main() -> int:
         import torch
 
         device = "cuda" if torch.cuda.is_available() else "cpu"
+        _pin_truth_math()
+        provenance = truth_provenance(device, a.chunk)
         print(f"  device          {device}")
         print()
         print("  BIT-IDENTITY CHECK: unregistered probe seeds, nothing "
@@ -228,7 +339,7 @@ def main() -> int:
         for i in range(a.check_allvar):
             w, _e, _s = canonical_mint(WIDTH, DEPTH, base + i)
             sa, _sb = _replica_seeds(base + i)
-            m_new, v_new, av = _truth_one(w, sa, n_samples, device, a.chunk)
+            m_new, v_new, av = _truth_one(w, sa, n_samples, device, a.chunk, expected_provenance=provenance)
             m_old, v_old = _truth_one_final_only_LEGACY(
                 w, sa, n_samples, device, a.chunk)
             same_m = np.array_equal(m_new, m_old)
@@ -250,6 +361,8 @@ def main() -> int:
         import torch
 
         device = "cuda" if torch.cuda.is_available() else "cpu"
+        _pin_truth_math()
+        provenance = truth_provenance(device, a.chunk)
         print(f"  device          {device}"
               + (f"  {torch.cuda.get_device_name(0)}" if device == "cuda" else ""))
         print(chr(10) + "  SMOKE: unregistered probe seeds, nothing claimed, nothing written.")
@@ -263,8 +376,8 @@ def main() -> int:
         for i in range(a.smoke):
             w, _e, _s = canonical_mint(WIDTH, DEPTH, base + i)
             sa, sb = _replica_seeds(base + i)
-            m1, v1, av1 = _truth_one(w, sa, n_samples, device, a.chunk)
-            m2, v2, av2 = _truth_one(w, sb, n_samples, device, a.chunk)
+            m1, v1, av1 = _truth_one(w, sa, n_samples, device, a.chunk, expected_provenance=provenance)
+            m2, v2, av2 = _truth_one(w, sb, n_samples, device, a.chunk, expected_provenance=provenance)
             pav1.append(av1); pav2.append(av2)
             d = m1[-1] - m2[-1]
             obs_l.append(float((d ** 2).mean()))
@@ -283,6 +396,8 @@ def main() -> int:
             # A PROBE truth file, so the downstream pipeline can be exercised
             # end to end without spending a block. It is stamped `probe=1` and
             # every consumer must refuse to treat it as evidence.
+            if os.path.exists(a.out) or os.path.exists(a.out + ".producer.json"):
+                raise SystemExit(f"REFUSED: {a.out} exists. Truth is immutable.")
             os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
             np.savez_compressed(
                 a.out,
@@ -297,7 +412,9 @@ def main() -> int:
                 n_samples=np.int64(n_samples),
                 width=np.int64(WIDTH), depth=np.int64(DEPTH),
                 probe=np.int64(1),
+                producer_manifest_json=np.asarray(json.dumps(provenance, sort_keys=True)),
             )
+            _write_truth_sidecar(a.out, provenance)
             print(f"  wrote PROBE truth (NOT evidence) -> {a.out}")
         print("=" * 78)
         return 0
@@ -312,7 +429,7 @@ def main() -> int:
 
     if not a.out or not a.ts:
         raise SystemExit("--out and --ts are required unless --plan")
-    if os.path.exists(a.out):
+    if os.path.exists(a.out) or os.path.exists(a.out + ".producer.json"):
         raise SystemExit(f"REFUSED: {a.out} exists. Truth is immutable.")
 
     import torch
@@ -320,6 +437,8 @@ def main() -> int:
     import seed_ledger as sl
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    _pin_truth_math()
+    provenance = truth_provenance(device, a.chunk)
     print(f"  device          {device}"
           + (f"  {torch.cuda.get_device_name(0)}" if device == "cuda" else ""))
     print()
@@ -378,8 +497,8 @@ def main() -> int:
     for i, s in enumerate(seeds):
         w, _est, _ss = canonical_mint(WIDTH, DEPTH, s)
         sa, sb = _replica_seeds(s)
-        m1[i], v1[i], av1[i] = _truth_one(w, sa, n_samples, device, a.chunk)
-        m2[i], v2[i], av2[i] = _truth_one(w, sb, n_samples, device, a.chunk)
+        m1[i], v1[i], av1[i] = _truth_one(w, sa, n_samples, device, a.chunk, expected_provenance=provenance)
+        m2[i], v2[i], av2[i] = _truth_one(w, sb, n_samples, device, a.chunk, expected_provenance=provenance)
         # The final-layer variance must be exactly the last row of the
         # all-layer one -- the same accumulator read two ways. Asserted per
         # network rather than trusted, because a silent divergence here would
@@ -410,7 +529,9 @@ def main() -> int:
         gt_noise=gt_noise.astype(np.float64),
         n_samples=np.int64(n_samples),
         width=np.int64(WIDTH), depth=np.int64(DEPTH),
+        producer_manifest_json=np.asarray(json.dumps(provenance, sort_keys=True)),
     )
+    _write_truth_sidecar(a.out, provenance)
     sha = hashlib.sha256(open(a.out, "rb").read()).hexdigest()
     rel = rel_out
     if a.already_claimed:
