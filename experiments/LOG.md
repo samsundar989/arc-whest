@@ -48756,3 +48756,28 @@ timing remain unknown. No new seed block, DECIDE read, public fitting,
 vault touch, source change or designation is authorized. Independent
 Skeptic review is required before interpreting any result or changing
 release status.
+
+**Upload/initial status, after the committed exception contract.** Contract
+commit `ef8d0a9` preceded upload. Immediately before it, the tar SHA and all
+three member hashes matched `package_receipt.json`; a fresh candidate
+`whest validate` passed. `whest submit --dry-run` refused an existing
+artifact because that CLI option requires `--estimator`, so it made no
+upload. From PowerShell with `PYTHONIOENCODING=utf-8`, the exact artifact
+was submitted once with description `F21 fused L4 diagnostic` and JSON
+output; CLI exited 0 and returned **submission #330950**, accepted at
+`2026-09-14T05:41:17.474Z`. Full saved CLI response is
+`experiments/2026-09-13_p10/f21_diagnostic_submit_cli.txt`, SHA256
+`6dc78e66c4d2e9252beb570ddf8a9b4830d60135dca25ef1edec52135d728121`.
+The same exact tar then passed installed `whest validate-package`, which
+checks archive/manifest structure but does **not** cure the failed mini
+or make the receipt's `validated_for_submission: false` flag true.
+The append-only slot ledger now records #330950 once as pending, approved
+by Samuel for this one-time exception. The first authenticated page fetch
+returned `status=SUBMITTED`, message "Successfully enqueued 1 Job",
+`evaluation=null` and no score; raw snapshot
+`experiments/2026-09-13_p10/f21_submission_330950_initial.json` SHA256
+`f3344099e9cb36c3397654c26df941116455edbf520a93ecb958f9c922fd4e7d`.
+The existing report-fetch script saved the pending snapshot then raised
+because it assumes `evaluation.results` exists; the snapshot was retained
+under its accurate initial-status name. No grading or server-residual
+conclusion exists yet, and no designation or second upload occurred.

@@ -1,5 +1,19 @@
 # CURRENT_STATE.md — read this first
 
+**September 14 F21 one-time diagnostic upload accepted as #330950; grading
+pending.** Samuel explicitly authorized one exception to the failed local
+clean-mini gate and one exact-package submission, without designation.
+Prerequisite exception contract is commit `ef8d0a9`. The official CLI
+accepted tar SHA256
+`4f3cc6f440e4cb66ea86a0904c00e182eb7ecf5aaab0ee64c73efb7d22904775`
+whose estimator member is frozen F21 SHA256
+`d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`.
+The first authenticated page read was `SUBMITTED`, with no evaluation or
+score; upload acceptance is not a grading result. The prior 100/100 local
+residual-cap failure and Full REFUSED certificate remain in force. Poll
+the official page for graded telemetry, save raw report, obtain a fresh
+Skeptic, and leave designation untouched.
+
 **September 14 F21 passes the fresh paired score gate, but normal submission
 release is BLOCKED: Full certificate REFUSED and the capped official mini
 failed 100/100 networks on the local residual-time cap.**
