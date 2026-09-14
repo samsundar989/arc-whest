@@ -1,0 +1,358 @@
+{
+  "source_sha256": {
+    "estimator_e14_tree.py": "5127a55ccd99a9516e271c8363153b86916684f470465d02c02dcaa413debb7d",
+    "estimator_k3_strassen_L4_f21.py": "d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94",
+    "local_sim/e14_tree_meter.py": "5373ef6a0601f92ed45d9e4d06e018751e7ad7838234cf3b4b663b76f96b6c6f",
+    "local_sim/p2_flop_anchor.py": "2b6dd48789ff85efd68b7c6d5a1d885f0c17f18da02defd48eacce56aa48cd10"
+  },
+  "fixture": "canonical_mint PROBE_SEED, 1024x16; no truth",
+  "instrument": "installed flopscope 0.12.1 BudgetContext with diagnostic 1e13 ceiling, live 2**41 passed into predict; reused immutable f64_readonly weights and in-window grader materialisation",
+  "baseline": {
+    "total": 928457637478.0,
+    "ops": {
+      "astype": {
+        "flops": 35747840.0,
+        "calls": 50.0
+      },
+      "ones": {
+        "flops": 1049600.0,
+        "calls": 2.0
+      },
+      "eye": {
+        "flops": 2048.0,
+        "calls": 2.0
+      },
+      "subtract": {
+        "flops": 8813919744.0,
+        "calls": 2879.0
+      },
+      "zeros": {
+        "flops": 0.0,
+        "calls": 3.0
+      },
+      "matmul": {
+        "flops": 867013201920.0,
+        "calls": 134.0
+      },
+      "add": {
+        "flops": 17332826127.0,
+        "calls": 6301.0
+      },
+      "concatenate": {
+        "flops": 32393317376.0,
+        "calls": 2417.0
+      },
+      "diagonal": {
+        "flops": 0.0,
+        "calls": 16.0
+      },
+      "maximum": {
+        "flops": 49152.0,
+        "calls": 17.0
+      },
+      "sqrt": {
+        "flops": 18432.0,
+        "calls": 17.0
+      },
+      "true_divide": {
+        "flops": 14745614.0,
+        "calls": 92.0
+      },
+      "clip": {
+        "flops": 32768.0,
+        "calls": 16.0
+      },
+      "stats.norm.cdf": {
+        "flops": 1572864.0,
+        "calls": 16.0
+      },
+      "stats.norm.pdf": {
+        "flops": 884736.0,
+        "calls": 16.0
+      },
+      "multiply": {
+        "flops": 2580181095.0,
+        "calls": 1921.0
+      },
+      "stack": {
+        "flops": 310272.0,
+        "calls": 65.0
+      },
+      "diag": {
+        "flops": 30720.0,
+        "calls": 30.0
+      },
+      "sum": {
+        "flops": 269466594.0,
+        "calls": 61.0
+      },
+      "isfinite": {
+        "flops": 49152.0,
+        "calls": 17.0
+      },
+      "where": {
+        "flops": 196608.0,
+        "calls": 17.0
+      },
+      "reshape": {
+        "flops": 2048.0,
+        "calls": 1.0
+      },
+      "asarray": {
+        "flops": 32768.0,
+        "calls": 1.0
+      }
+    },
+    "last_run_repr": "{'mode': 'full', 'generations': None, 'depth': 16, 'width': 1024, 'projected_flops': 1717419638784}"
+  },
+  "candidate": {
+    "total": 1014599318825.0,
+    "ops": {
+      "astype": {
+        "flops": 35747840.0,
+        "calls": 50.0
+      },
+      "ones": {
+        "flops": 1049600.0,
+        "calls": 2.0
+      },
+      "eye": {
+        "flops": 2048.0,
+        "calls": 2.0
+      },
+      "subtract": {
+        "flops": 9883989504.0,
+        "calls": 4364.0
+      },
+      "zeros": {
+        "flops": 0.0,
+        "calls": 5.0
+      },
+      "matmul": {
+        "flops": 942503443456.0,
+        "calls": 268.0
+      },
+      "add": {
+        "flops": 20039243791.0,
+        "calls": 9675.0
+      },
+      "concatenate": {
+        "flops": 36479566848.0,
+        "calls": 3673.0
+      },
+      "diagonal": {
+        "flops": 0.0,
+        "calls": 91.0
+      },
+      "maximum": {
+        "flops": 49152.0,
+        "calls": 17.0
+      },
+      "sqrt": {
+        "flops": 18432.0,
+        "calls": 17.0
+      },
+      "true_divide": {
+        "flops": 156381242.0,
+        "calls": 347.0
+      },
+      "clip": {
+        "flops": 32768.0,
+        "calls": 16.0
+      },
+      "stats.norm.cdf": {
+        "flops": 1572864.0,
+        "calls": 16.0
+      },
+      "stats.norm.pdf": {
+        "flops": 884736.0,
+        "calls": 16.0
+      },
+      "multiply": {
+        "flops": 4896653956.0,
+        "calls": 4366.0
+      },
+      "stack": {
+        "flops": 540672.0,
+        "calls": 94.0
+      },
+      "diag": {
+        "flops": 46080.0,
+        "calls": 45.0
+      },
+      "isfinite": {
+        "flops": 47311887.0,
+        "calls": 152.0
+      },
+      "sum": {
+        "flops": 552552375.0,
+        "calls": 375.0
+      },
+      "equal": {
+        "flops": 30.0,
+        "calls": 30.0
+      },
+      "where": {
+        "flops": 196728.0,
+        "calls": 47.0
+      },
+      "reshape": {
+        "flops": 2048.0,
+        "calls": 1.0
+      },
+      "asarray": {
+        "flops": 32768.0,
+        "calls": 1.0
+      }
+    },
+    "last_run_repr": "{'mode': 'e14_tree', 'generations': None, 'depth': 16, 'width': 1024, 'projected_flops': 1956935368704, 'reserved_flops': 239515729920}"
+  },
+  "operation_comparison": {
+    "add": {
+      "baseline_flops": 17332826127.0,
+      "candidate_flops": 20039243791.0,
+      "baseline_calls": 6301.0,
+      "candidate_calls": 9675.0
+    },
+    "asarray": {
+      "baseline_flops": 32768.0,
+      "candidate_flops": 32768.0,
+      "baseline_calls": 1.0,
+      "candidate_calls": 1.0
+    },
+    "astype": {
+      "baseline_flops": 35747840.0,
+      "candidate_flops": 35747840.0,
+      "baseline_calls": 50.0,
+      "candidate_calls": 50.0
+    },
+    "clip": {
+      "baseline_flops": 32768.0,
+      "candidate_flops": 32768.0,
+      "baseline_calls": 16.0,
+      "candidate_calls": 16.0
+    },
+    "concatenate": {
+      "baseline_flops": 32393317376.0,
+      "candidate_flops": 36479566848.0,
+      "baseline_calls": 2417.0,
+      "candidate_calls": 3673.0
+    },
+    "diag": {
+      "baseline_flops": 30720.0,
+      "candidate_flops": 46080.0,
+      "baseline_calls": 30.0,
+      "candidate_calls": 45.0
+    },
+    "diagonal": {
+      "baseline_flops": 0.0,
+      "candidate_flops": 0.0,
+      "baseline_calls": 16.0,
+      "candidate_calls": 91.0
+    },
+    "equal": {
+      "baseline_flops": 0,
+      "candidate_flops": 30.0,
+      "baseline_calls": 0,
+      "candidate_calls": 30.0
+    },
+    "eye": {
+      "baseline_flops": 2048.0,
+      "candidate_flops": 2048.0,
+      "baseline_calls": 2.0,
+      "candidate_calls": 2.0
+    },
+    "isfinite": {
+      "baseline_flops": 49152.0,
+      "candidate_flops": 47311887.0,
+      "baseline_calls": 17.0,
+      "candidate_calls": 152.0
+    },
+    "matmul": {
+      "baseline_flops": 867013201920.0,
+      "candidate_flops": 942503443456.0,
+      "baseline_calls": 134.0,
+      "candidate_calls": 268.0
+    },
+    "maximum": {
+      "baseline_flops": 49152.0,
+      "candidate_flops": 49152.0,
+      "baseline_calls": 17.0,
+      "candidate_calls": 17.0
+    },
+    "multiply": {
+      "baseline_flops": 2580181095.0,
+      "candidate_flops": 4896653956.0,
+      "baseline_calls": 1921.0,
+      "candidate_calls": 4366.0
+    },
+    "ones": {
+      "baseline_flops": 1049600.0,
+      "candidate_flops": 1049600.0,
+      "baseline_calls": 2.0,
+      "candidate_calls": 2.0
+    },
+    "reshape": {
+      "baseline_flops": 2048.0,
+      "candidate_flops": 2048.0,
+      "baseline_calls": 1.0,
+      "candidate_calls": 1.0
+    },
+    "sqrt": {
+      "baseline_flops": 18432.0,
+      "candidate_flops": 18432.0,
+      "baseline_calls": 17.0,
+      "candidate_calls": 17.0
+    },
+    "stack": {
+      "baseline_flops": 310272.0,
+      "candidate_flops": 540672.0,
+      "baseline_calls": 65.0,
+      "candidate_calls": 94.0
+    },
+    "stats.norm.cdf": {
+      "baseline_flops": 1572864.0,
+      "candidate_flops": 1572864.0,
+      "baseline_calls": 16.0,
+      "candidate_calls": 16.0
+    },
+    "stats.norm.pdf": {
+      "baseline_flops": 884736.0,
+      "candidate_flops": 884736.0,
+      "baseline_calls": 16.0,
+      "candidate_calls": 16.0
+    },
+    "subtract": {
+      "baseline_flops": 8813919744.0,
+      "candidate_flops": 9883989504.0,
+      "baseline_calls": 2879.0,
+      "candidate_calls": 4364.0
+    },
+    "sum": {
+      "baseline_flops": 269466594.0,
+      "candidate_flops": 552552375.0,
+      "baseline_calls": 61.0,
+      "candidate_calls": 375.0
+    },
+    "true_divide": {
+      "baseline_flops": 14745614.0,
+      "candidate_flops": 156381242.0,
+      "baseline_calls": 92.0,
+      "candidate_calls": 347.0
+    },
+    "where": {
+      "baseline_flops": 196608.0,
+      "candidate_flops": 196728.0,
+      "baseline_calls": 17.0,
+      "candidate_calls": 47.0
+    },
+    "zeros": {
+      "baseline_flops": 0.0,
+      "candidate_flops": 0.0,
+      "baseline_calls": 3.0,
+      "candidate_calls": 5.0
+    }
+  },
+  "delta_flops": 86141681347.0,
+  "ratio": 1.0927793341018655
+}
