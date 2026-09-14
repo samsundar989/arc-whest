@@ -1,5 +1,39 @@
 # CURRENT_STATE.md — read this first
 
+## Current decision — September 14 research review
+
+Samuel requested and received a multi-agent repository/validation/literature review
+and a live competition review through his Chrome. The returned
+[research strategy](RESEARCH_STRATEGY_2026-09-14.md) and
+[implementation plan](IMPLEMENTATION_PLAN_2026-09-14.md) recommend keeping the
+cumulant family while separating operator parity, all-age compression, and one
+coherent accuracy extension. A winning implementation is **not demonstrated**.
+The next proposed action is the existing fixed B4 float64-versus-float64 precision
+discriminator, followed by actual-precision conformance; no new labels are needed.
+Instrument work should be limited to candidate identity, numerical sensitivity,
+crash-safe evidence and production-truth precision provenance. These are proposals:
+apply the existing IMPORTANT/STRATEGIC contract before implementing or measuring.
+
+F21 #330950 remains the latest successful graded candidate; root `estimator.py`
+is the historical v2.6.1 baseline. Local capped-mini/Full refusal and the one-time
+server diagnostic pass remain separate. The leader detail page refines the dated
+target to `2.540e-9` (board rounds `2.50e-9`): F21 is about 6.28x higher. At its
+unchanged public raw error, the 0.1 floor still gives `3.7794e-9`; reaching the
+dated leader there requires about 32.79% lower raw error. Public truth noise and
+private performance remain unknown. No code, gate, protected-data access,
+submission, designation or write-up claim was changed by this review.
+
+The supporting [competition notes](research/2026-09-14_competition_review.md),
+[architecture audit](research/2026-09-14_architecture_audit.md),
+[validation audit](research/2026-09-14_validation_audit.md), and
+[frontier review](research/2026-09-14_frontier_research.md) preserve source paths,
+primary citations, unknowns and concrete acceptance tests. See the separate
+[research Skeptic verdict](research/2026-09-14_research_skeptic.md) for the scope
+of independent acceptance. The entries below are dated supporting chronology;
+older statements of pending status do not supersede the latest result.
+
+## Dated supporting chronology
+
 **September 14 F21 diagnostic #330950 GRADED, zero failures; strategist
 decision now concerns larger gains and private selection.** Samuel
 authorized one exception to the failed local clean-mini gate and one

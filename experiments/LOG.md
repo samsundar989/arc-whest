@@ -48910,3 +48910,71 @@ strategy or permission for another implementation, seed block,
 submission, designation, write-up claim or external message. Samuel can
 deliver the packet by hand; returned proposals must become a new
 preregistered contract before any strategic measurement.
+
+### 2026-09-14 — requested multi-agent research strategy returned; no new experiment
+
+**Scope / classification.** Samuel requested deep repository, competition,
+literature, architecture and validation research using multiple agents and his
+Chrome. This slice is read-only audit and ROUTINE internal documentation, not a
+new estimator intervention, promotion or contribution-write-up claim. Three
+specialists separately reviewed architecture, validation and frontier literature;
+a fourth fresh-context Skeptic reviewed exposed raw result artifacts before the
+final synthesis. No new labels, seed claim/read, vault operation, heavy workload,
+instrument/candidate edit, submission, designation or external message occurred.
+
+**Evidence and knowledge delta.** CONFIRMED existing F21 P10 arithmetic gain
+1.150566x and 100/100 graded completion survive independent reconstruction.
+CONFIRMED live Chrome leader detail refines the dated public target to 2.540e-9
+(board displays 2.50e-9), with our F21 tied rank58/156. The resulting conditional
+gap is 6.28x; at unchanged public raw error the cost floor still gives 3.7794e-9,
+so tying that target there requires 32.79% lower raw error. Public truth-noise
+floor is unavailable. Latest discussion 18218 adds a September-14 report of
+7–22% further cost savings elsewhere and reported sponsor Strassen permission;
+neither reveals leader source or independently verifies sponsor correspondence.
+Thread 18202's corrected scalar-synchronization mechanism supersedes a simple
+call-count-only residual explanation. Rules v14 still requires fresh private
+reruns and the October17 submission deadline; each contribution write-up must
+correspond to one successfully evaluated submission for that phase.
+
+CONFIRMED instrument gaps: latest F21 numerical checks retain a stale raw-error
+scale; final-only scorer publication can lose completed rows on interruption;
+production truth lacks complete math-mode provenance. These are coverage gaps,
+not proof that current predictions or labels are wrong. Current F21 counted
+cost and real Linux memory evidence are strong but do not imply a complete
+private-server timing twin. The historical root estimator is distinct from F21.
+
+INFERRED recommended family remains faithful persistent K3 with all ages,
+shared-basis representation and a separately coherent extra-K4 accuracy
+extension. Winning implementation is unproved: B4 still confounds f32/f64,
+compression has no accepted complete candidate bill, and a cheap stable extra
+K4 formula is not established. Local T1 is coupled 8n factorable AUGMENT, not
+full K4 or isolated matrix-K4 causal evidence. SPECULATIVE bounded extensions
+are query/output-sensitive bases and polynomial-feature sketches; primary
+literature supports mechanisms, not challenge performance or originality.
+
+**Returned decision.** First propose the existing fixed B4 f64-versus-f64
+diagnostic from layer0, then actual-precision conformance, before rank changes
+or labels. Keep instrument repairs bounded, freeze one faithful representation
+change, derive/falsify the accuracy extension independently, and compare a
+combined candidate only under a fresh committed contract. The proposed screens,
+cost milestones and dates in the plan are not binding promotion gates. No
+local release waiver, lane reopening or data-protocol change was made.
+
+**Deliverables.** `docs/RESEARCH_STRATEGY_2026-09-14.md` and
+`docs/IMPLEMENTATION_PLAN_2026-09-14.md`, plus
+`docs/research/2026-09-14_{architecture_audit,validation_audit,frontier_research,competition_review}.md`.
+CURRENT_STATE now distinguishes the latest decision from dated chronology.
+The QMC upper-bound/impossibility overstatement in older notes is identified
+in the research synthesis; existing measured lane closures are preserved.
+
+**Independent Skeptic: ACCEPT**, scoped to corrected research and plan, in
+`docs/research/2026-09-14_research_skeptic.md`. It independently recomputed P10,
+graded flags/counts/times and checked B4/T1 controls. Corrections clarify that
+B4 starts at layer0 and prohibit adding observations in response to interim
+results without preregistered sequential design. Reviewed report SHA256
+`bdb3943a9dd8813abf4c05e531ede5f1963e72d0ff04b9b7876553f914f5e21a`;
+plan SHA256 `0f343680c5de330f9aabfc85f99249182ae2996140b0c378ad667d2b787de1ca`.
+Unknown private accuracy, exact server-byte binding, eligibility and feasibility
+of the unbuilt architecture remain explicit. Documentation links, target
+arithmetic and whitespace were checked; no preflight/benchmark rerun was needed
+for this documentation-only review.
