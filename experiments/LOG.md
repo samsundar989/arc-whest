@@ -48689,3 +48689,70 @@ cap-disabled fresh P10 domain. No further mandatory candidate work is
 unblocked within the normal release path; F21 remains frozen and
 unsubmitted. This is an operational gate refusal, not a general scientific
 kill of the fusion or compact-representation research.
+
+## 2026-09-14 05:40 UTC — one-time F21 diagnostic submission exception (STRATEGIC contract, before upload/result)
+
+**Question and authorization.** Does the exact frozen F21 candidate clear the
+Phase-2 grading server's deployment limits, especially residual wall time,
+when submitted once as a diagnostic? Samuel answered **"yes submit"** after
+reviewing the exact candidate/package hashes, the 100/100 local capped-mini
+refusal, fresh score evidence and the need for a one-time exception to
+AGENTS.md rule 6. This is authorization for **one** submission of the exact
+package below despite the failed local clean-mini prerequisite. It does not
+authorize designation, another submission, an external message, new terms,
+or treating the local failure as a pass. The package receipt continues to
+say `validated_for_submission: false`; the exception does not rewrite it.
+
+**Existing evidence and hypothesis.** CONFIRMED: frozen F21 source SHA256
+`d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`,
+prepared `f21-with-notice.tar.gz` SHA256
+`4f3cc6f440e4cb66ea86a0904c00e182eb7ecf5aaab0ee64c73efb7d22904775`,
+and archive member `estimator.py` matches that source; the own-parent
+provenance/notice audit is in `f21_provenance_audit.md`. CONFIRMED:
+candidate `whest validate` passed again immediately before this contract;
+Full's 2/2 and official mini's 100/100 local subprocess rows failed only
+`residual_wall_time_exhausted`, with no exception or budget/wall flags.
+CONFIRMED: P10's fresh 128-pair cap-disabled score gate passed 1.150566x
+against original L4 with a positive paired interval and midpoint truth
+floor, but is not deployment proof. INFERRED: this host substantially
+over-reads residual time versus two previous graded anchors; the
+14,091-operation model forecasts 0.1888 s graded residual/2.12x headroom.
+SPECULATIVE: F21's operation mix and grading host will obey that sparse
+extrapolation and all graded MLPs will complete. The distinct hypothesis
+is **server feasibility**, not a new accuracy or score search.
+
+**Predictions, gate and falsifier.** Builder predicts zero estimator and
+counted-budget failures, zero server residual failures, and a server
+residual below 0.4 s; the residual prediction is a sparse-anchor model,
+not measured telemetry. Builder predicts counted FLOPs near the known
+f64-readonly 928,457,637,478 plus the previously observed server
+`2**24` offset, if the same server billing convention applies. Samuel's
+previous explicit F21/P10 forecasts were **"I don't know"** for exception/
+budget risk, fresh score gain and truth-floor magnitude; no separate
+graded-residual magnitude was asserted. Those answers remain uncertainty,
+not post hoc predictions or a new threshold. The sole diagnostic pass
+criterion is official grading success with **zero failed MLPs** and no
+residual, wall, budget or estimator failure. Any such failure falsifies
+server feasibility for these bytes. A timeout, processing status or
+missing telemetry is **no verdict**, not pass. Public score, if exposed,
+is read-only CONFIRM and cannot substitute for the preregistered P10 paired
+DECIDE or private result; no coefficient fitting or model selection follows.
+
+**Intervention, baseline, cost and confounders.** Upload the exact above
+tar once using `whest submit` from PowerShell with UTF-8 console encoding,
+then save CLI output/receipt, submission identifier, package hash, grade
+status and available raw telemetry. Do not run through workerq: the queue
+explicitly excludes submission. Baseline for context is original frozen L4
+SHA256 `052dd768e970c4bae831cff26f8ff15b0487f3b95eadf2fd3578e542aec34d58`
+and its stored Phase-2 graded report; L2 is robustness context, not an
+alternative selected by this upload. Phase-2 lambda=0 makes counted
+`C=F`; F21's f64-readonly ledger is 928,457,637,478 FLOPs versus L4's
+1,068,245,507,686, with the small observed server offset treated
+separately. Residual is a hard 0.4 s cliff, not part of score cost;
+report server headroom as `0.4 / worst observed graded residual` only
+if graded residual is actually exposed. Server wall has a 120 s cap.
+Fresh grading networks, private accuracy, server operation mix and host
+timing remain unknown. No new seed block, DECIDE read, public fitting,
+vault touch, source change or designation is authorized. Independent
+Skeptic review is required before interpreting any result or changing
+release status.
