@@ -579,7 +579,7 @@ print('  C/B          %.7f   failures %d' % (
     r['mean_compute_utilization'], r['n_failed_mlps']))
 worst = max(m['residual_wall_time_s'] for m in r['per_mlp'])
 cap = cfg['residual_wall_time_limit_s']
-print('  worst residual %.5f s of %.2f s cap  -> %.1fx headroom (GRADED PATH)' % (
+print('  worst residual %.5f s of %.2f s cap  -> %.1fx headroom (LOCAL OFFICIAL SUBPROCESS)' % (
     worst, cap, cap / worst if worst else float('inf')))
 bad = []
 if r['n_failed_mlps'] != 0:
@@ -631,7 +631,8 @@ if ($failures.Count -eq 0) {
     Write-Host "      uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v2-phase2 --split mini --runner subprocess"
     Write-Host "    (v1-phase1 is the PHASE-1 split; use it only to replay a Phase-1 artifact)"
     Write-Host "  - the 8,192 MB memory limit is UNENFORCEABLE on this host (no RLIMIT_AS on"
-    Write-Host "    Windows). Step 15 ACCOUNTS for it; nothing here TESTS it."
+    Write-Host "    Windows). Step 15 ACCOUNTS for it; candidate-specific linux_memory_gate.py"
+    Write-Host "    separately TESTS it under Linux. This preflight does not consume that proof."
     Write-Host "  - GPU mirror parity:                     .venv-gpu\Scripts\python.exe local_sim/gpu_parity.py"
     Write-Host "  - vault touch (ONE per estimator change): .venv-gpu\Scripts\python.exe local_sim/vault.py evaluate --label <v> --reason estimator-change"
     Write-Host "  - Samuel's explicit approval before any submission."

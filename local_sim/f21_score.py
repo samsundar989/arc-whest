@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import dataclasses
 import hashlib
+import importlib.metadata
 import json
 import os
 import subprocess
@@ -37,6 +38,7 @@ import official_config  # noqa: E402
 import seed_blocks  # noqa: E402
 import seed_ledger  # noqa: E402
 import truth_reads  # noqa: E402
+from evidence_journal import EvidenceJournal, verify_complete  # noqa: E402
 
 
 L4_SHA = "052dd768e970c4bae831cff26f8ff15b0487f3b95eadf2fd3578e542aec34d58"
@@ -275,7 +277,7 @@ def main() -> int:
         ap.error("--out must be an absolute live path")
     if not out.is_relative_to(live_root / "experiments"):
         ap.error("--out must be inside the live experiments directory")
-    if out.exists():
+    if os.path.lexists(out):
         ap.error("output already exists; evidence is immutable")
     if not a.fused_sha or len(a.fused_sha) != 64:
         ap.error("--fused-sha needs the frozen 64-character digest")
@@ -291,11 +293,42 @@ def main() -> int:
         live_copy = live_root / path.relative_to(_ROOT)
         if not live_copy.is_file() or _sha(live_copy) != digest:
             raise ValueError(f"live workspace does not contain snapshot-pinned {name} bytes")
+    # Reserve before any protected load. The guardian records abrupt process
+    # death; neither journal inspection nor failed publication authorizes a read.
+    instruments = [__file__, le.__file__, cs.__file__, official_config.__file__,
+                   seed_blocks.__file__, seed_ledger.__file__, truth_reads.__file__,
+                   _HERE / "evidence_journal.py", _HERE / "mint_provenance.py",
+                   _HERE / "harness.py"]
+    truth_files = []
+    for path in truth_paths:
+        full = (_ROOT / path).resolve()
+        if not full.is_relative_to(_ROOT):
+            raise ValueError("truth path leaves the executing snapshot")
+        # Actual content hashes arrive only through the authorized _labels /
+        # reserve-before-load receipt. Journal reservation does not read truth.
+        truth_files.append({"path": str(full), "sha256": None})
+    with EvidenceJournal(
+        out, candidates={name: {"path": str(path), "sha256": digest}
+                         for name, (path, digest) in paths.items()},
+        instrument_files=instruments, truth_files=truth_files,
+        expected_per_arm=24 if a.tier == "design" else 128,
+        config={"tier": a.tier, "weights_mode": "f64_readonly",
+                "python": sys.version, "numpy": np.__version__,
+                "packages": {package: importlib.metadata.version(package)
+                             for package in ("flopscope", "whestbench")},
+                "gate": 1.05, "interval": "t", "binding_score": "forecast_offset_max"},
+    ) as journal:
+        return _run(a, live_root, live_reads, live_ledger, paths, out, journal)
+
+
+def _run(a, live_root, live_reads, live_ledger, paths, out, journal):
     seeds, truth, noise, truth_prov = _labels(a, live_root, live_reads, live_ledger)
+    journal.bind(seeds, le._array_sha(truth), truth_prov)
     local_timing = {"residual_wall_time_limit_s": None}
     if a.tier == "decide":
         local_timing["wall_time_limit_s"] = None
     spec = le.LifecycleSpec.for_round("v2-phase2", **local_timing)
+    journal.event("lifecycle_config", spec=dataclasses.asdict(spec))
     print(f"F21 {a.tier.upper()}: {len(seeds)} paired networks; "
           f"local timing caps relaxed for accuracy only: {sorted(local_timing)}", flush=True)
     print(f"midpoint truth floor {noise.mean():.6e}; official forecast N={OFFICIAL_SAMPLES:,}", flush=True)
@@ -303,10 +336,20 @@ def main() -> int:
     arms = {}
     for name in ("L4", "fused_L4", "L2"):
         path, expected_sha = paths[name]
+        journal.stage = "evaluate:" + name
+        journal.event("arm_started", arm=name)
         print(f"arm {name} {expected_sha}...", flush=True)
-        evidence, prov = le.evaluate(
-            str(path), seeds, truth, spec=spec, gt_noise=noise,
-            weights_mode="f64_readonly", progress_every=8)
+        try:
+            evidence, prov = le.evaluate(
+                str(path), seeds, truth, spec=spec, gt_noise=noise,
+                weights_mode="f64_readonly", progress_every=8,
+                evidence_sink=lambda row, arm=name: journal.append_row(arm, row))
+        except BaseException as exc:
+            journal.event("setup_failure" if isinstance(exc, le.SetupFailure)
+                          else "evaluation_interrupted" if isinstance(exc, (KeyboardInterrupt, SystemExit))
+                          else "evaluation_error", arm=name,
+                          exception=type(exc).__name__, message=str(exc))
+            raise
         if prov["candidate_sha256"] != expected_sha or any(
             row.candidate_sha256 != expected_sha for row in evidence):
             raise ValueError(f"{name} evaluated unexpected source bytes")
@@ -318,7 +361,10 @@ def main() -> int:
         vectors = _score_vectors(rows, truth_prov["local_samples_total"])
         arms[name] = {"evidence": evidence, "provenance": prov, "rows": rows,
                       "vectors": vectors}
+        journal.event("arm_completed", arm=name, provenance=prov)
 
+    journal.stage = "paired_decision"
+    journal.assert_complete()  # mandatory before comparisons or cs.decide
     # Identity alignment is a mandatory pair check even though the generator
     # currently visits seeds in order.  All three arms share exact truth bytes.
     for name in ("fused_L4", "L2"):
@@ -362,6 +408,9 @@ def main() -> int:
                    "reasons": list(v.reasons)}
 
     payload = {
+        "evidence_journal": {"directory": str(journal.directory),
+                             "require_complete_manifest": True,
+                             "resume_authorized": False},
         "experiment": "F21 one shared-right D21 fusion", "tier": a.tier.upper(),
         "data_role": "exposed DESIGN" if a.tier == "design" else "fresh DECIDE",
         "n": len(seeds), "seeds": seeds, "truth": truth_prov,
@@ -400,12 +449,8 @@ def main() -> int:
     for path, digest in paths.values():
         if _sha(path) != digest:
             raise ValueError(f"candidate changed before report publication: {path}")
-    if out.exists():
-        raise ValueError("output appeared during evaluation")
-    out.parent.mkdir(parents=True, exist_ok=True)
-    with out.open("x", encoding="utf-8") as f:
-        json.dump(payload, f, indent=1, allow_nan=False)
-        f.write("\n")
+    journal.publish(payload)
+    verify_complete(journal.directory)
     print(f"{a.tier.upper()} {'PASS' if verdict['passed'] else 'FAIL'}: {out}", flush=True)
     return 0
 

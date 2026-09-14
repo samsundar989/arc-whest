@@ -49104,3 +49104,30 @@ sources and reset state at every layer, to localize local arithmetic drift
 separately from accumulated trajectory drift. Use the same four fixed cases,
 all layers/ages, original1e-5 internal reports, committed field envelope and
 2e-10 output bar. No rank change, K4 addition, fresh data or gate revision.
+
+**E14 infrastructure implementation checkpoint; verification pending.** Candidate
+release index, explicit tighten-only certifier CLI scale, durable scorer journal
+and pinned truth arithmetic are implemented. Nine release/sensitivity mutation
+tests and nine journal tests pass on reusable fixtures; first failed parser
+test (string-valued server IDs) and corrected pass remain in separate logs.
+The journal now binds truth-file hashes only from the authorized load receipt,
+never prehashes protected files before reservation. Preliminary synthetic
+artifacts are retained as history after automatic approval review rejected
+their cleanup (`blocked by policy`); no bypass was attempted or needed.
+Preflight explanatory labels now call local subprocess seconds LOCAL and name
+the separate Linux memory gate; no check, threshold or release policy changed.
+
+**Default preflight optimization review (before submission).** Run all12 default
+steps, including real package checks, ship identity, ledger refusals and vault
+seal verification (not evaluate/no touch). One process tree, CPU2 with BLAS/OMP
+and MKL capped2, RAM6GiB/VRAM0. Prior same default job1152 peak2.87GiB supports
+this conservative reserve. No loader duplication, workers/prefetch/cache or
+new batch choices; no omitted checks. Accepted unchanged Full/candidate evidence
+is not rerun to repair unrelated instruments. Preserve full verdict transcript
+and receipt; a failure gets a targeted repair before retry, not a waived gate.
+Command: `workerq submit --project arc-whest --gpus 0 --ram 6 --vram 0 --cpus 2
+--env OPENBLAS_NUM_THREADS=2 --env OMP_NUM_THREADS=2 --env MKL_NUM_THREADS=2
+--env PYTHONIOENCODING=utf-8 --label e14-default-preflight --eta 10m --
+powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File
+scripts/preflight.ps1 -Log
+C:/Users/samsu/Documents/arc-whest/experiments/2026-09-14_e14/preflight_default.txt`.

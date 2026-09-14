@@ -80,7 +80,7 @@ import os
 import sys
 import time
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
@@ -571,6 +571,7 @@ def evaluate(
     weights_mode: str = DEFAULT_WEIGHTS_MODE,
     predictions_out: Optional[List[np.ndarray]] = None,
     operation_logs_out: Optional[List[List[Any]]] = None,
+    evidence_sink: Optional[Callable[[EvidenceRow], None]] = None,
     _lifecycle: str = "grader",
 ) -> Tuple[List[EvidenceRow], Dict[str, Any]]:
     """Run `candidate` over `seeds` under the GRADER's lifecycle.
@@ -597,6 +598,11 @@ def evaluate(
     finished. Multi-row use is refused so callers cannot accidentally retain an
     unbounded rows-times-operations history. Normal evaluation and production
     producers leave it unset, so they retain no additional history or memory.
+
+    `evidence_sink` synchronously receives each immutable completed row outside
+    the measured window, before the next MLP begins. Sink errors abort the run;
+    a scorer must not continue after losing durable evidence. Setup failures
+    still raise and are recorded by the run-level caller, never invented rows.
 
     `_lifecycle` exists ONLY so the regression test can drive the historical
     `"per_mlp_no_setup"` path (vault.py:282 / coverage_lab.py:226) through the
@@ -826,6 +832,8 @@ def evaluate(
                 nonfinite=nonfinite,
             )
         )
+        if evidence_sink is not None:
+            evidence_sink(rows[-1])
         if progress_every and (i + 1) % progress_every == 0:
             print(f"  {i + 1}/{len(seeds)}", flush=True)
 

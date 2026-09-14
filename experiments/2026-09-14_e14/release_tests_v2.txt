@@ -1,0 +1,73 @@
+test_changed_evidence_rejected (__main__.ReleaseTests) ... ok
+test_different_valid_candidate_rejected (__main__.ReleaseTests) ... ok
+test_permutation_identity_and_excessive_drift (__main__.ReleaseTests) ... ok
+test_scale_is_explicit_tighten_only (__main__.ReleaseTests) ... ok
+test_server_semantic_mutations_refused (__main__.ReleaseTests) ... test_stored_domains_remain_separate (__main__.ReleaseTests) ... ERROR
+test_unknown_server_is_not_pass (__main__.ReleaseTests) ... ok
+test_wrong_candidate_hash_rejected (__main__.ReleaseTests) ... ok
+test_wrong_server_submission_rejected (__main__.ReleaseTests) ... ok
+
+======================================================================
+ERROR: test_server_semantic_mutations_refused (__main__.ReleaseTests) (mutation='duplicate')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\samsu\Documents\arc-whest\local_sim\test_release_e14.py", line 75, in test_server_semantic_mutations_refused
+    self.assertEqual(release.build(recipe)['domains']['SERVER_MEASURED']['verdict'], 'REFUSED')
+  File "C:\Users\samsu\Documents\arc-whest\local_sim\candidate_release_record.py", line 96, in build
+    raise ValueError('server submission identity mismatch')
+ValueError: server submission identity mismatch
+
+======================================================================
+ERROR: test_server_semantic_mutations_refused (__main__.ReleaseTests) (mutation='nan_later')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\samsu\Documents\arc-whest\local_sim\test_release_e14.py", line 75, in test_server_semantic_mutations_refused
+    self.assertEqual(release.build(recipe)['domains']['SERVER_MEASURED']['verdict'], 'REFUSED')
+  File "C:\Users\samsu\Documents\arc-whest\local_sim\candidate_release_record.py", line 96, in build
+    raise ValueError('server submission identity mismatch')
+ValueError: server submission identity mismatch
+
+======================================================================
+ERROR: test_server_semantic_mutations_refused (__main__.ReleaseTests) (mutation='fail_flag')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\samsu\Documents\arc-whest\local_sim\test_release_e14.py", line 75, in test_server_semantic_mutations_refused
+    self.assertEqual(release.build(recipe)['domains']['SERVER_MEASURED']['verdict'], 'REFUSED')
+  File "C:\Users\samsu\Documents\arc-whest\local_sim\candidate_release_record.py", line 96, in build
+    raise ValueError('server submission identity mismatch')
+ValueError: server submission identity mismatch
+
+======================================================================
+ERROR: test_server_semantic_mutations_refused (__main__.ReleaseTests) (mutation='missing_flag')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\samsu\Documents\arc-whest\local_sim\test_release_e14.py", line 75, in test_server_semantic_mutations_refused
+    self.assertEqual(release.build(recipe)['domains']['SERVER_MEASURED']['verdict'], 'REFUSED')
+  File "C:\Users\samsu\Documents\arc-whest\local_sim\candidate_release_record.py", line 96, in build
+    raise ValueError('server submission identity mismatch')
+ValueError: server submission identity mismatch
+
+======================================================================
+ERROR: test_server_semantic_mutations_refused (__main__.ReleaseTests) (mutation='incomplete')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\samsu\Documents\arc-whest\local_sim\test_release_e14.py", line 75, in test_server_semantic_mutations_refused
+    self.assertEqual(release.build(recipe)['domains']['SERVER_MEASURED']['verdict'], 'REFUSED')
+  File "C:\Users\samsu\Documents\arc-whest\local_sim\candidate_release_record.py", line 96, in build
+    raise ValueError('server submission identity mismatch')
+ValueError: server submission identity mismatch
+
+======================================================================
+ERROR: test_stored_domains_remain_separate (__main__.ReleaseTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\samsu\Documents\arc-whest\local_sim\test_release_e14.py", line 26, in test_stored_domains_remain_separate
+    result = release.build(self.recipe)
+  File "C:\Users\samsu\Documents\arc-whest\local_sim\candidate_release_record.py", line 96, in build
+    raise ValueError('server submission identity mismatch')
+ValueError: server submission identity mismatch
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.340s
+
+FAILED (errors=6)

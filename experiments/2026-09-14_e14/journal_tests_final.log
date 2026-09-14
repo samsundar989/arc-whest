@@ -1,0 +1,18 @@
+test_abrupt_death_mid_arm_after_arm_during_publication (__main__.JournalTests) ... ok
+test_chain_torn_tail_and_manifest_mutations_refused (__main__.JournalTests) ... C:\Users\samsu\Documents\arc-whest\local_sim\lifecycle_eval.py:619: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+C:\Users\samsu\Documents\arc-whest\local_sim\lifecycle_eval.py:619: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+ok
+test_duplicate_incomplete_and_binding_mismatches (__main__.JournalTests) ... ok
+test_exclusive_output_reservation_before_any_second_run (__main__.JournalTests) ... ok
+test_instrument_changed_before_publication_refused (__main__.JournalTests) ... ok
+test_pending_truth_hash_binds_without_reading_truth_bytes (__main__.JournalTests) ... ok
+test_production_scorer_complete_and_report_hash_refusal (__main__.JournalTests) ... ok
+test_setup_and_row_failure_keep_actual_prior_observations (__main__.JournalTests) ... ok
+test_valid_chain_duplicate_and_truth_binding_mutation_refused (__main__.JournalTests) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 8.712s
+
+OK

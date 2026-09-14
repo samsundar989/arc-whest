@@ -54,6 +54,31 @@ class ReleaseTests(unittest.TestCase):
         del recipe['evidence']['server_report']
         self.assertEqual(release.build(recipe)['domains']['SERVER_MEASURED']['verdict'], 'NOT_RUN')
 
+    def test_server_semantic_mutations_refused(self):
+        original = json.loads((release.ROOT / self.recipe['evidence']['server_report']['path']).read_text())
+        def duplicate(d):
+            d['evaluation']['results']['per_mlp'][1] = d['evaluation']['results']['per_mlp'][0]
+        def nan_later(d):
+            d['evaluation']['results']['per_mlp'][1]['telemetry']['residual_wall_time_s'] = float('nan')
+        def fail_flag(d):
+            d['evaluation']['results']['per_mlp'][1]['telemetry']['time_exhausted'] = True
+        def missing_flag(d):
+            del d['evaluation']['results']['per_mlp'][1]['telemetry']['budget_exhausted']
+        def incomplete(d):
+            d['evaluation']['results']['per_mlp'].pop()
+        for mutation in (duplicate, nan_later, fail_flag, missing_flag, incomplete):
+            with self.subTest(mutation=mutation.__name__), tempfile.TemporaryDirectory(dir=release.ROOT / 'experiments') as tmp:
+                fixture = copy.deepcopy(original); mutation(fixture)
+                path = Path(tmp) / 'mutant.json'; path.write_text(json.dumps(fixture))
+                recipe = copy.deepcopy(self.recipe)
+                recipe['evidence']['server_report'] = {'path': str(path.relative_to(release.ROOT)), 'sha256': release.sha(path)}
+                self.assertEqual(release.build(recipe)['domains']['SERVER_MEASURED']['verdict'], 'REFUSED')
+
+    def test_wrong_server_submission_rejected(self):
+        recipe = copy.deepcopy(self.recipe); recipe['server_submission_id'] = 1
+        with self.assertRaisesRegex(ValueError, 'submission identity mismatch'):
+            release.build(recipe)
+
     def test_scale_is_explicit_tighten_only(self):
         for bad in (0, -1, float('nan'), float('inf'), 1e-3):
             recipe = copy.deepcopy(self.recipe); recipe['numerical_raw_mse_scale'] = bad

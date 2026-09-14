@@ -92,6 +92,8 @@ def build(recipe, root=ROOT):
     graded = docs.get('server_report')
     if graded:
         ev = graded['evaluation']; rows = ev['results']['per_mlp']
+        if str(graded['id']) != str(recipe['server_submission_id']) or str(ev['submission_id']) != str(graded['id']):
+            raise ValueError('server submission identity mismatch')
         expected = ev['config_snapshot']['n_mlps']
         complete = (graded['status'] == 'GRADED' and ev['state'] == 'completed' and
                     not ev['error'] and len(rows) == expected and
@@ -101,8 +103,11 @@ def build(recipe, root=ROOT):
         telemetry = [r['telemetry'] for r in rows]
         residual = max((r['residual_wall_time_s'] for r in telemetry), default=None)
         wall = max((r['participant_predict_wall_s'] for r in telemetry), default=None)
-        valid_times = (residual is not None and wall is not None and
-                       math.isfinite(residual) and math.isfinite(wall) and 0 < residual <= .4 and 0 < wall <= 120)
+        valid_times = (bool(telemetry) and all(
+            math.isfinite(r['residual_wall_time_s']) and 0 < r['residual_wall_time_s'] <= .4
+            and math.isfinite(r['participant_predict_wall_s']) and 0 < r['participant_predict_wall_s'] <= 120
+            and math.isfinite(r['flops_used']) and 0 <= r['flops_used'] <= 2**41
+            for r in telemetry))
         domains['SERVER_MEASURED'] = {
             'verdict': 'PASS' if complete and not failures and valid_times else 'REFUSED',
             'submission_id': graded['id'], 'rows': len(rows), 'failed_rows': failures,
