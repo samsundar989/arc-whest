@@ -48446,3 +48446,19 @@ one matching reservation/completion pair `16c62eacd58d49ee`, artifact SHA
 `decide_P10.json`: **P10 is spent 1/1**, regardless of this job's eventual
 result. No second P10 score attempt is permitted. There is no score or
 promotion verdict at this checkpoint.
+
+**Read-only B4 follow-up diagnosis while P10 scorer runs (no new probe).**
+An independent agent inspected the archived B4 n8/depth6 source, raw trace
+and failed gate without touching P10 truth. B4 compares frozen L2 f32
+arithmetic with compact f64 arithmetic on the same f32-quantized weights;
+its earliest fixed-gate failure is layer-3 `wick.(4,1)` at `1.59962e-5`
+after layer-2 `8.96992e-7`. A smallest unrun discriminator is a separate
+preregistered tiny fixture that drives frozen L2 `_layer` in f64 on those
+same weights, beside archived frozen-f32 and compact-f64 traces, checking
+the existing incoming/pre/S/D3/D21/Wick/raw/centered/birth/c4 checkpoints
+against the same `1e-5` normalization. A f64 pass would support amplified
+mixed-precision drift; a f64 failure would localize a genuine interpreter
+or recurrence disagreement, not automatically prove a missing term. This
+is an **unrun proposal**, not a repaired B4 result, parity claim or
+scientific kill. It remains off F21's critical path and would need its own
+IMPORTANT contract/prediction, affected preflight and Skeptic before belief.
