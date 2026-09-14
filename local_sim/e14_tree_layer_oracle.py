@@ -30,7 +30,7 @@ def tensor_q(g, metric):
     return q
 
 
-def centered(pk, table):
+def centered(pk, table, last=False):
     def block(b,d):
         nz=[i for i,x in enumerate(b) if x>0]
         key=tuple(sorted((b[i] for i in nz),reverse=True))
@@ -41,6 +41,7 @@ def centered(pk, table):
     result={}
     for key, rows in table['pK_to_K'].items():
         ip=ast.literal_eval(key); d=len(ip)
+        if last and ip!=(1,): continue
         acc=None
         for row in rows:
             prod=1.0

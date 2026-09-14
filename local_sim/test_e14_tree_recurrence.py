@@ -69,9 +69,11 @@ def run():
             with BudgetContext(10**11):
                 f21=np.asarray(frozen.Estimator().predict(mlp,10**11))
             caps={}
+            forced_last={}
             for g in (1,2):
-                _,_,meta=evaluate(mlp,True,g)
+                final,_,meta=evaluate(mlp,True,g)
                 caps[str(g)]=meta
+                forced_last[str(g)]=final
             reserve=(4*(4-1)*n*n*(2*n-1)+(5000*4+100*4*4)*n*n)
             budget=reserve+int(np.ceil(e._projected_flops(n,4,1)/0.95))+1
             e._E14_QUERY_FUSED=True
@@ -81,12 +83,29 @@ def run():
             budget_mode=dict(chooser.last_run)
             assert budget_mode['mode']=='e14_tree' and budget_mode['generations']==1
             assert budget_mode['projected_flops']<=budget
+            forced_gap=float(np.max(abs(budget_out[-1]-np.maximum(forced_last['1'],0))))
+            assert forced_gap<1e-6
+            regen_budget=reserve+int(np.ceil(e._projected_flops(n,4,1)/0.95))-1000
+            fallback=e.Estimator(); fallback.setup(None)
+            with BudgetContext(10**11):
+                regen_out=np.asarray(fallback.predict(mlp,regen_budget))
+            f21_regen=frozen.Estimator(); f21_regen.setup(None)
+            with BudgetContext(10**11):
+                f21_regen_out=np.asarray(f21_regen.predict(mlp,regen_budget-reserve))
+            regen_gap=float(np.max(abs(regen_out-f21_regen_out)))
+            assert fallback.last_run['mode']=='regen' and regen_gap==0.0
             result['cases'].append({'n':n,'kind':kind,'weights':[x.tolist() for x in weights(n,kind)],
                 'fused':fused.tolist(),'unfused':unfused.tolist(),'f21':f21.tolist(),
                 'max_fused_unfused_gap':float(np.max(abs(diff))),
                 'difference':diff.tolist(),'mode':mode,'caps':caps,
                 'budget_chooser':{'budget':budget,'mode':budget_mode,
-                                  'output':budget_out.tolist()},
+                                  'output':budget_out.tolist(),
+                                  'forced_gen1_final_gap':forced_gap},
+                'regen_fallback':{'budget':regen_budget,
+                                  'mode':dict(fallback.last_run),
+                                  'f21_mode':dict(f21_regen.last_run),
+                                  'max_output_gap':regen_gap,
+                                  'output':regen_out.tolist()},
                 'finite':bool(np.isfinite(fused).all() and np.isfinite(unfused).all())})
     e._E14_QUERY_FUSED=True
     result['max_fused_unfused_gap']=max(c['max_fused_unfused_gap'] for c in result['cases'])
@@ -95,7 +114,7 @@ def run():
 
 
 if __name__=='__main__':
-    out=ROOT/'experiments'/'e14_tree_candidate'/'recurrence_v1.json'
+    out=ROOT/'experiments'/'e14_tree_candidate'/'recurrence_v2.json'
     out.parent.mkdir(parents=True,exist_ok=True)
     try: result=run()
     except Exception as exc:
