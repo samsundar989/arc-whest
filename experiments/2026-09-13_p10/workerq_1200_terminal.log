@@ -1,0 +1,157 @@
+﻿worker-q: job #1200 starting at 2026-09-14T02:22:30.932818+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=live -
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['C:/Users/samsu/Documents/arc-whest/.venv/Scripts/python.exe', '-u', 'local_sim/certify_candidate.py', '--candidate', 'estimator_k3_strassen_L4_f21.py', '--memory-report', 'experiments/2026-09-12_f21/f21_linux_cap_v6.json', '--json', 'C:/Users/samsu/Documents/arc-whest/experiments/2026-09-13_p10/cert_F21_full.json']
+worker-q: ------------------------------------------------------------
+candidate certification -- READ-ONLY, TRUTH-FREE
+  candidate   estimator_k3_strassen_L4_f21.py
+  sha256      d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94
+  shape       1024x16   B = 2,199,023,255,552
+  NOTE: this is NOT preflight and NOT a promotion. The ship-file gate is untouched;
+        `scripts/preflight.ps1` still certifies estimator.py.
+
+1  the official grader contract
+  PASS  1: `whest validate` accepts the candidate                     Next: `whest run --estimator estimator.py --split mini`
+
+2  package and round identity
+  PASS  2: the LIVE round matches the INSTALLED package, field by field  96/96
+  PASS  2: whestbench is the real package, not local_sim's shim       env\lib\site-packages\whestbench\__init__.py
+  PASS  2: flopscope is the real package, not local_sim's shim        venv\lib\site-packages\flopscope\__init__.py
+
+3  shape generality, the exact layer-1 closed form, and equivariance
+  PASS  3: the invariant suite passes on THIS candidate, at the LIVE shape and in the grader's dtype30/30 checks passed
+  PASS  3b: invariant 9 still rejects deliberate equivariance defects BATTERY PASSED -- every deliberate equivariance defect is st
+
+4  determinism, in-process and in a FRESH worker
+  PASS  4: two FRESH interpreters agree bitwise on seed 90000000201   46b8866ee312e4a2 pid 54324 vs 48252
+  PASS  4: ...and bill identical FLOPs on seed 90000000201            928,424,050,278
+  PASS  4: the shape is (16, 1024) on seed 90000000201                [16, 1024]
+  PASS  4: two FRESH interpreters agree bitwise on seed 90000000202   1bf8d8794489d1fa pid 18300 vs 33232
+  PASS  4: ...and bill identical FLOPs on seed 90000000202            928,424,050,278
+  PASS  4: the shape is (16, 1024) on seed 90000000202                [16, 1024]
+
+5-8  one metered run: immutability, cost, telemetry, scalar sync
+C:\Users\samsu\Documents\arc-whest\local_sim\certify_candidate.py:1602: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+  PASS  5: setup() raised nothing                                     0.0007 s
+  PASS  5: setup is inside the 5 s ceiling (LOCAL, in-process -- the grader's window is larger)0.0007 s of 5.0 s
+C:\Users\samsu\Documents\arc-whest\estimator_k3_strassen_L4_f21.py:303: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_strassen_L4_f21.py:304: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+  PASS  5: the arm is the GRADER's dtype (f64_readonly), not the historical local float32ran under 'f64_readonly'
+  PASS  5: no run raised                                              clean
+  PASS  5: the grader's weight arrays are UNCHANGED after predict     sha256 before == after
+  PASS  5: every output has shape (depth, width)                      [16, 1024]
+  PASS  5: every output is finite                                     
+  PASS  5: no output is negative beyond float rounding (bar -4.5e-12, scaled to the row)most negative 0.000e+00 -- none
+  PASS  5: no returned array approaches the 4 GiB single-array cap    0.062 MB
+  PASS  6: every counted-FLOP total is finite and inside the hard budget928,457,637,478
+  PASS  6: the multiplier is the score's own identity max(0.1, F/B)   0.422214  (C/B = 0.4222137)
+  PASS  6: the operation ledger is non-empty                          14,091 ops
+  PASS  7: worst op count is inside the Phase-2 gate (22,000 ops)     14,091 ops -> PREDICTED graded residual 188.8 ms, 2.12x under the 0.4 s cliff (29,851 ops would hit it)
+  PASS  7: LOCAL residual is stable run to run (a RATIO instrument -- the cliff is judged on the op count above, never on these seconds)worst 7655.8 ms / median 7655.4 ms = 1.00x spread; this host measures 543 us/op against the grader's 13.4
+  PASS  7: worst per-MLP wall is under the installed 120 s limit      52.138 s -> 2x
+  PASS  8: ZERO scalar materializations during predict (__bool__/__float__/__int__/__index__)counted, not asserted
+  PASS  8: every section-5 allocator teardown completed               gc plus native trim after each closed ledger
+
+5b  grader-twin arm: the same candidate across weight dtypes
+C:\Users\samsu\Documents\arc-whest\estimator_k3_strassen_L4_f21.py:303: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_strassen_L4_f21.py:304: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+      f32                     928,424,083,046 FLOPs   14,075 ops  clean
+C:\Users\samsu\Documents\arc-whest\estimator_k3_strassen_L4_f21.py:303: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_strassen_L4_f21.py:304: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+      f64                     928,457,637,478 FLOPs   14,091 ops  clean
+C:\Users\samsu\Documents\arc-whest\estimator_k3_strassen_L4_f21.py:303: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_strassen_L4_f21.py:304: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+      f64_readonly            928,457,637,478 FLOPs   14,091 ops  clean
+C:\Users\samsu\Documents\arc-whest\estimator_k3_strassen_L4_f21.py:303: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_strassen_L4_f21.py:304: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+      f64_listconstructed     928,457,637,478 FLOPs   14,091 ops  clean
+  PASS  5b: the f32 arm raised nothing                                clean
+  PASS  5b: the f32 arm returned a finite (depth, width) array        [16, 1024], finite=True
+  PASS  5b: the f64 arm raised nothing                                clean
+  PASS  5b: the f64 arm returned a finite (depth, width) array        [16, 1024], finite=True
+  PASS  5b: the f64_readonly arm raised nothing                       clean
+  PASS  5b: the f64_readonly arm returned a finite (depth, width) array[16, 1024], finite=True
+  PASS  5b: the f64_listconstructed arm raised nothing                clean
+  PASS  5b: the f64_listconstructed arm returned a finite (depth, width) array[16, 1024], finite=True
+  PASS  5b: every arm allocator teardown completed                    gc plus native trim after each closed arm ledger
+  PASS  5b: f64 agrees with the f32 control within f32 tolerance (9.54e-07 relative)max relative difference 0.000e+00
+  PASS  5b: f64_readonly agrees with the f32 control within f32 tolerance (9.54e-07 relative)max relative difference 0.000e+00
+  PASS  5b: f64_listconstructed agrees with the f32 control within f32 tolerance (9.54e-07 relative)max relative difference 0.000e+00
+  PASS  5b: the f64-vs-f32 FLOP delta is an integer multiple of one pass over the weights (2*depth*width^2 = 33,554,432)delta +33,554,432 = 1.0000 passes
+  PASS  5b: the read-only arm bills exactly what the writable f64 arm does (immutability is free, or the candidate is copying)+0
+  PASS  5b: section 5's own bill matches its arm in 5b (the two sections ran the same candidate the same way)928,457,637,478 vs 928,457,637,478
+
+9  memory: accounting here, ENFORCEMENT only on Linux
+      peak working set 3431.2 MB, peak commit 3939.0 MB (test_deployment_envelope.peak_memory_bytes)
+      RLIMIT_AS caps ADDRESS SPACE, which exceeds both counters by an amount
+      no Windows counter reports. These are accounting, and a headroom computed
+      from them is an UPPER BOUND, never a margin.
+  PASS  9: a Linux 8-GiB enforcement report exists FOR THIS CANDIDATE experiments\2026-09-12_f21\f21_linux_cap_v6.json  matched on sha256
+  PASS  9: ...and it is matched on the candidate's sha256, not its pathd77dab0e2c740cc9...
+  PASS  9: the report is bound to the current instrument and workload v5, current-source-sha256
+  PASS  9: every child completed without unexpected stderr            {}
+  PASS  9: the cap read back exactly                                  soft=8589934592
+  PASS  9: the negative control died under the cap                    an enforcement claim needs a dying over-cap control
+  PASS  9: the positive control survived uncapped                     distinguishes the cap from host exhaustion
+  PASS  9: predict completed under the applied cap                    
+  PASS  9: the deployment arrays are read-only float64                float64, writeable=False
+  PASS  9: the real packages loaded, not local_sim shims              ython3.12/site-packages/whestbench/__init__.py
+  PASS  9: at least three predictions ran in one worker               3 predictions
+  PASS  9: settled address space did not grow across candidate predictions+39.2 MB
+  PASS  9: peak address space is under the cap                        VmPeak 5381.7 MB
+
+10  the official subprocess runner -- DEPLOYMENT AUTHORITY
+      *** THIS SECTION READS CONFIRM-TIER TRUTH. It runs the
+      organisers' v2-phase2 mini split, so the report's
+      `final_layer_mse_CONFIRM_ONLY` is a REAL error against REAL
+      labels. CONFIRM is read-only: it may CHECK a decision made
+      on mints and may CHOOSE nothing. Do not select a basis
+      count, a blend, a rank or a threshold on it, and do not
+      describe a run that includes this section as truth-free.
+  PASS  10: the official runner produced a report                     
+  FAIL  10: zero failed MLPs                                          2 failed
+  PASS  10: the live config is the Phase-2 round                      1024x16, lambda 0.0, cap 0.4 s
+  FAIL  10: worst GRADED-PATH residual is under the cliff             8448.18 ms -> 0.0x
+      counted FLOPs 928,424,083,046   multiplier 1.0000   C/B 0.4221984
+
+11  residual TAIL -- the soak, not the anecdote
+      not requested (--residual-soak 0, the default).
+      Section 10 measured residual on TWO MLPs, ONCE. That is an
+      anecdote, not a tail, and this certificate does NOT carry a
+      p99. Rung-3 hardening requires --residual-soak 3.
+
+R  the repository was not modified
+  PASS  R: the candidate file is byte-identical                       d77dab0e2c740cc9
+  PASS  R: estimator.py is byte-identical                             00240eb1e60810f5
+  PASS  R: this run changed no tracked source under estimator.py/scripts/local_simunchanged since start
+
+  EVIDENCE BY DOMAIN -- one verdict over three different questions
+    MATH    CERTIFIED   41 checks, 0 failed, 0 skipped
+            the contract and the arithmetic. Host-independent; a failure here is a failure anywhere.
+    LOCAL   REFUSED     22 checks, 2 failed, 0 skipped
+            what this host measured. REAL, and NOT the grading server: no absolute second here transfers (docs/GOTCHAS.md).
+    SERVER_PREDICTED CERTIFIED   1 checks, 0 failed, 0 skipped
+            a FORECAST from the versioned per-operation model, inside its stated evidence domain. Not a measurement, and not a guarantee.
+    SERVER_MEASURED NOT_RUN     0 checks, 0 failed, 0 skipped
+            telemetry observed on the grading server and bound to submitted bytes. A missing row is NOT_RUN, never a forecast promoted into a measurement.
+
+
+  report -> C:/Users/samsu/Documents/arc-whest/experiments/2026-09-13_p10/cert_F21_full.json
+
+CANDIDATE REFUSED -- 2 failed:
+  - [10] 10: zero failed MLPs
+  - [10] 10: worst GRADED-PATH residual is under the cliff
+worker-q: ------------------------------------------------------------
+worker-q: job #1200 FAILED (exit code 1) at 2026-09-14T03:15:58.648515+00:00

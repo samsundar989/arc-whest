@@ -48573,3 +48573,30 @@ Windows printer trap and `--node local --live-worktree`; do not override
 project priority. Submit only after Full concludes to avoid local CPU/RAM
 contention distorting capped timing. Preserve the exact failure counts and
 do not call an uncapped mini a release pass.
+
+**Full F21 candidate certificate terminal refusal, September 14.** Workerq
+**1200** FAILED exit 1 after 3,207.72 s, observed peak 6,161.67 MiB under
+its declared 20 GiB RAM/6 CPU/0 GPU. The exact full report SHA256 is
+`bcc76ea02b2e7169e547eeae1b86bf2410b220388c3f39f0c871d7e4b473a5d4`;
+saved terminal log SHA256
+`517f81d99bb247b3b2bb16a6bae70b14425d1e273825a71caa937384dc42cc13`;
+receipt SHA256
+`9ab16ebb1508aa734afe4424d646e79dffa1de77459c0676fe3edc0bdc844173`.
+The report pins frozen candidate SHA `d77dab0e...` and verdict
+**REFUSED**: 64 checks, exactly two failed and none skipped. Its domains
+are MATH 41/41 CERTIFIED, LOCAL 20/22 with two failures, SERVER_PREDICTED
+1/1 CERTIFIED, SERVER_MEASURED 0 NOT_RUN. Linux v6 8192-MiB evidence was
+applicable and CERTIFIED, with candidate VmPeak 5,381.7 MB in that separate
+Linux report. The f64-readonly grader twin again counted
+`928,457,637,478` FLOPs and 14,091 ops. The two-row **capped official
+subprocess smoke** produced a report but failed **2/2 MLPs**, both
+`residual_wall_time_exhausted`: observed local residuals
+`8.4481832` and `8.3176498` seconds against installed `0.4`; no budget,
+wall, combined or estimator error flags. Thus the two failed checks were
+`10: zero failed MLPs` and `10: worst GRADED-PATH residual is under the
+cliff`. The op-count model forecast of 188.8 ms/2.12x headroom is a model,
+not a measured server pass and cannot erase this local refusal. The failed
+MLP score/zero-output MSE is not accuracy evidence. Keep P10's score
+promotion separate from this deployment gate. The separately registered
+full 100-row capped official mini is still required for the normal release
+path and will run next without simultaneous heavy work.
