@@ -1,7 +1,7 @@
 # CURRENT_STATE.md — read this first
 
 **September 14 P10 fresh DECIDE and independent result Skeptic pass;
-release checks remain.** Samuel's three new
+Full candidate certificate workerq 1200 is running.** Samuel's three new
 "I don't know" predictions were committed at `ce853f7` before any P10 data.
 The fresh SINGLE_USE 128-network truth claim was committed at `883bd45`;
 two `2**24` replicas passed the pre-score floor screen and were finalized
@@ -26,8 +26,9 @@ the Skeptic ACCEPTED only the DECIDE promotion evidence.
 The candidate remains frozen at SHA256
 `d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`.
 P10's scorer disabled both local scoring timing caps exactly as registered;
-this score is not a deployment pass. Run full candidate certification and
-a **clean capped** official subprocess mini;
+this score is not a deployment pass. Workerq 1200 is running full exact-byte
+certification with the accepted Linux v6 memory report; its first installed
+validator section passed. A **clean capped** official subprocess mini follows;
 a no-cap mini cannot substitute. F21 is not yet submission-ready, and no
 submission or designation is authorized.
 

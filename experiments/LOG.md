@@ -48542,3 +48542,34 @@ and Linux v6 report SHA rechecked
 Candidate `whest validate` passed shape/finite/contract after setting
 `PYTHONIOENCODING=utf-8`; the first attempt without that environment exited
 on the documented cp1252 box-drawing printer trap, not an estimator failure.
+
+**Full F21 candidate certificate submitted.** On committed independent
+P10 result ACCEPT and workload review, workerq **1200** launched
+`local_sim/certify_candidate.py` on frozen F21 bytes with the accepted
+Linux v6 report and new absolute `cert_F21_full.json` output. It uses
+`--node local --live-worktree --no-preemptible`, **20 GiB RAM, 0 VRAM,
+6 CPUs, 0 GPUs**, and `PYTHONIOENCODING=utf-8`; no priority override.
+The receipt shows the exact argv and RUNNING state; its first installed
+`whest validate` contract section passed. There is no Full certificate
+verdict yet. Its capped two-row official smoke remains necessary evidence.
+
+**Pre-submission optimization review — P10 clean capped official mini.**
+This is the second and independent release workload, conditional on Full's
+terminal evidence and still needed even if a local Full cap refuses. The
+September-12 conditional mini review remains applicable: reuse the pinned
+installed Phase-2 stack, existing cached public mini and frozen F21 bytes;
+no DECIDE truth or vault read, no coefficient fit, no alternate candidate.
+The official 100-row capped subprocess run requires every row to establish
+`n_failed_mlps: 0`; neither a reduced split nor a no-cap pass is equivalent.
+Run one sequential CPU-only `whest run` through workerq and keep its entire
+JSON/terminal output. Do not add loaders, workers, caching/prefetch, altered
+batch, changed device placement or extra passes without a proven equivalent
+and no wall-timing confounder. It has no checkpoint, so mark nonpreemptible;
+an interruption can restart to a new immutable log but a failure must be
+retained. Comparable official mini host peak was about 14.32 GiB harness
+plus 1.67 GiB estimator worker, so conservatively declare **20 GiB RAM,
+0 VRAM, 6 CPUs, 0 GPUs**. Use `PYTHONIOENCODING=utf-8` for the documented
+Windows printer trap and `--node local --live-worktree`; do not override
+project priority. Submit only after Full concludes to avoid local CPU/RAM
+contention distorting capped timing. Preserve the exact failure counts and
+do not call an uncapped mini a release pass.
