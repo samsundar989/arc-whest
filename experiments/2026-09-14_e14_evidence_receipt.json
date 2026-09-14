@@ -1,0 +1,10 @@
+{
+  "archive": "experiments/2026-09-14_e14_evidence.zip",
+  "archive_sha256": "1a3a48bb790170803a41d36f2d2454608827ca8faa269b39821171255d10bac5",
+  "archive_bytes": 16136333,
+  "members_verified": 534,
+  "source_files_match_final_preflight": 309,
+  "base_commit": "423b82455ca056aa180ef940a74e2d8717c35272",
+  "excluded": "No NPZ or vault-state files; no protected scoring reads",
+  "verified": true
+}

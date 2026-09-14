@@ -1,0 +1,13 @@
+# Independent E14 capsule packaging review: ACCEPT
+
+This is a routine read-only packaging check, separate from the earlier E14 scientific/instrument verdict. No extraction, source execution, candidate run, protected-data access, heavy job or commit was performed.
+
+Verified `experiments/2026-09-14_e14_evidence.zip` is 16,136,333 bytes with SHA256 `1a3a48bb790170803a41d36f2d2454608827ca8faa269b39821171255d10bac5`, matching its adjacent receipt.
+
+- The ZIP contains **534 preserved payload files plus two capsule metadata files**, 536 entries total. Every payload size and SHA256 matches `CAPSULE_MANIFEST.json`; payload totals 102,143,522 bytes. Inventory is exact, with no duplicates, absolute member paths or parent traversal. The manifest itself has SHA256 `e97b94fe091a8e525566a9879690afbe4da5aad4ca3f219147b1157b40136ba9` and is covered by the archive hash. The receipt's `members_verified:534` counts payload files, not all ZIP entries.
+- All 309 source-map entries exactly match both embedded final-preflight maps and their archived bytes. They also match current live bytes. All other preserved payloads match live files except LOG.md: the archived LOG is an exact byte prefix of live LOG, whose additional 817 bytes record this capsule's packaging. That later entry appropriately remains outside the frozen capsule.
+- The archived shipped `estimator.py` hash is `00240eb1e60810f5e9a6f743b8ad89a1533cfd8671c08e07525f1ed1de54d9ec`, matching preflight. Git's normalized blob at base commit `423b82455ca056aa180ef940a74e2d8717c35272` instead hashes to `1caa3752be56e8625ddb8b163ff8ffa853b110b18c2b25c71a53f261f42c9fb8`; direct comparison confirms only newline normalization differs. Thus the capsule preserves the tested live bytes instead of silently substituting Git-normalized bytes.
+- The embedded F21 tarball hashes to `4f3cc6f440e4cb66ea86a0904c00e182eb7ecf5aaab0ee64c73efb7d22904775`. Its complete regular-file inventory, member sizes and member hashes match the embedded package receipt. Its `estimator.py` member hashes to `d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`, equal to the frozen F21 source in the ZIP.
+- Inventory contains no NPZ/NPY arrays or vault-state files. Vault/read/seed-related Python instrument source is present as expected; it is code, not protected state. The included independent final verdict was verified like every other payload and was not modified during this review.
+
+No packaging blocker remains. Archive integrity does not establish a new execution location, complete installable environment, promotion, release clearance, protected-read permission or exact server-byte attribution. This review lives outside the capsule to preserve its accepted hash.

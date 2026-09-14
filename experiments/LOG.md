@@ -49342,3 +49342,15 @@ evidence, final gate and two concrete cost refusals. It explicitly rejects
 inferring a scientific family closure, algorithmic promotion or release
 clearance. Packet includes the196-product obstruction and exactly-once Wick
 ordering. No blocking finding remains within the accepted bounded scope.
+
+**Exact-byte evidence capsule, packaging verification.** Base accepted commit
+423b824; archive `experiments/2026-09-14_e14_evidence.zip`, SHA256
+1a3a48bb790170803a41d36f2d2454608827ca8faa269b39821171255d10bac5;16,136,333bytes.
+All534 preserved members pass size/SHA256 verification;309 source files
+match final preflight. The capsule preserves raw receipts and source bytes
+without Git newline conversion. It includes the unchanged F21 package and
+contains no NPZ or vault-state files. Original absolute receipt paths are
+preserved as provenance, not rewritten to suggest relocated execution.
+Packaging was a lightweight single-process operation; no protected scoring
+read, candidate run or new experiment occurred. Capsule base evidence is
+frozen; later packaging verification lives beside the archive.
