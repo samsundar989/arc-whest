@@ -1,0 +1,82 @@
+"""Reusable-input identity, evidence-domain and candidate sensitivity mutations."""
+from __future__ import annotations
+import copy
+import json
+import os
+from pathlib import Path
+import sys
+import tempfile
+import unittest
+from unittest.mock import patch
+
+HERE = Path(__file__).resolve().parent
+sys.path[:] = [p for p in sys.path if Path(p or '.').resolve() != HERE] + [str(HERE)]
+import numpy as np
+import candidate_release_record as release
+import certify_candidate as cert
+import edge_cases as edge
+
+
+class ReleaseTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.recipe = json.loads((release.ROOT / 'experiments/2026-09-14_e14/f21_release_recipe.json').read_text())
+
+    def test_stored_domains_remain_separate(self):
+        result = release.build(self.recipe)
+        self.assertEqual(result['domains']['LOCAL']['verdict'], 'REFUSED')
+        self.assertEqual(result['domains']['SERVER_MEASURED']['verdict'], 'PASS')
+        self.assertEqual(result['domains']['SERVER_MEASURED']['exact_byte_binding'], 'PROVISIONAL')
+        self.assertFalse(result['normal_release_ready'])
+        self.assertEqual(result['local_mini']['failed_rows'], 100)
+        self.assertEqual(result['counted_ledger']['arms']['f64_readonly']['flops_used'], 928457637478)
+
+    def test_wrong_candidate_hash_rejected(self):
+        recipe = copy.deepcopy(self.recipe)
+        recipe['candidate']['sha256'] = '0' * 64
+        with self.assertRaisesRegex(ValueError, 'hash mismatch'):
+            release.build(recipe)
+
+    def test_different_valid_candidate_rejected(self):
+        recipe = copy.deepcopy(self.recipe)
+        recipe['candidate'] = recipe['baseline']
+        with self.assertRaisesRegex(ValueError, 'certificate candidate mismatch'):
+            release.build(recipe)
+
+    def test_changed_evidence_rejected(self):
+        recipe = copy.deepcopy(self.recipe)
+        recipe['evidence']['certificate']['sha256'] = '0' * 64
+        with self.assertRaisesRegex(ValueError, 'hash mismatch'):
+            release.build(recipe)
+
+    def test_unknown_server_is_not_pass(self):
+        recipe = copy.deepcopy(self.recipe)
+        del recipe['evidence']['server_report']
+        self.assertEqual(release.build(recipe)['domains']['SERVER_MEASURED']['verdict'], 'NOT_RUN')
+
+    def test_scale_is_explicit_tighten_only(self):
+        for bad in (0, -1, float('nan'), float('inf'), 1e-3):
+            recipe = copy.deepcopy(self.recipe); recipe['numerical_raw_mse_scale'] = bad
+            with self.assertRaises(ValueError): release.build(recipe)
+
+    def test_permutation_identity_and_excessive_drift(self):
+        scale = 2e-8
+        with patch.dict(os.environ, {'ARC_WHEST_RAW_MSE': repr(scale)}):
+            self.assertEqual(edge.raw_mse_denominator()[0], scale)
+            self.assertEqual(cert._effective_permutation_bar()[1:3], (scale, .01 * scale))
+            for case in (0, 1, 3):
+                details = cert._expected_permutation_details(case)
+                self.assertEqual((details['depth'], details['width']), (16, 1024))
+                self.assertEqual(details['denom'], scale)
+            base = np.arange(16 * 8, dtype=np.float64).reshape(16, 8) / 128
+            permutation = np.arange(7, -1, -1)
+            for layer in (1, 8, 14):
+                equivalent = base.copy(); equivalent[layer] = base[layer, permutation]
+                self.assertTrue(edge.perm_gate(base, equivalent, permutation, layer, 16)['ok'])
+                for row in (layer, 15):
+                    mutant = equivalent.copy(); mutant[row] += np.sqrt(4e-10)
+                    self.assertFalse(edge.perm_gate(base, mutant, permutation, layer, 16)['ok'])
+
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

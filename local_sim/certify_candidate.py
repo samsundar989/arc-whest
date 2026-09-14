@@ -1215,6 +1215,9 @@ def main() -> int:
     ap.add_argument("--depth", type=int, default=DEPTH)
     ap.add_argument("--budget", type=int, default=BUDGET)
     ap.add_argument("--json", default="")
+    ap.add_argument("--raw-mse-scale", type=float, default=None,
+                    help="Predeclared candidate error scale; tightens the existing "
+                         "1%% numerical allowance and is inherited by every shard.")
     ap.add_argument(
         "--memory-report", default="", metavar="PATH",
         help="explicit Linux memory-gate artifact to consume. Its candidate, "
@@ -1250,6 +1253,12 @@ def main() -> int:
                     help="MLPs per soak repetition (default 100, the full mini "
                          "split). Lower it only to rehearse the plumbing.")
     a = ap.parse_args()
+    if a.raw_mse_scale is not None:
+        if not math.isfinite(a.raw_mse_scale) or not 0 < a.raw_mse_scale <= 1.4e-6:
+            ap.error("--raw-mse-scale must be finite, positive and <= 1.4e-6")
+        # Respect a stricter existing environment setting as well.
+        _, previous, _, _ = _effective_permutation_bar()
+        os.environ["ARC_WHEST_RAW_MSE"] = repr(min(previous, a.raw_mse_scale))
     if a.residual_soak < 0:
         print("--residual-soak must be >= 0")
         return 2

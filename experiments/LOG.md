@@ -49038,3 +49038,25 @@ QR coordinates. Use a separately hashed forced F21 D21 tiny adapter where feasib
 These tiny checks cannot certify width1024/depth16 production behavior. Builder
 predicts finite dtype-matched trajectory and output agreement; any failed required
 check blocks reliance and is retained without threshold revision.
+
+**E14 candidate numerical run optimization review (before submission).** Stored
+F21 permutation receipts retain pass flags under the old `1.4e-8` allowance but
+discard actual drift; their worker tails only say `1/1`. They therefore cannot
+establish the declared `2e-10` sensitivity without new label-free execution.
+Run only the three existing width1024/depth16 early/middle/late cases (0,1,3),
+sequential isolated workers, same frozen F21 bytes and f64_readonly weights.
+No duplicate datasets/loaders, no data cache/prefetch or protected truth; each
+worker releases state. Retain full stdout and each receipt immediately. Reuse
+unchanged memory, cost and grade artifacts; no full candidate recertification or
+mini rerun for this repair. Reserve RAM8GiB, VRAM0, CPU2 based on Full1200's
+6.02GiB observed process-tree peak, conservatively rounded; cap BLAS/OMP/MKL to2.
+This is smaller than the preferred16–24GiB envelope because no dataset loader
+or concurrent candidate workers are present. No recovery reread is needed for
+these reusable no-label fixtures. No chunk or arithmetic change is introduced.
+Command: `workerq submit --project arc-whest --gpus 0 --ram 8 --vram 0 --cpus 2
+--env OPENBLAS_NUM_THREADS=2 --env OMP_NUM_THREADS=2 --env MKL_NUM_THREADS=2
+--env PYTHONIOENCODING=utf-8 --label e14-f21-numerical --eta 15m --
+C:/Users/samsu/Documents/arc-whest/.venv/Scripts/python.exe
+local_sim/candidate_numerical_e14.py --candidate estimator_k3_strassen_L4_f21.py
+--sha256 d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94
+--out-dir C:/Users/samsu/Documents/arc-whest/experiments/2026-09-14_e14/f21_numerical`.
