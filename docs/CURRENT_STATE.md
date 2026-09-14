@@ -28,9 +28,16 @@ failure or Full REFUSED certificate. Private score, public truth floor and
 prize eligibility remain unobserved. No second submission or designation
 is authorized or made. The [dated board snapshot](../experiments/2026-09-13_p10/board_after_f21_330950.json)
 shows 2.5e-9 leading and our rounded 1.6e-8 at rank58/156; board rank
-is not the prize. Next: deliver the self-contained strategist packet for
-a bounded, accuracy-aware route beyond the exact fusion, then preregister
-one selected experiment before implementation.
+is not the prize. The self-contained
+[September-14 strategist packet](STRATEGIST_PACKET_2026-09-14.md), SHA256
+`ee0977c21b727dc462be680c2b5cbbb197f0c694a61dacc6aba157c8e09fcf60`,
+is ready for Samuel to take to a strategist. Its fresh independent
+[packet Skeptic](../experiments/2026-09-13_p10/f21_strategist_packet_skeptic.md)
+accepted the revised no-repo decision request at commit `c84ec7d` after
+correcting the per-network score formula, MiB unit and parameterized
+cost scope. Await the strategist's returned decision before selecting a
+new strategic experiment; preregister and get Samuel's predictions before
+any fresh block or source intervention.
 
 **September 14 F21 passes the fresh paired score gate, but normal submission
 release is BLOCKED: Full certificate REFUSED and the capped official mini

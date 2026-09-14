@@ -48874,3 +48874,39 @@ the receipt's `validated_for_submission:false` remains correct for the
 normal path. No second submission or designation occurred. The private
 rerun and prize eligibility are unobserved; do not select on public rows
 or infer a general scientific kill for deferred K4/compression research.
+
+**Read-only provenance follow-up.** A single authenticated status-API read
+for #330950 was saved as
+`experiments/2026-09-13_p10/f21_submission_330950_api_status.json`,
+SHA256 `125cd4c8d1821e915183a5d83285038e93d68e7b3c140fcfc5d15231f6c7eac1`.
+It reports `graded` and the exact public score, but its only response
+fields are ID/challenge/round/date/status/message/score/secondary score;
+there is no artifact or hash field. Combined with `submissionFiles=null`
+on the original graded page, the cheapest available metadata check did
+not resolve exact server-byte attribution. Preserve the Skeptic's
+PROVISIONAL source-binding limit rather than imply a server hash exists.
+
+**Strategist escalation packet prepared and independently checked.**
+Draft `docs/STRATEGIST_PACKET_2026-09-14.md` was committed at `ce4dedb`
+after result synthesis. A fresh-context packet Skeptic at `abf54cb`
+independently recomputed P10, graded/public, board cost-floor and B4/K4
+numeric claims, and found three no-repo brief defects: the score needed
+the per-network arithmetic identity, Linux VmPeak was mislabeled MB
+rather than MiB, and a demand for a complete executable cost table was
+unsupported without the full Wick table, factor lifetimes and primitive
+tariff. These were corrected without new data or candidate changes:
+the packet now states `mean_i[MSE_i*max(0.1,F_i/2**41)]`, correctly says
+5,381.7 **MiB** against 8,192 MiB, and requests a ranked conceptual
+decision plus one tiny discriminator/pseudocode and a **parameterized**
+operation/liveness table. Exact executable costing remains the repo-local
+Builder's required pre-score work. Revised packet commit `ecd927b`, SHA256
+`ee0977c21b727dc462be680c2b5cbbb197f0c694a61dacc6aba157c8e09fcf60`.
+The same independent Skeptic appended an ACCEPT addendum at `c84ec7d`
+(`experiments/2026-09-13_p10/f21_strategist_packet_skeptic.md`, SHA256
+`a4d2c355bea99c7a7b5cfae3e8d5a54e8add244887b6babc6fee2b3c4fb77322`)
+for that narrowed no-repo request, while retaining the server-hash
+provenance limit. This is an escalation artifact, **not** a returned
+strategy or permission for another implementation, seed block,
+submission, designation, write-up claim or external message. Samuel can
+deliver the packet by hand; returned proposals must become a new
+preregistered contract before any strategic measurement.
