@@ -49280,3 +49280,65 @@ local_sim/preflight_e14.py --out-dir
 C:/Users/samsu/Documents/arc-whest/experiments/2026-09-14_e14/preflight_final`.
 The gate concerns instrument changes; root default checks still cannot confer
 a new candidate Full release, local capped-mini pass or private improvement.
+
+
+**E14 final synthesis: infrastructure accepted; no new promotion.**
+Final workerq1230 default preflight is GREEN12/16,4skipped, exit0; before/after
+maps contain309 identical source hashes, still equal to live sources. Declared
+6GiBRAM/0VRAM/2CPU; observed peak2374.72MiB. Fresh infrastructure reviewer
+appended ACCEPT to infrastructure_skeptic.md and release_supplement_skeptic.md.
+No source changed after this gate. Candidate Full release is not implied.
+
+Bounded static compression slice8f600fb rejects two concrete implementations.
+The mixed-f64 decoder wrapper retains all F21 work and adds modeled
+4,727,673,482,280 FLOPs at1024x16. The ordinary-f64 direct-query spelling with
+full residual rank has196 necessary older-residual products costing
+841,402,548,224, already above the exploratory20%-saving ceiling
+742,766,109,982.4. These are symbolic spelling/subset obstructions, not a
+full counted candidate ledger or a universal compression lower bound. The
+newest source's symbolic P=I stays exact/dense until aging. Independent final
+Skeptic confirmed algebra, arithmetic and restricted scope. Final cost note hash
+24ca7881842bd60e8e2535e6eb66fc3a95b5e96de0f457d52efa3f8d1e8df870
+includes the reviewer-requested post-Wick state/next-linear ordering clarification.
+Shared-basis/full-residual methods remain open; no rank probe was run.
+
+The connected-tree K4 definition's symmetric-anchor/frozen-scalar corrections
+now have independent static ACCEPT. Its literal dense feed program remains
+over budget; no K4 implementation, instability test or accuracy result is claimed.
+Query-sensitive/sketch alternatives were not activated because actual-precision
+operator and useful-rank prerequisites remain unresolved; they do not waive them.
+
+Stage0 is implemented and accepted. B4 float64 equivalence is accepted;
+autonomous actual-f32 compact parity is refused. Stage2's two specified
+implementations are rejected by cost. Stage3's symbolic recipe is accepted,
+its literal implementation rejected by cost, stable affordable realization
+unproved. Stages4/5 are explicitly blocked by those dependencies. No fresh
+DECIDE claim/read, new score estimate, vault evaluation, submission, designation
+or external message occurred. Seal verification in required preflight is not
+a vault evaluation/touch. Historical P10 evidence is quoted with its noise floor
+and remains spent1/1; it was not remeasured or used for tuning.
+
+Retain frozen F21#330950 and its verified existing single-file package as the
+strongest validated implementation. Do not resubmit unchanged F21 or claim a
+new release pass: LOCAL remains REFUSED despite the distinct prior measured
+server success; exact server bytes/prize eligibility remain provisional/unknown.
+No submission approval is requested without a new justified concrete release.
+The contribution write-up stays stale/do-not-submit; symbolic diagnostics are
+not established accuracy or novelty claims. The self-contained strategist
+packet records the missing production-precision residual/query kernel, complete
+cost requirement and prior falsifiers; a returned concrete proposal must become
+a contract before new strategic data, with new Samuel predictions.
+
+Exact-byte reproducibility uses the existing verified F21 tarball plus a local
+E14 evidence capsule with per-member SHA256 inventory. This preserves raw CRLF
+source/evidence bytes despite Git text normalization, without modifying frozen
+archives, historical hashes, HUMAN_MODEL, root estimator or the vault seal.
+No challenge truth arrays are included. All work since clean4e0a987 belongs to
+this execution; local commits retain failures and accepted repairs. No unqueued
+heavy workload or additional protected scoring read was used for packaging.
+
+Fresh final independent Skeptic (`final_skeptic.md`) ACCEPTS the bounded E14
+evidence, final gate and two concrete cost refusals. It explicitly rejects
+inferring a scientific family closure, algorithmic promotion or release
+clearance. Packet includes the196-product obstruction and exactly-once Wick
+ordering. No blocking finding remains within the accepted bounded scope.

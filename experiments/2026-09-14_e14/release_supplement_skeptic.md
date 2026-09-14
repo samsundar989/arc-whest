@@ -13,3 +13,11 @@
 **Checklist items triggered**  14, 17, 18.
 
 **Blocking code fixes remaining:** none in this optional consumer. Final affected preflight remains the procedural acceptance condition. Prior Stage 0 acceptance and the independently reviewed underlying numerical evidence remain intact.
+
+## Final independent addendum: ACCEPT
+
+The pending procedural condition is satisfied. Independently inspected workerq 1230's successful exit-0 receipt and terminal log, `preflight_final/receipt.json`, both source maps, and `preflight_final/verdicts.txt`. The default gate reports GREEN 12/16 with four explicitly skipped Full checks. Both maps contain 309 identical entries, and every recorded source still matches disk bytes at review. The map binds the repaired consumer to the exact SHA256 reviewed above, `303be0a7220a9e1b43b263578edba39d04995a35a2d91790144c24b334c906d4`.
+
+Final receipt SHA256: `6402404e93cb9220c2bc20b63714695ae2fa1624e2f4d7c916b6d69362a2d622`. Each source-map file SHA256: `1bc0318af60c0c34877e36a19648bce7547cff267206910bcc3dd388356fdff5`. Verdict transcript SHA256: `f8a2e9c23c23f3fdbcc8c804007b6165abff663be13b35d9727552fbd321af3a`.
+
+No supplement blockers remain. ACCEPT is limited to the optional evidence consumer and its declared three-case index. It does not establish candidate Full certification or override F21 LOCAL REFUSED, PROVISIONAL server-byte attribution, or `normal_release_ready=false`. No additional tests, labels, or candidate execution were used for this final review.

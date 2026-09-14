@@ -5,14 +5,23 @@
 Samuel authorized implementing the reviewed plan, including parallel bounded
 tasks and local commits, while preserving new strategic predictions and per-entry
 submission approval. See [E14 stage/status record](E14_EXECUTION_STATUS.md).
-Stage0 repairs are implemented and undergoing fresh independent review and
-queued validation. B4 f64 passed841/841 on its existing fixed fixture; its
-Skeptic found nonfinite failure serialization incomplete, so acceptance is
-pending repair. Actual-f32 output conformance failed3/4 declared tiny cases;
-QR versus operation-order localization is underway. No compression or new
-accuracy measurement may rely on that failed prerequisite. No new candidate
-has earned promotion. Root estimator.py, frozen archives, HUMAN_MODEL, spent
-blocks and vault touch state are unchanged. F21#330950 remains primary control.
+Stage0 repairs are implemented; base infrastructure is independently accepted.
+The optional strict numerical-evidence consumer passes final affected preflight
+workerq1230 (12 enabled steps,4skipped;309 source hashes unchanged). Production-truth pilot1219 and exact-byte default preflight1222
+passed. B4 float64 mathematics passes841/841 and independent review. Original
+actual-f32 compact conformance still fails; a mixed-f64 representation with
+unchanged reference-order f32 operators reproduces all four fixed outputs,
+but is a dense wrapper with no savings and imperfect exact-zero recovery.
+The literal dense bridge and an ordinary-f64 direct-query spelling fail
+necessary cost screens; independent review accepts those scoped rejections. No rank test
+is justified by these results. The smallest missing artifact is a conformant
+full-rank production-precision residual/query kernel with complete costs; see
+[the self-contained strategist packet](research/2026-09-14_e14_strategist_packet.md).
+The coherent connected-tree K4 definition passed static independent review;
+its literal dense implementation exceeds the FLOP budget before all overhead.
+No new candidate has earned promotion. Root estimator.py, frozen archives,
+HUMAN_MODEL, spent blocks and vault touch state are unchanged. F21#330950
+remains primary control; its prior local cap refusal is not waived.
 
 ## Reviewed strategy — September 14 research review
 

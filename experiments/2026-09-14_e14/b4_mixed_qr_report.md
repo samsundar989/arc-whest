@@ -33,6 +33,13 @@ as an unconsumed extra diagnostic; it is excluded from consumed-state counts.
 These are actual tiny diagnostic operation charges. Payload counts unique array
 wrapper objects in the representation, excluding dense reference/candidate state,
 transient work, allocator metadata and process overhead; they are not peak RAM.
+For `k >= 1` retained sources at width `n`, this exact fullrank representation
+payload is `8*((3*k+3)*n^2+(k+2)*n)` bytes, and is zero for the empty state.
+It comprises Q, Gram and the shared identity L; three dense factor/residual
+matrices per source; each source's w2; and shared zero/one vectors. The formula
+gives the observed 9,664 bytes at `(n,k)=(8,5)` and 1,696 at `(4,3)`.
+It excludes all co-live dense tower, reconstruction, QR, cast and operator
+buffers, so it is neither a peak-memory model nor an 8,192-MiB cap result.
 No full-shape bill or savings claim is made. f64 factors double element storage
 relative to corresponding f32 factors, and all encoding/decoding operations are
 additional to the existing operator. This remains a dense-reference wrapper.
