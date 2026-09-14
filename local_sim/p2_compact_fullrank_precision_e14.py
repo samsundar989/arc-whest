@@ -17,8 +17,14 @@ import platform
 import sys
 from pathlib import Path
 
+# Direct script execution otherwise resolves local_sim/flopscope's NumPy shim.
+_HERE = Path(__file__).resolve().parent
+sys.path[:] = [p for p in sys.path if Path(p or ".").resolve() != _HERE]
 import flopscope as flops
 import flopscope.numpy as fnp
+if "site-packages" not in str(Path(flops.__file__).resolve()):
+    raise RuntimeError("E14 v2 requires the installed real flopscope package")
+sys.path.append(str(_HERE))
 import numpy as np
 
 import p2_compact_fullrank_bridge_b1 as b1
@@ -26,7 +32,7 @@ import p2_compact_reference as compact
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_OUT = ROOT / "experiments" / "2026-09-14_e14" / "b4_f64.json"
+DEFAULT_OUT = ROOT / "experiments" / "2026-09-14_e14" / "b4_f64_v2.json"
 TOL = 1e-5
 N = RANK = RESIDUAL_RANK = 8
 ORIGINAL = ROOT / "experiments" / "2026-09-12_b4_fullrank_deep.json"
@@ -36,6 +42,18 @@ CHECKS, ACTIVITY, CONTEXTS = [], [], []
 
 class FirstMismatch(RuntimeError):
     """Abort the recurrence at the first checked discrepancy."""
+
+
+def json_safe(value):
+    """Retain failed nonfinite operands as explicit JSON tags, never lose them."""
+    if isinstance(value, float) and not math.isfinite(value):
+        return {"nonfinite": "nan" if math.isnan(value) else
+                "positive_infinity" if value > 0 else "negative_infinity"}
+    if isinstance(value, dict):
+        return {key: json_safe(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [json_safe(item) for item in value]
+    return value
 
 
 def snapshot(value):
@@ -510,6 +528,8 @@ def main():
         "first_failure": next((row for row in CHECKS if not row["passed"]), None),
         "checkpoints": CONTEXTS,
         "runtime": {"python": platform.python_version(), "numpy": np.__version__,
+                    "flopscope_import_path": flops.__file__,
+                    "fnp_import_path": fnp.__file__,
                     "flopscope": importlib.metadata.version("flopscope"),
                     "whestbench": importlib.metadata.version("whestbench"),
                     "threadpools_during_run": backend},
@@ -518,7 +538,7 @@ def main():
     if sha(ORIGINAL) != ORIGINAL_SHA256:
         raise RuntimeError("Original B4 artifact changed during diagnosis")
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(result, indent=2, allow_nan=False) + "\n",
+    args.out.write_text(json.dumps(json_safe(result), indent=2, allow_nan=False) + "\n",
                         encoding="utf-8")
     print(json.dumps({"artifact": str(args.out), "checks": result["check_count"],
                       "failed": result["failed_count"],

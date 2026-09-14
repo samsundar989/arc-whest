@@ -1,0 +1,115 @@
+{
+  "schema": "e14.b4_actual_f32_conformance.v1",
+  "regime": {
+    "commit": "70819fc",
+    "original_tolerance": 1e-05,
+    "envelope_factor": 4.0,
+    "epsilon_factor": 64.0,
+    "output_allowance": 2e-10
+  },
+  "source_sha256": {
+    "driver": "419016da12b4584f97702be7c28ad8f99ff61e4100652cb4c699796fed952772",
+    "backend": "5b04ebe61b99a56533b250a10c93c4bf7348dd3a0d0d0bf52eb7d775c7b8d8d5",
+    "f64_adapter": "08d8c2ae196e341986e2814aa7dff23c98b860767fe52a75ddc1f842f1e11097",
+    "compact_reference": "81f8bbbbe60a617cf0533f13657440ed35feb9bb5d0bc0fbf8956ef002febdd2",
+    "L2": "390bc226bbf517df0110facfc0dc91c78ef670e8a49368a536cabf630057d1db",
+    "F21": "d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94"
+  },
+  "runtime": {
+    "python": "3.10.19",
+    "numpy": "2.2.6",
+    "flopscope_import_path": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\flopscope\\__init__.py",
+    "fnp_import_path": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\flopscope\\numpy\\__init__.py",
+    "flopscope": "0.12.1",
+    "threadpools": [
+      {
+        "user_api": "blas",
+        "internal_api": "openblas",
+        "num_threads": 1,
+        "prefix": "libscipy_openblas",
+        "filepath": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\Lib\\site-packages\\numpy.libs\\libscipy_openblas64_-13e2df515630b4a41f92893938845698.dll",
+        "version": "0.3.29",
+        "threading_layer": "pthreads",
+        "architecture": "SkylakeX"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "fixture": "b4",
+      "control": "l2",
+      "artifact": "experiments\\2026-09-14_e14\\b4_real_backend\\b4_l2_f32_conformance.json",
+      "sha256": "e2818d7fd16674f9a05f71ad0008b0618699cfeeffe06d79ca038bb898ee7587",
+      "passed": false,
+      "original_tolerance_failed_count": 66,
+      "failed_field_count": 0,
+      "output": {
+        "prediction_squared_drift": 7.260882557602599e-05,
+        "allowance": 2e-10,
+        "passed": false
+      }
+    },
+    {
+      "fixture": "b4",
+      "control": "f21_forced",
+      "artifact": "experiments\\2026-09-14_e14\\b4_real_backend\\b4_f21_forced_f32_conformance.json",
+      "sha256": "7018ae686343ea69d5ff3cadf862727f350f7c67d5821aef9bd67aa6e8b7628a",
+      "passed": false,
+      "original_tolerance_failed_count": 210,
+      "failed_field_count": 0,
+      "output": {
+        "prediction_squared_drift": 2.306408673473925,
+        "allowance": 2e-10,
+        "passed": false
+      }
+    },
+    {
+      "fixture": "b3",
+      "control": "l2",
+      "artifact": "experiments\\2026-09-14_e14\\b4_real_backend\\b3_l2_f32_conformance.json",
+      "sha256": "bd86c6a6edb7a9032c159064d7587c7023dd889a1e47b3679f6f67286d83ca42",
+      "passed": true,
+      "original_tolerance_failed_count": 0,
+      "failed_field_count": 0,
+      "output": {
+        "prediction_squared_drift": 6.274092356761685e-12,
+        "allowance": 2e-10,
+        "passed": true
+      }
+    },
+    {
+      "fixture": "b3",
+      "control": "f21_forced",
+      "artifact": "experiments\\2026-09-14_e14\\b4_real_backend\\b3_f21_forced_f32_conformance.json",
+      "sha256": "838e16bd689c4994ff38af5385d7410741580956c27f3d2b4ac1f51f707cecbf",
+      "passed": false,
+      "original_tolerance_failed_count": 8,
+      "failed_field_count": 0,
+      "output": {
+        "prediction_squared_drift": 4.2012704426497294e-10,
+        "allowance": 2e-10,
+        "passed": false
+      }
+    }
+  ],
+  "controls": {
+    "identity": {
+      "prediction_squared_drift": 0.0,
+      "allowance": 2e-10,
+      "passed": true
+    },
+    "injected_drift": {
+      "prediction_squared_drift": 4.0000000000000007e-10,
+      "allowance": 2e-10,
+      "passed": false
+    }
+  },
+  "passed": false,
+  "original_B4_unchanged": true,
+  "limitations": [
+    "Fixed n8/d6 and n4/d4 only; no 1024x16 production conformance.",
+    "Forced F21 tests at most3 or2 Strassen levels; no production L4 evidence.",
+    "No compression, ground truth, noise floor, prediction accuracy, counted cost or promotion claim.",
+    "The frozen normal helper and independent scalar normal evaluator both round to f32; exact operation-order equality is not required."
+  ]
+}

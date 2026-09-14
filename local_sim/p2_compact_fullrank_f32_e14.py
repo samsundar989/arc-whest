@@ -17,16 +17,22 @@ import platform
 import sys
 from pathlib import Path
 
+_HERE = Path(__file__).resolve().parent
+sys.path[:] = [p for p in sys.path if Path(p or ".").resolve() != _HERE]
 import flopscope as flops
 import flopscope.numpy as fnp
+if "site-packages" not in str(Path(flops.__file__).resolve()):
+    raise RuntimeError("Real flopscope required; refusing the local NumPy shim")
+sys.path.append(str(_HERE))
 import numpy as np
 
 import p2_compact_fullrank_bridge_b1 as b1
 import p2_compact_f32_backend_e14 as compact
+from p2_compact_fullrank_precision_e14 import json_safe
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_OUT = ROOT / "experiments" / "2026-09-14_e14" / "b4_f32.json"
+DEFAULT_OUT = ROOT / "experiments" / "2026-09-14_e14" / "b4_real_backend" / "b4_f32.json"
 TOL = 1e-5
 N = RANK = RESIDUAL_RANK = 8
 ORIGINAL = ROOT / "experiments" / "2026-09-12_b4_fullrank_deep.json"
@@ -631,7 +637,7 @@ def main():
                     lo = execute_case(sys.modules[__name__], weights, model, forced, outdir, label + '_f32')
                     case = {'fixture': fixture, 'control': name, 'f64': hi, 'f32': lo,
                             'conformance': assess(lo, hi)}
-                    path.write_text(json.dumps(case, indent=2, allow_nan=False) + '\n', encoding='utf-8')
+                    path.write_text(json.dumps(json_safe(case), indent=2, allow_nan=False) + '\n', encoding='utf-8')
                 results.append({'fixture': fixture, 'control': name,
                                 'artifact': str(path.relative_to(ROOT)), 'sha256': sha(path),
                                 'passed': case['conformance']['passed'],
@@ -649,6 +655,8 @@ def main():
                                 'f64_adapter': sha(f64.__file__), 'compact_reference': sha(b1.COMPACT),
                                 'L2': sha(b1.FROZEN), 'F21': sha(F21)},
               'runtime': {'python': platform.python_version(), 'numpy': np.__version__,
+                          'flopscope_import_path': flops.__file__,
+                          'fnp_import_path': fnp.__file__,
                           'flopscope': importlib.metadata.version('flopscope'),
                           'threadpools': backend},
               'cases': results, 'controls': {'identity': identity, 'injected_drift': injected},
@@ -659,7 +667,7 @@ def main():
                               'No compression, ground truth, noise floor, prediction accuracy, counted cost or promotion claim.',
                               'The frozen normal helper and independent scalar normal evaluator both round to f32; exact operation-order equality is not required.']}
     path = outdir / 'b4_f32_summary.json'
-    path.write_text(json.dumps(result, indent=2, allow_nan=False) + '\n', encoding='utf-8')
+    path.write_text(json.dumps(json_safe(result), indent=2, allow_nan=False) + '\n', encoding='utf-8')
     if not result['passed']:
         raise SystemExit(1)
 

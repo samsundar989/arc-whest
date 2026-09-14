@@ -1,0 +1,97 @@
+{
+  "schema": "e14.b4_localization.v1",
+  "prediction_commit": "c2bcfba",
+  "cases": [
+    {
+      "fixture": "b4",
+      "control": "l2",
+      "artifact": "experiments\\2026-09-14_e14\\b4_real_backend\\b4_l2_localization.json",
+      "sha256": "3aa8bcec05b1f6b553c3b9e9abd19c0b004af93abda45604b3100c2185fb36fc",
+      "identity": {
+        "prediction_squared_drift": 0.0,
+        "allowance": 2e-10,
+        "passed": true
+      },
+      "identity_all_observed_equal": true,
+      "qr": {
+        "prediction_squared_drift": 4.190951585769653e-09,
+        "allowance": 2e-10,
+        "passed": false
+      },
+      "same_input_independent": {
+        "prediction_squared_drift": 0.0,
+        "allowance": 2e-10,
+        "passed": true
+      }
+    },
+    {
+      "fixture": "b4",
+      "control": "f21_forced",
+      "artifact": "experiments\\2026-09-14_e14\\b4_real_backend\\b4_f21_forced_localization.json",
+      "sha256": "c49e60542d7d1888df39acb0e4e76ba15f2bc20a0267195b234f2725024f84d0",
+      "identity": {
+        "prediction_squared_drift": 0.0,
+        "allowance": 2e-10,
+        "passed": true
+      },
+      "identity_all_observed_equal": true,
+      "qr": {
+        "prediction_squared_drift": 0.0360966749212821,
+        "allowance": 2e-10,
+        "passed": false
+      },
+      "same_input_independent": {
+        "prediction_squared_drift": 4.9072034016717225e-05,
+        "allowance": 2e-10,
+        "passed": false
+      }
+    },
+    {
+      "fixture": "b3",
+      "control": "l2",
+      "artifact": "experiments\\2026-09-14_e14\\b4_real_backend\\b3_l2_localization.json",
+      "sha256": "203e7e644d4ba4fe6d858ac3730cb18ba7a9c6b224e93faef33047bfe10500dd",
+      "identity": {
+        "prediction_squared_drift": 0.0,
+        "allowance": 2e-10,
+        "passed": true
+      },
+      "identity_all_observed_equal": true,
+      "qr": {
+        "prediction_squared_drift": 0.0,
+        "allowance": 2e-10,
+        "passed": true
+      },
+      "same_input_independent": {
+        "prediction_squared_drift": 0.0,
+        "allowance": 2e-10,
+        "passed": true
+      }
+    },
+    {
+      "fixture": "b3",
+      "control": "f21_forced",
+      "artifact": "experiments\\2026-09-14_e14\\b4_real_backend\\b3_f21_forced_localization.json",
+      "sha256": "8a79f376b4b19b5e0596aa56b4d97734402c3ffbf0ed6fad18927b5c3846ca37",
+      "identity": {
+        "prediction_squared_drift": 0.0,
+        "allowance": 2e-10,
+        "passed": true
+      },
+      "identity_all_observed_equal": true,
+      "qr": {
+        "prediction_squared_drift": 1.5910348594161405e-09,
+        "allowance": 2e-10,
+        "passed": false
+      },
+      "same_input_independent": {
+        "prediction_squared_drift": 9.689360425113591e-12,
+        "allowance": 2e-10,
+        "passed": true
+      }
+    }
+  ],
+  "scope": "Fixed fullrank diagnostics. Identity passing cannot grant QR/backend acceptance or compression.",
+  "source_sha256": "aa76eda7abf83500c782f020f2b57b725aef01bee787ebab7f72db8a1e31a1bb",
+  "original_B4_unchanged": true
+}
