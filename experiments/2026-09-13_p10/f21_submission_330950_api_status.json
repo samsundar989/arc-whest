@@ -1,0 +1,14 @@
+{
+  "observed_at_utc": "2026-09-14T07:08:39.386781+00:00",
+  "source": "AIcrowd GET /api/v1/submissions/330950",
+  "response": {
+    "id": 330950,
+    "challenge_id": 1174,
+    "challenge_round_id": 1429,
+    "created_at": "2026-09-14T05:41:17.474Z",
+    "grading_status_cd": "graded",
+    "grading_message": "<p>Graded successfully</p>\n",
+    "score": 1.595729544363834e-08,
+    "score_secondary": 3.779436170248118e-08
+  }
+}

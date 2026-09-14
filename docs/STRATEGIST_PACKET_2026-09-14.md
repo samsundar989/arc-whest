@@ -13,8 +13,8 @@ The ARC White-Box Estimation Challenge 2026 Phase 2 asks for the expected
 post-ReLU activation of every neuron in a random He-initialized, bias-free
 MLP under Gaussian input. Live shape is width 1024, depth 16; output is
 `(16,1024)`. The estimator sees weights, not input samples or truth. The
-private objective is mean final-layer MSE times
-`max(0.1, counted_FLOPs / 2**41)`, lower better. Phase-2 lambda is zero:
+private objective is `mean_i[MSE_i * max(0.1, F_i / 2**41)]`, where `F_i`
+is network `i`'s counted FLOPs; lower is better. Phase-2 lambda is zero:
 residual time is **not** a priced cost, but exceeding 0.4 s per network
 fails that network. Wall cap is 120 s/network, memory cap 8 GiB. The
 installed/graded stack is WhestBench 0.16.1 and flopscope 0.12.1. Grader
@@ -65,7 +65,7 @@ accuracy change is negligible relative to its floor; the gain is the
 metered cost reduction. Original L2 was context, not an alternate selected
 on P10. Independent Skeptics accepted the engineering and DECIDE claims.
 
-Candidate-specific Linux-cap evidence passed at measured VmPeak 5,381.7 MB
+Candidate-specific Linux-cap evidence passed at measured VmPeak 5,381.7 MiB
 against 8,192 MiB. The exact-byte Full certificate nevertheless REFUSED
 locally: its capped two-row official subprocess smoke failed 2/2 on the
 0.4-s residual cap. A separate 100-row capped official local mini failed
@@ -108,9 +108,9 @@ is the binding fresh method decision.
 An independent fresh-context Skeptic independently enumerated all graded
 rows, checked the cost and timing identities and public pairing, and
 accepted the zero-failure diagnostic in this scope. Its overall exact-byte
-attribution remains **provisional**: both the CLI upload receipt and
-the graded page omit a server-provided archive/member hash
-(`submissionFiles=null`). The locally checked tar/source hashes and exact
+attribution remains **provisional**: the CLI upload receipt, graded page
+(`submissionFiles=null`) and read-only submission-status API all omit a
+server-provided archive/member hash. The locally checked tar/source hashes and exact
 graded FLOP fingerprint strongly support the binding, but are not a
 server-side cryptographic receipt. The pre-upload package receipt retains
 historical `submitted:false`; the append-only slot ledger retains its
@@ -181,6 +181,20 @@ message, second submission or designation is authorized.
 
 ## Decision requested from the strategist
 
+This packet deliberately does **not** reproduce the working estimator's
+full Wick/centering coefficient table, all birth and final-readout code,
+compact factor lifetimes, or flopscope's exact primitive tariff. Treat
+that working nonlinear recurrence as an **immutable operator to wrap and
+match**, not as a formula to invent from this summary. You can specify a
+first differential and rank conceptual architectures without those
+details. For a later compact method, use parameters `n=1024` (width),
+`d=16` (depth), `h` (retained source ages), and proposed ranks `r`;
+list dense products, elementwise work, QR/joins, materialized shapes and
+co-live lifetimes symbolically. Do **not** claim a final exact FLOP count,
+process peak, or drop-in implementation from this packet. The repo-local
+Builder must audit the actual source, implement the selected slice and
+meter its executed program before any score experiment.
+
 1. **Choose one next bounded hypothesis** that can plausibly improve both
    score and competitive position beyond F21. Compare a faithful compact
    full-rank bridge followed by one compression choice with at most one
@@ -193,8 +207,11 @@ message, second submission or designation is authorized.
    intervention. State what must match (Wick/centering, D3/D21, births,
    scalar K4, all ages, final readout), what tolerance is legitimate at
    the actual target precision, and what result kills only that
-   implementation. Supply a complete supported-primitive FLOP and
-   resident/process-memory model before any live-shape score run.
+   implementation. Give a **parameterized** operation/lifetime table and
+   identify which source-level counts and primitive rates the Builder
+   must measure to complete the cost and process-memory model before any
+   live-shape score run. The tiny f64 differential is a proposed new
+   IMPORTANT probe, not an already passed bridge.
 3. If a larger gain needs approximate K4 or another nonlinear correction,
    provide one coherent update/readout design with source identities,
    all consumers/births, explicit approximation error and covariance
@@ -210,9 +227,11 @@ message, second submission or designation is authorized.
    write-up should document F21's exact identity/validation or await a
    larger method, with claims limited to established evidence.
 
-Return a **ranked decision with one executable first slice**, equations or
-pseudocode sufficient to implement it, a complete cost table, a cheap
-falsifier, estimated resource envelope and explicit stop condition. If
+Return a **ranked decision with one executable tiny first slice**, enough
+pseudocode for that discriminator, a parameterized cost/liveness table
+for the later architecture, a cheap falsifier, estimated resource envelope
+and explicit stop condition. State which exact numbers depend on the
+unprovided recurrence and tariff. If
 neither route has a credible path past the score floor, say so and give a
 bounded fallback. Do not recommend a new submission or designation from
 public rank alone; those require separate Samuel authorization.
@@ -228,5 +247,7 @@ public rank alone; those require separate Samuel authorization.
 `experiments/2026-09-13_p10/f21_graded_skeptic.md` (independent verdict);
 `experiments/2026-09-13_p10/board_after_f21_330950.json` SHA256
 `ea0143329713035e2c6ea9b7ebeb9c42a03c1654f49a561cbd90fb27ec51c899`;
+`experiments/2026-09-13_p10/f21_submission_330950_api_status.json`
+SHA256 `125cd4c8d1821e915183a5d83285038e93d68e7b3c140fcfc5d15231f6c7eac1`;
 `experiments/2026-09-12_b4_fullrank_deep.json` SHA256
 `a5c6295c45695cc104f6db4d4f779cce059b18773184dfb418092953e420e52c`.

@@ -1,6 +1,18 @@
 # BENCHMARK.md — where we actually stand
 
-> **Latest public snapshot: 2026-09-10.** See [the source ledger](research/2026-09-10_competition_sources.md) and [current analysis](PHASE2_RESEARCH_AUDIT_2026-09-10.md). Our best public score is 1.836e-8, rank 44; the inspected leading result is 2.683e-9. Historical figures below remain dated evidence, not current board standings. This file remains PRIVATE.
+> **Latest read-only public snapshot: 2026-09-14 06:59 UTC.** Our one-time
+> diagnostic F21 #330950 GRADED 100/100 with zero failures and exact
+> adjusted score `1.5957295444e-8`, compared with original L4 #330290
+> `1.8359814201e-8` on matching exposed public rows. The board displayed
+> our account at rank 58/156 (rounded `1.6e-8`) and the leader at
+> `2.5e-9`, a dated **6.38x level gap**. This is read-only CONFIRM and
+> unpaired leaderboard context, not a private-rerun prediction or a new
+> promotion gate. Raw [graded report](../experiments/run_reports/f21_diagnostic_330950_graded_report.json),
+> [board snapshot](../experiments/2026-09-13_p10/board_after_f21_330950.json)
+> and [fresh Skeptic](../experiments/2026-09-13_p10/f21_graded_skeptic.md)
+> carry exact scopes. **PRIVATE — never the forum.**
+
+> **Prior public snapshot: 2026-09-10.** See [the source ledger](research/2026-09-10_competition_sources.md) and [current analysis](PHASE2_RESEARCH_AUDIT_2026-09-10.md). Our then-best public score was 1.836e-8, rank 44; the inspected leading result was 2.683e-9. Historical figures below remain dated evidence, not current board standings. This file remains PRIVATE.
 
 > **Phase-2 status — rechecked 2026-08-31 14:57 UTC.** The body below is the
 > private Phase-1 benchmark record and must not be used as the live target. The
