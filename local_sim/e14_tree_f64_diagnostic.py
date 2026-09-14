@@ -33,7 +33,8 @@ def wick64(mu, cov, table, const):
 def compare(left, right):
     a, b = dense.arr(left), dense.arr(right)
     ix = np.unravel_index(np.argmax(np.abs(a - b)), a.shape)
-    return {'max_abs': float(np.max(np.abs(a - b))), 'index': list(ix),
+    return {'max_abs': float(np.max(np.abs(a - b))),
+            'index': [int(i) for i in ix],
             'active': float(a[ix]), 'dense': float(b[ix])}
 
 
