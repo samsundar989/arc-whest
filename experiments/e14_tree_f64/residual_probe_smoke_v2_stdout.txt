@@ -1,0 +1,10 @@
+{
+  "ok": false,
+  "error": {
+    "stage": "run",
+    "code": "SCORING_RUNTIME_ERROR",
+    "message": "'flopscope_overhead_time_s'",
+    "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\whestbench\\cli.py\", line 3235, in _main_participant\n    contest_data = make_contest_from_dataset(contest_spec, ds, n_mlps)\n  File \"C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\whestbench\\scoring.py\", line 364, in make_contest_from_dataset\n    sampling_budget_breakdown=_restored_sampling_aggregate(breakdowns),\n  File \"C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\whestbench\\scoring.py\", line 304, in _restored_sampling_aggregate\n    aggregate = _aggregate_budget_breakdowns(restored)\n  File \"C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\whestbench\\scoring.py\", line 626, in _aggregate_budget_breakdowns\n    aggregate[\"flopscope_overhead_time_s\"] += float(breakdown[\"flopscope_overhead_time_s\"])\nKeyError: 'flopscope_overhead_time_s'\n"
+  },
+  "whestbench_version": "0.16.1"
+}

@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "error": {
+    "stage": "run",
+    "code": "SCORING_RUNTIME_ERROR",
+    "message": "'flopscope_overhead_time_s'"
+  },
+  "whestbench_version": "0.16.1"
+}
