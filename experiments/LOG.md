@@ -48978,3 +48978,45 @@ Unknown private accuracy, exact server-byte binding, eligibility and feasibility
 of the unbuilt architecture remain explicit. Documentation links, target
 arithmetic and whitespace were checked; no preflight/benchmark rerun was needed
 for this documentation-only review.
+## 2026-09-14 — execution E14 IMPORTANT prerequisites (prediction before implementation)
+
+**Authority and reconciliation.** Samuel authorized execution of the reviewed
+plan through implementation and review, preserving strategic predictions and
+release checkpoints. Starting tree clean at research commit `4e0a987`.
+F21 `d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`
+remains the competitive baseline. No fresh labels, seed claim, protected truth
+read, vault operation, submission or designation is part of this slice.
+
+**Classification and written Builder predictions.** IMPORTANT instrument work:
+(1) the fixed B4 float64/float64 comparison will pass the original `1e-5`
+operator tolerance, implicating precision in the preserved mixed-precision
+failure; a failure instead localizes the earliest recurrence/conditioning defect;
+(2) a candidate-bound release record will retain F21 LOCAL REFUSED and
+SERVER_MEASURED PASS with PROVISIONAL server-byte attribution;
+(3) durable row journaling will retain completed and failed observations after
+interruption while refusing duplicate, incomplete or mismatched terminal evidence;
+(4) explicit production truth math-mode provenance will make changed producer,
+backend, device and chunk settings observable without changing seed access.
+Numerical sensitivity is predeclared at raw-error scale `2e-8`, giving the
+existing 1% allowance `2e-10` for future E14 candidate-sensitive checks; this
+tightens the existing allowance, does not change a promotion gate. An identity
+control must pass and an injected output drift above this allowance must fail.
+No Samuel strategic prediction is inferred from these Builder predictions.
+
+**Bounded intervention and verification.** Separate B4 diagnostic adapter on
+the existing fixed width8/depth6 float32-quantized fixture, from layer0, preserving
+all ages, scalar K4, coefficients and original failed artifact. Save the first
+failed operands. No rank reduction or added K4. A float64 pass requires separately
+declared actual-production conformance before architectural reliance. Infrastructure
+uses existing certificate domains, evaluator and truth producer, with synthetic
+failure/mutation tests. No resume/re-read permission is introduced. Production
+1024x16 common-input arithmetic pilot requires its own recorded resource review
+before workerq; no labels are loaded. Default preflight and fresh independent
+Skeptic required before acceptance. Each lane owns separate files; coordinator
+alone edits LOG/CURRENT_STATE and handles queue/seed/release actions.
+
+**Scope/cost.** These are mathematical/instrument checks, not MSE or score
+promotion evidence. Phase2 remains C=F, residual cliff 0.4s, wall120s and cap
+8192MiB. Retain measured local, server forecasts and measured server domains.
+Use tiny one-thread CPU fixtures directly; queue all heavy work with a recorded
+optimization review. Frozen sources and HUMAN_MODEL remain unchanged.
