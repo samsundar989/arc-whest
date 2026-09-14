@@ -1,7 +1,7 @@
 # CURRENT_STATE.md — read this first
 
-**September 14 P10 fresh DECIDE passes its registered arithmetic gate;
-independent result review and release checks remain.** Samuel's three new
+**September 14 P10 fresh DECIDE and independent result Skeptic pass;
+release checks remain.** Samuel's three new
 "I don't know" predictions were committed at `ce853f7` before any P10 data.
 The fresh SINGLE_USE 128-network truth claim was committed at `883bd45`;
 two `2**24` replicas passed the pre-score floor screen and were finalized
@@ -20,13 +20,14 @@ interval on L4 minus F21 score is
 pairs favor F21. Mean raw MSE is L4 `4.1821425170e-8` and F21
 `4.1821088467e-8`, beside midpoint truth floor `2.2363657945e-9`;
 the useful gain comes from `13.08574%` measured counted-FLOP saving.
-L2 is robustness context only. The builder recomputed the canonical gate
-from raw rows, but **fresh independent result Skeptic review is pending**.
+L2 is robustness context only. The builder and fresh independent result
+Skeptic `9c94b6e` separately recomputed the canonical gate from raw rows;
+the Skeptic ACCEPTED only the DECIDE promotion evidence.
 The candidate remains frozen at SHA256
 `d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`.
 P10's scorer disabled both local scoring timing caps exactly as registered;
-this score is not a deployment pass. If the Skeptic accepts, run full
-candidate certification and a **clean capped** official subprocess mini;
+this score is not a deployment pass. Run full candidate certification and
+a **clean capped** official subprocess mini;
 a no-cap mini cannot substitute. F21 is not yet submission-ready, and no
 submission or designation is authorized.
 

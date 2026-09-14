@@ -48504,3 +48504,41 @@ timing caps were disabled exactly as preregistered for accuracy, so this
 DECIDE result **does not certify deployment**. F21 is not yet submission-ready:
 first obtain a fresh independent result Skeptic, then the
 candidate-specific Full certificate and clean capped official mini.
+
+**P10 independent terminal result Skeptic ACCEPT.** Fresh-context verdict
+`experiments/2026-09-13_p10/p10_result_skeptic.md`, commit `9c94b6e`,
+independently recomputed the binding paired arithmetic gate from all 128
+saved rows and accepted the F21-versus-original-L4 DECIDE promotion at
+`1.150566x`, positive paired 95% interval, with all identities, source
+hashes, truth floor/offset formulas, 384 lifecycle rows, workerq receipts
+and one-read register reconciled. The verdict explicitly refuses to call
+this a deployment, eligibility, submission or private-score pass because
+both local scoring timing caps were disabled for P10. Its strongest challenge
+is the 0.4-second residual / 120-second wall cliff; candidate-specific Full
+certification and a clean capped official mini are next.
+
+**Pre-submission optimization review — P10 F21 Full candidate certificate.**
+The conditional review recorded before P09 at LOG's September-12 Full
+certificate section remains applicable to unchanged F21 SHA `d77dab0e...`:
+reuse accepted full baseline preflight 1092, P10 scorer source/provenance,
+the exact existing Linux v6 8,192-MiB report, installed stack and cached
+public mini. Run all candidate-specific certifier sections without `--quick`,
+`--skip-smoke` or `--memory-only`; do not duplicate the Linux cap campaign,
+truth mint, score read or full baseline gate. Certifier's repeated lifecycle
+cases and two-row official capped smoke are required evidence, so no passes
+can be removed. A single sequential CPU-only process avoids duplicate
+dataset loaders, extra workers, caching/prefetch/batch changes or device
+placement changes without an equivalence proof. The report writes a new
+immutable path; if interrupted, restart to another path and retain refusal.
+Previous quick F21 peak was about 4.5 GiB, while comparable full official
+mini harness plus worker reached about 16 GiB; conservatively declare
+**20 GiB RAM, 0 VRAM, 6 CPUs, 0 GPUs**, nonpreemptible, local live worktree
+through workerq, no priority override. Preserve any local cap failure;
+the operation-count model is not a substitute for a clean capped result.
+Before Full submission, exact candidate SHA rechecked
+`d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`
+and Linux v6 report SHA rechecked
+`f48516139b8ef99109a89b342e3808f15879bf8fb3e1e3aa3f8005e631f344ab`.
+Candidate `whest validate` passed shape/finite/contract after setting
+`PYTHONIOENCODING=utf-8`; the first attempt without that environment exited
+on the documented cp1252 box-drawing printer trap, not an estimator failure.
