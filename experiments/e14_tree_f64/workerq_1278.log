@@ -1,0 +1,56 @@
+﻿worker-q: job #1278 starting at 2026-09-14T17:56:23.173315+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=live -
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['.venv/Scripts/python.exe', 'local_sim/linux_memory_gate.py', '--candidate', 'estimator_e14_tree_f64.py', '--json', 'experiments/e14_tree_f64/linux_memory_gate.json']
+worker-q: ------------------------------------------------------------
+Linux 8-GiB enforcement gate
+  candidate   estimator_e14_tree_f64.py
+  cap         8192 MB   shape 1024x16   B = 2,199,023,255,552
+  linux       wsl -- WSL2 Ubuntu, official stack in $HOME/.arcwhest-linux
+
+N  the cap is in force -- controls first, so a pass below means something
+  PASS  N: the negative-control child reported                        json returned
+  PASS  N: the negative-control child wrote no stderr                 
+  PASS  N: the cap was APPLIED in that child (soft == requested)      True
+  PASS  N: requesting 9.0 GiB under a 8192 MB cap DIES                MemoryError: 
+  PASS  P: the positive-control child wrote no stderr                 
+  PASS  P: the SAME allocation with NO cap succeeds                   so the death above is the cap, not the machine
+
+L  repeated-worker lifecycle controls
+  PASS  L: stateless allocations settle below the growth threshold    +0.0 MB
+  PASS  L: deliberately retained allocations exceed the threshold     +192.0 MB
+  PASS  L: lifecycle-control children wrote no stderr                 
+
+C  the candidate's own predict(), under the real cap
+  PASS  C: the child reported                                         stage=done
+  PASS  C: the candidate child wrote no stderr                        
+  PASS  C: the cap was applied to the candidate's process too         soft=8589934592 requested=8589934592
+  PASS  C: the REAL packages loaded, not local_sim's shims            ython3.12/site-packages/whestbench/__init__.py
+  PASS  C: installed distribution metadata names both package versionswhestbench='0.16.1', flopscope='0.12.1'
+  PASS  C: setup() raised nothing                                     0.0139 s
+  FAIL  C: predict() completed under the cap                          MemoryError: Unable to allocate 1.03 GiB for an array with shape (2401, 896, 64) and data type float64
+  FAIL  C: the output has the right shape                             None
+  FAIL  C: every value is finite                                      None
+  PASS  C: peak address space is under the cap                        VmPeak 8168.4 MB of 8192 MB -> 1.00x headroom
+  PASS  C: the weights were the DEPLOYMENT representation             f64_readonly / dtype float64 / writeable False
+  FAIL  C: repeated predictions in the SAME worker all completed      MemoryError: Unable to allocate 1.03 GiB for an array with shape (2401, 896, 64) and data type float64
+  PASS  C: ...and SETTLED address space did not GROW across them      +0.0 MB over 1 predictions
+      repeated FLOPs  1,784,386,394,774 (identical)
+  FAIL  C: the single largest returned array is under 4 GiB           0.000 MB
+
+  counted FLOPs   1,784,386,394,774
+  multiplier      0.811445
+  peak RSS        6297.9 MB
+  VmPeak          8168.4 MB (address space -- THE quantity RLIMIT_AS caps)
+  VmHWM           6297.9 MB
+
+  SCOPE: this is a Linux kernel applying the installed package's own
+  default. It is not the grading server, whose `memory_limit_mb` appears in
+  no run_config and no graded report this repository holds. No absolute
+  second measured here transfers either.
+  report -> experiments/e14_tree_f64/linux_memory_gate.json
+
+FAILED 5: C: predict() completed under the cap; C: the output has the right shape; C: every value is finite; C: repeated predictions in the SAME worker all completed; C: the single largest returned array is under 4 GiB
+worker-q: ------------------------------------------------------------
+worker-q: job #1278 FAILED (exit code 1) at 2026-09-14T17:58:49.259590+00:00

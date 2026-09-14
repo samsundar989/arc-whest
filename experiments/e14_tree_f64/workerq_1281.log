@@ -1,0 +1,17 @@
+﻿worker-q: job #1281 starting at 2026-09-14T18:02:08.612235+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=live -
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['.venv/Scripts/python.exe', 'local_sim/e14_f64_residual_probe.py']
+worker-q: ------------------------------------------------------------
+
+Creating parquet from Arrow format:   0%|          | 0/1 [00:00<?, ?ba/s]
+Creating parquet from Arrow format: 100%|██████████| 1/1 [00:00<00:00,  4.07ba/s]
+Creating parquet from Arrow format: 100%|██████████| 1/1 [00:00<00:00,  4.07ba/s]
+Repo card metadata block was not found. Setting CardData to empty.
+
+Generating probe split: 0 examples [00:00, ? examples/s]
+Generating probe split: 1 examples [00:00,  9.92 examples/s]
+{"returncode": 0, "report_parsed": true, "n_failed_mlps": 1, "weights_match": true, "out": "C:\\Users\\samsu\\Documents\\arc-whest\\experiments\\e14_tree_f64\\residual_probe.json"}
+worker-q: ------------------------------------------------------------
+worker-q: job #1281 SUCCEEDED (exit code 0) at 2026-09-14T18:04:34.701847+00:00

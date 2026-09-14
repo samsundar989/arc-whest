@@ -1,0 +1,20 @@
+﻿worker-q: job #1277 starting at 2026-09-14T17:53:22.950471+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=live -
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['.venv/Scripts/python.exe', 'local_sim/e14_tree_f64_meter.py']
+worker-q: ------------------------------------------------------------
+C:\Users\samsu\Documents\arc-whest\local_sim\e14_tree_f64_meter.py:31: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_strassen_L4_f21.py:303: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_strassen_L4_f21.py:304: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+{
+  "baseline": 928457637478.0,
+  "candidate": 2029122417342.0,
+  "ratio": 2.1854765747350324,
+  "out": "C:\\Users\\samsu\\Documents\\arc-whest\\experiments\\e14_tree_f64\\ledger.json"
+}
+worker-q: ------------------------------------------------------------
+worker-q: job #1277 SUCCEEDED (exit code 0) at 2026-09-14T17:56:28.406291+00:00
