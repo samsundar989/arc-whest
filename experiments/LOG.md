@@ -49089,3 +49089,18 @@ Queue command: `workerq submit --project arc-whest --gpus 1 --ram 8 --vram 6
 --eta 20m -- C:/Users/samsu/Documents/arc-whest/.venv-gpu/Scripts/python.exe
 local_sim/test_truth_math_e14.py --pilot --out
 C:/Users/samsu/Documents/arc-whest/experiments/2026-09-14_e14/truth_pilot.json`.
+
+**E14 precision localization follow-up, IMPORTANT prediction before run.**
+Actual-f32 output checks have failed on three of the four declared tiny
+fixture/reference cases; raw files remain intact. No compression may rely on
+them. Next isolate QR representation error from nonlinear arithmetic ordering
+without changing the recurrence or thresholds. Builder predicts exact fullrank
+identity encode/decode of each source tower followed by the unchanged reference32
+`_layer` will be bit-identical; this is a positive control with dense source cost,
+not a saving. Compare QR encode/reconstruct under that same reference operation
+order to determine whether QR alone crosses the existing2e-10 output bar. Replay
+the independent compact operator on each reference32 layer input with identity
+sources and reset state at every layer, to localize local arithmetic drift
+separately from accumulated trajectory drift. Use the same four fixed cases,
+all layers/ages, original1e-5 internal reports, committed field envelope and
+2e-10 output bar. No rank change, K4 addition, fresh data or gate revision.
