@@ -1,5 +1,15 @@
 # CURRENT_STATE.md — read this first
 
+## September 14 E14 revised execution: bounded proofs complete, candidate pending
+
+The revised E14 independent prerequisites are durable in `experiments/LOG.md` and commits `2128550` (mixed residual falsifier) and `fb96636` (scalar-feed proof). Slice A's unchanged no-basis control replays frozen F21 on exposed B3/B4, and its full-rank f64 query algebra matches a dense oracle, but the mixed f32 operational path **fails** the unchanged B4 numerical allowance: final drift energy 0.3663149 versus 2e-10, with first consumed difference at layer 2. A fresh Skeptic rejected operational conformance. The rank64 615.26B FLOP figure remains a static upper model, with no executed compressed ledger, memory or residual-time result. No rank selection or numerical-regime change is justified.
+
+Slice B's supplied-core scalar-metric J/U cancellation, shared A/P/y/r slices, active tiny f32 fused query and frozen disabled branch have a final **scoped independent ACCEPT**. The final 289-check raw probe independently reconstructs two frozen tiny F21 births and compares full direct/reduced supplied-Q births through two later supplied-state steps. Four earlier rejected/provisional revisions and their first falsifiers remain in `experiments/e14_slice_b/`. The accepted proof injects Q at a captured consumer boundary; it is not an active production estimator or a tested regeneration rule. No new MSE, counted candidate ledger, generic-shape budget fallback, memory or release certificate exists.
+
+Affected root preflight workerq #1254 passed 12/16 enabled checks (four Full skips) with 315 unchanged before/after source hashes and 2,374.51 MiB measured peak under a 4 GiB/2 CPU reservation. Queued #1252 was canceled before launch solely to right-size its reservation from measured history. See `experiments/e14_revised_preflight/`. This is infrastructure regression evidence, not candidate certification.
+
+**Exact next decision:** choose the specified tree-projected scalar-metric accuracy candidate on **uncompressed F21** as the first scientific intervention, separately from any shared-basis rank or numerical-regime change. Before building or measuring it, complete a prospective STRATEGIC contract with Samuel's new predictions, then retain all closure discarded terms and moment consumers, test active tiny/fallback paths, count the full actual ledger, and only then claim a new DECIDE block for paired arithmetic score evidence. Samuel's prediction response is pending. No fresh block, public fitting, vault touch, submission or designation occurred in this execution. F21 #330950 remains the accepted score comparator with its separate local release refusal; the contribution write-up remains stale.
+
 ## Next decision — independent E14 strategy review
 
 Samuel requested a fresh review of the worker's decision point. The
