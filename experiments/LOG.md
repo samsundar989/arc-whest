@@ -49060,3 +49060,32 @@ C:/Users/samsu/Documents/arc-whest/.venv/Scripts/python.exe
 local_sim/candidate_numerical_e14.py --candidate estimator_k3_strassen_L4_f21.py
 --sha256 d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94
 --out-dir C:/Users/samsu/Documents/arc-whest/experiments/2026-09-14_e14/f21_numerical`.
+
+**E14 production-truth pilot contract and optimization review (before running).**
+IMPORTANT arithmetic instrument check, not accuracy evidence or a seed claim.
+Use existing `p2_truth --check-allvar` unprotected probe1000051 (1024x16) and
+one shared synthetic NumPy f32 input fixture(seed140914),65537 samples. Exactly
+two production passes at chunks65536 and8192 compare to one independent NumPy
+IEEE-f32 matmul/f64 accumulation reference. Record f32 exported means separately
+from f64 accumulated means and the official versus existing variance-centering
+conventions. No protected labels, no sampling-error inference. Before results,
+require every layer mean and variance absolute discrepancy <=`2e-6*(1+abs(ref))`;
+require conditional final score-error bound `2*sqrt(2e-8*D)+D <=1e-10`, where D
+is the mean-squared discrepancy of final f32 exported means, at multiplier<=1.
+This is <=10% of a hypothetical5% raw gain at2e-8; it is an instrument pilot
+screen, not a global arithmetic-error proof or promotion gate. Builder predicts
+both chunk passes meet these bounds. Failure is retained and blocks reliance.
+
+Review: one shared256MiB input plus64MiB weights; no loaders, workers, prefetch,
+cache/model duplication or new samples. One Torch/BLAS CPU thread, sequential
+reference and production forwards, retaining current activations and per-layer
+moments only. Conservative host peak<4GiB plus runtime reserved as RAM8GiB;
+CUDA temporaries/caching/context estimated2GiB reserved as VRAM6GiB; CPU1.
+No half precision, compilation, changed sample schedule or omitted recovery
+evidence. Existing artifacts are reused; no old truth read or resume permission.
+Queue command: `workerq submit --project arc-whest --gpus 1 --ram 8 --vram 6
+--cpus 1 --env OPENBLAS_NUM_THREADS=1 --env OMP_NUM_THREADS=1
+--env MKL_NUM_THREADS=1 --env PYTHONIOENCODING=utf-8 --label e14-truth-pilot
+--eta 20m -- C:/Users/samsu/Documents/arc-whest/.venv-gpu/Scripts/python.exe
+local_sim/test_truth_math_e14.py --pilot --out
+C:/Users/samsu/Documents/arc-whest/experiments/2026-09-14_e14/truth_pilot.json`.
