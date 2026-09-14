@@ -49184,3 +49184,22 @@ Agents pause source edits while it runs. Reuse same6GiBRAM/0VRAM/2CPU review.
 --eta 10m -- C:/Users/samsu/Documents/arc-whest/.venv/Scripts/python.exe
 local_sim/preflight_e14.py --out-dir
 C:/Users/samsu/Documents/arc-whest/experiments/2026-09-14_e14/preflight_live`.
+
+**E14 mixed-precision QR stabilization, IMPORTANT prediction before run.** The
+real-backend localization identifies QR reconstruction rounding as a separate
+amplified perturbation even with unchanged reference operation order. Test one
+targeted remedy on the same4 fixed B4/B3 x L2/forcedF21 cases: encode source
+legs in f64; build Gram, QR and factors in f64; reconstruct all source legs and
+residuals in f64; cast decoded A_D/A_L/M/w2 to f32 BEFORE unchanged reference32
+`_layer`. All recurrences, source ages and fixture weights remain unchanged.
+Builder predicts final-output drift satisfies the existing2e-10 allowance,
+while exact bit/structural-zero recovery may fail. Retain exact-array and
+zero-mask mismatch diagnostics/operands; neither is silently rounded/clipped.
+Preserve original1e-5 internal reports and committed sensitivity envelope.
+No posthoc zero masking, threshold change, compression or K4 addition. Record
+actual tiny metered cast/allocation/operation overhead and parameterized f64
+state memory; do not claim complete fullshape cost from this diagnostic.
+This targets representation rounding only. It cannot clear the separate
+plain-versus-Strassen operator mismatch or turn an identity-only dense wrapper
+into a cheaper architecture. Failed attempts remain archived. Run only after
+the active preflight source-freeze window ends.
