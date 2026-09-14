@@ -1,0 +1,566 @@
+{
+  "scope": "saved n3 negative fixture; same f32-rounded weights and Wick evaluator; f64 arithmetic with f32 state quantization at layer boundaries",
+  "finding": "first traced operand difference is layer0 cov_pre[1,1], at the f32 WT @ I @ W boundary; the layer2 pK(4,) gap is already present in the base moment before the fourth-hyperedge addition",
+  "limitations": "boundary quantization is not an emulation of every f32 matmul, reduction, fused kernel, or rounding operation; this is a no-label diagnostic, not repair, gate change, or score evidence",
+  "declared_f32_bound": 2e-05,
+  "saved_first_falsifier": {
+    "n": 3,
+    "kind": "negative_variance",
+    "layer": 2,
+    "field": "pK(4,)",
+    "index": 1,
+    "active": -13.798526763916016,
+    "oracle": -13.798499841974602,
+    "absolute_gap": 2.692194141395987e-05,
+    "pre": [
+      -2.1774710746447026,
+      -1.571041006976744,
+      0.726219392183995
+    ],
+    "cpre": [
+      [
+        8.060922780929785,
+        6.582643248493604,
+        -1.3339892950746728
+      ],
+      [
+        6.582643248493606,
+        5.863776205295669,
+        -0.42575017713800817
+      ],
+      [
+        -1.3339892950746732,
+        -0.4257501771380081,
+        1.2808154405245813
+      ]
+    ],
+    "S3": [
+      -53.652242884954745,
+      -32.091137141283404,
+      7.314409561870103
+    ],
+    "S4": [
+      31.21519357924513,
+      31.21519357924513,
+      31.21519357924513
+    ],
+    "w_0_4": [
+      16.186777114868164,
+      11.548430442810059,
+      8.69176959991455
+    ],
+    "w_3_4": [
+      8.679118156433105,
+      9.047974586486816,
+      21.707929611206055
+    ],
+    "w_4_4": [
+      5.3174238204956055,
+      6.197751045227051,
+      17.747098922729492
+    ]
+  },
+  "layers": [
+    {
+      "layer": 0,
+      "fields": {
+        "pre": {
+          "active_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 0.0,
+            "right": 0.0,
+            "absolute_gap": 0.0
+          },
+          "matched_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 0.0,
+            "right": 0.0,
+            "absolute_gap": 0.0
+          }
+        },
+        "cpre": {
+          "active_vs_full": {
+            "index": [
+              1,
+              1
+            ],
+            "left": 10.434741020202637,
+            "right": 10.434741482851635,
+            "absolute_gap": 4.626489982229032e-07
+          },
+          "matched_vs_full": {
+            "index": [
+              0,
+              0
+            ],
+            "left": 0.7621205408426377,
+            "right": 0.7621205408426377,
+            "absolute_gap": 0.0
+          }
+        },
+        "D3": {
+          "active_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 0.0,
+            "right": 0.0,
+            "absolute_gap": 0.0
+          },
+          "matched_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 0.0,
+            "right": 0.0,
+            "absolute_gap": 0.0
+          }
+        },
+        "S(1,)": {
+          "active_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 0.0,
+            "right": 0.0,
+            "absolute_gap": 0.0
+          },
+          "matched_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 0.0,
+            "right": 0.0,
+            "absolute_gap": 0.0
+          }
+        },
+        "S(3,)": {
+          "active_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 0.0,
+            "right": 0.0,
+            "absolute_gap": 0.0
+          },
+          "matched_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 0.0,
+            "right": 0.0,
+            "absolute_gap": 0.0
+          }
+        },
+        "S(4,)": {
+          "active_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 0.0,
+            "right": 0.0,
+            "absolute_gap": 0.0
+          },
+          "matched_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 0.0,
+            "right": 0.0,
+            "absolute_gap": 0.0
+          }
+        },
+        "pK_base(4,)": {
+          "active_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 0.8712417483329773,
+            "right": 0.8712414503097534,
+            "absolute_gap": 2.980232238769531e-07
+          },
+          "matched_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 0.8712414503097534,
+            "right": 0.8712414503097534,
+            "absolute_gap": 0.0
+          },
+          "active_operands_f64_vs_active": {
+            "index": [
+              0
+            ],
+            "left": 0.8712417483329773,
+            "right": 0.8712417483329773,
+            "absolute_gap": 0.0
+          },
+          "active_operands_f64_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 0.8712417483329773,
+            "right": 0.8712414503097534,
+            "absolute_gap": 2.980232238769531e-07
+          }
+        },
+        "pK(4,)": {
+          "active_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 0.8712417483329773,
+            "right": 0.8712414503097534,
+            "absolute_gap": 2.980232238769531e-07
+          },
+          "matched_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 0.8712414503097534,
+            "right": 0.8712414503097534,
+            "absolute_gap": 0.0
+          }
+        }
+      }
+    },
+    {
+      "layer": 1,
+      "fields": {
+        "pre": {
+          "active_vs_full": {
+            "index": [
+              2
+            ],
+            "left": -1.3527487516403198,
+            "right": -1.3527488119792075,
+            "absolute_gap": 6.0338887664102e-08
+          },
+          "matched_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 0.6165222582839041,
+            "right": 0.6165222582839041,
+            "absolute_gap": 0.0
+          }
+        },
+        "cpre": {
+          "active_vs_full": {
+            "index": [
+              0,
+              1
+            ],
+            "left": -2.8072400093078613,
+            "right": -2.8072397545884704,
+            "absolute_gap": 2.547193909130385e-07
+          },
+          "matched_vs_full": {
+            "index": [
+              2,
+              2
+            ],
+            "left": 3.982880169375132,
+            "right": 3.9828802007985074,
+            "absolute_gap": 3.142337545725127e-08
+          }
+        },
+        "D3": {
+          "active_vs_full": {
+            "index": [
+              2
+            ],
+            "left": -11.08495044708252,
+            "right": -11.084952329911967,
+            "absolute_gap": 1.8828294479078522e-06
+          },
+          "matched_vs_full": {
+            "index": [
+              2
+            ],
+            "left": -11.08495212037511,
+            "right": -11.084952329911967,
+            "absolute_gap": 2.0953685719860005e-07
+          }
+        },
+        "S(1,)": {
+          "active_vs_full": {
+            "index": [
+              2
+            ],
+            "left": -1.3527487516403198,
+            "right": -1.3527488119792075,
+            "absolute_gap": 6.0338887664102e-08
+          },
+          "matched_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 0.6165222582839041,
+            "right": 0.6165222582839041,
+            "absolute_gap": 0.0
+          }
+        },
+        "S(3,)": {
+          "active_vs_full": {
+            "index": [
+              2
+            ],
+            "left": -11.08495044708252,
+            "right": -11.084952329911967,
+            "absolute_gap": 1.8828294479078522e-06
+          },
+          "matched_vs_full": {
+            "index": [
+              2
+            ],
+            "left": -11.08495212037511,
+            "right": -11.084952329911967,
+            "absolute_gap": 2.0953685719860005e-07
+          }
+        },
+        "S(4,)": {
+          "active_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 24.101512908935547,
+            "right": 24.101512748410695,
+            "absolute_gap": 1.6052485207751488e-07
+          },
+          "matched_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 24.101512908935547,
+            "right": 24.101512748410695,
+            "absolute_gap": 1.6052485207751488e-07
+          }
+        },
+        "pK_base(4,)": {
+          "active_vs_full": {
+            "index": [
+              2
+            ],
+            "left": -2.170562744140625,
+            "right": -2.170565619028447,
+            "absolute_gap": 2.8748878220241636e-06
+          },
+          "matched_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 72.95062368681188,
+            "right": 72.95062412234999,
+            "absolute_gap": 4.355381122422841e-07
+          },
+          "active_operands_f64_vs_active": {
+            "index": [
+              2
+            ],
+            "left": -2.170563349737753,
+            "right": -2.170562744140625,
+            "absolute_gap": 6.055971280005679e-07
+          },
+          "active_operands_f64_vs_full": {
+            "index": [
+              2
+            ],
+            "left": -2.170563349737753,
+            "right": -2.170565619028447,
+            "absolute_gap": 2.2692906940235957e-06
+          }
+        },
+        "pK(4,)": {
+          "active_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 76.62120056152344,
+            "right": 76.62120453494401,
+            "absolute_gap": 3.973420575675846e-06
+          },
+          "matched_vs_full": {
+            "index": [
+              2
+            ],
+            "left": 2.5118093554300005,
+            "right": 2.511809905720254,
+            "absolute_gap": 5.50290253364949e-07
+          }
+        }
+      }
+    },
+    {
+      "layer": 2,
+      "fields": {
+        "pre": {
+          "active_vs_full": {
+            "index": [
+              0
+            ],
+            "left": -2.1774706840515137,
+            "right": -2.1774710746447026,
+            "absolute_gap": 3.905931889036651e-07
+          },
+          "matched_vs_full": {
+            "index": [
+              0
+            ],
+            "left": -2.1774710172015155,
+            "right": -2.1774710746447026,
+            "absolute_gap": 5.7443187095884696e-08
+          }
+        },
+        "cpre": {
+          "active_vs_full": {
+            "index": [
+              1,
+              1
+            ],
+            "left": 5.863777160644531,
+            "right": 5.863776205295669,
+            "absolute_gap": 9.553488622415784e-07
+          },
+          "matched_vs_full": {
+            "index": [
+              0,
+              0
+            ],
+            "left": 8.060923174425346,
+            "right": 8.060922780929785,
+            "absolute_gap": 3.934955614681712e-07
+          }
+        },
+        "D3": {
+          "active_vs_full": {
+            "index": [
+              0
+            ],
+            "left": -53.652252197265625,
+            "right": -53.652242884954745,
+            "absolute_gap": 9.31231087974993e-06
+          },
+          "matched_vs_full": {
+            "index": [
+              1
+            ],
+            "left": -32.09113600873996,
+            "right": -32.091137141283404,
+            "absolute_gap": 1.1325434456921357e-06
+          }
+        },
+        "S(1,)": {
+          "active_vs_full": {
+            "index": [
+              0
+            ],
+            "left": -2.1774706840515137,
+            "right": -2.1774710746447026,
+            "absolute_gap": 3.905931889036651e-07
+          },
+          "matched_vs_full": {
+            "index": [
+              0
+            ],
+            "left": -2.1774710172015155,
+            "right": -2.1774710746447026,
+            "absolute_gap": 5.7443187095884696e-08
+          }
+        },
+        "S(3,)": {
+          "active_vs_full": {
+            "index": [
+              0
+            ],
+            "left": -53.652252197265625,
+            "right": -53.652242884954745,
+            "absolute_gap": 9.31231087974993e-06
+          },
+          "matched_vs_full": {
+            "index": [
+              1
+            ],
+            "left": -32.09113600873996,
+            "right": -32.091137141283404,
+            "absolute_gap": 1.1325434456921357e-06
+          }
+        },
+        "S(4,)": {
+          "active_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 31.215190887451172,
+            "right": 31.21519357924513,
+            "absolute_gap": 2.691793959286315e-06
+          },
+          "matched_vs_full": {
+            "index": [
+              0
+            ],
+            "left": 31.215192794799805,
+            "right": 31.21519357924513,
+            "absolute_gap": 7.844453264738149e-07
+          }
+        },
+        "pK_base(4,)": {
+          "active_vs_full": {
+            "index": [
+              1
+            ],
+            "left": -28.783889770507812,
+            "right": -28.78386849845871,
+            "absolute_gap": 2.1272049103515656e-05
+          },
+          "matched_vs_full": {
+            "index": [
+              1
+            ],
+            "left": -28.78386699316286,
+            "right": -28.78386849845871,
+            "absolute_gap": 1.505295848858168e-06
+          },
+          "active_operands_f64_vs_active": {
+            "index": [
+              0
+            ],
+            "left": -54.506238525868554,
+            "right": -54.50624465942383,
+            "absolute_gap": 6.133555274345781e-06
+          },
+          "active_operands_f64_vs_full": {
+            "index": [
+              1
+            ],
+            "left": -28.783889056953512,
+            "right": -28.78386849845871,
+            "absolute_gap": 2.055849480342431e-05
+          }
+        },
+        "pK(4,)": {
+          "active_vs_full": {
+            "index": [
+              1
+            ],
+            "left": -13.798526763916016,
+            "right": -13.798499841974602,
+            "absolute_gap": 2.692194141395987e-05
+          },
+          "matched_vs_full": {
+            "index": [
+              1
+            ],
+            "left": -13.798497910922519,
+            "right": -13.798499841974602,
+            "absolute_gap": 1.931052082682072e-06
+          }
+        }
+      }
+    }
+  ]
+}
