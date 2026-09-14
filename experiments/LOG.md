@@ -48462,3 +48462,45 @@ or recurrence disagreement, not automatically prove a missing term. This
 is an **unrun proposal**, not a repaired B4 result, parity claim or
 scientific kill. It remains off F21's critical path and would need its own
 IMPORTANT contract/prediction, affected preflight and Skeptic before belief.
+
+**2026-09-14 P10 DECIDE scorer completed; builder raw-result audit, pending
+independent result Skeptic.** Workerq **1185** SUCCEEDED exit 0 after
+16,477.64 s, peak 5,894.29 MiB under its 10 GiB/2 CPU/0 GPU declaration.
+The exact `decide_P10.json` SHA256 is
+`d868e4335168fa3ff1159c594be3166b61f81ebaba8b93faa846f0b77c23d79b`;
+the saved terminal log SHA256 is
+`c489434af3d1de3534de04c0562bc0c540d24c2d0f8eb825ab1f18a726759599`;
+the receipt SHA256 is
+`56186c052541cb1c99d2c72b686202ba090e276f74cbb506080b78226165ffc4`.
+All three fixed arms completed 128/128 with zero lifecycle failure flags;
+ordered input seeds match across arms and the registered P10 span. Source
+SHA256s in the report match original L4 `052dd768...`, frozen F21
+`d77dab0e...`, original L2 `390bc226...`; the protected read register
+shows only the intended P10 reservation/completion pair and is spent 1/1.
+
+The report's mean predicted midpoint truth floor is `2.2363657945e-9`
+(empirical `2.1827133322e-9`, ratio `0.976009`), range
+`1.4222441041e-9..3.2509037530e-9` over networks. Mean raw MSE is
+original L4 `4.1821425170e-8`, F21 `4.1821088467e-8`, L2
+`4.1822856733e-8`; F21's tiny MSE advantage (`3.3670e-13`) is not a
+material accuracy claim. Counted FLOPs are identical across networks within
+each arm: L4 `1,068,245,507,686`, F21 `928,457,637,478`, L2
+`1,328,688,049,766`. Thus F21 saves `13.0857437922%` versus L4, and
+the report's operation counts are 15,393/14,091/9,321 respectively.
+
+With the registered `+2**24` observed server-offset sensitivity applied
+to both arms, official-precision *forecast* mean arithmetic scores are
+L4 `1.9266457621e-8`, F21 `1.6745195771e-8`, L2 `2.3964488529e-8`.
+The sole binding primary comparison is `competition_score.decide` on paired
+L4/F21 vectors with `gate=1.05, interval="t"`: **PASS**, gain
+`1.1505662809x`, paired difference `2.5212618501e-9`, 95% t interval
+`[2.4582563842e-9, 2.5842673161e-9]`, strictly positive, 128/128
+pairs favor F21; largest mover accounts for 1.1083% of the delta. The
+builder independently recomputed `competition_score.decide` from saved
+per-network score rows and matched the verdict/gain/interval exactly.
+Observed and noise-corrected comparisons are in the raw JSON, as is L2
+context; neither changes the predeclared primary gate. Both local score
+timing caps were disabled exactly as preregistered for accuracy, so this
+DECIDE result **does not certify deployment**. F21 is not yet submission-ready:
+first obtain a fresh independent result Skeptic, then the
+candidate-specific Full certificate and clean capped official mini.

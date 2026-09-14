@@ -1,35 +1,34 @@
 # CURRENT_STATE.md — read this first
 
-**September 13 P10 DECIDE scorer workerq 1185 is running; its sole truth read is spent.**
-Samuel answered "I don't know" to all three new predictions; that response
-was committed at `ce853f7` before any P10 data. The fresh single-use claim was
-committed at `883bd45`; workerq 1176 SUCCEEDED with two `2**24` truth
-replicas on all 128 networks. The artifact SHA256 is
+**September 14 P10 fresh DECIDE passes its registered arithmetic gate;
+independent result review and release checks remain.** Samuel's three new
+"I don't know" predictions were committed at `ce853f7` before any P10 data.
+The fresh SINGLE_USE 128-network truth claim was committed at `883bd45`;
+two `2**24` replicas passed the pre-score floor screen and were finalized
+at artifact SHA256
 `9026b4ea66900695929cc9a32f1a801258733c176ae100b079e979907a04de30`.
-The producer's disagreement ratio is `0.9760`; its printed per-replica
-noise `4.4727e-9` gives a midpoint screen of `2.23635e-9`, or `5.50%` of
-the exposed L4 MSE, below the predeclared 10% ceiling. The ledger finalized
-the exact hash. Fresh pre-score Skeptic `dfba967` ACCEPTED the one-shot
-binding. Workerq 1185 launched on the local live worktree with original L4,
-F21 and L2 at the preregistered gate; its receipt shows the exact argv and
-the live truth-read register has one matching reservation/completion pair,
-spent 1/1. There is no score or promotion verdict yet. The same exact F21 candidate SHA
-`d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`
-is frozen against original L4, with L2 context. P09's only protected read
-ended without a score and cannot be repeated. P10 allocates fresh
-`40,913,010,000..127` as SINGLE_USE (registry commit `24e8b32`) and still has
-one finalized claim and one spent truth read. The [P10 contract](../experiments/LOG.md) keeps
-the paired arithmetic `competition_score.decide(gate=1.05, interval="t")`
-on the official-precision forecast with the conservative `+2**24` FLOP
-offset. It explicitly disables both **local scoring** wall/residual caps so
-host sleep cannot zero accuracy rows; this is not a deployment test. The
-pre-data [protocol Skeptic](../experiments/2026-09-13_p10_protocol_skeptic.md)
-and [registry Skeptic](../experiments/2026-09-13_p10_registry_skeptic.md)
-accepted their narrow scopes; affected default preflight 1166 passed 12/12.
-The producer's printed per-replica truth floor must be divided by two for
-the midpoint before the one protected score read. After a
-valid fresh score, full candidate checks and a **clean capped** official
-mini remain release gates; a no-cap mini cannot substitute.
+The one protected P10 read is spent 1/1. Workerq 1185 completed all 128
+original L4, frozen F21 and original L2 arms, exit 0, with no lifecycle
+failure flags. Its exact [DECIDE result](../experiments/2026-09-13_p10/decide_P10.json)
+SHA256 is
+`d868e4335168fa3ff1159c594be3166b61f81ebaba8b93faa846f0b77c23d79b`.
+The original-L4 versus F21 official-precision forecast at the conservative
+observed `+2**24` server FLOP offset gives paired **arithmetic gain
+`1.150566x`**, exceeding the predeclared `1.05` gate. The paired 95% t
+interval on L4 minus F21 score is
+`[2.4582563842e-9, 2.5842673161e-9]`, strictly positive; 128/128
+pairs favor F21. Mean raw MSE is L4 `4.1821425170e-8` and F21
+`4.1821088467e-8`, beside midpoint truth floor `2.2363657945e-9`;
+the useful gain comes from `13.08574%` measured counted-FLOP saving.
+L2 is robustness context only. The builder recomputed the canonical gate
+from raw rows, but **fresh independent result Skeptic review is pending**.
+The candidate remains frozen at SHA256
+`d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`.
+P10's scorer disabled both local scoring timing caps exactly as registered;
+this score is not a deployment pass. If the Skeptic accepts, run full
+candidate certification and a **clean capped** official subprocess mini;
+a no-cap mini cannot substitute. F21 is not yet submission-ready, and no
+submission or designation is authorized.
 
 **September 13 F21 lifecycle diagnostic closed; P09 still has no verdict.**
 The preregistered, label-free stress on the first 128 exposed P07 DESIGN
