@@ -1,0 +1,41 @@
+{
+  "observed_at_utc": "2026-09-14T06:59:03.978503+00:00",
+  "source": "https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/leaderboards",
+  "round_id": 1429,
+  "leaderboard_id": "1480",
+  "n_entries": 156,
+  "top5": [
+    {
+      "rank": 1,
+      "participant": "suliman_tadros",
+      "score": 2.5e-09
+    },
+    {
+      "rank": 2,
+      "participant": "marius_binner",
+      "score": 2.6e-09
+    },
+    {
+      "rank": 3,
+      "participant": null,
+      "score": 2.7e-09
+    },
+    {
+      "rank": 4,
+      "participant": null,
+      "score": 2.8e-09
+    },
+    {
+      "rank": 5,
+      "participant": "oqaris",
+      "score": 3.1e-09
+    }
+  ],
+  "our_rows": [
+    {
+      "rank": 58,
+      "participant": "neopok919",
+      "score": 1.6e-08
+    }
+  ]
+}
