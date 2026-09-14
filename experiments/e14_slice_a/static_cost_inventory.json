@@ -1,0 +1,654 @@
+[
+  {
+    "n": 1024,
+    "d": 16,
+    "r": 32,
+    "f21_counted": 928457637478,
+    "backbone": 47499816550,
+    "blocks": [
+      {
+        "layer": 1,
+        "all_D_transport": 1366126592,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 0,
+        "old_A_P_reconstruction": 0,
+        "old_D21_return": 0,
+        "young_D21_return": 4098379776,
+        "join": 821598892
+      },
+      {
+        "layer": 2,
+        "all_D_transport": 2697109504,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 134152192,
+        "old_A_P_reconstruction": 264241152,
+        "old_D21_return": 1766551552,
+        "young_D21_return": 4098379776,
+        "join": 842756780
+      },
+      {
+        "layer": 3,
+        "all_D_transport": 4028092416,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 134152192,
+        "old_A_P_reconstruction": 528482304,
+        "old_D21_return": 3364089856,
+        "young_D21_return": 4098379776,
+        "join": 851014316
+      },
+      {
+        "layer": 4,
+        "all_D_transport": 5359075328,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 134152192,
+        "old_A_P_reconstruction": 792723456,
+        "old_D21_return": 4961628160,
+        "young_D21_return": 4098379776,
+        "join": 859271852
+      },
+      {
+        "layer": 5,
+        "all_D_transport": 6690058240,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 134152192,
+        "old_A_P_reconstruction": 1056964608,
+        "old_D21_return": 6559166464,
+        "young_D21_return": 4098379776,
+        "join": 867529388
+      },
+      {
+        "layer": 6,
+        "all_D_transport": 8021041152,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 134152192,
+        "old_A_P_reconstruction": 1321205760,
+        "old_D21_return": 8156704768,
+        "young_D21_return": 4098379776,
+        "join": 875786924
+      },
+      {
+        "layer": 7,
+        "all_D_transport": 9352024064,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 134152192,
+        "old_A_P_reconstruction": 1585446912,
+        "old_D21_return": 9754243072,
+        "young_D21_return": 4098379776,
+        "join": 884044460
+      },
+      {
+        "layer": 8,
+        "all_D_transport": 10683006976,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 134152192,
+        "old_A_P_reconstruction": 1849688064,
+        "old_D21_return": 11351781376,
+        "young_D21_return": 4098379776,
+        "join": 892301996
+      },
+      {
+        "layer": 9,
+        "all_D_transport": 12013989888,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 134152192,
+        "old_A_P_reconstruction": 2113929216,
+        "old_D21_return": 12949319680,
+        "young_D21_return": 4098379776,
+        "join": 900559532
+      },
+      {
+        "layer": 10,
+        "all_D_transport": 13344972800,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 134152192,
+        "old_A_P_reconstruction": 2378170368,
+        "old_D21_return": 14546857984,
+        "young_D21_return": 4098379776,
+        "join": 908817068
+      },
+      {
+        "layer": 11,
+        "all_D_transport": 14675955712,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 134152192,
+        "old_A_P_reconstruction": 2642411520,
+        "old_D21_return": 16144396288,
+        "young_D21_return": 4098379776,
+        "join": 917074604
+      },
+      {
+        "layer": 12,
+        "all_D_transport": 16006938624,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 134152192,
+        "old_A_P_reconstruction": 2906652672,
+        "old_D21_return": 17741934592,
+        "young_D21_return": 4098379776,
+        "join": 925332140
+      },
+      {
+        "layer": 13,
+        "all_D_transport": 17337921536,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 134152192,
+        "old_A_P_reconstruction": 3170893824,
+        "old_D21_return": 19339472896,
+        "young_D21_return": 4098379776,
+        "join": 933589676
+      },
+      {
+        "layer": 14,
+        "all_D_transport": 18668904448,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 134152192,
+        "old_A_P_reconstruction": 3435134976,
+        "old_D21_return": 20937011200,
+        "young_D21_return": 4098379776,
+        "join": 941847212
+      },
+      {
+        "layer": 15,
+        "all_D_transport": 19999887360,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 134152192,
+        "old_A_P_reconstruction": 3699376128,
+        "old_D21_return": 0,
+        "young_D21_return": 0
+      }
+    ],
+    "products_qr": 427732454760,
+    "pointwise_copy_cast_envelope": 66716696576,
+    "total_upper": 541948967886,
+    "retained_payload_bytes_peak_layer_formula": 74719232,
+    "additional_transient_bytes": "two f64 old legs 16mn\u00b2; f64 D cast 8mn\u00b2; f32 PP 4mn\u00b2; old/new immutable D; Strassen recursive packed inputs/outputs and QR workspace must be measured"
+  },
+  {
+    "n": 1024,
+    "d": 16,
+    "r": 64,
+    "f21_counted": 928457637478,
+    "backbone": 47499816550,
+    "blocks": [
+      {
+        "layer": 1,
+        "all_D_transport": 1366126592,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 0,
+        "old_A_P_reconstruction": 0,
+        "old_D21_return": 0,
+        "young_D21_return": 4098379776,
+        "join": 1676219736
+      },
+      {
+        "layer": 2,
+        "all_D_transport": 2697109504,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 268304384,
+        "old_A_P_reconstruction": 532676608,
+        "old_D21_return": 2169073664,
+        "young_D21_return": 4098379776,
+        "join": 1762817368
+      },
+      {
+        "layer": 3,
+        "all_D_transport": 4028092416,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 268304384,
+        "old_A_P_reconstruction": 1065353216,
+        "old_D21_return": 4035047424,
+        "young_D21_return": 4098379776,
+        "join": 1796109656
+      },
+      {
+        "layer": 4,
+        "all_D_transport": 5359075328,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 268304384,
+        "old_A_P_reconstruction": 1598029824,
+        "old_D21_return": 5901021184,
+        "young_D21_return": 4098379776,
+        "join": 1829401944
+      },
+      {
+        "layer": 5,
+        "all_D_transport": 6690058240,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 268304384,
+        "old_A_P_reconstruction": 2130706432,
+        "old_D21_return": 7766994944,
+        "young_D21_return": 4098379776,
+        "join": 1862694232
+      },
+      {
+        "layer": 6,
+        "all_D_transport": 8021041152,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 268304384,
+        "old_A_P_reconstruction": 2663383040,
+        "old_D21_return": 9632968704,
+        "young_D21_return": 4098379776,
+        "join": 1895986520
+      },
+      {
+        "layer": 7,
+        "all_D_transport": 9352024064,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 268304384,
+        "old_A_P_reconstruction": 3196059648,
+        "old_D21_return": 11498942464,
+        "young_D21_return": 4098379776,
+        "join": 1929278808
+      },
+      {
+        "layer": 8,
+        "all_D_transport": 10683006976,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 268304384,
+        "old_A_P_reconstruction": 3728736256,
+        "old_D21_return": 13364916224,
+        "young_D21_return": 4098379776,
+        "join": 1962571096
+      },
+      {
+        "layer": 9,
+        "all_D_transport": 12013989888,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 268304384,
+        "old_A_P_reconstruction": 4261412864,
+        "old_D21_return": 15230889984,
+        "young_D21_return": 4098379776,
+        "join": 1995863384
+      },
+      {
+        "layer": 10,
+        "all_D_transport": 13344972800,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 268304384,
+        "old_A_P_reconstruction": 4794089472,
+        "old_D21_return": 17096863744,
+        "young_D21_return": 4098379776,
+        "join": 2029155672
+      },
+      {
+        "layer": 11,
+        "all_D_transport": 14675955712,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 268304384,
+        "old_A_P_reconstruction": 5326766080,
+        "old_D21_return": 18962837504,
+        "young_D21_return": 4098379776,
+        "join": 2062447960
+      },
+      {
+        "layer": 12,
+        "all_D_transport": 16006938624,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 268304384,
+        "old_A_P_reconstruction": 5859442688,
+        "old_D21_return": 20828811264,
+        "young_D21_return": 4098379776,
+        "join": 2095740248
+      },
+      {
+        "layer": 13,
+        "all_D_transport": 17337921536,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 268304384,
+        "old_A_P_reconstruction": 6392119296,
+        "old_D21_return": 22694785024,
+        "young_D21_return": 4098379776,
+        "join": 2129032536
+      },
+      {
+        "layer": 14,
+        "all_D_transport": 18668904448,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 268304384,
+        "old_A_P_reconstruction": 6924795904,
+        "old_D21_return": 24560758784,
+        "young_D21_return": 4098379776,
+        "join": 2162324824
+      },
+      {
+        "layer": 15,
+        "all_D_transport": 19999887360,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 268304384,
+        "old_A_P_reconstruction": 7457472512,
+        "old_D21_return": 0,
+        "young_D21_return": 0
+      }
+    ],
+    "products_qr": 498735180496,
+    "pointwise_copy_cast_envelope": 69023563776,
+    "total_upper": 615258560822,
+    "retained_payload_bytes_peak_layer_formula": 82345984,
+    "additional_transient_bytes": "two f64 old legs 16mn\u00b2; f64 D cast 8mn\u00b2; f32 PP 4mn\u00b2; old/new immutable D; Strassen recursive packed inputs/outputs and QR workspace must be measured"
+  },
+  {
+    "n": 1024,
+    "d": 16,
+    "r": 96,
+    "f21_counted": 928457637478,
+    "backbone": 47499816550,
+    "blocks": [
+      {
+        "layer": 1,
+        "all_D_transport": 1366126592,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 0,
+        "old_A_P_reconstruction": 0,
+        "old_D21_return": 0,
+        "young_D21_return": 4098379776,
+        "join": 2563338240
+      },
+      {
+        "layer": 2,
+        "all_D_transport": 2697109504,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 402456576,
+        "old_A_P_reconstruction": 801112064,
+        "old_D21_return": 2571595776,
+        "young_D21_return": 4098379776,
+        "join": 2762016768
+      },
+      {
+        "layer": 3,
+        "all_D_transport": 4028092416,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 402456576,
+        "old_A_P_reconstruction": 1602224128,
+        "old_D21_return": 4706004992,
+        "young_D21_return": 4098379776,
+        "join": 2837121024
+      },
+      {
+        "layer": 4,
+        "all_D_transport": 5359075328,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 402456576,
+        "old_A_P_reconstruction": 2403336192,
+        "old_D21_return": 6840414208,
+        "young_D21_return": 4098379776,
+        "join": 2912225280
+      },
+      {
+        "layer": 5,
+        "all_D_transport": 6690058240,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 402456576,
+        "old_A_P_reconstruction": 3204448256,
+        "old_D21_return": 8974823424,
+        "young_D21_return": 4098379776,
+        "join": 2987329536
+      },
+      {
+        "layer": 6,
+        "all_D_transport": 8021041152,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 402456576,
+        "old_A_P_reconstruction": 4005560320,
+        "old_D21_return": 11109232640,
+        "young_D21_return": 4098379776,
+        "join": 3062433792
+      },
+      {
+        "layer": 7,
+        "all_D_transport": 9352024064,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 402456576,
+        "old_A_P_reconstruction": 4806672384,
+        "old_D21_return": 13243641856,
+        "young_D21_return": 4098379776,
+        "join": 3137538048
+      },
+      {
+        "layer": 8,
+        "all_D_transport": 10683006976,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 402456576,
+        "old_A_P_reconstruction": 5607784448,
+        "old_D21_return": 15378051072,
+        "young_D21_return": 4098379776,
+        "join": 3212642304
+      },
+      {
+        "layer": 9,
+        "all_D_transport": 12013989888,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 402456576,
+        "old_A_P_reconstruction": 6408896512,
+        "old_D21_return": 17512460288,
+        "young_D21_return": 4098379776,
+        "join": 3287746560
+      },
+      {
+        "layer": 10,
+        "all_D_transport": 13344972800,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 402456576,
+        "old_A_P_reconstruction": 7210008576,
+        "old_D21_return": 19646869504,
+        "young_D21_return": 4098379776,
+        "join": 3362850816
+      },
+      {
+        "layer": 11,
+        "all_D_transport": 14675955712,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 402456576,
+        "old_A_P_reconstruction": 8011120640,
+        "old_D21_return": 21781278720,
+        "young_D21_return": 4098379776,
+        "join": 3437955072
+      },
+      {
+        "layer": 12,
+        "all_D_transport": 16006938624,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 402456576,
+        "old_A_P_reconstruction": 8812232704,
+        "old_D21_return": 23915687936,
+        "young_D21_return": 4098379776,
+        "join": 3513059328
+      },
+      {
+        "layer": 13,
+        "all_D_transport": 17337921536,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 402456576,
+        "old_A_P_reconstruction": 9613344768,
+        "old_D21_return": 26050097152,
+        "young_D21_return": 4098379776,
+        "join": 3588163584
+      },
+      {
+        "layer": 14,
+        "all_D_transport": 18668904448,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 402456576,
+        "old_A_P_reconstruction": 10414456832,
+        "old_D21_return": 28184506368,
+        "young_D21_return": 4098379776,
+        "join": 3663267840
+      },
+      {
+        "layer": 15,
+        "all_D_transport": 19999887360,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 402456576,
+        "old_A_P_reconstruction": 11215568896,
+        "old_D21_return": 0,
+        "young_D21_return": 0
+      }
+    ],
+    "products_qr": 572107831296,
+    "pointwise_copy_cast_envelope": 71347208192,
+    "total_upper": 690954856038,
+    "retained_payload_bytes_peak_layer_formula": 89989120,
+    "additional_transient_bytes": "two f64 old legs 16mn\u00b2; f64 D cast 8mn\u00b2; f32 PP 4mn\u00b2; old/new immutable D; Strassen recursive packed inputs/outputs and QR workspace must be measured"
+  },
+  {
+    "n": 1024,
+    "d": 16,
+    "r": 128,
+    "f21_counted": 928457637478,
+    "backbone": 47499816550,
+    "blocks": [
+      {
+        "layer": 1,
+        "all_D_transport": 1366126592,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 0,
+        "old_A_P_reconstruction": 0,
+        "old_D21_return": 0,
+        "young_D21_return": 4098379776,
+        "join": 3482430124
+      },
+      {
+        "layer": 2,
+        "all_D_transport": 2697109504,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 536608768,
+        "old_A_P_reconstruction": 1069547520,
+        "old_D21_return": 2974117888,
+        "young_D21_return": 4098379776,
+        "join": 3842189996
+      },
+      {
+        "layer": 3,
+        "all_D_transport": 4028092416,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 536608768,
+        "old_A_P_reconstruction": 2139095040,
+        "old_D21_return": 5376962560,
+        "young_D21_return": 4098379776,
+        "join": 3975883436
+      },
+      {
+        "layer": 4,
+        "all_D_transport": 5359075328,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 536608768,
+        "old_A_P_reconstruction": 3208642560,
+        "old_D21_return": 7779807232,
+        "young_D21_return": 4098379776,
+        "join": 4109576876
+      },
+      {
+        "layer": 5,
+        "all_D_transport": 6690058240,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 536608768,
+        "old_A_P_reconstruction": 4278190080,
+        "old_D21_return": 10182651904,
+        "young_D21_return": 4098379776,
+        "join": 4243270316
+      },
+      {
+        "layer": 6,
+        "all_D_transport": 8021041152,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 536608768,
+        "old_A_P_reconstruction": 5347737600,
+        "old_D21_return": 12585496576,
+        "young_D21_return": 4098379776,
+        "join": 4376963756
+      },
+      {
+        "layer": 7,
+        "all_D_transport": 9352024064,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 536608768,
+        "old_A_P_reconstruction": 6417285120,
+        "old_D21_return": 14988341248,
+        "young_D21_return": 4098379776,
+        "join": 4510657196
+      },
+      {
+        "layer": 8,
+        "all_D_transport": 10683006976,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 536608768,
+        "old_A_P_reconstruction": 7486832640,
+        "old_D21_return": 17391185920,
+        "young_D21_return": 4098379776,
+        "join": 4644350636
+      },
+      {
+        "layer": 9,
+        "all_D_transport": 12013989888,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 536608768,
+        "old_A_P_reconstruction": 8556380160,
+        "old_D21_return": 19794030592,
+        "young_D21_return": 4098379776,
+        "join": 4778044076
+      },
+      {
+        "layer": 10,
+        "all_D_transport": 13344972800,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 536608768,
+        "old_A_P_reconstruction": 9625927680,
+        "old_D21_return": 22196875264,
+        "young_D21_return": 4098379776,
+        "join": 4911737516
+      },
+      {
+        "layer": 11,
+        "all_D_transport": 14675955712,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 536608768,
+        "old_A_P_reconstruction": 10695475200,
+        "old_D21_return": 24599719936,
+        "young_D21_return": 4098379776,
+        "join": 5045430956
+      },
+      {
+        "layer": 12,
+        "all_D_transport": 16006938624,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 536608768,
+        "old_A_P_reconstruction": 11765022720,
+        "old_D21_return": 27002564608,
+        "young_D21_return": 4098379776,
+        "join": 5179124396
+      },
+      {
+        "layer": 13,
+        "all_D_transport": 17337921536,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 536608768,
+        "old_A_P_reconstruction": 12834570240,
+        "old_D21_return": 29405409280,
+        "young_D21_return": 4098379776,
+        "join": 5312817836
+      },
+      {
+        "layer": 14,
+        "all_D_transport": 18668904448,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 536608768,
+        "old_A_P_reconstruction": 13904117760,
+        "old_D21_return": 31808253952,
+        "young_D21_return": 4098379776,
+        "join": 5446511276
+      },
+      {
+        "layer": 15,
+        "all_D_transport": 19999887360,
+        "young_A_transport": 1366126592,
+        "old_Q_transport": 536608768,
+        "old_A_P_reconstruction": 14973665280,
+        "old_D21_return": 0,
+        "young_D21_return": 0
+      }
+    ],
+    "products_qr": 647873738088,
+    "pointwise_copy_cast_envelope": 73687629824,
+    "total_upper": 769061184462,
+    "retained_payload_bytes_peak_layer_formula": 97648640,
+    "additional_transient_bytes": "two f64 old legs 16mn\u00b2; f64 D cast 8mn\u00b2; f32 PP 4mn\u00b2; old/new immutable D; Strassen recursive packed inputs/outputs and QR workspace must be measured"
+  }
+]

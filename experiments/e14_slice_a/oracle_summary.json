@@ -1,0 +1,18 @@
+[
+  {
+    "fixture": "b3",
+    "max_D3_abs": 7.51264138676433e-08,
+    "max_D21_abs": 2.51733454012526e-08,
+    "max_dense_factor_D3_abs": 5.551115123125783e-17,
+    "max_dense_factor_D21_abs": 5.551115123125783e-17,
+    "path": "experiments\\e14_slice_a\\b3_dense_f64_oracle.json"
+  },
+  {
+    "fixture": "b4",
+    "max_D3_abs": 1.3306118776590381e-05,
+    "max_D21_abs": 7.76141034358746e-07,
+    "max_dense_factor_D3_abs": 1.4210854715202004e-14,
+    "max_dense_factor_D21_abs": 1.7763568394002505e-15,
+    "path": "experiments\\e14_slice_a\\b4_dense_f64_oracle.json"
+  }
+]
