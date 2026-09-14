@@ -1,5 +1,15 @@
 # Codex handoff — prepare a better submission from the working estimator
 
+> **September 14 execution update:** The exact F21 fusion below has been
+> built, frozen, fresh-DECIDE tested and submitted once as authorized
+> diagnostic #330950. It GRADED 100/100 with zero failures and a public
+> adjusted score of `1.5957295444e-8` versus original L4's
+> `1.8359814201e-8`; no designation is authorized. The local Full/mini
+> refusals remain recorded, and exact server-side archive hashing is
+> unavailable. Do not rerun this completed handoff. Read
+> [CURRENT_STATE](CURRENT_STATE.md), the LOG tail and the new
+> [strategist packet](STRATEGIST_PACKET_2026-09-14.md) for the next decision.
+
 **September 12, 2026.** This supersedes all earlier fit-first, K4-first and blanket Stage-3-hold prompts. Start Codex in `C:\Users\samsu\Documents\arc-whest` and copy the prompt below.
 
 ---

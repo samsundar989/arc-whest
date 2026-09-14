@@ -48796,3 +48796,81 @@ This review accepts neither a graded-feasibility claim nor a clean-mini
 pass, and leaves designation unauthorized. The cheapest follow-up is the
 original final grader report and any exposed submission-file metadata;
 no second upload or protected data read is warranted.
+
+## 2026-09-14 — F21 #330950 official graded result and independent synthesis
+
+**Raw result and preregistered diagnostic gate.** The authenticated original
+report `experiments/run_reports/f21_diagnostic_330950_graded_report.json`
+SHA256 `4dc5c2f6f1d06220921efb74b71a3b5bee930e141e7319af0e0d55028100e5f3`
+records `status=GRADED`, evaluation `state=completed`, completed at
+`2026-09-14T06:21:08Z`, no evaluation error, passed smoke test (11 worker
+passes/0 failures) and 100/100 completed MLPs. Every one of the 100
+per-MLP indices/names is unique; every error code is null and budget,
+wall, residual-wall and combined-budget flags are false. Official public
+aggregate `n_failed_mlps=0`. The **predeclared server-feasibility diagnostic
+passes for submission #330950**. This is direct graded telemetry, unlike
+the 100/100 local capped-mini refusal, which remains a correct local result
+and was explicitly excepted by Samuel for this one upload.
+
+Every graded MLP bills `928,457,637,478` counted FLOPs, exactly the
+f64-readonly F21 ledger and **without** the contract's conditional
+`+2**24` server offset. At lambda0 the multiplier is
+`0.42221365105342556`. Measured graded residual min/median/max is
+`0.143267824 / 0.150010759 / 0.156232250` s, giving **2.56029x**
+headroom `0.4/worst`; graded predict wall min/median/max is
+`86.044859 / 89.493137 / 93.159715` s against the 120-s cap (1.28811x
+worst-row wall headroom). These are graded-server observations for this
+run, not guarantees for the fresh private rerun. Official stack is
+WhestBench `0.16.1`, flopscope/client/server `0.12.1`, 1024x16,
+budget `2**41`. The original graded report does not expose a server
+archive hash, submission-file metadata or private accuracy.
+
+**Read-only public CONFIRM, paired only within its fixed exposed rows.**
+Original L4 #330290's stored raw report SHA256 is
+`65b5d9668620f1b17d6392198b408568287be1d6b3de6e009de43dfc687838e4`.
+All 100 official telemetry index/name pairs match L4; all 50 exposed
+public-score indices match. Top-level official public adjusted scores are
+F21 `1.595729544363834e-8`, L4 `1.835981420067277e-8`, a descriptive
+L4/F21 **1.1505592702x** or 13.0857466% lower score; 50/50 displayed
+paired adjusted rows favor F21. Counted L4 FLOPs are
+`1,068,245,507,686`, so F21 saves **13.0857438%**. The official
+secondary/raw-MSE scores are F21 `3.779436170248118e-8` and L4
+`3.7794362910403833e-8`; the public ground-truth-replica noise floor is
+**unavailable** (`sampling_mse=1.132e-6` is not that floor), so no
+accuracy-gain claim follows from their tiny difference. The public
+comparison is a fixed-split CONFIRM check, not an independent fresh
+promotion statistic. The separate preregistered P10 128-pair DECIDE gain
+`1.1505662809x`, with its own midpoint truth floor `2.2363657945e-9`
+and positive 95% paired interval, remains the binding method decision.
+
+**Board context and limits.** An authenticated read-only Phase-2 board
+snapshot at `2026-09-14T06:59:03.978503Z` is
+`experiments/2026-09-13_p10/board_after_f21_330950.json`, SHA256
+`ea0143329713035e2c6ea9b7ebeb9c42a03c1654f49a561cbd90fb27ec51c899`.
+It displays leader `2.5e-9` and our account rank58/rounded `1.6e-8`
+among 156 entries. This is a dated, unpaired leaderboard level, **not**
+the private prize objective or a promotion gate. At F21's current reported
+public raw error, even the minimum 0.1 cost multiplier would give
+`3.7794e-9`, 1.512x the dated leader's score: **cost saving alone cannot
+close that displayed gap** under unchanged reported error. The implied
+raw-error reduction at cost floor is about 33.85%, but official public
+truth noise is unavailable and the leaderboard can change; treat this
+as a conditional algebraic target, not an experimental accuracy finding.
+
+**Independent Skeptic and bookkeeping.** Fresh-context
+`experiments/2026-09-13_p10/f21_graded_skeptic.md`, commit `a8887c2`,
+independently recomputed all 100 failure flags, residual/wall and FLOP
+telemetry, public pairing, official score/cost ratios, and the data-tier
+limits. It ACCEPTS the terminal zero-failure server diagnostic and the
+read-only public comparison, but its overall source-attribution verdict
+is **PROVISIONAL**: the CLI response and graded page both omit the
+uploaded archive hash/path (`submissionFiles=null`), so local hash checks
+plus a matching FLOP fingerprint cannot independently prove the exact
+server bytes. The exception remains only for #330950; normal local Full
+and mini refusals are not rewritten. `f21_submission_330950_final_status.json`
+records the final status without changing the append-only slot ledger's
+historical `pending` row or pre-upload package receipt's `submitted:false`;
+the receipt's `validated_for_submission:false` remains correct for the
+normal path. No second submission or designation occurred. The private
+rerun and prize eligibility are unobserved; do not select on public rows
+or infer a general scientific kill for deferred K4/compression research.

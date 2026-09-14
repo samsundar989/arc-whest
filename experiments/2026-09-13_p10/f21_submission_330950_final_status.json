@@ -1,0 +1,21 @@
+{
+  "submission_id": 330950,
+  "status": "GRADED",
+  "evaluation_state": "completed",
+  "evaluation_completed_at_utc": "2026-09-14T06:21:08Z",
+  "source_report": "experiments/run_reports/f21_diagnostic_330950_graded_report.json",
+  "source_report_sha256": "4dc5c2f6f1d06220921efb74b71a3b5bee930e141e7319af0e0d55028100e5f3",
+  "local_submitted_artifact": "experiments/2026-09-12_f21/f21-with-notice.tar.gz",
+  "local_submitted_artifact_sha256": "4f3cc6f440e4cb66ea86a0904c00e182eb7ecf5aaab0ee64c73efb7d22904775",
+  "local_estimator_member_sha256": "d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94",
+  "server_artifact_sha256": null,
+  "server_artifact_hash_scope": "The CLI acknowledgement and graded page do not expose an uploaded archive or member hash; FLOP matching is an indirect fingerprint only.",
+  "n_mlps": 100,
+  "n_failed_mlps": 0,
+  "public_adjusted_score": 1.595729544363834e-08,
+  "counted_flops_per_mlp": 928457637478,
+  "worst_graded_residual_wall_time_s": 0.15623225000000218,
+  "worst_graded_predict_wall_time_s": 93.15971529699993,
+  "designation": "none_authorized_or_made",
+  "bookkeeping_note": "The append-only submission ledger's pending row and the pre-upload package receipt's submitted:false remain historical snapshots; this final-status sidecar and the raw grader report supersede those status fields without rewriting their records. The package receipt's validated_for_submission:false and the local Full/mini refusals remain valid in their own scope."
+}

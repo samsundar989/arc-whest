@@ -4,15 +4,22 @@
 
 **Execution status, September 14.** Stage A's exact F21 candidate is frozen;
 engineering, registered DESIGN and fresh P10 paired arithmetic score checks
-passed, with 13.08574% measured counted-FLOP saving and 1.150566x fresh
-score gain over original L4. The required candidate Full certificate REFUSED
-locally and the capped official mini failed 100/100 rows, all residual-time
-exhaustion. Therefore A3 and normal submission readiness remain blocked.
-See [CURRENT_STATE](CURRENT_STATE.md) and the raw mini report. No-cap accuracy
-evidence or a modeled server residual can replace the clean-mini gate. The
-full-rank compact B4 bridge is an unrun mixed-precision diagnostic, not a
-validated compression path; it does not delay this release verdict. The
-research target below remains a target, not a declaration that F21 is ready.
+passed, with 13.08574% counted-FLOP saving and 1.150566x fresh score gain
+over original L4. The required candidate Full certificate REFUSED locally
+and the capped official mini failed 100/100 rows, all residual-time
+exhaustion. Samuel explicitly authorized one diagnostic exception and
+submission #330950 then **GRADED 100/100 with zero failures**: worst
+graded residual `0.15623` s (2.56x headroom) and public adjusted score
+`1.59573e-8` versus original L4 `1.83598e-8` on the same exposed rows.
+This is graded server-feasibility and read-only public CONFIRM evidence,
+not a retroactive local Full/mini pass or private-rerun guarantee. Exact
+server-side archive hash remains unavailable; the Skeptic's source-binding
+verdict is provisional. No designation is authorized. See
+[CURRENT_STATE](CURRENT_STATE.md) and the raw report. The full-rank compact
+B4 bridge has an unrun mixed-precision diagnostic, not a validated
+compression path. The research target below remains a target; the next
+strategist decision should seek larger **accuracy-aware** gains within
+cost floor and deployment limits.
 
 ## Objective and scope
 

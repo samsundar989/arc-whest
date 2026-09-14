@@ -1,22 +1,36 @@
 # CURRENT_STATE.md — read this first
 
-**September 14 F21 one-time diagnostic upload accepted as #330950; grading
-pending.** Samuel explicitly authorized one exception to the failed local
-clean-mini gate and one exact-package submission, without designation.
-Prerequisite exception contract is commit `ef8d0a9`. The local submission
-command checked tar SHA256
+**September 14 F21 diagnostic #330950 GRADED, zero failures; strategist
+decision now concerns larger gains and private selection.** Samuel
+authorized one exception to the failed local clean-mini gate and one
+submission without designation. The [official graded report](../experiments/run_reports/f21_diagnostic_330950_graded_report.json)
+SHA256 `4dc5c2f6f1d06220921efb74b71a3b5bee930e141e7319af0e0d55028100e5f3`
+records 100/100 completed MLPs, no estimator, budget, wall or residual-cap
+failures, and exactly `928,457,637,478` counted FLOPs per MLP. Worst
+measured graded residual is `0.15623225` s against 0.4 s, or **2.56029x
+headroom**; worst predict wall is `93.1597153` s against 120 s. The
+predeclared server-feasibility diagnostic therefore passes for #330950.
+Original L4 #330290 and F21 share the 50 exposed public score rows:
+official adjusted score improves from `1.8359814201e-8` to
+`1.5957295444e-8`, a **1.150559x** descriptive paired ratio; 50/50
+displayed adjusted rows favor F21. This is read-only public CONFIRM;
+the independent fresh P10 DECIDE remains the binding method result.
+The [fresh graded Skeptic](../experiments/2026-09-13_p10/f21_graded_skeptic.md)
+ACCEPTS zero-failure grade and these scoped comparisons. Its exact-byte
+server-attribution verdict is PROVISIONAL because the CLI and graded page
+expose no uploaded archive hash; local tar SHA256
 `4f3cc6f440e4cb66ea86a0904c00e182eb7ecf5aaab0ee64c73efb7d22904775`
-whose estimator member is frozen F21 SHA256
-`d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`.
-The CLI accepted submission #330950, but its receipt contains no archive
-hash, so independent server-byte attribution remains provisional. The
-fresh [pre-grade Skeptic](../experiments/2026-09-13_p10/f21_submission_skeptic_initial.md)
-confirms that scope. The first authenticated page read was `SUBMITTED`,
-with no evaluation or score; upload acceptance is not a grading result.
-The prior 100/100 local
-residual-cap failure and Full REFUSED certificate remain in force. Poll
-the official page for graded telemetry, save raw report, obtain a fresh
-Skeptic, and leave designation untouched.
+and source/member SHA256
+`d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`
+are verified and the graded FLOP fingerprint matches. The one-time
+exception does **not** rewrite the correct 100/100 local capped-mini
+failure or Full REFUSED certificate. Private score, public truth floor and
+prize eligibility remain unobserved. No second submission or designation
+is authorized or made. The [dated board snapshot](../experiments/2026-09-13_p10/board_after_f21_330950.json)
+shows 2.5e-9 leading and our rounded 1.6e-8 at rank58/156; board rank
+is not the prize. Next: deliver the self-contained strategist packet for
+a bounded, accuracy-aware route beyond the exact fusion, then preregister
+one selected experiment before implementation.
 
 **September 14 F21 passes the fresh paired score gate, but normal submission
 release is BLOCKED: Full certificate REFUSED and the capped official mini
