@@ -49020,3 +49020,21 @@ promotion evidence. Phase2 remains C=F, residual cliff 0.4s, wall120s and cap
 8192MiB. Retain measured local, server forecasts and measured server domains.
 Use tiny one-thread CPU fixtures directly; queue all heavy work with a recorded
 optimization review. Frozen sources and HUMAN_MODEL remain unchanged.
+
+**E14 actual-f32 follow-up, declared before running.** B4 f64 raw diagnostic is
+written but not yet independently accepted. Test the existing B4 n8/depth6 and
+B3/B1 n4/depth4 fixtures, no RNG or labels. Preserve every original `1e-5`
+internal verdict separately. For dtype-matched engineering conformance, each
+consumed field/source reconstruction must be finite and satisfy
+`maxabs(compact32-reference32) <= 4*maxabs(reference32-reference64)
++ 64*eps32*max(maxabs(reference64),maxabs(reference32))`.
+Exact-zero scale requires equality. Factor4 is a predeclared reassociation/QR
+envelope against the reference's own sensitivity, not a forward-error proof
+or a relaxation of the historical B4 verdict. Final output drift must separately
+satisfy mean-squared difference <=`2e-10` including the f32 output boundary;
+the identity and deliberately excessive drift mutation test the gate. Compare
+all layers/ages, scalar K4 and gauge-invariant reconstructed sources, never raw
+QR coordinates. Use a separately hashed forced F21 D21 tiny adapter where feasible.
+These tiny checks cannot certify width1024/depth16 production behavior. Builder
+predicts finite dtype-matched trajectory and output agreement; any failed required
+check blocks reliance and is retained without threshold revision.
