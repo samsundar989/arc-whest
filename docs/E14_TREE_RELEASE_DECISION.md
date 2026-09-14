@@ -1,5 +1,7 @@
 # E14 tree candidate — release decision
 
+Historical decision for the original float32 spelling. The later separately predicted full-float64 spelling has its own [release hold](E14_F64_RELEASE_DECISION.md); statements below about an unbuilt float64 candidate describe the state when this earlier decision was written.
+
 September 14, 2026. **Recommendation: do not submit or designate this candidate.** This is a reviewable hold decision, not a release package or a competition outcome. The exact candidate is `estimator_e14_tree.py` at SHA256 `5127a55ccd99a9516e271c8363153b86916684f470465d02c02dcaa413debb7d`; frozen F21 remains the explicit comparator.
 
 The active 1024×16 candidate billed 1,014,599,318,825 counted FLOPs versus F21's 928,457,637,478, a 9.27793341% increase. It fits the 2**41 counted budget, but at equal truth targets its raw MSE would need to fall 8.49021675% just to tie F21's Phase-2 score and 12.84782548% to meet the proposed 1.05 arithmetic-gain gate. No fresh truth or paired score exists, so neither reduction is observed. The full operation ledger and independent cost verdict are in `experiments/e14_tree_meter/` and `experiments/LOG.md`.
