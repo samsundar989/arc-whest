@@ -1,0 +1,123 @@
+{
+  "schema": "e14.b4_actual_f32_conformance.v1",
+  "regime": {
+    "commit": "70819fc",
+    "original_tolerance": 1e-05,
+    "envelope_factor": 4.0,
+    "epsilon_factor": 64.0,
+    "output_allowance": 2e-10
+  },
+  "source_sha256": {
+    "driver": "79f434aed6877e07aa70b9a82e7d08ad73e067fbeee1a1d2d2efd7289f597a8d",
+    "backend": "5b04ebe61b99a56533b250a10c93c4bf7348dd3a0d0d0bf52eb7d775c7b8d8d5",
+    "f64_adapter": "314f72cccd8a55ce4bb071cc96dc41f773e3c58bba7a061f3734a69c7e99e944",
+    "compact_reference": "81f8bbbbe60a617cf0533f13657440ed35feb9bb5d0bc0fbf8956ef002febdd2",
+    "L2": "390bc226bbf517df0110facfc0dc91c78ef670e8a49368a536cabf630057d1db",
+    "F21": "d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94"
+  },
+  "runtime": {
+    "python": "3.10.19",
+    "numpy": "2.2.6",
+    "flopscope": "0.12.1",
+    "threadpools": [
+      {
+        "user_api": "blas",
+        "internal_api": "openblas",
+        "num_threads": 1,
+        "prefix": "libscipy_openblas",
+        "filepath": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\Lib\\site-packages\\numpy.libs\\libscipy_openblas64_-13e2df515630b4a41f92893938845698.dll",
+        "version": "0.3.29",
+        "threading_layer": "pthreads",
+        "architecture": "SkylakeX"
+      },
+      {
+        "user_api": "blas",
+        "internal_api": "openblas",
+        "num_threads": 1,
+        "prefix": "libscipy_openblas",
+        "filepath": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\Lib\\site-packages\\scipy.libs\\libscipy_openblas-f07f5a5d207a3a47104dca54d6d0c86a.dll",
+        "version": "0.3.28",
+        "threading_layer": "pthreads",
+        "architecture": "SkylakeX"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "fixture": "b4",
+      "control": "l2",
+      "artifact": "experiments\\2026-09-14_e14\\b4_l2_f32_conformance.json",
+      "sha256": "1051e08ad87f70bbfbbda1d800db4d065a086d86dee6ba9bcb48f6a9d1d4d83f",
+      "passed": false,
+      "original_tolerance_failed_count": 88,
+      "failed_field_count": 0,
+      "output": {
+        "prediction_squared_drift": 0.00023606419563293457,
+        "allowance": 2e-10,
+        "passed": false
+      }
+    },
+    {
+      "fixture": "b4",
+      "control": "f21_forced",
+      "artifact": "experiments\\2026-09-14_e14\\b4_f21_forced_f32_conformance.json",
+      "sha256": "c568ecc194926d2159d1fce4abd7b18fd89c9acbe1c4c1f48f1639ab4756336c",
+      "passed": false,
+      "original_tolerance_failed_count": 167,
+      "failed_field_count": 0,
+      "output": {
+        "prediction_squared_drift": 0.42276324750855565,
+        "allowance": 2e-10,
+        "passed": false
+      }
+    },
+    {
+      "fixture": "b3",
+      "control": "l2",
+      "artifact": "experiments\\2026-09-14_e14\\b3_l2_f32_conformance.json",
+      "sha256": "729d6d401abcb14d677e2f9bef950f5196b4507937c33705c367d8b66ec18b1e",
+      "passed": true,
+      "original_tolerance_failed_count": 0,
+      "failed_field_count": 0,
+      "output": {
+        "prediction_squared_drift": 1.0375922343541788e-11,
+        "allowance": 2e-10,
+        "passed": true
+      }
+    },
+    {
+      "fixture": "b3",
+      "control": "f21_forced",
+      "artifact": "experiments\\2026-09-14_e14\\b3_f21_forced_f32_conformance.json",
+      "sha256": "d1fc07f5f507d90f463886955f5418e88ef5c5d6716fa52693db4fcaaea256bf",
+      "passed": false,
+      "original_tolerance_failed_count": 12,
+      "failed_field_count": 0,
+      "output": {
+        "prediction_squared_drift": 3.6947265247277983e-09,
+        "allowance": 2e-10,
+        "passed": false
+      }
+    }
+  ],
+  "controls": {
+    "identity": {
+      "prediction_squared_drift": 0.0,
+      "allowance": 2e-10,
+      "passed": true
+    },
+    "injected_drift": {
+      "prediction_squared_drift": 4.0000000000000007e-10,
+      "allowance": 2e-10,
+      "passed": false
+    }
+  },
+  "passed": false,
+  "original_B4_unchanged": true,
+  "limitations": [
+    "Fixed n8/d6 and n4/d4 only; no 1024x16 production conformance.",
+    "Forced F21 tests at most3 or2 Strassen levels; no production L4 evidence.",
+    "No compression, ground truth, noise floor, prediction accuracy, counted cost or promotion claim.",
+    "The frozen normal helper and independent scalar normal evaluator both round to f32; exact operation-order equality is not required."
+  ]
+}
