@@ -49354,3 +49354,83 @@ preserved as provenance, not rewritten to suggest relocated execution.
 Packaging was a lightweight single-process operation; no protected scoring
 read, candidate run or new experiment occurred. Capsule base evidence is
 frozen; later packaging verification lives beside the archive.
+
+### 2026-09-14 — independent E14 decision review and concrete successor plan
+
+**Request / scope.** Samuel requested validation of the worker through9eb1527,
+deep analysis/research as needed, a revised plan and the next Codex handoff.
+This slice changes internal research documentation only. Independent agents
+reviewed the full-residual cost/precision route, the accuracy closure, and raw
+worker evidence. No estimator/probe/instrument was edited, no rank or trajectory
+experiment ran, and no protected label, seed claim, vault operation, submission,
+designation or external message occurred. Existing lightweight reusable-input
+journal/release tests were independently rerun (21/21 pass); no heavy job ran.
+
+**CONFIRMED worker evidence.** The fresh audit independently matched309 final
+preflight source hashes, four actual-f32 and four mixed-QR artifact bindings,
+and the recorded truth-pilot arithmetic. It ACCEPTS the bounded infrastructure
+repairs and diagnostic refusals. Default12/16 preflight is root-baseline scope;
+the separate E14 tests support the new modules. The truth pilot does not prove
+historical TF32 equivalence or population accuracy. F21 remains unchanged.
+
+**Knowledge delta.** The196 ordinary-f64 product refusal is valid only for that
+spelling. Actual frozen `_sb` adds/copies give S4(1024)=1,366,126,592 f32FLOPs.
+A specified mixed f32fullresidual/f64basis program has static complete product,
+QR and conservative element/copy envelope615,258,560,822 at hypotheticalr64.
+This is a feasible operation budget, not a rank choice, measured ledger,
+numerical pass or resource certificate. Full-rank control correctness must be
+separated from reduced-rank savings; an expensive reference is permissible.
+
+The forced tiny B4 reference itself differs from f64 by maximum4.30524 at
+outputscale110.981, comparable to compact/ref32 difference4.29549. Original
+2e-10 gate failures remain failed, but cannot serve as universal rejection
+of stable arithmetic. Also d=.01E prediction-drift energy permits conditional
+|deltaMSE|<=2sqrt(E*d)+d=.21E, not1% accuracy change. No gate is revised here;
+any new numerical regime needs a prospective strategic contract.
+
+**New accuracy proposal, static only.** For the explicitly approximate scalar
+metric Q=mL_I(G), the induced J modulo its repeated-slice reconstruction equals
+U((m/12)a,diag(b)Gdiag(b)) modulo the same reconstruction. This is a full new
+K3 tensor identity in real arithmetic, pending independent tiny implementation.
+With covariance-aligned off-diagonal G, existing F21 A/M factors and thin
+vectors share the persistent U feed; both D21 orientations and outer(t,y) can
+fuse into three products. The active fusion moves w2 across a product and
+therefore needs its own numerical comparison. The proposed later tree-projected
+closure retains the transported diagonal but explicitly discards an off-diagonal
+core transport term and replaces the metric by a scalar identity. No omitted
+approximation is called exact. With valid fusion,60 extra actual square products
+cost81,967,595,520, requiring>8.11% raw improvement before other overhead just
+to break even. This is neither a complete executed bill nor accuracy evidence.
+
+**Decision.** Execute two bounded independent no-label slices: mixed residual
+kernel conformance and supplied-core J/U cancellation/sharing proof. The latter
+does not depend on compact QR or choosing a regeneration coefficient. After
+Skeptic/synthesis, a complete accuracy candidate can use uncompressed F21 while
+rank selection proceeds separately. Every scientific selection retains fresh
+predictions, contract, new block and paired arithmetic law. Full residual rank
+is an initial isolation choice; the illustrative combinedcost still needs
+about8e-9 raw error to tie the datedleader, so no winning claim follows. A later
+measured residual bottleneck can motivate a separate residual/query intervention.
+No resumed dense wrapper, unchanged failed K4 arm, general infrastructure loop,
+posthoc tolerance change or public-data fitting is authorized by this review.
+
+**Primary research.** Rechecked numerical-stability research including the
+2016 fast-matmul/scaling paper and February2026 alternative-basis paper. The
+latter corrects its preliminary Strassen-equivalent stability claim. They
+motivate explicit numerical policy, not a cumulant accuracy guarantee. The
+public covariance-aligned source supports factor sharing as prior art, while
+its public-fitted coefficients are not adopted. Source links/limits are in
+the new reviews; novelty and prize eligibility remain unproved.
+
+**Artifacts and review.** `docs/E14_REVISED_PLAN.md` and
+`docs/research/2026-09-14_e14_strategy_review.md` summarize the returned decision.
+Detailed files are `2026-09-14_e14_math_review.md`,
+`2026-09-14_e14_accuracy_review.md`, and
+`2026-09-14_e14_independent_review.md` under docs/research. Fresh independent
+`2026-09-14_e14_strategy_skeptic.md` ACCEPTS the revised research scope and
+records exact reviewed hashes. It independently checked the mixed-query
+coefficients, U cancellation/fusion, all four static cost totals and the
+square-product break-even arithmetic. Generic-shape/budget fallback and
+lockstep source metadata requirements were made explicit. No implementation,
+promotion or release is accepted by that verdict. Documentation links and
+whitespace are verified separately; historical reviewed plan bytes are preserved.

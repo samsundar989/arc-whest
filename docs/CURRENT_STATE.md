@@ -1,5 +1,32 @@
 # CURRENT_STATE.md — read this first
 
+## Next decision — independent E14 strategy review
+
+Samuel requested a fresh review of the worker's decision point. The
+[strategy assessment](research/2026-09-14_e14_strategy_review.md) accepts the
+bounded worker evidence and supplies a [revised execution plan](E14_REVISED_PLAN.md).
+It supersedes the remaining dependency order below, not the recorded failures.
+The [independent worker audit](research/2026-09-14_e14_independent_review.md)
+reproduced21 lightweight journal/release tests and309 source hashes. No new
+estimator, rank or protected-data experiment was run in this review.
+
+Two concrete next slices are independent: (A) packed f32 full residual plus
+f64 shared-basis direct queries under the specified complete cost model;
+(B) supplied-core scalar-metric K4 feed cancellation and sharing with existing
+F21 factors, verified against full tiny tensors. Full-rank correctness does
+not require full-rank cost savings. The accuracy identity need not wait for
+compact QR. Both remain unimplemented proposals and require their normal
+prediction/contract, tests and Skeptic before reliance. The
+[strategy Skeptic](research/2026-09-14_e14_strategy_skeptic.md) accepts only this
+research scope. Later rank, closure or numerical-regime selection is STRATEGIC
+and needs new Samuel predictions. No historical tolerance or release rule is
+changed. Full residual preservation is the first isolation step, not a permanent
+winning constraint; later measured residual cost may motivate its own intervention.
+
+F21#330950 remains primary. No new score, release pass, submission, designation,
+vault touch or contribution claim exists. Stage0 is complete; further general
+infrastructure work is not the critical path absent a concrete defect.
+
 ## Current execution — September 14 E14 prerequisites
 
 Samuel authorized implementing the reviewed plan, including parallel bounded
