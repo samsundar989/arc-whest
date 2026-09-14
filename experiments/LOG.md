@@ -48781,3 +48781,18 @@ The existing report-fetch script saved the pending snapshot then raised
 because it assumes `evaluation.results` exists; the snapshot was retained
 under its accurate initial-status name. No grading or server-residual
 conclusion exists yet, and no designation or second upload occurred.
+
+**Independent pre-grade Skeptic: PROVISIONAL exact server-byte binding.**
+Fresh-context verdict
+`experiments/2026-09-13_p10/f21_submission_skeptic_initial.md`, commit
+`177d02c`, rechecked the exact tar/member/source/manifest hashes, own L4
+parent diff, exception contract chronology, one slot-ledger row, initial
+page status and 100/100 local refusal. The CLI acknowledgement proves
+#330950 was accepted but does not contain the uploaded archive path/hash;
+the local command selected the hash-checked archive, yet the independent
+server-side byte identity is **provisional** until submission-file metadata
+can be inspected, if exposed. Initial page has no evaluation or score.
+This review accepts neither a graded-feasibility claim nor a clean-mini
+pass, and leaves designation unauthorized. The cheapest follow-up is the
+original final grader report and any exposed submission-file metadata;
+no second upload or protected data read is warranted.
