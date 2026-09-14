@@ -49203,3 +49203,22 @@ This targets representation rounding only. It cannot clear the separate
 plain-versus-Strassen operator mismatch or turn an identity-only dense wrapper
 into a cheaper architecture. Failed attempts remain archived. Run only after
 the active preflight source-freeze window ends.
+
+
+**E14 next representation bridge, IMPORTANT prediction before implementation.**
+The mixed-f64 reference-order QR control reproduces all four fixed outputs,
+but reconstructs the dense tower and therefore saves no contraction cost.
+Complete the bounded Stage 2 feasibility analysis without labels or rank
+measurements: derive a faithful all-age shared-basis operator using the exact
+F21 Wick/centering/birth conventions, separating residual-rank preservation
+from common-basis rank. Price every required full-width reconstruction,
+transport/join/rotation/readout/cast and co-live buffer before constructing
+an expensive implementation. Builder predicts the literal mixed-f64 bridge
+with full residual rank cannot meet the plan's 20 percent cost screen; a
+cheaper direct-query spelling needs a complete equivalence and cost argument,
+not an uncounted dense fallback. Use only fixed existing symbolic dimensions
+and prior operation tariffs. If reconstruction alone rules out the literal
+spelling, stop that spelling and give the exact unresolved work, without
+claiming the entire compression family is closed. Do not run reduced-rank
+probes, new fixture trajectories, additional K4, or fresh data in this slice.
+No gate or experimental threshold changes. Independent review follows.
