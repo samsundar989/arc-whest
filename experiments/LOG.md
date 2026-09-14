@@ -49173,3 +49173,14 @@ v2 passed841/841; real-f32 still fails the output gate. QR/reference-order
 localization separately fails3/4 output cases while identity/reference-order
 controls are bit-identical4/4. These remain pending independent review; neither
 the failed QR path nor an identity-only dense wrapper licenses compression.
+
+**Exact-byte preflight retry command, before submission.** Freeze root/local_sim/
+scripts source plus binding AGENTS/VALIDATION before and after the live queued
+run via `local_sim/preflight_e14.py`; any changed source refuses the wrapper.
+Agents pause source edits while it runs. Reuse same6GiBRAM/0VRAM/2CPU review.
+`workerq submit --project arc-whest --live-worktree --gpus 0 --ram 6 --vram 0
+--cpus 2 --env OPENBLAS_NUM_THREADS=2 --env OMP_NUM_THREADS=2
+--env MKL_NUM_THREADS=2 --env PYTHONIOENCODING=utf-8 --label e14-preflight-live
+--eta 10m -- C:/Users/samsu/Documents/arc-whest/.venv/Scripts/python.exe
+local_sim/preflight_e14.py --out-dir
+C:/Users/samsu/Documents/arc-whest/experiments/2026-09-14_e14/preflight_live`.
