@@ -1,8 +1,8 @@
 # CURRENT_STATE.md — read this first
 
-**September 14 P10 fresh DECIDE and independent result Skeptic pass;
-Full candidate certificate REFUSED locally; capped official mini workerq
-1201 is running.**
+**September 14 F21 passes the fresh paired score gate, but normal submission
+release is BLOCKED: Full certificate REFUSED and the capped official mini
+failed 100/100 networks on the local residual-time cap.**
 Samuel's three new
 "I don't know" predictions were committed at `ce853f7` before any P10 data.
 The fresh SINGLE_USE 128-network truth claim was committed at `883bd45`;
@@ -33,9 +33,25 @@ certificate reported MATH 41/41 and an applicable Linux v6 memory pass,
 but LOCAL REFUSED: its two-row capped official subprocess smoke failed 2/2
 on local residual-cap exhaustion. The 14,091-op server-residual model
 passed only as a forecast. The separate **clean capped** 100-row official
-subprocess mini is now workerq 1201, with no result yet;
-a no-cap mini cannot substitute. F21 is not yet submission-ready, and no
-submission or designation is authorized.
+subprocess mini, workerq 1201, has completed. Its report records
+`n_failed_mlps: 100`, all `residual_wall_time_exhausted` at local residuals
+7.312–9.633 s against 0.4 s; the other four failure categories and estimator
+tracebacks are zero. Its `928,424,083,046` f32-mini counted FLOPs are below
+budget. Thus the required clean-mini gate `n_failed_mlps: 0` fails,
+confirming the Full local refusal. The workerq exit 0 means only that a
+complete report was produced; failed zeroed outputs are not accuracy
+evidence. Local residual timing is not a graded-server measurement, and the
+op-count server forecast cannot waive the observed gate. The exact
+[mini report](../experiments/2026-09-13_p10/mini_F21_capped_official.json)
+SHA256 is `c43eb8104047a2d2d0967c73d39f30b205bbe2389da5f66d2d81b28203d33808`;
+the [workerq receipt](../experiments/2026-09-13_p10/workerq_1201_receipt.json)
+and full terminal log are retained. F21 is a demonstrated score improvement,
+but **not submission-ready** under the normal release contract. A no-cap mini
+cannot substitute. No submission, external message or designation is authorized.
+Next action: retain this scoped refusal. Any one-off release exception would
+require Samuel's explicit decision on the exact evidence; otherwise use
+standing L4/L2 while investigating a bounded residual-time remedy. No further
+P10 or vault read is permitted.
 
 **September 13 F21 lifecycle diagnostic closed; P09 still has no verdict.**
 The preregistered, label-free stress on the first 128 exposed P07 DESIGN

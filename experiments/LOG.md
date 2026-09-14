@@ -48629,3 +48629,44 @@ zeroed outputs carry no accuracy claim; local residual seconds do not prove
 graded-server failure, and the 14,091-op forecast cannot erase the local
 refusal. The separate registered capped 100-row mini is running; no waiver,
 submission or designation follows from this review.
+
+**Capped official F21 mini result, September 14 — normal release gate FAILED.**
+Workerq **1201** completed its exact registered default-cap official
+subprocess `mini` command, exit 0 after `6761.472799` s with measured peak
+`13563.3515625` MiB under declared 20 GiB RAM/6 CPU/0 GPU. The terminal
+artifact is
+`experiments/2026-09-13_p10/workerq_1201_terminal.log`, SHA256
+`2704db6d8dca10da967fefdf5c5449626e214e2894a37860506dac881e420688`;
+receipt SHA256
+`6b80cee2848f9ca66ede739bf7cfcfc3ae76f19d0b4f8d092a01ff46523698d0`.
+The complete JSON block was extracted to the standalone
+`experiments/2026-09-13_p10/mini_F21_capped_official.json`, SHA256
+`c43eb8104047a2d2d0967c73d39f30b205bbe2389da5f66d2d81b28203d33808`.
+Its Phase-2 config is 100 networks, width1024/depth16, public v2-phase2
+dataset SHA `264fa1f416d16a40821fb5e8e94f5d2da4698a201d40da999616225b38b464f1`,
+lambda0, `2**41` FLOP budget, 120 s wall and **0.4 s residual** default caps.
+The job receipt pins F21 source path and `--runner subprocess --detail full`;
+source SHA was independently rechecked after run as
+`d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`.
+
+The complete report says `n_failed_mlps: 100`, all **100**
+`residual_wall_time_exhausted`, with `budget_exhausted=0`,
+`time_exhausted=0`, `combined_budget_exhausted=0`, `error=0` and zero
+tracebacks. Each row counted `928,424,083,046` f32-mini FLOPs. Local
+residual time ranges `7.3123824`–`9.6331944` s, median `8.2246576` s,
+versus the installed 0.4 s cap; local total wall ranges 49.375–58.840 s.
+This reproduces Full's two-row local cap refusal at 100-row scope. Workerq
+exit 0 establishes complete report generation, **not** successful MLPs.
+The failed outputs are zeroed and their reported score/MSE cannot be used
+as accuracy evidence. These host-local seconds do not establish the
+graded-server residual, while the op-count forecast cannot replace this
+observed release gate. P10's cap-disabled fresh score PASS remains separately
+valid in its registered domain; it is not deployment certification. Required
+clean capped mini `n_failed_mlps: 0` is **FAILED**, so the normal submission
+path is blocked, despite the F21 score improvement. No no-cap mini, P10
+retry, vault touch, submission, external message or designation follows.
+Own-parent provenance and a prepared exact-byte tar remain documented in
+`experiments/2026-09-12_f21/f21_provenance_audit.md`; package receipt remains
+`validated_for_submission: false`. Await independent mini Skeptic, then
+retain a scoped refusal. A one-off exception would require Samuel's explicit
+decision on these exact bytes and evidence; none is implied here.

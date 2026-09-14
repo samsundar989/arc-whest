@@ -2,6 +2,18 @@
 
 **Active September 12, 2026.** This replaces the K4-first ordering, preserved in [archive](archive/GAME_PLAN_before_worker_review_2026-09-12.md). Read CURRENT_STATE, LOG tail, [STRATEGIST_RESPONSE](STRATEGIST_RESPONSE_2026-09-12.md), VALIDATION and SKEPTIC. Existing failed gates and data restrictions are unchanged. All thresholds below are proposals to preregister, not passed or preapproved gates.
 
+**Execution status, September 14.** Stage A's exact F21 candidate is frozen;
+engineering, registered DESIGN and fresh P10 paired arithmetic score checks
+passed, with 13.08574% measured counted-FLOP saving and 1.150566x fresh
+score gain over original L4. The required candidate Full certificate REFUSED
+locally and the capped official mini failed 100/100 rows, all residual-time
+exhaustion. Therefore A3 and normal submission readiness remain blocked.
+See [CURRENT_STATE](CURRENT_STATE.md) and the raw mini report. No-cap accuracy
+evidence or a modeled server residual can replace the clean-mini gate. The
+full-rank compact B4 bridge is an unrun mixed-precision diagnostic, not a
+validated compression path; it does not delay this release verdict. The
+research target below remains a target, not a declaration that F21 is ready.
+
 ## Objective and scope
 
 Deliver a demonstrably better, eligible candidate than our best standing L4 result, with L2 retained as the robust fallback. Then pursue larger savings toward the leading score. No current evidence proves a winning method.
