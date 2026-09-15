@@ -1,6 +1,6 @@
 # CURRENT_STATE.md — read this first
 
-## September 15: P1 measured and attributed; P2's algebra proved and repriced
+## September 15: P1 measured and attributed; P2 BUILT, and an invariant caught it
 
 **P1 gives 1.2371x on 24 of 24 design networks** (raw `4.791516e-08` ->
 `3.872559e-08`, t 95% `[+3.36e-9, +4.39e-9]`, sign p `0.0000`, cost unchanged at
@@ -29,15 +29,95 @@ Sensitivity is **asymmetric**: halving λ costs 3.3%, doubling costs 16.4%, and
 the bare core 1.07×. The accurate headline is "κ4 regeneration with a label-free
 λ", not "per-neuron core".
 
-**P2's algebra is fully proved and repriced.** Both identities hold exactly —
-reconstruction (`1.9e-16` float64, 3.7 float32 ulps on real state) and the
-`(2,1)` regrouping (`6.8e-16`, arbitrary residual). Seven dense products per
-layer become four, which is what "7→4" literally names, and the saving is
-**41.5% of the tower**, not the 27.6% first modelled. Stacked with P1 that
-projects `1.596e-8 -> 8.0e-9`; 504aldo are at 5.4e-9 and the leader at 2.5e-9.
+### P2 is implemented — `estimator_k3_v31.py`, and it carries P1 as well
 
-`whest validate` on v30 passes (73 ms). Certification queued as job `1352`; the
-evidence path has never been walked for this file.
+Both identities were proved **before any estimator code existed**:
+reconstruction (`1.9e-16` float64, 3.7 float32 ulps on real F21 state at its own
+birth site) and the `(2,1)` regrouping (`6.8e-16`, arbitrary residual).
+`local_sim/p2_build_v31.py` emits three arms from v30 by asserted-count patches;
+the patches are **disjoint** from v30's, so this is layering, not merging.
+
+**The price, counted off the code and not off the plan.** Per layer, products
+that scale with `k`: F21 spends 3 transports + 3 contractions = **6**; P2 spends
+2 + 2 = **4**, plus `O(k n² r)` thin work that is 1.6% of the total.
+
+| | projected tower FLOPs at 1024×16 |
+|---|---|
+| v30/F21 as the code **issues** (6 aged / 5 young) | `1.4920e+12` |
+| P2 (4 aged / 3 young) + thin | `1.0252e+12` |
+| **ratio** | **`0.6871` — 31.3%** |
+
+Applied to F21's measured total with the K2 anchor held fixed:
+`928,457,637,478 -> 659,482,000,000`, **C/B `0.4222 -> 0.2999`**.
+
+> **P2 was mispriced three times before this** — 27.6%, 41.5%, 32.3% — because I
+> read the plan and the mechanism's name instead of the source. F21's own
+> `_matmuls` cost model bills an aged lineage **7**, which the code has not
+> issued since `_dslice21`'s two permutations were found to be the same
+> product. That phantom seventh product is where "7→4" came from. **Count the
+> products in the source before quoting a saving.**
+
+### The finding worth remembering: a deterministic sketch is not a free win
+
+The rank compression needs a sketch. 504aldo use `W[:, :r]`, the layer's leading
+weight columns (`estimator_v16b.py:561`), and we copied it — at He init those
+columns are i.i.d. Gaussian, so no seed is needed and hard rule 2 is satisfied
+without sampling anything. **That reasoning was incomplete.** Relabelling the
+hidden neurons permutes those columns, so "the first `r`" selects a different
+subspace and the truncation error lands elsewhere. The estimator stops being
+permutation-equivariant — a property the true answer has.
+
+`local_sim/edge_cases.py::inv_permutation` caught it before the screen ran:
+
+| shape | v30 | v31, `W[:, :r]` | v31, fixed |
+|---|---|---|---|
+| 256x32 permute layer 7 | `4.1e-13` | `2.7e-10` | `5.2e-13` |
+| 256x32 permute layer 20 | `1.3e-13` | `2.2e-10` | `8.4e-13` |
+| **128x8 permute layer 1** | `2.2e-14` | **`1.5e-08` = 1.07%, FAILED** | `1.5e-14` |
+| 256x32 permute layer 30 | `1.3e-14` | `8.1e-12` | `1.5e-14` |
+
+**The dense arm discriminated it.** Same code at full rank: 30/30, equivariant
+to `3.0e-13`. At full rank the projector is the identity on `range(R)`, so the
+sketch cannot reach the output — which exonerates the reconstruction, the
+regrouping and every `Z`/`L` side convention in one run. The arm was specified
+to answer a numerical question and answered a structural one.
+
+**The fix is free**: sketch with the residual's own strongest columns,
+`R[:, argsort((R*R).sum(0))[-r:]]`. Equivariant because the norms permute with
+the columns, so the selected *set* is unchanged and only the projector reaches
+the output. Still deterministic. Measured side by side under a random
+permutation: **`8.8e-01` for the column slice, `3.2e-07` for this one.**
+
+This is the first place our re-implementation is **better** than the oracle
+rather than merely independent of it, and an instrument found it, not a closer
+reading.
+
+### v31's standing
+
+- `--parity`, five claims: control == v30 **bitwise** at identical counted
+  FLOPs; dense arm `1.5–1.9e-7`; rank-32 arm `1.7–2.6e-4`; both arms pick the
+  same `gens` at the live shape; **equivariance within 1.3× of the control's own
+  float32 floor** (bar 100×; the old sketch scores `4.4e+05×`).
+- `whest validate` **81 ms**; `edge_cases` **30/30**.
+- **No `auto-routed` warning** — v31 does not carry the release blocker that
+  failed E14's memory gate. v31 adds **zero** warnings over v30; the one v30
+  adds over F21 (`op 'diagonal' is not symmetry-aware`) is P1's κ4 transport.
+- **Not yet measured end to end.** Contract and gate: `experiments/LOG.md`,
+  2026-09-15, *CONTRACT (Rule 1): Slice 6b P2*, with its pre-data amendment.
+  Screen queued as job **`1364`**; gate **`≥1.20×`** with the 95% studentised-t
+  interval strictly above 0.
+
+### v30's certification
+
+Job `1352` ran 1h08m, **passed 46 checks**, and was REFUSED by one:
+`this run changed no tracked source under estimator.py/scripts/local_sim` —
+because I edited the P2 generator while it ran. That is my error, not v30's.
+Two sections were named SKIPs and remain real gaps: the Linux 8-GiB
+enforcement, and the official subprocess smoke (`--skip-smoke`). Re-queued on a
+clean tree as job **`1365`**.
+
+**Nothing here is a submission, a promotion, a DECIDE block, or a vault touch.**
+
 
 **Next:** finish v30's evidence path (certify, Linux memory gate, mini run),
 then **implement P2** — its algebra is proved, its price is known, and it is the
