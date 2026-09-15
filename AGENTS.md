@@ -56,7 +56,8 @@ Where we stand, what is open, and what to do next: **`docs/CURRENT_STATE.md`**.
    tracked files, logs, or LOG.md.
 6. **Never submit without Samuel's approval** — per submission, never durable. A
    failed MLP scores as zeros. Order: `whest validate` → clean mini run
-   (`n_failed_mlps: 0`) → ask → an agent **may** then run `whest submit` (rule
+   (`n_failed_mlps: 0`; residual advisory, cost gates on ops) → ask → an agent
+   **may** then run `whest submit` (rule
    changed 2026-09-05), logging its sha256. **No agent ever designates.**
 7. Keep `estimator.py` shape-generic (`mlp.width`, `len(mlp.weights)`).
    `ARC_WHEST_DISABLE_CAL=1` disables calibration (used by fitting).

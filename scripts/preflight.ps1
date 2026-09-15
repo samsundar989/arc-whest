@@ -590,8 +590,15 @@ if cfg['lambda_flops_per_second'] != 0.0:
     bad.append('lambda is not 0')
 if cfg['residual_wall_time_limit_s'] != 0.4:
     bad.append('residual cap is not 0.4 s')
+# THE LOCAL RESIDUAL NO LONGER REFUSES. Slice 6 contract 0.1, 2026-09-14.
+# It is printed above and it gates nothing: this host reads 12-53x high per
+# operation on residual, so refusing on it refuses candidates for being run
+# here. The binding cost check is the operation count against
+# official_config.PHASE2_OP_COUNT_GATE, in certify_candidate section 6.
+# Historical refusals that quoted this line stand; they are not amended.
 if worst > cap:
-    bad.append('worst residual %.4f s exceeds the %.2f s cap' % (worst, cap))
+    print('  ADVISORY: worst LOCAL residual %.4f s is over the %.2f s cap. '
+          'This does not refuse.' % (worst, cap))
 if bad:
     print('  REFUSED: ' + '; '.join(bad)); sys.exit(1)
 "@

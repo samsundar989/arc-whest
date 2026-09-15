@@ -2117,13 +2117,43 @@ def main() -> int:
             # unguarded, so the certifier died with a ZeroDivisionError before
             # writing its JSON or printing a verdict -- on a host where a 15%
             # per-row failure rate had just been observed, a ~2% event.
+            # ---- THE LOCAL RESIDUAL IS ADVISORY. Slice 6 contract, 0.1. ----
+            #
+            # This was a binding `check()` until 2026-09-14. It is not one now,
+            # and the reason is that it was measuring the wrong machine.
+            #
+            # THE RECORD IS NOT AMENDED. Two candidates failed this check, one
+            # of them (330327) while holding a real graded 0/100 row, and those
+            # two FAILURES STAND exactly as written. Nobody has ruled that they
+            # were mis-specified; Samuel explicitly declined to on 2026-09-10.
+            # What changed is not the verdict on those runs, it is what a
+            # FUTURE run is allowed to decide on. The check name is preserved
+            # verbatim for the same reason it was preserved on 2026-09-10:
+            # renaming it would orphan the two standing FAIL lines.
+            #
+            # WHY. This host reads high per operation on residual by a factor
+            # the repository has measured at 12-53x, and `docs/GOTCHAS.md` and
+            # `docs/VALIDATION.md` 433-542 both say so. A gate whose instrument
+            # is wrong by a factor of forty is not conservative, it is noisy:
+            # it refuses candidates for being run here.
+            #
+            # WHAT REPLACES IT. Section 6's operation-count gate against
+            # `official_config.PHASE2_OP_COUNT_GATE`, priced by the calibrated
+            # per-operation server model. That is a SERVER-domain forecast with
+            # a stated evidence domain, and it is the binding cost check now.
+            # `local_sim/predict_public.py` prices residual the same way.
             _wr = smoke["worst_residual"]
-            check("10: worst GRADED-PATH residual is under the cliff",
-                  0.0 < _wr < smoke["residual_cap"],
-                  (f"{_wr * 1000:.2f} ms -> "
-                   f"{smoke['residual_cap'] / _wr:.1f}x") if _wr > 0 else
-                  "0.00 ms -- every smoke row FAILED before it was timed; "
-                  "this is not a pass")
+            _adv = ((f"{_wr * 1000:.2f} ms -> "
+                     f"{smoke['residual_cap'] / _wr:.1f}x under the cliff")
+                    if _wr > 0 else
+                    "0.00 ms -- every smoke row failed before it was timed")
+            print(f"      ADVISORY, LOCAL seconds, gates nothing: worst "
+                  f"residual {_adv}")
+            print("      The binding cost check is section 6's operation count "
+                  "against")
+            print("      the calibrated server model. This host's seconds are "
+                  "not the server's.")
+            report.setdefault("advisory", {})["local_worst_residual_s"] = _wr
             print(f"      counted FLOPs {smoke['flops_per_mlp']:,.0f}   "
                   f"multiplier {smoke['multiplier']:.4f}   "
                   f"C/B {smoke['c_over_b']:.7f}")
