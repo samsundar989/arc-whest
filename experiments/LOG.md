@@ -50036,3 +50036,91 @@ standing candidate.
   differed by one coefficient family.
 - The gap to their reported 1.97x is **located, not mysterious**: a missing
   third consumer and an initialiser λ.
+
+---
+
+## 2026-09-15 — **The λ sweep: the extrapolated table sits within 1.1% of the optimum**
+
+The independent Skeptic's PROVISIONAL on P1 rested on one worry: the 1.2371×
+might be carried by a λ table whose value at width 1024 an *earlier* Skeptic had
+rejected as window-dependent at an **8.89×** leave-one-out spread. This is the
+experiment it asked for.
+
+DESIGN tier, 24 P01 networks, label-free, all local-seconds caps off, 0/24
+failed in every arm. Jobs `1336` (crashed at 1h35m, three arms recovered from
+its queue log) and `1337`.
+
+### The curve
+
+| λ-scale | score | gain vs F21 |
+|---:|---|---|
+| 0.0 — the bare per-neuron core | `1.891315e-08` | **1.0696×** |
+| 0.5 | `1.690972e-08` | 1.1964× |
+| **1.0 — our extrapolated table** | **`1.635247e-08`** | **1.2371×** |
+| 2.0 | `1.955754e-08` | 1.0344× |
+
+A parabola through the three log-spaced points puts the optimum at
+**λ-scale 0.794**, peak gain **1.2506×**.
+
+### What that settles
+
+**Our label-free extrapolation landed within 1.1% of the peak.** The table came
+from a per-layer power law fitted at widths 64/96/128 and extrapolated eight-fold
+to 1024, with no truth, no public data and no tuning against any score. Despite
+the window spread that condemned its *value*, it lands at 0.794–1.0 of the
+optimum in λ and within 1.1% of the best achievable gain.
+
+So the Skeptic's worry is answered, and answered better than a sensitivity bound
+would have: **the uncertainty in λ does not propagate into the result**, because
+the objective is flat near its optimum.
+
+**The attribution it raised is confirmed, though.** The bare core is 1.0696× of
+the 1.2371×, so λ carries about two thirds of the log-gain. My original headline
+said "per-neuron κ4 core"; the accurate headline is **"κ4 regeneration, with a
+label-free λ"**, and the core alone is a smaller, constant-free 1.07×.
+
+### The sensitivity is ASYMMETRIC, and that is the operational lesson
+
+    halving  lambda   1.0 -> 0.5    gain 1.2371 -> 1.1964     -3.3%
+    doubling lambda   1.0 -> 2.0    gain 1.2371 -> 1.0344    -16.4%
+
+At λ-scale 2.0 the candidate is **worse than the bare core**. Overshooting is
+actively harmful; undershooting merely leaves gain on the table. Any future λ
+work should err low.
+
+### Why the table is NOT being retuned to 0.794
+
+The 0.794 optimum was measured **on P01**, and P01 is the corpus these arms were
+scored on. Adopting it would make our λ a constant fitted on the networks we
+evaluate against, and the 1.1% it would buy is not worth that.
+
+The current table's provenance is better than the optimum's: it is fitted on
+**no evaluation data at all**. Keeping λ-scale 1.0 costs 1.1% of the gain and
+keeps a clean claim — the same trade 504aldo make in the other direction by
+shipping 0.95× their own fitted mean.
+
+### Also this session
+
+- `whest validate` on v30: **passes, 73 ms**. The first attempt died inside the
+  CLI's own error printer on a cp1252 console — the documented `GOTCHAS` trap —
+  and with `PYTHONIOENCODING=utf-8` it is clean.
+- **P2's second identity is proved.** The `(2,1)` regrouping sends two of the
+  reconstructed leg's three pieces into groups that already exist, leaving only
+  a thin `Z` term: `6.760e-16` on synthetic float64 with an arbitrary residual.
+  With transport going three dense to two, **seven dense products per layer
+  become four** — the "7→4" is literal.
+- **P2 repriced at 41.5% of the tower**, not the 27.6% I first modelled. My
+  model had assumed 4→3 contractions; it is 4→2. `p2_repriced.md`.
+- v30 certification queued as job `1352` — the evidence path has never been
+  walked for this file.
+
+### Knowledge delta
+
+- **A quantity can be badly determined and still be good enough.** λ's *value*
+  at 1024 has an 8.89× window spread and is genuinely undetermined; λ's *effect*
+  is flat enough near the optimum that this does not matter. Those are different
+  questions and the earlier rejection only answered the first.
+- **Overshoot and undershoot are not symmetric here.** λ=2 is worse than λ=0, so
+  a mis-estimated λ can be worse than no λ at all.
+- Declining a 1.1% gain to keep a constant free of evaluation data is the right
+  trade, and it should be stated rather than assumed.

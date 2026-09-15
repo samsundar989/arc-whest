@@ -1,6 +1,51 @@
 # CURRENT_STATE.md — read this first
 
-## September 15: Slice 6a P1 WORKS — 1.2371x on 24 of 24, Skeptic pending
+## September 15: P1 measured and attributed; P2's algebra proved and repriced
+
+**P1 gives 1.2371x on 24 of 24 design networks** (raw `4.791516e-08` ->
+`3.872559e-08`, t 95% `[+3.36e-9, +4.39e-9]`, sign p `0.0000`, cost unchanged at
+`+0.000044 B`).
+
+**The λ sweep settles the Skeptic's PROVISIONAL.** Gains against F21:
+
+| λ-scale | gain |
+|---:|---|
+| 0.0 (bare core) | 1.0696× |
+| 0.5 | 1.1964× |
+| **1.0 (our table)** | **1.2371×** |
+| 2.0 | 1.0344× |
+
+Optimum at λ-scale **0.794**, peak **1.2506×** — so our label-free extrapolation
+lands **within 1.1% of the peak**, despite the 8.89× window spread that
+condemned its value. The uncertainty in λ does not propagate, because the
+objective is flat near its optimum. **We are NOT retuning to 0.794**: that was
+measured on P01, the corpus we score on, and 1.1% is not worth a constant
+fitted on evaluation data.
+
+Sensitivity is **asymmetric**: halving λ costs 3.3%, doubling costs 16.4%, and
+λ=2 is worse than the bare core. Err low.
+
+**The attribution is confirmed**: λ carries about two thirds of the log-gain and
+the bare core 1.07×. The accurate headline is "κ4 regeneration with a label-free
+λ", not "per-neuron core".
+
+**P2's algebra is fully proved and repriced.** Both identities hold exactly —
+reconstruction (`1.9e-16` float64, 3.7 float32 ulps on real state) and the
+`(2,1)` regrouping (`6.8e-16`, arbitrary residual). Seven dense products per
+layer become four, which is what "7→4" literally names, and the saving is
+**41.5% of the tower**, not the 27.6% first modelled. Stacked with P1 that
+projects `1.596e-8 -> 8.0e-9`; 504aldo are at 5.4e-9 and the leader at 2.5e-9.
+
+`whest validate` on v30 passes (73 ms). Certification queued as job `1352`; the
+evidence path has never been walked for this file.
+
+**Next:** finish v30's evidence path (certify, Linux memory gate, mini run),
+then **implement P2** — its algebra is proved, its price is known, and it is the
+larger remaining lever.
+
+---
+
+## September 15 (earlier): Slice 6a P1 WORKS — 1.2371x on 24 of 24, Skeptic pending
 
 | arm | raw MSE | C/B | score |
 |---|---|---|---|

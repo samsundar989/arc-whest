@@ -1,0 +1,24 @@
+worker-q: job #1337 starting at 2026-09-15T15:05:53.309432+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=none -
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', "$env:PYTHONWARNINGS='ignore'; cd C:/Users/samsu/Documents/arc-whest; uv run python -u local_sim/p2_design_score.py --control estimator_k3_strassen_L4_f21.py --candidate 'experiments/2026-09-15_p1_lam_sweep/v30_lam2p0.py,experiments/2026-09-15_p1_lam_sweep/v30_lam4p0.py' --truth experiments/2026-08-21_p2_cp1/truth_P01.npz --n 24 --wall-caps off --ts 2026-09-15T08:00:00Z --note 'lambda sweep completion after crash' --out experiments/2026-09-15_p1_lam_sweep/sweep_tail.json"]
+worker-q: ------------------------------------------------------------
+================================================================================================
+DESIGN-TIER PAIRED SCORE -- licenses a contract, never a promotion
+================================================================================================
+  control    estimator_k3_strassen_L4_f21.py
+  candidate  experiments/2026-09-15_p1_lam_sweep/v30_lam2p0.py,experiments/2026-09-15_p1_lam_sweep/v30_lam4p0.py
+  truth      experiments\2026-08-21_p2_cp1\truth_P01.npz   block P01   24 nets   1024x16   2 replicas x 4,194,304
+  *** ALL LOCAL-SECONDS CAPS OFF -- ACCURACY-ONLY. Residual,
+  *** wall and predict timeout are all disarmed together. This
+  *** run is NOT deployment evidence for any of them, and its
+  *** failure accounting cannot see a timing violation.
+  *** (Armed, this host's ~73 s/MLP blows the 120 s wall on
+  *** some networks and scores them at zero-prediction MSE --
+  *** which measures the host, not the candidate.)
+
+  control    score 2.023044e-08   raw MSE 4.791516e-08   C/B 0.422214   mult 0.422214   failed 0/24   1441s
+             ADVISORY local wall: median 59.0s  worst 89.5s   -- LOCAL seconds, gates nothing, not the server's
+  cand0      score 1.955754e-08   raw MSE 4.631576e-08   C/B 0.422265   mult 0.422265   failed 0/24   1943s
+             ADVISORY local wall: median 75.3s  worst 152.3s   -- LOCAL seconds, gates nothing, not the server's
