@@ -49,6 +49,29 @@ Neutral by construction: it asks where the line is, it does not argue for a
 position, and it does not name or disparage the accounts that submitted the
 published bytes.
 
+## The clone — what was taken from it, and what was not
+
+**Cloned 2026-09-15 with Samuel's explicit approval**, into `external/504aldo/`,
+which is **gitignored**: their code is never vendored into our history, never
+edited, and never submitted. HEAD is exactly the commit this file already
+pinned, `18c17e2d7a9aeacd399cfc2c6b571e4e16dbfb45`.
+
+It is used as a **parity oracle** and nothing else. Every consultation gets a
+row here, naming the file, the line and what question it answered.
+
+| date | their file | what was checked | outcome |
+|---|---|---|---|
+| 2026-09-15 | `estimators/estimator_v17.py:679` | which harmonic projection the per-neuron κ4 core is | **r = 1 matrix core**, `g = (K4 + rowsum K22)·6/(n+4) − (ΣK4 + Σrowsum K22)·3/((n+2)(n+4))`. F21's `_proj_coef_d4_r2` is the **r = 2** scalar — a *different projection*, not a rescaling. This was the bug behind a 9.2× design-screen regression |
+| 2026-09-15 | `estimator_v17.py:447–450` | the transport operand and the consumer coefficients | `WW = W*W`, `dG = WW @ (g_prev − var_prev·λ) + var·λ`; `D4 = metric·dG`, `D22 = (metric/6)(dG_i+dG_j)`, `METRIC_C = 2.0`. **Our implementation already matched all of these** — only the birth was wrong |
+| 2026-09-15 | `estimator_v17.py:585–592` | the κ4→κ3 feed | Confirmed it belongs to their **compact leg representation**. F21's frozen term table already routes κ4 into the κ3 births, so porting it would double count. **P1b stays struck** |
+
+**What was NOT taken:** no code was copied. The coefficients above are
+mathematical facts about a harmonic projection — `6/(n+4)` and
+`3/((n+2)(n+4))` are properties of the degree-4 tensor at width `n`, derivable
+from ARC's own `harmonic.proj_coef`, and the oracle was used to identify
+*which* projection applies, not to supply a fitted number. Their fitted λ table
+remains unimported.
+
 ## Source, pinned
 
 | what | value |
@@ -68,7 +91,7 @@ own tiny-shape parity evidence.
 
 | # | mechanism | their finding | our file | status |
 |---|---|---|---|---|
-| P1 | κ4 regeneration `G = diag(g) + λ·C_off`, with consumers and the κ4→κ3 feed derived from one state | F68 | `estimator_k3_v30.py` (not yet created) | **NOT STARTED** — λ being fitted independently, see below |
+| P1 | κ4 regeneration `G = diag(g) + λ·C_off`, with consumers and the κ4→κ3 feed derived from one state | F68 | `estimator_k3_v30.py` | **RE-IMPLEMENTED**, own code from F21 lineage via `local_sim/p2_build_v30.py`. Birth projection identified against the oracle; consumers and transport were already ours and already correct. Accuracy unproven — first screen regressed 9.2× on the wrong projection; corrected rerun pending |
 | P2 | the 7→4 leg identity, `S21 = S_sep + R_res` with a thin transported residual | F63 | — | **NOT STARTED** |
 | P3 | rank-16 D21→birth feedback | F69 | — | **NOT STARTED** |
 | P4 | Strassen depth/pooling/block-symmetric `C_pre`/final-layer trim | F86 (cost anatomy) | — | **NOT STARTED** |

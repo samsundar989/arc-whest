@@ -37,6 +37,27 @@ in `local_sim/p2_compact_reference.py::t_k4_identity`:
 `diag C_pre` is `var`, which `_layer` computes two lines above, so the whole
 channel is one Hadamard and two matrix-vector products against an O(n^3) chain.
 
+THE BIRTH PROJECTION, AND THE ORACLE THAT SETTLED IT
+----------------------------------------------------
+The per-neuron core is the **r = 1 matrix-core** harmonic projection of the
+degree-4 tensor:
+
+    g = (K4 + rowsum K22) * 6/(n+4) - (sum K4 + sum rowsum K22) * 3/((n+2)(n+4))
+
+F21's `_proj_coef_d4_r2(n)` is the **r = 2** projection -- a scalar, the fully
+contracted isotropic part. They are DIFFERENT PROJECTIONS of the same tensor,
+and the first three versions of this generator tried to obtain one by rescaling
+the other. That produced three normalisations, three residuals and a design
+screen 9.2x worse than the control. The trace subtraction is what makes the
+projection harmonic, and omitting it is what let the core compound with depth
+(measured: ratio to F21's scalar 1.000 at layer 0, 6.4x by layer 4).
+
+Settled against the 504aldo parity oracle, `external/504aldo` commit
+`18c17e2d`, `estimators/estimator_v17.py:679`, whose own comment names it the
+"r=1 matrix-core harmonic projection". The oracle also confirms the consumers
+this file already had -- `D4 = metric * dG` and `D22 = (metric/6)(dG_i + dG_j)`
+with `METRIC_C = 2.0` -- and the transport operand orientation.
+
 LAMBDA IS A FREE PARAMETER, NOT A FITTED CONSTANT
 --------------------------------------------------
 `_K4_LAM` is a per-layer table. `experiments/2026-09-14_slice6a_lambda/`
@@ -209,15 +230,34 @@ def _patches(per_neuron: bool):
     c4_out = _proj * (_a4 * K[(4,)].sum() + _b22 * K[(2, 2)].sum())
     # NEW: the per-neuron core F21 projects away. `6/(n+4) (K4 + rowsum K22)`
     # is `_proj` applied to the same two objects WITHOUT the trailing sum.
-    # NORMALISATION. F21's scalar is proj*(a4*SUM(K4) + b22*SUM(K22)) and every
-    # neuron then receives that whole sum. The per-neuron object with the same
-    # isotropic limit is therefore n times the per-neuron term, so that its MEAN
-    # equals F21's scalar. Without the n the core is ~n*metric too small and the
-    # channel is inert; with the lambda injection on top of a mis-scaled core it
-    # is worse than inert. Measured: lambda=0 differed from F21 by 5e-3 relative
-    # before this factor, and the extrapolated-lambda arm was 9.2x worse on raw
-    # MSE over 24 design networks.
-    g_out = (_a4 * K[(4,)] + _b22 * K[(2, 2)].sum(axis=1)) * (_proj * n)
+    # THE BIRTH IS A DIFFERENT HARMONIC PROJECTION, not a rescaling of F21's.
+    #
+    # This is what the first three attempts got wrong, and the error was
+    # conceptual rather than arithmetic. `_proj_coef_d4_r2(n)` is
+    # `harmonic.proj_coef(n, 4, 2)` -- the **r = 2** projection, which is a
+    # SCALAR: the fully contracted isotropic part of the degree-4 tensor. The
+    # per-neuron core is the **r = 1** matrix-core projection, a different
+    # object with its own coefficients, and no amount of rescaling the r=2
+    # scalar produces it. Trying to derive one from the other gave three
+    # normalisations and three residuals (5e-3, 1.2e-3, 3e-2) and a design
+    # screen 9.2x worse than the control.
+    #
+    #     g = (K4 + rowsum K22) * 6/((n+4))
+    #         - (sum K4 + sum rowsum K22) * 3/((n+2)(n+4))
+    #
+    # The second term is the TRACE SUBTRACTION that makes it a harmonic
+    # (traceless) projection, and omitting it is what let the core grow with
+    # depth. Confirmed against the 504aldo parity oracle
+    # (`external/504aldo`, commit 18c17e2d, `estimators/estimator_v17.py:679`),
+    # whose own comment names it "r=1 matrix-core harmonic projection".
+    #
+    # F21's isotropic scalar `c4_out` is UNCHANGED above and still carried:
+    # the two projections coexist, exactly as they do in the oracle.
+    _cA = 6.0 / (n + 4.0)
+    _cI = -3.0 / ((n + 2.0) * (n + 4.0))
+    _k22row = K[(2, 2)].sum(axis=1)
+    _k4 = K[(4,)]
+    g_out = (_k4 + _k22row) * _cA + (_k4.sum() + _k22row.sum()) * _cI
     g_out = fnp.where(fnp.isfinite(g_out), g_out, dtype(0.0))
     return (mu_out, cov_out, out_tw, c4_out, g_out)'''
     else:

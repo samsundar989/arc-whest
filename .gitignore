@@ -50,3 +50,8 @@ local_sim/*.fault_inject_backup
 # local_sim/p2_cal_gpu.py stage_weights() from the seeds in truth_P01.npz.
 # It is a cache, not evidence -- the seeds and the mint are the evidence.
 *.f32
+
+# The 504aldo parity oracle: MIT, read-only, cloned for local checks only.
+# Pinned by COMMIT in docs/PROVENANCE_504aldo.md, never vendored into our
+# history. Their bytes are never submitted and never edited here.
+external/

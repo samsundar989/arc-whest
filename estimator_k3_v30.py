@@ -35,7 +35,7 @@ from whestbench import MLP, BaseEstimator
 _K4_PERNEURON = True
 #: Per-layer lambda INITIALISER. Fitted end to end against
 #: score; never quoted as a measured constant.
-_K4_LAM = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+_K4_LAM = [0.00968143045664494, 0.009142257779618279, 0.009841284427774549, 0.009301796540053444, 0.009449170133567886, 0.009167097043377889, 0.0076572907850084955, 0.0069621042106064275, 0.0054750830927211116, 0.004574739646806055, 0.005647050489044209, 0.005575418293711488, 0.005672301130570071, 0.005715207829079359, 0.007679451606169168, 0.0]
 
 
 #: zlib+base64 of the `terms` / `wick` / `pK_to_K` / `lap2_d4` tables from
@@ -767,19 +767,14 @@ def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,
     # The consumers. At a CONSTANT dG these are F21's own two lines exactly --
     # q4 = m*dG is c4*metric^2, and q22 = (m/6)(dG_i+dG_j) is c4*metric^2/3 --
     # which is why this is a generalisation and not an addition.
-    # metric SQUARED, matching F21's `(c4 * metric * metric) * ones_n`. The
-    # handoff writes q4 = m*dG for a core already carrying one factor of m;
-    # F21's c4 does not, so the isotropic limit needs both factors here or the
-    # channel is a factor of `metric` weak.
-    D4 = (metric * metric) * dG
+    D4 = metric * dG
     if last_layer:
         S = {(1,): mu_pre, (3,): D3, (4,): D4}
     else:
         C11 = cov_pre * off_mask
         D21 = (_dslice21(adv, off_mask) if adv is not None
                else fnp.zeros((n, n), dtype=dtype))
-        D22 = ((metric * metric / 6.0)
-               * (dG[:, None] + dG[None, :])) * off_mask
+        D22 = ((metric / 6.0) * (dG[:, None] + dG[None, :])) * off_mask
         S = {(1,): mu_pre, (2,): var, (1, 1): C11, (2, 1): D21, (1, 2): D21.T,
              (3,): D3, (4,): D4, (2, 2): D22}
 
@@ -914,15 +909,34 @@ def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,
     c4_out = _proj * (_a4 * K[(4,)].sum() + _b22 * K[(2, 2)].sum())
     # NEW: the per-neuron core F21 projects away. `6/(n+4) (K4 + rowsum K22)`
     # is `_proj` applied to the same two objects WITHOUT the trailing sum.
-    # NORMALISATION. F21's scalar is proj*(a4*SUM(K4) + b22*SUM(K22)) and every
-    # neuron then receives that whole sum. The per-neuron object with the same
-    # isotropic limit is therefore n times the per-neuron term, so that its MEAN
-    # equals F21's scalar. Without the n the core is ~n*metric too small and the
-    # channel is inert; with the lambda injection on top of a mis-scaled core it
-    # is worse than inert. Measured: lambda=0 differed from F21 by 5e-3 relative
-    # before this factor, and the extrapolated-lambda arm was 9.2x worse on raw
-    # MSE over 24 design networks.
-    g_out = (_a4 * K[(4,)] + _b22 * K[(2, 2)].sum(axis=1)) * (_proj * n)
+    # THE BIRTH IS A DIFFERENT HARMONIC PROJECTION, not a rescaling of F21's.
+    #
+    # This is what the first three attempts got wrong, and the error was
+    # conceptual rather than arithmetic. `_proj_coef_d4_r2(n)` is
+    # `harmonic.proj_coef(n, 4, 2)` -- the **r = 2** projection, which is a
+    # SCALAR: the fully contracted isotropic part of the degree-4 tensor. The
+    # per-neuron core is the **r = 1** matrix-core projection, a different
+    # object with its own coefficients, and no amount of rescaling the r=2
+    # scalar produces it. Trying to derive one from the other gave three
+    # normalisations and three residuals (5e-3, 1.2e-3, 3e-2) and a design
+    # screen 9.2x worse than the control.
+    #
+    #     g = (K4 + rowsum K22) * 6/((n+4))
+    #         - (sum K4 + sum rowsum K22) * 3/((n+2)(n+4))
+    #
+    # The second term is the TRACE SUBTRACTION that makes it a harmonic
+    # (traceless) projection, and omitting it is what let the core grow with
+    # depth. Confirmed against the 504aldo parity oracle
+    # (`external/504aldo`, commit 18c17e2d, `estimators/estimator_v17.py:679`),
+    # whose own comment names it "r=1 matrix-core harmonic projection".
+    #
+    # F21's isotropic scalar `c4_out` is UNCHANGED above and still carried:
+    # the two projections coexist, exactly as they do in the oracle.
+    _cA = 6.0 / (n + 4.0)
+    _cI = -3.0 / ((n + 2.0) * (n + 4.0))
+    _k22row = K[(2, 2)].sum(axis=1)
+    _k4 = K[(4,)]
+    g_out = (_k4 + _k22row) * _cA + (_k4.sum() + _k22row.sum()) * _cI
     g_out = fnp.where(fnp.isfinite(g_out), g_out, dtype(0.0))
     return (mu_out, cov_out, out_tw, c4_out, g_out)
 
