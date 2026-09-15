@@ -1,5 +1,85 @@
 # CURRENT_STATE.md — read this first
 
+## September 14 (night): Slice 6 is the operative plan; 6a step 1 is DONE
+
+`docs/CLAUDE_CODE_HANDOFF_2026-09-14.md` is the operative contract. It replaces
+`E14_REVISED_PLAN.md`, `E14_TREE_CANDIDATE_DRAFT.md` and every earlier Sep-14
+next-action below. **E14 is stopped** — its label-free Gaussian-tree λ was
+measured to be a different object from the one that produces the κ4 gain
+(opposite sign from layer 4 on, R² ≤ 0.2, depth-profile Pearson r = −0.01;
+`experiments/2026-09-14_exp_lambda/`). Its consumer and feed plumbing is kept
+for P1; its λ is discarded.
+
+**Where we stand on the board:** F21 `#330950`, adjusted **1.5957e-8**, rank 62.
+Leaders 2.5–2.8e-9. A public MIT baseline (504aldo v29) sits at 5.4e-9 and its
+clones at 4.2e-9. The family is right; the product is three times off.
+
+### Done this session
+
+| what | evidence |
+|---|---|
+| **§0.5 `local_sim/predict_public.py`** — project a public score from a paired local mini run against F21's graded anchor, every line tagged MATH / LOCAL / SERVER_PREDICTED | `test_predict_public.py` **39/39**; the real `#330950` report replays to `1.595740e-8` |
+| **§2.1 our own κ4 λ, label-free, 24 fresh P03 nets** | job `1305`, `experiments/2026-09-14_slice6a_lambda/` |
+| **§1 `docs/PROVENANCE_504aldo.md`** — pinned commit, five mechanism rows, what we refuse to take, and the rules §6 question **drafted and UNSENT** | — |
+
+### The two results that change the plan
+
+**1. The AUGMENT route to λ has a hard memory wall at about width 175.**
+Unfactored AUGMENT at `k_max=3` keeps κ3 as a dense `(n,n,n)`. Measured peak
+VRAM on a 32 GiB card: `n=64` **1.61 GiB**, `n=128` **12.44 GiB** (growth 7.73×
+against the n³ law's 8.00×), `n=192` **OOM** exactly where that law predicts
+42.0 GiB. Extrapolated, `n=1024` needs **6,369 GiB**. The handoff's "dump the
+κ4 core at 1024×16" is not executable. Any future plan that proposes running
+the dense augmented chain at the live shape is proposing 6.4 TB of VRAM.
+
+**2. λ is not width-stable, but it is width-REGULAR, and it independently
+corroborates 504aldo's mechanism.** Per-layer power law `λ_l(n) = a_l·n^(−p_l)`
+over widths 64/96/128: power-law R² **0.9138–0.99996** (median 0.9724),
+exponents 0.995–1.665. The fit's own R² (κ4 core on `C_off`) is **0.624–0.811**
+at `n=128`, rising with depth — the same profile 504aldo report. Extrapolated
+to 1024, ours/theirs has **median 0.744, range [0.499, 1.940]**, with **5 of 15
+layers within 15%**.
+
+| pre-registered prediction | verdict |
+|---|---|
+| strategist: λ within 15% per layer at l=1–14 | **FALSIFIED** — 5 of 15 |
+| strategist: R² ≥ 0.6 by layer 4 | **CONFIRMED** — 0.692 at n=128 |
+| Samuel: "I don't know" | recorded as given |
+
+Two independent fits of the same coefficient — ours label-free on fresh mints,
+theirs on eight public MLPs — agree within a factor of two across the full
+depth. **That corroborates the mechanism, not the table.** The extrapolation
+spans 8× in width beyond the largest measured point, so `lam_own.npz` is a
+starting point for P1 to be checked end to end against score, never a fitted
+constant.
+
+### Exact next actions, in order
+
+1. **P1 in `estimator_k3_v30.py`** (does not exist yet): port the κ4 consumers
+   and the κ4→κ3 feed from E14's `_tree_core` downstream, driven by
+   `lam_own.npz` rather than the Gaussian-tree λ. Handoff §2.2 lists the terms.
+   Goal: F21 raw `3.78e-8` → `≤2.3e-8` at unchanged FLOPs.
+2. **Then `predict_public.py`** on it against F21, and one graded canary only
+   with Samuel's per-submission approval.
+3. **§0.1 is still owed**: remove the local-seconds residual gate from
+   `certify_candidate.py` §10, `preflight.ps1` step 16 and AGENTS hard rule 6,
+   gating on operation count instead. `predict_public.py` already prices
+   residual this way; the decision paths do not yet.
+4. **§0.6 is partly owed**: E14 is stopped in this document, but both E14 files
+   are still present and still referenced by older sections below.
+5. **Rule 2 Skeptic on Slice 6a is in flight** at the time of writing; its
+   verdict belongs in `experiments/LOG.md` before the λ table is relied on.
+
+### Standing constraints
+
+Samuel approves every submission individually and designates alone. The rules
+§6 question is drafted and **unsent**, pending his approval of the exact
+wording. 504aldo's code is a **parity oracle only**; their fitted λ table is
+never imported. No DECIDE block is spent, the vault is untouched, P08/P09/P10
+stay spent, and the contribution write-up remains stale.
+
+---
+
 ## September 14 full-float64 E14 tree: release hold after independent checks
 
 Samuel's new prediction was “i dont know” for raw MSE, counted FLOPs, and residual/memory feasibility; it was committed before the separate full-float64 source. The candidate `estimator_e14_tree_f64.py` passes a bounded independent Gaussian-start dense recurrence (696 n3/4 checks, max 9.95e-14 against 1e-8), with exact frozen-F21 disabled output. This proves neither accuracy nor release feasibility.
