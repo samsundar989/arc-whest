@@ -50124,3 +50124,169 @@ shipping 0.95× their own fitted mean.
   a mis-estimated λ can be worse than no λ at all.
 - Declining a 1.1% gain to keep a constant free of evaluation data is the right
   trade, and it should be stated rather than assumed.
+
+---
+
+## 2026-09-15 — **CONTRACT (Rule 1): Slice 6b P2 — the separable `(2,1)` leg**
+
+**Class: STRATEGIC.** Pre-registered and committed **before any data exists**.
+`AGENTS.md` § *Rule 1*. Samuel's prediction is taken separately and appended
+below before the result exists; if it is not there when the result is, the
+result is reported as having no human prior, not as having passed one.
+
+**Scope guard, stated first.** DESIGN-tier knowledge. It spends **no DECIDE
+block**, it is **not a promotion**, and it **is not a submission**. The shipped
+`estimator.py` (v2.6.1), the vault, and the public split are untouched. v30
+itself is untouched — it is the control.
+
+### Question
+
+Does carrying the third-cumulant `(2,1)` leg **factored** — `A_D` never
+materialised or transported, but reconstructed from `M`, `A_L` and a thin
+rank-`r` residual — reduce the paired arithmetic competition score against v30
+on fresh design networks, and at what measured cost and residual?
+
+### Evidence
+
+| item | status |
+|---|---|
+| `A_D = diag(S3) + 3 S21^T` and `S21 = S_sep + R_res`, with `3 S_sep^T = 3 a_b d(e)` a free column scale on a leg the tower already carries | **CONFIRMED** — `local_sim/p2_p2_identity_test.py`, 1.9e-16 float64 with an arbitrary residual, **3.7 float32 ulps on real F21 state at its own birth site** |
+| substituting that on the right of F21's contractions leaves right factors `A_L`, `M` and a thin `Z` — two dense contractions, not three | **CONFIRMED** — same file, 6.8e-16, arbitrary residual |
+| F21 issues **6** products a layer that scale with `k` (3 transports + 3 contractions); P2 issues **4** | **CONFIRMED** — counted in `estimator_k3_v30.py::_advance` and `::_dslice21`, not inferred from a name. Priced three times wrongly first (27.6%, 41.5%) by reading the plan instead of the code |
+| F21's own `_matmuls` bills an aged lineage `7`, which the code has not issued since `_dslice21`'s two permutations were found to be the same product | **CONFIRMED** — and deliberately left standing; it only picks `gens`, and both arms pick `None` at the live shape |
+| the residual is numerically low-rank | **INFERRED** — our own Frobenius screen at n=128 leaves 1.7–7.7% at rank 16 (`p2_split_n128.json`), an order of magnitude worse than the end-to-end cost 504aldo report, in the expected direction: a contraction forgives Frobenius error |
+| rank 32 costs +0.9% raw MSE | **SPECULATIVE for us** — 504aldo's F63 row, measured on **their** chain with a different term set. A suggestion for our rank, not a result about ours |
+| a deterministic sketch suffices — `W[:, :r]`, which at He init is i.i.d. Gaussian | **CONFIRMED as available**, read off the oracle (`estimator_v16b.py:561`). It removes hard rule 2 from the problem entirely rather than satisfying it by seeding |
+| the emitted candidate is not a no-op and its control is exact | **CONFIRMED** — `p2_build_v31.py --parity`: control == v30 bitwise at identical counted FLOPs; dense arm 1.5–2.3e-7 relative (float32 reassociation); rank-32 arm 2.0–2.6e-4 |
+
+### Hypothesis and mechanism
+
+**H.** The dense `A_D` leg is redundant. Two of its three pieces are column
+scales on legs the tower already transports, so carrying it dense pays `n^3` a
+layer for arithmetic that is `n^2`. Replacing it with the factored form removes
+one transport and one contraction outright and costs only `O(k n^2 r)`, so the
+score improves through the **cost** half of the objective while raw MSE moves
+by at most the rank truncation.
+
+**Why it should be true.** This is an algebraic identity, not a model: the
+reconstruction is exact at full rank, and it is *preserved by transport*
+(`W^T A_D = (W^T M) d(s) + 3 (W^T A_L) d(e) + (W^T Z) L^T`), which is the only
+reason a factored leg can survive more than one layer. The mechanism claim
+that can actually fail is the **rank**: that `R_res` is low-rank enough at
+`r = 32` for the contraction to forgive what is dropped.
+
+### Intervention
+
+One change: the representation of the `(2,1)` leg. Same births, same
+consumers, same term table, same kappa-4 channel, same Strassen depth.
+
+### Arms
+
+| arm | file | what it is |
+|---|---|---|
+| control | `estimator_k3_v31_control.py` | **v30, bit-identical.** Reached through the same generator so the two cannot drift apart by separate editing |
+| dense | `estimator_k3_v31_dense.py` | `_P2_RANK = 0`. The factored leg at **full rank** — algebraically v30, and *more expensive* than it. Separates "did the regrouping break anything" from "does truncation cost accuracy" |
+| candidate | `estimator_k3_v31.py` | `_P2_RANK = 32` |
+
+### Numbered predictions, mine, before any data
+
+1. **Measured counted FLOPs, candidate / control: `0.70` to `0.78`.** The
+   model says `0.687` of the tower, but Strassen depth 4 discounts the dense
+   products P2 *removes* and does not discount the thin ones it *adds*, so the
+   measured ratio must be **worse** than the model. If it comes in below 0.687
+   I have the direction of Strassen's effect backwards.
+2. **Raw MSE, candidate / control: `1.00` to `1.04`.** Centred near 504aldo's
+   +0.9% but with a wider upper tail, because F21's term set is not theirs.
+3. **Paired arithmetic score gain vs v30: `1.25x` to `1.45x`**, driven almost
+   entirely by cost.
+4. **The dense arm's score is within `0.5%` of the control's.** It is the same
+   algebra; anything larger is an implementation bug, and it would be a bug in
+   the regrouping, not in the rank.
+5. **Residual does not worsen.** P2 removes three `(n, k n)` materialisations
+   (the `A_D` transport output, `A_D . M`, and `M.M @ A_D^T`) and adds two (the
+   dense reconstruction and one layout shuttle), so worst observed local
+   residual <= the control's. **This is the prediction I am least sure of** —
+   the shuttles are strided copies and the removals are not.
+
+### Gate — on the difference this slice isolates
+
+Written on the **paired arithmetic score difference**, candidate against
+control, not on any total that contains it:
+
+> **PROMOTE to a DECIDE-block contract iff** the 95% studentised-t interval on
+> the paired arithmetic score difference `(control - candidate)` is **strictly
+> above 0**, **and** the point gain is **>= 1.20x**.
+
+`1.20` is chosen now and is below my own prediction band on purpose, but it is
+not un-failable: it fails if the rank truncation costs more than ~15% of raw
+MSE, if the thin overhead is larger than modelled, or if the float32
+regrouping is numerically worse than the spelling it replaces. All three are
+live.
+
+Passed to `local_sim/competition_score.py::decide(gate=...)`, which has no
+default.
+
+### Falsifier
+
+- the interval includes or sits below 0 → **P2 as implemented does not pay**;
+- the dense arm differs from the control by more than 0.5% in score → **the
+  regrouping implementation is wrong**, and the rank arm's number means
+  nothing until it is fixed;
+- worst observed local residual exceeds the control's by more than 25% → the
+  layout shuttles are the problem, and the 2-D/3-D design has to change before
+  the accuracy question is worth asking.
+
+### Baseline
+
+`estimator_k3_v31_control.py`, which `--parity` asserts is v30 bit for bit.
+**DESIGN tier.**
+
+### Cost model — Phase 2, lambda = 0, so `C = F`
+
+Counted-FLOP model, frozen here before measurement:
+
+| | projected tower FLOPs at 1024x16 |
+|---|---|
+| v30/F21, as the code **issues** (6 aged / 5 young) | `1.4920e+12` |
+| P2 (4 aged / 3 young) + `4 k n^2 r` thin a layer | `1.0252e+12` |
+| **ratio** | **`0.6871` — a 31.3% saving** |
+
+Thin terms are **1.6%** of P2's total. Applied to F21's measured live-shape
+total `928,457,637,478` with its f32 K2 backbone anchor `68,802,510,336`
+held fixed (the tower is 92.6% of the bill):
+
+    928,457,637,478  ->  659,482,000,000        C/B  0.4222 -> 0.2999
+
+Residual is **not a cost** at lambda = 0; it is the 0.4 s per-MLP cliff.
+Reported as **headroom, `0.4 / worst observed`**, against F21's graded
+`0.15623 s` (2.56x headroom). `VALIDATION.md` section 2b-ii.
+
+### Statistic
+
+Paired, common random numbers, **arithmetic score difference**, studentised-t
+95%. The geometric mean of per-MLP ratios is reported as a stability
+diagnostic with no authority. Percentile and BCa are refused.
+
+### Seed block
+
+**P01, DESIGN tier**, via `experiments/2026-08-21_p2_cp1/truth_P01.npz`,
+24 networks, the same truth the P1 screen used — deliberately, so P1 and P2
+are measured on identical inputs and their gains are comparable. DESIGN truth
+is reusable by protocol (`truth_reads.CAPS["DESIGN"] is None`); the read is
+registered through `local_sim/truth_reads.py` like any other.
+
+### Confounders, scope, and what must not change
+
+- **The rank is a free parameter and must not be tuned on this screen.** 32 is
+  taken from 504aldo's published F63 row and is fixed before measurement. If
+  the gate fails at 32, that is a failed gate — not an invitation to sweep `r`
+  on the same networks and report the best.
+- The candidate carries **P1 as well as P2**. The paired difference isolates
+  P2 because the control is v30, but any *absolute* number quoted from this
+  screen is the pair, not P2 alone.
+- Strassen depth, the term table, the kappa-4 channel, `_ELEM_PER_LAYER` and
+  the generation cap are unchanged. `--parity` asserts both arms choose the
+  same `gens` at the live shape.
+- Untouched: `estimator.py`, the vault, the public split, `HUMAN_MODEL.md`,
+  every historical failed gate.
+- **No submission follows from this entry**, whatever it says.
