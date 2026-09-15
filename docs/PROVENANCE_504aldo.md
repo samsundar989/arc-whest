@@ -64,6 +64,8 @@ row here, naming the file, the line and what question it answered.
 | 2026-09-15 | `estimators/estimator_v17.py:679` | which harmonic projection the per-neuron κ4 core is | **r = 1 matrix core**, `g = (K4 + rowsum K22)·6/(n+4) − (ΣK4 + Σrowsum K22)·3/((n+2)(n+4))`. F21's `_proj_coef_d4_r2` is the **r = 2** scalar — a *different projection*, not a rescaling. This was the bug behind a 9.2× design-screen regression |
 | 2026-09-15 | `estimator_v17.py:447–450` | the transport operand and the consumer coefficients | `WW = W*W`, `dG = WW @ (g_prev − var_prev·λ) + var·λ`; `D4 = metric·dG`, `D22 = (metric/6)(dG_i+dG_j)`, `METRIC_C = 2.0`. **Our implementation already matched all of these** — only the birth was wrong |
 | 2026-09-15 | `estimator_v17.py:585–592` | the κ4→κ3 feed | Confirmed it belongs to their **compact leg representation**. F21's frozen term table already routes κ4 into the κ3 births, so porting it would double count. **P1b stays struck** |
+| 2026-09-15 | `estimator_v16b.py:558–569` | P2's separable split | Identical to what we derived and measured independently BEFORE cloning: `e = w(1,2) − 2·pK1·w(1,1)`, `S_sep = zero_diag(e_i·C_off·w1_j)`, birth `diag(S3) + 3·a_b·d(e) + 3·R·Lᵀ`. No correction needed |
+| 2026-09-15 | `estimator_v16b.py:280` | P2's residual rank | They ship **32**, not the handoff's 16. Their F63 row gives raw-MSE cost +1.6% / +0.9% / +0.4% at rank 16 / 32 / 64. A *suggestion* for our rank, to be verified end to end on our chain |
 
 **What was NOT taken:** no code was copied. The coefficients above are
 mathematical facts about a harmonic projection — `6/(n+4)` and
@@ -92,7 +94,7 @@ own tiny-shape parity evidence.
 | # | mechanism | their finding | our file | status |
 |---|---|---|---|---|
 | P1 | κ4 regeneration `G = diag(g) + λ·C_off`, with consumers and the κ4→κ3 feed derived from one state | F68 | `estimator_k3_v30.py` | **RE-IMPLEMENTED**, own code from F21 lineage via `local_sim/p2_build_v30.py`. Birth projection identified against the oracle; consumers and transport were already ours and already correct. Accuracy unproven — first screen regressed 9.2× on the wrong projection; corrected rerun pending |
-| P2 | the 7→4 leg identity, `S21 = S_sep + R_res` with a thin transported residual | F63 | — | **NOT STARTED** |
+| P2 | the 7→4 leg identity, `S21 = S_sep + R_res` with a thin transported residual | F63 | — | **NOT STARTED** — identity derived and measured independently, priced at ~27.6% of the tower; see `experiments/2026-09-14_slice6a_p1/p2_design_note.md` |
 | P3 | rank-16 D21→birth feedback | F69 | — | **NOT STARTED** |
 | P4 | Strassen depth/pooling/block-symmetric `C_pre`/final-layer trim | F86 (cost anatomy) | — | **NOT STARTED** |
 | P5 | age-gated shared basis, 384 at age 4 nested to 224 at age 7 | F72/F73 | — | **NOT STARTED** |
