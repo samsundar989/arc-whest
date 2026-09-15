@@ -1,4 +1,18 @@
-# P2 repriced: 41.5% of the tower, not 27.6% — and the name is literal
+# P2 repriced: 32.3% of the tower
+
+> **CORRECTED AGAIN, 2026-09-15, and this is the one to use.** The 41.5% below
+> assumed F21 spends **seven** dense products per layer. It spends **six**:
+> `_dslice21` already fuses its two `M`-right-factor terms into one matmul, so
+> the baseline is 3 transports + 3 contractions, not 3 + 4. P2 gives
+> 2 + 2, so the count is **6→4** and the saving is **32.3%**, giving
+> `C/B 0.4222 → 0.2959`.
+>
+> I have now priced this three times — 27.6%, 41.5%, 32.3% — and only the last
+> was read off the code. The first two were read off the plan and the mechanism
+> name. **Count the products in the source before quoting a saving.**
+>
+> The identity, the regrouping, the rank and every caveat below stand
+> unchanged; only the arithmetic of the baseline moved.
 
 *2026-09-15. Corrects `p2_design_note.md`. Label-free; arithmetic on measured
 shapes, nothing run.*
