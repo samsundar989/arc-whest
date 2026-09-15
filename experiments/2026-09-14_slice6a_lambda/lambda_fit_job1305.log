@@ -1,0 +1,63 @@
+worker-q: job #1305 starting at 2026-09-15T01:03:52.133701+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=none -
+worker-q: CUDA_VISIBLE_DEVICES=0
+worker-q: command=['C:/Users/samsu/Documents/arc-whest/.venv-gpu/Scripts/python.exe', 'C:/Users/samsu/Documents/arc-whest/local_sim/p2_lambda_fit.py', '--widths', '48,64,96,128', '--depth', '16', '--n-mlps', '24', '--seed-start', '40901003000', '--block', 'P03', '--device', 'cuda', '--out', 'C:/Users/samsu/Documents/arc-whest/experiments/2026-09-14_slice6a_lambda/lambda_fit.npz']
+worker-q: ------------------------------------------------------------
+W0914 20:03:53.929000 68044 Lib\site-packages\torch\utils\flop_counter.py:29] triton not found; flop counting will not work for triton kernels
+================================================================================================
+OUR OWN kappa-4 REGENERATION LAMBDA, from the unfactored AUGMENT chain
+================================================================================================
+  widths   [48, 64, 96, 128]   depth 16   24 nets   float32
+  seeds    40901003000..40901003023   block P03
+  LABEL-FREE: no truth, no public split, no DECIDE block.
+
+  -- width 48 ------------------------------------------------------------
+  -- width 64 ------------------------------------------------------------
+  -- width 96 ------------------------------------------------------------
+  -- width 128 ------------------------------------------------------------
+
+  l              n=48          n=64          n=96         n=128        504aldo
+  0      1.997219e-01  1.527714e-01  1.016875e-01  7.670654e-02   4.989475e-03
+  1      2.779712e-01  1.999352e-01  1.247611e-01  9.283744e-02   8.087550e-03
+  2      3.566154e-01  2.364155e-01  1.448022e-01  1.073352e-01   9.829100e-03
+  3      4.118811e-01  2.645375e-01  1.689253e-01  1.136068e-01   1.054901e-02
+  4      4.504005e-01  2.771158e-01  1.843809e-01  1.170147e-01   1.085100e-02
+  5      5.542450e-01  3.161170e-01  2.039050e-01  1.283760e-01   1.082750e-02
+  6      6.155980e-01  3.562585e-01  2.159087e-01  1.347442e-01   1.058862e-02
+  7      6.224255e-01  3.774699e-01  2.403999e-01  1.354242e-01   1.004805e-02
+  8      6.018385e-01  4.036375e-01  2.610950e-01  1.324743e-01   9.648350e-03
+  9      5.898927e-01  4.257000e-01  2.871786e-01  1.298030e-01   9.171988e-03
+  10     6.325268e-01  4.280832e-01  2.949763e-01  1.376374e-01   8.773038e-03
+  11     5.944234e-01  4.476270e-01  2.918434e-01  1.432220e-01   8.393763e-03
+  12     1.019291e+01  4.580564e-01  2.825328e-01  1.479703e-01   8.055513e-03
+  13     3.113400e+04  4.450862e-01  2.883097e-01  1.438152e-01   7.677038e-03
+  14              nan  4.349247e-01  3.085341e-01  1.508231e-01   7.258787e-03
+
+  R^2 of that fit (cos^2), same layout
+  0            0.6356        0.6590        0.6451        0.6531
+  1            0.6115        0.6209        0.6095        0.6243
+  2            0.6787        0.6442        0.6563        0.6570
+  3            0.7241        0.6897        0.6889        0.6763
+  4            0.7533        0.7065        0.7219        0.6919
+  5            0.7945        0.7326        0.7370        0.7183
+  6            0.7886        0.7728        0.7572        0.7320
+  7            0.7939        0.7885        0.7786        0.7480
+  8            0.7928        0.8040        0.8051        0.7618
+  9            0.7469        0.7927        0.8099        0.7538
+  10           0.7318        0.7879        0.8165        0.7639
+  11           0.6352        0.7935        0.8342        0.7802
+  12           0.6491        0.7848        0.8160        0.8065
+  13           0.5236        0.7430        0.8312        0.8021
+  14              nan        0.6403        0.8407        0.8108
+
+  WIDTH STABILITY -- the question the memory wall forces
+    n=96 -> n=128: median |rel change| 0.4367, worst 0.5480
+    A fit at a feasible width transfers to 1024 only if this
+    is small AND still shrinking as width grows. One pair of
+    widths cannot establish that; it can only refute it.
+    ours / 504aldo at n=128: median 13.7303, range [10.7694, 20.7780]
+
+  -> C:/Users/samsu/Documents/arc-whest/experiments/2026-09-14_slice6a_lambda/lambda_fit.npz
+worker-q: ------------------------------------------------------------
+worker-q: job #1305 SUCCEEDED (exit code 0) at 2026-09-15T01:05:17.557652+00:00

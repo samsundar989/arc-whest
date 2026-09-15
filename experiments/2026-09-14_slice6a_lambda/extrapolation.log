@@ -1,0 +1,41 @@
+================================================================================================
+DOES OUR OWN LAMBDA REACH n = 1024?
+================================================================================================
+  fitted on widths [64, 96, 128]   DROPPED [48]
+  A dropped width was non-positive or non-finite at some layer:
+  a degenerate arm, excluded as such and named here.
+
+  l     exponent p   power R2    lambda(1024)      504aldo      ratio
+  0         0.9946    0.99996      9.6814e-03   4.9895e-03      1.940
+  1         1.1105    0.99885      9.1423e-03   8.0876e-03      1.130
+  2         1.1438    0.99833      9.8413e-03   9.8291e-03      1.001
+  3         1.2120    0.99611      9.3018e-03   1.0549e-02      0.882
+  4         1.2281    0.98334      9.4492e-03   1.0851e-02      0.871
+  5         1.2857    0.98721      9.1671e-03   1.0828e-02      0.847
+  6         1.3917    0.99355      7.6573e-03   1.0589e-02      0.723
+  7         1.4548    0.97244      6.9621e-03   1.0048e-02      0.693
+  8         1.5724    0.95109      5.4751e-03   9.6483e-03      0.567
+  9         1.6648    0.91820      4.5747e-03   9.1720e-03      0.499
+  10        1.5899    0.91624      5.6471e-03   8.7730e-03      0.644
+  11        1.6054    0.94316      5.5754e-03   8.3938e-03      0.664
+  12        1.6014    0.96753      5.6723e-03   8.0555e-03      0.704
+  13        1.5932    0.94779      5.7152e-03   7.6770e-03      0.744
+  14        1.4832    0.91375      7.6795e-03   7.2588e-03      1.058
+
+  power-law R2   min 0.9138   median 0.9724
+  exponent p     0.995 .. 1.665   median 1.455
+  the fit's OWN R2 (kappa-4 core on C_off), at n=128: 0.624 .. 0.811
+
+  ours / 504aldo at n=1024: median 0.744, range [0.499, 1.940]
+  layers within 15% of their table: 5 of 15
+
+  PRE-REGISTERED PREDICTION (strategist, before this ran):
+    'within 15% per layer at l=1-14'  -> FALSIFIED
+    'R2 >= 0.6 by layer 4'            -> CONFIRMED  (R2 = 0.692 at n=128)
+
+  THE EXTRAPOLATION SPANS 8x IN WIDTH beyond the
+  largest measured point. A power law with this R2 shows lambda moves
+  smoothly in width over 64-128. It does NOT show the same exponent
+  holds to 1024, and no R2 inside the measured range can show that.
+  Treat the table as a STARTING POINT for P1, to be checked end to
+  end against score, not as a fitted constant.

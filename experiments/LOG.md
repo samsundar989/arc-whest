@@ -49557,3 +49557,140 @@ Engineering gate: independently compare full Gaussian-start n3/4 active f64 vers
 **Affected preflight snapshot failure and corrected workload review.** Workerq #1283 used the default Git snapshot and returned RED at seed-ledger steps 7/9 and official anchor step 12. This was a representation artifact: the repository has `core.autocrlf=true`, with tracked blobs LF but live working files CRLF; the snapshot checked out LF files and therefore changed exact-byte SHA commitments for 22 historical artifacts and `estimator.py` (snapshot SHA `1caa3752…`, live and stored official SHA `00240eb1…`). Live `uv run python local_sim/p2_flop_anchor.py --gate` passes all 19 operation types with exact official parity and the expected live SHA. No protected artifact was edited, no ledger was changed, and the preflight RED is retained. Re-run the same default 12-step preflight via `workerq --live-worktree`, as accepted #1274 did, freezing its imported live sources until completion; this preserves the committed byte representations. Reserve 4 GiB RAM/0 VRAM/2 CPUs, the same conservative envelope as #1283 (3.4 GiB measured peak). No dataset loader, caching, prefetch, GPU, checkpoint or pass elimination applies; all required gates stay enabled. This is a corrected execution path, not a relaxation of source-integrity checks or candidate memory failure.
 
 **Corrected affected preflight result.** Workerq #1284 used `--live-worktree` with all imported source bytes frozen and SUCCEEDED exit0 after 313.07s, measured peak host RAM 3091.2 MiB under the 4-GiB reservation. `experiments/e14_tree_f64/preflight_live.log` reports **PREFLIGHT GREEN 12/16, four Full skips**; previously false failing steps 7/9/12 all PASS, with official FLOP anchor exact across 19 operations. Full stdout/stderr is `workerq_1284.log` and the receipt is `workerq_1284.json`; #1283 RED snapshot receipt/transcript are retained alongside them. This is affected infrastructure verification only, not a candidate memory, residual, truth or release certificate. The full-f64 release HOLD and next strategist decision stand.
+
+---
+
+## 2026-09-14 (night) — **Slice 6 §0.5 and §2.1: the projector, and our own κ4 λ**
+
+Session resumed after a VSCode crash. First act was to commit the Sep-14
+strategist package and the λ experiment that killed E14, which existed only in
+the working tree (`d26cc94`). Nothing was lost.
+
+Operative contract: `docs/CLAUDE_CODE_HANDOFF_2026-09-14.md`. No submission, no
+designation, no DECIDE block, no vault touch, no public fitting.
+
+### §0.5 — `predict_public.py`, the piece to build first
+
+    projected_public(candidate) = graded_public(control) x ratio(local, paired)
+
+The ratio is what transfers: our 100 public-mini networks are not the board's
+50, but both arms see the same 100. The anchor is measured, the ratio is
+measured, the product is labelled a **prediction**. Every line carries **MATH**,
+**LOCAL** or **SERVER_PREDICTED** — the split `certify_candidate` grew on
+2026-09-10, for the same reason.
+
+Residual is priced on the **operation count** against the 22,000 gate and the
+calibrated 13.4 µs/op model *with its range*, never on local seconds — §0.1 of
+the contract. Cost is reported at **both** ends of the server's `{0, +2**24}`
+offset, because the server picks one and we cannot tell which from here.
+
+It refuses runs over different networks, rows with no identity, a report with
+no budget, and an arm with failed MLPs unless told otherwise. The real F21
+`#330950` report replays to **1.595740e-8**, raw `3.7795e-8`, multiplier
+`0.422214`. `test_predict_public.py` **39/39**; three of its checks were wrong
+in the first draft and the code was right, both corrected with the reason
+recorded.
+
+### §2.1 — the memory wall the plan did not anticipate
+
+The handoff says to dump the AUGMENT κ4 core at **1024×16**. That cannot be
+done. Unfactored AUGMENT at `k_max=3` keeps κ3 as a dense `(n,n,n)`
+(`get_d_max(3, AUGMENT) = 4`, `r_x = {1:0, 2:0, 3:0, 4:1}`; degree 4 at `r=1`
+is the `(n,n)` core we want). Measured peak VRAM, RTX 5090 32 GiB, float32,
+depth 16:
+
+    n =  64      1.61 GiB
+    n = 128     12.44 GiB      growth 7.73x against the n^3 law's 8.00x
+    n = 192     OUT OF MEMORY  where that law predicts 42.0 GiB
+
+**The law is confirmed by the failure that tests it.** Extrapolated: `n=256`
+99.5 GiB, `n=512` 796 GiB, **`n=1024` 6,369 GiB**. This card holds about `n=175`.
+
+So the question became: **is λ width-stable enough to transfer?**
+
+### The measurement — job `1305`, 24 fresh P03 design networks, LABEL-FREE
+
+Seeds `40901003000..023` claimed through the ledger **in the live repository
+before the job was submitted**, because a claim written inside a job snapshot
+is discarded with the snapshot while the seeds are really drawn. No truth, no
+public split, no DECIDE spend.
+
+**The fit's own quality is excellent and essentially width-independent.** R² of
+the κ4 core on `C_off` at `n=128` runs **0.624 → 0.811**, rising with depth —
+the same shape and range 504aldo report (0.66–0.97). Their stop condition
+(*"if R² < 0.5 at depth, stop and report"*) is **not triggered**.
+
+**λ itself moves strongly with width, and it moves as a clean power law.**
+Fitting `λ_l(n) = a_l · n^(−p_l)` over `n = 64, 96, 128`:
+
+    power-law R^2     0.9138 .. 0.99996     median 0.9724
+    exponent p        0.995 .. 1.665        median 1.455
+
+`n=48` is **excluded as a degenerate arm, named as such**: it reads `1.02e+01`
+at l=12, `3.11e+04` at l=13 and `nan` at l=14 against a per-layer scale of
+order 0.5, with the upstream chain snapping negative variances throughout.
+
+### The result, against the pre-registered predictions
+
+Extrapolated to `n=1024` and compared with 504aldo's table:
+
+| | |
+|---|---|
+| ours / theirs, median | **0.744** |
+| range across 15 layers | **[0.499, 1.940]** |
+| layers within 15% | **5 of 15** |
+
+| prediction, recorded before this ran | verdict |
+|---|---|
+| strategist: *λ within 15% per layer at l=1–14* | **FALSIFIED** — 5 of 15 |
+| strategist: *R² ≥ 0.6 by layer 4* | **CONFIRMED** — 0.692 at `n=128` |
+| Samuel: *"I don't know"* | recorded as given |
+
+**What this is.** An independent, label-free fit of the κ4 regeneration
+coefficient, on our own fresh mints, lands **within a factor of two of a
+competitor's public-data fit at every one of fifteen layers**, with the same R²
+profile. That corroborates the *mechanism* strongly and independently. It does
+**not** reproduce their table, and the disagreement is structured rather than
+noisy: we agree at the ends (`1.00` at l=2, `1.06` at l=14) and sit low in the
+middle (`0.50` at l=9).
+
+**What it is not.** The extrapolation spans **8× in width** beyond the largest
+measured point. A power law with R² 0.97 over 64–128 shows λ moves smoothly
+there; it does not show the exponent holds to 1024, and no R² inside the
+measured range can show that. `lam_own.npz` is a **starting point for P1, to be
+checked end to end against score**, not a fitted constant.
+
+Artifacts: [`experiments/2026-09-14_slice6a_lambda/`](2026-09-14_slice6a_lambda/)
+— `lambda_fit.npz`, `lam_own.npz`, both `_meta.json`, the job log and
+`workerq-1305.json`. Instruments: `local_sim/p2_lambda_fit.py`,
+`local_sim/p2_lambda_extrapolate.py`.
+
+### Provenance
+
+`docs/PROVENANCE_504aldo.md` opens the file §1 requires before any mechanism is
+ported: the pinned commit `18c17e2d…`, five mechanism rows (all **NOT
+STARTED**), and what we deliberately do not take — their public-fitted λ table,
+their mutable-buffer patterns, their runner advice. The rules §6 question is
+**drafted and UNSENT**, awaiting Samuel's approval of the exact wording. His
+2026-09-14 decision to ask it supersedes his 2026-09-10 decision to hold off;
+both are recorded.
+
+### Knowledge delta
+
+- The AUGMENT route to λ has a **hard O(n³) memory wall at about width 175** on
+  this hardware. Any future plan that says "run the dense augmented chain at
+  the live shape" is proposing 6.4 TB of VRAM.
+- λ is **not** width-stable, but it is **width-regular**: a per-layer power law
+  with median R² 0.97. That is a much better situation than instability, and it
+  is why the wall costs less than it first appeared to.
+- Two independent fits of the same coefficient — ours label-free on fresh
+  mints, theirs on eight public MLPs — agree to within a factor of two across
+  the full depth. The κ4 regeneration mechanism is real and is not an artefact
+  of their fitting set.
+
+### Owed
+
+P1's consumers and the κ4→κ3 feed are not implemented; `estimator_k3_v30.py`
+does not exist. §0.1 (removing the local-seconds residual gate from the
+decision paths), §0.6 (formally stopping both E14 files) and the Rule 2 Skeptic
+on this slice are all outstanding.

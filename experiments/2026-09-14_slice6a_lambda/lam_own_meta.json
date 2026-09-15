@@ -1,0 +1,18 @@
+{
+  "source_fit": "experiments\\2026-09-14_slice6a_lambda\\lambda_fit.npz",
+  "widths_used": [
+    64,
+    96,
+    128
+  ],
+  "widths_dropped": [
+    48
+  ],
+  "target_width": 1024,
+  "model": "lambda_l(n) = a_l * n**(-p_l), per-layer LS in log-log",
+  "extrapolation_factor": 8.0,
+  "caveat": "the extrapolation spans 8x beyond the largest measured width; the power law is evidence of smooth width dependence over the measured range and not evidence that the exponent holds to the target",
+  "label_free": true,
+  "public_labels_used": false,
+  "aldo_table_used_as": "comparison target only, never as a fitted constant"
+}
