@@ -1,0 +1,158 @@
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:1027: RuntimeWarning: overflow encountered in multiply
+  prod = f if prod is None else prod * f
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:1034: RuntimeWarning: overflow encountered in multiply
+  term = prod * coef
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:615: RuntimeWarning: overflow encountered in matmul
+  Q, _ = fnp.linalg.qr(R @ (R.T @ Q))
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:1084: RuntimeWarning: invalid value encountered in scalar add
+  c4_out = _proj * (_a4 * K[(4,)].sum() + _b22 * K[(2, 2)].sum())
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:1114: RuntimeWarning: invalid value encountered in add
+  g_out = (_k4 + _k22row) * _cA + (_k4.sum() + _k22row.sum()) * _cI
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:1114: RuntimeWarning: invalid value encountered in scalar add
+  g_out = (_k4 + _k22row) * _cA + (_k4.sum() + _k22row.sum()) * _cI
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:971: RuntimeWarning: overflow encountered in multiply
+  term = f if term is None else term * f
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:984: RuntimeWarning: invalid value encountered in multiply
+  term = term * (wk if d == 1 else (wk[:, None] if axis == 0 else wk[None, :]))
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:1014: RuntimeWarning: overflow encountered in multiply
+  + ((fac1 * fac1) * w2b) * off_mask)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:1014: RuntimeWarning: invalid value encountered in multiply
+  + ((fac1 * fac1) * w2b) * off_mask)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:664: RuntimeWarning: overflow encountered in multiply
+  return (MP * tw.M).sum(axis=1) + 3.0 * (tw.A_L * tw.M * C_L).sum(axis=1)
+C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\numpy\_core\_methods.py:52: RuntimeWarning: overflow encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\numpy\_core\_methods.py:52: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:698: RuntimeWarning: overflow encountered in multiply
+  LP = (tw.A_L * tw.A_L) * tw.w2b + PP * (tw.sb / 3.0) + (2.0 / 3.0) * MP
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:698: RuntimeWarning: invalid value encountered in multiply
+  LP = (tw.A_L * tw.A_L) * tw.w2b + PP * (tw.sb / 3.0) + (2.0 / 3.0) * MP
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:483: RuntimeWarning: overflow encountered in matmul
+  return A @ B
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:511: RuntimeWarning: invalid value encountered in add
+  c11 = p1 + p4 - p5 + p7
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:511: RuntimeWarning: invalid value encountered in subtract
+  c11 = p1 + p4 - p5 + p7
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:512: RuntimeWarning: invalid value encountered in add
+  c12 = p3 + p5
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:513: RuntimeWarning: invalid value encountered in add
+  c21 = p2 + p4
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:514: RuntimeWarning: invalid value encountered in subtract
+  c22 = p1 - p2 + p3 + p6
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:514: RuntimeWarning: invalid value encountered in add
+  c22 = p1 - p2 + p3 + p6
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:1035: RuntimeWarning: invalid value encountered in add
+  acc = term if acc is None else acc + term
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:1027: RuntimeWarning: invalid value encountered in multiply
+  prod = f if prod is None else prod * f
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:614: RuntimeWarning: invalid value encountered in matmul
+  Q, _ = fnp.linalg.qr(R @ Om)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:1084: RuntimeWarning: overflow encountered in scalar multiply
+  c4_out = _proj * (_a4 * K[(4,)].sum() + _b22 * K[(2, 2)].sum())
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:1067: RuntimeWarning: overflow encountered in multiply
+  S_sep = (e_b[:, None] * C11) * w1[None, :]
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:1067: RuntimeWarning: invalid value encountered in multiply
+  S_sep = (e_b[:, None] * C11) * w1[None, :]
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:1068: RuntimeWarning: invalid value encountered in subtract
+  Zb, Lb = _p2_compress(S21 - S_sep, W)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:646: RuntimeWarning: overflow encountered in multiply
+  MP = PP * tw.sb + (tw.A_L * tw.M) * (3.0 * tw.eb) + Zres * tw.M
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:646: RuntimeWarning: invalid value encountered in add
+  MP = PP * tw.sb + (tw.A_L * tw.M) * (3.0 * tw.eb) + Zres * tw.M
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:927: RuntimeWarning: invalid value encountered in multiply
+  dG = _WT2 @ (gk4 - fnp.diagonal(cov) * _lam_prev) + var * _lam_prev
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:511: RuntimeWarning: overflow encountered in add
+  c11 = p1 + p4 - p5 + p7
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:511: RuntimeWarning: overflow encountered in subtract
+  c11 = p1 + p4 - p5 + p7
+world: 256x32  B = 272,000,000,000  weights = numpy float32   [HISTORICAL DEFAULT -- not the graded world]
+candidate: tau=n/a  target C/B=n/a  chunk=n/a
+
+1. NORMAL CASE
+  he 256x32                          ok   shape (32, 256)  range [0.000e+00, 5.138e+00]  final mean 0.6468  deterministic=True
+
+2. DEGENERATE PRUNING (whole layers pushed below tau)
+  layer 5 scaled 0.02                ok   shape (32, 256)  range [0.000e+00, 1.445e+15]  final mean 0.0000  deterministic=True
+  layer 5 scaled 0.001               ok   shape (32, 256)  range [0.000e+00, 2.534e+15]  final mean 0.0000  deterministic=True
+  layer 7 identically zero           ok   shape (32, 256)  range [0.000e+00, 1.956e+25]  final mean 0.0000  deterministic=True
+
+3. EXTREME DYNAMIC RANGE
+  layer 12 scaled 100x               ok   shape (32, 256)  range [0.000e+00, 5.121e+02]  final mean 67.8445  deterministic=True
+  layer 12 scaled 1e-3               ok   shape (32, 256)  range [0.000e+00, 3.852e+14]  final mean 0.0000  deterministic=True
+  layer 12 scaled 1e4                ok   shape (32, 256)  range [0.000e+00, 2.297e+36]  final mean 0.0000  deterministic=True
+  layer 3 mean-shifted (all on)      ok   shape (32, 256)  range [0.000e+00, 1.572e+02]  final mean 15.8967  deterministic=True
+
+4. SEED EXTREMES (the rng contract)
+  seed 0                             ok   shape (32, 256)  range [0.000e+00, 5.307e+00]  final mean 0.5724  deterministic=True
+  seed 1                             ok   shape (32, 256)  range [0.000e+00, 5.307e+00]  final mean 0.5724  deterministic=True
+  seed 2147483647                    ok   shape (32, 256)  range [0.000e+00, 5.307e+00]  final mean 0.5724  deterministic=True
+  seed 9223372036854775807           ok   shape (32, 256)  range [0.000e+00, 5.307e+00]  final mean 0.5724  deterministic=True
+  seed 12345678901234567890          ok   shape (32, 256)  range [0.000e+00, 5.307e+00]  final mean 0.5724  deterministic=True
+
+5. SHAPE GENERALITY (calibration must disable itself off-width)
+  depth 2 x width 256                ok   shape (2, 256)  range [7.043e-03, 1.983e+00]  final mean 0.5480  deterministic=True
+  depth 8 x width 128                ok   shape (8, 128)  range [0.000e+00, 2.746e+00]  final mean 0.3156  deterministic=True
+  depth 32 x width 64                ok   shape (32, 64)  range [0.000e+00, 4.539e+00]  final mean 0.1861  deterministic=True
+  depth 4 x width 256                ok   shape (4, 256)  range [0.000e+00, 2.966e+00]  final mean 0.5809  deterministic=True
+  depth 64 x width 256               ok   shape (64, 256)  range [0.000e+00, 4.644e+00]  final mean 0.5140  deterministic=True
+
+6. BUDGET EDGES (the analytic fallback path)
+  budget 0                           ok   shape (32, 256)  range [0.000e+00, 4.661e+00]  final mean 0.4074  deterministic=True
+  budget 1                           ok   shape (32, 256)  range [0.000e+00, 4.661e+00]  final mean 0.4074  deterministic=True
+  budget 1e7 (below min N)           ok   shape (32, 256)  range [0.000e+00, 4.661e+00]  final mean 0.4074  deterministic=True
+  budget 1e9                         ok   shape (32, 256)  range [0.000e+00, 4.661e+00]  final mean 0.4074  deterministic=True
+  budget 10x                         ok   shape (32, 256)  range [0.000e+00, 4.651e+00]  final mean 0.4045  deterministic=True
+
+7. GRADER-ARRAY IMMUTABILITY (weights must be untouched)
+  input weights unmodified           ok
+
+8. LAYER-1 CLOSED FORM  (exact: ||W1[:,j]|| / sqrt(2*pi))
+  256x32                             max rel err 1.773e-16   ok
+  128x8                              max rel err 1.644e-16   ok
+  64x4                               max rel err 1.631e-16   ok
+  256x2                              max rel err 1.724e-16   ok
+
+9. PERMUTATION EQUIVARIANCE  (hidden-layer relabelling)
+  bar: every row MSE <= 1% of raw MSE = 1.400e-08   [frozen decision signal]
+  256x32 permute layer 7             row-k 9.54e-07  other-rows 1.18e-04  final 5.85e-05
+                                     MSE row-k 2.13e-14  other 2.74e-10  final 2.37e-10
+                                     worst 2.74e-10 = 0.0196% of raw MSE   ok
+  256x32 permute layer 20            row-k 9.54e-07  other-rows 8.68e-05  final 6.33e-05
+                                     MSE row-k 3.92e-14  other 5.46e-11  final 2.18e-10
+                                     worst 2.18e-10 = 0.0156% of raw MSE   ok
+  128x8 permute layer 1              row-k 2.68e-07  other-rows 4.27e-04  final 4.27e-04
+                                     MSE row-k 7.49e-15  other 1.01e-08  final 1.50e-08
+                                     worst 1.50e-08 = 1.0737% of raw MSE   FAILED
+  256x32 permute layer 30            row-k 3.58e-07  other-rows 1.45e-05  final 1.45e-05
+                                     MSE row-k 7.23e-15  other 2.62e-13  final 8.13e-12
+                                     worst 8.13e-12 = 0.0006% of raw MSE   ok
+
+10. BUDGET MONOTONICITY  (the failsafe ladder)
+  budget                0  n/a        valid=True  non-decreasing=True
+  budget                1  n/a        valid=True  non-decreasing=True
+  budget        1,000,000  n/a        valid=True  non-decreasing=True
+  budget       10,000,000  n/a        valid=True  non-decreasing=True
+  budget      100,000,000  n/a        valid=True  non-decreasing=True
+  budget    1,000,000,000  n/a        valid=True  non-decreasing=True
+  budget   10,000,000,000  n/a        valid=True  non-decreasing=True
+  budget   27,200,000,000  n/a        valid=True  non-decreasing=True
+  budget  272,000,000,000  n/a        valid=True  non-decreasing=True
+  budget 2,720,000,000,000  n/a        valid=True  non-decreasing=True
+  every rung degrades, none throws   ok
+  sample-count monotonicity          NOT PROVABLE -- this candidate exposes no _log2_samples
+
+11. DETERMINISM  (3x bit-identity + fresh instance)
+  256x32                             3x identical=True  fresh-instance identical=True  ok
+  128x8                              3x identical=True  fresh-instance identical=True  ok
+
+12. SEED-BLOCK HYGIENE
+  live blocks disjoint               ok   (29 decision blocks + vault block 20,260,806,000..20,260,806,499)
+
+13. GT-NOISE FLOOR  (what counts as signal)
+  vault GT samples/MLP               33,554,432
+  vault GT-noise MSE (mean)          1.575e-09  (0.113% of the 1.4e-6 decision signal)
+  vault touches                      1
+  noise < 10% of signal              ok
+
+29/30 checks passed

@@ -1,0 +1,41 @@
+C:\Users\samsu\Documents\arc-whest\local_sim\p2_build_v31.py:522: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v30.py:231: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v30.py:232: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31_control.py:251: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31_control.py:252: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31_dense.py:251: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31_dense.py:252: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:251: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_v31.py:252: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+budget guard at 1024x16
+  gens  control None   candidate None     AGREE
+  projected tower FLOPs  1.7174e+12 -> 1.0252e+12   0.5969x
+
+parity at 96x6
+  seed 90000000401
+    control == v30 bitwise: True    same counted FLOPs: True 
+    dense  differs by 1.768e-07 relative   cost 1.7515x
+    v31    differs by 2.169e-04 relative   cost 1.0331x
+  seed 90000000402
+    control == v30 bitwise: True    same counted FLOPs: True 
+    dense  differs by 1.915e-07 relative   cost 1.7515x
+    v31    differs by 2.639e-04 relative   cost 1.0331x
+  seed 90000000403
+    control == v30 bitwise: True    same counted FLOPs: True 
+    dense  differs by 1.513e-07 relative   cost 1.7515x
+    v31    differs by 1.700e-04 relative   cost 1.0331x
+
+permutation equivariance at 96x6  (vs the control's own floor)
+    layer 1    control 2.42e-14   v31 2.99e-14   ratio      1.2x   ok
+    layer 4    control 3.71e-15   v31 4.78e-15   ratio      1.3x   ok
+
+PARITY OK
