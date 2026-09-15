@@ -65,12 +65,11 @@ def main(argv=None) -> int:
     ap.add_argument("--gate", type=float, default=None,
                     help="a PRE-REGISTERED gate. Omit unless a contract set "
                          "one; this tool does not invent thresholds.")
-    ap.add_argument("--residual-cap", type=float, default=0.0,
-                    help="<=0 disables the local residual cliff. Default: "
-                         "disabled, because section 0.1 removed local seconds "
-                         "from every decision path and an armed cliff here "
-                         "replaces an accuracy comparison with a comparison of "
-                         "zero-prediction MSEs.")
+    ap.add_argument("--wall-caps", default="off", choices=("off", "official"),
+                    help="ALL local-seconds caps -- residual, wall, predict "
+                         "timeout -- together. Default off, which is what an "
+                         "ACCURACY-ONLY run needs; 'official' arms them and "
+                         "makes the run a deployment check instead.")
     ap.add_argument("--official-samples", type=float, default=1e9)
     ap.add_argument("--out", default="")
     a = ap.parse_args(argv)
@@ -101,11 +100,29 @@ def main(argv=None) -> int:
     # The AVERAGED truth has half the per-replica noise.
     gt_avg = None if gt is None else gt / 2.0
 
-    res = {} if a.residual_cap > 0 else {"residual_wall_time_limit_s": None}
-    if a.residual_cap > 0:
-        res = {"residual_wall_time_limit_s": a.residual_cap}
+    # EVERY LOCAL-SECONDS CAP GOES TOGETHER, OR NONE DOES.
+    #
+    # The first version of this module disabled the residual cliff and left the
+    # 120 s WALL cap armed. On this host F21 at Strassen depth 4 averages ~73 s
+    # per MLP, so three of twenty-four networks blew the wall, were scored at
+    # zero-prediction MSE, and dragged the control arm's raw error from ~4e-8
+    # to 1.03e-01. The comparison measured the host, not the candidate.
+    #
+    # Section 0.1 removed LOCAL SECONDS from every decision path. The residual
+    # cliff is local seconds; so is the wall cap; so is the predict timeout.
+    # Disabling one and arming the others is the worst of both, because the
+    # failure it produces looks like an accuracy result.
+    #
+    # `--wall-caps official` arms all three, which makes the run a deployment
+    # check rather than an accuracy comparison. It is never the default.
+    accuracy_only = (a.wall_caps == "off")
+    caps = ({"residual_wall_time_limit_s": None,
+             "wall_time_limit_s": None,
+             "predict_timeout_s": 1.0e9,
+             "setup_timeout_s": 1.0e9}
+            if accuracy_only else {})
     spec = le.LifecycleSpec(width=width, depth=depth,
-                            flop_budget=2 ** 41, lam=0.0, **res)
+                            flop_budget=2 ** 41, lam=0.0, **caps)
 
     print("=" * 96)
     print("DESIGN-TIER PAIRED SCORE -- licenses a contract, never a promotion")
@@ -114,10 +131,14 @@ def main(argv=None) -> int:
     print(f"  candidate  {a.candidate}")
     print(f"  truth      {os.path.relpath(a.truth, _ROOT)}   block {block}   "
           f"{n} nets   {width}x{depth}   2 replicas x {n_samples:,.0f}")
-    if a.residual_cap <= 0:
-        print("  *** RESIDUAL CAP DISABLED -- ACCURACY-ONLY. This run's failure")
-        print("  *** accounting cannot see a 0.4 s violation and it is NOT")
-        print("  *** residual evidence for anything (contract section 0.1).")
+    if accuracy_only:
+        print("  *** ALL LOCAL-SECONDS CAPS OFF -- ACCURACY-ONLY. Residual,")
+        print("  *** wall and predict timeout are all disarmed together. This")
+        print("  *** run is NOT deployment evidence for any of them, and its")
+        print("  *** failure accounting cannot see a timing violation.")
+        print("  *** (Armed, this host's ~73 s/MLP blows the 120 s wall on")
+        print("  *** some networks and scores them at zero-prediction MSE --")
+        print("  *** which measures the host, not the candidate.)")
     print()
 
     arms = {}
@@ -130,10 +151,18 @@ def main(argv=None) -> int:
         arms[label] = {"rows": rows, "suite": suite, "prov": prov,
                        "secs": time.perf_counter() - t0}
         f = float(np.mean([r.flops_used for r in rows]))
+        wall = [r.wall_time_s for r in rows]
         print(f"  {label:<10} score {suite.objective:.6e}   "
               f"raw MSE {suite.mean_mse:.6e}   C/B {f / 2 ** 41:.6f}   "
               f"mult {suite.mean_multiplier:.6f}   failed {suite.n_failed}/{n}"
               f"   {arms[label]['secs']:.0f}s")
+        print(f"             ADVISORY local wall: median "
+              f"{float(np.median(wall)):.1f}s  worst {float(np.max(wall)):.1f}s"
+              f"   -- LOCAL seconds, gates nothing, not the server's")
+        if suite.n_failed:
+            print(f"             *** {suite.n_failed} FAILED. With caps off "
+                  "this is a real failure, not a timing artefact -- read the "
+                  "flags before trusting any number above.")
 
     c_rows = [r.to_row() for r in arms["control"]["rows"]]
     k_rows = [r.to_row() for r in arms["candidate"]["rows"]]
@@ -184,7 +213,8 @@ def main(argv=None) -> int:
             "truth": os.path.relpath(a.truth, _ROOT), "block": block,
             "n": n, "width": width, "depth": depth,
             "n_samples_per_replica": n_samples,
-            "accuracy_only": a.residual_cap <= 0,
+            "accuracy_only": accuracy_only,
+            "local_seconds_caps": a.wall_caps,
             "tier": "DESIGN", "promotes_nothing": True,
             "arms": {k: {"objective": float(v["suite"].objective),
                          "raw_mse": float(v["suite"].mean_mse),
