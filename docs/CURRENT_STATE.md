@@ -26,39 +26,55 @@ clones at 4.2e-9. The family is right; the product is three times off.
 
 **1. The AUGMENT route to λ has a hard memory wall at about width 175.**
 Unfactored AUGMENT at `k_max=3` keeps κ3 as a dense `(n,n,n)`. Measured peak
-VRAM on a 32 GiB card: `n=64` **1.61 GiB**, `n=128` **12.44 GiB** (growth 7.73×
-against the n³ law's 8.00×), `n=192` **OOM** exactly where that law predicts
-42.0 GiB. Extrapolated, `n=1024` needs **6,369 GiB**. The handoff's "dump the
-κ4 core at 1024×16" is not executable. Any future plan that proposes running
-the dense augmented chain at the live shape is proposing 6.4 TB of VRAM.
+**retained state alone is ≥133 GiB at 1024×16 — 4.2× the card**, before any
+transient, derived from the state inventory. The handoff's "dump the κ4 core at
+1024×16" is not executable.
 
-**2. λ is not width-stable, but it is width-REGULAR, and it independently
-corroborates 504aldo's mechanism.** Per-layer power law `λ_l(n) = a_l·n^(−p_l)`
-over widths 64/96/128: power-law R² **0.9138–0.99996** (median 0.9724),
-exponents 0.995–1.665. The fit's own R² (κ4 core on `C_off`) is **0.624–0.811**
-at `n=128`, rising with depth — the same profile 504aldo report. Extrapolated
-to 1024, ours/theirs has **median 0.744, range [0.499, 1.940]**, with **5 of 15
-layers within 15%**.
+*(Three peak figures quoted here earlier — 1.61 GiB, 12.44 GiB and an OOM at
+n=192 — were **withdrawn**: they came from an ad-hoc shell run that was never
+saved as an artifact, and "the law is confirmed by the failure that tests it"
+was false, since an OOM at n=192 is consistent with any exponent ≥ 2.33. The
+retained-state figure needs none of them.)*
+
+**2. λ: the mechanism is confirmed, the VALUE at 1024 is not. The original
+headline here was RETRACTED after an independent Skeptic REJECT.**
+
+What stands: the fit's own R² (κ4 core on `C_off`) is **0.624–0.843**, rising
+with depth, essentially width-independent, per-net unimodal and tight, and
+strengthened by a clean `n=160` arm. A coefficient explaining 62–84% of that
+core's variance at every reachable width **is a real mechanism**, and the
+pre-registered *"R² ≥ 0.6 by layer 4"* is **CONFIRMED**.
+
+What was withdrawn: *"within a factor of two of 504aldo's at every layer"*. The
+pre-registered gate was **15%**, it **FAILED**, and "factor of two" was a
+criterion chosen after seeing the answer — which also cannot fail (a random
+permutation of their table passes 14.5/15; a single constant passes 15/15).
+λ(1024) moves by **8.89×** in the median across leave-one-out fit windows, so
+its value is set by the window and not by the data.
+
+A follow-up at `n=160` showed the extrapolation family is sound at a **1.25×
+step** (median error 3.00%, 15/15 within 15%) and that dropping the "dirty"
+`n=64` width makes it **worse**, not better. Both facts are in
+`experiments/2026-09-14_slice6a_lambda/followup_result.md`.
+
+**`lam_own.npz` must NOT be used as a fitted constant.** The route to a usable λ
+is one scalar per layer fitted end to end against score on fresh design
+networks, initialised from this shape.
 
 | pre-registered prediction | verdict |
 |---|---|
-| strategist: λ within 15% per layer at l=1–14 | **FALSIFIED** — 5 of 15 |
-| strategist: R² ≥ 0.6 by layer 4 | **CONFIRMED** — 0.692 at n=128 |
+| strategist: λ within 15% per layer at l=1–14 | **FALSIFIED** — no window exceeds 6 of 15 |
+| strategist: R² ≥ 0.6 by layer 4 | **CONFIRMED** — 0.692 at n=128, 0.744+ at n=160 |
 | Samuel: "I don't know" | recorded as given |
-
-Two independent fits of the same coefficient — ours label-free on fresh mints,
-theirs on eight public MLPs — agree within a factor of two across the full
-depth. **That corroborates the mechanism, not the table.** The extrapolation
-spans 8× in width beyond the largest measured point, so `lam_own.npz` is a
-starting point for P1 to be checked end to end against score, never a fitted
-constant.
 
 ### Exact next actions, in order
 
 1. **P1 in `estimator_k3_v30.py`** (does not exist yet): port the κ4 consumers
-   and the κ4→κ3 feed from E14's `_tree_core` downstream, driven by
-   `lam_own.npz` rather than the Gaussian-tree λ. Handoff §2.2 lists the terms.
-   Goal: F21 raw `3.78e-8` → `≤2.3e-8` at unchanged FLOPs.
+   and the κ4→κ3 feed from E14's `_tree_core` downstream. Handoff §2.2 lists
+   the terms. Goal: F21 raw `3.78e-8` → `≤2.3e-8` at unchanged FLOPs.
+   **λ is a free parameter, one scalar per layer, fitted end to end against
+   score on fresh design networks** — `lam_own.npz` supplies the SHAPE as an
+   initialiser and must not be used as a fitted constant (see above).
 2. **Then `predict_public.py`** on it against F21, and one graded canary only
    with Samuel's per-submission approval.
 3. **§0.1 is still owed**: remove the local-seconds residual gate from
@@ -67,8 +83,8 @@ constant.
    residual this way; the decision paths do not yet.
 4. **§0.6 is partly owed**: E14 is stopped in this document, but both E14 files
    are still present and still referenced by older sections below.
-5. **Rule 2 Skeptic on Slice 6a is in flight** at the time of writing; its
-   verdict belongs in `experiments/LOG.md` before the λ table is relied on.
+5. **Rule 2 Skeptic on Slice 6a: DONE — REJECT on λ, PROVISIONAL on memory.**
+   Retraction and follow-up recorded in LOG and in `experiments/2026-09-14_slice6a_lambda/`.
 
 ### Standing constraints
 

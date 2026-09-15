@@ -1,0 +1,77 @@
+worker-q: job #1308 starting at 2026-09-15T01:23:58.153705+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=none -
+worker-q: CUDA_VISIBLE_DEVICES=0
+worker-q: command=['C:/Users/samsu/Documents/arc-whest/.venv-gpu/Scripts/python.exe', 'C:/Users/samsu/Documents/arc-whest/local_sim/p2_lambda_fit.py', '--widths', '160', '--depth', '16', '--n-mlps', '24', '--seed-start', '40901003000', '--block', 'P03', '--device', 'cuda', '--dtype', 'float32', '--out', 'C:/Users/samsu/Documents/arc-whest/experiments/2026-09-14_slice6a_lambda/skeptic_followup/lambda_n160.npz']
+worker-q: ------------------------------------------------------------
+W0914 20:23:59.732000 74348 Lib\site-packages\torch\utils\flop_counter.py:29] triton not found; flop counting will not work for triton kernels
+================================================================================================
+OUR OWN kappa-4 REGENERATION LAMBDA, from the unfactored AUGMENT chain
+================================================================================================
+  widths   [160]   depth 16   24 nets   float32
+  seeds    40901003000..40901003023   block P03
+  LABEL-FREE: no truth, no public split, no DECIDE block.
+
+  -- width 160 ------------------------------------------------------------
+    n=160 net 1/24 seed 40901003000 1.5s
+    n=160 net 2/24 seed 40901003001 2.3s
+    n=160 net 3/24 seed 40901003002 3.1s
+    n=160 net 4/24 seed 40901003003 3.9s
+    n=160 net 5/24 seed 40901003004 4.8s
+    n=160 net 6/24 seed 40901003005 5.6s
+    n=160 net 7/24 seed 40901003006 6.4s
+    n=160 net 8/24 seed 40901003007 7.3s
+    n=160 net 9/24 seed 40901003008 8.1s
+    n=160 net 10/24 seed 40901003009 9.0s
+    n=160 net 11/24 seed 40901003010 9.8s
+    n=160 net 12/24 seed 40901003011 10.6s
+    n=160 net 13/24 seed 40901003012 11.5s
+    n=160 net 14/24 seed 40901003013 12.3s
+    n=160 net 15/24 seed 40901003014 13.2s
+    n=160 net 16/24 seed 40901003015 14.0s
+    n=160 net 17/24 seed 40901003016 14.8s
+    n=160 net 18/24 seed 40901003017 15.6s
+    n=160 net 19/24 seed 40901003018 16.4s
+    n=160 net 20/24 seed 40901003019 17.3s
+    n=160 net 21/24 seed 40901003020 18.1s
+    n=160 net 22/24 seed 40901003021 19.0s
+    n=160 net 23/24 seed 40901003022 19.8s
+    n=160 net 24/24 seed 40901003023 20.6s
+
+  l             n=160        504aldo
+  0      6.153888e-02   4.989475e-03
+  1      7.109257e-02   8.087550e-03
+  2      7.917087e-02   9.829100e-03
+  3      8.641199e-02   1.054901e-02
+  4      9.207806e-02   1.085100e-02
+  5      9.493332e-02   1.082750e-02
+  6      1.003787e-01   1.058862e-02
+  7      9.852762e-02   1.004805e-02
+  8      1.002916e-01   9.648350e-03
+  9      1.037386e-01   9.171988e-03
+  10     1.073916e-01   8.773038e-03
+  11     1.065755e-01   8.393763e-03
+  12     1.039962e-01   8.055513e-03
+  13     1.056501e-01   7.677038e-03
+  14     1.048031e-01   7.258787e-03
+
+  R^2 of that fit (cos^2), same layout
+  0            0.6616
+  1            0.6275
+  2            0.6621
+  3            0.6856
+  4            0.7106
+  5            0.7245
+  6            0.7452
+  7            0.7437
+  8            0.7608
+  9            0.7771
+  10           0.8004
+  11           0.8100
+  12           0.8297
+  13           0.8378
+  14           0.8430
+
+  -> C:/Users/samsu/Documents/arc-whest/experiments/2026-09-14_slice6a_lambda/skeptic_followup/lambda_n160.npz
+worker-q: ------------------------------------------------------------
+worker-q: job #1308 SUCCEEDED (exit code 0) at 2026-09-15T01:24:20.700471+00:00

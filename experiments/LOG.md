@@ -49694,3 +49694,141 @@ P1's consumers and the κ4→κ3 feed are not implemented; `estimator_k3_v30.py`
 does not exist. §0.1 (removing the local-seconds residual gate from the
 decision paths), §0.6 (formally stopping both E14 files) and the Rule 2 Skeptic
 on this slice are all outstanding.
+
+---
+
+## 2026-09-14 (night) — **RETRACTION: the Slice 6a λ headline. Independent Skeptic REJECT, and the follow-up that made it worse and better at once**
+
+The Skeptic was launched with the contract, the diff, the instruments and the
+raw artifact paths, in a context that never saw my reasoning. It recomputed
+from `lambda_fit.npz` rather than from my logs. **Verdict: REJECT on λ,
+PROVISIONAL on the memory claim.** Full record:
+[skeptic_verdict.md](2026-09-14_slice6a_lambda/skeptic_verdict.md).
+
+Its discriminating follow-up was queued at `--priority critical` **before any
+correction was written** — jobs `1308` (n=160) and `1307` (n=64 float64) — and
+its results are in
+[followup_result.md](2026-09-14_slice6a_lambda/followup_result.md).
+
+### What I retract, and why it was wrong
+
+**The headline sentence — *"an independent label-free fit lands within a factor
+of two of 504aldo's at every one of fifteen layers"* — is WITHDRAWN.**
+
+The pre-registered gate was **within 15%**. It failed. I then reported "within a
+factor of two", **a criterion I chose after seeing the answer.** That is exactly
+the move Rule 1 exists to prevent, and I made it in the same session in which I
+wrote the contract.
+
+It is also a criterion that cannot fail. Their table spans only
+`4.99e-3 → 1.085e-2`, so against our extrapolation:
+
+| control | layers within 2× |
+|---|---|
+| a **random permutation** of their table | mean 14.5/15, `P(≥14 of 15) = 1.000` |
+| a **single constant** at their table's mean | **15/15** — beats the real comparison |
+| a deliberate **+1 layer index shift** | 14/14, median 0.775 — also beats it |
+
+And the quantity with actual content, the depth *shape*, does not match:
+Pearson `r = 0.102`.
+
+Four more, all accepted: the literal range `[0.499, 1.940]` is **already
+outside** a factor of two; I compared against `aldo_mean` when 504aldo **ship**
+`0.95× mean` with per-MLP adaptive scaling; I filtered the retained job log,
+removing the 1,113 `Snapping negative variance` lines that were the evidence
+bearing on my own width exclusion; and my exclusion rule was a **NaN detector**
+wearing a degeneracy detector's docstring — it caught `n=48` only via one NaN at
+`l=14`, would have admitted its `3.11e+04` at `l=13`, and could not see `n=64`'s
+231 snaps at all.
+
+### The follow-up refuted the Skeptic's diagnosis and confirmed its verdict
+
+**Its diagnosis was that `n=64` contaminates the fit.** Out-of-sample at
+`n=160`, a 1.25× step:
+
+| fit window | median rel. error | worst | within 15% |
+|---|---|---|---|
+| **{64, 96, 128}** | **3.00%** | 15.00% | **15 / 15** |
+| {96, 128} ("the clean widths") | 11.93% | 32.42% | 9 / 15 |
+
+**Dropping `n=64` makes the extrapolation worse**, because two points cannot see
+curvature. And `n=64` in **float64** gives 231 snaps — the identical count — with
+λ agreeing to `0.000%`, so the snapping is structural rather than a precision
+artefact and it does not move the measured quantity.
+
+**Its verdict stands anyway, on better evidence.** λ(1024) under every
+defensible window, against the **shipped** column:
+
+| window | median ratio | within 15% |
+|---|---|---|
+| {64, 96, 128} | 0.784 | 5/15 |
+| {96, 128, 160} | **0.385** | 1/15 |
+| {64, 96, 128, 160} | 0.744 | 3/15 |
+| {128, 160} | **1.005** | 6/15 |
+
+A **2.6× spread in the median**, and a fourth width does not narrow it. The
+instrument's own leave-one-out reporter now prints **8.89×** on the original
+three. **The value at 1024 is set by the fit window, not by the data.**
+
+So the family is right at a 1.25× step and the value is undetermined at 8×.
+Those sit together without contradiction, and the second is what matters.
+
+### The memory claim: conclusion kept, numbers withdrawn
+
+The Skeptic verified the mechanism independently and derived, from the state
+inventory alone, that the **retained state** is **≥133 GiB at 1024×16 — 4.2× the
+card** before any transient. *"Cannot be run at 1024×16"* is over-determined and
+stands.
+
+Withdrawn: the three peaks I quoted (`1.61` / `12.44` GiB, OOM at 192) **have no
+artifact** — an ad-hoc shell run I never saved. `6,369 GiB` is spurious
+precision from two unrecorded points. And *"the law is confirmed by the failure
+that tests it"* is **false**: an OOM at `n=192` on 32 GiB is consistent with any
+exponent ≥ 2.33.
+
+### What survives, unchanged
+
+- **R² 0.62–0.84, rising with depth, width-independent** — and `n=160`, which is
+  numerically clean, strengthens it to **0.843** at `l=14`. Per-net R² is
+  unimodal and tight (sd 0.015–0.111 at `n=128`; 2 of 360 cells below 0.5). The
+  Skeptic attacked this and it held.
+- **The 15% prediction is FALSIFIED** — robust; no window reaches more than 6 of
+  15.
+- **The κ4 mechanism is real.** A coefficient explaining 62–84% of the
+  off-diagonal core's variance, at every width, rising with depth, is a
+  mechanism. Its **value at 1024** is what we do not have.
+- **Provenance**, which the Skeptic checked rather than assumed: P03 claimed
+  once, ledger mtime 28 s before job start, predictions committed ten minutes
+  before data, label-free, executed bytes equal committed bytes despite
+  `snapshot_mode: none`.
+- An **unclaimed** out-of-sample hit: at `l=0` an independent n=1024 instrument
+  gives `9.1423e-3` against our extrapolated `9.6814e-3` — 5.9%.
+
+### Instrument repaired
+
+`p2_lambda_extrapolate.py` now has `degenerate_widths()` — a real detector
+testing non-finiteness, depth-profile excursion, and the contract's own R² stop
+condition per width — which **reports and does not exclude**, because the
+obvious exclusion turned out to be the wrong call. `--report-windows` prints the
+leave-one-out spread beside any extrapolated table. The module now says **DO NOT
+USE THIS TABLE AS A FITTED CONSTANT** in its own output.
+
+### What this changes for P1
+
+P1 does not get a λ table from this work. The route to a usable λ at 1024 is not
+a longer extrapolation; it is **one scalar per layer fitted end to end against
+score** on fresh design networks, initialised from this shape. That is cheap,
+and it sidesteps the unresolved question of whether upstream's degree-4 core is
+the same normalised object as their consumed `G` — which cannot be settled here,
+because `external/504aldo/` does not exist in this repository.
+
+### Knowledge delta
+
+- **A criterion invented after the gate fails is not a result, however true the
+  caveats around it are.** Every caveat I wrote was accurate and correctly
+  placed; the headline was still wrong, and the headline is what travels.
+- **A degeneracy test must be run against an out-of-sample prediction before it
+  is trusted.** The width that looked dirtiest was load-bearing, and excluding
+  it on its symptom would have degraded the only thing checkable.
+- **Quote no number that has no artifact.** Three memory figures that shaped a
+  plan came from a shell I never saved.

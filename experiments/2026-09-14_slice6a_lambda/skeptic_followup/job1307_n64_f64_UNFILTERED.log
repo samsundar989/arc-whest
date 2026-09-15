@@ -1,0 +1,308 @@
+worker-q: job #1307 starting at 2026-09-15T01:23:34.584713+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=none -
+worker-q: CUDA_VISIBLE_DEVICES=0
+worker-q: command=['C:/Users/samsu/Documents/arc-whest/.venv-gpu/Scripts/python.exe', 'C:/Users/samsu/Documents/arc-whest/local_sim/p2_lambda_fit.py', '--widths', '64', '--depth', '16', '--n-mlps', '24', '--seed-start', '40901003000', '--block', 'P03', '--device', 'cuda', '--dtype', 'float64', '--out', 'C:/Users/samsu/Documents/arc-whest/experiments/2026-09-14_slice6a_lambda/skeptic_followup/lambda_n64_f64.npz']
+worker-q: ------------------------------------------------------------
+W0914 20:23:36.233000 41900 Lib\site-packages\torch\utils\flop_counter.py:29] triton not found; flop counting will not work for triton kernels
+================================================================================================
+OUR OWN kappa-4 REGENERATION LAMBDA, from the unfactored AUGMENT chain
+================================================================================================
+  widths   [64]   depth 16   24 nets   float64
+  seeds    40901003000..40901003023   block P03
+  LABEL-FREE: no truth, no public split, no DECIDE block.
+
+  -- width 64 ------------------------------------------------------------
+    n=64 net 1/24 seed 40901003000 1.2s
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+    n=64 net 2/24 seed 40901003001 1.9s
+    n=64 net 3/24 seed 40901003002 2.7s
+    n=64 net 4/24 seed 40901003003 3.4s
+    n=64 net 5/24 seed 40901003004 4.2s
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+    n=64 net 6/24 seed 40901003005 4.9s
+    n=64 net 7/24 seed 40901003006 5.7s
+    n=64 net 8/24 seed 40901003007 6.4s
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+    n=64 net 9/24 seed 40901003008 7.2s
+    n=64 net 10/24 seed 40901003009 8.0s
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+    n=64 net 11/24 seed 40901003010 8.8s
+    n=64 net 12/24 seed 40901003011 9.5s
+    n=64 net 13/24 seed 40901003012 10.2s
+    n=64 net 14/24 seed 40901003013 10.9s
+    n=64 net 15/24 seed 40901003014 11.7s
+    n=64 net 16/24 seed 40901003015 12.5s
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+    n=64 net 17/24 seed 40901003016 13.2s
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+    n=64 net 18/24 seed 40901003017 14.0s
+    n=64 net 19/24 seed 40901003018 14.7s
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+    n=64 net 20/24 seed 40901003019 15.4s
+    n=64 net 21/24 seed 40901003020 16.2s
+    n=64 net 22/24 seed 40901003021 17.0s
+    n=64 net 23/24 seed 40901003022 17.7s
+    n=64 net 24/24 seed 40901003023 18.4s
+
+  l              n=64        504aldo
+  0      1.527714e-01   4.989475e-03
+  1      1.999352e-01   8.087550e-03
+  2      2.364155e-01   9.829100e-03
+  3      2.645376e-01   1.054901e-02
+  4      2.771158e-01   1.085100e-02
+  5      3.161170e-01   1.082750e-02
+  6      3.562584e-01   1.058862e-02
+  7      3.774698e-01   1.004805e-02
+  8      4.036372e-01   9.648350e-03
+  9      4.256999e-01   9.171988e-03
+  10     4.280831e-01   8.773038e-03
+  11     4.476267e-01   8.393763e-03
+  12     4.580559e-01   8.055513e-03
+  13     4.450859e-01   7.677038e-03
+  14     4.349230e-01   7.258787e-03
+
+  R^2 of that fit (cos^2), same layout
+  0            0.6590
+  1            0.6209
+  2            0.6442
+  3            0.6897
+  4            0.7065
+  5            0.7326
+  6            0.7728
+  7            0.7885
+  8            0.8040
+  9            0.7927
+  10           0.7879
+  11           0.7935
+  12           0.7848
+  13           0.7430
+  14           0.6403
+
+  -> C:/Users/samsu/Documents/arc-whest/experiments/2026-09-14_slice6a_lambda/skeptic_followup/lambda_n64_f64.npz
+worker-q: ------------------------------------------------------------
+worker-q: job #1307 SUCCEEDED (exit code 0) at 2026-09-15T01:23:54.812666+00:00

@@ -2,9 +2,13 @@
 
 Slice 6a step 1, second half. `local_sim/p2_lambda_fit.py` measured λ at the
 widths a 32 GiB card can hold; the live shape is 1024 and the dense AUGMENT
-state is O(n³), so 1024 is 6,369 GiB away. This module asks whether the
+state is O(n³), whose RETAINED part alone is ~133 GiB at 1024x16 -- over 4x the
+card, before any transient. (An earlier version of this line quoted "6,369 GiB"
+from a two-point extrapolation of peaks that were never saved as an artifact.
+Withdrawn: the retained-state figure is derivable from the state inventory and
+does not need them.) This module asks whether the
 measured widths determine λ(1024), and answers with a model and a residual
-rather than a hope.
+rather than a hope. **The answer is no** -- see the window spread below.
 
 THE MODEL, AND WHY THIS ONE
 ----------------------------
@@ -16,24 +20,45 @@ grows, so a dimensionless coefficient that moves with `n` should move as a
 power of it. The fit's own R² is reported per layer, so the family is judged
 rather than assumed.
 
-WIDTH 48 IS EXCLUDED, AND THE REASON IS MEASURED
--------------------------------------------------
-The n=48 chain goes numerically degenerate past layer 11 — λ reads `1.02e+01`
-at l=12, `3.11e+04` at l=13 and `nan` at l=14, against a per-layer scale of
-order `0.5`, with the upstream chain printing "snapping negative variance to
-zero" throughout. Including it drops the median power-law R² from 0.972 to
-0.988-with-two-garbage-rows and puts an exponent of 10.85 on layer 13. It is
-excluded as a degenerate arm, not as an inconvenient one, and `--widths` makes
-that choice visible and reversible.
+EXCLUDING A WIDTH — AND THE DEFECT AN INDEPENDENT SKEPTIC FOUND HERE
+--------------------------------------------------------------------
+The first version of this module said it excluded a width for being
+"numerically degenerate". **It did not.** As coded, the rule was *"drop a width
+that is non-finite or non-positive at some layer"* — a **NaN detector**. It
+dropped `n=48` only because of a single NaN at `l=14`; it would happily have
+kept `n=48`'s `3.11e+04` at `l=13` (against a per-layer scale of order 0.5) had
+that NaN not occurred, and it could not see `n=64`'s 231 negative-variance
+snaps at all. A rule whose docstring describes a different rule from the one it
+implements is worse than no rule, because it is quoted as evidence.
 
-WHAT AN 8x EXTRAPOLATION IS WORTH
-----------------------------------
-The largest width measured is 128 and the target is 1024. That is three
-doublings beyond the data. A power law with R² 0.97 over 64-128 is evidence
-that λ moves smoothly in width; it is **not** evidence that the same exponent
-holds to 1024, and no amount of R² inside the measured range can be. This
-module prints the extrapolation and that sentence together, because the number
-without the sentence is the kind of thing that ends up in a write-up.
+`degenerate_widths()` below is the replacement, and it tests the three things
+the prose always claimed: a non-finite or non-positive λ, a λ that leaves its
+own depth profile by more than `--outlier-factor`, and a per-layer fit R² that
+falls under the contract's own stop condition on more than a few networks.
+
+**What the corrected rule finds, and what that cost the original claim:**
+`n=48` is degenerate (17 of 24 nets snapping, λ of `1.02e+01` and `3.11e+04`).
+`n=64` snaps on 7 of 24 nets — but an out-of-sample test at `n=160` showed that
+**dropping `n=64` makes the extrapolation worse** (median error 11.93% against
+3.00%), because two points cannot see curvature. So the flag is reported and
+the decision is left to `--widths`: a degeneracy marker is information, not an
+automatic exclusion, and this module no longer pretends otherwise.
+`experiments/2026-09-14_slice6a_lambda/followup_result.md`.
+
+WHAT AN 8x EXTRAPOLATION IS WORTH — MEASURED, NOT ARGUED
+---------------------------------------------------------
+A power law with R² 0.97 inside the measured range is not evidence that the
+exponent holds to 1024. That used to be a caveat here; it is now a
+**measurement**. Fitting λ(1024) under every defensible window gives medians
+from **0.385** to **1.005** relative to 504aldo's shipped table — a factor of
+2.6 spread — and adding a fourth width at `n=160` does not narrow it.
+
+The same machinery predicts `λ(160)` from `{64,96,128}` to a median 3.00% and
+15/15 layers within 15%. So the family is right at a **1.25× step** and the
+value is undetermined at **8×**, and those two facts sit together without
+contradiction. Anything this module prints for the target width is a shape, not
+a constant; `--report-windows` prints the spread next to it so the number
+cannot travel without it.
 
 Run:
     uv run python local_sim/p2_lambda_extrapolate.py \\
@@ -63,6 +88,53 @@ def aldo_table(n_layers):
         return None
     rows = np.genfromtxt(ALDO_CSV, delimiter=",", names=True, comments="#")
     return np.asarray(rows[rows.dtype.names[1]], dtype=np.float64)[:n_layers]
+
+
+
+#: A layer's λ this far from the median of its own depth profile is treated as
+#: an excursion rather than a measurement.
+DEFAULT_OUTLIER_FACTOR = 8.0
+
+
+def degenerate_widths(z, widths, L, *, outlier_factor=DEFAULT_OUTLIER_FACTOR,
+                      r2_floor=0.5, r2_bad_frac=0.10):
+    """Which widths look numerically degenerate, and WHY — one reason each.
+
+    Three tests, because the prose always claimed three and the code used to
+    implement one:
+
+      `nonfinite`   λ non-finite or non-positive at some layer;
+      `excursion`   |λ_l| more than `outlier_factor` times the median |λ|
+                    across that width's own depth profile;
+      `low_r2`      the fit's own per-net R² below `r2_floor` on more than
+                    `r2_bad_frac` of net-layer cells — the contract's stop
+                    condition, applied per width instead of globally.
+
+    Returns `{width: [reasons]}`, empty list meaning clean. It REPORTS; it does
+    not exclude. An out-of-sample test showed the obvious exclusion was the
+    wrong call, so the caller decides with `--widths` and has to say so.
+    """
+    out = {}
+    for w in widths:
+        reasons = []
+        lam = np.asarray(z["n%d_lam_mean" % w][:L], dtype=np.float64)
+        if not np.all(np.isfinite(lam)) or np.any(lam <= 0):
+            reasons.append("nonfinite")
+        finite = lam[np.isfinite(lam)]
+        if finite.size:
+            med = float(np.median(np.abs(finite)))
+            if med > 0 and np.nanmax(np.abs(finite)) > outlier_factor * med:
+                reasons.append("excursion(x%.0f)"
+                               % (np.nanmax(np.abs(finite)) / med))
+        key = "n%d_raw_r2" % w
+        if key in z:
+            r2 = np.asarray(z[key])[:, :L]
+            frac = float((r2 < r2_floor).mean())
+            if frac > r2_bad_frac:
+                reasons.append("low_r2(%.0f%% of cells < %.1f)"
+                               % (frac * 100, r2_floor))
+        out[w] = reasons
+    return out
 
 
 def powerfit(widths, lam):
@@ -95,20 +167,30 @@ def main(argv=None) -> int:
                          "file EXCEPT any that is non-positive or non-finite at "
                          "some layer.")
     ap.add_argument("--target", type=int, default=1024)
+    ap.add_argument("--outlier-factor", type=float,
+                    default=DEFAULT_OUTLIER_FACTOR,
+                    help="a layer's |lambda| this far from its own depth "
+                         "profile's median is flagged as an excursion")
+    ap.add_argument("--report-windows", action="store_true",
+                    help="refit under every leave-one-out window and print the "
+                         "spread. An extrapolated table whose spread is wide "
+                         "is a shape, not a constant.")
     ap.add_argument("--out", default="")
     a = ap.parse_args(argv)
 
     z = np.load(a.fit)
     all_w = [int(w) for w in z["widths"]]
     L = min(len(z["n%d_lam_mean" % w]) for w in all_w)
+    flags = degenerate_widths(z, all_w, L, outlier_factor=a.outlier_factor)
     if a.widths:
         ws = [int(x) for x in a.widths.split(",") if x]
     else:
-        ws = []
-        for w in all_w:
-            y = z["n%d_lam_mean" % w][:L]
-            if np.all(np.isfinite(y)) and np.all(y > 0):
-                ws.append(w)
+        # Default: keep every width whose λ is usable as a NUMBER, and report
+        # the degeneracy flags rather than acting on them. The old default
+        # silently dropped a width on a NaN test and called it degeneracy.
+        ws = [w for w in all_w
+              if "nonfinite" not in flags[w] and "excursion" not in
+              " ".join(flags[w])]
     dropped = [w for w in all_w if w not in ws]
 
     lam = np.stack([z["n%d_lam_mean" % w][:L] for w in ws], axis=0)
@@ -121,9 +203,9 @@ def main(argv=None) -> int:
     print(f"DOES OUR OWN LAMBDA REACH n = {a.target}?")
     print("=" * 96)
     print(f"  fitted on widths {ws}" + (f"   DROPPED {dropped}" if dropped else ""))
-    if dropped:
-        print("  A dropped width was non-positive or non-finite at some layer:")
-        print("  a degenerate arm, excluded as such and named here.")
+    print("  degeneracy flags (REPORTED, not acted on -- see --widths):")
+    for w in all_w:
+        print(f"    n={w:<5d} " + (", ".join(flags[w]) if flags[w] else "clean"))
     print()
     print("  l     exponent p   power R2    lambda(%4d)      504aldo      ratio"
           % a.target)
@@ -159,12 +241,38 @@ def main(argv=None) -> int:
               + ("CONFIRMED" if float(r2fit[-1][4]) >= 0.6 else "FALSIFIED")
               + f"  (R2 = {float(r2fit[-1][4]):.3f} at n={ws[-1]})")
     print()
+    if a.report_windows and len(ws) >= 3:
+        import itertools
+        print()
+        print("  LEAVE-ONE-OUT WINDOWS -- how much of this is the fit window?")
+        meds = []
+        for drop in [None] + list(ws):
+            sub = [w for w in ws if w != drop]
+            if len(sub) < 2:
+                continue
+            sl = np.stack([z["n%d_lam_mean" % w][:L] for w in sub], axis=0)
+            aa, pp, _ = powerfit(sub, sl)
+            ee = aa * float(a.target) ** (-pp)
+            if al is not None:
+                rr = ee[np.isfinite(ee)] / al[:L][np.isfinite(ee)]
+                meds.append(float(np.median(rr)))
+                print(f"    {str(sub):<26} median ratio {np.median(rr):.3f}"
+                      f"   range [{np.min(rr):.3f}, {np.max(rr):.3f}]")
+        if len(meds) >= 2:
+            print(f"    spread across windows: {max(meds) / min(meds):.2f}x in "
+                  "the median.")
+            print("    A wide spread means the target-width value is set by the")
+            print("    fit window and not by the data.")
+    print()
     print(f"  THE EXTRAPOLATION SPANS {a.target / ws[-1]:.0f}x IN WIDTH beyond the")
     print("  largest measured point. A power law with this R2 shows lambda moves")
     print("  smoothly in width over 64-128. It does NOT show the same exponent")
     print("  holds to 1024, and no R2 inside the measured range can show that.")
-    print("  Treat the table as a STARTING POINT for P1, to be checked end to")
-    print("  end against score, not as a fitted constant.")
+    print("  DO NOT USE THIS TABLE AS A FITTED CONSTANT. Measured 2026-09-14:")
+    print("  the leave-one-out window spread is 8.89x in the median, so the")
+    print("  target-width VALUE is set by the fit window, not by the data. What")
+    print("  survives is the SHAPE and the mechanism -- fit one scalar per layer")
+    print("  end to end against score, using this as the initialiser.")
 
     if a.out:
         d = os.path.dirname(os.path.abspath(a.out))
