@@ -18,9 +18,10 @@ fitted constant and never 504aldo's published table. Its value at width 1024 is
 explicitly undetermined -- see `experiments/2026-09-14_slice6a_lambda/`.
 
 Grader-legal by inheritance: imports only flopscope, flopscope.numpy and
-whestbench; never mutates a grader array; shape-generic; deterministic given the
-network. **Not a submission candidate.** Samuel approves every submission
-individually and designates alone.
+whestbench; never mutates a grader array; deterministic given the network.
+**Shape-generic**: past the end of `_K4_LAM` the fourth-order channel disables
+itself rather than extrapolating a lambda it never fitted. **Not a submission
+candidate.** Samuel approves every submission individually and designates alone.
 """
 
 import base64
@@ -759,7 +760,20 @@ def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,
     # first, numpy's __mul__ wins the dispatch and flopscope auto-routes
     # with a warning -- meaning the operation was nearly billed by the
     # wrong meter. Explicit is the whole point of this file.
-    _lam_prev = dtype(_K4_LAM[layer_index - 1] if layer_index > 0 else 0.0)
+    # SHAPE-GENERIC OR NOTHING (hard rule 7). `_K4_LAM` is a fixed-length table
+    # and `layer_index` is the real depth, so a deeper MLP than the table walks
+    # off the end. An independent Skeptic ran `edge_cases.py` at its default
+    # 256x32 world and EVERY case in groups 1, 2, 3, 4 and 6 raised
+    # `IndexError: list index out of range`, with the suite crashing in group 7
+    # before it could report. Live Phase 2 is depth 16 so the scored result
+    # stands, but the file's own "shape-generic" claim was false and no
+    # certification path could have passed.
+    #
+    # Past the table the channel is DISABLED (lambda 0), not extrapolated: the
+    # table's values are an initialiser measured at one depth, and inventing
+    # entries for depths we never fitted would be the same error one layer out.
+    _li = layer_index - 1
+    _lam_prev = dtype(_K4_LAM[_li] if 0 <= _li < len(_K4_LAM) else 0.0)
     _WT2 = WT * WT
     dG = _WT2 @ (gk4 - fnp.diagonal(cov) * _lam_prev) + var * _lam_prev
     dG = fnp.where(fnp.isfinite(dG), dG, dtype(0.0))

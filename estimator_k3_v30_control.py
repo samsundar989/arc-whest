@@ -17,9 +17,10 @@ fitted constant and never 504aldo's published table. Its value at width 1024 is
 explicitly undetermined -- see `experiments/2026-09-14_slice6a_lambda/`.
 
 Grader-legal by inheritance: imports only flopscope, flopscope.numpy and
-whestbench; never mutates a grader array; shape-generic; deterministic given the
-network. **Not a submission candidate.** Samuel approves every submission
-individually and designates alone.
+whestbench; never mutates a grader array; deterministic given the network.
+**Shape-generic**: past the end of `_K4_LAM` the fourth-order channel disables
+itself rather than extrapolating a lambda it never fitted. **Not a submission
+candidate.** Samuel approves every submission individually and designates alone.
 """
 
 import base64

@@ -1,0 +1,13 @@
+index guard added
+  wrote estimator_k3_v30.py                per_neuron=True  53394 bytes
+  wrote estimator_k3_v30_control.py        per_neuron=False 49287 bytes
+
+13. GT-NOISE FLOOR  (what counts as signal)
+  vault GT samples/MLP               33,554,432
+  vault GT-noise MSE (mean)          1.575e-09  (0.113% of the 1.4e-6 decision signal)
+  vault touches                      1
+  noise < 10% of signal              ok
+
+30/30 checks passed
+
+[exited with code 0]

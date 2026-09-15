@@ -53,7 +53,11 @@ import numpy as np  # noqa: E402
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--control", required=True)
-    ap.add_argument("--candidate", required=True)
+    ap.add_argument("--candidate", required=True,
+                    help="one path, or several comma-separated. The control is "
+                         "run ONCE and every candidate is paired against it, "
+                         "which is what makes a parameter sweep affordable: "
+                         "k candidates cost k+1 arms, not 2k.")
     ap.add_argument("--truth", required=True)
     ap.add_argument("--n", type=int, default=24)
     ap.add_argument("--ts", required=True,
@@ -141,8 +145,13 @@ def main(argv=None) -> int:
         print("  *** which measures the host, not the candidate.)")
     print()
 
+    cand_paths = [x.strip() for x in a.candidate.split(",") if x.strip()]
+    labels = [("control", a.control)] + [
+        ("cand%d" % i if len(cand_paths) > 1 else "candidate", pth)
+        for i, pth in enumerate(cand_paths)]
+
     arms = {}
-    for label, path in (("control", a.control), ("candidate", a.candidate)):
+    for label, path in labels:
         t0 = time.perf_counter()
         rows, prov = le.evaluate(path, seeds, y, spec=spec,
                                  gt_noise=None if gt_avg is None
@@ -165,41 +174,63 @@ def main(argv=None) -> int:
                   "flags before trusting any number above.")
 
     c_rows = [r.to_row() for r in arms["control"]["rows"]]
-    k_rows = [r.to_row() for r in arms["candidate"]["rows"]]
-
-    print()
-    if gt_avg is not None:
-        nac = cs.noise_corrected_compare(
-            c_rows, k_rows, local_samples=n_samples * 2.0,
-            official_samples=a.official_samples, require_ids=True)
-        print(nac)
-        paired = nac.observed
-    else:
-        paired = cs.paired_compare_rows(c_rows, k_rows, require_ids=True)
-        print("  no gt_noise in the truth file: observed difference only")
-
-    print()
-    print(f"  PAIRED arithmetic score difference (the binding statistic)")
-    print(f"    mean difference   {paired.mean_difference:+.6e}")
-    print(f"    studentised-t 95% [{paired.t_ci_difference[0]:+.4e}, "
-          f"{paired.t_ci_difference[1]:+.4e}]")
-    print(f"    arithmetic gain   {paired.arithmetic_gain:.4f}x   "
-          f"candidate better on {paired.n_candidate_better}/{paired.n}   "
-          f"sign p {paired.sign_test_p:.4f}")
-    print(f"    geometric gain    {paired.geometric_gain:.4f}x   "
-          "DIAGNOSTIC ONLY, no authority")
-
-    verdict = None
-    if a.gate is not None:
-        v = cs.decide(arms["control"]["suite"].scores,
-                      arms["candidate"]["suite"].scores, gate=a.gate)
+    comparisons = {}
+    for label, _pth in labels[1:]:
+        k_rows = [r.to_row() for r in arms[label]["rows"]]
         print()
-        print(v)
-        verdict = {"passed": bool(v.passed), "gain": float(v.gain),
-                   "gate": float(v.gate),
-                   "ci_excludes_zero": bool(v.ci_excludes_zero),
-                   "reasons": list(v.reasons)}
-    else:
+        print("=" * 96)
+        print(f"  {label}  vs  control")
+        print("=" * 96)
+        nac = None
+        if gt_avg is not None:
+            nac = cs.noise_corrected_compare(
+                c_rows, k_rows, local_samples=n_samples * 2.0,
+                official_samples=a.official_samples, require_ids=True)
+            print(nac)
+            paired = nac.observed
+        else:
+            paired = cs.paired_compare_rows(c_rows, k_rows, require_ids=True)
+            print("  no gt_noise in the truth file: observed difference only")
+
+        print()
+        print("  PAIRED arithmetic score difference (the binding statistic)")
+        print(f"    mean difference   {paired.mean_difference:+.6e}")
+        print(f"    studentised-t 95% [{paired.t_ci_difference[0]:+.4e}, "
+              f"{paired.t_ci_difference[1]:+.4e}]")
+        print(f"    arithmetic gain   {paired.arithmetic_gain:.4f}x   "
+              f"candidate better on {paired.n_candidate_better}/{paired.n}   "
+              f"sign p {paired.sign_test_p:.4f}")
+        print(f"    geometric gain    {paired.geometric_gain:.4f}x   "
+              "DIAGNOSTIC ONLY, no authority")
+
+        # THE RATIO ON THE NOISE-CORRECTED SCALE, which is the one a public
+        # forecast needs. `noise_bias` being ~0 says the two MULTIPLIERS are
+        # close; it says nothing about the ratio, because the label floor sits
+        # in BOTH arms' MSE and cancels from the difference while inflating the
+        # denominator. An independent Skeptic caught exactly that conflation.
+        if nac is not None:
+            tf = nac.true_function
+            print(f"    noise-corrected gain {tf.arithmetic_gain:.4f}x   "
+                  f"(observed {paired.arithmetic_gain:.4f}x)")
+            print(f"      control true-function mean {tf.mean_control:.6e}, "
+                  f"candidate {tf.mean_candidate:.6e}")
+            print("      The label floor sits in both arms and cancels from the")
+            print("      DIFFERENCE, not from the RATIO. Quote this one for a")
+            print("      public forecast; quote the observed one for this run.")
+
+        verdict = None
+        if a.gate is not None:
+            v = cs.decide(arms["control"]["suite"].scores,
+                          arms[label]["suite"].scores, gate=a.gate)
+            print()
+            print(v)
+            verdict = {"passed": bool(v.passed), "gain": float(v.gain),
+                       "gate": float(v.gate),
+                       "ci_excludes_zero": bool(v.ci_excludes_zero),
+                       "biggest_mover_share": float(v.biggest_mover_share),
+                       "reasons": list(v.reasons)}
+        comparisons[label] = (paired, nac, verdict)
+    if a.gate is None:
         print()
         print("  no --gate given, so no verdict. This tool does not invent "
               "thresholds.")
@@ -216,7 +247,8 @@ def main(argv=None) -> int:
             "accuracy_only": accuracy_only,
             "local_seconds_caps": a.wall_caps,
             "tier": "DESIGN", "promotes_nothing": True,
-            "arms": {k: {"objective": float(v["suite"].objective),
+            "arms": {k: {"path": dict(labels)[k],
+                         "objective": float(v["suite"].objective),
                          "raw_mse": float(v["suite"].mean_mse),
                          "multiplier": float(v["suite"].mean_multiplier),
                          "n_failed": int(v["suite"].n_failed),
@@ -225,26 +257,53 @@ def main(argv=None) -> int:
                          "rows_hash": le.rows_hash(v["rows"]),
                          "candidate_sha256": v["prov"].get("candidate_sha256",
                                                            ""),
-                         "seconds": v["secs"]}
+                         "seconds": v["secs"],
+                         # PER-MLP ROWS, not just their hash. Without these
+                         # nobody can recompute the interval, find the biggest
+                         # mover, or inspect a guarded row -- a Skeptic could
+                         # only take the printed summary on trust.
+                         "rows": [{"index": r.index, "seed": r.input_seed,
+                                   "mse": float(r.mse),
+                                   "flops_used": float(r.flops_used),
+                                   "gt_noise": float(r.gt_noise),
+                                   "wall_time_s": float(r.wall_time_s),
+                                   "residual_wall_time_s":
+                                       float(r.residual_wall_time_s),
+                                   "failed": bool(r.failed),
+                                   "error_code": r.error_code,
+                                   "nonfinite": bool(r.nonfinite)}
+                                  for r in v["rows"]]}
                      for k, v in arms.items()},
-            "paired": {"mean_difference": float(paired.mean_difference),
-                       "t_ci": [float(x) for x in paired.t_ci_difference],
-                       "arithmetic_gain": float(paired.arithmetic_gain),
-                       "geometric_gain_DIAGNOSTIC": float(paired.geometric_gain),
-                       "n_candidate_better": int(paired.n_candidate_better),
-                       "sign_test_p": float(paired.sign_test_p),
-                       "notes": list(paired.notes)},
-            "verdict": verdict,
+            "comparisons": {
+                lab: {
+                    "mean_difference": float(pr.mean_difference),
+                    "t_ci": [float(x) for x in pr.t_ci_difference],
+                    "arithmetic_gain": float(pr.arithmetic_gain),
+                    "geometric_gain_DIAGNOSTIC": float(pr.geometric_gain),
+                    "n_candidate_better": int(pr.n_candidate_better),
+                    "sign_test_p": float(pr.sign_test_p),
+                    "notes": list(pr.notes),
+                    "verdict": vd,
+                    "noise_aware": (None if na is None else {
+                        "true_function_difference":
+                            float(na.true_function.mean_difference),
+                        "true_function_gain":
+                            float(na.true_function.arithmetic_gain),
+                        "true_function_mean_control":
+                            float(na.true_function.mean_control),
+                        "true_function_mean_candidate":
+                            float(na.true_function.mean_candidate),
+                        "forecast_difference":
+                            float(na.forecast.mean_difference),
+                        "forecast_gain":
+                            float(na.forecast.arithmetic_gain),
+                        "noise_bias": float(na.noise_bias),
+                        "noise_bias_share": float(na.noise_bias_share),
+                        "n_negative_corrected": int(na.n_negative_corrected),
+                    }),
+                }
+                for lab, (pr, na, vd) in comparisons.items()},
         }
-        if gt_avg is not None:
-            payload["noise_aware"] = {
-                "true_function_difference": float(
-                    nac.true_function.mean_difference),
-                "forecast_difference": float(nac.forecast.mean_difference),
-                "noise_bias": float(nac.noise_bias),
-                "noise_bias_share": float(nac.noise_bias_share),
-                "n_negative_corrected": int(nac.n_negative_corrected),
-            }
         with open(a.out, "w", encoding="utf-8") as fh:
             fh.write(json.dumps(payload, indent=2, default=str) + "\n")
         print(f"\n  -> {a.out}")
