@@ -499,6 +499,16 @@ def parity():
     4. `_fit_generations` picks the same `gens` for control and candidate at
        the LIVE shape, so the two arms are structurally comparable despite
        their different `_matmuls` branches.
+    5. the candidate is PERMUTATION-EQUIVARIANT. Relabelling a hidden layer
+       must permute that row of the prediction and leave every other row
+       alone, because the relabelled network computes the same function.
+
+    Claim 5 is here, duplicating `edge_cases.py::inv_permutation`, because the
+    first sketch this generator emitted was NOT equivariant and the four
+    minutes `edge_cases` takes is long enough to run a screen against a broken
+    candidate by mistake. `--parity` is the fast gate; it should refuse this
+    the moment it is reintroduced. See the 2026-09-15 amendment in
+    `experiments/LOG.md`.
     """
     import sys
     import numpy as np
@@ -570,6 +580,53 @@ def parity():
         if rel("v31") < 1e-12:
             ok = False
             print("    *** v31 CHANGED NOTHING -- a no-op cannot test P2 ***")
+    # ---- 5. permutation equivariance ------------------------------------
+    # Relabel hidden layer `k` by swapping the OUTPUT columns of W_k and the
+    # matching INPUT rows of W_{k+1}. The network's function is unchanged, so
+    # row k of the prediction must permute and every other row must not move.
+    # JUDGED AGAINST THE CONTROL, NOT AN ABSOLUTE BAR. The control is the same
+    # chain with the same float32 reassociation, so it measures how much
+    # equivariance error is unavoidable here; anything the candidate adds on
+    # top is structural. An absolute 1%-of-raw bar was tried first and was
+    # USELESS: the non-equivariant sketch scores 1.1e-8 against it and sails
+    # through, because `edge_cases::inv_permutation` normalises differently
+    # (worst ROW, in MSE units against the candidate's own raw MSE) and reaches
+    # 1.07% on the same build. A gate that passes the bug it was written for is
+    # not a gate. Measured separation at this shape: fixed 1.2x the control,
+    # `W[:, :r]` 4.4e+05x.
+    EQUIVAR_MAX_RATIO = 100.0
+    print("\npermutation equivariance at %dx%d  (vs the control's own floor)"
+          % (width, depth))
+    rng = np.random.default_rng(20260915)
+    w, es, _ = canonical_mint(width, depth, 90000000404)
+    for lay in (1, depth - 2):
+        perm = rng.permutation(width)
+        wp = [np.array(x, copy=True) for x in w]
+        wp[lay] = wp[lay][:, perm]
+        wp[lay + 1] = wp[lay + 1][perm, :]
+        err = {}
+        for name in ("control", "v31"):
+            m = mods[name]
+            out = []
+            for weights in (w, wp):
+                mlp = harness.MLP(weights=[np.asarray(x) for x in weights],
+                                  width=width, depth=depth, seed=es)
+                with flops.BudgetContext(flop_budget=budget, quiet=True):
+                    out.append(np.asarray(m.Estimator().predict(mlp, budget),
+                                          dtype=np.float64))
+            base, perm_out = out
+            moved = base.copy()
+            moved[lay] = base[lay][perm]
+            err[name] = (float(np.mean((moved - perm_out) ** 2))
+                         / max(float(np.mean(base ** 2)), 1e-300))
+        ratio = err["v31"] / max(err["control"], 1e-300)
+        bad = ratio > EQUIVAR_MAX_RATIO
+        print("    layer %-2d   control %.2e   v31 %.2e   ratio %8.1fx   %s"
+              % (lay, err["control"], err["v31"], ratio,
+                 "*** NOT EQUIVARIANT ***" if bad else "ok"))
+        if bad:
+            ok = False
+
     print("\nPARITY OK" if ok else "\nPARITY FAILED")
     return 0 if ok else 1
 
