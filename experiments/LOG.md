@@ -50640,3 +50640,93 @@ rank 16, `--parity` at 96×6 (`r/n = 1/3`). The live shape keeps **1/32**.
 - **An agent auditing its own independence will overstate it.** Not from bad
   faith — from reconstructing a timeline out of its own reasoning rather than
   out of timestamps. The artifacts are the record; memory is not.
+
+---
+
+## 2026-09-15 — **Slice 6b P2 PASSES: 1.3902x on 24 of 24, and the rank costs exactly the +0.9% they published**
+
+Job `1364`, DESIGN tier, 24 P01 networks, three arms, all local-seconds caps
+off, 0/24 failed in every arm. Contract and gate pre-registered at `51a448f`
+before any data existed; amended pre-data at `5bd74b5` (the sketch), gate
+untouched.
+
+### Verdict against the pre-registered gate
+
+    VERDICT  PASS   arithmetic gain 1.3902x   gate 1.2000x
+      t 95% CI on the paired difference [+4.2087e-09, +4.9713e-09]  excludes zero: True
+      n = 24, candidate better on 24, sign-test p = 0.0000
+      noise-corrected gain 1.3865x   (label-noise bias carries 23.8% of the observed difference)
+      biggest single mover carries 5.8% of the delta
+
+### Raw MSE, the same 24 networks
+
+| | raw MSE | vs v30 |
+|---|---|---|
+| F21 | `4.791516e-08` | — |
+| v30 (P1) | `3.872559e-08` | — |
+| **v31 dense** (full rank) | `3.872318e-08` | **`0.99994x`** |
+| **v31 rank 32** | `3.907465e-08` | **`1.0090x` = +0.90%** |
+
+**The dense arm reproduces v30 to 6 parts in 100,000.** The `(2,1)` regrouping
+is exact algebra at the live shape, end to end, on real networks — not just in
+the identity test's numpy transcription.
+
+**The rank-32 truncation costs +0.90% raw MSE.** 504aldo's published F63 row
+says +0.9% on *their* chain with a *different* term set. The contract marked
+that SPECULATIVE for us and predicted 1.00–1.04. It reproduced to two decimal
+places. The Skeptic's independent orthogonal-`delta` bound predicted +1.12%,
+and the cross term `2<e,delta>` turned out slightly negative rather than the
++-21.2% its envelope allowed.
+
+### The stacked position, computed from measured quantities, NOT multiplied
+
+The Skeptic warned that P1's and P2's gains are correlated (same 24 networks)
+and must not be multiplied. So this is read off raw MSE and measured C/B
+directly:
+
+| | raw MSE | C/B | score |
+|---|---|---|---|
+| F21 | `4.791516e-08` | `0.422208` | `2.0230e-08` |
+| v30 (P1) | `3.872559e-08` | `0.422208` | `1.6350e-08` |
+| **v31 (P1+P2)** | `3.907465e-08` | `0.300970` | **`1.1760e-08`** |
+
+**F21 -> v31 is `1.7202x`** = raw `1.2262x` x cost `1.4028x`. Against F21's
+graded `1.5957e-08` that projects to **`~9.3e-09`**, which is a DESIGN-tier
+extrapolation and not a public number: `predict_public.py` has not been run.
+
+For scale: 504aldo sit at `5.4e-9`, their clones at `4.2e-9`, the leader at
+`2.5e-9`.
+
+### The five predictions
+
+| # | mine, pre-data | measured | |
+|---|---|---|---|
+| 1 | counted FLOPs `0.70`–`0.78` | **`0.7128`** | **CONFIRMED**, with the right mechanism and sign |
+| 2 | raw MSE `1.00`–`1.04` | **`1.0090`** | **CONFIRMED** |
+| 3 | score gain `1.25x`–`1.45x` | **`1.3902x`** | **CONFIRMED** |
+| 4 | dense arm's *score* within 0.5% of control | `0.5593x` | **WRONG QUANTITY** — see below |
+| 5 | residual does not worsen | **9.1% fewer ops** | **CONFIRMED** |
+
+Samuel's prediction was "I don't know" on all three questions asked, recorded
+before the data existed. This slice had no human prior to pass.
+
+**Prediction 4 was written on the wrong quantity, and it is my own error of the
+exact kind `AGENTS.md` warns about**: *"write the gate on the DIFFERENCE the
+slice isolates, not on a total that contains it."* The dense arm is
+algebraically identical to v30 but costs `1.788x` as much, so its *score* must
+be worse by construction — `1/1.788 = 0.559`, and it measured `0.5593`. The
+agreement to three digits is the strongest possible confirmation of what I
+*meant* (accuracy parity) stated as a failure of what I *wrote*. The dense arm
+FAILED its gate and was supposed to.
+
+### What this does not establish
+
+- Not a public number, not a submission, not a promotion, no DECIDE block
+  spent, vault untouched.
+- v31 has **no certification**, **no Linux memory gate**, and **no public mini
+  run**. Its evidence path is one third walked.
+- The budget-guard regression the Skeptic found (`_projected_flops`
+  under-predicts for the candidate) is still open.
+- P1 and P2 were screened on the same 24 P01 networks. The `1.7202x` above is
+  read off raw MSE and cost, not multiplied from two correlated gains, but the
+  two mechanisms have never been measured on independent corpora.
