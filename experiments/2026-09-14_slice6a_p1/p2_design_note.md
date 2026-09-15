@@ -1,5 +1,12 @@
 # P2, the 7→4 identity: the target, priced and pinned
 
+> **SUPERSEDED IN ONE RESPECT, 2026-09-15.** The price table below says 27.6%
+> of the tower. That is **too low**: it modelled 3→2 transports and 4→3
+> contractions, but the oracle's restructuring gives 3→2 AND **4→2**, so seven
+> dense products per layer become four — which is what "7→4" literally names.
+> The corrected figure is **41.5%**. See `p2_repriced.md`. Everything else
+> here — the identity, the rank, the caveats — stands.
+
 *2026-09-15. Design note for the implementation, not a result. Label-free.*
 
 ## The identity, confirmed three ways
