@@ -37,25 +37,42 @@ birth site) and the `(2,1)` regrouping (`6.8e-16`, arbitrary residual).
 `local_sim/p2_build_v31.py` emits three arms from v30 by asserted-count patches;
 the patches are **disjoint** from v30's, so this is layering, not merging.
 
-**The price, counted off the code and not off the plan.** Per layer, products
-that scale with `k`: F21 spends 3 transports + 3 contractions = **6**; P2 spends
-2 + 2 = **4**, plus `O(k n² r)` thin work that is 1.6% of the total.
+**The price, MEASURED at the live shape.** An independent Skeptic metered both
+arms at 1024x16 inside one `BudgetContext` rather than trusting the hand model,
+and that measurement is now the number of record:
 
-| | projected tower FLOPs at 1024×16 |
-|---|---|
-| v30/F21 as the code **issues** (6 aged / 5 young) | `1.4920e+12` |
-| P2 (4 aged / 3 young) + thin | `1.0252e+12` |
-| **ratio** | **`0.6871` — 31.3%** |
+| arm | counted FLOPs | C/B |
+|---|---:|---:|
+| v30 (control) | `928,411,199,060` | `0.422208` |
+| **v31, rank 32** | **`661,806,923,368`** | **`0.300970`** |
+| v31 dense (full rank) | `1,660,083,133,052` | `0.754934` |
 
-Applied to F21's measured total with the K2 anchor held fixed:
-`928,457,637,478 -> 659,482,000,000`, **C/B `0.4222 -> 0.2999`**.
+**Ratio `0.7128` — a 28.7% saving. Cost-only score gain `1.4028x`.** v30's C/B
+reproduces F21's graded `0.4222` to five decimals, so the instrument is sound.
 
-> **P2 was mispriced three times before this** — 27.6%, 41.5%, 32.3% — because I
-> read the plan and the mechanism's name instead of the source. F21's own
-> `_matmuls` cost model bills an aged lineage **7**, which the code has not
-> issued since `_dslice21`'s two permutations were found to be the same
-> product. That phantom seventh product is where "7→4" came from. **Count the
-> products in the source before quoting a saving.**
+The count behind it is confirmed: F21 issues **6** k-scaling products a layer
+(3 transports + 3 contractions), P2 issues **4**. Independently corroborated
+without reading any source — v30's measured total against the shipped 7/6 model
+implies a Strassen discount of `0.5406`, *below the theoretical depth-4 floor of
+`0.5819`*, which is impossible; against 6/5 it implies `0.6222`, matching the
+chain's own L4/L0 census `0.62303` to 0.13%.
+
+> **I MISPRICED THIS A FOURTH TIME, and the Skeptic caught two errors that
+> cancelled.** My hand model said 31.3% and `C/B 0.2999`. It under-billed the
+> thin terms by exactly 2x (charging `k·n²·r` where flopscope's own convention
+> is `n·n·(2n−1)`) and omitted `_p2_compress` entirely — eight cost centres, not
+> the four the patch comment lists. Two further errors pushed the other way: a
+> nominal ratio applied to a Strassen-discounted total, and the K2 anchor held
+> at its nominal value when the measured total has it discounted too. Net error
+> 0.35%. **Right answer, wrong working** — and a model that is wrong twice and
+> cancels is the same hazard wearing a better coat. The corrected model gives
+> 30.0%; the measurement gives 28.7%. **Quote the measurement.**
+>
+> The earlier mispricings (27.6%, 41.5%, 32.3%) came from reading the plan
+> instead of the source. F21's own `_matmuls` bills an aged lineage **7**, a
+> phantom left from before `_dslice21`'s two permutations were found to be the
+> same product, and that is where "7→4" came from. **Count the products in the
+> source, then meter them.**
 
 ### The finding worth remembering: a deterministic sketch is not a free win
 
@@ -92,17 +109,32 @@ This is the first place our re-implementation is **better** than the oracle
 rather than merely independent of it, and an instrument found it, not a closer
 reading.
 
+**What it is NOT: a better approximation.** I wrote that the rank-32 deviation
+"got slightly smaller, which is the expected direction". The Skeptic ran the
+ablation — three builds differing only in which columns are selected — and at
+256x16 the *strongest* columns are the **worst** of the three. The power
+iteration washes the sketch out; the selection is immaterial to accuracy and
+the ordering flips with shape. That `2.0e-4 -> 1.7e-4` was one draw from a noise
+band, and it is a story I would have told whichever way it went. **The
+equivariance justification is the real one and it is sufficient.**
+
 ### v31's standing
 
 - `--parity`, five claims: control == v30 **bitwise** at identical counted
   FLOPs; dense arm `1.5–1.9e-7`; rank-32 arm `1.7–2.6e-4`; both arms pick the
   same `gens` at the live shape; **equivariance within 1.3× of the control's own
-  float32 floor** (bar 100×; the old sketch scores `4.4e+05×`).
+  float32 floor** (bar 100×). The Skeptic rebuilt the old sketch and confirmed
+  the gate bites: `5.4e+05×` and `1.8e+05×`, both ~2,000× past the bar.
 - `whest validate` **81 ms**; `edge_cases` **30/30**.
 - **No `auto-routed` warning** — v31 does not carry the release blocker that
   failed E14's memory gate. v31 adds **zero** warnings over v30; the one v30
   adds over F21 (`op 'diagonal' is not symmetry-aware`) is P1's κ4 transport.
-- **Not yet measured end to end.** Contract and gate: `experiments/LOG.md`,
+- **Residual: prediction 5 is SUPPORTED, measured, before the screen.** v31
+  bills **12,665 operations** against the `22,000` gate (1.74× margin) — **9.1%
+  FEWER than v30's 13,936**. At the frozen `13.4 µs/op` that forecasts a graded
+  residual of `0.1697 s` against the `0.4 s` cliff, **2.36× headroom**. The
+  layout shuttles I was least confident about cost operations *down*, not up.
+- **Accuracy not yet measured.** Contract and gate: `experiments/LOG.md`,
   2026-09-15, *CONTRACT (Rule 1): Slice 6b P2*, with its pre-data amendment.
   Screen queued as job **`1364`**; gate **`≥1.20×`** with the 95% studentised-t
   interval strictly above 0.

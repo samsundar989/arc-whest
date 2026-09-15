@@ -50426,3 +50426,217 @@ strongest columns is a better sketch than four arbitrary ones.
   would not have shown up in the design screen: the grader never permutes, so
   the score would have been fine and we would have shipped a labelling-
   dependent estimator without knowing it.
+
+---
+
+## 2026-09-15 — **Rule 2 Skeptic on the P2 build: PROVISIONAL / ACCEPT / ACCEPT / REJECT**
+
+Launched against the build, the contract and the raw artifacts, with the
+end-to-end screen still running (job `1364`), so it was explicitly **not**
+asked whether P2 improves the score. Four claims were put up; three came back
+changed.
+
+**Artifacts** (this is the LOG pointer that was missing — checklist 17):
+`experiments/2026-09-15_slice6b_p2/` holds `parity_v31.log`,
+`identity_test.log`, and four `edge_cases` transcripts —
+`_fixed` (30/30), `_OLDSKETCH_failed` (29/30, the equivariance failure),
+`_dense` (30/30, the discriminating arm) and `_control` (30/30).
+
+### 1. THE PRICE — PROVISIONAL, and it is the fourth mispricing
+
+**The Skeptic metered both arms at 1024x16 instead of arguing with my model.**
+That measurement replaces every projected cost number in this repository.
+
+| arm | counted FLOPs | C/B |
+|---|---:|---:|
+| v30 (control) | `928,411,199,060` | `0.422208` |
+| **v31, rank 32** | **`661,806,923,368`** | **`0.300970`** |
+| v31 dense | `1,660,083,133,052` | `0.754934` |
+
+**`0.7128x` — a 28.7% saving, not 31.3%. C/B `0.4222 -> 0.3010`, not `0.2999`.
+Cost-only gain `1.4028x`.** v30's C/B reproduces F21's graded `0.4222` to five
+decimals, which validates the instrument.
+
+**6→4 is CONFIRMED**, counted at source and corroborated arithmetically without
+reading anything: v30's measured total against the shipped 7/6 model implies a
+Strassen discount of `0.5406`, **below the theoretical depth-4 floor of
+`0.5819`** — impossible. Against 6/5 it implies `0.6222`, matching the chain's
+own L4/L0 census (`0.62303`) to 0.13%. The phantom seventh product is dead on
+the numbers, not just on the reading.
+
+**Two errors in my model, and two more that cancelled them.**
+`_projected_flops` charges `k·n²·r` per thin term where flopscope's own
+convention — used by its *own base term* — is `n·n·(2n−1)`: **under by exactly
+2×**. And `_p2_compress` is **absent from the cost model entirely** (four
+`O(n²r)` products, two QRs and a gather, `278,906,540` FLOPs per birth,
+`4.18e9` over the run). The patch comment lists four thin cost centres; there
+are eight. Corrected model: **30.0%**. Measured: **28.7%**.
+
+It landed within 0.35% only because I applied a *nominal* ratio to a
+*Strassen-discounted* total and held the K2 anchor at its nominal value when
+the measured total has it discounted too. **Right answer, wrong working.** A
+model that is wrong twice and cancels is the same hazard wearing a better coat.
+
+**Prediction 1 is CONFIRMED.** I predicted `0.70`–`0.78` with the mechanism
+"Strassen discounts what P2 removes and not what it adds, so the measured ratio
+must be worse than the model". Measured `0.7128`, and that is the correct
+mechanism with the correct sign.
+
+**A real regression I introduced.** `_projected_flops` is the **budget guard** —
+`predict` consults it before issuing an operation, and an MLP over `B` scores
+zeros. v30's guard is 1.22–1.85× conservative everywhere. v31's is **10.2% low
+at 96×6** and 1.9% low at 128×8; the dense arm is **8.9% low at 1024×16**. The
+5% margin `_BUDGET_FRACTION = 0.95` is documented as holding is consumed twice
+over. Blast radius is bounded — the guard is anti-conservative only where
+`_depth_for` returns 0 (width ≲128), where absolute cost is four orders below
+`B`, and no bustable shape could be constructed — but it must be fixed, and the
+conservatism at the live shape is an accident of unmodelled Strassen, not a
+property.
+
+**`gens` selection is safe**, measured for all three arms at the live shape:
+`None` everywhere, and neither the 7/6 over-billing nor the 2× thin error nor
+the dense arm's 8.9% shortfall can move it.
+
+### 2. THE ALGEBRA — ACCEPT, and `11/11` was really `8/11`
+
+**Three of the identity test's checks cannot fail**, and I wrote all three:
+
+- `:334` — `check("right factors are only A, P and a THIN Z", True, ...)`. A
+  literal `True`.
+- `:207` — the conjunction of the two checks immediately above it.
+- `:332` — *"the `(3,)` slice agrees under the same substitution"* **does not
+  test the substitution**. Both sides use the dense `Mrec`, so after
+  cancellation it reduces to `C_L = A·d(w2)` — a property of **v30** that holds
+  for any `Mrec`, correct or not.
+
+And structurally: **nothing in that file executes the emitted estimator.** It
+tests a numpy re-transcription of both spellings.
+
+**But the emitted code does implement what was proved**, and the Skeptic
+checked the two paths I flagged as least covered rather than reasoning about
+them. `_wick_tower` *is* covered — the dense arm exercises its factored branch
+on every parity seed, and a wrong scale on `Z` would break it. **`_truncate`
+was covered by nothing**: every equivalence check in the repo runs at
+`gens = None`. Forcing `gens ∈ {None,4,3,2,1}` at 96×6 and 64×8 found it
+**correct** — a live, untested path, reachable in production through `_regen`
+and the low-budget rungs.
+
+**The strongest single piece of evidence for the algebra did not exist before
+this review**: dense-vs-v30 at the **live shape**, final-row MSE `4.23e-13` and
+`3.25e-13` against a raw signal of `~3.9e-8` — nine orders down.
+
+### 3. THE EQUIVARIANCE FIX — ACCEPT
+
+The Skeptic rebuilt the pre-fix sketch and ran the new gate on it rather than
+taking my word: **`5.35e+05×` and `1.82e+05×` the control's floor, against a
+100× bar** — ~2,000× past it, with v31 at `1.23×` and `1.29×`. **The gate
+bites.** The QR premise was verified directly too: `np.linalg.qr` on a square
+matrix returns an `n×n` orthogonal `Q` whatever the input's rank
+(`‖QQᵀ−I‖ ≈ 7e-16` at ranks 64, 32 and 1), so the dense arm cannot be passing
+for a degenerate reason.
+
+**Two corrections to how I told it.** First, my framing — *"one arm, one run,
+and the two candidate explanations separate cleanly"* — **over-credits the
+arm**. At `r = n` selection and truncation switch off *together* and the
+argsort branch never runs, so dense narrows the cause to `{selection,
+truncation}` and exonerates everything else; what closes it to *selection* is
+the **pair** of runs, dense plus the changed-selection build.
+
+Second, and this one is retracted outright: I claimed the norm-selected sketch
+was *also a better approximation* because the rank-32 deviation fell from
+`2.0e-4` to `1.7e-4`. **It is not.** Three builds differing only in the selected
+columns:
+
+| shape | strongest | weakest | first-`r` |
+|---|---|---|---|
+| 96x6 (`r/n = 1/3`) | `2.169e-04` | `2.314e-04` | `2.268e-04` |
+| 256x16 (`r/n = 1/8`) | `1.121e-04` | **`9.940e-05`** | `1.025e-04` |
+
+At 256×16 *strongest* is the **worst** of the three. The power iteration washes
+the sketch out; the ordering flips with shape. That was one draw from a noise
+band dressed as a mechanism — **a story I would have told whichever way it
+went**, which is this repository's own test for a narrative. The equivariance
+justification is the real one and it is sufficient.
+
+### 4. PROVENANCE — REJECT, and this is the one that matters most
+
+This file's P2 row claimed *"the algebra is ours and the oracle only confirmed
+the sketch and the rank"*. **The Skeptic read git and the filesystem instead of
+my reasoning, and the timestamps refute it.**
+
+- **The reconstruction identity IS ours** — `cfb13bd`, 2026-09-14 22:24:39,
+  **1h47m before the clone** at 00:11:18. That is real and creditable and it
+  should be said.
+- **The `(2,1)` regrouping is NOT.** Proved at `e61b7d8`, **11h15m after** the
+  clone — and our own design note, written 36 minutes after cloning, states the
+  plan as *"**Their `_dslices` at `estimator_v16b.py:583-620` is the shape to
+  match**"*. It was matched: same decomposition, same variable names
+  `LA`/`LP`/`MP`/`PPL`, same `(2/3)` and `(1/3)` placement, same right-factor
+  convention, and the birth tuple `(a_b, Bm.T * 3.0, Q, S3c, e_b)` verbatim
+  from their `:571`.
+- **"Only the sketch" understates the range finder too.** `_p2_compress` is
+  *their whole function* with one line changed.
+
+`docs/PROVENANCE_504aldo.md` already contained the correct sentence in its
+*Attribution* section — *"the κ4 regeneration law, the **7→4 identity**, the
+D21 feedback and the age-gated basis are **504aldo's published work**"*. The
+mechanism row contradicted it. **The row was wrong and the attribution was
+right, so the row moved**, and a timestamped *P2 timeline* section now records
+what preceded the clone and what did not.
+
+This matters beyond bookkeeping: the file exists to hold the Rules §6 line, and
+the §6 question is drafted and **unsent**. It does not change the standing
+rules — own re-implementation only, no external bytes ever submitted — but it
+changes what an honest answer would have to say, and **Samuel should see the
+timeline before that question goes anywhere.**
+
+### Also flagged, and acted on
+
+- `experiments/2026-09-15_slice6b_p2/` was committed with **no pointer from any
+  LOG entry or doc**. Fixed at the top of this entry.
+- `parity_v31.log` prints `0.5969x` from the control's known-inflated 7/6
+  model — a committed artifact asserting a 40.3% saving nobody believes. The
+  `_projected_flops` line is being replaced by a measured claim 6.
+- The amendment said *"--parity still passes all four claims"*; there are five.
+- **P01 now carries the F21 screen, the λ sweep, the P1 gain and P2 on the same
+  24 networks.** Protocol-legal (DESIGN, uncapped, registered) but P1's and P2's
+  gains are **correlated**, and must never be quoted as two independent
+  readings or multiplied into a joint projection.
+
+### The open question the screen may not settle
+
+The rank-32 truncation perturbs the scored row by `|δ|² = 4.34e-10`, which is
+**+1.12%** of v30's raw `3.873e-08` *if δ is orthogonal to the existing error* —
+strikingly close to 504aldo's published +0.9%. But
+`MSE(v31) − MSE(v30) = 2⟨e,δ⟩ + |δ|²`, and the cross term's envelope is
+**±21.2%** of raw. At the measured cost gain `1.4028×`, **the gate fails if raw
+degrades by more than 16.9%.** So the screen is *probably* a formality and
+*not certainly* one, and nothing in the repository resolves which.
+
+The Skeptic's recommended follow-up: score `v31_dense` against `v31` on **8** of
+the 24 P01 networks — about a third of the screen's cost, DESIGN tier, block
+already registered. That isolates the rank truncation from the regrouping and
+from P1, and reads `⟨e,δ⟩` directly instead of bounding it.
+
+Also noted: **no rank evidence exists at the live ratio.** The identity test's
+rank table is at `n = 64` (`r/n = 1/2`), `p2_split_n128.json` at `n = 128`
+rank 16, `--parity` at 96×6 (`r/n = 1/3`). The live shape keeps **1/32**.
+
+### Knowledge delta
+
+- **Meter it, do not model it.** Four pricings, three wrong, and the first one
+  that was right about the thing it needed to be right about was a
+  measurement that took 107 seconds. The metering belongs in `--parity` as a
+  standing claim, not in a hand table.
+- **A model that is wrong twice and cancels is not a model that works.** The
+  0.35% agreement was luck, and luck that validates a broken derivation is
+  worse than a visible error.
+- **Count your own unfalsifiable checks.** I shipped `check(..., True, ...)` and
+  reported `11/11` three times in commit messages. A suite's headline count is
+  a claim like any other.
+- **The paths no equivalence test reaches are the ones to hand a Skeptic.** I
+  named `_truncate` and `_wick_tower` as my least-confident paths and one of
+  them turned out to be tested by *nothing* in the repository.
+- **An agent auditing its own independence will overstate it.** Not from bad
+  faith — from reconstructing a timeline out of its own reasoning rather than
+  out of timestamps. The artifacts are the record; memory is not.

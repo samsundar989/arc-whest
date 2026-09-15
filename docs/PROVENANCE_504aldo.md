@@ -67,7 +67,7 @@ row here, naming the file, the line and what question it answered.
 | 2026-09-15 | `estimator_v16b.py:558–569` | P2's separable split | Identical to what we derived and measured independently BEFORE cloning: `e = w(1,2) − 2·pK1·w(1,1)`, `S_sep = zero_diag(e_i·C_off·w1_j)`, birth `diag(S3) + 3·a_b·d(e) + 3·R·Lᵀ`. No correction needed |
 | 2026-09-15 | `estimator_v17.py:247–250, 452` | where the missing `q31` consumer feeds | It is **four term rows** plus a new `(3,1)` slice, not one line. F21's table is upstream's frozen SIMPLE enumeration and does not contain `(3,1)`, so adding it is a deliberate divergence from the pinned reference needing its own contract |
 | 2026-09-15 | `estimator_v16b.py:280` | P2's residual rank | They ship **32**, not the handoff's 16. Their F63 row gives raw-MSE cost +1.6% / +0.9% / +0.4% at rank 16 / 32 / 64. A *suggestion* for our rank, to be verified end to end on our chain |
-| 2026-09-15 | `estimator_v16b.py:561` | how the range finder gets its sketch without randomness | `Om = w32[:, :r]` -- the first `r` columns of the layer's OWN weight matrix, which at He init is i.i.d. Gaussian. We copied it, and **our own invariant suite rejected it**: relabelling the hidden neurons permutes those columns, so the sketch picks a different subspace and the estimator stops being permutation-equivariant -- `inv_permutation` went from v30's `1e-13` to **1.07% of raw MSE at 128x8, FAILED** against its 1% bar. We ship a different sketch: **the residual's own strongest columns by norm**, which is equally deterministic and equivariant besides (`8.8e-01` vs `3.2e-07` relative, measured side by side). **A DIVERGENCE FROM THE ORACLE, and one that corrects it** -- their published estimator has this property too, and we did not inherit it |
+| 2026-09-15 | `estimator_v16b.py:558-569` | the range finder, whole | **`_p2_compress` is their function with one line changed**, not merely their sketch: same single power iteration, same two QRs, same `Bm = Q^T R` and `(Bm.T * 3.0, Q)` return with the factor 3 folded into `Z`, same narrow-shape rank guard. The one line we changed is the sketch, and we changed it because **our invariant suite rejected theirs**: `Om = w32[:, :r]` is deterministic but not permutation-equivariant, and `inv_permutation` went from v30's `1e-13` to **1.07% of raw MSE at 128x8, FAILED** against its 1% bar. We select the residual's own strongest columns instead -- equally deterministic, and equivariant (`5.4e+05x` the control's float32 floor versus `1.2x`, independently reproduced). **That divergence is genuinely ours and it corrects their published estimator**; the rest of the function is not |
 | 2026-09-15 | `estimator_v16b.py:583-620` | whether the dense residual reconstruction is avoidable | It is **not**, and they do not avoid it either: `MP = einsum("kiq,kjq->kij", Z, L)` forms it densely at `O(k n^2 r)`. Confirms our own reading that `LP` genuinely needs `A_D . M`. Their tower is 3-D throughout, so they pay no layout shuffle; F21's is 2-D and Strassen-wide, so ours does -- **that difference is ours to measure, not theirs to answer** |
 
 **What was NOT taken:** no code was copied. The coefficients above are
@@ -97,10 +97,78 @@ own tiny-shape parity evidence.
 | # | mechanism | their finding | our file | status |
 |---|---|---|---|---|
 | P1 | κ4 regeneration `G = diag(g) + λ·C_off`, with consumers and the κ4→κ3 feed derived from one state | F68 | `estimator_k3_v30.py` | **RE-IMPLEMENTED**, own code from F21 lineage via `local_sim/p2_build_v30.py`. Birth projection identified against the oracle; consumers and transport were already ours and already correct. **1.2371x on 24/24 design nets** at unchanged cost (t 95% `[+3.36e-9, +4.39e-9]`, sign p 0.0000). Their reported gain is 1.97x, so ~half is missing: the `q31` consumer is absent and λ is an initialiser. Skeptic pending |
-| P2 | the 7→4 leg identity, `S21 = S_sep + R_res` with a thin transported residual | F63 | `estimator_k3_v31.py` | **RE-IMPLEMENTED**, own code from the v30/F21 lineage via `local_sim/p2_build_v31.py`. Both identities were **proved before any estimator code existed** (`p2_p2_identity_test.py`: reconstruction to 3.7 float32 ulps on real F21 state, regrouping to 6.8e-16 with an arbitrary residual), so the algebra is ours and the oracle only confirmed the sketch and the rank. Tiny-shape parity: control == v30 bitwise, dense arm 2.2e-7, rank-32 arm 2.5e-4. Priced at **31.3%** of the tower, counted off the code. **Not yet measured end to end** -- contract `experiments/LOG.md` 2026-09-15, screen job `1361` |
+| P2 | the 7→4 leg identity, `S21 = S_sep + R_res` with a thin transported residual | F63 | `estimator_k3_v31.py` | **RE-IMPLEMENTED, and PART OF IT IS THEIRS.** See *The P2 timeline* below, which an independent Skeptic reconstructed from git and filesystem timestamps on 2026-09-15 after this row claimed more independence than the record supports. In short: the **reconstruction identity is ours** (committed 1h47m before the clone); the **`(2,1)` regrouping and the range finder are theirs**, matched deliberately from `estimator_v16b.py:558-620`. Our own contributions are the 2-D Strassen-wide layout, its shuttles, and the equivariant sketch. Measured at 1024x16: **`0.7128x` of v30's cost, a 28.7% saving, C/B `0.4222 -> 0.3010`**. **Accuracy not yet measured** -- contract `experiments/LOG.md` 2026-09-15, screen job `1364` |
 | P3 | rank-16 D21→birth feedback | F69 | — | **NOT STARTED** |
 | P4 | Strassen depth/pooling/block-symmetric `C_pre`/final-layer trim | F86 (cost anatomy) | — | **NOT STARTED** |
 | P5 | age-gated shared basis, 384 at age 4 nested to 224 at age 7 | F72/F73 | — | **NOT STARTED** |
+
+## The P2 timeline — what preceded the clone and what did not
+
+*Added 2026-09-15 after an independent Skeptic **REJECTED** this file's earlier
+claim that "the algebra is ours and the oracle only confirmed the sketch and
+the rank". That claim was written by the agent that did the work, from memory
+of its own reasoning. The Skeptic read git and the filesystem instead. **The
+timestamps win.** This section exists because the §6 eligibility question turns
+on exactly this distinction, and a document that overstates our independence is
+worse than useless for answering it.*
+
+| when (UTC) | what |
+|---|---|
+| **2026-09-14 22:24:39** | `cfb13bd` commits `local_sim/p2_p2_split_probe.py` and `p2_split_n128.json`, already carrying `e = w(1,2) − 2·pK1·w(1,1)` and `(3·S_sep)ᵀ = 3·fac1·d(e)` |
+| **2026-09-15 00:11:18** | **the clone** — `external/504aldo/.git` |
+| 2026-09-15 00:47:51 | `221a671`, the design note |
+| 2026-09-15 02:10:48 | `9c69c68`, the reconstruction identity test |
+| **2026-09-15 11:26:21** | `e61b7d8`, the **`(2,1)` regrouping** proved — **11h15m after the clone** |
+
+### What is ours
+
+**The reconstruction identity** — `A_D = M·d(s) + 3·A_L·d(e) + Z·Lᵀ`, and the
+observation that `3 S_sepᵀ` is a free column scale on a leg the tower already
+carries. Derived, implemented and committed **1h47m before the clone existed**,
+and the commit proves it.
+
+**The 2-D Strassen-wide layout and its shuttles.** Their tower is `(k,n,n)`
+throughout; F21's is `(n, k·n)` so that one wide matmul feeds Strassen depth 4.
+Everything in `_p2_recon` that moves between the two layouts is ours, exists
+only because our layout differs from theirs, and is a genuinely different cost
+regime.
+
+**The equivariant sketch**, which corrects a real defect in their published
+estimator — found by running an instrument, not by reading their code.
+
+### What is theirs, and was matched deliberately
+
+**The `(2,1)` regrouping.** Our own design note, written 36 minutes after the
+clone, states the plan as *"Their `_dslices` at `estimator_v16b.py:583-620` is
+the shape to match."* It was matched: same decomposition, the same variable
+names `LA` / `LP` / `MP` / `PPL`, the same `(2/3)` and `(1/3)` placement, the
+same right-factor convention, and the birth tuple `(a_b, Bm.T * 3.0, Q, S3c,
+e_b)` verbatim from their `:571`.
+
+*In fairness, and stated as the weaker argument it is:* the regrouping is a
+forced consequence of substituting the reconstruction into F21's own
+contraction, so an independent derivation would plausibly have reached the same
+grouping. That is an argument about what could have happened. The artifacts
+record what did.
+
+**The range finder** — see the `:558-569` row above. Ours is their function
+with the sketch line changed.
+
+**The rank**, 32, taken from their F63 row.
+
+### Why this correction was made rather than argued with
+
+This file's own *Attribution, for the write-up* section already said the right
+thing: *"the κ4 regeneration law, the **7→4 identity**, the D21 feedback and
+the age-gated basis are **504aldo's published work**."* The mechanism row
+contradicted it. The row was wrong and the attribution was right, so the row
+moved.
+
+Nothing here changes the standing rules: own re-implementation only, no v29 or
+v16b bytes ever submitted, the §6 question drafted and **unsent** pending
+Samuel's approval of the exact wording. It does change what an honest answer to
+that question would have to say, and Samuel should see this section before the
+question goes anywhere.
 
 ### What we are deliberately NOT taking
 
