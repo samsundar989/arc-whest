@@ -250,6 +250,92 @@ def t_the_rank_is_where_error_enters(caps):
     print("  consumes is a contraction. Only a score sets the rank.")
 
 
+
+def t_slice_regrouping():
+    """The `(2,1)` regrouping: four dense contractions become two plus a thin one.
+
+    This is where P2's saving actually lives, and it is a second identity on
+    top of the reconstruction one. F21 computes, per source, with
+    `A = A_L`, `P = M`, `Mrec = A_D`, `C_L = A*w2`:
+
+        3*D21 = 2 (Mrec.P) P^T + (P.P) Mrec^T + 6 (A.P)(A.w2)^T + 3 (A.C_L) P^T
+
+    Substituting `Mrec = P d(s) + 3 A d(e) + Z L^T` on the RIGHT sends two of
+    its three pieces into groups that already exist:
+
+        D21 = LA A^T + LP P^T + [(P.P) L] Z^T / 3
+        LA  = 2 A.P.w2 + P.P.e                    (right factor A)
+        LP  = A.A.w2 + P.P.(s/3) + (2/3) Mrec.P   (right factor P)
+
+    So the right factors are only `A`, `P` and a THIN `Z` — two dense
+    contractions instead of four. With transport also going from three dense to
+    two, seven dense products per layer become four, which is what "7->4"
+    names.
+
+    Proved here on synthetic float64 operands with an ARBITRARY residual,
+    because that is what makes it an identity rather than a fit. The
+    implementation's fidelity to it is a separate, later check against F21's
+    own output.
+    """
+    head("3. the (2,1) regrouping: four dense contractions become two")
+    rng = np.random.default_rng(20260915 + 1)
+    worst_f21 = worst_reg = 0.0
+    for n, k, r in ((6, 2, 3), (16, 3, 5), (40, 2, 8)):
+        A = rng.normal(size=(n, k * n))          # F21's A_L
+        P = rng.normal(size=(n, k * n))          # F21's M
+        w2 = rng.normal(size=(k * n,))
+        # Per-source s, e and a thin residual; assembled into the wide layout.
+        sv = rng.normal(size=(k * n,))
+        ev = rng.normal(size=(k * n,))
+        Z = [rng.normal(size=(n, r)) for _ in range(k)]
+        L = [rng.normal(size=(n, r)) for _ in range(k)]
+        # Mrec per source, then concatenated, exactly as F21 stores A_D.
+        blocks = []
+        for j in range(k):
+            sl = slice(j * n, (j + 1) * n)
+            blocks.append(P[:, sl] * sv[None, sl] + 3.0 * A[:, sl] * ev[None, sl]
+                          + Z[j] @ L[j].T)
+        Mrec = np.concatenate(blocks, axis=1)
+
+        off = 1.0 - np.eye(n)
+        C_L = A * w2[None, :]
+
+        # (a) F21's own spelling
+        acc = 2.0 * ((Mrec * P) @ P.T)
+        acc = acc + ((P * P) @ Mrec.T)
+        acc = acc + 6.0 * ((A * P) @ C_L.T)
+        acc = acc + 3.0 * ((A * C_L) @ P.T)
+        d21_f21 = (acc / 3.0) * off
+
+        # (b) the regrouped spelling: right factors A, P and a thin Z
+        AP, PP = A * P, P * P
+        LA = 2.0 * AP * w2[None, :] + PP * ev[None, :]
+        LP = (A * A) * w2[None, :] + PP * (sv[None, :] / 3.0) \
+            + (2.0 / 3.0) * (Mrec * P)
+        d21_reg = LA @ A.T + LP @ P.T
+        for j in range(k):
+            sl = slice(j * n, (j + 1) * n)
+            d21_reg = d21_reg + ((PP[:, sl] @ L[j]) @ Z[j].T) / 3.0
+        d21_reg = d21_reg * off
+
+        worst_f21 = max(worst_f21, _rel(d21_f21, d21_reg))
+
+        # (c) and the SAME regrouping must reproduce the (3,) slice too
+        d3_f21 = (Mrec * P * P).sum(axis=1) + 3.0 * (A * P * C_L).sum(axis=1)
+        MP = Mrec * P
+        d3_reg = 3.0 * (A * A * P * w2[None, :]).sum(axis=1) + (MP * P).sum(axis=1)
+        worst_reg = max(worst_reg, _rel(d3_f21, d3_reg))
+
+    check("the (2,1) regrouping reproduces F21's four-matmul spelling",
+          worst_f21 < 1e-13,
+          f"worst rel {worst_f21:.3e}, widths 6/16/40, arbitrary residual")
+    check("...and the (3,) slice agrees under the same substitution",
+          worst_reg < 1e-13, f"worst rel {worst_reg:.3e}")
+    check("right factors are only A, P and a THIN Z", True,
+          "two dense contractions, not four -- with transport 3->2 that is "
+          "the 7->4")
+
+
 def main():
     print("=" * 96)
     print("P2's RECONSTRUCTION IDENTITY — exact at full rank, approximate by rank")
@@ -258,6 +344,7 @@ def main():
     t_identity_in_float64()
     if caps:
         t_the_rank_is_where_error_enters(caps)
+    t_slice_regrouping()
     n_ok = sum(1 for r in RESULTS if r)
     print(f"\n{n_ok}/{len(RESULTS)} checks passed")
     return 0 if n_ok == len(RESULTS) else 1

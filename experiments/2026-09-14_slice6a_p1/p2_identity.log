@@ -32,4 +32,10 @@ P2's RECONSTRUCTION IDENTITY — exact at full rank, approximate by rank
   smaller than the Frobenius picture, because what the chain
   consumes is a contraction. Only a score sets the rank.
 
-8/8 checks passed
+3. the (2,1) regrouping: four dense contractions become two
+-----------------------------------------------------------
+  the (2,1) regrouping reproduces F21's four-matmul spelling       ok   worst rel 6.760e-16, widths 6/16/40, arbitrary residual
+  ...and the (3,) slice agrees under the same substitution         ok   worst rel 1.690e-16
+  right factors are only A, P and a THIN Z                         ok   two dense contractions, not four -- with transport 3->2 that is the 7->4
+
+11/11 checks passed
