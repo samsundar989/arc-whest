@@ -50290,3 +50290,29 @@ registered through `local_sim/truth_reads.py` like any other.
 - Untouched: `estimator.py`, the vault, the public split, `HUMAN_MODEL.md`,
   every historical failed gate.
 - **No submission follows from this entry**, whatever it says.
+
+### Samuel's prediction, taken 2026-09-15 before any P2 data existed
+
+Three questions, asked after the contract above was committed (`51a448f`) and
+before the screen was queued.
+
+| question | answer |
+|---|---|
+| paired score gain vs v30 | **"I don't know"** |
+| raw-MSE cost of the rank-32 truncation | **"I don't know"** |
+| whether the layout shuffles threaten the 0.4 s residual cliff | **"I don't know"** |
+
+**This is a valid answer and it is recorded as one.** `AGENTS.md` Rule 1 says
+so explicitly, and a guess he does not hold would be worse than a blank: the
+record exists to measure whether the project's model of itself is any good,
+and a fabricated prior corrupts that measurement in the direction that
+flatters us.
+
+What it means for how the result gets reported: **this slice has no human
+prior to pass or fail.** My own numbered predictions (1–5 above) are the only
+ones on the table, and they are the ones the result will be scored against.
+Three consecutive "I don't know"s on a mechanism whose algebra is proved and
+whose price is counted is itself a signal — the uncertainty here is not about
+the mathematics, it is about whether a published accuracy number transfers
+between two different term sets, and that is genuinely not knowable from where
+he sits.
