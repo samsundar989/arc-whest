@@ -120,12 +120,16 @@ Two measurements from 2026-09-14, both ours:
    comes from κ3-*sourced* κ4 production, which a Gaussian-tree diagram does not
    contain. `experiments/2026-09-14_exp_lambda/`.
 2. **The unfactored AUGMENT chain cannot be run at the live width.** Its κ3
-   state is a dense `(n,n,n)`, so peak memory follows an n³ law measured at
-   1.61 GiB (n=64) and 12.44 GiB (n=128), with n=192 out of memory on a 32 GiB
-   card exactly as that law predicts. Extrapolated to n=1024: **6,369 GiB**.
-   So "fit λ from the AUGMENT chain at 1024×16" is not a tuning problem, and
-   the open question is whether λ is width-stable enough to transfer from a
-   width that fits. `local_sim/p2_lambda_fit.py`.
+   state is a dense `(n,n,n)`, so the **retained state alone is ≥133 GiB at
+   1024×16 — over 4× a 32 GiB card**, before any transient. So "fit λ from the
+   AUGMENT chain at 1024×16" is not a tuning problem.
+   *(Three peak figures quoted here earlier were withdrawn on Skeptic review:
+   they came from an ad-hoc run never saved as an artifact, and an OOM at
+   n=192 is consistent with any exponent ≥ 2.33, so it does not test the law.
+   The retained-state figure needs none of them.)*
+   And λ's own value at 1024 is **undetermined** — the leave-one-out window
+   spread is 8.89× — so `lam_own.npz` is an initialiser, never a constant.
+   `local_sim/p2_lambda_fit.py`, `local_sim/p2_lambda_extrapolate.py`.
 
 ## Attribution, for the write-up
 
