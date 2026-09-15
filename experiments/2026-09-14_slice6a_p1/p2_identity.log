@@ -1,0 +1,35 @@
+================================================================================================
+P2's RECONSTRUCTION IDENTITY — exact at full rank, approximate by rank
+================================================================================================
+
+1. the rewrite is EXACT at full rank, on real chain state
+---------------------------------------------------------
+  F21 state captured at its own birth site                         ok   5 layers, F21 sha d77dab0e2c740cc9...
+  3*S_sep.T == 3*a_b*d(e), every layer                             ok   worst 4.441e-07 = 3.73 float32 ulps
+  diag(S3) + 3*a_b*d(e) + 3*R.T == A_D, every layer                ok   worst 3.939e-07 = 3.30 float32 ulps
+
+1b. the same identity in float64, where round-off cannot hide it
+----------------------------------------------------------------
+  3*S_sep.T == 3*a_b*d(e) exactly, widths 7/33/64                  ok   worst rel 1.900e-16
+  the full reconstruction is exact for an ARBITRARY residual       ok   worst rel 1.906e-16 -- it is a regrouping, not a fit
+  ...so the rewrite introduces NO error at full rank               ok   the approximation is the RANK, and it is a separate step
+
+2. and the rank is where error enters — separately, and measurably
+------------------------------------------------------------------
+  reconstruction error of A_D at rank r, n = 64
+  layer          r=8         r=16         r=32
+      0    2.704e-02    1.931e-02    6.611e-03
+      1    5.529e-02    3.259e-02    1.776e-02
+      2    6.570e-02    4.954e-02    1.322e-02
+      3    5.750e-02    4.367e-02    1.346e-02
+      4    7.540e-02    6.062e-02    1.723e-02
+  more rank is monotonically less error, every layer               ok   
+  rank 32 is not yet exact -- it is an approximation and says so   ok   an 'exact' low-rank reconstruction would mean the residual was already thin, which would make P2 free rather than a trade
+
+  NOTE the units. This is reconstruction error of A_D in Frobenius
+  norm, NOT score. The oracle's own end-to-end figures are +1.6% /
+  +0.9% / +0.4% raw MSE at rank 16 / 32 / 64, an order of magnitude
+  smaller than the Frobenius picture, because what the chain
+  consumes is a contraction. Only a score sets the rank.
+
+8/8 checks passed
