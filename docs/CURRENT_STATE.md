@@ -1,6 +1,40 @@
 # CURRENT_STATE.md — read this first
 
-## September 15: Slice 6a P1 MEASURED AND FALSIFIED — decision needed
+## September 15: Slice 6a P1 WORKS — 1.2371x on 24 of 24, Skeptic pending
+
+| arm | raw MSE | C/B | score |
+|---|---|---|---|
+| F21 | `4.791516e-08` | 0.422214 | `2.023044e-08` |
+| **v30** | **`3.872559e-08`** | 0.422265 | **`1.635247e-08`** |
+
+Paired difference `+3.877963e-09`, t 95% `[+3.3625e-09, +4.3935e-09]`, better on
+**24/24**, sign p `0.0000`. Cost essentially unchanged (`+0.000044 B`). Label
+noise `-0.01%`. Design ratio `0.80831`; against F21's graded `1.5957e-8` that
+projects to **`1.29e-8`** — a DESIGN-TIER projection, not a public run.
+
+**The pre-registered prediction is still FALSIFIED**: raw `2.1e-8` predicted,
+`3.87e-8` measured. The gain is real but **1.24x, not ~1.8x**. 504aldo report
+**1.97x** from the same mechanism, so about half their gain is missing, and
+both likely causes are identified: the **`q31` consumer is absent** (F21's Wick
+table has no `(3,1)` entry to receive it) and **λ is an initialiser** whose
+1024 value an earlier Skeptic rejected as window-dependent.
+
+**What separated this from the earlier 9.2x regression** was one coefficient
+family: the birth is the **r=1 matrix-core** harmonic projection, not a rescaled
+r=2 scalar. Settled in one line of the parity oracle, cloned with approval and
+recorded in [PROVENANCE](PROVENANCE_504aldo.md) with a consultation table.
+
+**Standing:** Rule 2 Skeptic running. This licenses a DECIDE-tier contract and
+nothing else — no promotion, submission, designation or public run. F21
+`#330950` remains the standing candidate.
+
+**Next, in order:** (1) Skeptic verdict; (2) the `q31` consumer, or P2 — see
+[the P2 design note](../experiments/2026-09-14_slice6a_p1/p2_design_note.md),
+which prices P2 at ~27.6% of the tower with their shipped rank 32 at +0.9% raw.
+
+---
+
+## September 15 (earlier): the P1 regression that located the projection bug
 
 **v30 is 9.2x worse than F21 on 24 design networks.** Pre-registered raw
 `2.1e-8` (range `1.9-2.4e-8`); measured `4.428424e-07` against F21's

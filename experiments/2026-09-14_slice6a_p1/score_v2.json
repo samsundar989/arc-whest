@@ -1,0 +1,58 @@
+{
+  "control": "estimator_k3_strassen_L4_f21.py",
+  "candidate": "estimator_k3_v30.py",
+  "truth": "experiments\\2026-08-21_p2_cp1\\truth_P01.npz",
+  "block": "P01",
+  "n": 24,
+  "width": 1024,
+  "depth": 16,
+  "n_samples_per_replica": 4194304.0,
+  "accuracy_only": true,
+  "local_seconds_caps": "off",
+  "tier": "DESIGN",
+  "promotes_nothing": true,
+  "arms": {
+    "control": {
+      "objective": 2.023043526427976e-08,
+      "raw_mse": 4.791516146814464e-08,
+      "multiplier": 0.42221365105342556,
+      "n_failed": 0,
+      "flops_mean": 928457637478.0,
+      "rows_hash": "bdd6b8dceb3ba07a43931e2693470ced3277bd32e3a1fddad9acce223cfbcdd3",
+      "candidate_sha256": "d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94",
+      "seconds": 1259.686514400004
+    },
+    "candidate": {
+      "objective": 1.635247179919714e-08,
+      "raw_mse": 3.872559066013063e-08,
+      "multiplier": 0.42226526491776895,
+      "n_failed": 0,
+      "flops_mean": 928571137566.0,
+      "rows_hash": "779b99dad38a09c68852733e83454d0a868406f4277f300f7e5d4fafa6e3c567",
+      "candidate_sha256": "98d243012bfef1b660f9ce1cbc5aabbfc8f059434aa9bcbfe04420668b80b94c",
+      "seconds": 1320.4258636999875
+    }
+  },
+  "paired": {
+    "mean_difference": 3.877963465082623e-09,
+    "t_ci": [
+      3.362462030873925e-09,
+      4.393464899291321e-09
+    ],
+    "arithmetic_gain": 1.2371484575972802,
+    "geometric_gain_DIAGNOSTIC": 1.2407499183424278,
+    "n_candidate_better": 24,
+    "sign_test_p": 1.1920928955078125e-07,
+    "notes": [
+      "paired on 24 matched MLP identities"
+    ]
+  },
+  "verdict": null,
+  "noise_aware": {
+    "true_function_difference": 3.878427633676695e-09,
+    "forecast_difference": 3.878423739948314e-09,
+    "noise_bias": -4.641685940727096e-13,
+    "noise_bias_share": -0.0001196939058998639,
+    "n_negative_corrected": 0
+  }
+}

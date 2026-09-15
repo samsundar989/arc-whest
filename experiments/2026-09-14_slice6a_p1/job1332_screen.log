@@ -1,0 +1,44 @@
+worker-q: job #1332 starting at 2026-09-15T05:14:05.207195+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=none -
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', "$env:PYTHONWARNINGS='ignore'; cd C:/Users/samsu/Documents/arc-whest; uv run python -u local_sim/p2_design_score.py --control estimator_k3_strassen_L4_f21.py --candidate estimator_k3_v30.py --truth experiments/2026-08-21_p2_cp1/truth_P01.npz --n 24 --wall-caps off --ts 2026-09-15T00:20:00Z --note 'P1 rerun, r=1 matrix-core birth' --out experiments/2026-09-14_slice6a_p1/score_v2.json"]
+worker-q: ------------------------------------------------------------
+================================================================================================
+DESIGN-TIER PAIRED SCORE -- licenses a contract, never a promotion
+================================================================================================
+  control    estimator_k3_strassen_L4_f21.py
+  candidate  estimator_k3_v30.py
+  truth      experiments\2026-08-21_p2_cp1\truth_P01.npz   block P01   24 nets   1024x16   2 replicas x 4,194,304
+  *** ALL LOCAL-SECONDS CAPS OFF -- ACCURACY-ONLY. Residual,
+  *** wall and predict timeout are all disarmed together. This
+  *** run is NOT deployment evidence for any of them, and its
+  *** failure accounting cannot see a timing violation.
+  *** (Armed, this host's ~73 s/MLP blows the 120 s wall on
+  *** some networks and scores them at zero-prediction MSE --
+  *** which measures the host, not the candidate.)
+
+  control    score 2.023044e-08   raw MSE 4.791516e-08   C/B 0.422214   mult 0.422214   failed 0/24   1260s
+             ADVISORY local wall: median 52.3s  worst 53.7s   -- LOCAL seconds, gates nothing, not the server's
+  candidate  score 1.635247e-08   raw MSE 3.872559e-08   C/B 0.422265   mult 0.422265   failed 0/24   1320s
+             ADVISORY local wall: median 54.2s  worst 57.1s   -- LOCAL seconds, gates nothing, not the server's
+
+NOISE-AWARE  n = 24
+  observed adjusted difference      +3.877963e-09
+  true-function difference          +3.878428e-09
+  forecast at official precision    +3.878424e-09
+  label-noise bias in `observed`    -4.641686e-13   (-0.01% of it)
+  networks whose corrected MSE went negative: 0 (RETAINED, never clipped)
+  - paired on 24 matched MLP identities
+
+  PAIRED arithmetic score difference (the binding statistic)
+    mean difference   +3.877963e-09
+    studentised-t 95% [+3.3625e-09, +4.3935e-09]
+    arithmetic gain   1.2371x   candidate better on 24/24   sign p 0.0000
+    geometric gain    1.2407x   DIAGNOSTIC ONLY, no authority
+
+  no --gate given, so no verdict. This tool does not invent thresholds.
+
+  -> experiments/2026-09-14_slice6a_p1/score_v2.json
+worker-q: ------------------------------------------------------------
+worker-q: job #1332 SUCCEEDED (exit code 0) at 2026-09-15T05:57:07.259985+00:00

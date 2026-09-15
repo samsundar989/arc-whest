@@ -49952,3 +49952,87 @@ which is the cheapest possible way to have learned it.
   normalisation that F21 simply does not have.
 - Three convention guesses gave three residuals. **Measure the ratio; do not
   tune the constant.** The measurement took one instrumented run at width 96.
+
+---
+
+## 2026-09-15 — **Slice 6a P1 WORKS: 1.2371x on 24 of 24 design networks** — and the prediction is still falsified
+
+DESIGN tier, 24 P01 networks, label-free, all local-seconds caps off, **0/24
+failed in both arms**. Artifacts:
+[score_v2.json](2026-09-14_slice6a_p1/score_v2.json), job `1332`.
+
+### The result
+
+| arm | raw MSE | C/B | score |
+|---|---|---|---|
+| F21 (control) | `4.791516e-08` | 0.422214 | `2.023044e-08` |
+| v30 (per-neuron κ4) | **`3.872559e-08`** | 0.422265 | **`1.635247e-08`** |
+
+    paired arithmetic difference   +3.877963e-09
+    studentised-t 95%              [+3.3625e-09, +4.3935e-09]
+    arithmetic gain                1.2371x    better on 24/24
+    sign test p                    0.0000
+    geometric (diagnostic)         1.2407x
+
+**Raw MSE falls 1.237x at essentially unchanged cost** — `C/B` moves
+`0.422214 → 0.422265`, the `+0.000044 B` measured at the live shape. Label noise
+contributes `-0.01%` of the difference, so this is the true functions.
+
+Design-tier ratio `0.80831`. Against F21's graded public `1.5957e-8` that
+projects to **`1.29e-8`** — a **DESIGN-TIER projection**, not a public run, and
+not a promotion.
+
+### The prediction is still FALSIFIED, and that matters
+
+The handoff pre-registered raw `2.1e-8`, range `1.9–2.4e-8`. Measured
+`3.87e-8`. The improvement is **real and 1.24x**, not the ~1.8x predicted.
+
+For scale: 504aldo report their κ4 regeneration taking raw `4.46e-8 → 2.26e-8`,
+a **1.97x**. We get **1.24x** from the same mechanism. So roughly **half their
+reported gain is missing**, and the two most likely places it went are both
+identified rather than speculative:
+
+1. **The `q31` consumer is absent.** Their `wk431 = C_off · (0.5 · METRIC_C ·
+   λ_prev)` is a third consumer of the core, and F21's frozen Wick table has no
+   `(3,1)` entry to receive it. Adding one is a table change with its own parity
+   evidence, deliberately deferred.
+2. **λ is the extrapolated table**, whose value at width 1024 an earlier
+   Skeptic **rejected** as window-dependent (8.89x median spread across
+   leave-one-out fits). It is an initialiser, not a fitted constant.
+
+### What the earlier failure cost, and what it bought
+
+The first screen of this same candidate was **9.2x worse** on the same 24
+networks. One change separates the runs: the birth is the **r = 1 matrix-core**
+harmonic projection, not a rescaling of F21's **r = 2** scalar. The trace
+subtraction is what makes it harmonic, and without it the core compounded with
+depth — ratio to F21's scalar `1.000 / 1.557 / 2.449 / 3.781 / 6.369` by layer,
+against `1.000 / 0.998 / 1.014 / 1.025 / 1.033` after.
+
+That correction came from the parity oracle, cloned with Samuel's approval on
+2026-09-15 and recorded in `docs/PROVENANCE_504aldo.md` with a consultation
+table. It was one line of their `estimator_v17.py`. Deriving it instead would
+have been days, with no way to check the derivation except a 45-minute
+end-to-end screen.
+
+**The oracle also confirmed everything we already had right** — the transport
+operand, both consumer coefficients, the metric — so only the birth was wrong.
+No code was copied; the coefficients are properties of a harmonic projection at
+width `n`.
+
+### Standing
+
+Rule 2 Skeptic launched on this result before it is believed. **This licenses a
+DECIDE-tier contract, nothing more.** No promotion, no submission, no
+designation, no public run, no DECIDE block spent. F21 `#330950` remains the
+standing candidate.
+
+### Knowledge delta
+
+- **The κ4 mechanism is real on our chain, and worth 1.24x.** That is the first
+  raw-MSE movement this repository has measured since September 7.
+- **A mechanism can be right and its projection wrong, and the failure looks
+  identical to the mechanism being wrong.** A 9.2x regression and a 1.24x gain
+  differed by one coefficient family.
+- The gap to their reported 1.97x is **located, not mysterious**: a missing
+  third consumer and an initialiser λ.

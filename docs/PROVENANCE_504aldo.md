@@ -93,7 +93,7 @@ own tiny-shape parity evidence.
 
 | # | mechanism | their finding | our file | status |
 |---|---|---|---|---|
-| P1 | κ4 regeneration `G = diag(g) + λ·C_off`, with consumers and the κ4→κ3 feed derived from one state | F68 | `estimator_k3_v30.py` | **RE-IMPLEMENTED**, own code from F21 lineage via `local_sim/p2_build_v30.py`. Birth projection identified against the oracle; consumers and transport were already ours and already correct. Accuracy unproven — first screen regressed 9.2× on the wrong projection; corrected rerun pending |
+| P1 | κ4 regeneration `G = diag(g) + λ·C_off`, with consumers and the κ4→κ3 feed derived from one state | F68 | `estimator_k3_v30.py` | **RE-IMPLEMENTED**, own code from F21 lineage via `local_sim/p2_build_v30.py`. Birth projection identified against the oracle; consumers and transport were already ours and already correct. **1.2371x on 24/24 design nets** at unchanged cost (t 95% `[+3.36e-9, +4.39e-9]`, sign p 0.0000). Their reported gain is 1.97x, so ~half is missing: the `q31` consumer is absent and λ is an initialiser. Skeptic pending |
 | P2 | the 7→4 leg identity, `S21 = S_sep + R_res` with a thin transported residual | F63 | — | **NOT STARTED** — identity derived and measured independently, priced at ~27.6% of the tower; see `experiments/2026-09-14_slice6a_p1/p2_design_note.md` |
 | P3 | rank-16 D21→birth feedback | F69 | — | **NOT STARTED** |
 | P4 | Strassen depth/pooling/block-symmetric `C_pre`/final-layer trim | F86 (cost anatomy) | — | **NOT STARTED** |
