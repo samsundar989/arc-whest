@@ -209,7 +209,15 @@ def _patches(per_neuron: bool):
     c4_out = _proj * (_a4 * K[(4,)].sum() + _b22 * K[(2, 2)].sum())
     # NEW: the per-neuron core F21 projects away. `6/(n+4) (K4 + rowsum K22)`
     # is `_proj` applied to the same two objects WITHOUT the trailing sum.
-    g_out = _proj * (_a4 * K[(4,)] + _b22 * K[(2, 2)].sum(axis=1))
+    # NORMALISATION. F21's scalar is proj*(a4*SUM(K4) + b22*SUM(K22)) and every
+    # neuron then receives that whole sum. The per-neuron object with the same
+    # isotropic limit is therefore n times the per-neuron term, so that its MEAN
+    # equals F21's scalar. Without the n the core is ~n*metric too small and the
+    # channel is inert; with the lambda injection on top of a mis-scaled core it
+    # is worse than inert. Measured: lambda=0 differed from F21 by 5e-3 relative
+    # before this factor, and the extrapolated-lambda arm was 9.2x worse on raw
+    # MSE over 24 design networks.
+    g_out = (_a4 * K[(4,)] + _b22 * K[(2, 2)].sum(axis=1)) * (_proj * n)
     g_out = fnp.where(fnp.isfinite(g_out), g_out, dtype(0.0))
     return (mu_out, cov_out, out_tw, c4_out, g_out)'''
     else:

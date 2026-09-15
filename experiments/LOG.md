@@ -49832,3 +49832,123 @@ because `external/504aldo/` does not exist in this repository.
   it on its symptom would have degraded the only thing checkable.
 - **Quote no number that has no artifact.** Three memory figures that shaped a
   plan came from a shell I never saved.
+
+---
+
+## 2026-09-15 — **Slice 6a P1 design screen: prediction FALSIFIED by 21x, and the cause located**
+
+DESIGN tier, 24 P01 networks, label-free, all local-seconds caps off. No DECIDE
+block, no vault touch, no submission. Artifacts:
+[experiments/2026-09-14_slice6a_p1/](2026-09-14_slice6a_p1/) — `score.json`,
+`job1327_screen.log`, `convention_probe.{py,log}`, `p2_split_n128.json`,
+`feed_already_present.md`.
+
+### The result
+
+| arm | raw MSE | C/B | score | failed |
+|---|---|---|---|---|
+| F21 (control) | `4.791516e-08` | 0.422214 | `2.023044e-08` | 0/24 |
+| v30 (per-neuron κ4) | `4.428424e-07` | 0.422265 | `1.869970e-07` | 0/24 |
+
+    paired arithmetic difference   -1.667665e-07
+    studentised-t 95%              [-1.7936e-07, -1.5417e-07]
+    arithmetic gain                0.1082x     candidate better on 0/24
+    sign test p                    0.0000
+
+**v30 is 9.2x WORSE.** The handoff pre-registered raw `2.1e-8` in the range
+`1.9–2.4e-8`; the measurement is `4.43e-7`, wrong by a factor of 21 and in the
+wrong direction. **FALSIFIED**, with no room for interpretation: zero of
+twenty-four networks improved.
+
+Label noise is irrelevant here — the noise-aware split puts the bias at
+`-4.6e-13`, **0.00%** of the difference — so this is the true functions, not the
+labels.
+
+The cost half of the prediction was met exactly: the channel adds `0.000044 B`
+(measured at the live shape, `928,411,183,646` against `928,314,476,134`).
+
+### The cause, located by measurement and not by tuning
+
+At `λ = 0` the per-neuron core should be inert. **It is not**: v30 still differs
+from F21 by `5e-3` relative. So the fault was never λ.
+
+I then made three attempts at the normalisation and got three different
+residuals — `5e-3`, then `1.2e-3` with an `n` factor, then `3e-2` with
+`metric²`. Three guesses, three answers, none exact. That is tuning a
+convention, which is how a wrong constant gets committed, so I stopped and
+measured it instead.
+
+`convention_probe.py` instruments both files at their birth return and compares
+F21's scalar `c4_out` with v30's `mean(g_out)`, layer by layer, at `λ = 0`:
+
+    layer          0        1        2        3        4
+    net A    1.00000  1.55714  2.44885  3.78134  6.36876
+    net B    1.00000  1.59296  2.57838  4.59584  7.54039
+
+**At layer 0 the ratio is exactly 1.000000** — so the *birth* normalisation
+(with the `n` factor) is right. The ratio then **compounds at ~1.5–1.7x per
+layer**, which is the transport: `WT2 @ g` sums `n` terms of order `2/n` under
+He initialisation, so it multiplies the mean by about `metric = 2` every layer.
+
+### What that actually means, and why it is not a bug to patch
+
+**F21 never transports `c4`.** It re-derives the scalar from `K[(4,)]` each
+layer and multiplies by `metric²` at consumption. My per-neuron `g` *is*
+transported, and then also scaled — the metric is applied twice.
+
+So the per-neuron core is **not a reparametrisation of F21's scalar**. It is a
+different object with different dynamics, and its transport normalisation
+**cannot be fixed by matching an untransported scalar**, because there is
+nothing to match.
+
+That also corrects a claim I made in the commit that built v30. I said `θ = 0`
+gives an exact nested control. True only in the sense that `_K4_PERNEURON =
+False` takes the old code path; the per-neuron path **at λ = 0 is not a no-op**,
+and I presented it as though it should be. The parity harness only ever
+compared the *control file* against F21, never the per-neuron path at λ = 0 —
+so it could not catch this, and the first thing that did was the design screen.
+
+### What is not in question
+
+- The cost model. `0.000044 B`, four significant figures inside "unchanged".
+- The feed. F21's frozen term table already routes `S[(4,)] → K[(3,)]` (scalar
+  `1/24`) and `S[(2,2)] → K[(2,1)]` (scalar `1/4`), so consumers and induced
+  births come from one state. **P1b is struck.**
+- P2's feasibility, measured separately: the separable part of `S21` carries
+  ~101% of the norm and is free; rank-16 on the remainder leaves 1.7–7.7%.
+  Unaffected by this result.
+
+### The decision this reaches
+
+Deriving the correct transport normalisation for a per-neuron κ4 core is
+**research, not porting**. Two routes:
+
+1. **Derive it.** Work out how the isotropic projection `_proj_coef_d4_r2(n)`
+   and the `metric` convention generalise when the core is carried per neuron
+   and transported. Self-contained; slower.
+2. **Check it against the oracle.** `docs/CLAUDE_CODE_HANDOFF_2026-09-14.md` §1
+   authorises cloning 504aldo's MIT repository into `external/504aldo/` as a
+   **parity oracle only**, and their V17 carries exactly this core with a
+   working convention. It would settle the question in minutes.
+
+**Route 2 is authorised in writing and I have not taken it**, because it is an
+outward-facing fetch of a competitor's code and I flagged earlier in this
+session that I had deliberately left it alone. That is Samuel's call, not mine
+to make silently.
+
+This is also precisely the ambiguity the independent Skeptic named earlier
+today, in the same words: *"whether upstream's degree-4 HTensor core is the same
+normalised object as 504aldo's consumed `G` cannot be settled here, because
+their code is not in the repository."* It has now cost a falsified prediction,
+which is the cheapest possible way to have learned it.
+
+### Knowledge delta
+
+- **A control that shares a code path is not a control for the mechanism.** The
+  parity harness compared the control FILE to F21 and passed; it never ran the
+  per-neuron path at λ = 0, which is where the defect lived.
+- **F21's `c4` is an invariant re-derived per layer, not a state that flows.**
+  Anything replacing it with a flowing per-neuron object inherits a transport
+  normalisation that F21 simply does not have.
+- Three convention guesses gave three residuals. **Measure the ratio; do not
+  tune the constant.** The measurement took one instrumented run at width 96.

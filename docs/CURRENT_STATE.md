@@ -1,5 +1,45 @@
 # CURRENT_STATE.md — read this first
 
+## September 15: Slice 6a P1 MEASURED AND FALSIFIED — decision needed
+
+**v30 is 9.2x worse than F21 on 24 design networks.** Pre-registered raw
+`2.1e-8` (range `1.9-2.4e-8`); measured `4.428424e-07` against F21's
+`4.791516e-08`. Paired difference `-1.667665e-07`, t 95%
+`[-1.7936e-07, -1.5417e-07]`, better on **0 of 24**, sign p `0.0000`. Label
+noise contributes `0.00%`, so this is the true functions. The cost half was met
+exactly: `+0.000044 B`.
+
+**Cause located by measurement.** At `λ = 0` the per-neuron core is not inert —
+it still differs by `5e-3`. Three normalisation guesses gave three residuals
+(`5e-3`, `1.2e-3`, `3e-2`), so I stopped guessing and instrumented both files.
+The ratio `mean(g_out)/c4_out` is **exactly 1.000000 at layer 0** and compounds
+at **~1.5-1.7x per layer** — the transport applies `metric` a second time.
+
+**F21 never transports `c4`**: it re-derives the scalar each layer and scales at
+consumption. A per-neuron core that flows is a *different object*, and its
+transport normalisation cannot be fixed by matching an untransported scalar.
+
+**THE DECISION, and it is Samuel's.** Two routes:
+
+1. **Derive** how `_proj_coef_d4_r2(n)` and the `metric` convention generalise
+   to a transported per-neuron core. Self-contained, slower, real research.
+2. **Clone the oracle.** Handoff §1 authorises `external/504aldo/` as a parity
+   oracle only; their V17 carries this core with a working convention and would
+   settle it in minutes. **Authorised in writing, not taken** — it is an
+   outward-facing fetch of a competitor's code and I flagged earlier that I had
+   left it alone deliberately.
+
+This is the exact ambiguity the independent Skeptic named earlier: whether
+upstream's degree-4 core is the same normalised object as 504aldo's consumed
+`G` cannot be settled without their code in the repository.
+
+**Unaffected and still standing:** the `+0.000044 B` cost model; P1b struck
+because F21's term table already routes κ4 into the κ3 births (`1/24` and
+`1/4`); P2's feasibility (separable part ~101% of `||S21||` and free, rank-16
+remainder 1.7-7.7%).
+
+---
+
 ## September 14 (night): Slice 6 is the operative plan; 6a step 1 is DONE
 
 `docs/CLAUDE_CODE_HANDOFF_2026-09-14.md` is the operative contract. It replaces
