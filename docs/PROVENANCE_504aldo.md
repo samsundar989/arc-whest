@@ -67,7 +67,7 @@ row here, naming the file, the line and what question it answered.
 | 2026-09-15 | `estimator_v16b.py:558–569` | P2's separable split | Identical to what we derived and measured independently BEFORE cloning: `e = w(1,2) − 2·pK1·w(1,1)`, `S_sep = zero_diag(e_i·C_off·w1_j)`, birth `diag(S3) + 3·a_b·d(e) + 3·R·Lᵀ`. No correction needed |
 | 2026-09-15 | `estimator_v17.py:247–250, 452` | where the missing `q31` consumer feeds | It is **four term rows** plus a new `(3,1)` slice, not one line. F21's table is upstream's frozen SIMPLE enumeration and does not contain `(3,1)`, so adding it is a deliberate divergence from the pinned reference needing its own contract |
 | 2026-09-15 | `estimator_v16b.py:280` | P2's residual rank | They ship **32**, not the handoff's 16. Their F63 row gives raw-MSE cost +1.6% / +0.9% / +0.4% at rank 16 / 32 / 64. A *suggestion* for our rank, to be verified end to end on our chain |
-| 2026-09-15 | `estimator_v16b.py:561` | how the range finder gets its sketch without randomness | `Om = w32[:, :r]` -- the first `r` columns of the layer's OWN weight matrix. At He init that is an i.i.d. Gaussian matrix, so it is statistically what a random sketch would be and deterministic besides. This **removes hard rule 2 from the problem** rather than satisfying it by seeding; our own design note had assumed `mlp.seed` would be needed |
+| 2026-09-15 | `estimator_v16b.py:561` | how the range finder gets its sketch without randomness | `Om = w32[:, :r]` -- the first `r` columns of the layer's OWN weight matrix, which at He init is i.i.d. Gaussian. We copied it, and **our own invariant suite rejected it**: relabelling the hidden neurons permutes those columns, so the sketch picks a different subspace and the estimator stops being permutation-equivariant -- `inv_permutation` went from v30's `1e-13` to **1.07% of raw MSE at 128x8, FAILED** against its 1% bar. We ship a different sketch: **the residual's own strongest columns by norm**, which is equally deterministic and equivariant besides (`8.8e-01` vs `3.2e-07` relative, measured side by side). **A DIVERGENCE FROM THE ORACLE, and one that corrects it** -- their published estimator has this property too, and we did not inherit it |
 | 2026-09-15 | `estimator_v16b.py:583-620` | whether the dense residual reconstruction is avoidable | It is **not**, and they do not avoid it either: `MP = einsum("kiq,kjq->kij", Z, L)` forms it densely at `O(k n^2 r)`. Confirms our own reading that `LP` genuinely needs `A_D . M`. Their tower is 3-D throughout, so they pay no layout shuffle; F21's is 2-D and Strassen-wide, so ours does -- **that difference is ours to measure, not theirs to answer** |
 
 **What was NOT taken:** no code was copied. The coefficients above are
@@ -114,6 +114,11 @@ own tiny-shape parity evidence.
   official participant shim permits. Unresolved, and stated as unresolved.
 - **Their local-runner advice and package-version range.** External code is a
   reference, not a policy.
+- **Their range-finder sketch.** `W[:, :r]` is deterministic but not
+  permutation-equivariant, and our invariant suite fails it. We select the
+  residual's strongest columns instead. This is the first place our
+  re-implementation is *better* than the source rather than merely
+  independent of it, and it was found by an instrument, not by reading.
 
 ## What we found on our own, that their table does not give us
 

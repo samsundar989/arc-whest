@@ -50316,3 +50316,113 @@ whose price is counted is itself a signal — the uncertainty here is not about
 the mathematics, it is about whether a published accuracy number transfers
 between two different term sets, and that is genuinely not knowable from where
 he sits.
+
+---
+
+## 2026-09-15 — **CONTRACT AMENDMENT (pre-data): P2's sketch was not permutation-equivariant, and the invariant suite caught it**
+
+Amends the *CONTRACT (Rule 1): Slice 6b P2* entry above. **The screen had not
+run** — job `1361` was cancelled from the queue before it started, and no
+scored data existed at any point in this entry. The amendment is recorded
+rather than folded in silently, because a contract edited after commit must be
+visible in the diff.
+
+### What changed, and why
+
+The contract's evidence table carried this row:
+
+> a deterministic sketch suffices — `W[:, :r]`, which at He init is i.i.d.
+> Gaussian | **CONFIRMED as available** … It removes hard rule 2 from the
+> problem entirely rather than satisfying it by seeding.
+
+**That reasoning was incomplete, and the conclusion was wrong.** It is true
+that `W[:, :r]` needs no seed. It is also true that relabelling the hidden
+neurons permutes the weight columns, so "the first `r`" selects a *different*
+subspace, the range finder keeps different directions, and the rank-32
+truncation error lands somewhere else. The estimator stops being permutation
+equivariant — a property the true answer has, and therefore one an estimator
+has no business losing.
+
+`local_sim/edge_cases.py::inv_permutation` found it, at a 1% bar judged in MSE
+units against the candidate's own raw MSE:
+
+| shape | v30 | v31, `W[:, :r]` | v31, fixed |
+|---|---|---|---|
+| 256x32 permute layer 7 | `4.1e-13` | `2.7e-10` | `5.2e-13` |
+| 256x32 permute layer 20 | `1.3e-13` | `2.2e-10` | `8.4e-13` |
+| **128x8 permute layer 1** | `2.2e-14` | **`1.5e-08` = 1.07%, FAILED** | `1.5e-14` |
+| 256x32 permute layer 30 | `1.3e-14` | `8.1e-12` | `1.5e-14` |
+
+That check exists to catch "a transposed index, an axis swapped in a
+reduction, or **a basis applied on the wrong side**". P2 applies a basis, so
+the first hypothesis had to be that I had one of those, not that the sketch
+was at fault.
+
+### The discrimination, which is the part worth keeping
+
+The **dense arm settles it**. `estimator_k3_v31_dense.py` is the same code with
+`_P2_RANK = 0`, so it sketches with the full width and the range finder is
+exact. It scores **30/30 and is equivariant to `3.0e-13`** — indistinguishable
+from v30.
+
+At full rank the projector `Q Q^T` is the identity on `range(R)`, so **the
+sketch's choice cannot reach the output.** It follows that the reconstruction,
+the `(2,1)` regrouping, and every `Z`/`L` side convention are correct, and that
+the non-equivariance came only from truncating onto a labelling-dependent
+subspace. One arm, one run, and the two candidate explanations separate
+cleanly. That arm was put in the contract to answer a *numerical* question and
+it answered a structural one instead.
+
+### The fix, and why it is free
+
+Sketch with **the residual's own strongest columns by norm** instead of the
+weight matrix's leading ones:
+
+    Om = R if r >= n else R[:, fnp.argsort((R * R).sum(axis=0))[-r:]]
+
+Equivariant because the norms permute with the columns, so the selected *set*
+is the same set; the basis inside the subspace never reaches the output, only
+the projector does. Still deterministic — nothing is sampled, so hard rule 2
+is satisfied by construction exactly as before. Cost is `O(n^2)` for the norms
+plus a sort of `n` floats, against the `O(k n^2 r)` the leg already spends.
+
+Measured side by side on the same operands, relative error under a random
+permutation: **`8.8e-01` for the column slice, `3.2e-07` for the
+norm-selected** — the latter being float32 precision.
+
+The rank-32 arm's deviation from v30 also got slightly *smaller* (2.0–2.6e-4
+to 1.7–2.6e-4), which is the expected direction: selecting the residual's
+strongest columns is a better sketch than four arbitrary ones.
+
+### Standing after the amendment
+
+- `--parity` still passes all four claims: control == v30 bitwise at identical
+  counted FLOPs; dense arm 1.5–1.9e-7; rank-32 arm 1.7–2.6e-4; both arms pick
+  the same `gens` at the live shape.
+- `whest validate` accepts v31 in 81 ms; **invariants 30/30**.
+- Everything else in the contract — the gate (`>= 1.20x`, t-interval strictly
+  above 0), the falsifiers, the arms, the cost model, the seed block, my five
+  numbered predictions and Samuel's three "I don't know"s — **stands
+  unchanged**. None of them referenced the sketch.
+
+### Knowledge delta
+
+- **"Deterministic" and "well-posed" are different properties, and satisfying
+  one can cost the other.** Avoiding a seed by keying on `W[:, :r]` bought hard
+  rule 2 compliance and paid for it with a dependence on an arbitrary neuron
+  labelling. The honest statement is a trade, not a free win, and the version
+  of this claim in `docs/PROVENANCE_504aldo.md` has been corrected rather than
+  left standing.
+- **This is the first place our re-implementation is BETTER than the oracle
+  rather than merely independent of it.** 504aldo ship `W[:, :r]`
+  (`estimator_v16b.py:561`) and their published estimator carries the same
+  property. We did not inherit it — and we found that by running an instrument,
+  not by reading their code more carefully.
+- **A control arm built to answer one question can answer a different and more
+  important one.** The dense arm was specified to separate "did the regrouping
+  break anything" from "does truncation cost accuracy". What it actually did
+  was exonerate the entire index layout in a single run.
+- **An invariant suite pays for itself on the runs where it says no.** This
+  would not have shown up in the design screen: the grader never permutes, so
+  the score would have been fine and we would have shipped a labelling-
+  dependent estimator without knowing it.

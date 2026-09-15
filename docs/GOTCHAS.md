@@ -1842,3 +1842,49 @@ contract. Skeptic verdict PROVISIONAL; full audit in `experiments/LOG.md`.*
 - **`studentised_t`'s scipy-less fallback was `t` at the WRONG degrees of freedom.** `crit = 1.96 if n > 60 else 2.064` uses `df=24`'s value for every `n` from 2 to 60 (`2.064` against `2.0687` at `df=23`). scipy is installed in both venvs so it never fired and no published interval is affected — but it was one import failure away from a 12% error on an interval, and a `1.15x` gate would have inherited it. Fixed with an exact `df 1..30` table plus a Cornish–Fisher tail; **the artifact now records which branch produced the critical value.** An artifact that cannot say where its interval came from is not reproducible.
 - **`Add-Content -Encoding utf8` from PowerShell DOUBLE-ENCODES UTF-8.** Two `LOG.md` appends on 2026-09-10 turned every `§` into `Â§` and every en-dash into `â€"`, 38 lines in total. **Append to `LOG.md` from bash (`cat >> file`), never from PowerShell.**
 - **`seed_blocks.py` and `seed_ledger.TIERS` are two registries of one fact, and forgetting the second is a repeat offence.** Allocating `P07`/`P08` in `seed_blocks.py` alone left `tier_of('P07')` raising `KeyError` — the exact failure `SKEPTIC WP14-FOLLOWUP` found for `P05`/`P06`. The both-directions test added after that Skeptic **caught it before any instrument ran**. Add a block to both files in the same edit.
+
+## Phase-2 gotchas added 2026-09-15 (Slice 6b)
+
+**`certify_candidate.py` requires a QUIESCENT `local_sim/` for its whole run,
+and it is right to.** Job `1352` certified `estimator_k3_v30.py` for 1h08m,
+passed **46 checks**, and was then REFUSED by one:
+
+    FAIL  R: this run changed no tracked source under estimator.py/scripts/local_sim
+          THIS RUN DIRTIED: M local_sim/p2_build_v31.py
+
+The dirtied file was an unrelated lab generator. The check does not and cannot
+know that — `local_sim/` also holds `competition_score.py`, `lifecycle_eval.py`
+and the mint, so an edit there genuinely can change a verdict mid-run. The cost
+of the strictness is an occasional wasted hour; the cost of relaxing it is a
+certificate that describes a tree that no longer exists.
+
+**Operationally: commit, then certify, then do not touch `local_sim/` until it
+finishes.** Editing anything under `estimator.py`, `scripts/` or `local_sim/`
+while a certification is in flight throws the run away. Check with
+`workerq status` before starting an edit session.
+
+**A skipped section is not a pass, and the run says so.** The same job recorded
+
+    SKIP  9: the real 8-GiB enforcement    no linux_memory_gate report FOR THIS CANDIDATE
+    SKIP 10: official Phase-2 subprocess smoke    --quick/--skip-smoke; a skipped
+             deployment check is NOT a pass
+
+Both are named, both are real gaps in v30's evidence path, and neither is
+closed by the 46 passes around them.
+
+**`fnp.linalg.qr` does not raise on non-finite input.** It propagates NaN/Inf
+like ordinary arithmetic and is fast doing it (`qr((1024,32))` on an all-NaN
+matrix, 3 ms). So adding a LAPACK call to a path the invariant suite
+deliberately floods with overflowed values does not introduce a new crash mode.
+Verified because P2 puts a QR inside the birth, where sections 2 and 3 of
+`edge_cases.py` push layers to `1e25` on purpose.
+
+**Redirecting a long Python run to a file block-buffers its stdout.** Two
+`edge_cases.py` runs sat at exactly 3,984 bytes — one buffer short of a flush —
+and looked hung for minutes while progressing normally. Use `python -u` when
+you intend to watch a redirected run, or you will debug a buffer.
+
+**A `nohup ... &` inside the Bash tool does not survive its parent shell here.**
+One `edge_cases.py` run died silently at 68 lines. Use the tool's own
+background mode, which does survive, and redirect inside the command if the
+full transcript is wanted — the task output file keeps only the tail.

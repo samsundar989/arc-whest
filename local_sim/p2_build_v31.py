@@ -70,16 +70,29 @@ control's bit-identity with v30. The candidate's own branch is set to the true
 `4`/`3`; the control's `7`/`6` is left exactly as it stands.
 
 --------------------------------------------------------------------------
-THE RANK, AND WHY NO RANDOMNESS ENTERS
+THE RANK, THE SKETCH, AND A TRAP THE INVARIANTS CAUGHT
 
-The compression is a randomized range finder with one power iteration — but the
-sketch is `W[:, :r]`, the first `r` columns of THIS layer's weight matrix. At
-He init that is an i.i.d. Gaussian matrix, which is exactly what a random
-sketch would be, and it makes the estimator **deterministic by construction**:
-hard rule 2 is satisfied without seeding anything, because nothing is sampled.
-(Read off `external/504aldo/estimators/estimator_v16b.py:561`, logged in
-`docs/PROVENANCE_504aldo.md`. Our own design note had assumed this would need
-`mlp.seed`; it does not.)
+The compression is a range finder with one power iteration. The sketch is the
+residual's own strongest columns by norm — deterministic, so hard rule 2 is
+satisfied by construction, and **permutation-equivariant**, which the obvious
+choice is not.
+
+504aldo sketch with `W[:, :r]`, the layer's leading weight columns
+(`estimator_v16b.py:561`), and the first version of this generator copied that
+because at He init those columns are i.i.d. Gaussian — statistically what a
+random sketch would be, and free of any seed. **That reasoning was incomplete.**
+Relabelling the hidden neurons permutes the weight columns, so "the first `r`"
+selects a different subspace and the truncation error lands elsewhere. The
+invariant suite caught it before the scored screen ran: `inv_permutation`,
+which v30 satisfies to `1e-13`, reached **1.07% of raw MSE at 128x8 and
+FAILED** its 1% bar. Side by side on the same operands, the column-slice sketch
+is `8.8e-01` relative under permutation and the norm-selected one is `3.2e-07`.
+
+So a deterministic sketch does not come free — it trades a seeding requirement
+for a dependence on an arbitrary labelling, unless the sketch is chosen from
+the data equivariantly. Selecting by column norm is: the norms permute with the
+columns, the selected SET is unchanged, and only the projector `Q Q^T` reaches
+the output, never the basis inside it.
 
 `_P2_RANK = 0` means FULL rank: the sketch is the whole of `W`, the range
 finder is exact, and the reconstruction reproduces the dense `A_D` to float32.
@@ -112,25 +125,37 @@ DEFAULT_RANK = 32
 # the new module-level machinery, inserted ahead of `_dslice3`
 
 _P2_FUNCS = '''
-def _p2_compress(R, W):
-    """`3 R^T ~= Z L^T` by a randomized range finder with one power iteration.
+def _p2_compress(R):
+    """`3 R^T ~= Z L^T` by a range finder with one power iteration.
 
-    THE SKETCH IS NOT RANDOM. `W[:, :r]` is the first `r` columns of this
-    layer's weight matrix, which at He init is an i.i.d. Gaussian matrix --
-    statistically what a random sketch would be, and deterministic, so hard
-    rule 2 is satisfied by construction and nothing is ever seeded.
+    THE SKETCH IS THE RESIDUAL'S OWN STRONGEST COLUMNS, selected by norm. That
+    is deterministic -- nothing is sampled, so hard rule 2 is satisfied by
+    construction -- and, unlike a fixed slice of the weight matrix, it is
+    **permutation-equivariant**.
 
-    `_P2_RANK <= 0` takes the full width, which makes the range finder exact
-    and the reconstruction a float32 copy of the dense `A_D`.
+    Why that matters, measured rather than assumed. The first version of this
+    function used `W[:, :r]`, the layer's own leading weight columns (which is
+    what 504aldo ship). Relabelling the hidden neurons permutes those columns,
+    so "the first r" selects a DIFFERENT subspace, the range finder keeps
+    different directions, and the truncation error lands somewhere else. The
+    invariant suite caught it: `inv_permutation` went from v30's 1e-13 to
+    1.07% of raw MSE at 128x8 and FAILED its 1% bar. A standalone check put the
+    two side by side -- column-slice sketch `8.8e-01` relative, this sketch
+    `3.2e-07`, which is float32 precision.
+
+    Selecting by norm is equivariant because the norms permute with the
+    columns, so the selected SET is the same set, and only the projector
+    `Q Q^T` -- not the basis inside it -- reaches the output.
+
+    `_P2_RANK <= 0` sketches with `R` itself, which makes the range finder
+    exact and the reconstruction a float32 copy of the dense `A_D`.
 
     Returns `(Z, L)` with the factor 3 already folded into `Z`, so the
     consumers never carry it.
     """
     n = R.shape[0]
     r = n if _P2_RANK <= 0 else min(int(_P2_RANK), n)
-    Om = W[:, :r]
-    if Om.dtype != R.dtype:
-        Om = Om.astype(R.dtype)
+    Om = R if r >= n else R[:, fnp.argsort((R * R).sum(axis=0))[-r:]]
     Q, _ = fnp.linalg.qr(R @ Om)
     Q, _ = fnp.linalg.qr(R @ (R.T @ Q))
     return (Q.T @ R).T * 3.0, Q
@@ -317,7 +342,7 @@ def _patches(separable: bool):
         # to 3.7 float32 ulps (`local_sim/p2_p2_identity_test.py`).
         e_b = w[(1, 2)] - 2.0 * pK[(1,)] * w1
         S_sep = (e_b[:, None] * C11) * w1[None, :]
-        Zb, Lb = _p2_compress(S21 - S_sep, W)
+        Zb, Lb = _p2_compress(S21 - S_sep)
         out_tw = _append(adv, None, fac1, w2b_vec, n, Zb, Lb, S3, e_b)
     else:
         out_tw = _append(adv, fnp.diag(S3) + 3.0 * S21.T, fac1, w2b_vec, n)''',

@@ -188,22 +188,51 @@ networks, initialised from this shape.
 
 ### Exact next actions, in order
 
-1. **P1 in `estimator_k3_v30.py`** (does not exist yet): port the κ4 consumers
-   and the κ4→κ3 feed from E14's `_tree_core` downstream. Handoff §2.2 lists
-   the terms. Goal: F21 raw `3.78e-8` → `≤2.3e-8` at unchanged FLOPs.
-   **λ is a free parameter, one scalar per layer, fitted end to end against
-   score on fresh design networks** — `lam_own.npz` supplies the SHAPE as an
-   initialiser and must not be used as a fitted constant (see above).
-2. **Then `predict_public.py`** on it against F21, and one graded canary only
-   with Samuel's per-submission approval.
-3. **§0.1 is still owed**: remove the local-seconds residual gate from
-   `certify_candidate.py` §10, `preflight.ps1` step 16 and AGENTS hard rule 6,
-   gating on operation count instead. `predict_public.py` already prices
-   residual this way; the decision paths do not yet.
-4. **§0.6 is partly owed**: E14 is stopped in this document, but both E14 files
-   are still present and still referenced by older sections below.
-5. **Rule 2 Skeptic on Slice 6a: DONE — REJECT on λ, PROVISIONAL on memory.**
-   Retraction and follow-up recorded in LOG and in `experiments/2026-09-14_slice6a_lambda/`.
+*Rewritten 2026-09-15. The previous list opened with "P1 in
+`estimator_k3_v30.py` (does not exist yet)", which had been false for a day —
+v30 exists, is measured, and is in certification. A stale next-action list is
+worse than none, because it is the first thing the next driver reads.*
+
+1. **Read job `1352`'s verdict** — v30's certification, the first time the
+   evidence path has been walked for that file. Running since 2026-09-15
+   16:29 UTC; at §4 of 12 after an hour.
+2. **Read job `1361`'s verdict** — the P2 design screen, three arms
+   (`v31_control` = v30, `v31_dense` = full rank, `v31` = rank 32) × 24 P01
+   networks. Contract and gate: `experiments/LOG.md`, 2026-09-15, *CONTRACT
+   (Rule 1): Slice 6b P2*. **Gate `>= 1.20x` with the 95% studentised-t
+   interval strictly above 0**, chosen before the data existed.
+3. **Rule 2 Skeptic on P2**, with the contract, the generator diff, the
+   `--parity` transcript and the raw `score.json` — never a prose summary.
+   P1's Skeptic returned PROVISIONAL and found a real shape-genericity crash;
+   this one has a live target too, in the layout shuttles.
+4. **Then v30's remaining evidence path**: the Linux memory gate (the 8,192 MB
+   limit is unenforceable on Windows — it is accounting here, never a test
+   passed) and a public mini run projected through `predict_public.py`.
+   Only then is a graded canary worth Samuel's per-submission approval.
+5. **Slices 6c (N1 kill test) and 6d (raw levers)** — untouched, and both are
+   unblocked.
+6. **The `q31` consumer** is a **four-row term-table extension plus a new
+   `(3,1)` slice**, not one line. F21's table is upstream's frozen SIMPLE
+   enumeration and does not contain `(3,1)`, so adding it diverges from the
+   pinned reference and **needs its own contract**.
+   `experiments/2026-09-14_slice6a_p1/q31_is_a_table_extension.md`.
+
+**§0.1 is DONE** (verified 2026-09-15, all three sites): the local-seconds
+residual no longer refuses in `certify_candidate.py` §10 (ADVISORY),
+`preflight.ps1` step 16 ("THE LOCAL RESIDUAL NO LONGER REFUSES"), or AGENTS
+hard rule 6 ("residual advisory, cost gates on ops"). The binding cost check
+is the operation count against `official_config.PHASE2_OP_COUNT_GATE`
+(22,000), which is asserted in that module. Historical refusals that quoted
+the old line stand and are not amended.
+
+**§0.6 is still partly owed**: E14 is stopped in this document, but both E14
+files are still present and still referenced by older sections below.
+
+**Rule 2 Skeptic on Slice 6a: DONE** — REJECT on λ, PROVISIONAL on P1.
+Retraction and follow-up in LOG and `experiments/2026-09-14_slice6a_lambda/`.
+The PROVISIONAL's main worry — that λ's 8.89x window spread invalidated the
+gain — was answered by the λ sweep: the objective is flat near its optimum and
+our label-free table sits within **1.1%** of peak.
 
 ### Standing constraints
 
