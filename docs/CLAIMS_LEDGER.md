@@ -41,19 +41,26 @@ and a date is not evidence — it is a recollection. Everything here is a
 | 12 | Rank-32 M-residual truncation costs | `+0.90%` raw | MEASURED | P01 | same | 2026-09-15 |
 | 13 | — and 504aldo publish `+0.9%` for the same rank on *their* chain | `+0.9%` | THEIRS (F63) | — | `docs/PROVENANCE_504aldo.md` | 2026-09-10 |
 | 14 | v31 (P1+P2) over F21, read off raw and measured C/B, **not multiplied** | `1.7202×` = raw `1.2262×` × cost `1.4028×` | MEASURED | P01 | `experiments/2026-09-15_slice6b_p2/` | 2026-09-15 |
-| 15 | v31 op count against the 22,000 gate | `12,665` ops — 9.1% FEWER than v30's 13,936 | MEASURED | — | `--parity` / ledger | 2026-09-15 |
+| 15 | v31 op count against the 22,000 gate | `12,665` ops on P01; **`13,037` on the public mini** (+2.9%) — 7.4% fewer than F21's `14,075` there | MEASURED | P01 / mini 100 | `--parity`; `experiments/2026-09-16_slice7_mini/v31_mini.json` | 2026-09-15 / 09-16 |
 | 16 | v31 under a real `RLIMIT_AS = 8,192 MB` on Linux | 23/23, VmPeak `5,434.6 MB`, 1.51× headroom, peak RSS `3,563.1 MB` | MEASURED | — | job 1374, `local_sim/linux_memory_gate.py` | 2026-09-15 |
 | 17 | **A deterministic sketch is not automatically a well-posed one.** `W[:, :r]` (504aldo's published sketch) fails permutation-equivariance at `1.07%` of raw MSE at 128×8; norm-selected columns restore it to `1.3×` the float32 floor | `5.4e5×` / `1.8e5×` the floor vs a 100× bar | MEASURED | D06 | `experiments/2026-09-15_slice6b_p2/edge_cases_*.log` | 2026-09-15 |
 | 18 | — and the selection is **not** a better approximation. At 256×16 strongest columns are the worst of three | `1.121e-4` vs `9.940e-5` vs `1.025e-4` | RETRACTED (as an accuracy claim), MEASURED (as an ablation) | — | Skeptic ablation | 2026-09-15 |
-| 19 | The grading server adds an unexplained `+2**24` FLOPs | `+0.0122%` | MEASURED | — | `docs/GOTCHAS.md` | earlier |
+| 19 | Server FLOPs vs local: `+2**24` on early same-dtype-cast rows; **exactly `+2**25` against the `whest run` subprocess meter** for both #330950 and #331317, while F21's grader-twin (`lifecycle_eval f64_readonly`) matched the server exactly — the gap is between the two local paths | `+0.005%` of v31 | MEASURED + GRADED | — | `official_config.py`; LOG 2026-09-16 16:09 | earlier / 2026-09-16 |
 | 20 | ~85–90% of 504aldo's κ4 gain rides on one n² term (λ inside the dG transport), consumed through the (4)/(2,2) rows | `×2.32` at 128×8, `×3.95` at 64×8 | PROXY | 8 He-init nets/shape | `experiments/2026-09-16_exp_q31/results_all.json` | 2026-09-16 |
 | 21 | — and the (3,1) consumer alone is worth | `×1.00` at 128×8, `×1.09` at 64×8 | PROXY | same | same | 2026-09-16 |
 | 22 | — while F68 reports the κ4→κ3 feed is worth `~4×` at 1024×16, against `≤1.14×` on the proxy | — | THEIRS (F68) + PROXY | — | same | 2026-09-16 |
+| 23 | v31 (P1+P2) public score | adjusted `8.752e-9`, raw `2.9074e-8`, C/B `0.30103`, 100/100 | GRADED | public 100 | `experiments/run_reports/v31_canary_331317_331317_graded_report.json` | 2026-09-16 |
+| 24 | v31 vs F21, **graded against graded**, paired per network | `1.8233×`, better 50/50, t95 `[+6.88e-9, +7.53e-9]`; raw `1.300×` | GRADED | public-board 50 | same + `f21_diagnostic_330950_graded_report.json` | 2026-09-16 |
+| 25 | v31 worst graded wall / residual | `68.13 s` of 120; `0.140244 s` of 0.4 (`10.76 µs/op`) | GRADED | public 100 | same | 2026-09-16 |
+| 26 | `predict_public.py` projection vs the graded row | projected `8.713e-9`, graded `8.752e-9`: **+0.45%**, inside the band | GRADED vs MEASURED | mini 100 | `experiments/2026-09-16_slice7_mini/predict_public_v31.json` | 2026-09-16 |
+| 27 | v31 is deterministic to the bit on the public mini | 100/100 networks identical across two runs, every layer and every FLOP | MEASURED | mini 100 | `experiments/2026-09-16_slice7_mini/v31_mini{,_confirm}.json` | 2026-09-16 |
+| 28 | ×1.60 on local worst wall **under-predicts** the server when the local run is uncontended | `63.2 s` projected vs `68.1 s` graded; graded/local median `1.82` alone, `1.46–1.49` contended | GRADED vs MEASURED | mini 100 | LOG 2026-09-16 16:09 | 2026-09-16 |
 
 ## Claims this repository has RETRACTED, and must not quietly re-acquire
 
 | what was claimed | what replaced it | where |
 |---|---|---|
+| F21's `93.16/87.72 = 1.062` is the local→graded wall anchor | Worst-over-worst is not transferable; median-to-median is, and it moves 1.46→1.82 with host load | LOG 2026-09-16 16:09 |
 | "κ4 pays only in an exact tower" (Sep 10 "theorem") | Falsified: memoryless λ·C_off regeneration retains ~90% of AUGMENT's gain at zero n³ cost. It generalised from one ablation | strategist 09-14 §4 |
 | P2 priced at 27.6% / 41.5% / 32.3% / 31.3% of the tower | **Metered** at 28.7%. Four hand models, three wrong, and the one that was close was right for the wrong reason | LOG 2026-09-15 |
 | The identity suite is `11/11` | It was `8/11`: three checks could not fail, one of them a literal `True`. Now `10/10` and mutation-tested | LOG 2026-09-15 |

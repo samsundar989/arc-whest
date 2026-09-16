@@ -51121,3 +51121,135 @@ need not disclose what we integrate. Stripping them changes the sha and voids
 every piece of evidence the approval rested on, so the approved bytes went up
 unchanged. **It is his decision for the file that eventually gets designated**,
 which is where §6 verification would apply.
+
+---
+
+## 2026-09-16 16:09 UTC — **#331317 GRADED: v31 scores 8.752e-9, 100/100 clean, and two of my claims from this morning were wrong**
+
+Report: `experiments/run_reports/v31_canary_331317_331317_graded_report.json`.
+Item 0a is closed. Board read at 16:11 UTC:
+`experiments/board_snapshots/2026-09-16T1611Z_slice7_v31_canary_board.md`.
+
+### The graded row
+
+| | value |
+|---|---|
+| **adjusted score** | **`8.75203e-09`** |
+| raw (final-layer MSE) | `2.9074e-08` |
+| all-layers MSE | `1.109e-08` |
+| multiplier | `0.3010253` |
+| FLOPs / MLP | `661,961,618,994`, spread 0 |
+| failed | **0 / 100**, every exhaustion flag 0, smoke 8/8 |
+| worst / median wall | **`68.13 s`** / `65.98 s` of 120 — 1.76× margin |
+| worst / median residual | **`0.140244 s`** / `0.136054 s` of 0.4 — **2.85× headroom** |
+
+**Graded against graded, which this project has never had for a candidate
+pair.** F21 `#330950` and v31 `#331317` both expose per-network scores for the
+same 50 public-board networks, so the comparison is paired on the server's own
+numbers with no local model anywhere in it:
+
+    F21 1.5957e-08   v31 8.7520e-09   gain 1.8233x   better on 50/50
+    paired difference t95 [+6.8806e-09, +7.5298e-09]
+    raw  F21 3.7795e-08   v31 2.9074e-08   = 1.300x
+
+Standing: `1.60e-8` rank 69 → **`8.75e-9`, about rank 58 of 165**. Leader
+`2.4e-9` (marius_binner, moved from 2.5e-9); the 504aldo family occupies
+roughly ranks 11–30 at `4.2–5.3e-9`.
+
+### The predictions, scored against what I wrote BEFORE grading
+
+| # | prediction (LOG, 15:43 UTC) | graded | |
+|---|---|---|---|
+| 1 | adjusted in `[8.45e-9, 8.97e-9]` | `8.752e-9` | **HIT** — `predict_public` said `8.713e-9`; error **+0.45%** |
+| 2 | 0/100 failed | 0/100 | **HIT** |
+| 3 | worst residual `< 0.20 s` | `0.1402 s` | **HIT** |
+| 4 | worst wall `50–65 s` | `68.13 s` | **MISS**, above the range — see correction 1 |
+| 5 | FLOPs = local + `0` or `2**24` | local + **`2**25`** | **MISS** in detail, harmless — see note 3 |
+
+### Correction 1 — the "1.062 local→graded wall anchor" is RETRACTED
+
+Earlier today (entry *"P11 is minted; the v31 mini pair measured nothing"*,
+point 3) I wrote that F21's `93.16 / 87.72 = 1.062` was "the honest
+local-to-graded anchor", and used it to predict v31 near 55 s. **Wrong.** It
+divided a server worst row by a local worst row that happened to be an outlier
+under host contention (F21's local median was `61.3 s`, its worst `92.2 s`).
+Worst-over-worst compares two unrelated noise processes.
+
+What actually transfers is **median to median**, and even that depends on how
+loaded this host was during the local run:
+
+| local run | graded median / local median | graded worst / local worst | local worst ×1.60 vs graded worst |
+|---|---:|---:|---|
+| F21, job 1401 (concurrent) | `1.459` | `1.011` | `147.5` vs `93.2` — conservative |
+| v31, job 1412 (concurrent) | `1.488` | `1.310` | `83.2` vs `68.1` — conservative |
+| **v31, job 1413 (ran alone)** | **`1.824`** | **`1.724`** | **`63.2` vs `68.1` — UNDER-predicts** |
+
+**The consequence matters more than the retraction.** The ×1.60 contention
+factor applied to local worst wall — the projection `predict_public.py` prints
+and the handoff gates on — was conservative only because this host was busy.
+**On a quiet host it under-predicts the server by 7%.** A future candidate
+certified on an uncontended local run at, say, 72 s local worst would project
+115 s and pass, and could grade past 120. The server itself is tight (worst /
+median `1.03` for v31, `1.04` for F21); the variance is ours.
+
+Until it is re-derived: **quote graded wall as `1.9 × local median` from a
+standalone run** (1.824 measured, rounded up), and treat ×1.60-on-local-worst as
+advisory. Not yet changed in `predict_public.py` — that is an instrument change
+and gets its own commit.
+
+### Correction 2 — the residual model is ~20% conservative, which is the safe direction
+
+`13.4 µs/op` forecast `0.1747 s`; the server measured `0.1402 s` = **`10.76
+µs/op`**. F21's graded row gives `11.10 µs/op`, and the Sep-8 L3 row gave
+`10.73`. Three graded rows now sit at 10.7–11.1; the frozen `13.4` is the top of
+a range none of them reached. Headroom was quoted as 2.29× and is really
+**2.85×**. Left frozen deliberately — a gate should err safe — but quoted
+honestly.
+
+### Note 3 — the FLOP offset is 2²⁵ against `whest run`, and that is not new server behaviour
+
+Graded minus local-subprocess FLOPs is **exactly `33,554,432 = 2**25` for
+BOTH** submissions (F21: `928,457,637,478 − 928,424,083,046`; v31:
+`661,961,618,994 − 661,928,064,562`). But F21's **grader-twin** figure
+(`lifecycle_eval`, `f64_readonly`) was `928,457,637,478` — identical to the
+server. So the gap is between the two *local* paths, not a new server offset:
+the `whest run` subprocess runner bills 2²⁵ less than the grader does. Effect on
+the multiplier: `1.5e-5` relative. `predict_public.py`'s `{F, F+2**24}` band is
+therefore one step too narrow when fed a `whest run` report; harmless at this
+size, recorded so nobody rediscovers it near a boundary.
+
+### Job 1400's crash: not reproduced anywhere
+
+| run | failures | note |
+|---|---|---|
+| 1400 (concurrent with F21 + two other projects) | **2 / 100 raised** | report destroyed by the wrapper bug |
+| 1412 (partly concurrent) | 0 / 100 | |
+| 1413 (alone) | 0 / 100 | **bit-identical to 1412 on all 100 networks, every layer, every FLOP** |
+| server `#331317` | 0 / 100 | smoke 8/8 |
+
+The estimator is deterministic to the bit, so no network can raise in one run
+and not in another. Whatever happened in 1400 was outside the arithmetic.
+**Mechanism unknown; evidence unrecoverable. Downgraded from blocker to
+open-low.**
+
+### What this licenses and what it does not
+
+- v31 has **a clean graded row** — the 09-16 handoff's stated condition for it
+  to replace F21 as fallback. **Nothing is designated.** That is Samuel's, and
+  the 09-14 response's own rule is three clean graded runs before designating.
+- The submitted file names 504aldo in six comment lines. Flagged to Samuel
+  before upload; his decision for whichever file gets designated.
+- Item 0 is complete: 0a graded, 0b P11 minted, 0c withdrawn by Samuel. **Item 1
+  (D1, λ-table diagnostic on P11) is next and has not started.**
+
+### Knowledge delta
+
+- **The local projection chain works, end to end, to half a percent.** Mini-100
+  paired ratio × graded anchor = `8.713e-9`; server `8.752e-9`. That is the
+  first time `predict_public.py` has been scored against a real row, and it is
+  the instrument every later slice's "did that help?" depends on.
+- **Worst-row ratios are not transferable quantities.** The worst of 100 is a
+  tail statistic of whatever else the host was doing. I built an "anchor" out of
+  one and predicted a wall 13% low within the same day.
+- **A conservative factor that is conservative *because the host was busy* is
+  not a safety margin.** Run the same bytes alone and it inverts.

@@ -1,5 +1,72 @@
 # CURRENT_STATE.md — read this first
 
+## September 16: v31 GRADED at 8.752e-9 (#331317), Slice 7 item 0 closed, item 1 not started
+
+**Operative contract:** `docs/CLAUDE_CODE_HANDOFF_2026-09-16.md` (Slice 7, Sep 16–29),
+answering `docs/STRATEGIST_RESPONSE_2026-09-16.md`. **Latest state packet:**
+`docs/STRATEGIST_PACKET_2026-09-16.md`. Narrative: `experiments/LOG.md` from the bottom.
+
+| | adjusted | raw | C/B | worst wall | worst residual | failed |
+|---|---|---|---|---|---|---|
+| F21 `#330950` (designated fallback) | `1.596e-8` | `3.780e-8` | `0.4222` | `93.16 s` | `0.1562 s` | 0/100 |
+| **v31 `#331317`, non-designated canary** | **`8.752e-9`** | **`2.907e-8`** | **`0.3010`** | **`68.13 s`** | **`0.1402 s`** | **0/100** |
+
+**Graded against graded**, paired on the 50 public-board networks both reports
+score: **`1.8233×`, better on 50/50**, t95 on the difference
+`[+6.88e-9, +7.53e-9]`. Board ~rank **58/165** (was 69). Leader `2.4e-9`;
+504aldo's family `4.2–5.3e-9`. Snapshot:
+`experiments/board_snapshots/2026-09-16T1611Z_slice7_v31_canary_board.md`.
+
+**`predict_public.py` projected `8.713e-9`; the server gave `8.752e-9` — +0.45%.**
+First time the projection chain has been scored against a real row. It works.
+
+### Slice 7 work list — where each item stands
+
+| item | status |
+|---|---|
+| **0a** v31 evidence path + canary | **DONE.** Certified 60/0/1-skip, Linux 8 GiB CERTIFIED, mini-100 clean twice and bit-identical, graded clean |
+| **0b** mint P11 | **DONE.** `P11[40,916,011,000..023]`, DESIGN, 24 nets × 2 replicas of 2²⁴, independence ratio `0.9998`, noise `4.76e-9`, ledger finalized, passed through in `.gpuq.toml` |
+| **0c** rules question | **WITHDRAWN by Samuel** 2026-09-16. Do not re-raise. `PROVENANCE_504aldo.md` stays current as an internal record |
+| **1** close the κ4 half: D1 → D2 → D3 | **NEXT. Not started.** Needs Samuel's prediction recorded first (strategist's: D1 moves raw >15%, 40%; D2 finds a ≥1.3× discrepancy, 60%; half closes to ≤2.4e-8 P01-scale, 55%) |
+| 2 P3 · 3 P4 · 4 N1 · 5 | not started |
+
+### Decisions pending, all Samuel's
+
+1. **Whether v31 replaces F21 as the designated fallback.** The 09-16 handoff's
+   condition (a clean graded row) is met. The 09-14 response's rule is three
+   clean graded runs before designating. No agent designates.
+2. **The six comment lines in `estimator_k3_v31.py` that name 504aldo** (lines
+   28, 31, 605, 935, 1136–1137 — attributions, no code). Submitted unchanged
+   because every piece of approved evidence was bound to that sha. Stripping
+   them is five minutes; it must happen **before** a designation file's
+   evidence is gathered, not after.
+
+### Instrument facts learned today — read before quoting a wall or a residual
+
+- **×1.60 on local worst wall is NOT a safety margin.** It was conservative for
+  every contended local run and **under-predicted by 7% on an uncontended one**
+  (63.2 s vs 68.1 s graded). Median-to-median graded/local is `1.46–1.49`
+  contended, `1.82` alone. Until `predict_public.py` is repaired, quote graded
+  wall as **1.9 × standalone local median**. The "1.062 anchor" is retracted.
+- **The 13.4 µs/op residual model is ~20% conservative.** Graded rows sit at
+  10.73–11.10 µs/op. Left frozen on purpose; quote real headroom (v31: 2.85×).
+- **`whest run` subprocess bills exactly 2²⁵ FLOPs below the server** for both
+  submissions; the grader-twin path matches the server exactly.
+- **Mini runs must use `scripts/run_mini_json.ps1 -NoResidualLimit`.** A bare
+  `whest run ... > file.json` writes UTF-16 and, without the flag, fails every
+  row on this host's residual and reports the zero-prediction MSE. That cost
+  4h28m on 09-16. The wrapper also no longer discards a report when an MLP
+  raises (a second 1h55m loss the same day).
+- **`local_sim/p2_repro_mlp.py`** runs one named public network through a
+  candidate with the grader's own `MLP` construction and `setup()` — 45 s,
+  instead of a 2-hour split.
+- **v31 is deterministic to the bit** (100/100 networks, every layer, every
+  FLOP, two runs). Job 1400's 2-of-100 raise never recurred locally or on the
+  server; mechanism unknown, evidence destroyed. Open-low.
+
+---
+
+
 ## September 15: P1 measured and attributed; P2 BUILT, and an invariant caught it
 
 **P1 gives 1.2371x on 24 of 24 design networks** (raw `4.791516e-08` ->
