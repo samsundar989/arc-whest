@@ -51791,3 +51791,39 @@ forecast). That is ~10% better than v31's graded 8.75e-9 and **far from the
 parked on economics. Per the handoff, this is not a package to upload merely to
 finish; the next steps are the remaining justified discriminators for the
 unexplained accuracy gap (below), then a Strategist Packet if they are exhausted.
+
+---
+
+## 2026-09-16 — **CONTRACT (Rule 1): DIAGNOSTIC reads on P11 — where is the remaining accuracy gap? (D1 λ table; public v17/v29 reference)**
+
+**Question.** After stage 1 (feed worth ~3%), is the ~1.36× raw gap between our
+chain (v31 graded public raw 2.907e-8 @ 0.301 B) and the public 504aldo chain
+(v29 README: public raw 2.13e-8 @ 0.2526 B) real on OUR networks, and is our λ
+depth profile its cause?
+**Evidence.** REPORTED: v29 public LB 5.40e-9, raw 2.13e-8 (README, pinned
+commit `18c17e2d`). CONFIRMED: our λ table falls from 0.0097 to ~0.005
+mid-depth; v17's rises from 0.0020 to ~0.011 then decays to 0.0069.
+SPECULATIVE: the gap lives in λ's depth profile (strategist D1, 40% >15%).
+**Hypothesis + mechanism.** ~85–90% of the κ4 gain rides on λ inside the dG
+transport (strategist's small-shape ablation); a wrong depth profile would
+under-deliver without breaking any parity.
+**Arms (all DIAGNOSTIC, never packaged, never submitted, promote nothing):**
+control `estimator_k3_v32.py` (`10869a6c…`); D1 `estimator_k3_v32_lam504.py`
+(`3087d91c…`, v17 LAM verbatim substituted for `_K4_LAM`); reference
+`external/504aldo/estimators/estimator_v17.py` (`3e5b611b…`) and
+`estimator_v29.py` (`d9b2c114…`) run unmodified under the grader lifecycle.
+**Predictions.** Builder: D1 moves v32 raw by ≤ 10% either way (their table was
+fitted on their chain and public dumps; our flat-optimum sweep showed λ scale
+is not the lever); v29 raw on P11 ≈ 2.4–2.8e-8 (better than v32's 3.32e-8),
+v17 between. Samuel: **"I don't know"** to both (asked 2026-09-16, recorded
+verbatim). Strategist: D1 moves raw >15% (40%).
+**Gate.** None — diagnostics decide nothing. **Pre-registered consequence:** if
+D1 improves raw by ≥10% with t95 above zero, the next step is our OWN per-layer λ
+fit on DESIGN plus a fresh SINGLE_USE DECIDE block before any submission (their
+constants are never imported). If v29's raw beats v32 by ≥1.2×, a layer-by-layer
+trace comparison on one P11 network (identical incoming states) is the next
+discriminator before any new mechanism is built.
+**Statistic.** paired arithmetic difference, studentised-t, printed per arm
+against the v32 control (`p2_design_score.py`, no `--gate`).
+**Data.** P11 DESIGN re-read (registered); caps off; rows streamed.
+**Cost model.** reported only (not a candidate); v29's C/B read for context.
