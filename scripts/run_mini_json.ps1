@@ -45,7 +45,8 @@ param(
     [string]$Split = "mini",
     [string]$Dataset = "hf://aicrowd/arc-whestbench-public-2026@v2-phase2",
     [string]$Runner = "subprocess",
-    [int]$NMlps = 0
+    [int]$NMlps = 0,
+    [switch]$DebugTracebacks
 )
 
 $ErrorActionPreference = "Stop"
@@ -62,10 +63,25 @@ $whestArgs = @(
 )
 if ($NoResidualLimit) { $whestArgs += "--no-residual-wall-time-limit" }
 if ($NMlps -gt 0) { $whestArgs += @("--n-mlps", "$NMlps") }
+if ($DebugTracebacks) { $whestArgs += "--debug" }
 
 Write-Host "whest $($whestArgs -join ' ')"
 $lines = & uv run whest @whestArgs
-if ($LASTEXITCODE -ne 0) { throw "whest run exited $LASTEXITCODE" }
+$whestExit = $LASTEXITCODE
+
+# DO NOT throw here. `whest run` exits 1 when ANY MLP raises -- and it still
+# evaluated the other 99 and still printed a complete report naming which ones
+# failed and why. Throwing on the exit code discards exactly the evidence
+# needed to diagnose the failure, which is what happened to job 1400 on
+# 2026-09-16: 1h55m of subprocess run, 98 good rows and the identity of the 2
+# bad ones, deleted by this line because the script trusted an exit code over
+# the artifact in its hand.
+#
+# The report is written first; the exit code is re-raised at the very end,
+# AFTER the evidence is safely on disk, so the job still reports FAILED.
+if ($whestExit -ne 0) {
+    Write-Host "NOTE: whest run exited $whestExit -- writing the report anyway, then failing."
+}
 
 $text = ($lines -join "`n")
 
@@ -84,3 +100,8 @@ if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { throw
 if ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF) { throw "wrote a BOM after all" }
 
 Write-Host "wrote $Out  ($($bytes.Length) bytes, UTF-8 no BOM, parses as JSON)"
+
+# Only now, with the evidence durable, does a failed run report as failed.
+if ($whestExit -ne 0) {
+    throw "whest run exited $whestExit (the report WAS written to $Out -- read its failure_breakdown and per_mlp error_code)"
+}
