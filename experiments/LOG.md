@@ -51317,3 +51317,110 @@ about 3.88e-9, a major improvement but above today's leader. Around 1.9e-8 raw a
 forecasts. Existing Slice 7 item 1 remains unstarted and requires the recorded
 prediction/contract before measurement. Process consolidation and the staged plan
 are proposals; no binding policy was silently weakened by this review.
+
+---
+
+## 2026-09-16 — **EXECUTION CONTRACT AMENDMENT (pre-data): the Sep-16 audit refinements become the operative sequence through the next submission**
+
+Samuel instructed on 2026-09-16: *"Read and execute
+`docs/CLAUDE_CODE_HANDOFF_NEXT_SUBMISSION_2026-09-16.md` … implement the
+September 16 audit recommendations through a complete, validated
+next-submission package. After I approve that exact package, submit it."*
+No data from any experiment below exists at the time of this entry.
+Historical contracts are not rewritten; this entry amends forward only.
+
+### Active plan pointer (one place)
+
+| role | document |
+|---|---|
+| **operative execution sequence** | `docs/CLAUDE_CODE_HANDOFF_NEXT_SUBMISSION_2026-09-16.md` (stages 0–4 + release) |
+| still-binding gates it preserves | `docs/CLAUDE_CODE_HANDOFF_2026-09-16.md` (Slice 7 item gates), `docs/STRATEGIST_RESPONSE_2026-09-16.md` §6 (strategist predictions) |
+| the evidence behind the refinements | `docs/research/2026-09-16_strategy_and_implementation_plan.md` + its five supporting reports |
+| superseded as a plan (kept as history) | `docs/GAME_PLAN.md`'s Sep-12 F21/B4 ordering; Slice 7 D2 "trace" and D3 "zero the κ4 birth inputs" as *the* discriminators |
+
+### Process: already-authorized simplifications, consolidated (nothing new, nothing weakened)
+
+Authorized by Samuel in `CLAUDE_CODE_HANDOFF_2026-09-14.md` §0 and repeated in the
+Sep-16 handoff: local-seconds residual is advisory, op count ≤ 22,000 is the
+residual gate; tiny-shape conformance is relative (f32 vs f64, 1e-4); single-use
+DECIDE blocks only for candidates carrying fitted constants; exact FLOP
+transformations are certified by ledger diff + tiny parity + one 24-net DESIGN
+run; no CONTRACT/Skeptic blocks for infrastructure-only work.
+**Still binding and unchanged:** Rule 1 contracts and Samuel's recorded
+predictions before every STRATEGIC measurement; paired arithmetic score
+difference via `competition_score.decide(gate=…)`, t or basic interval;
+truth-noise quoting; public split CONFIRM-only; no vault touch; per-submission
+approval (hard rule 6); no agent designates. **Independent review in this
+sequence:** a fresh-context Skeptic on (a) any stage result that enters the
+release bundle and (b) the frozen release package before the approval request.
+IMPORTANT instrument repairs get a written prediction, tests, LOG entry and an
+affected preflight.
+
+### Changed D2/D3 discriminator (stage 1)
+
+Source reading (audit, CONFIRMED): v31's new source adds κ4 only through the
+term table's repeated slices `(3,)`/`(2,1)`; public v17 additionally carries a
+κ4-dependent hub whose **all-distinct** entries are generally nonzero, and
+subtracts the hub's repeated slices before forming its residual. A
+repeated-slice test cannot see this.
+
+- **D2′ (replaces the trace comparison as first discriminator):** a label-free
+  float64 full-tensor oracle at tiny width. Identical incoming state and Wick
+  coefficients; nonzero off-diagonal κ4 (λ ≠ 0). Compare birth tensors entry
+  classes separately (all-distinct / repeated), then one arbitrary dense
+  transport and the consumed `D3`/`D21` slices. The missing component and its
+  coefficient are derived independently (first-order cumulant expansion of the
+  κ4 model implied by `D4`/`D22`/λ), not copied.
+- **D3 (zeroing κ4 birth inputs)** is demoted to an ablation of the existing
+  repeated-slice route; it is not evidence about full-feed completeness.
+- **D1** (504aldo λ table, diagnostic arm, never packaged) is retained only if a
+  remaining uncertainty after D2′ needs it.
+- If D2′ shows equivalence, the diagnosis is retracted. If it shows a
+  discrepancy, the correction is built in a **new** candidate file, with tiny
+  parity and a 1024×16 operation ledger before any P11 read.
+
+**Stage-1 gate (unchanged from Slice 7):** raw ≥ 1.5× better than frozen v31 on
+P11, counted cost within 0.5%, paired t95 on the arithmetic score difference
+strictly above zero. Outcomes below target are recorded, not promoted.
+
+### Stage 2–4 gates (unchanged numbers, one added economic condition)
+
+- **P3 thin D21 birth feedback:** ≥ 1.06× raw at ≤ +1% counted cost, tested
+  against an attributable control and for interaction with stage 1.
+- **P4 exact savings:** ≤ 0.27 B at raw parity, ≤ 20,000 operations, Linux
+  8-GiB pass, no `auto-routed` warnings; synchronizations, wall forecast and
+  memory checked separately; only supported gains retained.
+- **N1 old-history compression, economics added:** before any rank/truth sweep,
+  (i) define the perturbation and output error; test the cheap mean-path proxy
+  against the full remaining moment recurrence (covariance and future births)
+  with signed perturbations and a forward-energy control, using a PSD /
+  generalized-eigenproblem objective; (ii) build and meter one complete
+  old-source join + basis update + transport + D3/D21 query cycle, billing every
+  selector, QR/sketch, rotation, reconstruction and temporary. **Rank-halving
+  alone is not a pass.** Ranks 128–150 join the grid. Intermediate target
+  ≤ 0.20 B at ≤ 5% raw loss vs its frozen control; adaptive rank judged on
+  worst per-network cost, residual and memory. Timebox ≈ 2 days for (i)+(ii).
+
+### Stage 0 (IMPORTANT, instrument) — written prediction
+
+Repairs: residual-cap-disabled local accuracy routing at every call site; raw
+stdout/stderr streamed and retained; reports bound to dependency content
+hashes instead of `git status` text; projection provenance refusals; runner-
+specific FLOP accounting and relabelled timing forecasts.
+**Prediction:** all five land in ≤ ~½ day of work; existing suites
+(`test_competition_score` 134, `test_predict_public` 39 before edits) stay green
+after their obsolete-assumption assertions are replaced by real-report
+fixtures; no historical artifact changes; `verify_portability.py` stays green.
+
+### Samuel's predictions
+
+Requested 2026-09-16 for stage 1, P3, P4 and N1, before any dependent
+measurement. Recorded verbatim in the per-experiment contracts when given;
+not assumed. Strategist predictions (`STRATEGIST_RESPONSE_2026-09-16.md` §6)
+are copied separately and are not Samuel's.
+
+### Release target
+
+Desired next release ≈ 4.0–4.4e-9 adjusted or better — a planning target, not a
+gate and not a forecast. Frozen controls: v31 `6dde5fd4…787c` (#331317), F21
+`d77dab0e…a94` (#330950).
