@@ -50863,3 +50863,81 @@ meter can see.
 It closes the `SKIP 9: the real 8-GiB enforcement` that v30's certification
 recorded. It is **not** a server memory result, no Linux seconds transfer to
 graded residual or wall, and it says nothing about accuracy or cost.
+
+---
+
+## 2026-09-16 — **Slice 7 opens: P11 registered and claimed before the mint**
+
+Operative contract: `docs/CLAUDE_CODE_HANDOFF_2026-09-16.md`, answering
+`docs/STRATEGIST_PACKET_2026-09-15.md` with
+`docs/STRATEGIST_RESPONSE_2026-09-16.md`. Work list, in order: **0** v31's
+evidence path + canary request, mint P11, hand Samuel the rules question;
+**1** close the κ4 half (D1 → D2 → D3, gate ≥1.5× raw on P11); **2** P3
+rank-16 D21 feedback; **3** P4 cost mechanics; **4** N1's kill test, then the
+merged core or P5. This entry is item **0b**. Infrastructure, so no CONTRACT
+or Skeptic block (handoff 09-14 §0.4).
+
+### Why a new block, when P01 is DESIGN and reusable
+
+It is reusable, and that is exactly the trap. **P01 now carries F21's screen,
+the λ-scale sweep, P1's 1.2371× and P2's 1.3902× on the same 24 networks.**
+Every one of those reads was protocol-legal, and the Skeptic already flagged
+on 2026-09-15 that P1's and P2's gains are therefore *correlated* and must
+never be quoted as independent. Slice 7's accuracy half — D1's λ-table
+diagnostic, D3's feed ablation, the κ4 fix screen, P3's gate — would have been
+reads five through nine of one corpus, and the κ4 fix is the one number this
+slice exists to produce.
+
+`P11[40,916,011,000..40,916,011,095]`, **DESIGN**, allocated 96 and **claimed
+24** for the mint. Registered in **both** registries — `seed_blocks.py` and
+`seed_ledger.TIERS` — because a block present in one and absent from the other
+is precisely how WP15's first claim would have died (`block_span('P05')`
+worked while `tier_of('P05')` raised, found by the WP14 Skeptic). The ledger's
+own self-test passes **66/66** and `check_disjoint()` holds.
+
+**DESIGN, deliberately not SINGLE_USE.** D1, D3 and P3's gate are *meant* to
+read the same 24 networks, so their gains are comparable on identical inputs
+under common random numbers. That makes them one corpus and one correlated
+family of reads — declared here rather than discovered later. The consequence
+is written into the block's own registry text: **a constant fitted on P11 is
+fitted on DESIGN data and needs its own fresh single-use block before it can
+reach a submission.** D1's branch where we fit our own per-layer λ profile is
+exactly that case.
+
+### Order of operations, which is the part that has to be right
+
+1. `seed_blocks` + `seed_ledger` entries, self-test green.
+2. `seed_ledger.claim_range('P11', 40_916_011_000, 24, 'local_sim/p2_truth.py', ts='2026-09-16')` — one-way.
+3. **Commit** (`3354f5e`) — so the git timestamp proves which seeds were spoken for *before any truth existed*.
+4. Only then the producer: workerq **1379**, `--already-claimed --seed-start 40916011000`, which draws nothing and records nothing, and refuses outright if any seed it is about to mint lacks a ledger record.
+
+`--plan` on the host first: 24 networks, two independent replicas of `2^24`,
+`2.702e+16` FLOPs total, predicted truth noise **`5.186e-09` per replica**
+against a v31 raw of `~3.9e-8` — 13%, which the two-replica cross product
+removes from the bias and leaves only in the variance. P10's comparable figure
+was `4.47e-9`. Declared 8 GiB RAM / 6 GiB VRAM / 4 CPUs from P10's observed
+peaks (4,565 MiB / 2,636 MiB); P10 took 5,615 s for 128 networks, so 24 should
+land near 18 minutes. Queued at **normal** priority deliberately, behind the
+high-priority v31 certification (1377) that item 0a is waiting on.
+
+### Also done, and it was a gap rather than a task
+
+`experiments/submissions.jsonl` still recorded **#330950 as `pending`** while
+its graded report had been sitting in `experiments/run_reports/` since 09-14.
+Backfilled with what the handoff requires on every graded row: raw
+`3.779e-8`, multiplier `0.42221`, **worst wall `93.16 s`** of the 120 s cap
+(1.29× margin) and **worst residual `0.156232 s`** of the 0.4 s cliff (2.56×
+headroom). That row is the anchor `predict_public.py` projects from, so a
+ledger that did not know it had graded was a real hazard, not untidiness.
+
+`docs/CLAIMS_LEDGER.md` opened the same day (handoff § Throughout): 22
+measured numbers with block, artifact and date, and the five claims this
+repository has already retracted.
+
+### Knowledge delta
+
+- **"The tier permits it" and "the evidence is independent" are different
+  questions, and only the first one is enforced.** DESIGN truth is reusable by
+  protocol, so nothing in the instrument would have stopped a ninth read of
+  P01 — the ledger would have printed its correlation NOTE and moved on. The
+  protection that matters here is a *new block*, and it costs 18 minutes.
