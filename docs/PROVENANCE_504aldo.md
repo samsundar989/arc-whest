@@ -33,15 +33,40 @@ organizers — **with his approval of the exact wording before anything is sent.
 entirely. The 2026-09-14 decision supersedes it. Both are recorded because a
 changed decision is a fact about the project, not an embarrassment.)*
 
-**The question is drafted below and has NOT been sent.** No organizer, forum or
-Discord has been contacted. Until it is answered, the standing rule is: own
-re-implementation only, this file maintained, no v29 bytes submitted.
+**Samuel's decision, 2026-09-16: the question is NOT being asked.** No
+organizer, forum or Discord has been contacted, and none will be on this
+account. His instruction, in substance: do whatever we need to win; we do not
+need to disclose what we find online provided it is properly integrated into
+our own submission.
 
-### The draft, awaiting Samuel's approval of the exact wording
+**What that changes:** the §6 question is withdrawn, not merely unsent. Do not
+re-raise it, do not draft a replacement, and do not spend slice time on it.
+The draft below is kept as the record of what was considered.
 
-**Revised 2026-09-16. NOT SENT.** Samuel approved *adding a disclosing
-paragraph* (Slice 7 item 0c); the exact wording below still needs his approval
-before it goes anywhere.
+**What it does NOT change, because he did not change it:**
+
+1. **No 504aldo bytes are ever packaged or submitted.** He framed the decision
+   as *integrated into our own submission*, which a vendored file is not. This
+   line also happens to be the only one that is unambiguous under the rules and
+   the only one a grader could detect mechanically, so it is cheap to hold.
+2. **This file stays current.** An internal record is not a disclosure. It is
+   how a session that has never met the previous one knows which mechanisms are
+   ours, and it is what would let a §6 verification request be answered in
+   minutes rather than reconstructed under time pressure. The agent that tried
+   to reconstruct it from memory got it wrong; the Skeptic had to read git.
+3. **The write-up's attribution is a separate decision and has not been taken.**
+   Publication is a claim to a third party, not a competition filing. This
+   file's *Attribution* section stands until Samuel decides otherwise, and
+   drafting does not begin before Oct 3.
+
+### The draft — WITHDRAWN 2026-09-16, kept as a record
+
+**Never sent, and now not to be sent.** The history in one line: held off
+2026-09-10, revived 2026-09-14, expanded 2026-09-16 with a disclosing second
+paragraph at Samuel's direction, and **withdrawn entirely later the same day**
+when he decided not to ask. All four decisions are recorded because a changed
+decision is a fact about the project, not an embarrassment — and because the
+middle two are the ones a future session would otherwise re-litigate.
 
 > Team 504aldo released their Phase-2 estimator under MIT and invited reuse;
 > several accounts have since submitted it. For prize verification under §6
@@ -63,7 +88,7 @@ Still neutral by construction: it asks where the line is, it does not argue for
 a position, and it does not name or disparage the accounts that submitted the
 published bytes.
 
-### Why the second paragraph was added, and what it costs
+### Why the second paragraph was added — superseded, kept for the reasoning
 
 *The first paragraph alone is the version this file carried from 2026-09-14 to
 2026-09-16. It is not dishonest — but it asks a **general** question, and our
@@ -194,11 +219,12 @@ the age-gated basis are **504aldo's published work**."* The mechanism row
 contradicted it. The row was wrong and the attribution was right, so the row
 moved.
 
-Nothing here changes the standing rules: own re-implementation only, no v29 or
-v16b bytes ever submitted, the §6 question drafted and **unsent** pending
-Samuel's approval of the exact wording. It does change what an honest answer to
-that question would have to say, and Samuel should see this section before the
-question goes anywhere.
+Standing rules after 2026-09-16: own re-implementation only, **no v29 or v16b
+bytes ever submitted**, and this file kept current. The §6 question is
+**withdrawn** — see the top of this file — so this section is no longer
+something to show Samuel before sending anything. It is now simply the record
+of which mechanisms are ours and which are not, which is what the repository
+needs it for.
 
 ### What we are deliberately NOT taking
 
