@@ -377,13 +377,33 @@ def _patches(separable: bool):
             + _ELEM_PER_LAYER * n * n * depth)
     if not _P2_SEPARABLE:
         return base
-    # The thin terms: transport `W^T Z`, the dense reconstruction `Z L^T`,
-    # `(M.M) L`, and `[(M.M)L] Z^T` -- four `O(k n^2 r)` products a layer.
+    # THIS IS THE BUDGET GUARD, not a report: `predict` consults it before
+    # issuing an operation, and an MLP over `B` scores as zeros. It must
+    # OVER-predict. The first version charged `4 k n^2 r` and did neither:
+    #   * it used `k n^2 r` per product where flopscope's convention -- which
+    #     this function's OWN base term above uses -- is `n n (2n-1)`, so it
+    #     was under by exactly 2x; and
+    #   * it omitted `_p2_compress` completely.
+    # Measured consequence before the fix: the guard came in at 0.898 of the
+    # true cost at 96x6, consuming twice the margin `_BUDGET_FRACTION = 0.95`
+    # is documented as holding. Found by an independent Skeptic, 2026-09-15.
     r = n if _P2_RANK <= 0 else min(int(_P2_RANK), n)
     thin = 0
     for l in range(depth):
         k = l if gens is None else min(l, gens)
-        thin += 4 * k * n * n * r
+        if k:
+            thin += n * (k * r) * (2 * n - 1)      # W^T Z, the transport
+            thin += k * n * n * (2 * r - 1)        # Z L^T, the reconstruction
+            thin += k * n * r * (2 * n - 1)        # (M.M) L
+            thin += n * n * (2 * k * r - 1)        # [(M.M) L] Z^T
+        if l < depth - 1:                          # a birth, so a compression
+            # four `(n,n)@(n,r)`-class products, TWO QRs, and the column norms.
+            # The QR term is `2 n r^2` per factorisation with its `-(2/3) r^3`
+            # dropped, because this is a guard: an over-charge costs a little
+            # conservatism and an under-charge costs the whole MLP. At the
+            # dense arm's `r = n` the QRs are cubic and omitting them left the
+            # guard at 0.9955 -- under, and therefore useless.
+            thin += 4 * n * r * (2 * n - 1) + 4 * n * r * r + 2 * n * n
     return base + thin''',
         "the thin FLOPs enter the projection", 1))
 
@@ -542,11 +562,14 @@ def parity():
     print("budget guard at %dx%d" % (lw, ld))
     print("  gens  control %-6s candidate %-6s   %s"
           % (g_ctl, g_can, "AGREE" if g_ctl == g_can else "*** DIFFER ***"))
-    print("  projected tower FLOPs  %.4e -> %.4e   %.4fx"
-          % (f_ctl, f_can, f_can / f_ctl))
     if g_ctl != g_can:
         ok = False
         print("  *** the arms would carry different towers ***")
+    # The guard must OVER-predict; under-prediction is how an MLP scores zeros.
+    # Printing the projected ratio was worse than useless -- it quoted the
+    # control's known-inflated 7/6 model and asserted a saving nobody believed.
+    # What matters is the SIGN of model-minus-measured, checked in claim 6.
+    print("  projected  control %.4e   candidate %.4e" % (f_ctl, f_can))
 
     print("\nparity at %dx%d" % (width, depth))
     for seed in (90000000401, 90000000402, 90000000403):
@@ -626,6 +649,41 @@ def parity():
                  "*** NOT EQUIVARIANT ***" if bad else "ok"))
         if bad:
             ok = False
+
+    # ---- 6. cost, METERED rather than modelled ---------------------------
+    # P2 was mispriced FOUR times off hand models (27.6%, 41.5%, 32.3%, 31.3%)
+    # before anyone metered it, and the metering took under two minutes at a
+    # small shape. It is a standing claim now so the fifth cannot happen.
+    # The guard check is one-sided ON PURPOSE: over-predicting is safe and
+    # under-predicting scores an MLP as zeros.
+    print("\ncost, metered in one BudgetContext")
+    for cw, cd in ((96, 6), (128, 8)):
+        w, es, _ = canonical_mint(cw, cd, 90000000406)
+        cost = {}
+        for name in ("control", "dense", "v31"):
+            m = mods[name]
+            mlp = harness.MLP(weights=[np.asarray(x) for x in w],
+                              width=cw, depth=cd, seed=es)
+            ctx = flops.BudgetContext(flop_budget=budget, quiet=True)
+            with ctx:
+                m.Estimator().predict(mlp, budget)
+            cost[name] = float(ctx.flops_used)
+        print("    %3dx%-3d  control %,d   v31 %,d   %.4fx"
+              .replace(",d", "d")
+              % (cw, cd, cost["control"], cost["v31"],
+                 cost["v31"] / cost["control"]))
+        for name in ("control", "dense", "v31"):
+            m = mods[name]
+            g = m._fit_generations(cw, cd, budget)
+            model = m._projected_flops(cw, cd, g)
+            ratio = model / cost[name]
+            bad = ratio < 1.0
+            print("        guard %-8s model/measured %.4f   %s"
+                  % (name, ratio,
+                     "*** UNDER-PREDICTS -- an MLP over B scores ZEROS ***"
+                     if bad else "conservative"))
+            if bad:
+                ok = False
 
     print("\nPARITY OK" if ok else "\nPARITY FAILED")
     return 0 if ok else 1

@@ -204,9 +204,10 @@ def t_identity_in_float64():
     check("the full reconstruction is exact for an ARBITRARY residual",
           worst_full < 1e-14,
           f"worst rel {worst_full:.3e} -- it is a regrouping, not a fit")
-    check("...so the rewrite introduces NO error at full rank",
-          worst_sep < 1e-14 and worst_full < 1e-14,
-          "the approximation is the RANK, and it is a separate step")
+    # NOT a check: it was the conjunction of the two checks immediately above
+    # and could not fail independently, yet it counted toward the total.
+    print("      -> the rewrite introduces NO error at full rank; the "
+          "approximation is the RANK, and it is a separate step")
 
 
 def t_the_rank_is_where_error_enters(caps):
@@ -280,6 +281,7 @@ def t_slice_regrouping():
     head("3. the (2,1) regrouping: four dense contractions become two")
     rng = np.random.default_rng(20260915 + 1)
     worst_f21 = worst_reg = 0.0
+    structural_ok = True
     for n, k, r in ((6, 2, 3), (16, 3, 5), (40, 2, 8)):
         A = rng.normal(size=(n, k * n))          # F21's A_L
         P = rng.normal(size=(n, k * n))          # F21's M
@@ -320,20 +322,44 @@ def t_slice_regrouping():
 
         worst_f21 = max(worst_f21, _rel(d21_f21, d21_reg))
 
-        # (c) and the SAME regrouping must reproduce the (3,) slice too
+        # (c) and the SAME regrouping must reproduce the (3,) slice too.
+        #
+        # THE REGROUPED SIDE IS BUILT FROM THE FACTORED PIECES, not from the
+        # dense `Mrec`. Until 2026-09-15 both sides used `Mrec`, so it
+        # CANCELLED and what remained was `C_L = A d(w2)` -- a property of the
+        # ORIGINAL spelling that holds whatever `Mrec` is, correct or not. The
+        # check passed for a year of arithmetic it never touched. Found by an
+        # independent Skeptic; this is what it was supposed to say.
         d3_f21 = (Mrec * P * P).sum(axis=1) + 3.0 * (A * P * C_L).sum(axis=1)
-        MP = Mrec * P
-        d3_reg = 3.0 * (A * A * P * w2[None, :]).sum(axis=1) + (MP * P).sum(axis=1)
+        MP_fac = P * P * sv[None, :] + (A * P) * (3.0 * ev[None, :])
+        for j in range(k):
+            sl = slice(j * n, (j + 1) * n)
+            MP_fac[:, sl] = MP_fac[:, sl] + (Z[j] @ L[j].T) * P[:, sl]
+        d3_reg = (3.0 * (A * A * P * w2[None, :]).sum(axis=1)
+                  + (MP_fac * P).sum(axis=1))
         worst_reg = max(worst_reg, _rel(d3_f21, d3_reg))
+
+        # (d) and the claim that the right factors are only `A`, `P` and a THIN
+        # `Z` is STRUCTURAL, so check the structure. This replaces a literal
+        # `check(..., True, ...)` that could not fail and was reported inside
+        # "11/11" in three commit messages.
+        dense_rights = [A.T.shape, P.T.shape]
+        thin_rights = [Z[j].T.shape for j in range(k)]
+        if not (len(dense_rights) == 2
+                and all(sh == (k * n, n) for sh in dense_rights)
+                and all(sh == (r, n) for sh in thin_rights)
+                and r < n):
+            structural_ok = False
 
     check("the (2,1) regrouping reproduces F21's four-matmul spelling",
           worst_f21 < 1e-13,
           f"worst rel {worst_f21:.3e}, widths 6/16/40, arbitrary residual")
     check("...and the (3,) slice agrees under the same substitution",
           worst_reg < 1e-13, f"worst rel {worst_reg:.3e}")
-    check("right factors are only A, P and a THIN Z", True,
-          "two dense contractions, not four -- with transport 3->2 that is "
-          "the 7->4")
+    check("right factors are exactly TWO dense (A, P) plus a THIN Z",
+          structural_ok,
+          "shapes asserted per width: dense rights (k n, n), thin rights "
+          "(r, n) with r < n -- with transport 3->2 that is the 7->4")
 
 
 def main():

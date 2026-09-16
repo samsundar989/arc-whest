@@ -823,13 +823,33 @@ def _projected_flops(n, depth, gens):
             + _ELEM_PER_LAYER * n * n * depth)
     if not _P2_SEPARABLE:
         return base
-    # The thin terms: transport `W^T Z`, the dense reconstruction `Z L^T`,
-    # `(M.M) L`, and `[(M.M)L] Z^T` -- four `O(k n^2 r)` products a layer.
+    # THIS IS THE BUDGET GUARD, not a report: `predict` consults it before
+    # issuing an operation, and an MLP over `B` scores as zeros. It must
+    # OVER-predict. The first version charged `4 k n^2 r` and did neither:
+    #   * it used `k n^2 r` per product where flopscope's convention -- which
+    #     this function's OWN base term above uses -- is `n n (2n-1)`, so it
+    #     was under by exactly 2x; and
+    #   * it omitted `_p2_compress` completely.
+    # Measured consequence before the fix: the guard came in at 0.898 of the
+    # true cost at 96x6, consuming twice the margin `_BUDGET_FRACTION = 0.95`
+    # is documented as holding. Found by an independent Skeptic, 2026-09-15.
     r = n if _P2_RANK <= 0 else min(int(_P2_RANK), n)
     thin = 0
     for l in range(depth):
         k = l if gens is None else min(l, gens)
-        thin += 4 * k * n * n * r
+        if k:
+            thin += n * (k * r) * (2 * n - 1)      # W^T Z, the transport
+            thin += k * n * n * (2 * r - 1)        # Z L^T, the reconstruction
+            thin += k * n * r * (2 * n - 1)        # (M.M) L
+            thin += n * n * (2 * k * r - 1)        # [(M.M) L] Z^T
+        if l < depth - 1:                          # a birth, so a compression
+            # four `(n,n)@(n,r)`-class products, TWO QRs, and the column norms.
+            # The QR term is `2 n r^2` per factorisation with its `-(2/3) r^3`
+            # dropped, because this is a guard: an over-charge costs a little
+            # conservatism and an under-charge costs the whole MLP. At the
+            # dense arm's `r = n` the QRs are cubic and omitting them left the
+            # guard at 0.9955 -- under, and therefore useless.
+            thin += 4 * n * r * (2 * n - 1) + 4 * n * r * r + 2 * n * n
     return base + thin
 
 

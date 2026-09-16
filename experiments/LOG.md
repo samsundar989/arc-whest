@@ -50730,3 +50730,89 @@ FAILED its gate and was supposed to.
 - P1 and P2 were screened on the same 24 P01 networks. The `1.7202x` above is
   read off raw MSE and cost, not multiplied from two correlated gains, but the
   two mechanisms have never been measured on independent corpora.
+
+---
+
+## 2026-09-15 — **The Skeptic's three code findings, fixed and mutation-tested**
+
+### 1. The budget guard under-predicted for the candidate — FIXED
+
+`_projected_flops` is not a report: `predict` consults it before issuing an
+operation, and an MLP over `B` scores as **zeros**. It must over-predict. It
+charged `4 k n^2 r` for the thin terms, which was wrong twice — `k n^2 r` per
+product where flopscope's convention (used by this function's *own* base term)
+is `n n (2n-1)`, so **under by exactly 2x**; and `_p2_compress` was **absent
+entirely**. Now charges all four thin products in the right convention, plus
+the compression's four products, its two QRs (`2 n r^2` each, with the
+`-(2/3) r^3` dropped *because* it is a guard) and the column norms.
+
+    guard model/measured      before        after
+      v31    96x6             0.8978        1.0978
+      v31   128x8             0.9806        1.1406
+      dense  96x6             0.6633        1.0624
+      dense 128x8             0.7952        1.0967
+      control (unchanged)     1.2182        1.2182
+
+All conservative. `--parity` now **fails** if any arm's guard under-predicts,
+one-sided on purpose.
+
+**At the live shape the fix changes nothing for the arms that matter**, and
+this was verified rather than assumed: control and v31 both still select the
+exact tower (`gens None`), and both meter **bit-identically** to the Skeptic's
+independent measurement — `928,411,199,060` and `661,806,923,368`. **The
+re-emitted candidate is the candidate that was screened.**
+
+**The dense arm does change**: its guard now projects `2.0782e+12` against the
+`0.95 B = 2.0891e+12` bar, so it truncates to `gens 11` at 1024x16 where it
+previously carried the exact tower. That is the guard behaving correctly — the
+dense arm genuinely costs `1.66e+12` of a `2.199e+12` budget, only 1.32x
+headroom, and the guard cannot model Strassen. It is a correctness control that
+has already done its job and will never ship. **Its screened row and its
+`edge_cases` transcript describe the pre-fix file**, and that is recorded here
+rather than quietly re-run.
+
+### 2. `11/11` was really `8/11` — FIXED, and it is now `10/10`
+
+- `check("right factors are only A, P and a THIN Z", True, ...)` — a literal
+  `True`. Replaced with the **structural** assertion it was gesturing at: the
+  dense right operands are exactly two and both `(k n, n)`, the thin ones are
+  all `(r, n)`, and `r < n` so that "thin" means something.
+- `"...so the rewrite introduces NO error at full rank"` — the conjunction of
+  the two checks immediately above it, unable to fail independently. Demoted to
+  a printed note; it is commentary, not evidence.
+- `"...and the (3,) slice agrees under the same substitution"` — **did not test
+  the substitution.** Both sides used the dense `Mrec`, so it cancelled and what
+  remained was `C_L = A d(w2)`, a property of the ORIGINAL spelling that holds
+  whatever `Mrec` is. The regrouped side is now built from the **factored**
+  pieces, which is what the sentence always claimed.
+
+**And the repaired check was mutation-tested**, because the lesson of this
+session is that a check is worthless until it has been seen to fail:
+
+    UNMUTATED (positive control)   passes   correct
+    drop the 3 on the e-leg        CAUGHT
+    drop the residual              CAUGHT
+    transpose the residual         CAUGHT
+    drop sv from the P-leg         CAUGHT
+
+*(A first attempt reported all four NOT CAUGHT. That was the harness, not the
+check: the mutants ran from the scratchpad, where the test cannot resolve
+`_ROOT` and section 3 never executed. Run in place, it works. A mutation
+battery that reports a false negative is itself a check that needs checking.)*
+
+### 3. Cost is now METERED in `--parity`, not modelled — claim 6
+
+P2 was mispriced **four** times off hand models (27.6%, 41.5%, 32.3%, 31.3%)
+before anyone metered it, and the metering took under two minutes at a small
+shape. It is a standing claim now, and the `projected tower FLOPs ... 0.5969x`
+line — which quoted the control's known-inflated 7/6 model and asserted a
+saving nobody believed — is gone.
+
+### Knowledge delta
+
+- **A guard is not a report, and its errors are one-sided.** Over-charging the
+  QR term costs a little conservatism; under-charging it costs the whole MLP.
+  The model should be written to be wrong in the safe direction on purpose.
+- **A mutation battery can itself return a false negative.** Mine did, for a
+  path reason, and had I trusted it I would have concluded the repaired check
+  was still broken and "fixed" something that was already right.
