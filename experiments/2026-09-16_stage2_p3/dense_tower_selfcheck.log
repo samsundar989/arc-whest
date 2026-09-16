@@ -1,0 +1,2 @@
+estimator_k3_v31_dense.py: dense chain vs factored chain, worst rel mean diff 2.61e-16  OK
+estimator_k3_v32_dense.py: dense chain vs factored chain, worst rel mean diff 3.58e-16  OK

@@ -1,0 +1,36 @@
+{
+  "candidate": "estimator_k3_v32_dense.py",
+  "eps0": {
+    "exact": -0.026971218725448536,
+    "estimator": -0.02697121872544858
+  },
+  "odd_eps": {
+    "exact": 0.20365917611054452,
+    "estimator": 0.29124088595922865,
+    "beta1": 0.010990285979870347,
+    "beta2": -0.05767968616908032,
+    "gamma": -0.04092269564831573
+  },
+  "checks": [
+    {
+      "check": "A. control eps=0: all-distinct response, estimator == exact (1e-6 rel)",
+      "ok": true,
+      "detail": "exact -2.697122e-02  est -2.697122e-02"
+    },
+    {
+      "check": "B. discriminator: v32 misses > 20% of the odd-eps response",
+      "ok": true,
+      "detail": "missing -8.7582e-02"
+    },
+    {
+      "check": "C. v32 + beta1 + beta2 == exact (5%)",
+      "ok": false,
+      "detail": "rel 2.01e-01"
+    },
+    {
+      "check": "C. v32 + beta1 + beta2 + gamma == exact (5%)",
+      "ok": true,
+      "detail": "rel 1.49e-04"
+    }
+  ]
+}
