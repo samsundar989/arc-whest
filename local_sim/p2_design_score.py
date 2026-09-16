@@ -76,6 +76,10 @@ def main(argv=None) -> int:
                          "makes the run a deployment check instead.")
     ap.add_argument("--official-samples", type=float, default=1e9)
     ap.add_argument("--out", default="")
+    ap.add_argument("--rows-jsonl", default="",
+                    help="stream every completed row (arm label, candidate sha256, "
+                         "row) to this JSONL, flushed and fsynced as it lands, so "
+                         "a crash keeps every finished network")
     a = ap.parse_args(argv)
 
     import flopscope as flops
@@ -150,12 +154,32 @@ def main(argv=None) -> int:
         ("cand%d" % i if len(cand_paths) > 1 else "candidate", pth)
         for i, pth in enumerate(cand_paths)]
 
+    import hashlib
+
+    def _sink_for(label, path):
+        if not a.rows_jsonl:
+            return None
+        with open(path, "rb") as fh:
+            sha = hashlib.sha256(fh.read()).hexdigest()
+
+        def sink(row):
+            rec = {"arm": label, "candidate": os.path.basename(path),
+                   "candidate_sha256": sha, "block": block,
+                   "row": row.to_row() if hasattr(row, "to_row") else str(row)}
+            with open(a.rows_jsonl, "a", encoding="utf-8") as fh:
+                fh.write(json.dumps(rec, default=str) + "
+")
+                fh.flush()
+                os.fsync(fh.fileno())
+        return sink
+
     arms = {}
     for label, path in labels:
         t0 = time.perf_counter()
         rows, prov = le.evaluate(path, seeds, y, spec=spec,
                                  gt_noise=None if gt_avg is None
-                                 else list(gt_avg), progress_every=0)
+                                 else list(gt_avg), progress_every=0,
+                                 evidence_sink=_sink_for(label, path))
         suite = le.score(rows, spec=spec)
         arms[label] = {"rows": rows, "suite": suite, "prov": prov,
                        "secs": time.perf_counter() - t0}

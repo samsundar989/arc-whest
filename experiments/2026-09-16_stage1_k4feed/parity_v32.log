@@ -1,0 +1,37 @@
+1. nesting: _HUB_ROUTES = () is v31
+  PASS  64x5: no-route arm == v31 bitwise and same FLOPs               flops 37795598 vs 37795598
+  PASS  64x5: v32 is not a no-op                                       rel 2.36e-04  cost x1.02398
+  PASS  96x6: no-route arm == v31 bitwise and same FLOPs               flops 156095052 vs 156095052
+  PASS  96x6: v32 is not a no-op                                       rel 1.61e-04  cost x1.01967
+
+2-3. f64 chain, n=9, depth=6, lam patched to 0.15
+  PASS  2. newborn(v32_dense) - newborn(v31_dense) == oracle routes (i)+(ii) worst rel 3.60e-16  (hub size 1.81e-01 rel)
+  PASS  2. the routes are not vacuous at this fixture                  1.81e-01
+  PASS  3. transported full tensor == _dslice3/_dslice21 (hubs included) worst rel 6.73e-15
+
+4. exact scale-mixture law, n=3
+  PASS  4. v32_dense all-distinct response == exact (5%)               exact -1.1206e-02  v32 -1.1205e-02
+
+5. float32 predict vs float64 layer loop, 64x5
+  PASS  5. v32 float32 error <= 2x v31's own + 1e-5                    v31 2.32e-07  v32 1.53e-07
+
+6. permutation equivariance, 96x6
+  PASS  6. layer 1: v32 equivariance error <= 100x v31's               v31 2.42e-14  v32 1.84e-14  ratio 0.8x
+  PASS  6. layer 4: v32 equivariance error <= 100x v31's               v31 1.13e-14  v32 7.19e-15  ratio 0.6x
+
+7. cost, metered
+  PASS  7. 96x6 v31: guard over-predicts                               model/measured 1.0978
+  PASS  7. 96x6 v32: guard over-predicts                               model/measured 1.1006
+  PASS  7. 96x6 v32_i: guard over-predicts                             model/measured 1.1006
+  PASS  7. 96x6 v32_uncomp: guard over-predicts                        model/measured 1.1026
+  PASS  7. 96x6 v32_dense: guard over-predicts                         model/measured 1.0645
+      96x6: v32/v31 counted FLOPs x1.01967
+  PASS  7. 128x8 v31: guard over-predicts                              model/measured 1.1406
+  PASS  7. 128x8 v32: guard over-predicts                              model/measured 1.1416
+  PASS  7. 128x8 v32_i: guard over-predicts                            model/measured 1.1416
+  PASS  7. 128x8 v32_uncomp: guard over-predicts                       model/measured 1.1429
+  PASS  7. 128x8 v32_dense: guard over-predicts                        model/measured 1.0976
+      128x8: v32/v31 counted FLOPs x1.01805
+  PASS  7. 1024x16: guard picks the same gens for v32 and v31          None / None; projected x1.00305
+
+22/22 claims pass

@@ -51471,3 +51471,110 @@ match historical FAIL lines (records untouched).
   graded-report fixtures are now the regression oracle.
 - Neither report format carries a source hash, so provenance must live in a
   receipt bound to the report's bytes — a filename is not identity.
+
+---
+
+## 2026-09-16 — **Stage 1 D2′ oracle RESULT (label-free) and CONTRACT (Rule 1): the distinct-index κ4 birth feed, screened on P11**
+
+### D2′ result — no labels, no block
+
+`local_sim/k4feed_oracle.py` → `experiments/2026-09-16_stage1_k4feed/oracle_v31.{json,log}`.
+Reference: an exact Gaussian **scale mixture** (κ3 = 0, κ4 = d²·pairings(Σ),
+Σ = I + εC) whose fourth cumulant is, to first order in ε, exactly the
+estimator's own model `κ4 = m·Sym(G⊗I)`, `G = diag(dG) + λC_off` (g = 1.5d²,
+λ = 3d²). Post-ReLU cumulants by nested Gauss–Legendre quadrature (~1e-13); the
+d²·ε part isolated by finite differences, so the Gaussian-closure truncation
+cancels.
+
+| d²·ε response (d=0.02, ε=0.01) | exact | v31 | v31 + route (i) | v31 + (i)+(ii) |
+|---|---:|---:|---:|---:|
+| **all-distinct κ3(0,1,2)** | **−1.12056e-2** | **0** | −1.71821e-2 | **−1.12049e-2** |
+| convention control: mean, ε=0 | −4.1163e-2 | −4.1159e-2 | same | same |
+| convention control: (2,1), ε=0 | +8.0635e-2 | +8.0632e-2 | same | same |
+
+- **CONFIRMED:** v31's newborn source carries **zero** κ4 content at
+  all-distinct indices (also: λ leaves them exactly unchanged on a real f64
+  chain, 0.0e+00, while moving repeated entries 7.5e-2).
+- **CONFIRMED, new:** the exact first-order distinct content has **two** routes:
+  (i) κ4_ppxy, coefficient ½ → `(m/12)λ Σ_cyc w2 w1 C w1` — the public v17 feed's
+  form — and (ii) κ4_aabb plus one covariance link, coefficient ¼ →
+  `(1/4) D22_ab [w2_a w3_b C_bc + w3_a w2_b C_ac] w1_c`. **(i) alone overshoots by
+  53%; (i)+(ii) matches to 6e-5.** The pre-fixed check "(i) alone == exact" FAILED;
+  it is recorded as the finding, not a defect.
+- **Recorded, not acted on (contract scope):** the repeated (2,1) slice's odd-ε
+  κ4×C response is −0.162 exact vs −0.020 in v31; adding the (3,1) rows
+  overshoots to −0.211. That slice needs its own derivation and contract.
+- Power counting for why distinct entries matter more: one dense transport sums
+  n³ distinct entries into each consumed slice against n² repeated ones.
+
+### The candidate (built after the oracle, before any label)
+
+`local_sim/s1_build_v32.py` emits, from frozen v31 by asserted-count patches:
+
+| arm | routes | compensated | rank | sha256 |
+|---|---|---|---|---|
+| `estimator_k3_v32.py` **PRIMARY** | (i)+(ii) | yes | 32 | `10869a6c…657c` |
+| `estimator_k3_v32_i.py` diagnostic | (i) | yes | 32 | `0e8789e5…6ec6` |
+| `estimator_k3_v32_uncomp.py` diagnostic | (i)+(ii) | no | 32 | `d4424b83…80a5` |
+| `estimator_k3_v32_dense.py` parity only | (i)+(ii) | yes | 0 | `2ab2bf94…e485` |
+
+Representation: hubs `Sym3(y⊗(X Mᵀ+M Xᵀ))`, `X = A_L d(c)` on legs every lineage
+already carries — hub A `y=w2, c=(m/8)(λw1+dG·w3)`, hub B `y=dG·w2, c=(m/8)w3`;
+consumed by folding into the existing `LA A_Lᵀ`/`LP Mᵀ` contractions, plus one
+thin `Y` transport and one thin `(n,2k)@(2k,n)` product per layer. Compensation:
+`d(yc)Cd(w1)` moves `e_b` exactly; `d(yw1)Cd(c)` enters the rank-32 residual.
+
+`local_sim/s1_parity_v32.py` → `parity_v32.log`, **22/22**: no-route arm ==
+v31 bitwise + same FLOPs (64×5, 96×6); newborn tensor difference == oracle
+routes to 3.6e-16 (f64, identical incoming state incl. incoming hubs);
+transported full tensor == `_dslice3`/`_dslice21` to 6.7e-15; exact-law response
+−1.1205e-2 vs −1.1206e-2; float32 error 1.5e-7 (v31 2.3e-7); equivariance
+0.6–0.8× v31's floor; guard over-predicts every arm at 96×6/128×8; at 1024×16
+same `gens` (None), projected FLOPs ×1.00305. `whest validate` passes.
+
+### CONTRACT (Rule 1)
+
+**Question.** Does adding the complete first-order distinct-index κ4 birth
+content to v31 improve P11 raw MSE at unchanged cost?
+**Evidence.** CONFIRMED: oracle above; v31 graded 8.752e-9. INFERRED: transport
+amplifies distinct-entry omissions (n³ vs n²). SPECULATIVE: the size at
+1024×16; 504aldo's F68 (feed worth ~4× on their chain) is REPORTED for a
+different representation and an incomplete (route-i-only) feed.
+**Hypothesis + mechanism.** v31's third-cumulant sources are born without the
+κ4·C content at all-distinct indices; each later transport mixes that omission
+into the D3/D21 slices the mean reads, compounding with depth.
+**Intervention.** `estimator_k3_v32.py` vs frozen `estimator_k3_v31.py`; one
+mechanism.
+**Predictions (Builder).** (1) v32 raw better than v31 on ≥ 18/24 nets;
+(2) raw gain 1.03–1.25×, so the 1.5× slice gate **fails** (~70%);
+(3) counted FLOPs ratio 1.002–1.004; (4) v32_i worse than v32 (route (i) alone
+overshoots); (5) v32_uncomp within ±3% of v32.
+**Samuel:** "I don't know" (recorded above). **Strategist:** κ4 half closes to
+≤2.4e-8 P01-scale (55%).
+**Gate (binding, on the isolated change).**
+`competition_score.decide(v31_scores, v32_scores, gate=1.4925, interval="t")`
+on per-network adjusted scores — 1.4925 = 1.5 raw ÷ 1.005 cost, the score
+identity of "≥1.5× raw at ≤+0.5% counted cost" — **and** mean raw ratio ≥ 1.5
+**and** counted FLOPs ratio ≤ 1.005. All three, or the slice target fails.
+**Secondary (pre-registered now):** if v32 is better with arithmetic t95 strictly
+above zero and FLOPs ≤ +0.5% but below 1.5×, it is a *supported improvement*
+eligible for the combined release bundle (to be re-screened in combination), not
+a slice pass. Diagnostics v32_i/v32_uncomp promote nothing; a diagnostic
+beating v32 opens a new contract on a different block.
+**Falsifier.** v32 not better (t95 includes or lies below zero) → the
+distinct-feed hypothesis does not improve score at this shape; retain the
+algebra finding, do not promote.
+**Baseline.** frozen v31 `6dde5fd4…787c`, same run, same networks.
+**Cost model (frozen).** counted FLOPs: guard-projected ×1.00305 at 1024×16;
+measured per arm in this run (f64_readonly weights). Residual: operations
+≤ 22,000 max per network at 13.4 µs/op; v31 13,037 → v32 predicted ≈ 13,300,
+metered on the frozen file before any release step.
+**Statistic.** paired, common networks, arithmetic score difference,
+studentised-t; truth-noise-corrected and official-precision forecast printed
+beside it (`p2_design_score.py`).
+**Data.** P11 DESIGN `truth_P11.npz` (sha `6eeb2d7f…e3f3`), 24 nets × 2
+replicas of 2²⁴, noise 4.76e-9, already claimed/minted; this is a registered
+DESIGN re-read, counted by `truth_reads`. Not fresh confirmation.
+**Confounders / what must not change.** v31 bytes; rank 32; λ table; P11; caps
+off for accuracy only (not deployment evidence). Rows streamed to
+`rows.jsonl` as each network completes.

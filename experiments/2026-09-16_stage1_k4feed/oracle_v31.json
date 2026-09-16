@@ -1,0 +1,165 @@
+{
+  "candidate": "estimator_k3_v31_dense.py",
+  "mixture": [
+    {
+      "d": 0.04,
+      "eps": 0.02,
+      "even_eps0": {
+        "exact": {
+          "mean0": -0.04117436693283627,
+          "k3_001": 0.08064855065544746
+        },
+        "v31": {
+          "mean0": -0.0411591755524604,
+          "k3_001": 0.08063543783402281
+        },
+        "v31+i": {
+          "mean0": -0.0411591755524604,
+          "k3_001": 0.08063543783402281
+        },
+        "v31+i+ii": {
+          "mean0": -0.0411591755524604,
+          "k3_001": 0.08063543783402281
+        }
+      },
+      "odd_eps": {
+        "exact": {
+          "mean0": 0.0,
+          "k3_001": -0.16211315828108805,
+          "k3_012": -0.011207727130483484
+        },
+        "v31": {
+          "mean0": 0.0,
+          "k3_001": -0.02022841441417643,
+          "k3_012": 0.0
+        },
+        "v31+i": {
+          "mean0": 0.0,
+          "k3_001": -0.02022841441417643,
+          "k3_012": -0.01718212836243861
+        },
+        "v31+i+ii": {
+          "mean0": 0.0,
+          "k3_001": -0.02022841441417643,
+          "k3_012": -0.011204914002597668
+        }
+      }
+    },
+    {
+      "d": 0.02,
+      "eps": 0.01,
+      "even_eps0": {
+        "exact": {
+          "mean0": -0.041162971784469704,
+          "k3_001": 0.0806350900066366
+        },
+        "v31": {
+          "mean0": -0.04115917555252979,
+          "k3_001": 0.08063181413914321
+        },
+        "v31+i": {
+          "mean0": -0.04115917555252979,
+          "k3_001": 0.08063181413914321
+        },
+        "v31+i+ii": {
+          "mean0": -0.04115917555252979,
+          "k3_001": 0.08063181413914321
+        }
+      },
+      "odd_eps": {
+        "exact": {
+          "mean0": 0.0,
+          "k3_001": -0.16209594800101199,
+          "k3_012": -0.011205616379239556
+        },
+        "v31": {
+          "mean0": 0.0,
+          "k3_001": -0.020228414414217088,
+          "k3_012": 0.0
+        },
+        "v31+i": {
+          "mean0": 0.0,
+          "k3_001": -0.020228414414217088,
+          "k3_012": -0.01718212836243861
+        },
+        "v31+i+ii": {
+          "mean0": 0.0,
+          "k3_001": -0.020228414414217088,
+          "k3_012": -0.011204914002597668
+        }
+      }
+    }
+  ],
+  "route_i_predicted": -0.017182128362438417,
+  "chain": {
+    "n": 9,
+    "depth": 5,
+    "lam": 0.15,
+    "worst_reconstruction_rel": 2.486449947341771e-15,
+    "lam_distinct_move_rel": 0.0,
+    "lam_repeated_move_rel": 0.07516038039525386,
+    "feed_consumed_move_rel_per_layer": [
+      0.017220846137086052,
+      0.010508392055070953,
+      0.03464112561915251,
+      0.0052733138681640935
+    ]
+  },
+  "checks": [
+    {
+      "check": "A. convention control, eps=0 d^2 response of mean0: v31 == exact (5%)",
+      "ok": true,
+      "detail": "exact -4.1163e-02  v31 -4.1159e-02"
+    },
+    {
+      "check": "A. convention control, eps=0 d^2 response of k3_001: v31 == exact (5%)",
+      "ok": true,
+      "detail": "exact +8.0635e-02  v31 +8.0632e-02"
+    },
+    {
+      "check": "B. DISCRIMINATOR: all-distinct d^2*eps response, v31 misses > 50% of it",
+      "ok": true,
+      "detail": "exact -1.1206e-02  v31 +0.0000e+00"
+    },
+    {
+      "check": "C. route (i) alone (m/12 lam feed) == exact all-distinct (5%)",
+      "ok": false,
+      "detail": "v31+i -1.7182e-02  (i) closed form -1.7182e-02"
+    },
+    {
+      "check": "C. routes (i)+(ii) == exact all-distinct (5%)",
+      "ok": true,
+      "detail": "v31+i+ii -1.1205e-02"
+    },
+    {
+      "check": "C. adding the compensated routes leaves mean0 unchanged (1e-12 abs)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "C. adding the compensated routes leaves k3_001 unchanged (1e-12 abs)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "D. reconstructed tensor, transported, == _dslice3/_dslice21 (1e-10)",
+      "ok": true,
+      "detail": "worst 2.49e-15"
+    },
+    {
+      "check": "D. lam moves the newborn source's REPEATED entries (> 1e-6)",
+      "ok": true,
+      "detail": "7.52e-02"
+    },
+    {
+      "check": "D. lam leaves its ALL-DISTINCT entries unchanged (< 1e-12)",
+      "ok": true,
+      "detail": "0.00e+00"
+    },
+    {
+      "check": "E. compensated feed moves consumed D3/D21 after one transport (> 1e-4)",
+      "ok": true,
+      "detail": "per layer 1.72e-02, 1.05e-02, 3.46e-02, 5.27e-03"
+    }
+  ]
+}

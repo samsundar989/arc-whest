@@ -1,0 +1,32 @@
+
+A-C. one birth from an exact non-Gaussian law (scale mixture), n = 3
+    d=0.04 eps=0.02
+      response                       exact           v31         v31+i      v31+i+ii
+      d^2, eps=0: mean0       -4.11744e-02  -4.11592e-02  -4.11592e-02  -4.11592e-02
+      d^2, eps=0: k3_001      +8.06486e-02  +8.06354e-02  +8.06354e-02  +8.06354e-02
+      d^2*eps: mean0          +0.00000e+00  +0.00000e+00  +0.00000e+00  +0.00000e+00
+      d^2*eps: k3_001         -1.62113e-01  -2.02284e-02  -2.02284e-02  -2.02284e-02
+      d^2*eps: k3_012         -1.12077e-02  +0.00000e+00  -1.71821e-02  -1.12049e-02
+    d=0.02 eps=0.01
+      response                       exact           v31         v31+i      v31+i+ii
+      d^2, eps=0: mean0       -4.11630e-02  -4.11592e-02  -4.11592e-02  -4.11592e-02
+      d^2, eps=0: k3_001      +8.06351e-02  +8.06318e-02  +8.06318e-02  +8.06318e-02
+      d^2*eps: mean0          +0.00000e+00  +0.00000e+00  +0.00000e+00  +0.00000e+00
+      d^2*eps: k3_001         -1.62096e-01  -2.02284e-02  -2.02284e-02  -2.02284e-02
+      d^2*eps: k3_012         -1.12056e-02  +0.00000e+00  -1.71821e-02  -1.12049e-02
+  PASS  A. convention control, eps=0 d^2 response of mean0: v31 == exact (5%) exact -4.1163e-02  v31 -4.1159e-02
+  PASS  A. convention control, eps=0 d^2 response of k3_001: v31 == exact (5%) exact +8.0635e-02  v31 +8.0632e-02
+  PASS  B. DISCRIMINATOR: all-distinct d^2*eps response, v31 misses > 50% of it exact -1.1206e-02  v31 +0.0000e+00
+  FAIL  C. route (i) alone (m/12 lam feed) == exact all-distinct (5%)      v31+i -1.7182e-02  (i) closed form -1.7182e-02
+  PASS  C. routes (i)+(ii) == exact all-distinct (5%)                      v31+i+ii -1.1205e-02
+  PASS  C. adding the compensated routes leaves mean0 unchanged (1e-12 abs) 
+  PASS  C. adding the compensated routes leaves k3_001 unchanged (1e-12 abs) 
+      (info) odd-eps (2,1) response exact -1.6210e-01 vs v31 -2.0228e-02: includes the (3,1) consumer v31 omits by contract
+
+D-E. full tensor on a real float64 chain, n=9, depth=5
+  PASS  D. reconstructed tensor, transported, == _dslice3/_dslice21 (1e-10) worst 2.49e-15
+  PASS  D. lam moves the newborn source's REPEATED entries (> 1e-6)        7.52e-02
+  PASS  D. lam leaves its ALL-DISTINCT entries unchanged (< 1e-12)         0.00e+00
+  PASS  E. compensated feed moves consumed D3/D21 after one transport (> 1e-4) per layer 1.72e-02, 1.05e-02, 3.46e-02, 5.27e-03
+
+10/11 checks pass
