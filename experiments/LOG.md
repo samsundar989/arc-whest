@@ -51424,3 +51424,12 @@ are copied separately and are not Samuel's.
 Desired next release ≈ 4.0–4.4e-9 adjusted or better — a planning target, not a
 gate and not a forecast. Frozen controls: v31 `6dde5fd4…787c` (#331317), F21
 `d77dab0e…a94` (#330950).
+
+### Samuel's predictions — recorded 2026-09-16, before any stage-1..3 data
+
+Asked as four bundled questions (stage-1 full κ4 feed raw gain vs v31 on P11;
+P3 thin D21 feedback raw gain; P4 compute fraction vs the 0.27 gate; N1 ≤0.20 B
+at ≤5% raw loss). **Samuel answered "I don't know" to all four**, verbatim.
+Strategist predictions stay separate: κ4 half closes to ≤2.4e-8 P01-scale (55%),
+D2 finds a ≥1.3× discrepancy (60%), N1 halves rank at equal error (35%), P3
+×0.92 raw.
