@@ -51580,3 +51580,63 @@ off for accuracy only (not deployment evidence). Rows streamed to
 `rows.jsonl` as each network completes.
 
 **Workload optimization review (stage-1 P11 screen, before submission).** Reuse: P11 truth is loaded once and shared by all four arms; the v31 control is re-run in the same job rather than reused from an earlier run because no earlier v31 P11 rows exist (P11 has never been scored). Duplication: final-layer truth only (`(24,1024)`), no weight cache (canonical mint per network, as P2's job 1364). Workers: one process, arms sequential — a parallel arm would double peak RAM for a ~25-min saving and contend for the CPUs the timing columns describe (advisory only). Batches/prefetch: n/a (one network at a time is the grader lifecycle). Unnecessary passes: none — the dense parity arm is NOT screened. Recovery: every completed row fsynced to `rows.jsonl`; a crash keeps finished networks, and the register entry is written at reservation. Device: CPU only (flopscope). Declaration from job 1364 (9 GiB, 4 CPU, same scorer, 3 arms): **10 GiB RAM, 4 CPU, 0 GPU**, ETA ~100 min.
+
+---
+
+## 2026-09-16 — **P3 derivation (label-free) and N1 prerequisite (i): the mean-path relevance proxy is REJECTED**
+
+While jobs 1439 (stage-1 P11 screen) and 1443 (Strassen-depth meter) wait:
+the host has ~5–9 GiB free because a WSL VM outside the queue commits ~53 GiB
+(`vmmemWSL`) with the GPU at 98%. Not ours; not bypassed.
+
+### P3: κ3 × covariance distinct-index routes, derived and checked exactly
+
+`local_sim/k3feed_oracle.py` → `experiments/2026-09-16_stage2_p3/k3feed_oracle_v32.{json,log}`.
+Exact law: `z = x + δ q(x)`, q quadratic, so κ3 is first order in δ and κ4 is
+O(δ²); post-ReLU moment derivatives by quadrature. Estimator: v32's real
+`_layer` on a dense κ3 tensor (`local_sim/dense_tower.py`; dense chain ==
+factored chain to 3e-16 for v31/v32/v33 dense arms).
+
+| odd-ε all-distinct response | value |
+|---|---:|
+| exact | +0.20366 |
+| v32 | +0.29124 (control ε=0 matches exact to 1e-6 rel) |
+| β1 `½ κ3_dds C_dt w3_d w1_s w1_t` | +0.01099 |
+| β2 `½ κ3_dds C_st w2_d w2_s w1_t` | −0.05768 |
+| γ `κ3_abc C_pq w2_p w2_q w1_r` | −0.04092 |
+| v32+β1+β2 / +γ | 20% off / **1.5e-4 off** |
+
+β1+β2 is the F69 feedback's structure (two L blocks on legs we carry); **γ —
+the correlation correction to the incoming tensor's Wick scaling — is a Hadamard
+product with C and has no cheap factored form**, so a P3 candidate can close at
+most ~80% of this route at birth. Generator `local_sim/s2_build_p3.py` and
+`s2_parity_p3.py` **13/13** (nesting bitwise, newborn difference == β1+β2 to
+2.3e-16, dense == factored 1.7e-12, float32, equivariance, guard). The v33
+dense arm reproduces v32+β1+β2 on the exact law to 5 digits.
+**Cost warning, pre-data:** at rank 32 the guard projects **×1.069** at
+1024×16 (per-layer A reconstruction and thin transports), far above P3's +1%
+gate; a P3 contract must pick its rank against metered cost first.
+
+### N1 prerequisite (i): what compression costs, and whether JᵀJ predicts it
+
+`local_sim/n1_relevance_oracle.py` → `experiments/2026-09-16_stage3_n1/relevance_n40.{json,log}`.
+**Definition (the audit's request).** Perturbation: at layer l0, the summed
+old tier (lineages of age ≥ a) is replaced once by `T(Π,Π,Π)`; the file's own
+recurrence then continues exactly (covariance, Wick, births, κ4 all live).
+Output error: mean squared change of final-layer means. Bases at equal rank:
+forward energy (HOSVD mode Gram); **meanJ** — the proposed `JᵀJ` weighting as a
+valid PSD objective (Cholesky-whitened HOSVD, K-orthogonal projector — not a
+Gram product); random floor. Verdict thresholds were written in the module
+docstring before running.
+
+n=40, depth 12, l0=7, age ≥3, 3 networks: **proxy_informative FALSE (1/3;
+Spearman true-vs-proxy 0.46 / 0.51 / 0.29), proxy_pays FALSE (0/3)**. At
+r = n/4 meanJ/energy error ratios 1.40, 1.18, 4.08; at r = n/2, 7.8, 7.7, 4.3.
+Energy bases beat random by 10²–10⁴.
+
+**Knowledge delta.** The frozen mean-path Jacobian discards directions that
+matter through covariance and future births — the audit's concern, now
+measured. This rejects **this proxy**, not output-aware compression: energy is
+the stronger cheap basis at tiny width, and the economic question is the
+energy rank needed at 1024 plus the complete cycle price (prerequisite (ii),
+metering in progress). A tiny-width spectrum does not transfer to n=1024.
