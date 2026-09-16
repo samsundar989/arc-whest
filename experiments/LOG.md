@@ -51827,3 +51827,37 @@ discriminator before any new mechanism is built.
 against the v32 control (`p2_design_score.py`, no `--gate`).
 **Data.** P11 DESIGN re-read (registered); caps off; rows streamed.
 **Cost model.** reported only (not a candidate); v29's C/B read for context.
+
+### RESULT (job 1499): the accuracy gap is REAL on P11 and already present in public v17; λ profile is NOT the cause
+
+`experiments/2026-09-16_diag_gap/{score.json,rows.jsonl}`. Control v32, 24 P11 nets, caps off, 0 failures.
+
+| arm | raw MSE | C/B | score | paired t95 on score diff vs v32 | better |
+|---|---:|---:|---:|---|---:|
+| v32 | 3.3249e-08 | 0.3023 | 1.00518e-08 | — | — |
+| D1 v32 + v17 λ table | 3.2469e-08 | 0.3023 | 9.8159e-09 | [+9.5e-11, +3.8e-10] (1.024×) | 20/24 |
+| public v17 | **2.7301e-08** | 0.4922 | 1.34362e-08 | [−3.87e-9, −2.90e-9] (0.748×) | 0/24 |
+| public v29 | **2.5701e-08** | **0.2532** | **6.50666e-09** | [+3.16e-9, +3.93e-9] (**1.545×**) | 24/24 |
+
+- **D1: raw −2.4%** (< the 10% pre-registered threshold) → our label-free λ
+  profile is not the gap; no own-λ fit is triggered. Strategist's D1 (>15%, 40%):
+  not supported. Builder prediction (≤10% either way): HIT.
+- **v29 beats v32 by 1.29× raw at 0.84× cost; v17 (no basis, no D21
+  feedback) already beats it by 1.22× raw.** Builder prediction v29 raw
+  2.4–2.8e-8: HIT (2.57e-8). Pre-registered consequence fires: locate before building.
+- The public board ratio (v29 5.40e-9 vs v31 8.75e-9 = 1.62×) matches P11's 1.545×
+  vs v32 — the local instrument reproduces the public ordering.
+
+### Next discriminator (DIAGNOSTIC, same contract): attribute v17's 1.22× raw advantage
+
+v17 carries env kill-switches read at import: `V17_NO_WK431` (drop the (3,1)
+consumer), `V17_NO_FEED` (drop the κ4→κ3 feed), `V17_NO_REGEN` (drop κ4
+regeneration). Three separate jobs, each v32 control + one v17 ablation arm,
+paired offline by seed against job 1499's unablated v17 rows.
+**Builder prediction:** NO_WK431 removes most of v17's advantage (raw → ≥3.1e-8),
+because the exact oracle showed v32 carries only ~12% of the (2,1)-slice κ4×C
+response and the (3,1) rows are the table route for it; NO_FEED costs ≤5%
+(stage 1 measured ~3% for our feed); NO_REGEN loses more than NO_WK431.
+Strategist's small-shape proxy predicted the (3,1) consumer at 0–9%; this read
+discriminates. Diagnostics promote nothing; a located mechanism is re-derived
+independently (oracle first) in our own file under a new contract.
