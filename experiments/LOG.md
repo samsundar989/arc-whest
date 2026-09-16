@@ -51062,3 +51062,62 @@ and parsing as JSON. Re-queued as `1400` (v31) and `1401` (F21).
 - **A contract line that exists to prevent a failure only works if the command
   carries it.** §0.1 of the 09-14 handoff names this exact trap. It was read,
   it was logged, and then it was not passed to `whest run`.
+
+---
+
+## 2026-09-16 15:43 UTC — **v31 submitted as a non-designated canary: #331317**
+
+Slice 7 item 0a. **Samuel approved "yes submit"** after seeing the full evidence
+packet *and* the disclosed, unexplained 2-of-100 raise in job 1400. Approval is
+for this package as a non-designated canary and nothing else. **No agent
+designates.** F21 `#330950` remains the designated fallback until v31 has a
+clean graded row **and** confirmation job `1413` is clean.
+
+### Exactly what was uploaded
+
+| | sha256 |
+|---|---|
+| package `v31-canary.tar.gz` | `50d24ee5bb2f366bcd8d7145707793820de59a7fa6e0e5c40a4f4a5c04782db7` |
+| member `estimator.py` | `6dde5fd43ad41e8ec7199b742dd554d22d506c9cf85a532027e86a590d0a787c` = `estimator_k3_v31.py`, the certified bytes |
+| member `LICENSE` | `e83f75bdf098e029fd72df880b39cce65bb92c43a99aaed6fd96071cca361207` = ARC's MIT notice, identical to `#330950`'s |
+
+Built with whestbench's own `package_submission` from a staged folder,
+`validate_package` ok, extracted and re-hashed before upload. No file from
+`external/` is in it. Receipt: `experiments/2026-09-16_slice7_canary/package_receipt.json`.
+
+### The evidence it was approved on
+
+| | value | label |
+|---|---|---|
+| paired gain vs F21, same 100 public mini nets | **1.8314×**, better on 100/100, sign p 0.0000 | MATH |
+| t 95% on the paired difference | `[+7.2529e-09, +7.7929e-09]` | MATH |
+| raw MSE, v31 / F21 | `3.006065e-08` / `3.925033e-08` | LOCAL |
+| **projected public adjusted** | **`8.713e-09`** `[8.453e-09, 8.973e-09]` | SERVER_PREDICTED |
+| multiplier at F / F+2²⁴ | `0.301010` / `0.301018` | SERVER_PREDICTED |
+| ops → residual | 13,037 → `0.1747 s`, 2.29× under 0.4 s | SERVER_PREDICTED |
+| worst local wall → ×1.60 | `52.02 s` → `83.2 s` of 120, 1.44× | SERVER_PREDICTED |
+| Linux 8-GiB gate | CERTIFIED, VmPeak 5,434.6 MB | LOCAL |
+| certification | 60 checks, 0 failed, 1 skipped (§10, superseded) | mixed |
+
+### Predictions, recorded before any grading exists
+
+**Builder:** graded adjusted inside `[8.45e-9, 8.97e-9]` (the projection band);
+0/100 failed; worst graded residual `< 0.20 s`; worst graded wall `50–65 s`
+(F21's local→graded ratio 1.062 applied to 52.0 s gives ~55 s); FLOPs
+`661,928,064,562` plus 0 or `2**24`.
+
+**The failure I cannot rule out:** 1–3 rows raising, as in job 1400. If that
+happens the score is destroyed (~1e-2), and it tells us the raise is real and
+server-side rather than host contention.
+
+**Samuel:** not asked. This is a canary of a candidate already screened, not a
+STRATEGIC experiment with a hypothesis. Recorded as an omission, not assumed.
+
+### Also flagged to Samuel, and deliberately NOT acted on
+
+The submitted `estimator.py` names **504aldo in six comment lines** (lines 28,
+31, 605, 935, 1136–1137) — attributions, no code. Samuel said on 2026-09-16 we
+need not disclose what we integrate. Stripping them changes the sha and voids
+every piece of evidence the approval rested on, so the approved bytes went up
+unchanged. **It is his decision for the file that eventually gets designated**,
+which is where §6 verification would apply.

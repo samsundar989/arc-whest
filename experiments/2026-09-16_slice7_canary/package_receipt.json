@@ -1,0 +1,25 @@
+{
+  "package_path": "experiments/2026-09-16_slice7_canary/v31-canary.tar.gz",
+  "package_sha256": "50d24ee5bb2f366bcd8d7145707793820de59a7fa6e0e5c40a4f4a5c04782db7",
+  "members": [
+    {
+      "name": "estimator.py",
+      "size": 63777,
+      "sha256": "6dde5fd43ad41e8ec7199b742dd554d22d506c9cf85a532027e86a590d0a787c"
+    },
+    {
+      "name": "LICENSE",
+      "size": 1103,
+      "sha256": "e83f75bdf098e029fd72df880b39cce65bb92c43a99aaed6fd96071cca361207"
+    },
+    {
+      "name": "manifest.json",
+      "size": 650
+    }
+  ],
+  "source_candidate": "estimator_k3_v31.py",
+  "validated_for_submission": true,
+  "submitted": true,
+  "submission_id": "331317",
+  "submitted_at_utc": "2026-09-16T15:43:47Z"
+}

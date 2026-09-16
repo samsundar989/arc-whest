@@ -1,0 +1,99 @@
+{
+  "meta": {
+    "candidate": "estimator_k3_v31.py",
+    "control": "f21_mini.json",
+    "control_submission": "330950",
+    "candidate_sha256": "6dde5fd43ad41e8ec7199b742dd554d22d506c9cf85a532027e86a590d0a787c",
+    "dataset": "hf://aicrowd/arc-whestbench-public-2026@v2-phase2",
+    "anchor_n": 50,
+    "anchor_failed": 0
+  },
+  "projection": {
+    "n": 100,
+    "local_control_adjusted": 1.6571425565414235e-08,
+    "local_candidate_adjusted": 9.048556344717298e-09,
+    "local_control_raw_mse": 3.925032844520615e-08,
+    "local_candidate_raw_mse": 3.006064691390975e-08,
+    "local_control_multiplier": 0.42219839226436306,
+    "local_candidate_multiplier": 0.3010100338369739,
+    "ratio": 0.5460336715751414,
+    "ratio_ci": [
+      0.5297403626666338,
+      0.562326980483649
+    ],
+    "mean_difference": 7.522869220696936e-09,
+    "t_ci_difference": [
+      7.2528658649053016e-09,
+      7.79287257648857e-09
+    ],
+    "arithmetic_gain": 1.831388890570253,
+    "geometric_gain_DIAGNOSTIC": 1.8303429091649275,
+    "n_candidate_better": 100,
+    "sign_test_p": 1.5777218104420236e-30,
+    "anchor_graded_adjusted": 1.5957396056103795e-08,
+    "projected_public_adjusted": 8.713275557293036e-09,
+    "projected_public_ci": [
+      8.453276773975537e-09,
+      8.973274340610536e-09
+    ],
+    "notes": [
+      "paired on 100 matched MLP identities",
+      "paired on 100 matched MLP identities"
+    ],
+    "n_failed_control": 0,
+    "n_failed_candidate": 0
+  },
+  "multiplier_band": [
+    {
+      "offset": 0,
+      "flops": 661928064562.0,
+      "c_over_b": 0.3010100338369739,
+      "multiplier": 0.3010100338369739
+    },
+    {
+      "offset": 16777216,
+      "flops": 661944841778.0,
+      "c_over_b": 0.30101766323150514,
+      "multiplier": 0.30101766323150514
+    }
+  ],
+  "residual_forecast": {
+    "ops_per_mlp": 13037.0,
+    "gate_ops": 22000,
+    "gate_passed": true,
+    "s_per_op_point": 1.34e-05,
+    "s_per_op_range": [
+      9e-06,
+      1.34e-05
+    ],
+    "predicted_s_point": 0.1746958,
+    "predicted_s_range": [
+      0.117333,
+      0.1746958
+    ],
+    "cap_s": 0.4,
+    "headroom_point": 2.2896944288300003
+  },
+  "wall_forecast": {
+    "available": true,
+    "local_worst_s": 52.01767440000549,
+    "contention_factor": 1.6,
+    "projected_worst_s": 83.22827904000879,
+    "cap_s": 120.0,
+    "margin": 1.4418176295861485
+  },
+  "memory": {
+    "available": true,
+    "report": "experiments\\2026-09-15_v31_certify\\linux_memory_gate_estimator_k3_v31.json",
+    "degraded": "",
+    "failed_checks": [],
+    "verdict": "PASS"
+  },
+  "labels": {
+    "MATH": "arithmetic and identities; host-independent",
+    "LOCAL": "measured on THIS host; not server seconds",
+    "SERVER_PREDICTED": "a forecast from a versioned model with a stated evidence domain"
+  },
+  "confirm_tier_read": true,
+  "promotes_nothing": true
+}
