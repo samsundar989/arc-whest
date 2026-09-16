@@ -51640,3 +51640,56 @@ measured. This rejects **this proxy**, not output-aware compression: energy is
 the stronger cheap basis at tiny width, and the economic question is the
 energy rank needed at 1024 plus the complete cycle price (prerequisite (ii),
 metering in progress). A tiny-width spectrum does not transfer to n=1024.
+
+---
+
+## 2026-09-16 — **N1 prerequisite (ii): the complete merged old-tier cycle, metered at n=1024 — and the go/no-go**
+
+`local_sim/n1_cycle_meter.py` → `experiments/2026-09-16_stage3_n1/cycle_cost.{json,md}`
+(bounded subagent, cost only, real flopscope 0.12.1). Self-check f64 n=12
+passes (worst 2.2e-14: lineage tensor == v31 slices, query spellings, full-rank
+join, transport == `_advance`+`_wick_tower`, rebase, join-with-enlargement exact
+at r+s=n). No-merge control metered **0.30103 B / 13,052 ops** == stored v31
+certification to the FLOP.
+
+Representation priced: old lineages merged into one symmetric Tucker core
+G(V,V,V); V transported (thin); per-layer D3/D21 query; joins either
+fixed-basis (a) or with basis enlargement + truncation (b); rebases on schedules.
+
+| r | fixed basis (a), a=3 | join (b) s=32, a=3 | ≤0.20 B with (b)? |
+|---|---:|---:|---|
+| 96 | 0.143–0.145 | 0.169 | yes, a ≤ 4 |
+| 128 | 0.171–0.179 | 0.226 | only a=2 is 0.204 — **no** |
+| 150 | 0.201–0.216 | 0.287 | no |
+| 192 | 0.287–0.327 | — | no |
+| 256 | 0.508–0.636 | 0.98 | no |
+
+Operations 12.5k–13.6k everywhere (never binding); memory ≤1.3 GiB per step.
+**Joins dominate** (core build 2·n·m³, and for (b) rotation/truncation
+~2·m³·r + 2·m⁴); the query is second (~2·n·r³). Local advisory wall suggests
+a (b) tier could add ~50% residual time — unmeasured on the subprocess runner.
+Not priced: any relevance basis (dense backward sweep ≈0.016 B/pass), power
+iterations, and **cheaper exact join spellings** (rotate with the r×r triangular
+QR factor, project only the s new directions, symmetric core declaration).
+
+### Synthesis with prerequisite (i) and the scaling read
+
+- Proxy (i): the mean-path JᵀJ weighting is rejected (n=40 and n=64); energy is
+  the stronger cheap basis.
+- Label-free scaling (`rank_scaling.{json,log}`, n=24–96): one-shot energy
+  compression of the age≥3 tier leaves E/E0 ≈ 0.05–0.17 at r/n = 1/8 and ≈ 0.01
+  at r/n = 1/4, roughly flat in width. At 1024 that maps to r≈128 (≈10% of the
+  tier-deletion damage, one-shot; continuous joins will accumulate more) and
+  r≈256 (≈1%).
+- Economics: r=256 is 0.5–1.0 B — impossible. r=128 with an enlarging join is
+  0.204–0.26 B as spelled; r=96 fits but sits below the n/8 accuracy regime.
+
+**Decision (recorded before any truth is spent): NO rank/truth sweep now.** The
+full operation graph is not yet plausible at the rank the accuracy scaling
+suggests. The single bounded follow-up that could change this is exact and
+label-free: meter the cheaper join spellings (triangular-factor rotation,
+new-direction-only projection, symmetric declaration) at r∈{128,150}. If a
+join (b) at r=128, a≤3 lands ≤ ~0.17 B, a P11 rank screen becomes justified;
+otherwise N1 is parked with this negative economic result and the release
+bundle proceeds from v32/P3/P4. This rejects this merged-core spelling at
+r≥128, not every compact old-history representation.
