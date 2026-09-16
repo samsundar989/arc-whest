@@ -183,6 +183,109 @@ def join_b(V, G, P, AL, Z, L, sb, eb, w2, OmP, OmA, r_out, core):
     return Vn, Gn
 
 
+# ---- v2: cheaper EXACT join-(b) spellings --------------------------------
+#   rot  = "full": G(Rv,Rv,Rv) with Rv = Rf[:, :r]   (m x r)
+#          "tri" : G(R11,R11,R11) with R11 = Rf[:r, :r], folded into the (r,r,*)
+#                  block of X. Exact because Rf[r:, :r] == 0 (V = U[:, :r] R11).
+#   core = "full": lineage core with U-basis legs (m, n), one sym3 of (m,m,m)
+#          "block": legs split into existing (Q1, r) and new (Q2, s) directions;
+#                  X assembled from its (rr*), (ss*), (rs*) blocks.
+#   sym  = True: the enlarged core is CANONICALISED (every entry copied from its
+#          sorted-index orbit representative, so it is bitwise symmetric) and
+#          declared with flopscope.as_symmetric; the mode Gram and truncation read
+#          the declared core; the truncated core is canonicalised + declared again
+#          so the next layers' queries read a declared core. Everything billed.
+#          WHY the canonicalisation: at float32 and realistic magnitudes a sym3
+#          or 6-permutation average is refused by the declaration's tolerance
+#          (measured deviation 0.086 at |G| ~ 1e5), and any einsum whose output
+#          flopscope INFERS to be symmetric (declared input + the same factor
+#          object on every mode, e.g. the rotation) validates its float32 output
+#          and RAISES (max deviation = inf). So the rotation reads the plain core
+#          and the truncation passes three distinct views of E.
+#   gram = "mm": reshape + matmul;  "ein": einsum('ajk,bjk->ab', Gx, Gx).
+V2_VARIANTS = [dict(rot=rot, core=core, sym=sym, gram=gram)
+               for rot in ("full", "tri") for core in ("full", "block")
+               for sym in (False, True) for gram in ("mm", "ein")]
+
+
+def _vname(v):
+    return f"jb2_rot-{v['rot']}_core-{v['core']}_sym-{int(v['sym'])}_gram-{v['gram']}"
+
+
+def canon_sym(X):
+    """Bitwise-symmetric copy of a (numerically) symmetric cube, and its declaration."""
+    m = X.shape[0]
+    ar = fnp.arange(m)
+    i, j, k = ar[:, None, None], ar[None, :, None], ar[None, None, :]
+    lo = fnp.minimum(fnp.minimum(i, j), k)
+    hi = fnp.maximum(fnp.maximum(i, j), k)
+    mid = (i + j + k) - lo - hi
+    idx = fnp.reshape((lo * m + mid) * m + hi, (m * m * m,))
+    Xc = fnp.reshape(fnp.take(fnp.reshape(X, (m * m * m,)), idx), (m, m, m))
+    return Xc, flopscope.as_symmetric(Xc, symmetry=(0, 1, 2))
+
+
+def _xblock(pa, pb, aLa, aLb, aD, pw):
+    """X_{A,B,*} = E/3 + H restricted to rows A (mode 0), B (mode 1)."""
+    return (fnp.einsum("ij,kj,lj->ikl", pa, pb, aD) * (1.0 / 3.0)
+            + fnp.einsum("ij,kj,lj->ikl", aLa, aLb, pw))
+
+
+def join_b2(V, G, P, AL, Z, L, sb, eb, w2, OmP, OmA, r_out, rot, core, sym, gram):
+    """Returns (V_new, G_new plain, G_new declared or None). `G` must be PLAIN."""
+    n, r = V.shape
+    Y = P @ OmP + AL @ OmA
+    U, Rf = fnp.linalg.qr(fnp.concatenate([V, Y], axis=1))
+    m = Rf.shape[0]
+    s = m - r
+    UT = U.T
+    p, aL, z = UT @ P, UT @ AL, UT @ Z
+    aD = p * sb + aL * (eb * 3.0) + z @ L.T
+    pw = p * w2
+    Gold = None
+    if rot == "full":
+        Rv = Rf[:, :r]
+        Gold = fnp.einsum("abc,ia,jb,kc->ijk", G, Rv, Rv, Rv)
+        Gr3 = None
+    else:
+        R11 = Rf[:r, :r]
+        Gr3 = fnp.einsum("abc,ia,jb,kc->ijk", G, R11, R11, R11) * (1.0 / 3.0)
+    if core == "full":
+        X = (fnp.einsum("ij,kj,lj->ikl", p, p, aD) * (1.0 / 3.0)
+             + fnp.einsum("ij,kj,lj->ikl", aL, aL, pw))
+        if Gr3 is not None:                         # sym3(Gr/3) == Gr
+            top = fnp.concatenate([Gr3, fnp.zeros((r, r, s), dtype=Gr3.dtype)], axis=2)
+            X = X + fnp.concatenate(
+                [fnp.concatenate([top, fnp.zeros((r, s, m), dtype=Gr3.dtype)], axis=1),
+                 fnp.zeros((s, m, m), dtype=Gr3.dtype)], axis=0)
+    else:
+        p1, p2, a1, a2 = p[:r], p[r:], aL[:r], aL[r:]
+        Xrr = _xblock(p1, p1, a1, a1, aD, pw)            # (r, r, m)
+        Xss = _xblock(p2, p2, a2, a2, aD, pw)            # (s, s, m)
+        Xrs = _xblock(p1, p2, a1, a2, aD, pw)            # (r, s, m)
+        if Gr3 is not None:
+            Xrr = Xrr + fnp.concatenate([Gr3, fnp.zeros((r, r, s), dtype=Gr3.dtype)], axis=2)
+        X = fnp.concatenate([fnp.concatenate([Xrr, Xrs], axis=1),
+                             fnp.concatenate([Xrs.transpose(1, 0, 2), Xss], axis=1)], axis=0)
+    Gx = X + X.transpose(0, 2, 1) + X.transpose(2, 0, 1)
+    if Gold is not None:
+        Gx = Gx + Gold
+    Gs = canon_sym(Gx)[1] if sym else Gx
+    if gram == "mm":
+        Gu = fnp.reshape(Gs, (m, m * m))
+        Gram = Gu @ Gu.T
+    else:
+        Gram = fnp.einsum("ajk,bjk->ab", Gs, Gs)
+    _ev, Ev = fnp.linalg.eigh(Gram)
+    E = Ev[:, m - r_out:]
+    Vn = U @ E
+    if sym:
+        Gn = fnp.einsum("abc,ai,bj,ck->ijk", Gs, E, Ev[:, m - r_out:], Ev[:, m - r_out:])
+        Gc, Gd = canon_sym(Gn)
+        return Vn, Gc, Gd
+    return Vn, fnp.einsum("abc,ai,bj,ck->ijk", Gs, E, E, E), None
+
+
 # ==========================================================================
 # self-check, float64, n = 12
 # ==========================================================================
@@ -302,6 +405,33 @@ def selfcheck(v31):
         np.einsum("ijk,ai,bj,ck->abc", *(lambda VG: (np.asarray(VG[1]),) + (np.asarray(VG[0]),) * 3)(
             join_b(A(V0), A(G0), A(P), A(AL), A(Z), A(L), A(sb), A(eb), A(w2),
                    A(OmP), A(OmA), 12, core_einsum))), Ttot)
+    # (G) v2 join-(b) spellings: exact at r+s = n, truncated == projection onto
+    # the new orthonormal basis. Old basis deliberately NON-orthonormal (a
+    # transported basis), so R11 is a genuine rotation, not a sign flip.
+    V0t = f(n, r_old)
+    Ttot_t = np.einsum("ijk,ai,bj,ck->abc", G0, V0t, V0t, V0t) + T
+    for v in V2_VARIANTS:
+        for r_out in (12, 8):
+            Vn, Gn, Gd = join_b2(A(V0t), A(G0), A(P), A(AL), A(Z), A(L), A(sb), A(eb), A(w2),
+                                 A(OmP), A(OmA), r_out, **v)
+            if Gd is not None:
+                gn = np.asarray(Gn)
+                out[f"G_{_vname(v)}_r{r_out}_declared_is_bitwise_symmetric"] = max(
+                    float(np.abs(gn - gn.transpose(q)).max()) for q in [(0, 2, 1), (1, 0, 2), (2, 1, 0)])
+                out[f"G_{_vname(v)}_r{r_out}_declared_equals_plain"] = _rel(np.asarray(Gd), gn)
+            Vn = np.asarray(Vn)
+            Tn = np.einsum("ijk,ai,bj,ck->abc", np.asarray(Gn), Vn, Vn, Vn)
+            Pi = Vn @ Vn.T
+            key = f"G_{_vname(v)}_r{r_out}"
+            if r_out == 12:
+                out[key + "_vs_exact_total"] = _rel(Tn, Ttot_t)
+            out[key + "_vs_projected_total"] = _rel(
+                Tn, np.einsum("ijk,ai,bj,ck->abc", Ttot_t, Pi, Pi, Pi))
+            out[key + "_basis_orthonormal"] = _rel(Vn.T @ Vn, np.eye(r_out))
+            # the kept subspace IS the dense HOSVD one (top-r left singular
+            # vectors of the mode-0 unfolding of the exact total), not just any
+            Uh = np.linalg.svd(Ttot_t.reshape(n, n * n), full_matrices=False)[0][:, :r_out]
+            out[key + "_subspace_vs_dense_hosvd"] = _rel(Pi, Uh @ Uh.T)
     worst = max(v for k, v in out.items())
     out["worst"] = worst
     out["pass_1e-10"] = bool(worst < 1e-10)
@@ -553,12 +683,135 @@ def chain(r, a, sched, steps, v31m, sym=False):
             "gate_cb_le_0p20": total_f / B <= 0.20, "gate_ops_le_22000": total_o <= 22000}
 
 
+def meter_v2(v31, ranks, s_list):
+    """Old-tier steps + every v2 join-(b) spelling, same operands as meter_steps."""
+    rng = np.random.default_rng(PRICE_SEED)
+    n = N
+
+    def arr(*shape):
+        return fnp.asarray(rng.standard_normal(shape).astype(np.float32))
+
+    WT, col = arr(n, n), arr(n, 1)
+    off = fnp.asarray((1.0 - np.eye(n)).astype(np.float32))
+    P, AL = arr(n, n), arr(n, n)
+    Z, L = arr(n, R0), arr(n, R0)
+    sb, eb, w2 = arr(n), arr(n), arr(n)
+    D3r, D21r = arr(n), arr(n, n)
+    out = {}
+    for r in ranks:
+        st = {}
+        # a TRANSPORTED (non-orthonormal) basis, as a join actually sees it
+        V = fnp.asarray((np.linalg.qr(rng.standard_normal((n, r)))[0]
+                         * (1.0 + 0.1 * rng.standard_normal((n, 1)))).astype(np.float32))
+        g = rng.standard_normal((r, r, r)).astype(np.float32)
+        g = (g + g.transpose(0, 2, 1) + g.transpose(1, 0, 2) + g.transpose(1, 2, 0)
+             + g.transpose(2, 0, 1) + g.transpose(2, 1, 0)) / np.float32(6.0)
+        G = fnp.asarray(g)
+        _, st["transport_plain"] = meter(lambda: transport(WT, V, col, lambda x, y: x @ y))
+        _, st["transport_mm"] = meter(lambda: transport(WT, V, col, v31._mm))
+        _, st["transport_last_plain"] = meter(lambda: transport(WT, V, None, lambda x, y: x @ y))
+        _, st["transport_last_mm"] = meter(lambda: transport(WT, V, None, v31._mm))
+
+        Gdecl = canon_sym(G)[1]                   # made at the join; not billed here
+        _, st["canon_sym_r"] = meter(lambda: canon_sym(G))
+
+        def q(last, sym):
+            def f():
+                Gq = Gdecl if sym else G
+                d3, d21 = query_einsum(Gq, V, off, last)
+                return (D3r + d3,) if last else (D3r + d3, D21r + d21)
+            return f
+        _, st["query_d21_einsum"] = meter(q(False, False))
+        _, st["query_d3_einsum"] = meter(q(True, False))
+        _, st["query_d21_einsum_symdeclared"] = meter(q(False, True))
+        _, st["query_d3_einsum_symdeclared"] = meter(q(True, True))
+        OmP_r, OmA_r = arr(n, r), arr(n, r)
+        Gz = fnp.asarray(np.zeros((r, r, r), dtype=np.float32))
+        _, st["init_einsum"] = meter(lambda: join_a(init_basis(P, AL, OmP_r, OmA_r), Gz, P, AL, Z, L,
+                                                    sb, eb, w2, legs_ortho, core_einsum))
+        for s in s_list:
+            OmP, OmA = arr(n, s), arr(n, s)
+            print(f"[v2] r={r} s={s}", flush=True)
+            _, st[f"join_b_v1_s{s}"] = meter(
+                lambda: join_b(V, G, P, AL, Z, L, sb, eb, w2, OmP, OmA, r, core_einsum))
+            for v in V2_VARIANTS:
+                _, st[f"{_vname(v)}_s{s}"] = meter(
+                    lambda v=v: join_b2(V, G, P, AL, Z, L, sb, eb, w2, OmP, OmA, r, **v))
+        out[str(r)] = st
+    return out
+
+
+def chain_v2(r, a, s, st, v31m, allow_sym):
+    def cheapest(keys):
+        keys = [k for k in keys if k in st]
+        return min(keys, key=lambda k: st[k]["flops"])
+    jkeys = [f"{_vname(v)}_s{s}" for v in V2_VARIANTS if allow_sym or not v["sym"]]
+    roles = {
+        "transport": cheapest(["transport_plain", "transport_mm"]),
+        "transport_last": cheapest(["transport_last_plain", "transport_last_mm"]),
+        "query_d21": cheapest(["query_d21_einsum"] + (["query_d21_einsum_symdeclared"] if allow_sym else [])),
+        "query_d3": cheapest(["query_d3_einsum"] + (["query_d3_einsum_symdeclared"] if allow_sym else [])),
+        "init": "init_einsum",
+        "join": cheapest(jkeys),
+    }
+    base = v31m[str(a)]
+    terms = {"recent_tier_and_rest_v31_gens": (base["flops"], base["operations"])}
+
+    def add(term, key, times):
+        f0, o0 = terms.get(term, (0, 0))
+        terms[term] = (f0 + st[key]["flops"] * times, o0 + st[key]["operations"] * times)
+    add("transport", roles["transport"], 14 - a)
+    add("transport", roles["transport_last"], 1)
+    add("query", roles["query_d21"], 14 - a)
+    add("query", roles["query_d3"], 1)
+    add("join", roles["init"], 1)
+    if allow_sym and roles["query_d21"].endswith("symdeclared"):
+        add("join", "canon_sym_r", 1)            # declare the init core once
+    add("join", roles["join"], 14 - a)
+    tf = sum(v[0] for v in terms.values())
+    to = sum(v[1] for v in terms.values())
+    return {"r": r, "a": a, "s": s, "allow_symdeclared": allow_sym, "roles": roles,
+            "flops": tf, "c_over_b": tf / B, "operations": to,
+            "terms_c_over_b": {k: v[0] / B for k, v in terms.items()},
+            "terms_operations": {k: v[1] for k, v in terms.items()},
+            "join_step_c_over_b": st[roles["join"]]["c_over_b"],
+            "join_step_tracemalloc_peak_bytes": st[roles["join"]]["tracemalloc_peak_increment_bytes"],
+            "old_tier_c_over_b": sum(v[0] for k, v in terms.items()
+                                     if k != "recent_tier_and_rest_v31_gens") / B,
+            "gate_r128_a_le_3_cb_le_0p17": (r == 128 and a <= 3 and tf / B <= 0.17),
+            "cb_le_0p20": tf / B <= 0.20, "ops_le_22000": to <= 22000}
+
+
+def main_v2(v31, sha, sc, out_path, v1_path):
+    with open(v1_path, encoding="utf-8") as fh:
+        v1 = json.load(fh)
+    if v1.get("v31_sha256") != sha:
+        raise SystemExit("v1 JSON was metered on a different estimator_k3_v31.py; re-run v1")
+    with open(v1_path, "rb") as fh:
+        v1_sha = hashlib.sha256(fh.read()).hexdigest()
+    ranks, s_list, ages = [128, 150], [32, 64], [2, 3, 4]
+    steps = meter_v2(v31, ranks, s_list)
+    v31m = v1["v31_metered_chain"]
+    chains = [chain_v2(r, a, s, steps[str(r)], v31m, sym)
+              for sym in (False, True) for r in ranks for s in s_list for a in ages]
+    doc = {"what": "N1 v2: cheaper exact join-(b) spellings, n=1024, depth 16. COST ONLY.",
+           "flopscope": getattr(flopscope, "__version__", "?"), "v31_sha256": sha,
+           "v31_chain_reused_from": v1_path, "v31_chain_source_sha256": v1_sha,
+           "variants": {_vname(v): v for v in V2_VARIANTS},
+           "selfcheck_f64_n12": sc, "steps_by_r": steps, "chains": chains}
+    with open(out_path, "w", encoding="utf-8") as fh:
+        json.dump(doc, fh, indent=1)
+    print("wrote", out_path)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--selfcheck", action="store_true")
     ap.add_argument("--v31-child", default=None)
     ap.add_argument("--out", default=None)
     ap.add_argument("--ranks", default=",".join(map(str, RANKS)))
+    ap.add_argument("--v2", action="store_true", help="cheaper exact join-(b) spellings")
+    ap.add_argument("--v1-json", default="experiments/2026-09-16_stage3_n1/cycle_cost.json")
     a = ap.parse_args()
     if a.v31_child is not None:
         _v31_child(a.v31_child)
@@ -570,6 +823,9 @@ def main():
         return 0 if sc["pass_1e-10"] else 1
     if not sc["pass_1e-10"]:
         raise SystemExit("self-check failed; refusing to price an unverified spelling")
+    if a.v2:
+        main_v2(v31, sha, sc, a.out, a.v1_json)
+        return 0
     ranks = [int(x) for x in a.ranks.split(",")]
     s_list = [32, 64, "half"]
     steps = meter_steps(v31, ranks, s_list)

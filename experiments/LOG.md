@@ -51693,3 +51693,26 @@ join (b) at r=128, a≤3 lands ≤ ~0.17 B, a P11 rank screen becomes justified;
 otherwise N1 is parked with this negative economic result and the release
 bundle proceeds from v32/P3/P4. This rejects this merged-core spelling at
 r≥128, not every compact old-history representation.
+
+### N1 follow-up RESULT: cheaper exact joins priced — pre-set gate NOT met; N1 merged core PARKED
+
+`experiments/2026-09-16_stage3_n1/cycle_cost_v2.{json,md}`, meter self-check
+144 new f64 checks, worst 2.2e-14 (full-rank exactness, truncation == projection
+onto the new orthonormal basis, kept subspace == dense HOSVD, declared cores
+exactly symmetric).
+
+Best join-(b) whole chains at r=128: **a=2 0.179 B, a=3 0.2035 B** (with symmetry
+declaration; 0.195/0.218 without). The recorded gate was ≤ ~0.17 B at r=128,
+a≤3. **Not met.** Structural floor: everything but joins already costs 0.135 B
+at a=3 (recent tier 0.118), leaving ≤0.0032 B per join, while the exact
+projection of a lineage's n source columns alone costs 0.0037 B (O(n(r+s)³)).
+Triangular-factor rotation and einsum Gram save ~14%; block update saves no
+FLOPs; symmetric declaration halves queries but needs an exact symmetrisation
+copy and **can raise `SymmetryError` on float32 outputs (a failed MLP on the
+grader)** — any future use needs its own deployment test.
+
+**Decision:** N1 as a merged Tucker core with exact per-lineage joins is parked
+on economics, without spending truth. Getting under the floor requires
+compressing each lineage's source columns before joining, which is no longer
+exact and would be a new contract (Strategist Packet material). The release
+bundle proceeds from v32 / P3 / P4.
