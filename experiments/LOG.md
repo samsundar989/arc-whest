@@ -50941,3 +50941,124 @@ repository has already retracted.
   protocol, so nothing in the instrument would have stopped a ninth read of
   P01 — the ledger would have printed its correlation NOTE and moved on. The
   protection that matters here is a *new block*, and it costs 18 minutes.
+
+---
+
+## 2026-09-16 — **P11 is minted; the v31 mini pair measured nothing, for two separate reasons**
+
+Item 0b closed, item 0a not. Infrastructure entry, no contract, no Skeptic.
+
+### P11 truth, minted and finalized
+
+Workerq **1379**, 1,071.7 s, exit 0, 24/24 of the exact claimed seeds.
+
+    replica disagreement  observed 9.5253e-09   predicted 2V/N 9.5269e-09   ratio 0.9998
+    mean truth noise      4.7634e-09
+    sha256                6eeb2d7f4a0f06ac48fe9131ba57161183c6f807e07b5d234d1adb6edb74e3f3
+
+The ratio is the check that matters and it is the tightest this project has
+recorded: `0.9998` against P10's `0.9760`. It says the two replicas really are
+independent, which is the whole premise of the cross-product estimate that
+removes truth noise from the **bias** and leaves it only in the variance.
+`seed_ledger.finalize` bound that digest to the P11 claim on the host, and it
+matched the producer's own print exactly.
+
+Truth noise `4.76e-9` against a v31 raw near `3.9e-8` is **12.2%**, so every
+MSE read on P11 is quoted with it, per the measurement law.
+
+### The mini pair: 4h28m of compute, zero accuracy
+
+Jobs `1375` (F21, 2h30m) and `1376` (v31, 1h58m) both exited **0** and both
+produced **nothing usable**. Two independent defects, either of which alone
+would have been enough.
+
+**Defect 1 — the report was UTF-16.** `whest run --format json > report.json`
+under Windows PowerShell 5.1 writes UTF-16LE. `predict_public.py` opens with
+`encoding="utf-8"` and died on `byte 0xff in position 0`. Nothing warned, the
+file looked correct in an editor, and the job exited 0. **The first two bytes
+were `ff fe` and nobody had looked at them.**
+
+**Defect 2 — and this is the one that destroyed the measurement.** Both arms
+came back:
+
+    n_failed_mlps 100
+    failure_breakdown  {residual_wall_time_exhausted: 100}
+    final_layer_mse    0.9095061498880387     <- IDENTICAL in both arms
+
+Identical because it is not the estimator's number at all: it is the
+zero-prediction MSE assigned to a failed row. This host reads residual roughly
+**27x high per operation**, so the graded `0.4 s` cap fails every MLP locally —
+v31's local residual was `7.16 s` median, F21's `9.87 s`. **Handoff 09-14 §0.1
+says to run the clean mini with the residual cap lifted, precisely so that it
+measures accuracy, and neither job passed `--no-residual-wall-time-limit`.**
+
+`predict_public.py` refused the projection rather than computing one, which is
+the instrument behaving correctly: *"a failed row is scored at zero-prediction
+MSE, so a projection built on one is a projection of a different program."*
+There was an `--allow-failures` escape hatch two characters away, and it would
+have produced a confident, meaningless number.
+
+### What the wasted runs DID measure, and it is not nothing
+
+A residual-failed row still ran `predict` to completion — the gate judges it
+afterwards. So the **cost and wall telemetry are real**; only the MSE is
+fiction. On the 100 organisers' mini networks, with `spread 0` across all 100
+in both arms:
+
+| | FLOPs/MLP | C/B | C/B with `+2**24` | ops/MLP | local wall worst | local resid worst |
+|---|---:|---:|---:|---:|---:|---:|
+| F21 | `928,424,083,046` | `0.422198` | `0.422206` | `14,075` | `87.72 s` | `11.911 s` |
+| **v31** | **`661,928,064,562`** | **`0.301010`** | **`0.301018`** | **`13,037`** | **`53.39 s`** | **`7.916 s`** |
+
+Three things follow.
+
+1. **The metered P01 cost transfers to the public networks.** C/B `0.301010`
+   here against `0.300970` metered at 1024x16 — agreement to `1.3e-4` relative.
+   And F21's `0.422198` reproduces its own graded `0.4222137` to five decimals,
+   which is the instrument check that licenses reading the other row at all.
+2. **v31 bills 13,037 operations, not the 12,665 this repository has been
+   quoting.** That figure came from the P01 metering; the public networks cost
+   **+2.9%** more operations. Still **1.69x** under the 22,000 gate and **7.4%
+   fewer than F21's 14,075**. Residual forecast at the frozen `13.4 us/op`:
+   **`0.1747 s` against the `0.4 s` cliff, 2.29x headroom.** The old number was
+   not wrong, it was measured somewhere else — and the correction goes the
+   unfavourable way, which is why it is worth making rather than rounding past.
+3. **The x1.60 wall factor must not be applied to a local wall, and this pair
+   proves it.** F21's local worst is `87.72 s`; x1.60 gives `140.4 s`, which
+   would **refuse a candidate that is graded and passing right now** at a worst
+   row of `93.16 s`. The factor's own docstring says what it is: *what the
+   maximum row moved between two graded runs of IDENTICAL bytes*. It is a
+   graded-to-graded contention factor, and multiplying a local second by it
+   double-counts a host difference it never described. The honest local-to-graded
+   anchor from this pair is F21's `93.16 / 87.72 = 1.062`.
+
+### Fixed, so it cannot recur
+
+`scripts/run_mini_json.ps1`: runs the split and writes the report with
+`[System.IO.File]::WriteAllText(..., UTF8Encoding($false))` — the one spelling
+that produces what the readers expect. `Out-File -Encoding utf8` is **not** the
+fix; 5.1 writes a BOM and Python's plain `utf-8` codec does not strip one. It
+takes `-NoResidualLimit`, refuses to write output that does not parse as JSON,
+and re-reads its own bytes to assert that neither a UTF-16 mark nor a BOM
+survived. `verify_portability.py` 103/103 after the edit.
+
+**Smoke-tested before re-queuing anything**, which is the part the previous
+attempt skipped: one MLP, cap lifted — `n_failed_mlps 0`, `residual cap None`,
+real `final_layer_mse 3.061e-08`, `C/B 0.3010100`, written UTF-8 with no BOM
+and parsing as JSON. Re-queued as `1400` (v31) and `1401` (F21).
+
+### Knowledge delta
+
+- **An exit code of 0 is not a result.** Two jobs, four and a half hours, exit 0
+  twice, and the only honest output in the chain was a *refusal* from the next
+  tool along. The check that saved this was `predict_public.py` declining to
+  project on failed rows — written earlier by someone anticipating exactly this,
+  and shipped with an `--allow-failures` bypass that would have turned the
+  refusal into a number.
+- **Two arms agreeing to sixteen digits is a symptom, not a confirmation.**
+  `0.9095061498880387` in both files should have been the first thing anyone
+  looked at. Identical accuracy across two different estimators means neither
+  one was measured.
+- **A contract line that exists to prevent a failure only works if the command
+  carries it.** §0.1 of the 09-14 handoff names this exact trap. It was read,
+  it was logged, and then it was not passed to `whest run`.
