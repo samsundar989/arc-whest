@@ -129,6 +129,15 @@ if ($NoResidualLimit) { $whestArgs += "--no-residual-wall-time-limit" }
 if ($NMlps -gt 0) { $whestArgs += @("--n-mlps", "$NMlps") }
 if ($DebugTracebacks) { $whestArgs += "--debug" }
 
+# RECEIPT (2026-09-16): bind the report to the SOURCE that produced it. Hash the
+# estimator before launch and again after; a change in between refuses the receipt.
+function Source-Sha([string]$Path) {
+    if (-not (Test-Path -LiteralPath $Path)) { return $null }
+    return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
+}
+$srcFull = [System.IO.Path]::GetFullPath($Estimator)
+$srcShaBefore = Source-Sha $srcFull
+
 $Out = [System.IO.Path]::GetFullPath($Out)
 if (Test-Path -LiteralPath $Out) { throw "refusing to overwrite existing evidence: $Out" }
 $dir = Split-Path -Parent $Out
@@ -213,6 +222,34 @@ if (-not $published -or $whestExit -ne 0) {
     Write-NewFileAtomic $failMeta ($meta | ConvertTo-Json -Depth 5)
     $null = Assert-Utf8NoBom $failMeta
     Write-Host "failure metadata -> $failMeta"
+}
+
+if ($published) {
+    # arc-whest.run_receipt/1, the schema `local_sim/predict_public.py` validates.
+    $srcShaAfter = Source-Sha $srcFull
+    $ds = $null
+    try { $ds = ($text | ConvertFrom-Json).run_config.dataset } catch { $ds = $null }
+    $receipt = [ordered]@{
+        schema         = "arc-whest.run_receipt/1"
+        report_path    = $Out
+        report_sha256  = (Get-FileHash -LiteralPath $Out -Algorithm SHA256).Hash.ToLowerInvariant()
+        source_path    = $Estimator
+        source_sha256  = $(if ($srcShaBefore -eq $srcShaAfter) { $srcShaBefore } else { $null })
+        source_changed_during_run = ($srcShaBefore -ne $srcShaAfter)
+        meter_path     = $(if ($Runner -eq "subprocess") { "whest_run_subprocess" } else { "unknown" })
+        dataset        = $(if ($ds) { [ordered]@{ path = $ds.path; sha256 = $ds.sha256; n_mlps = $ds.n_mlps } } else { $null })
+        host_load      = [ordered]@{ class = "unknown"; evidence = "runner-written receipt; queue overlap is not queried here" }
+        provenance     = [ordered]@{ kind = "written_by_run_mini_json"; started_utc = $started;
+                                     ended_utc = (Get-Date).ToUniversalTime().ToString("o"); arguments = $allArgs;
+                                     exit_code = $whestExit }
+    }
+    $receiptPath = "$Out.receipt.json"
+    Write-NewFileAtomic $receiptPath ($receipt | ConvertTo-Json -Depth 6)
+    $null = Assert-Utf8NoBom $receiptPath
+    Write-Host "receipt -> $receiptPath"
+    if ($srcShaBefore -ne $srcShaAfter) {
+        throw "the estimator changed during the run ($srcShaBefore -> $srcShaAfter); the receipt carries no source_sha256"
+    }
 }
 
 if (-not $published) {

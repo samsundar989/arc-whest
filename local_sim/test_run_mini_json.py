@@ -116,6 +116,13 @@ class RunMiniJsonEvidence(unittest.TestCase):
             self.assertEqual(len(glob.glob(out + ".*.stdout.raw")), 1)
             self.assertEqual(len(glob.glob(out + ".*.stderr.raw")), 1)
             self.assertEqual(glob.glob(out + ".*.failure.json"), [])
+            # the run receipt is bound to the published report's bytes
+            with open(out + ".receipt.json", "rb") as fh:
+                rec = json.loads(fh.read().decode("utf-8"))
+            self.assertEqual(rec["schema"], "arc-whest.run_receipt/1")
+            self.assertEqual(rec["report_sha256"], _sha(out))
+            self.assertEqual(rec["meter_path"], "whest_run_subprocess")
+            self.assertFalse(rec["source_changed_during_run"])
 
     def test_valid_json_nonzero_exit_publishes_then_fails(self):
         with tempfile.TemporaryDirectory(prefix="run_mini_json_") as tmp:

@@ -1,0 +1,17 @@
+net 0: |T_old| 5.687e+00  identity-proj err 2.2e-31  spearman(true, meanJ) +0.724
+   r=8   E energy 1.076e-05  meanJ 7.135e-06  random 2.414e-04   meanJ/energy 0.663
+   r=16  E energy 8.089e-07  meanJ 9.292e-07  random 2.115e-04   meanJ/energy 1.149
+   r=24  E energy 1.380e-07  meanJ 2.168e-07  random 2.830e-04   meanJ/energy 1.570
+   r=32  E energy 2.017e-08  meanJ 4.724e-08  random 1.080e-04   meanJ/energy 2.342
+net 1: |T_old| 4.121e+00  identity-proj err 7.1e-32  spearman(true, meanJ) +0.547
+   r=8   E energy 1.423e-05  meanJ 9.664e-06  random 1.466e-04   meanJ/energy 0.679
+   r=16  E energy 9.684e-07  meanJ 1.965e-06  random 1.395e-04   meanJ/energy 2.029
+   r=24  E energy 1.073e-07  meanJ 2.689e-07  random 1.522e-04   meanJ/energy 2.505
+   r=32  E energy 7.747e-09  meanJ 9.611e-09  random 6.511e-05   meanJ/energy 1.241
+net 2: |T_old| 8.007e+00  identity-proj err 1.4e-31  spearman(true, meanJ) +0.606
+   r=8   E energy 5.167e-06  meanJ 9.173e-06  random 5.682e-05   meanJ/energy 1.775
+   r=16  E energy 6.441e-07  meanJ 6.791e-07  random 7.781e-05   meanJ/energy 1.054
+   r=24  E energy 7.377e-08  meanJ 2.980e-07  random 7.252e-05   meanJ/energy 4.040
+   r=32  E energy 3.810e-09  meanJ 1.570e-08  random 1.039e-04   meanJ/energy 4.120
+
+VERDICT proxy_informative: True (3/3)   proxy_pays: False (0/3)
