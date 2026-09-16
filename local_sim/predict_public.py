@@ -314,7 +314,16 @@ def memory_verdict(candidate_path: Optional[str], sha: Optional[str],
             lg, candidate_sha256=sha or lg.get("candidate_sha256", ""),
             width=width, depth=depth, budget=int(budget),
             weights_mode=cc._lifecycle_default_mode(),
-            stack=cc._certified_stack())
+            stack=cc._certified_stack(),
+            # REQUIRED, and omitting it was a defect. `consume_memory_report`
+            # binds the instrument sha as `bool(expected) and expected == got`,
+            # so passing nothing is not "skip this check" -- it is a FAILED
+            # binding, and the report comes back INCOMPLETE for a reason that
+            # belongs to this caller rather than to the report. On 2026-09-16
+            # that printed `INCOMPLETE ... 463b8560aa5be78b... vs ...` for a
+            # report `certify_candidate.py` had just called CERTIFIED off the
+            # same bytes. The fail-safe direction is right; the omission was not.
+            expected_instrument_sha256=cc._memory_instrument_sha256())
         bad = [n for n, ok, _ in checks if not ok]
         return {"available": True, "report": os.path.relpath(p, _ROOT),
                 "degraded": degraded, "failed_checks": bad,
