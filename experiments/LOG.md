@@ -50816,3 +50816,50 @@ saving nobody believed — is gone.
 - **A mutation battery can itself return a false negative.** Mine did, for a
   path reason, and had I trusted it I would have concluded the repaired check
   was still broken and "fixed" something that was already right.
+
+---
+
+## 2026-09-15 — **v31 passes the 8,192 MB enforcement gate, 23/23**
+
+Job `1374`, WSL, real `RLIMIT_AS = 8589934592` applied to the candidate's own
+process, with the instrument's negative-cap and lifecycle controls.
+
+    PASS  the cap was applied to the candidate's process too    soft=8589934592
+    PASS  the REAL packages loaded, not local_sim's shims       whestbench 0.16.1 / flopscope 0.12.1
+    PASS  predict() completed under the cap                     52.140 s
+    PASS  peak address space is under the cap                   VmPeak 5434.6 MB of 8192 MB -> 1.51x headroom
+    PASS  the weights were the DEPLOYMENT representation        f64_readonly / float64 / writeable False
+    PASS  repeated predictions in the SAME worker all completed 3 runs
+    PASS  ...and SETTLED address space did not GROW             +14.0 MB over 3 predictions
+    PASS  the candidate child wrote no stderr
+
+    peak RSS  3563.1 MB     VmPeak  5434.6 MB     23/23
+
+**This is the constraint this host cannot test at all**, and every memory figure
+in this repository outside this instrument is accounting rather than a test
+passed — Windows has no `RLIMIT_AS`, so `--runner local` is advisory by design.
+`VmPeak` is the quantity `RLIMIT_AS` actually caps and it exceeds both the
+working set and the commit charge by an amount no Windows counter reports. This
+is the first time v31's memory has been **enforced**.
+
+**The no-stderr requirement was checked in advance and it mattered.** The gate
+treats every unexpected child stderr byte as an instrument failure, and that is
+what failed the E14 candidate in September (an `np.multiply(FlopscopeArray)
+auto-routed` `UserWarning`). Before queuing, v31's warning set was compared
+against F21's and v30's: v31 emits **no** auto-route warning and adds **zero**
+warnings over v30, and the only family v30 adds over F21 (`op 'diagonal' is not
+symmetry-aware`) belongs to P1's κ4 transport. Both families v31 emits are the
+two the gate explicitly filters.
+
+**A declaration note worth keeping.** `workerq` advised `--ram 2`, reporting
+that this command "has never used more than 0.1 GiB across 9 runs". That
+measurement is **blind to the WSL child**, which deliberately allocates 9 GiB
+to prove the cap is in force. The documented 12 GiB declaration is correct and
+the suggestion is not; an automated suggestion is only as good as what its
+meter can see.
+
+### What this closes and what it does not
+
+It closes the `SKIP 9: the real 8-GiB enforcement` that v30's certification
+recorded. It is **not** a server memory result, no Linux seconds transfer to
+graded residual or wall, and it says nothing about accuracy or cost.
