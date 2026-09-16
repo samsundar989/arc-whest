@@ -39,15 +39,45 @@ re-implementation only, this file maintained, no v29 bytes submitted.
 
 ### The draft, awaiting Samuel's approval of the exact wording
 
+**Revised 2026-09-16. NOT SENT.** Samuel approved *adding a disclosing
+paragraph* (Slice 7 item 0c); the exact wording below still needs his approval
+before it goes anywhere.
+
 > Team 504aldo released their Phase-2 estimator under MIT and invited reuse;
 > several accounts have since submitted it. For prize verification under §6
 > ("not derived from another Participant's submission"), is building on that
 > code with attribution and substantial own changes acceptable, and where is
 > the line?
+>
+> Our own case, stated concretely rather than in the abstract: we submit only
+> our own code and none of their files, and we keep their repository locally
+> only as a reference to check our arithmetic against. Some of what our
+> estimator does we derived before we had read that repository; at least two
+> mechanisms — a contraction-regrouping identity and a randomized range
+> finder — we re-implemented after reading it, deliberately matching its
+> structure. We keep a timestamped record of which is which. Is a
+> re-implementation of that second kind "derived from another Participant's
+> submission", and does attribution change the answer?
 
-Neutral by construction: it asks where the line is, it does not argue for a
-position, and it does not name or disparage the accounts that submitted the
+Still neutral by construction: it asks where the line is, it does not argue for
+a position, and it does not name or disparage the accounts that submitted the
 published bytes.
+
+### Why the second paragraph was added, and what it costs
+
+*The first paragraph alone is the version this file carried from 2026-09-14 to
+2026-09-16. It is not dishonest — but it asks a **general** question, and our
+situation is narrower and more awkward than the general one. An answer obtained
+on a vaguer premise than our actual case is worth less than a slower, honest
+one: we would have to apply it to a case we had not described, and the §6
+reviewer would be entitled to say we never asked about what we actually did.*
+
+*The cost is real and is stated here rather than discovered later: the second
+paragraph discloses, unprompted, that two mechanisms in our estimator were
+matched from a competitor's published source. That is a fact the timeline below
+already records, and it is a fact the organizers would find if they looked. The
+judgement — Samuel's, taken 2026-09-16 — is that a question we might lose on
+is better than an answer we could not rely on.*
 
 ## The clone — what was taken from it, and what was not
 
