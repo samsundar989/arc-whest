@@ -29,11 +29,21 @@ import k4feed_oracle as K  # noqa: E402
 
 
 class DenseTower(object):
-    __slots__ = ("T", "k")
+    """Dense carried tensor. `F`/`R3`/`R4`/`w3b` are set by a P3 birth for the
+    newborn lineage only; the dense `_truncate` folds them into `T`."""
 
     def __init__(self, T, k=1):
         self.T = T
         self.k = k
+        self.F = self.R3 = self.R4 = self.w3b = None
+        self.AL_new = self.w2_new = None
+
+
+def _lblock(A, C):
+    import itertools
+    n = A.shape[0]
+    TL = np.einsum("aj,bj,cj->abc", A, np.eye(n), C)
+    return 0.5 * sum(TL.transpose(pm) for pm in itertools.permutations(range(3)))
 
 
 def load_dense(path):
@@ -68,11 +78,23 @@ def load_dense(path):
         n = args[3]
         newborn = orig["_append"](None, *args, **kwargs)
         Tn = K.tower_tensor(newborn, n)
-        if tw is None:
-            return DenseTower(Tn, 1)
-        return DenseTower(tw.T + Tn, tw.k + 1)
+        out = DenseTower(Tn, 1) if tw is None else DenseTower(tw.T + Tn, tw.k + 1)
+        out.AL_new = _np(args[1])
+        out.w2_new = _np(args[2]).reshape(-1)
+        return out
 
     def truncate(tw, gens, n):
+        if getattr(tw, "F", None) is not None:
+            F = _np(tw.F)
+            r = F.shape[1] // 2
+            U = _np(tw.R3)[-1]
+            V = _np(tw.R4)[-1]
+            A1 = F[:, :r] @ U.T
+            A2 = F[:, r:] @ V.T
+            AL = tw.AL_new
+            T = (tw.T + _lblock(A1, AL * _np(tw.w3b).reshape(-1)[None, :])
+                 + _lblock(A2, AL * tw.w2_new[None, :]))
+            return DenseTower(T, tw.k)
         return tw
 
     mod._advance = advance
@@ -165,7 +187,7 @@ def self_check(path, n=10, depth=5, seed=3):
 if __name__ == "__main__":
     import flopscope as flops
     flops.configure(symmetry_warnings=False)
-    for f in ("estimator_k3_v31_dense.py", "estimator_k3_v32_dense.py"):
+    for f in ("estimator_k3_v31_dense.py", "estimator_k3_v32_dense.py", "estimator_k3_v33_dense.py"):
         w = self_check(os.path.join(_ROOT, f))
         print(f"{f}: dense chain vs factored chain, worst rel mean diff {w:.2e}  "
               f"{'OK' if w < 1e-10 else 'FAILED'}")
