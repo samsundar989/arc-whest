@@ -1,2 +1,2 @@
-Traceback (most recent call last):
-  File "C:\Users\samsu\Documents\arc-whest\local_sim\s5_rep_oracle.py", line 3, in <module>
+cov01 exact +3.52809e-03 v32 +0.00000e+00 ('q31',) +2.50006e-03 ('q31', 'link') +3.52767e-03
+k3_001 exact -1.62096e-01 v32 -2.02284e-02 ('q31',) -2.10915e-01 ('q31', 'link') -1.62090e-01

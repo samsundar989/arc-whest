@@ -1,5 +1,8 @@
 import sys, os, numpy as np
-R=r"C:\Users\samsu\Documents\arc-whest"; sys.path.append(os.path.join(R,"local_sim"))
+"""Stage-1b v34 parity gates (nesting, exact law, float32, equivariance, guard)."""
+_HERE = os.path.dirname(os.path.abspath(__file__)); R = os.path.dirname(_HERE)
+# never let local_sim/ shadow the real flopscope: drop it, append it last
+sys.path[:] = [q for q in sys.path if os.path.abspath(q or ".") != _HERE] + [R, _HERE]
 import flopscope as flops; flops.configure(symmetry_warnings=False)
 import k4feed_oracle as K, s1_parity_v32 as P1, s5_build_rep as B
 from mint_provenance import canonical_mint

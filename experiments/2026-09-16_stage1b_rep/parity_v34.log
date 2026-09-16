@@ -1,2 +1,14 @@
-Traceback (most recent call last):
-  File "C:\Users\samsu\Documents\arc-whest\local_sim\s5_parity_rep.py", line 3, in <module>
+PASS 64x5 off==v32 bitwise+flops 
+PASS 64x5 v34 not no-op rel 3.05e-04 cost x1.02224
+PASS 64x5 guard over-predicts 1.1622
+PASS 96x6 off==v32 bitwise+flops 
+PASS 96x6 v34 not no-op rel 4.47e-04 cost x1.01516
+PASS 96x6 guard over-predicts 1.1047
+PASS exact law cov01 +3.52767e-03 vs +3.52809e-03
+PASS exact law k3_001 -1.62090e-01 vs -1.62096e-01
+PASS exact law k3_012 -1.12049e-02 vs -1.12056e-02
+PASS float32 <= 2x v32 + 1e-5 {'v32': np.float64(2.3422990533829045e-07), 'v34': np.float64(2.2284498501557977e-07)}
+PASS equivariance layer 1 <= 100x v32 {'v32': np.float64(1.642302981070531e-14), 'v34': np.float64(2.0580910017282935e-14)}
+PASS equivariance layer 4 <= 100x v32 {'v32': np.float64(1.0706761224549069e-14), 'v34': np.float64(1.1346306031549002e-14)}
+PASS 1024 same gens 
+13/13

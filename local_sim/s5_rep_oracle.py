@@ -1,9 +1,12 @@
 import sys, os, numpy as np
-R=r"C:\Users\samsu\Documents\arc-whest"; sys.path.append(os.path.join(R,"local_sim"))
+"""Stage-1b exact-law oracle: bivariate kappa4 (x C) completion (q31, link) vs the scale mixture."""
+_HERE = os.path.dirname(os.path.abspath(__file__)); R = os.path.dirname(_HERE)
+# never let local_sim/ shadow the real flopscope: drop it, append it last
+sys.path[:] = [q for q in sys.path if os.path.abspath(q or ".") != _HERE] + [R, _HERE]
 import flopscope as flops; flops.configure(symmetry_warnings=False)
 import k4feed_oracle as K
 from scipy.special import ndtr
-SCR=os.path.dirname(os.path.abspath(__file__))
+import tempfile; SCR=tempfile.mkdtemp(prefix="s5rep_")
 src=open(os.path.join(R,"estimator_k3_v32_dense.py"),encoding="utf-8").read()
 anchor="    # ---- the (1,1,1) block's repeated part -------------------------------"
 assert src.count(anchor)==1
