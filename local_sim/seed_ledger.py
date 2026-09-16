@@ -110,6 +110,13 @@ TIERS: Dict[str, str] = {
     "P08": "SINGLE_USE",
     "P09": "SINGLE_USE",
     "P10": "SINGLE_USE",
+    # Allocated 2026-09-16 for Slice 7. DESIGN, not SINGLE_USE: D1, D3 and the
+    # P3 gate all read it, deliberately and repeatedly, so their gains are
+    # comparable on identical inputs. That is the same correlation P01 carries
+    # and it must be declared the same way -- these reads are ONE corpus, never
+    # several independent ones. A constant fitted here is fitted on DESIGN data
+    # and needs a fresh single-use block before it reaches a submission.
+    "P11": "DESIGN",
 }
 
 #: Strictness ordering, so a tier CHANGE can be judged as a tightening or a

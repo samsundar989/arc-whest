@@ -202,6 +202,18 @@ DECISION_BLOCKS = [
                                  "robustness context only; no fitting or selection. "
                                  "Claim once before mint; local score-only wall "
                                  "and residual limits are disabled per the P10 contract."),
+    ("P11", 40_916_011_000, 96,  "PHASE-2 DESIGN block, allocated 2026-09-16 for "
+                                 "Slice 7's accuracy reads (the kappa-4 half: D1's "
+                                 "lambda-table diagnostic, D3's feed-coefficient "
+                                 "ablation, P3's feedback gate). Allocated because "
+                                 "P01 now carries F21, the lambda sweep, P1 and P2 "
+                                 "on the SAME 24 networks -- protocol-legal, but a "
+                                 "fifth read of one corpus is not a fifth "
+                                 "independent read. P01 keeps cost and parity work; "
+                                 "every accuracy number in Slice 7 is read HERE. "
+                                 "DESIGN tier: tuning is permitted, so any constant "
+                                 "fitted on P11 needs its own fresh SINGLE_USE block "
+                                 "before it can be submitted."),
 ]
 
 # --- single-use blocks -------------------------------------------------------
