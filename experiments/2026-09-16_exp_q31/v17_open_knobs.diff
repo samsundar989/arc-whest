@@ -1,0 +1,44 @@
+--- estimators/estimator_v17_open.py	2026-09-16 00:49:04.305208022 +0000
++++ ../whest-p2-cumulant-k3/estimators/estimator_v17.py	2026-09-14 21:29:08.471465492 +0000
+@@ -239,9 +239,6 @@
+ # anti-correlated with V16b's base error; on the regen base it HURTS (dump0: 3.57e-8
+ # with vs 2.51e-8 without). Off by default until refitted on the V17 trajectory.
+ NO_CORR = _os.environ.get("V17_NO_CORR", "1") == "1"
+-FORCE_RIDERS = _os.environ.get("V17_FORCE_RIDERS", "0") == "1"  # exp_q31 addition
+-LAM_DIAG = float(_os.environ.get("V17_LAM_DIAG_SCALE", "1"))  # exp_q31: lambda inside the dG transport only
+-LAM_OFF = float(_os.environ.get("V17_LAM_OFF_SCALE", "1"))    # exp_q31: lambda inside wk431 and the feed c1_b only
+ LAM = [c * float(_os.environ.get("V17_LAM_SCALE", "1")) for c in LAM]
+ DEBUG = []  # parity_v17.py: per-layer dict of diagnostics when V17_DEBUG=1
+ 
+@@ -349,7 +346,7 @@
+         # Phase-2 suite shape ONLY; any other shape (e.g. the grader smoke MLP)
+         # runs the shape-generic V1.6 base path. The correction destabilizes small
+         # widths (non-finite blowup observed at 16x64) -- never apply it off-suite.
+-        riders = (n == 1024 and L == len(CORR_BETA)) or FORCE_RIDERS  # exp_q31: env V17_FORCE_RIDERS=1 opens the suite gate off-suite
++        riders = (n == 1024 and L == len(CORR_BETA))
+ 
+         C1l, C2l, SELCl = self._wick_consts
+         C1 = fnp.asarray(C1l, dtype=f32)
+@@ -448,11 +445,11 @@
+                     # - (W*W) var).  NOT an einsum: same-object repeated operands
+                     # crash flopscope (F45).
+                     WW = W * W
+-                    dG = WW @ (g_prev - var_prev * (lam_prev * LAM_DIAG)) + var * (lam_prev * LAM_DIAG)  # exp_q31 split knob
++                    dG = WW @ (g_prev - var_prev * lam_prev) + var * lam_prev  # var == diag(C_pre)
+                     g4row = dG * METRIC_C
+                     g22c = fnp.reshape(dG * (METRIC_C / 6.0), (-1, 1))
+                     wk4m = _zero_diag(g22c + g22c.T)
+-                    wk431 = C_off * (0.5 * METRIC_C * lam_prev * LAM_OFF)  # exp_q31 split knob
++                    wk431 = C_off * (0.5 * METRIC_C * lam_prev)
+                     if _os.environ.get("V17_DEBUG", "0") == "1":
+                         DEBUG.append(dict(layer=li, dG=dG, g_prev=g_prev, var_prev=var_prev,
+                                           lam=lam_prev, var=var, D3=D3, D21=D21))
+@@ -593,7 +590,7 @@
+                 y_b = w2 * (0.25 * METRIC_C)
+                 dgw = w1sq * dG
+                 u_b = y_b * dG
+-                c1_b = w1 * lam_prev * LAM_OFF  # exp_q31 split knob
++                c1_b = w1 * lam_prev
+                 D21_new = (D21_new
+                            + fnp.reshape(dgw, (-1, 1)) * fnp.reshape(y_b, (1, -1)) * (1.0 / 3.0)
+                            + fnp.reshape(y_b * (2.0 / 3.0), (-1, 1)) * (a_b * fnp.reshape(c1_b, (1, -1)))
