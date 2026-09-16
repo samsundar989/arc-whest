@@ -1,0 +1,43 @@
+{
+  "schema": "arc-whest.run_receipt/1",
+  "report_path": "experiments/2026-09-16_slice7_mini/v31_mini_confirm.json",
+  "report_sha256": "00d465036b79943a5622e5a5e96db5ac3502e3d498ad09317678d9c64fac184d",
+  "source_path": "estimator_k3_v31.py",
+  "source_sha256": "6dde5fd43ad41e8ec7199b742dd554d22d506c9cf85a532027e86a590d0a787c",
+  "meter_path": "whest_run_subprocess",
+  "dataset": {
+    "path": "hf://aicrowd/arc-whestbench-public-2026@v2-phase2",
+    "sha256": "264fa1f416d16a40821fb5e8e94f5d2da4698a201d40da999616225b38b464f1",
+    "n_mlps": 100
+  },
+  "host_load": {
+    "class": "standalone",
+    "evidence": "workerq queue records only: jobs whose [started_at, finished_at] overlapped this one. Work launched outside the queue is invisible here.",
+    "overlapping_queue_jobs": []
+  },
+  "provenance": {
+    "kind": "backfilled_from_workerq_snapshot",
+    "note": "Written after the run, not by the runner. source_sha256 is the sha256 of the file in the job's immutable execution snapshot, cross-checked against the git blob at snapshot_commit; meter_path follows from the command (run_mini_json.ps1, default -Runner subprocess).",
+    "workerq_job": 1413,
+    "snapshot_commit": "7459212e1abbeca1dcb654098752ce41b141b39f",
+    "snapshot_file": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1413\\job-1413\\estimator_k3_v31.py",
+    "git_blob_sha256_at_snapshot_commit": "6dde5fd43ad41e8ec7199b742dd554d22d506c9cf85a532027e86a590d0a787c",
+    "command": [
+      "powershell",
+      "-NoProfile",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      "scripts/run_mini_json.ps1",
+      "-Estimator",
+      "estimator_k3_v31.py",
+      "-Out",
+      "C:/Users/samsu/Documents/arc-whest/experiments/2026-09-16_slice7_mini/v31_mini_confirm.json",
+      "-NoResidualLimit",
+      "-DebugTracebacks"
+    ],
+    "job_started_at": "2026-09-16T08:14:50.342915+00:00",
+    "job_finished_at": "2026-09-16T09:44:06.580813+00:00",
+    "written_at_utc": "2026-09-16T17:23:43+00:00"
+  }
+}

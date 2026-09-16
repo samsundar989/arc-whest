@@ -1,0 +1,229 @@
+{
+  "meta": {
+    "candidate": "estimator_k3_v31.py",
+    "control": "f21_mini.json",
+    "control_submission": "330950",
+    "candidate_source": {
+      "status": "VERIFIED",
+      "sha256": "6dde5fd43ad41e8ec7199b742dd554d22d506c9cf85a532027e86a590d0a787c",
+      "file_sha256": "6dde5fd43ad41e8ec7199b742dd554d22d506c9cf85a532027e86a590d0a787c",
+      "evidence": "--candidate bytes == candidate receipt source_sha256"
+    },
+    "control_source": {
+      "status": "VERIFIED",
+      "sha256": "d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94",
+      "evidence": "control receipt == estimator.py inside experiments/2026-09-12_f21/f21-with-notice.tar.gz (tarball sha256 matches ledger)"
+    },
+    "candidate_receipt": "experiments/2026-09-16_stage0/predict_public_receipts/v31_mini_confirm.receipt.json",
+    "control_receipt": "experiments/2026-09-16_stage0/predict_public_receipts/f21_mini.receipt.json",
+    "dataset": {
+      "path": "hf://aicrowd/arc-whestbench-public-2026@v2-phase2",
+      "sha256": "264fa1f416d16a40821fb5e8e94f5d2da4698a201d40da999616225b38b464f1",
+      "n_mlps": 100
+    },
+    "anchor_n": 50,
+    "anchor_failed": 0
+  },
+  "projection": {
+    "n": 100,
+    "local_control_adjusted": 1.6571425565414235e-08,
+    "local_candidate_adjusted": 9.048556344717298e-09,
+    "local_control_raw_mse": 3.925032844520615e-08,
+    "local_candidate_raw_mse": 3.006064691390975e-08,
+    "local_control_multiplier": 0.42219839226436306,
+    "local_candidate_multiplier": 0.3010100338369739,
+    "ratio": 0.5460336715751414,
+    "mean_difference": 7.522869220696936e-09,
+    "t_ci_difference": [
+      7.2528658649053016e-09,
+      7.79287257648857e-09
+    ],
+    "interval_label": "transformed local paired-difference interval (conditional; excludes hidden-network transfer uncertainty)",
+    "interval_is_hidden_board_prediction_interval": false,
+    "transformed_band_ratio": [
+      0.5297403626666338,
+      0.562326980483649
+    ],
+    "arithmetic_gain": 1.831388890570253,
+    "geometric_gain_DIAGNOSTIC": 1.8303429091649275,
+    "n_candidate_better": 100,
+    "sign_test_p": 1.5777218104420236e-30,
+    "anchor_graded_adjusted": 1.5957396056103795e-08,
+    "projected_public_adjusted": 8.713275557293036e-09,
+    "projected_public_transformed_band": [
+      8.453276773975537e-09,
+      8.973274340610536e-09
+    ],
+    "notes": [
+      "paired on 100 matched MLP identities",
+      "paired on 100 matched MLP identities"
+    ],
+    "n_failed_control": 0,
+    "n_failed_candidate": 0,
+    "ratio_at_graded_flops": 0.5460416164516899,
+    "projected_public_at_graded_flops": 8.713402336834737e-09
+  },
+  "cost": {
+    "meter_path": "whest_run_subprocess",
+    "status": "VERIFIED",
+    "evidence": "graded - local subprocess = 33,554,432 exactly for F21 #330950 (928,457,637,478 - 928,424,083,046) and v31 #331317 (661,961,618,994 - 661,928,064,562); two pairs, one representation",
+    "entries": [
+      {
+        "offset": 33554432,
+        "flops": 661961618994.0,
+        "c_over_b": 0.3010252926260364,
+        "multiplier": 0.3010252926260364
+      }
+    ],
+    "max_network_flops": 661928064562.0,
+    "max_network": "logan-fitzgerald"
+  },
+  "network_summary": {
+    "flops": {
+      "n": 100,
+      "mean": 661928064562.0,
+      "median": 661928064562.0,
+      "max": 661928064562.0,
+      "max_network": "logan-fitzgerald",
+      "min": 661928064562.0
+    },
+    "wall_s": {
+      "n": 100,
+      "mean": 36.346282398999755,
+      "median": 36.183923550001055,
+      "max": 39.53049119999923,
+      "max_network": "richard-davis",
+      "min": 35.84231969999382
+    },
+    "residual_s_local": {
+      "n": 100,
+      "mean": 6.016273874971667,
+      "median": 5.996366300547379,
+      "max": 6.409270600328455,
+      "max_network": "richard-davis",
+      "min": 5.909362999649602
+    },
+    "ops": {
+      "n": 100,
+      "mean": 13037.0,
+      "median": 13037.0,
+      "max": 13037.0,
+      "max_network": "logan-fitzgerald",
+      "min": 13037.0
+    },
+    "ops_mean_aggregate": 13037.0,
+    "sync_scalar": {
+      "available": false,
+      "why": "per-operation breakdown present but it contains no synchronisation/scalar-materialisation counter (checked item, tolist, __float__, __int__, __bool__, __index__, float, int, bool, synchronize, materialize); ABSENT, not zero"
+    }
+  },
+  "residual_forecast": {
+    "ops_max": 13037.0,
+    "ops_max_network": "logan-fitzgerald",
+    "ops_mean": 13037.0,
+    "gate_ops": 22000,
+    "gate_basis": "per-network MAX operation count",
+    "gate_passed": true,
+    "s_per_op_point": 1.34e-05,
+    "s_per_op_range": [
+      9e-06,
+      1.34e-05
+    ],
+    "graded_us_per_op_observed": [
+      10.73,
+      11.1
+    ],
+    "model_note": "frozen 13.4 us/op is ~20% conservative against graded rows (10.73-11.10 us/op); kept frozen deliberately",
+    "predicted_s_point": 0.1746958,
+    "predicted_s_range": [
+      0.117333,
+      0.1746958
+    ],
+    "cap_s": 0.4,
+    "headroom_point": 2.2896944288300003
+  },
+  "wall": {
+    "available": true,
+    "local_median_s": 36.183923550001055,
+    "local_mean_s": 36.346282398999755,
+    "local_worst_s": 39.53049119999923,
+    "local_worst_network": "richard-davis",
+    "host_load": {
+      "class": "standalone",
+      "evidence": "workerq queue records only: jobs whose [started_at, finished_at] overlapped this one. Work launched outside the queue is invisible here.",
+      "overlapping_queue_jobs": []
+    },
+    "host_meta": {
+      "hostname": "Sam_Mega_PC",
+      "os": "Windows",
+      "os_release": "10",
+      "platform": "Windows-10-10.0.26200-SP0",
+      "machine": "AMD64",
+      "python_version": "3.10.19",
+      "cpu_brand": "AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD",
+      "cpu_count_logical": 16,
+      "numpy_version": "2.2.6",
+      "flopscope_version": "0.12.1"
+    },
+    "model_version": "wall-empirical-median-x1.9 / 2026-09-16",
+    "label": "EMPIRICAL_FORECAST",
+    "empirical_factor": 1.9,
+    "empirical_forecast_s": 68.749454745002,
+    "in_evidence_domain": true,
+    "advisory": true,
+    "is_gate": false,
+    "cap_s": 120.0,
+    "advisory_margin": 1.74546838873255,
+    "caveat": "family-specific (K3 Strassen), fitted to very few graded rows, NOT a safety proof. A new arithmetic family, Strassen depth or allocation/synchronisation pattern needs a canary"
+  },
+  "anchor": {
+    "adjusted": 1.5957396056103795e-08,
+    "raw_mse": 3.77946e-08,
+    "multiplier": 0.42221365105342556,
+    "n": 50,
+    "n_failed": 0,
+    "n_rows": 100,
+    "submission_id": "330950",
+    "wall": {
+      "n": 100,
+      "mean": 89.43015737057,
+      "median": 89.49313703400001,
+      "max": 93.15971529699993,
+      "max_network": "mark-watson",
+      "min": 86.04485902800002
+    },
+    "residual": {
+      "n": 100,
+      "mean": 0.15025826000999956,
+      "median": 0.15001075899999705,
+      "max": 0.15623225000000218,
+      "max_network": "emily-soto",
+      "min": 0.14326782400000582
+    },
+    "flops": {
+      "n": 100,
+      "mean": 928457637478.0,
+      "median": 928457637478.0,
+      "max": 928457637478.0,
+      "max_network": "natasha-heath",
+      "min": 928457637478.0
+    },
+    "control_ops_max": 14075.0
+  },
+  "memory": {
+    "available": true,
+    "report": "experiments\\2026-09-15_v31_certify\\linux_memory_gate_estimator_k3_v31.json",
+    "degraded": "",
+    "failed_checks": [],
+    "verdict": "PASS"
+  },
+  "labels": {
+    "MATH": "arithmetic and identities; host-independent",
+    "LOCAL": "measured on THIS host; not server seconds",
+    "SERVER_MEASURED": "reported by the grading server",
+    "SERVER_PREDICTED": "a forecast from a versioned model with a stated evidence domain",
+    "EMPIRICAL_FORECAST": "advisory rule of thumb; few candidates; not a safety proof"
+  },
+  "confirm_tier_read": true,
+  "promotes_nothing": true
+}

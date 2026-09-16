@@ -1,0 +1,29 @@
+{
+"_fixture": {
+"never_edit_by_hand": true,
+"why": "regression anchors for meter-path FLOP canonicalisation"
+},
+"meters": [
+{
+"candidate": "F21",
+"candidate_sha256": "d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94",
+"meter_path": "grader_twin_f64_readonly",
+"weights_mode": "f64_readonly",
+"flops_per_mlp": 928457637478.0,
+"source": "experiments/2026-09-12_f21/meter_F21_f64.json",
+"source_sha256": "68c4d2440b9c68223bb02a91e715982cdd47f694dc01c52df11adcf05a74bfcb",
+"graded_submission": "330950"
+},
+{
+"candidate": "v31",
+"candidate_sha256": "6dde5fd43ad41e8ec7199b742dd554d22d506c9cf85a532027e86a590d0a787c",
+"meter_path": "grader_twin_f64_readonly",
+"weights_mode": "f64_readonly",
+"flops_per_mlp": 661961618994.0,
+"weight_pass_flops": 33554432,
+"source": "experiments/2026-09-15_v31_certify/certify_v31.json#sections.grader_twin_arm.arms.f64_readonly",
+"source_sha256": "f93aaca4a7e0dbd3ccaa80e58855a2a14b2c64df54fb6dda5c604ad61261ab97",
+"graded_submission": "331317"
+}
+]
+}

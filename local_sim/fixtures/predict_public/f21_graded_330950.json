@@ -1,0 +1,2076 @@
+{
+"_fixture": {
+"trimmed_from": "experiments/run_reports/f21_diagnostic_330950_graded_report.json",
+"source_report_sha256": "4dc5c2f6f1d06220921efb74b71a3b5bee930e141e7319af0e0d55028100e5f3",
+"kept": "per-row telemetry the projector reads, public_scores, aggregates, config, progress, runtime",
+"never_edit_by_hand": true
+},
+"id": "330950",
+"status": "GRADED",
+"score": 1.595729544363834e-08,
+"evaluation": {
+"submission_id": "330950",
+"state": "completed",
+"config_snapshot": {
+"n_mlps": 100,
+"depth": 16,
+"width": 1024,
+"flop_budget": 2199023255552.0
+},
+"progress": {
+"total_mlps": 100,
+"mlps_completed": 100,
+"mlps_in_flight": 0,
+"mlps_failed": 0,
+"pct_complete": 100.0
+},
+"smoke_test_result": {
+"passed": true,
+"duration_ms": 14917.256244999997,
+"worker_passes": 11,
+"worker_failures": 0,
+"error_code": null
+},
+"results": {
+"per_mlp": [
+{
+"mlp_index": 0,
+"mlp_name": "natasha-heath",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 88.21438708299999,
+"residual_wall_time_s": 0.14912490499999365,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 1,
+"mlp_name": "caitlin-kemp",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 87.818107279,
+"residual_wall_time_s": 0.14811331399999972,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 2,
+"mlp_name": "jennifer-jordan",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 93.15663073099999,
+"residual_wall_time_s": 0.15134488599998974,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 3,
+"mlp_name": "brandon-chen",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 87.81611060400002,
+"residual_wall_time_s": 0.14489613400000678,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 4,
+"mlp_name": "nicholas-gonzalez",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 93.01319743999998,
+"residual_wall_time_s": 0.15112036499999704,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 5,
+"mlp_name": "thomas-anderson",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 87.33268509300001,
+"residual_wall_time_s": 0.1479250290000067,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 6,
+"mlp_name": "jill-gardner",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 86.594853683,
+"residual_wall_time_s": 0.14687991499999953,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 7,
+"mlp_name": "amanda-richmond",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 87.91487783600002,
+"residual_wall_time_s": 0.1459358970000011,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 8,
+"mlp_name": "tina-garcia",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 92.01982071100002,
+"residual_wall_time_s": 0.15191626700000427,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 9,
+"mlp_name": "alicia-levy",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 92.02922805199998,
+"residual_wall_time_s": 0.15174203099999772,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 10,
+"mlp_name": "jennifer-miller",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.05443528100002,
+"residual_wall_time_s": 0.14866997600000786,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 11,
+"mlp_name": "richard-contreras",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 88.90365740499999,
+"residual_wall_time_s": 0.14845824799999718,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 12,
+"mlp_name": "david-webb",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 87.97061813800002,
+"residual_wall_time_s": 0.14633347599999524,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 13,
+"mlp_name": "bradley-king",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 88.910636877,
+"residual_wall_time_s": 0.14936822199999256,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 14,
+"mlp_name": "jodi-morales",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 87.92864725700002,
+"residual_wall_time_s": 0.14883250600000508,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 15,
+"mlp_name": "travis-ward",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 87.41118307699998,
+"residual_wall_time_s": 0.1477755549999955,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 16,
+"mlp_name": "tanya-bennett",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 87.65699623500001,
+"residual_wall_time_s": 0.14832515599999851,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 17,
+"mlp_name": "joseph-vega",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 88.21974226499998,
+"residual_wall_time_s": 0.14642018700000392,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 18,
+"mlp_name": "amy-young",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 87.97500441900002,
+"residual_wall_time_s": 0.14767749499999638,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 19,
+"mlp_name": "april-rogers",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 86.570702289,
+"residual_wall_time_s": 0.14690518199999758,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 20,
+"mlp_name": "william-white",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 86.452816816,
+"residual_wall_time_s": 0.15000607300000013,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 21,
+"mlp_name": "evan-jennings",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 87.64540157399995,
+"residual_wall_time_s": 0.1494456199999945,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 22,
+"mlp_name": "julie-grant",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 88.72232549599994,
+"residual_wall_time_s": 0.15102827999999135,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 23,
+"mlp_name": "chad-cortez",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 90.93971355699995,
+"residual_wall_time_s": 0.14925069500000632,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 24,
+"mlp_name": "diana-summers",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 90.57707325299998,
+"residual_wall_time_s": 0.15030634100000384,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 25,
+"mlp_name": "lauren-nelson",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 87.94371411099996,
+"residual_wall_time_s": 0.14888818900000445,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 26,
+"mlp_name": "stephen-kelly",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 86.897761747,
+"residual_wall_time_s": 0.1487306430000075,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 27,
+"mlp_name": "brandy-johnston",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 90.32162677200006,
+"residual_wall_time_s": 0.1517409229999913,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 28,
+"mlp_name": "joshua-reed",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 92.99359920000006,
+"residual_wall_time_s": 0.15327340999999706,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 29,
+"mlp_name": "william-saunders",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 86.942197541,
+"residual_wall_time_s": 0.14642271299999265,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 30,
+"mlp_name": "john-fischer",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 87.16481863399997,
+"residual_wall_time_s": 0.1481177080000009,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 31,
+"mlp_name": "stacey-cunningham",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 86.12302437799997,
+"residual_wall_time_s": 0.14859414299999685,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 32,
+"mlp_name": "jeffery-bailey",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 87.30608017500003,
+"residual_wall_time_s": 0.14885210900000345,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 33,
+"mlp_name": "sandra-fernandez",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 92.66855218699993,
+"residual_wall_time_s": 0.15343587099999922,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 34,
+"mlp_name": "patricia-douglas",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 92.84763878000001,
+"residual_wall_time_s": 0.15385868900000332,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 35,
+"mlp_name": "donald-nguyen",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 88.43261359399992,
+"residual_wall_time_s": 0.148517990000002,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 36,
+"mlp_name": "ian-lara",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 87.29253398700007,
+"residual_wall_time_s": 0.1477779540000057,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 37,
+"mlp_name": "margaret-miller",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 86.04485902800002,
+"residual_wall_time_s": 0.14757368399999393,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 38,
+"mlp_name": "gabriel-baird",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 91.43072326200001,
+"residual_wall_time_s": 0.15263899699999683,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 39,
+"mlp_name": "jason-davies",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 93.08827898600009,
+"residual_wall_time_s": 0.15333352400000422,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 40,
+"mlp_name": "jerry-kerr",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.94600635599988,
+"residual_wall_time_s": 0.15107349999999542,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 41,
+"mlp_name": "travis-fox",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 90.48458575400002,
+"residual_wall_time_s": 0.15185573200000135,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 42,
+"mlp_name": "tim-richardson",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 87.15600762200006,
+"residual_wall_time_s": 0.14659885999999744,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 43,
+"mlp_name": "seth-griffin",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 87.10061064899992,
+"residual_wall_time_s": 0.1480145049999919,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 44,
+"mlp_name": "stephanie-garcia",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 86.18156570300002,
+"residual_wall_time_s": 0.14326782400000582,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 45,
+"mlp_name": "daniel-martinez",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.76754293100001,
+"residual_wall_time_s": 0.14938169500000242,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 46,
+"mlp_name": "jared-parker",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 91.36347936599998,
+"residual_wall_time_s": 0.1522635930000007,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 47,
+"mlp_name": "ronnie-carpenter",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.74814158999999,
+"residual_wall_time_s": 0.15133740699999976,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 48,
+"mlp_name": "leah-fields",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 90.58578442199996,
+"residual_wall_time_s": 0.15092366799999013,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 49,
+"mlp_name": "tyler-espinoza",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.12739362,
+"residual_wall_time_s": 0.1493367759999984,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 50,
+"mlp_name": "robert-gilbert",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 90.54559579100001,
+"residual_wall_time_s": 0.14987269200000242,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 51,
+"mlp_name": "crystal-mann",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.09963094399998,
+"residual_wall_time_s": 0.14806744300000219,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 52,
+"mlp_name": "sheri-lopez",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.91093082799999,
+"residual_wall_time_s": 0.15033957499998962,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 53,
+"mlp_name": "ryan-peck",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.75296179700001,
+"residual_wall_time_s": 0.15194862200000614,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 54,
+"mlp_name": "barbara-williams",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 91.81052042800002,
+"residual_wall_time_s": 0.1528874170000023,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 55,
+"mlp_name": "joshua-willis",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.56254324400001,
+"residual_wall_time_s": 0.14907935400000838,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 56,
+"mlp_name": "mary-castro",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 90.39681367600002,
+"residual_wall_time_s": 0.15227428100000395,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 57,
+"mlp_name": "kathleen-carlson",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 90.45641023099998,
+"residual_wall_time_s": 0.15001467899999454,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 58,
+"mlp_name": "hunter-cooper",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.15392015600003,
+"residual_wall_time_s": 0.1502942549999915,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 59,
+"mlp_name": "phillip-carter",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 90.84302308899998,
+"residual_wall_time_s": 0.15170845200000826,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 60,
+"mlp_name": "emily-anderson",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 90.75741470400004,
+"residual_wall_time_s": 0.15201796799999556,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 61,
+"mlp_name": "dustin-sanchez",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 92.091485213,
+"residual_wall_time_s": 0.15254446000000144,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 62,
+"mlp_name": "michael-watts",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 90.63593103400001,
+"residual_wall_time_s": 0.15273504099999968,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 63,
+"mlp_name": "christy-dawson",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 88.45605271499994,
+"residual_wall_time_s": 0.1490043510000021,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 64,
+"mlp_name": "samantha-coleman",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.631958784,
+"residual_wall_time_s": 0.15215431299999693,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 65,
+"mlp_name": "sarah-woods",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 91.41306954000004,
+"residual_wall_time_s": 0.1525559990000005,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 66,
+"mlp_name": "natalie-johnson",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 90.66030766999995,
+"residual_wall_time_s": 0.1521619659999942,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 67,
+"mlp_name": "jerry-bailey",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 91.347543003,
+"residual_wall_time_s": 0.15265605899999457,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 68,
+"mlp_name": "shannon-snyder",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 88.43447032100005,
+"residual_wall_time_s": 0.1486506239999983,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 69,
+"mlp_name": "donna-bryant",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.26475537599998,
+"residual_wall_time_s": 0.14983926899999744,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 70,
+"mlp_name": "renee-bryant",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 90.06730208499994,
+"residual_wall_time_s": 0.15181951300000662,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 71,
+"mlp_name": "raymond-fields",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 92.21931121900008,
+"residual_wall_time_s": 0.15619885799999622,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 72,
+"mlp_name": "mark-watson",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 93.15971529699993,
+"residual_wall_time_s": 0.15478326500000605,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 73,
+"mlp_name": "laurie-miller",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.254695792,
+"residual_wall_time_s": 0.14997511299999644,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 74,
+"mlp_name": "gregory-lopez",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.977214032,
+"residual_wall_time_s": 0.1535811459999934,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 75,
+"mlp_name": "mary-barber",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 91.049703798,
+"residual_wall_time_s": 0.1542293779999966,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 76,
+"mlp_name": "robert-wood",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.42373082400002,
+"residual_wall_time_s": 0.151869664000003,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 77,
+"mlp_name": "pamela-sharp",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 90.06704661499998,
+"residual_wall_time_s": 0.15139177400000392,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 78,
+"mlp_name": "joseph-mccormick",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 87.31174456899998,
+"residual_wall_time_s": 0.1488750130000085,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 79,
+"mlp_name": "jeremy-ali",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.70518863500001,
+"residual_wall_time_s": 0.15029330699999832,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 80,
+"mlp_name": "jesse-stewart",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.951706693,
+"residual_wall_time_s": 0.1504500460000031,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 81,
+"mlp_name": "mark-kelley",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.6763430100001,
+"residual_wall_time_s": 0.15077422799998885,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 82,
+"mlp_name": "michael-white",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.839340053,
+"residual_wall_time_s": 0.14929885899999817,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 83,
+"mlp_name": "christine-rios",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 88.09162338199985,
+"residual_wall_time_s": 0.1482728499999979,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 84,
+"mlp_name": "melvin-brooks",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.91180415300005,
+"residual_wall_time_s": 0.1507926820000023,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 85,
+"mlp_name": "jamie-mcdaniel",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 90.15630972999998,
+"residual_wall_time_s": 0.15096144400000355,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 86,
+"mlp_name": "michael-thomas",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 88.38914234899994,
+"residual_wall_time_s": 0.14939518300000998,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 87,
+"mlp_name": "patricia-colon",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.39310046800006,
+"residual_wall_time_s": 0.14990022300000305,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 88,
+"mlp_name": "sara-mack",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 87.97261311099987,
+"residual_wall_time_s": 0.1488573769999988,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 89,
+"mlp_name": "jason-cameron",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 90.34990763400003,
+"residual_wall_time_s": 0.15261733399999855,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 90,
+"mlp_name": "dawn-watson",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.035535299,
+"residual_wall_time_s": 0.15131061799999657,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 91,
+"mlp_name": "jennifer-douglas",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 91.703091019,
+"residual_wall_time_s": 0.15406007199999294,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 92,
+"mlp_name": "lauren-martinez",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 88.61629536199996,
+"residual_wall_time_s": 0.15084202500000288,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 93,
+"mlp_name": "patricia-johnson",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 87.17345049699998,
+"residual_wall_time_s": 0.14854469200000153,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 94,
+"mlp_name": "emily-soto",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 90.9956636610001,
+"residual_wall_time_s": 0.15623225000000218,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 95,
+"mlp_name": "samantha-davis",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.19380918899992,
+"residual_wall_time_s": 0.15000683899999956,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 96,
+"mlp_name": "nicholas-trujillo",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.70789646700007,
+"residual_wall_time_s": 0.14990685200000087,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 97,
+"mlp_name": "jimmy-reynolds",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 90.75406468899996,
+"residual_wall_time_s": 0.15620839399998943,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 98,
+"mlp_name": "michelle-curtis",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 86.51125893599988,
+"residual_wall_time_s": 0.14849613900000236,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+},
+{
+"mlp_index": 99,
+"mlp_name": "jeremiah-neal",
+"state": "completed",
+"error_code": null,
+"telemetry": {
+"flops_used": 928457637478.0,
+"effective_compute": 928457637478.0,
+"participant_predict_wall_s": 89.32379709899999,
+"residual_wall_time_s": 0.15146218099999942,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false
+}
+}
+],
+"public_scores": [
+{
+"mlp_index": 0,
+"scores": {
+"final_layer_mse": 3.794e-08,
+"all_layers_mse": 1.675e-08,
+"adjusted_final_layer_score": 1.602e-08
+}
+},
+{
+"mlp_index": 1,
+"scores": {
+"final_layer_mse": 3.675e-08,
+"all_layers_mse": 1.52e-08,
+"adjusted_final_layer_score": 1.552e-08
+}
+},
+{
+"mlp_index": 2,
+"scores": {
+"final_layer_mse": 3.073e-08,
+"all_layers_mse": 1.525e-08,
+"adjusted_final_layer_score": 1.298e-08
+}
+},
+{
+"mlp_index": 3,
+"scores": {
+"final_layer_mse": 3.621e-08,
+"all_layers_mse": 1.507e-08,
+"adjusted_final_layer_score": 1.529e-08
+}
+},
+{
+"mlp_index": 4,
+"scores": {
+"final_layer_mse": 3.407e-08,
+"all_layers_mse": 1.508e-08,
+"adjusted_final_layer_score": 1.439e-08
+}
+},
+{
+"mlp_index": 5,
+"scores": {
+"final_layer_mse": 3.542e-08,
+"all_layers_mse": 1.326e-08,
+"adjusted_final_layer_score": 1.495e-08
+}
+},
+{
+"mlp_index": 6,
+"scores": {
+"final_layer_mse": 3.281e-08,
+"all_layers_mse": 1.436e-08,
+"adjusted_final_layer_score": 1.385e-08
+}
+},
+{
+"mlp_index": 7,
+"scores": {
+"final_layer_mse": 3.59e-08,
+"all_layers_mse": 1.547e-08,
+"adjusted_final_layer_score": 1.516e-08
+}
+},
+{
+"mlp_index": 8,
+"scores": {
+"final_layer_mse": 3.958e-08,
+"all_layers_mse": 1.517e-08,
+"adjusted_final_layer_score": 1.671e-08
+}
+},
+{
+"mlp_index": 9,
+"scores": {
+"final_layer_mse": 3.683e-08,
+"all_layers_mse": 1.581e-08,
+"adjusted_final_layer_score": 1.555e-08
+}
+},
+{
+"mlp_index": 10,
+"scores": {
+"final_layer_mse": 3.531e-08,
+"all_layers_mse": 1.505e-08,
+"adjusted_final_layer_score": 1.491e-08
+}
+},
+{
+"mlp_index": 11,
+"scores": {
+"final_layer_mse": 3.601e-08,
+"all_layers_mse": 1.489e-08,
+"adjusted_final_layer_score": 1.52e-08
+}
+},
+{
+"mlp_index": 12,
+"scores": {
+"final_layer_mse": 3.44e-08,
+"all_layers_mse": 1.577e-08,
+"adjusted_final_layer_score": 1.452e-08
+}
+},
+{
+"mlp_index": 13,
+"scores": {
+"final_layer_mse": 3.953e-08,
+"all_layers_mse": 1.528e-08,
+"adjusted_final_layer_score": 1.669e-08
+}
+},
+{
+"mlp_index": 14,
+"scores": {
+"final_layer_mse": 4.01e-08,
+"all_layers_mse": 1.788e-08,
+"adjusted_final_layer_score": 1.693e-08
+}
+},
+{
+"mlp_index": 15,
+"scores": {
+"final_layer_mse": 3.237e-08,
+"all_layers_mse": 1.353e-08,
+"adjusted_final_layer_score": 1.367e-08
+}
+},
+{
+"mlp_index": 16,
+"scores": {
+"final_layer_mse": 4.005e-08,
+"all_layers_mse": 1.547e-08,
+"adjusted_final_layer_score": 1.691e-08
+}
+},
+{
+"mlp_index": 17,
+"scores": {
+"final_layer_mse": 3.447e-08,
+"all_layers_mse": 1.456e-08,
+"adjusted_final_layer_score": 1.455e-08
+}
+},
+{
+"mlp_index": 18,
+"scores": {
+"final_layer_mse": 4.904e-08,
+"all_layers_mse": 1.721e-08,
+"adjusted_final_layer_score": 2.07e-08
+}
+},
+{
+"mlp_index": 19,
+"scores": {
+"final_layer_mse": 4.372e-08,
+"all_layers_mse": 1.775e-08,
+"adjusted_final_layer_score": 1.846e-08
+}
+},
+{
+"mlp_index": 20,
+"scores": {
+"final_layer_mse": 4.675e-08,
+"all_layers_mse": 1.77e-08,
+"adjusted_final_layer_score": 1.974e-08
+}
+},
+{
+"mlp_index": 21,
+"scores": {
+"final_layer_mse": 4.507e-08,
+"all_layers_mse": 1.654e-08,
+"adjusted_final_layer_score": 1.903e-08
+}
+},
+{
+"mlp_index": 22,
+"scores": {
+"final_layer_mse": 4.421e-08,
+"all_layers_mse": 1.742e-08,
+"adjusted_final_layer_score": 1.867e-08
+}
+},
+{
+"mlp_index": 23,
+"scores": {
+"final_layer_mse": 3.742e-08,
+"all_layers_mse": 1.54e-08,
+"adjusted_final_layer_score": 1.58e-08
+}
+},
+{
+"mlp_index": 24,
+"scores": {
+"final_layer_mse": 3.731e-08,
+"all_layers_mse": 1.446e-08,
+"adjusted_final_layer_score": 1.575e-08
+}
+},
+{
+"mlp_index": 25,
+"scores": {
+"final_layer_mse": 4.194e-08,
+"all_layers_mse": 1.659e-08,
+"adjusted_final_layer_score": 1.771e-08
+}
+},
+{
+"mlp_index": 26,
+"scores": {
+"final_layer_mse": 3.562e-08,
+"all_layers_mse": 1.407e-08,
+"adjusted_final_layer_score": 1.504e-08
+}
+},
+{
+"mlp_index": 27,
+"scores": {
+"final_layer_mse": 3.826e-08,
+"all_layers_mse": 1.62e-08,
+"adjusted_final_layer_score": 1.615e-08
+}
+},
+{
+"mlp_index": 28,
+"scores": {
+"final_layer_mse": 4.831e-08,
+"all_layers_mse": 1.724e-08,
+"adjusted_final_layer_score": 2.04e-08
+}
+},
+{
+"mlp_index": 29,
+"scores": {
+"final_layer_mse": 4.027e-08,
+"all_layers_mse": 1.685e-08,
+"adjusted_final_layer_score": 1.7e-08
+}
+},
+{
+"mlp_index": 30,
+"scores": {
+"final_layer_mse": 4.08e-08,
+"all_layers_mse": 1.542e-08,
+"adjusted_final_layer_score": 1.722e-08
+}
+},
+{
+"mlp_index": 31,
+"scores": {
+"final_layer_mse": 3.622e-08,
+"all_layers_mse": 1.603e-08,
+"adjusted_final_layer_score": 1.529e-08
+}
+},
+{
+"mlp_index": 32,
+"scores": {
+"final_layer_mse": 4.005e-08,
+"all_layers_mse": 1.552e-08,
+"adjusted_final_layer_score": 1.691e-08
+}
+},
+{
+"mlp_index": 33,
+"scores": {
+"final_layer_mse": 3.547e-08,
+"all_layers_mse": 1.533e-08,
+"adjusted_final_layer_score": 1.498e-08
+}
+},
+{
+"mlp_index": 34,
+"scores": {
+"final_layer_mse": 3.309e-08,
+"all_layers_mse": 1.461e-08,
+"adjusted_final_layer_score": 1.397e-08
+}
+},
+{
+"mlp_index": 35,
+"scores": {
+"final_layer_mse": 4.134e-08,
+"all_layers_mse": 1.587e-08,
+"adjusted_final_layer_score": 1.745e-08
+}
+},
+{
+"mlp_index": 36,
+"scores": {
+"final_layer_mse": 3.969e-08,
+"all_layers_mse": 1.587e-08,
+"adjusted_final_layer_score": 1.676e-08
+}
+},
+{
+"mlp_index": 37,
+"scores": {
+"final_layer_mse": 3.079e-08,
+"all_layers_mse": 1.528e-08,
+"adjusted_final_layer_score": 1.3e-08
+}
+},
+{
+"mlp_index": 38,
+"scores": {
+"final_layer_mse": 3.651e-08,
+"all_layers_mse": 1.614e-08,
+"adjusted_final_layer_score": 1.541e-08
+}
+},
+{
+"mlp_index": 39,
+"scores": {
+"final_layer_mse": 3.49e-08,
+"all_layers_mse": 1.378e-08,
+"adjusted_final_layer_score": 1.474e-08
+}
+},
+{
+"mlp_index": 40,
+"scores": {
+"final_layer_mse": 3.637e-08,
+"all_layers_mse": 1.513e-08,
+"adjusted_final_layer_score": 1.536e-08
+}
+},
+{
+"mlp_index": 41,
+"scores": {
+"final_layer_mse": 3.388e-08,
+"all_layers_mse": 1.363e-08,
+"adjusted_final_layer_score": 1.431e-08
+}
+},
+{
+"mlp_index": 42,
+"scores": {
+"final_layer_mse": 4.056e-08,
+"all_layers_mse": 1.627e-08,
+"adjusted_final_layer_score": 1.712e-08
+}
+},
+{
+"mlp_index": 43,
+"scores": {
+"final_layer_mse": 4.057e-08,
+"all_layers_mse": 1.776e-08,
+"adjusted_final_layer_score": 1.713e-08
+}
+},
+{
+"mlp_index": 44,
+"scores": {
+"final_layer_mse": 3.683e-08,
+"all_layers_mse": 1.56e-08,
+"adjusted_final_layer_score": 1.555e-08
+}
+},
+{
+"mlp_index": 45,
+"scores": {
+"final_layer_mse": 4.064e-08,
+"all_layers_mse": 1.838e-08,
+"adjusted_final_layer_score": 1.716e-08
+}
+},
+{
+"mlp_index": 46,
+"scores": {
+"final_layer_mse": 3.144e-08,
+"all_layers_mse": 1.334e-08,
+"adjusted_final_layer_score": 1.327e-08
+}
+},
+{
+"mlp_index": 47,
+"scores": {
+"final_layer_mse": 3.267e-08,
+"all_layers_mse": 1.458e-08,
+"adjusted_final_layer_score": 1.379e-08
+}
+},
+{
+"mlp_index": 48,
+"scores": {
+"final_layer_mse": 3.198e-08,
+"all_layers_mse": 1.36e-08,
+"adjusted_final_layer_score": 1.35e-08
+}
+},
+{
+"mlp_index": 49,
+"scores": {
+"final_layer_mse": 3.953e-08,
+"all_layers_mse": 1.621e-08,
+"adjusted_final_layer_score": 1.669e-08
+}
+}
+],
+"aggregates": {
+"public": {
+"score": 1.596e-08,
+"score_secondary": 3.779e-08,
+"sampling_mse": 1.132e-06,
+"adjusted_final_layer_score": 1.596e-08,
+"final_layer_mse": 3.779e-08,
+"all_layers_mse": 1.559e-08,
+"best_mlp_adjusted_final_layer_score": 1.298e-08,
+"worst_mlp_adjusted_final_layer_score": 2.07e-08,
+"mean_score_multiplier": 0.42221365105342556,
+"mean_compute_utilization": 0.42221365105342556,
+"mean_effective_compute": 928457637478.0,
+"n_failed_mlps": 0,
+"failure_breakdown": {
+"budget_exhausted": 0,
+"time_exhausted": 0,
+"residual_wall_time_exhausted": 0,
+"combined_budget_exhausted": 0,
+"error": 0
+}
+}
+}
+},
+"runtime_environment": {
+"whestbench_version": "0.16.1",
+"flopscope_version": "0.12.1",
+"flopscope_server_version": "0.12.1",
+"numpy_version": "2.2.6",
+"python_version": "3.10.21",
+"flopscope_patches": [],
+"flopscope_client_version": "0.12.1",
+"participant_shim_version": "0.1.0",
+"participant_python_version": "3.10.21"
+},
+"error": null
+}
+}

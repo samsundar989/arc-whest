@@ -51433,3 +51433,41 @@ at ≤5% raw loss). **Samuel answered "I don't know" to all four**, verbatim.
 Strategist predictions stay separate: κ4 half closes to ≤2.4e-8 P01-scale (55%),
 D2 finds a ≥1.3× discrepancy (60%), N1 halves rank at equal error (35%), P3
 ×0.92 raw.
+
+---
+
+## 2026-09-16 — **Stage 0 instrument repairs landed (IMPORTANT): cap-off accuracy routing, crash evidence, content identity, projection provenance**
+
+Prediction written in the amendment above (≤ ½ day, suites green after
+obsolete-assumption assertions are replaced, no historical artifact changed,
+portability green). **Held.** Built by two bounded subagents on disjoint files;
+every test below re-run by the Builder.
+
+| defect | repair | evidence |
+|---|---|---|
+| local residual cap zeroed K3 smoke/soak rows before the advisory check | `certify_candidate.official_run_cmd()` adds only `--no-residual-wall-time-limit`; `official_functional_verdict()` still fails exception/budget/wall/NaN rows and REFUSES a report whose local cap was on; soak worst-residual is advisory; `preflight.ps1` step 16 same | `test_certify_instrument_repairs.py` 14/14 |
+| `run_mini_json.ps1` held stdout in memory; truncated JSON lost everything | stdout/stderr streamed to `<out>.<stamp>.{stdout,stderr}.raw` from launch; atomic publish; `failure.json` with sha256s on any bad exit; refuses to overwrite | `test_run_mini_json.py` 4/4 (fake launcher: truncated JSON + exit 3 keeps raw bytes) |
+| certification bound to `git status` text | `dependency_identity()` hashes candidate + 16-file traced instrument closure + package file lists + Python + thread env, before and after | 14/14 incl. "unrelated edit stays valid" and "already-dirty dependency edited is invalid" |
+| projector accepted unbound reports, skipped missing rows, did not refuse failed anchors | sidecar `arc-whest.run_receipt/1` bound to report bytes; refuses dataset/name/version mismatch, truncated/NaN rows, failed/incomplete graded anchors, source-hash mismatch (no override), mixed meter paths | `test_predict_public.py` **87/87** (was 39/39) |
+| band called a prediction interval; `{0,2**24}` offset; ×1.60 wall gate; mean ops | band relabelled *transformed local paired-difference interval (conditional)*; meter paths `whest_run_subprocess` +2**25, `grader_twin_f64_readonly` +0; wall = `1.9 × standalone median` tagged EMPIRICAL_FORECAST, `is_gate: False`; residual forecast gates on **max** per-network ops; sync counts printed ABSENT when absent | real-report regressions: subprocess+2**25 and twin+0 reproduce both graded FLOP totals exactly; job-1413 replay projects `8.713276e-9` (graded `8.752e-9`), wall forecast 68.75 s (graded 68.13 s) |
+
+`test_competition_score.py` 134/134 unchanged; `verify_portability.py` PORTABLE.
+Replay: `experiments/2026-09-16_stage0/predict_public_v31_job1413_vs_f21.{txt,json}`;
+backfilled receipts for jobs 1401/1412/1413 (source sha from the workerq
+snapshot, cross-checked against the git blob).
+
+**Not yet exercised end to end:** a full certification and `preflight -Full`
+step 16 with the new code — scheduled on the frozen release candidate, where
+they are needed anyway. Default affected preflight queued now.
+**Deferred, recorded:** `official_config.py:1034` survival table still prints
+the ×1.60 factor (display only, no gate reads it); `run_mini_json.ps1` should
+emit the receipt at run time; certification still runs from the live tree
+(identity detects change, does not isolate); renamed check names no longer
+match historical FAIL lines (records untouched).
+
+### Knowledge delta
+- The projector's tests had been *asserting* the disproved ×1.60 and 2**24
+  assumptions; green tests measured the implementation, not the world. Real
+  graded-report fixtures are now the regression oracle.
+- Neither report format carries a source hash, so provenance must live in a
+  receipt bound to the report's bytes — a filename is not identity.

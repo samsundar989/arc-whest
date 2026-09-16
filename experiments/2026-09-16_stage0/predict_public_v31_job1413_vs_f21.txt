@@ -1,0 +1,79 @@
+====================================================================================================
+PROJECTED PUBLIC SCORE -- an estimate, not a score
+====================================================================================================
+  candidate   estimator_k3_v31.py
+  control     f21_mini.json   graded submission 330950
+  networks    100 public-mini MLPs, paired on mlp_name; dataset hf://aicrowd/arc-whestbench-public-2026@v2-phase2 sha256 264fa1f416d16a40...
+
+  *** THE PUBLIC MINI SPLIT CARRIES THE ORGANISERS' REAL LABELS.
+  *** This is a CONFIRM-tier read. It may CHECK a decision made on
+  *** fresh mints and it may CHOOSE NOTHING.
+
+-- provenance -------------------------------------------------------------------------------------
+  [MATH              ] control run source == graded source                 VERIFIED
+       control receipt == estimator.py inside experiments/2026-09-12_f21/f21-with-notice.tar.gz (tarball sha256 matches ledger)
+  [MATH              ] candidate source binding                            VERIFIED
+       --candidate bytes == candidate receipt source_sha256
+  [MATH              ] anchor                                              100 rows completed, 0 failed, 50 public scores
+  [MATH              ] meter path                                          whest_run_subprocess (VERIFIED)
+
+-- the paired local measurement -------------------------------------------------------------------
+  [LOCAL             ] control adjusted                                    1.657143e-08
+  [LOCAL             ] candidate adjusted                                  9.048556e-09
+  [LOCAL             ] control raw MSE                                     3.925033e-08
+  [LOCAL             ] candidate raw MSE                                   3.006065e-08
+  [LOCAL             ] control multiplier                                  0.422198
+  [LOCAL             ] candidate multiplier                                0.301010
+
+  [MATH              ] paired arithmetic score difference  (BINDING)       +7.522869e-09
+  [MATH              ]   studentised-t 95% CI on that difference           [+7.2529e-09, +7.7929e-09]
+  [MATH              ] ratio candidate/control                             0.546034
+  [MATH              ]   transformed difference band (ratio scale)         [0.529740, 0.562327]
+  [MATH              ] arithmetic gain (control/candidate)                 1.8314x
+  [MATH              ] candidate better on                                 100/100   sign p = 0.0000
+  [MATH              ] geometric gain  DIAGNOSTIC ONLY, no authority       1.8303x
+
+-- the projection ---------------------------------------------------------------------------------
+  [SERVER_MEASURED   ] control's graded public score #330950               1.595740e-08  (replayed)
+  [SERVER_PREDICTED  ] projected public adjusted                           8.713276e-09
+  [MATH              ]   same, both arms at graded FLOPs                   8.713402e-09
+  [SERVER_PREDICTED  ]   transformed band                                  [8.4533e-09, 8.9733e-09]
+       That band is a transformed local paired-difference interval (conditional; excludes hidden-network transfer uncertainty).
+       It is NOT a 95% prediction interval for the hidden-board score.
+
+-- cost: FLOPs by meter path ----------------------------------------------------------------------
+  [LOCAL             ] counted FLOPs per network                           mean 661,928,064,562   max 661,928,064,562 (logan-fitzgerald)
+  [SERVER_PREDICTED  ] mean F + 33,554,432 -> C/B                          0.301025   multiplier 0.301025
+       VERIFIED: graded - local subprocess = 33,554,432 exactly for F21 #330950 (928,457,637,478 - 928,424,083,046) and v31 #331317 (661,961,618,994 - 661,928,064,562); two pairs, one representation
+
+-- residual, priced on OPERATIONS (gate on the per-network MAX) -----------------------------------
+  [LOCAL             ] metered operations per network                      mean 13,037   max 13,037 (logan-fitzgerald)
+  [MATH              ]   max against the 22,000-operation gate             PASS
+  [SERVER_PREDICTED  ] predicted server residual, max network              0.1747 s   [0.1173, 0.1747]
+  [SERVER_PREDICTED  ]   headroom under the 0.4 s cliff                    2.29x
+       frozen 13.4 us/op is ~20% conservative against graded rows (10.73-11.10 us/op); kept frozen deliberately.
+  [LOCAL             ] local residual s (advisory, NOT server s)           mean 6.016   max 6.409 (richard-davis)
+  [LOCAL             ] sync/scalar materialisations                        ABSENT
+       per-operation breakdown present but it contains no synchronisation/scalar-materialisation counter (checked item, tolist, __float__, __int__, __bool__, __index__, float, int, bool, synchronize, materialize); ABSENT, not zero
+  [SERVER_MEASURED   ] control graded residual                             median 0.1500 s   max 0.1562 s (emily-soto)
+  [MATH              ]   graded residual per op, control max/max           11.10 us/op at 14,075 ops
+
+-- wall (advisory; no gate) -----------------------------------------------------------------------
+  [LOCAL             ] local median / mean                                 36.184 s / 36.346 s
+  [LOCAL             ] local worst                                         39.530 s (richard-davis)
+  [LOCAL             ] host load                                           standalone   (0 overlapping queue jobs)
+       workerq queue records only: jobs whose [started_at, finished_at] overlapped this one. Work launched outside the queue is invisible here.
+  [EMPIRICAL_FORECAST] 1.9 x local median                                  68.75 s of 120 s  (advisory margin 1.75x)
+       wall-empirical-median-x1.9 / 2026-09-16: family-specific (K3 Strassen), fitted to very few graded rows, NOT a safety proof. A new arithmetic family, Strassen depth or allocation/synchronisation pattern needs a canary.
+  [SERVER_MEASURED   ] control graded wall                                 median 89.49 s   max 93.16 s (mark-watson)
+
+-- memory, the one cap this host cannot test -------------------------------------------------------
+  [LOCAL             ] Linux 8-GiB enforcement                             PASS
+  [LOCAL             ]   report                                            experiments\2026-09-15_v31_certify\linux_memory_gate_estimator_k3_v31.json
+
+  note: paired on 100 matched MLP identities
+  note: paired on 100 matched MLP identities
+
+  NOTHING HERE PROMOTES, SUBMITS OR DESIGNATES ANYTHING. Samuel
+  approves every submission individually and designates alone.
+  -> experiments/2026-09-16_stage0/predict_public_v31_job1413_vs_f21.json

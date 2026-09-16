@@ -538,13 +538,23 @@ if ($Full) {
     # Zero failures is the bar, and `--runner subprocess` is not optional: the
     # in-process runner cannot reproduce worker death, and its residual figure is a
     # different instrument from the one the 0.4 s cliff is measured against.
+    #
+    # 2026-09-16 (validation audit P0): ONLY the local residual cap is disabled.
+    # With it armed, this host's ~27x per-op residual over-read made the runner
+    # ZERO every K3 row before the advisory wording below could help, so the
+    # failures and MSE were the cap's, not the estimator's. Every other failure
+    # (exception, budget, wall, combined) still refuses. The server's 0.4 s cap is
+    # NOT exercised here -- it stays a deployment requirement, forecast by the op
+    # count against official_config.PHASE2_OP_COUNT_GATE (certify_candidate s.7).
     Step "16. official Phase-2 subprocess smoke (zero failures)" {
         $py = @"
 import json, subprocess, sys, os
 cmd = [os.path.join(os.path.dirname(sys.executable), 'whest.exe'), 'run',
        '--estimator', 'estimator.py',
        '--dataset', 'hf://aicrowd/arc-whestbench-public-2026@v2-phase2',
-       '--split', 'mini', '--runner', 'subprocess', '--n-mlps', '2', '--json']
+       '--split', 'mini', '--runner', 'subprocess', '--n-mlps', '2',
+       '--no-residual-wall-time-limit', '--json']
+SERVER_RESIDUAL_CAP_S = 0.4
 p = subprocess.run(cmd, capture_output=True, text=True)
 i = p.stdout.find('{')
 if i < 0:
@@ -570,26 +580,30 @@ print('  dataset      %s' % cfg['dataset']['path'])
 print('  shape        %sx%s   B = %s   lambda = %s' % (
     cfg['width'], cfg['depth'], format(cfg['flop_budget'], ','),
     cfg['lambda_flops_per_second']))
-print('  residual cap %ss   wall %ss' % (
-    cfg['residual_wall_time_limit_s'], cfg['wall_time_limit_s']))
+print('  LOCAL residual cap %s (disabled on purpose; server cap %.1f s NOT exercised)   wall %ss' % (
+    cfg['residual_wall_time_limit_s'], SERVER_RESIDUAL_CAP_S, cfg['wall_time_limit_s']))
 print('  score        %.6e   raw MSE %.6e   mult %.4f' % (
     r['adjusted_final_layer_score'], r['final_layer_mse'],
     r['mean_score_multiplier']))
 print('  C/B          %.7f   failures %d' % (
     r['mean_compute_utilization'], r['n_failed_mlps']))
 worst = max(m['residual_wall_time_s'] for m in r['per_mlp'])
-cap = cfg['residual_wall_time_limit_s']
-print('  worst residual %.5f s of %.2f s cap  -> %.1fx headroom (LOCAL OFFICIAL SUBPROCESS)' % (
+cap = SERVER_RESIDUAL_CAP_S
+print('  worst residual %.5f s vs the %.2f s SERVER cap -> %.1fx (ADVISORY LOCAL seconds, gates nothing)' % (
     worst, cap, cap / worst if worst else float('inf')))
 bad = []
 if r['n_failed_mlps'] != 0:
-    bad.append('n_failed_mlps = %d' % r['n_failed_mlps'])
+    bad.append('n_failed_mlps = %d (%s)' % (r['n_failed_mlps'], r.get('failure_breakdown')))
+if r.get('failure_breakdown', {}).get('residual_wall_time_exhausted'):
+    bad.append('residual_wall_time_exhausted with the local cap disabled: inconsistent report')
 if not str(cfg['dataset']['path']).endswith('@v2-phase2'):
     bad.append('not the v2-phase2 dataset')
 if cfg['lambda_flops_per_second'] != 0.0:
     bad.append('lambda is not 0')
-if cfg['residual_wall_time_limit_s'] != 0.4:
-    bad.append('residual cap is not 0.4 s')
+if cfg['residual_wall_time_limit_s'] is not None:
+    bad.append('local residual cap is ARMED (%r): not the corrected path' % cfg['residual_wall_time_limit_s'])
+if cfg['wall_time_limit_s'] != 120.0 or cfg['flop_budget'] != 2 ** 41:
+    bad.append('a cap other than the local residual cap was changed')
 # THE LOCAL RESIDUAL NO LONGER REFUSES. Slice 6 contract 0.1, 2026-09-14.
 # It is printed above and it gates nothing: this host reads 12-53x high per
 # operation on residual, so refusing on it refuses candidates for being run
@@ -597,7 +611,7 @@ if cfg['residual_wall_time_limit_s'] != 0.4:
 # official_config.PHASE2_OP_COUNT_GATE, in certify_candidate section 6.
 # Historical refusals that quoted this line stand; they are not amended.
 if worst > cap:
-    print('  ADVISORY: worst LOCAL residual %.4f s is over the %.2f s cap. '
+    print('  ADVISORY: worst LOCAL residual %.4f s is over the %.2f s server cap. '
           'This does not refuse.' % (worst, cap))
 if bad:
     print('  REFUSED: ' + '; '.join(bad)); sys.exit(1)

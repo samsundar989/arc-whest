@@ -69,6 +69,10 @@ _ROOT = os.path.dirname(_HERE)
 sys.path[:] = [p for p in sys.path if os.path.abspath(p or ".") != _HERE] + [_ROOT, _HERE]
 
 import numpy as np  # noqa: E402
+# The ONE content-hash writer the F21 scorer's dependency binding already uses
+# (`f21_score.py` hands `instrument_files` to `EvidenceJournal`, which hashes
+# them with this). Stdlib-only, so importing it keeps this module importable.
+from evidence_journal import sha_file as _dependency_sha  # noqa: E402
 
 WIDTH, DEPTH = 1024, 16
 BUDGET = 2 ** 41
@@ -81,6 +85,17 @@ SEEDS = (90000000201, 90000000202, 90000000203, 90000000204)
 
 RESIDUAL_CAP_S = 0.4
 WALL_CAP_S = 120.0
+
+#: The organisers' Phase-2 public split, used by sections 10 and 11.
+OFFICIAL_DATASET = "hf://aicrowd/arc-whestbench-public-2026@v2-phase2"
+#: The ONLY local cap the functional/accuracy runs disable. This host reads
+#: residual ~27x high per operation, so with the graded 0.4 s cap armed the
+#: runner zeroes every K3 row BEFORE any advisory wording can help, and the
+#: report's failures and MSE stop being the estimator's
+#: (`docs/research/2026-09-16_validation_audit.md` P0). The server cap remains a
+#: deployment requirement; it is forecast by section 7's op-count gate and is
+#: NOT exercised by a run built with this flag.
+LOCAL_RESIDUAL_CAP_OFF_FLAG = "--no-residual-wall-time-limit"
 SETUP_CAP_S = 5.0
 MEMORY_CAP_MB = 8192
 SINGLE_ARRAY_CAP = 4 * (1 << 30)
@@ -1206,6 +1221,131 @@ def _json_tail(text):
 
 
 # --------------------------------------------------------------------------- #
+# DEPENDENCY-CONTENT IDENTITY -- replaces `git status --porcelain` equality.
+#
+# Status equality was not source immutability (validation audit 2026-09-16,
+# P1): an already-dirty instrument could change bytes while its status stayed
+# ` M path`, and an unrelated clean file becoming dirty invalidated a useful
+# run. The binding is now the SHA-256 of the candidate and of the instrument
+# closure this command actually executes or imports, plus the installed stack,
+# the interpreter and the numerical environment. Edits elsewhere in the tree do
+# not touch it; any byte change inside it does, whatever git thinks.
+
+#: local_sim files this command runs as a subprocess or imports directly.
+#: Their transitive local imports are traced by `instrument_dependency_files`.
+INSTRUMENT_ROOTS = (
+    "certify_candidate.py",        # this command
+    "official_config.py",          # section 2 subprocess + section 7 import
+    "edge_cases.py",               # section 3 subprocess workers
+    "test_edge_cases_inv9.py",     # section 3b subprocess
+    "mint_provenance.py",          # section 4 FRESH_WORKER + section 5 import
+    "p2_weff.py",                  # section 5 MaterializationCounter
+    "lifecycle_eval.py",           # section 5/5b arms
+    "test_deployment_envelope.py",  # section 9 peak_memory_bytes
+    "linux_memory_gate.py",        # section 9 instrument hash
+    "evidence_journal.py",         # the hash writer itself
+)
+
+#: Environment that changes numerical results or the candidate's thresholds.
+NUMERICAL_ENV_KEYS = (
+    "OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
+    "NUMEXPR_NUM_THREADS", "VECLIB_MAXIMUM_THREADS", "BLIS_NUM_THREADS",
+    "PYTHONHASHSEED", "ARC_WHEST_RAW_MSE", "ARC_WHEST_DISABLE_CAL",
+)
+DEPENDENCY_IDENTITY_VERSION = 1
+
+
+def instrument_dependency_files(roots=INSTRUMENT_ROOTS, base=None):
+    """Sorted absolute paths of `roots` plus their transitive local imports.
+
+    Static (AST) tracing, so nothing is imported to discover it. A name counts
+    as local only when `<base>/<name>.py` exists; the numpy shim PACKAGES named
+    `flopscope`/`whestbench` are directories and are never matched, so the
+    real installed packages are bound by version instead. A root that does not
+    exist is an error, not a silent omission.
+    """
+    import ast
+    base = os.path.abspath(base or _HERE)
+    seen, stack = set(), list(roots)
+    while stack:
+        name = stack.pop()
+        if name in seen:
+            continue
+        path = os.path.join(base, name)
+        if not os.path.isfile(path):
+            raise FileNotFoundError("instrument dependency is absent: " + path)
+        seen.add(name)
+        with open(path, encoding="utf-8") as fh:
+            tree = ast.parse(fh.read(), filename=path)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                mods = [alias.name.split(".")[0] for alias in node.names]
+            elif (isinstance(node, ast.ImportFrom) and node.level == 0
+                  and node.module):
+                mods = [node.module.split(".")[0]]
+            else:
+                continue
+            for mod in mods:
+                if os.path.isfile(os.path.join(base, mod + ".py")):
+                    stack.append(mod + ".py")
+    return sorted(os.path.join(base, name) for name in seen)
+
+
+def _distribution_identity(name):
+    try:
+        dist = importlib.metadata.distribution(name)
+    except importlib.metadata.PackageNotFoundError:
+        return {"version": None, "record_sha256": None}
+    record = dist.read_text("RECORD")
+    return {"version": dist.version,
+            "record_sha256": None if record is None else
+            hashlib.sha256(record.encode("utf-8")).hexdigest()}
+
+
+def dependency_identity(candidate, *, roots=INSTRUMENT_ROOTS, base=None,
+                        root_dir=None):
+    """Content identity of everything this run's verdict depends on. PURE
+    with respect to the working tree: reads bytes, never git state."""
+    root_dir = os.path.abspath(root_dir or _ROOT)
+
+    def _key(path):
+        try:
+            return os.path.relpath(path, root_dir).replace("\\", "/")
+        except ValueError:  # a different Windows drive: keep it absolute
+            return os.path.abspath(path).replace("\\", "/")
+
+    files = instrument_dependency_files(roots, base)
+    return {
+        "version": DEPENDENCY_IDENTITY_VERSION,
+        "candidate": {"path": _key(os.path.abspath(candidate)),
+                      "sha256": _dependency_sha(candidate)},
+        "instruments": {_key(p): _dependency_sha(p) for p in files},
+        "packages": {n: _distribution_identity(n)
+                     for n in ("whestbench", "flopscope", "numpy")},
+        "runtime": {"python": sys.version,
+                    "executable": os.path.abspath(sys.executable),
+                    "numerical_env": {k: os.environ.get(k)
+                                      for k in NUMERICAL_ENV_KEYS}},
+    }
+
+
+def dependency_identity_changes(before, after):
+    """Every leaf that differs, as dotted keys. Empty list == still bound."""
+    changes = []
+
+    def walk(a, b, prefix):
+        if isinstance(a, dict) and isinstance(b, dict):
+            for k in sorted(set(a) | set(b)):
+                walk(a.get(k, "<absent>"), b.get(k, "<absent>"),
+                     prefix + [str(k)])
+        elif a != b:
+            changes.append(".".join(prefix))
+
+    walk(before, after, [])
+    return changes
+
+
+# --------------------------------------------------------------------------- #
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
@@ -1245,6 +1385,9 @@ def main() -> int:
                     help="run the official subprocess mini split N times and "
                          "pool the residuals into a TAIL (worst / p99 / median) "
                          "instead of the 2-MLP anecdote section 10 gives. "
+                         "The local residual cap is disabled and the pooled "
+                         "seconds are DIAGNOSTIC; only non-residual failures "
+                         "gate. "
                          "0 (default) skips it, and a skipped soak is NOT a "
                          "pass. Rung-3 hardening wants N=3. Costs roughly "
                          "N x 100 subprocess MLPs of wall time. READS "
@@ -1272,9 +1415,10 @@ def main() -> int:
 
     sha_before = _sha(cand)
     ship_sha_before = _sha(os.path.join(_ROOT, "estimator.py"))
-    git_dirty_before = ((_run(["git", "status", "--porcelain", "--",
-                               "estimator.py", "scripts", "local_sim"],
-                              timeout=180).stdout) or "").strip()
+    # Content identity of the candidate and the instrument closure, bound into
+    # the report BEFORE any section runs and re-verified in section R. Not git
+    # status: see `dependency_identity`.
+    identity_before = dependency_identity(cand)
 
     # Resolved here because section 3 runs long before section 5 imports
     # lifecycle_eval; the two must agree on which arm is being certified.
@@ -1305,6 +1449,7 @@ def main() -> int:
               "confirm_tier_read": not bool(
                   a.quick or a.skip_smoke or a.memory_only),
               "is_shipped_file": is_ship,
+              "dependency_identity": identity_before,
               "sections": {}}
 
     if a.memory_only:
@@ -2104,14 +2249,30 @@ def main() -> int:
         check("10: the official runner produced a report",
               smoke.get("ok_report") is True, smoke.get("why", "")[:60])
         if smoke.get("ok_report"):
-            check("10: zero failed MLPs", smoke["n_failed_mlps"] == 0,
-                  f"{smoke['n_failed_mlps']} failed")
+            fv = smoke["functional_verdict"]
+            # 2026-09-16 (validation audit P0): the smoke used to run with the
+            # graded 0.4 s cap armed, so this host's ~27x residual over-read
+            # zeroed every K3 row here -- before the advisory text below could
+            # help. It now disables ONLY that local cap. Every other failure
+            # category still refuses, and the server cap is NOT certified by
+            # this run: it stays a deployment requirement forecast by section 7.
+            check("10: only the LOCAL residual cap was disabled (server cap "
+                  "not exercised here)",
+                  fv["local_residual_cap_disabled"]
+                  and smoke.get("wall_limit") == WALL_CAP_S
+                  and smoke.get("flop_budget") == BUDGET,
+                  f"local cap {smoke['residual_cap']}, wall "
+                  f"{smoke.get('wall_limit')} s, B {smoke.get('flop_budget')}")
+            check("10: zero failed MLPs", fv["ok"] and smoke["n_failed_mlps"] == 0,
+                  f"{smoke['n_failed_mlps']} failed"
+                  + ("" if fv["ok"] else " -- " + "; ".join(fv["problems"])[:90]))
             check("10: the live config is the Phase-2 round",
                   smoke["dataset"].endswith("@v2-phase2")
-                  and smoke["lambda"] == 0.0
-                  and smoke["residual_cap"] == 0.4,
+                  and smoke["lambda"] == 0.0,
                   f"{smoke['width']}x{smoke['depth']}, lambda "
-                  f"{smoke['lambda']}, cap {smoke['residual_cap']} s")
+                  f"{smoke['lambda']}; server residual cap "
+                  f"{smoke['server_residual_cap_s']} s is a deployment "
+                  f"requirement (op-count forecast, section 7)")
             # `worst_residual` is 0.0 when EVERY smoke row took the exception
             # path (the runner zeroes it there). The headroom division was
             # unguarded, so the certifier died with a ZeroDivisionError before
@@ -2144,7 +2305,7 @@ def main() -> int:
             # `local_sim/predict_public.py` prices residual the same way.
             _wr = smoke["worst_residual"]
             _adv = ((f"{_wr * 1000:.2f} ms -> "
-                     f"{smoke['residual_cap'] / _wr:.1f}x under the cliff")
+                     f"{RESIDUAL_CAP_S / _wr:.1f}x vs the server cliff")
                     if _wr > 0 else
                     "0.00 ms -- every smoke row failed before it was timed")
             print(f"      ADVISORY, LOCAL seconds, gates nothing: worst "
@@ -2184,6 +2345,10 @@ def main() -> int:
               soak["ok"], soak.get("why", "")[:70])
         if soak["ok"]:
             cap = soak["residual_cap"]
+            check("11: every repetition disabled ONLY the local residual cap "
+                  "(server cap not exercised here)",
+                  soak["local_residual_cap_disabled_every_rep"],
+                  f"local caps {soak['local_residual_caps']}")
             check("11: zero failed MLPs across every repetition",
                   soak["n_failed_mlps"] == 0,
                   f"{soak['n_failed_mlps']} failed of {soak['n_rows']} rows"
@@ -2222,10 +2387,17 @@ def main() -> int:
                   f"{soak['flops_executed_min']:,} .. "
                   f"{soak['flops_executed_max']:,}"
                   if soak["flops_executed_min"] is not None else "no rows")
-            check("11: the WORST pooled residual clears the cliff",
-                  soak["worst"] < cap,
-                  f"worst {soak['worst']*1000:.2f} ms of a {cap*1000:.0f} ms "
-                  f"cap -> {soak['headroom_worst']:.2f}x headroom")
+            # WAS a binding check ("11: the WORST pooled residual clears the
+            # cliff"). Demoted 2026-09-16 with the smoke's cap: these are this
+            # host's seconds, which over-read residual ~27x per op, so the
+            # comparison is DIAGNOSTIC and gates nothing. The residual gate is
+            # section 7's op count; historical FAIL lines on the old name stand.
+            print(f"      ADVISORY, LOCAL seconds, gates nothing: worst pooled "
+                  f"residual {soak['worst']*1000:.2f} ms vs the "
+                  f"{cap*1000:.0f} ms server cap -> "
+                  f"{soak['headroom_worst']:.2f}x")
+            report.setdefault("advisory", {})["soak_worst_residual_s"] = \
+                soak["worst"]
             # The number that matters is the WORST, not the mean: the cap is a
             # cliff and one MLP over it FAILS that MLP. The mean is recorded
             # because a mean far below a wild worst is itself a finding.
@@ -2272,28 +2444,29 @@ def main() -> int:
     check("R: estimator.py is byte-identical",
           _sha(os.path.join(_ROOT, "estimator.py")) == ship_sha_before,
           ship_sha_before[:16])
-    # THIS CHECK'S CONDITION USED TO BE THE LITERAL `True`, with the git output
-    # relegated to an "informational:" detail string -- so it printed PASS while
-    # its own detail listed modified files. That is `docs/GOTCHAS.md`'s named
-    # failure: a check reporting a state rather than testing a property, and an
-    # independent Skeptic found it inside a claimed 36/36.
-    #
-    # The property that is actually this run's business is narrow and is now the
-    # condition: THIS RUN wrote nothing. Files already dirty when it started are
-    # the caller's business, so they are compared BEFORE and AFTER rather than
-    # required to be absent.
-    g_after = ((_run(["git", "status", "--porcelain", "--", "estimator.py",
-                      "scripts", "local_sim"], timeout=180).stdout) or "").strip()
-    check("R: this run changed no tracked source under "
-          "estimator.py/scripts/local_sim",
-          g_after == git_dirty_before,
-          "unchanged since start"
-          + (f" (already dirty at start: {len(git_dirty_before.splitlines())} "
-             f"file(s), not this run's doing)" if git_dirty_before else "")
-          if g_after == git_dirty_before
-          else "THIS RUN DIRTIED: "
-               + "; ".join(sorted(set(g_after.splitlines())
-                                  - set(git_dirty_before.splitlines())))[:70])
+    # HISTORY: this was `git status --porcelain` equality over
+    # estimator.py/scripts/local_sim (once with a literal-`True` condition, which
+    # a Skeptic caught). Status equality is not immutability: an already-dirty
+    # instrument could change bytes and still read ` M path`, while an unrelated
+    # generator going dirty refused a valid run (validation audit 2026-09-16,
+    # P1). The property is now content: the candidate, the instrument closure
+    # this command executes, the installed stack and the numerical environment
+    # bound at start must be identical at the end.
+    try:
+        identity_after = dependency_identity(cand)
+        identity_changes = dependency_identity_changes(identity_before,
+                                                       identity_after)
+    except Exception as exc:
+        identity_after = None
+        identity_changes = ["<unreadable: %s: %s>" % (type(exc).__name__, exc)]
+    report["dependency_identity_after"] = identity_after
+    report["dependency_identity_changes"] = identity_changes
+    check("R: the bound candidate + instrument closure + stack + numerical env "
+          "are unchanged",
+          not identity_changes,
+          "%d instrument file(s), candidate, packages, runtime" %
+          len(identity_before["instruments"]) if not identity_changes
+          else "CHANGED DURING RUN: " + "; ".join(identity_changes)[:70])
 
     report["checks_total"] = _TOTAL[0]
     report["checks_failed"] = list(_FAILED)
@@ -2496,14 +2669,14 @@ def _residual_soak(rel, reps, n_mlps, timeout=5400):
     figures are kept beside it as `*_all_rows` -- the correction is shown, not
     silently applied.
     """
-    exe = os.path.join(os.path.dirname(sys.executable), "whest")
     env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUTF8="1")
     reports = []
     for i in range(reps):
-        cmd = [exe, "run", "--estimator", rel,
-               "--dataset", "hf://aicrowd/arc-whestbench-public-2026@v2-phase2",
-               "--split", "mini", "--runner", "subprocess",
-               "--n-mlps", str(n_mlps), "--json"]
+        # 2026-09-16: the LOCAL residual cap is disabled here too. With it armed
+        # the runner zeroes every row this host over-reads, so the soak measured
+        # its own cap rather than the candidate. Its residual numbers are now
+        # DIAGNOSTIC local seconds; the non-residual failure checks still bind.
+        cmd = official_run_cmd(rel, n_mlps)
         try:
             p = _run(cmd, timeout=timeout, env=env)
         except subprocess.TimeoutExpired:
@@ -2539,10 +2712,15 @@ def _pool_residual(reports, reps, n_mlps, candidate=None):
     subprocess, no clock, no filesystem.
     """
     res, res_all, per_rep, failures, fl = [], [], [], [], []
-    failed, cap, breakdown = 0, None, {}
+    failed, breakdown = 0, {}
+    local_caps, verdicts = [], []
+    # Headroom is quoted against the SERVER cap, as advisory local seconds. The
+    # report's own cap is None on the corrected path and is kept separately.
+    cap = RESIDUAL_CAP_S
     for i, d in enumerate(reports):
         r = d["results"]
-        cap = d["run_config"]["residual_wall_time_limit_s"]
+        local_caps.append(d["run_config"].get("residual_wall_time_limit_s"))
+        verdicts.append(official_functional_verdict(d))
         rows_all = [float(m["residual_wall_time_s"]) for m in r["per_mlp"]]
         # A row is EXECUTED unless the runner marked it failed. `_row_failed`
         # applies the runner's own definition rather than a second one of ours,
@@ -2594,7 +2772,16 @@ def _pool_residual(reports, reps, n_mlps, candidate=None):
                                   if failed and breakdown else None),
         "failures": failures,
         "failures_truncated": failed > len(failures),
+        # `residual_cap` is the SERVER cap the advisory headroom is quoted
+        # against; `local_residual_caps` is what each run actually enforced
+        # (None on the corrected path, which exercises no server cap).
         "residual_cap": cap,
+        "residual_comparison": "ADVISORY local seconds vs the server cap; "
+                               "gates nothing (section 7's op count does)",
+        "local_residual_caps": local_caps,
+        "local_residual_cap_disabled_every_rep": all(c is None
+                                                     for c in local_caps),
+        "functional_verdicts": verdicts,
         # EXECUTED ROWS ONLY. A failed row carries residual 0.0 from
         # scoring.py's exception path; pooling it understates every percentile
         # and leaves the max untouched, which is the worst of both.
@@ -2644,12 +2831,84 @@ def _pctile(xs, q):
     return s[k]
 
 
+def official_run_cmd(rel, n_mlps, exe=None):
+    """THE canonical local official-run command for functional/accuracy evidence.
+
+    Sections 10 and 11 both build their command here, so neither can drift back
+    to the capped form. It disables ONLY the local residual cap: budget, wall
+    and setup caps, the dataset, the split and the subprocess runner are the
+    runner's defaults. A report produced by this command is NOT evidence that
+    the server's 0.4 s residual cap was met; see `official_functional_verdict`.
+    """
+    exe = exe or os.path.join(os.path.dirname(sys.executable), "whest")
+    return [exe, "run", "--estimator", rel,
+            "--dataset", OFFICIAL_DATASET,
+            "--split", "mini", "--runner", "subprocess",
+            "--n-mlps", str(int(n_mlps)),
+            LOCAL_RESIDUAL_CAP_OFF_FLAG, "--json"]
+
+
+def official_functional_verdict(report):
+    """Is this parsed `whest run --json` report a clean functional pass? PURE.
+
+    Binding failures are every failure the runner records -- estimator
+    exception (`error_code`), FLOP budget, wall time, combined budget -- plus a
+    non-finite MSE. Refused as well:
+
+    * a report whose run_config shows the local residual cap ARMED. That report
+      did not come from `official_run_cmd`; its residual-zeroed rows and MSE
+      are not the estimator's, and a capped report must not be re-read as a
+      functional pass (nor a cap-disabled one as a server-cap pass);
+    * `residual_wall_time_exhausted` on a cap-disabled report, which the runner
+      cannot produce -- an inconsistent report is not evidence.
+    """
+    cfg = report.get("run_config") or {}
+    res = report.get("results") or {}
+    per = [m for m in (res.get("per_mlp") or []) if isinstance(m, dict)]
+    problems = []
+    cap_disabled = ("residual_wall_time_limit_s" in cfg
+                    and cfg["residual_wall_time_limit_s"] is None)
+    if not cap_disabled:
+        problems.append(
+            "local residual cap ARMED (%r): not produced by the corrected "
+            "path (%s)" % (cfg.get("residual_wall_time_limit_s", "<absent>"),
+                           LOCAL_RESIDUAL_CAP_OFF_FLAG))
+    failed = [m for m in per if _row_failed(m)]
+    categories = {}
+    for m in failed:
+        keys = [k for k in _FAILURE_FLAGS if m.get(k)]
+        if m.get("error_code"):
+            keys.append("estimator_error:%s" % m["error_code"])
+        for k in keys:
+            categories[k] = categories.get(k, 0) + 1
+    if cap_disabled and categories.get("residual_wall_time_exhausted"):
+        problems.append("residual_wall_time_exhausted with the local cap "
+                        "disabled: inconsistent report")
+    declared = res.get("n_failed_mlps")
+    if declared != len(failed):
+        problems.append("n_failed_mlps %r disagrees with %d failed rows"
+                        % (declared, len(failed)))
+    if failed:
+        problems.append("%d failed MLP(s): %s" % (
+            len(failed), ", ".join("%s=%d" % kv
+                                   for kv in sorted(categories.items()))))
+    if not per:
+        problems.append("no per-MLP rows")
+    mse = res.get("final_layer_mse")
+    if not (isinstance(mse, (int, float)) and math.isfinite(mse)):
+        problems.append("final_layer_mse is not finite: %r" % (mse,))
+    return {"ok": not problems,
+            "local_residual_cap_disabled": cap_disabled,
+            "server_residual_cap_exercised": not cap_disabled,
+            "n_failed_mlps": len(failed),
+            "failure_categories": categories,
+            "problems": problems}
+
+
 def _smoke(rel, timeout=2400):
-    """`whest run --runner subprocess` on two organiser MLPs."""
-    exe = os.path.join(os.path.dirname(sys.executable), "whest")
-    cmd = [exe, "run", "--estimator", rel,
-           "--dataset", "hf://aicrowd/arc-whestbench-public-2026@v2-phase2",
-           "--split", "mini", "--runner", "subprocess", "--n-mlps", "2", "--json"]
+    """`whest run --runner subprocess` on two organiser MLPs, local residual
+    cap disabled (see `official_run_cmd`)."""
+    cmd = official_run_cmd(rel, 2)
     env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUTF8="1")
     try:
         p = _run(cmd, timeout=timeout, env=env)
@@ -2669,8 +2928,11 @@ def _smoke(rel, timeout=2400):
                 "why": f"REFUSED at {err.get('stage')}: {err.get('code')} "
                        f"{err.get('message', '')[:80]}"}
     r, cfg = d["results"], d["run_config"]
+    verdict = official_functional_verdict(d)
     return {
         "ok_report": True,
+        "command": cmd[1:],
+        "functional_verdict": verdict,
         "n_failed_mlps": r["n_failed_mlps"],
         # Same attribution as the soak. A two-row smoke that fails silently is
         # exactly as unhelpful as a 300-row one that does.
@@ -2680,7 +2942,12 @@ def _smoke(rel, timeout=2400):
         "dataset": str(cfg["dataset"]["path"]),
         "width": cfg["width"], "depth": cfg["depth"],
         "lambda": cfg["lambda_flops_per_second"],
+        # The run's LOCAL cap: None on the corrected path. The server cap is
+        # `server_residual_cap_s`, a deployment requirement this run did not
+        # exercise.
         "residual_cap": cfg["residual_wall_time_limit_s"],
+        "server_residual_cap_s": RESIDUAL_CAP_S,
+        "flop_budget": cfg.get("flop_budget"),
         "wall_limit": cfg["wall_time_limit_s"],
         "worst_residual": max(m["residual_wall_time_s"] for m in r["per_mlp"]),
         "flops_per_mlp": max(m.get("flops_used", 0) for m in r["per_mlp"]),

@@ -1,0 +1,2374 @@
+{
+"_fixture": {
+"trimmed_from": "experiments/2026-09-16_slice7_mini/v31_mini.json",
+"source_report_sha256": "3d0ca513c881322d31b6fde310b7bd916e013075bc7d26cd4cb499e9803f1fcb",
+"workerq_job": 1412,
+"kept": "every field predict_public.py reads; per-op breakdowns and per-layer MSE dropped",
+"never_edit_by_hand": true
+},
+"schema_version": "1.1",
+"mode": "agent",
+"results": {
+"adjusted_final_layer_score": 9.048556344717298e-09,
+"final_layer_mse": 3.006064691390975e-08,
+"n_failed_mlps": 0,
+"mean_effective_compute": 661928064562.0,
+"failure_breakdown": {
+"budget_exhausted": 0,
+"time_exhausted": 0,
+"residual_wall_time_exhausted": 0,
+"combined_budget_exhausted": 0,
+"error": 0
+},
+"per_mlp": [
+{
+"mlp_index": 0,
+"mlp_name": "logan-fitzgerald",
+"final_layer_mse": 2.7579380557085642e-08,
+"flops_used": 661928064562,
+"wall_time_s": 48.06649300000572,
+"residual_wall_time_s": 7.505659499525791,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 1,
+"mlp_name": "william-graves",
+"final_layer_mse": 3.364195322319574e-08,
+"flops_used": 661928064562,
+"wall_time_s": 45.765630499998224,
+"residual_wall_time_s": 6.8819943998532835,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 2,
+"mlp_name": "raymond-barnes",
+"final_layer_mse": 3.314045571300994e-08,
+"flops_used": 661928064562,
+"wall_time_s": 44.13242109998828,
+"residual_wall_time_s": 6.796945599082392,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 3,
+"mlp_name": "steven-rice",
+"final_layer_mse": 3.541819637575827e-08,
+"flops_used": 661928064562,
+"wall_time_s": 43.71918080000614,
+"residual_wall_time_s": 6.880809599446366,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 4,
+"mlp_name": "sarah-kelley",
+"final_layer_mse": 2.9360389675048282e-08,
+"flops_used": 661928064562,
+"wall_time_s": 47.57497050000529,
+"residual_wall_time_s": 7.341145100072026,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 5,
+"mlp_name": "christopher-morales",
+"final_layer_mse": 2.9296455039684588e-08,
+"flops_used": 661928064562,
+"wall_time_s": 47.237584800008335,
+"residual_wall_time_s": 7.263006899927859,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 6,
+"mlp_name": "cheryl-graham",
+"final_layer_mse": 2.7718613182514673e-08,
+"flops_used": 661928064562,
+"wall_time_s": 45.86906850000378,
+"residual_wall_time_s": 6.973374299996067,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 7,
+"mlp_name": "renee-park",
+"final_layer_mse": 2.6712505984960444e-08,
+"flops_used": 661928064562,
+"wall_time_s": 45.559013699996285,
+"residual_wall_time_s": 7.091713000947493,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 8,
+"mlp_name": "justin-johnson",
+"final_layer_mse": 3.057113318050142e-08,
+"flops_used": 661928064562,
+"wall_time_s": 48.730022800009465,
+"residual_wall_time_s": 7.4413921995292185,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 9,
+"mlp_name": "christina-lopez",
+"final_layer_mse": 3.0911373016806465e-08,
+"flops_used": 661928064562,
+"wall_time_s": 52.01767440000549,
+"residual_wall_time_s": 7.737053699995158,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 10,
+"mlp_name": "randy-murray",
+"final_layer_mse": 2.7978209971024626e-08,
+"flops_used": 661928064562,
+"wall_time_s": 51.10113640000054,
+"residual_wall_time_s": 7.587439100985648,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 11,
+"mlp_name": "john-koch",
+"final_layer_mse": 3.0656359228942165e-08,
+"flops_used": 661928064562,
+"wall_time_s": 46.54265240000677,
+"residual_wall_time_s": 7.246178499568487,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 12,
+"mlp_name": "susan-butler",
+"final_layer_mse": 2.818842759211293e-08,
+"flops_used": 661928064562,
+"wall_time_s": 47.15762490000634,
+"residual_wall_time_s": 7.142283699387917,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 13,
+"mlp_name": "crystal-gonzales",
+"final_layer_mse": 3.3344871752660765e-08,
+"flops_used": 661928064562,
+"wall_time_s": 48.18180949999078,
+"residual_wall_time_s": 7.267799300592742,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 14,
+"mlp_name": "troy-richardson",
+"final_layer_mse": 3.167950524129992e-08,
+"flops_used": 661928064562,
+"wall_time_s": 47.55949649999093,
+"residual_wall_time_s": 7.0937867995671695,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 15,
+"mlp_name": "sharon-whitehead",
+"final_layer_mse": 3.0518222615683044e-08,
+"flops_used": 661928064562,
+"wall_time_s": 47.64866229999461,
+"residual_wall_time_s": 6.556814201438101,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 16,
+"mlp_name": "adam-morrison",
+"final_layer_mse": 2.3897877454714944e-08,
+"flops_used": 661928064562,
+"wall_time_s": 45.869107699996675,
+"residual_wall_time_s": 6.877854100923287,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 17,
+"mlp_name": "william-simmons",
+"final_layer_mse": 2.739377080729355e-08,
+"flops_used": 661928064562,
+"wall_time_s": 46.03950930001156,
+"residual_wall_time_s": 7.114274400126305,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 18,
+"mlp_name": "william-bryant",
+"final_layer_mse": 2.9728056460953667e-08,
+"flops_used": 661928064562,
+"wall_time_s": 48.2159510999918,
+"residual_wall_time_s": 7.254098100936972,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 19,
+"mlp_name": "angela-hancock",
+"final_layer_mse": 2.408519250707286e-08,
+"flops_used": 661928064562,
+"wall_time_s": 50.07741199999873,
+"residual_wall_time_s": 7.37064919952536,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 20,
+"mlp_name": "lisa-aguirre",
+"final_layer_mse": 3.007390958487122e-08,
+"flops_used": 661928064562,
+"wall_time_s": 45.097323900001356,
+"residual_wall_time_s": 7.016865401281393,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 21,
+"mlp_name": "marissa-perez",
+"final_layer_mse": 3.652901270356779e-08,
+"flops_used": 661928064562,
+"wall_time_s": 45.23547119999421,
+"residual_wall_time_s": 6.586033300249255,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 22,
+"mlp_name": "matthew-cruz",
+"final_layer_mse": 2.6912994499639353e-08,
+"flops_used": 661928064562,
+"wall_time_s": 47.522031100001186,
+"residual_wall_time_s": 7.278873199713416,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 23,
+"mlp_name": "dana-parker",
+"final_layer_mse": 2.7016652026645716e-08,
+"flops_used": 661928064562,
+"wall_time_s": 46.20721039999626,
+"residual_wall_time_s": 7.236195100005716,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 24,
+"mlp_name": "justin-thomas",
+"final_layer_mse": 2.6229775684782908e-08,
+"flops_used": 661928064562,
+"wall_time_s": 45.64743989999988,
+"residual_wall_time_s": 6.788812799088191,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 25,
+"mlp_name": "jose-booker",
+"final_layer_mse": 3.1217592066923316e-08,
+"flops_used": 661928064562,
+"wall_time_s": 43.226427999994485,
+"residual_wall_time_s": 6.597486399754416,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 26,
+"mlp_name": "jennifer-best",
+"final_layer_mse": 3.483977906171276e-08,
+"flops_used": 661928064562,
+"wall_time_s": 42.82445749999897,
+"residual_wall_time_s": 6.825845000552363,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 27,
+"mlp_name": "lisa-dean",
+"final_layer_mse": 2.457324654869808e-08,
+"flops_used": 661928064562,
+"wall_time_s": 45.0429923000047,
+"residual_wall_time_s": 7.033520999990287,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 28,
+"mlp_name": "terri-salazar",
+"final_layer_mse": 3.0929562910841923e-08,
+"flops_used": 661928064562,
+"wall_time_s": 45.88529059999564,
+"residual_wall_time_s": 7.165922801315901,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 29,
+"mlp_name": "monica-duncan",
+"final_layer_mse": 2.7477426556288265e-08,
+"flops_used": 661928064562,
+"wall_time_s": 44.205036900006235,
+"residual_wall_time_s": 6.988328298553824,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 30,
+"mlp_name": "katherine-allen",
+"final_layer_mse": 2.76917617725303e-08,
+"flops_used": 661928064562,
+"wall_time_s": 42.65930629998911,
+"residual_wall_time_s": 6.792597999621648,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 31,
+"mlp_name": "stephanie-fowler",
+"final_layer_mse": 2.6072264347476448e-08,
+"flops_used": 661928064562,
+"wall_time_s": 43.15413249999983,
+"residual_wall_time_s": 6.856511698963004,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 32,
+"mlp_name": "nathan-valdez",
+"final_layer_mse": 2.6203771597010928e-08,
+"flops_used": 661928064562,
+"wall_time_s": 46.00339139999414,
+"residual_wall_time_s": 7.1131829014921095,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 33,
+"mlp_name": "mark-sweeney",
+"final_layer_mse": 3.512492341428697e-08,
+"flops_used": 661928064562,
+"wall_time_s": 46.104355899995426,
+"residual_wall_time_s": 7.049053700815421,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 34,
+"mlp_name": "rachel-warren",
+"final_layer_mse": 3.619075883420919e-08,
+"flops_used": 661928064562,
+"wall_time_s": 43.37788949999958,
+"residual_wall_time_s": 6.825468899958651,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 35,
+"mlp_name": "cory-clarke",
+"final_layer_mse": 2.3511629976269433e-08,
+"flops_used": 661928064562,
+"wall_time_s": 42.85131939999701,
+"residual_wall_time_s": 6.86687939944386,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 36,
+"mlp_name": "patricia-cochran",
+"final_layer_mse": 3.395857461896412e-08,
+"flops_used": 661928064562,
+"wall_time_s": 44.695162400006666,
+"residual_wall_time_s": 6.965371199199581,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 37,
+"mlp_name": "paige-miller",
+"final_layer_mse": 3.448990071319713e-08,
+"flops_used": 661928064562,
+"wall_time_s": 46.07338850000815,
+"residual_wall_time_s": 7.217612700187601,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 38,
+"mlp_name": "daniel-smith",
+"final_layer_mse": 3.2103809388672744e-08,
+"flops_used": 661928064562,
+"wall_time_s": 45.40204209998774,
+"residual_wall_time_s": 7.021277301086229,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 39,
+"mlp_name": "rebecca-jackson",
+"final_layer_mse": 3.213764188103596e-08,
+"flops_used": 661928064562,
+"wall_time_s": 43.06116130000737,
+"residual_wall_time_s": 6.732277000541217,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 40,
+"mlp_name": "sylvia-stanley",
+"final_layer_mse": 3.519318170219776e-08,
+"flops_used": 661928064562,
+"wall_time_s": 42.84157140000025,
+"residual_wall_time_s": 6.8384108004538575,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 41,
+"mlp_name": "john-lee",
+"final_layer_mse": 3.03329485973336e-08,
+"flops_used": 661928064562,
+"wall_time_s": 45.54104169999482,
+"residual_wall_time_s": 6.995028400342562,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 42,
+"mlp_name": "crystal-carrillo",
+"final_layer_mse": 2.9543747004368015e-08,
+"flops_used": 661928064562,
+"wall_time_s": 46.22747849998996,
+"residual_wall_time_s": 7.1144762004114455,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 43,
+"mlp_name": "renee-garcia",
+"final_layer_mse": 3.011521698681463e-08,
+"flops_used": 661928064562,
+"wall_time_s": 44.47696949999954,
+"residual_wall_time_s": 6.858913800664595,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 44,
+"mlp_name": "anita-collier",
+"final_layer_mse": 2.9359288333807854e-08,
+"flops_used": 661928064562,
+"wall_time_s": 42.698612899999716,
+"residual_wall_time_s": 6.82796929932374,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 45,
+"mlp_name": "tina-webb",
+"final_layer_mse": 2.7553896941867606e-08,
+"flops_used": 661928064562,
+"wall_time_s": 43.91602689999854,
+"residual_wall_time_s": 6.92285020055715,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 46,
+"mlp_name": "lisa-mitchell",
+"final_layer_mse": 3.2049868536887516e-08,
+"flops_used": 661928064562,
+"wall_time_s": 46.959161199993105,
+"residual_wall_time_s": 7.263079399679555,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 47,
+"mlp_name": "douglas-kelly",
+"final_layer_mse": 3.30868523690242e-08,
+"flops_used": 661928064562,
+"wall_time_s": 46.14357260000543,
+"residual_wall_time_s": 7.284146599180531,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 48,
+"mlp_name": "maria-calderon",
+"final_layer_mse": 3.083417610127981e-08,
+"flops_used": 661928064562,
+"wall_time_s": 43.06835259999207,
+"residual_wall_time_s": 6.826927200192586,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 49,
+"mlp_name": "jay-harris",
+"final_layer_mse": 2.378794405899498e-08,
+"flops_used": 661928064562,
+"wall_time_s": 43.972048199997516,
+"residual_wall_time_s": 7.077272399532376,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 50,
+"mlp_name": "robyn-davis",
+"final_layer_mse": 2.5804947512142462e-08,
+"flops_used": 661928064562,
+"wall_time_s": 45.33407909999369,
+"residual_wall_time_s": 7.089154100482119,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 51,
+"mlp_name": "daniel-vasquez",
+"final_layer_mse": 2.787240305224259e-08,
+"flops_used": 661928064562,
+"wall_time_s": 46.40834530000575,
+"residual_wall_time_s": 7.251266600200324,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 52,
+"mlp_name": "richard-davis",
+"final_layer_mse": 3.291523498205606e-08,
+"flops_used": 661928064562,
+"wall_time_s": 44.99463580000156,
+"residual_wall_time_s": 6.884375100009493,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 53,
+"mlp_name": "darryl-lewis",
+"final_layer_mse": 2.4534642761864234e-08,
+"flops_used": 661928064562,
+"wall_time_s": 43.777372199998354,
+"residual_wall_time_s": 6.741331600263948,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 54,
+"mlp_name": "james-parsons",
+"final_layer_mse": 3.039307472363362e-08,
+"flops_used": 661928064562,
+"wall_time_s": 43.30996790000063,
+"residual_wall_time_s": 6.764102399465628,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 55,
+"mlp_name": "victor-short",
+"final_layer_mse": 3.267361492476084e-08,
+"flops_used": 661928064562,
+"wall_time_s": 45.35340769999311,
+"residual_wall_time_s": 7.05098999881011,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 56,
+"mlp_name": "katherine-singh",
+"final_layer_mse": 1.970307650367431e-08,
+"flops_used": 661928064562,
+"wall_time_s": 46.05323119999957,
+"residual_wall_time_s": 7.123726300211274,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 57,
+"mlp_name": "gregory-wilson",
+"final_layer_mse": 2.6270889463830827e-08,
+"flops_used": 661928064562,
+"wall_time_s": 43.71081910000066,
+"residual_wall_time_s": 6.869529501127545,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 58,
+"mlp_name": "daniel-graves",
+"final_layer_mse": 2.6682085874085715e-08,
+"flops_used": 661928064562,
+"wall_time_s": 42.69588090000616,
+"residual_wall_time_s": 6.849147000379162,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 59,
+"mlp_name": "amy-fields",
+"final_layer_mse": 3.204607423867856e-08,
+"flops_used": 661928064562,
+"wall_time_s": 44.01300080001238,
+"residual_wall_time_s": 6.96694090103847,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 60,
+"mlp_name": "erica-whitaker",
+"final_layer_mse": 3.193526509903677e-08,
+"flops_used": 661928064562,
+"wall_time_s": 48.140443700001924,
+"residual_wall_time_s": 7.308071999417734,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 61,
+"mlp_name": "mallory-morales",
+"final_layer_mse": 3.1118535304131e-08,
+"flops_used": 661928064562,
+"wall_time_s": 46.270199400009005,
+"residual_wall_time_s": 6.86911699832126,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 62,
+"mlp_name": "walter-moore",
+"final_layer_mse": 3.02204483659807e-08,
+"flops_used": 661928064562,
+"wall_time_s": 43.614216399990255,
+"residual_wall_time_s": 6.527631601216854,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 63,
+"mlp_name": "dillon-taylor",
+"final_layer_mse": 2.2174539537900273e-08,
+"flops_used": 661928064562,
+"wall_time_s": 43.893782300001476,
+"residual_wall_time_s": 6.891219000186538,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 64,
+"mlp_name": "diane-jones",
+"final_layer_mse": 3.2880549838409934e-08,
+"flops_used": 661928064562,
+"wall_time_s": 48.43880069999432,
+"residual_wall_time_s": 7.559253399769659,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 65,
+"mlp_name": "brandon-king",
+"final_layer_mse": 3.290254113608171e-08,
+"flops_used": 661928064562,
+"wall_time_s": 47.87708850001218,
+"residual_wall_time_s": 7.033119200335932,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 66,
+"mlp_name": "samuel-simon",
+"final_layer_mse": 2.3748604860429623e-08,
+"flops_used": 661928064562,
+"wall_time_s": 46.76209450000897,
+"residual_wall_time_s": 6.223255500008236,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 67,
+"mlp_name": "marie-paul",
+"final_layer_mse": 3.6350510157490135e-08,
+"flops_used": 661928064562,
+"wall_time_s": 45.262012399995,
+"residual_wall_time_s": 6.0662273997295415,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 68,
+"mlp_name": "barbara-walls",
+"final_layer_mse": 3.1654202814479504e-08,
+"flops_used": 661928064562,
+"wall_time_s": 45.06854150000436,
+"residual_wall_time_s": 6.286261499335524,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 69,
+"mlp_name": "deborah-harris",
+"final_layer_mse": 2.8426434539596812e-08,
+"flops_used": 661928064562,
+"wall_time_s": 47.0727509999997,
+"residual_wall_time_s": 6.833829099443392,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 70,
+"mlp_name": "daniel-smith-2",
+"final_layer_mse": 2.5416737159389413e-08,
+"flops_used": 661928064562,
+"wall_time_s": 37.93912190000992,
+"residual_wall_time_s": 5.091162999757216,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 71,
+"mlp_name": "mary-garrett",
+"final_layer_mse": 3.010736904229816e-08,
+"flops_used": 661928064562,
+"wall_time_s": 37.9688967000111,
+"residual_wall_time_s": 5.0131075001409044,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 72,
+"mlp_name": "sandra-powell",
+"final_layer_mse": 3.1843669034969935e-08,
+"flops_used": 661928064562,
+"wall_time_s": 40.6654572999978,
+"residual_wall_time_s": 6.241817399684805,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 73,
+"mlp_name": "victor-garrett",
+"final_layer_mse": 3.9684579178356216e-08,
+"flops_used": 661928064562,
+"wall_time_s": 45.03305260000343,
+"residual_wall_time_s": 7.144520400965121,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 74,
+"mlp_name": "steven-montgomery",
+"final_layer_mse": 3.103678380966812e-08,
+"flops_used": 661928064562,
+"wall_time_s": 40.06046759999299,
+"residual_wall_time_s": 6.2793578992568655,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 75,
+"mlp_name": "jennifer-perez",
+"final_layer_mse": 2.891022532480747e-08,
+"flops_used": 661928064562,
+"wall_time_s": 44.485585899994476,
+"residual_wall_time_s": 7.122359400324058,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 76,
+"mlp_name": "scott-young",
+"final_layer_mse": 3.177793317377109e-08,
+"flops_used": 661928064562,
+"wall_time_s": 36.83376139999018,
+"residual_wall_time_s": 5.983348599736928,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 77,
+"mlp_name": "debra-jones",
+"final_layer_mse": 3.4198947673758084e-08,
+"flops_used": 661928064562,
+"wall_time_s": 36.355321600000025,
+"residual_wall_time_s": 6.028158799774246,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 78,
+"mlp_name": "george-chase",
+"final_layer_mse": 3.903086565060221e-08,
+"flops_used": 661928064562,
+"wall_time_s": 36.31219389999751,
+"residual_wall_time_s": 6.008534699358279,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 79,
+"mlp_name": "troy-welch",
+"final_layer_mse": 2.581576552529441e-08,
+"flops_used": 661928064562,
+"wall_time_s": 36.44655389999389,
+"residual_wall_time_s": 6.028510600372101,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 80,
+"mlp_name": "jacob-adams",
+"final_layer_mse": 3.079898291957761e-08,
+"flops_used": 661928064562,
+"wall_time_s": 36.412325500001316,
+"residual_wall_time_s": 6.032320200101822,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 81,
+"mlp_name": "courtney-baker",
+"final_layer_mse": 2.543404420407569e-08,
+"flops_used": 661928064562,
+"wall_time_s": 36.53141609999875,
+"residual_wall_time_s": 6.053762299969094,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 82,
+"mlp_name": "pamela-carr",
+"final_layer_mse": 2.514002162001816e-08,
+"flops_used": 661928064562,
+"wall_time_s": 36.41531130000658,
+"residual_wall_time_s": 6.0179076000640634,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 83,
+"mlp_name": "denise-smith",
+"final_layer_mse": 3.1687285684256494e-08,
+"flops_used": 661928064562,
+"wall_time_s": 37.01219989999663,
+"residual_wall_time_s": 6.074862300869427,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 84,
+"mlp_name": "michelle-taylor",
+"final_layer_mse": 3.2125541338245966e-08,
+"flops_used": 661928064562,
+"wall_time_s": 36.553672399997595,
+"residual_wall_time_s": 6.057872900710208,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 85,
+"mlp_name": "ashley-williams",
+"final_layer_mse": 2.507302809817702e-08,
+"flops_used": 661928064562,
+"wall_time_s": 36.47021559999848,
+"residual_wall_time_s": 6.0364972003153525,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 86,
+"mlp_name": "judith-maxwell",
+"final_layer_mse": 2.93207023105424e-08,
+"flops_used": 661928064562,
+"wall_time_s": 39.502342599997064,
+"residual_wall_time_s": 6.453828800062183,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 87,
+"mlp_name": "travis-reed",
+"final_layer_mse": 3.380566226951487e-08,
+"flops_used": 661928064562,
+"wall_time_s": 40.388814599995385,
+"residual_wall_time_s": 6.742047299470869,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 88,
+"mlp_name": "heather-strickland",
+"final_layer_mse": 3.206926280086009e-08,
+"flops_used": 661928064562,
+"wall_time_s": 39.21608680000645,
+"residual_wall_time_s": 6.365630500004045,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 89,
+"mlp_name": "kyle-petersen",
+"final_layer_mse": 2.8462729062539438e-08,
+"flops_used": 661928064562,
+"wall_time_s": 39.89537179999752,
+"residual_wall_time_s": 5.766189300906262,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 90,
+"mlp_name": "rachel-kelley",
+"final_layer_mse": 3.6454501639582304e-08,
+"flops_used": 661928064562,
+"wall_time_s": 39.95656700000109,
+"residual_wall_time_s": 6.044862800423289,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 91,
+"mlp_name": "robert-patrick",
+"final_layer_mse": 2.8986240963035925e-08,
+"flops_used": 661928064562,
+"wall_time_s": 39.11641729999974,
+"residual_wall_time_s": 6.398592799770995,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 92,
+"mlp_name": "james-perez",
+"final_layer_mse": 3.046285712571262e-08,
+"flops_used": 661928064562,
+"wall_time_s": 39.93130849998852,
+"residual_wall_time_s": 5.87240059839678,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 93,
+"mlp_name": "nathan-moore",
+"final_layer_mse": 3.5065543357859497e-08,
+"flops_used": 661928064562,
+"wall_time_s": 39.30282939999597,
+"residual_wall_time_s": 6.074108499582508,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 94,
+"mlp_name": "gregory-harrison",
+"final_layer_mse": 2.556031120093394e-08,
+"flops_used": 661928064562,
+"wall_time_s": 36.32540469999367,
+"residual_wall_time_s": 5.978225799437496,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 95,
+"mlp_name": "mark-snyder",
+"final_layer_mse": 3.7240830863538577e-08,
+"flops_used": 661928064562,
+"wall_time_s": 36.542124200001126,
+"residual_wall_time_s": 6.0354483992559835,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 96,
+"mlp_name": "kathleen-mueller",
+"final_layer_mse": 3.4129783443859196e-08,
+"flops_used": 661928064562,
+"wall_time_s": 36.12129320000531,
+"residual_wall_time_s": 5.964920001424616,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 97,
+"mlp_name": "michelle-kramer",
+"final_layer_mse": 2.9301288506644596e-08,
+"flops_used": 661928064562,
+"wall_time_s": 36.26016220000747,
+"residual_wall_time_s": 5.982474600183195,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 98,
+"mlp_name": "elizabeth-hughes",
+"final_layer_mse": 3.051104258133819e-08,
+"flops_used": 661928064562,
+"wall_time_s": 36.18337930001144,
+"residual_wall_time_s": 5.986946599368821,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+},
+{
+"mlp_index": 99,
+"mlp_name": "kelsey-gonzalez",
+"final_layer_mse": 2.9341421736717166e-08,
+"flops_used": 661928064562,
+"wall_time_s": 36.25476749999507,
+"residual_wall_time_s": 6.0078352996497415,
+"budget_exhausted": false,
+"time_exhausted": false,
+"residual_wall_time_exhausted": false,
+"combined_budget_exhausted": false,
+"traceback": null,
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 13037,
+"flops_used": 661928064562
+}
+}
+}
+}
+}
+],
+"breakdowns": {
+"estimator": {
+"by_namespace": {
+"estimator.estimator-client": {
+"calls": 1303700,
+"flops_used": 66192806456200
+}
+}
+}
+}
+},
+"run_meta": {
+"run_started_at_utc": "2026-09-16T08:12:37.108512+00:00",
+"run_finished_at_utc": "2026-09-16T08:12:37.108512+00:00",
+"run_duration_s": 5932.189253091812,
+"host": {
+"hostname": "Sam_Mega_PC",
+"os": "Windows",
+"os_release": "10",
+"platform": "Windows-10-10.0.26200-SP0",
+"machine": "AMD64",
+"python_version": "3.10.19",
+"cpu_brand": "AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD",
+"cpu_count_logical": 16,
+"cpu_count_physical": null,
+"ram_total_bytes": null,
+"ram_available_bytes": null,
+"numpy_version": "2.2.6",
+"flopscope_version": "0.12.1"
+}
+},
+"run_config": {
+"n_mlps": 100,
+"width": 1024,
+"depth": 16,
+"seed": null,
+"flop_budget": 2199023255552,
+"setup_timeout_s": 5.0,
+"wall_time_limit_s": 120.0,
+"residual_wall_time_limit_s": null,
+"lambda_flops_per_second": 0.0,
+"dataset": {
+"path": "hf://aicrowd/arc-whestbench-public-2026@v2-phase2",
+"sha256": "264fa1f416d16a40821fb5e8e94f5d2da4698a201d40da999616225b38b464f1",
+"seed": null,
+"n_mlps": 100
+}
+},
+"whestbench_version": "0.16.1"
+}
