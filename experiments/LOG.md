@@ -51253,3 +51253,67 @@ open-low.**
   one and predicted a wall 13% low within the same day.
 - **A conservative factor that is conservative *because the host was busy* is
   not a safety margin.** Run the same bytes alone and it inverts.
+
+## 2026-09-16 — independent repository, competition and literature strategy audit
+
+**Scope:** Samuel requested multiple agents, a live review through his Chrome of
+the competition/boards/submissions/discussions, primary-literature research,
+architecture assessment and an implementation plan for a major next score jump.
+This entry records research and existing-artifact analysis, not a pre-registration
+or a new empirical candidate result. No estimator/instrument edits, seed claims,
+new truth generation, vault touches, heavy jobs, submissions or designations.
+
+**Artifacts:** `docs/research/2026-09-16_strategy_and_implementation_plan.md` is the
+main report. Supporting files in the same directory are
+`2026-09-16_architecture_audit.md`, `2026-09-16_validation_audit.md`,
+`2026-09-16_literature_review.md`, `2026-09-16_competition_audit.md`, and
+`2026-09-16_independent_skeptic.md`. The first three were independent parallel
+research assignments. The Skeptic received raw sources/contracts/artifact paths
+in a fresh context, without Builder reasoning or the new audit narratives.
+
+**Evidence and knowledge delta:**
+
+- CONFIRMED by live Chrome: v31 #331317 remains 8.7520303e-9, rank 58/165;
+  leader #331308 detailed score is 2.448e-9, raw 1.678e-8, compute 14.59%.
+  Public graded MSE truth-noise floors are unavailable. The remaining descriptive
+  score gap is about 3.58x. Leader code was not exposed; telemetry does not identify
+  their representation. Phase-1 rankings are historical, not the current target.
+- CONFIRMED source distinction: v31's κ4-dependent repeated-support completion
+  does not reproduce the public v17 hub's all-distinct κ4-to-K3 entries at birth.
+  The prior `feed_already_present.md` proves repeated-slice feed, not complete
+  tensor feed. Public v17 compensates repeated slices before residual completion.
+  INFERRED next diagnostic: tiny label-free full birth plus one dense transport at
+  identical incoming state, before attributing full-trajectory differences.
+  SPECULATIVE: correcting this component improves score; no gain was measured.
+- CONFIRMED algebraic concern: generic merged Tucker rotation is O(r^4), and its
+  repeated-slice query is O(n*r^3+n^2*r). N1 must price joins, bases, transport and
+  readout, not rank/storage alone. Its frozen mean-path Jacobian omits covariance
+  and future-birth sensitivity. Neither this proxy's failure nor leaderboard
+  telemetry establishes that only one winning architecture is possible.
+- CONFIRMED instrument defects: default smoke still enables the local residual
+  cap before its advisory result; projection timing and FLOP-offset assumptions
+  are stale; Git-status equality does not prove dependency-byte identity; input
+  receipts and uncertainty labels need strengthening. Linux memory evidence is
+  real, but runtime versions differ from the server. See precise source anchors
+  and limitations in the validation audit.
+- CONFIRMED external evidence: the pinned public repository HEADs are unchanged.
+  A March 2026 implicit Tucker-sum paper is relevant to avoiding intermediate
+  expansion, not proof of an affordable challenge rank. Output-aware compression
+  and implicit quadratic queries are evidence-backed research directions, already
+  partly proposed in this repo; no global novelty or winning guarantee is claimed.
+
+**Verification:** lightweight scorer suite 134/134 and public-projector suite
+39/39 passed in the validation assignment. Existing graded JSON and code were
+inspected; no protected truth was consumed. The independent Skeptic verdict is
+**PROVISIONAL**: it corroborates the structural feed gap and N1/instrument concerns,
+but the score benefit and affordable rank remain unknown.
+
+**Decision/proposed next action:** keep the cumulant family and frozen v31 fallback.
+Refine D2/D3 with the full birth/transport discriminator; make bounded evidence
+repairs; test thin feedback and exact cost work; require a complete affordable
+N1 prototype before its rank sweep. A hypothetical 1.5x raw gain at 0.20B produces
+about 3.88e-9, a major improvement but above today's leader. Around 1.9e-8 raw at
+0.12B would produce 2.28e-9. These are planning arithmetic, not amended gates or
+forecasts. Existing Slice 7 item 1 remains unstarted and requires the recorded
+prediction/contract before measurement. Process consolidation and the staged plan
+are proposals; no binding policy was silently weakened by this review.

@@ -1,5 +1,16 @@
 # CURRENT_STATE.md — read this first
 
+**September 16 independent strategy review:**
+[`research/2026-09-16_strategy_and_implementation_plan.md`](research/2026-09-16_strategy_and_implementation_plan.md)
+contains the live Chrome competition audit, architecture/validation/literature reviews,
+and independent Skeptic verdict. Proposed refinements: test full κ4-to-K3 birth plus
+transport (repeated slices alone do not establish completeness), price the complete
+N1 join/transport/query cycle, and repair bounded evidence/timing defects. This was
+a read-only research review, not a new candidate or measured gain; Slice 7 item 1
+remains unstarted. The existing execution contract remains operative pending a
+recorded amendment. Live detailed leader score was `2.448e-9`; v31's gap is about
+`3.58×`. One successful projection does not establish general half-percent accuracy.
+
 ## September 16: v31 GRADED at 8.752e-9 (#331317), Slice 7 item 0 closed, item 1 not started
 
 **Operative contract:** `docs/CLAUDE_CODE_HANDOFF_2026-09-16.md` (Slice 7, Sep 16–29),
