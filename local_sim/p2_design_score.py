@@ -167,8 +167,7 @@ def main(argv=None) -> int:
                    "candidate_sha256": sha, "block": block,
                    "row": row.to_row() if hasattr(row, "to_row") else str(row)}
             with open(a.rows_jsonl, "a", encoding="utf-8") as fh:
-                fh.write(json.dumps(rec, default=str) + "
-")
+                fh.write(json.dumps(rec, default=str) + chr(10))
                 fh.flush()
                 os.fsync(fh.fileno())
         return sink
