@@ -51716,3 +51716,78 @@ on economics, without spending truth. Getting under the floor requires
 compressing each lineage's source columns before joining, which is no longer
 exact and would be a new contract (Strategist Packet material). The release
 bundle proceeds from v32 / P3 / P4.
+
+---
+
+## 2026-09-16 — **Stage 1 RESULT: the distinct-index κ4 feed is real but small — 1.032× score, slice gate FAILS; P4 metered: depth 5 saves 6.6%, gate ≤0.27 not reachable within 8 GiB**
+
+Job 1463 (resubmit; job 1439 died at parse on my rows-sink newline bug before
+any truth reservation — the register's last entry was still P01). P11 DESIGN,
+24 nets, all caps off (accuracy only), 0/24 failures every arm. Artifacts:
+`experiments/2026-09-16_stage1_k4feed/{score.json,rows.jsonl}`; truth noise 4.76e-9.
+
+| arm | raw MSE | C/B | score | raw gain | paired t95 on score diff | better |
+|---|---:|---:|---:|---:|---|---:|
+| v31 control | 3.4455e-08 | 0.301025 | 1.03718e-08 | — | — | — |
+| **v32 (i)+(ii) compensated, PRIMARY** | 3.3249e-08 | 0.302321 | 1.00518e-08 | **1.0363×** | **[+2.36e-10, +4.04e-10]** | 23/24 |
+| v32_i (route i only), diag | 3.3073e-08 | 0.302321 | 9.99859e-09 | 1.0418× | [+2.75e-10, +4.71e-10] | 22/24 |
+| v32_uncomp, diag | 3.3316e-08 | 0.302278 | 1.00708e-08 | 1.0342× | [+2.16e-10, +3.86e-10] | 23/24 |
+
+Noise-corrected (true-function) gain for v32: 1.0346×. Counted FLOPs ×1.00430.
+
+**Binding verdict:** `decide(gate=1.4925)` **FAIL** (gain 1.0318×). The slice
+target (≥1.5× raw) is not met by a factor of ~14 in log terms.
+**Secondary criterion (pre-registered): MET** — v32 is better with t95 strictly
+above zero at +0.43% counted cost ≤ 0.5%. v32 is a *supported improvement*
+eligible for the combined bundle, not a slice pass.
+
+**Predictions scored.** Builder: (1) ≥18/24 better — HIT (23); (2) 1.03–1.25×,
+gate fails — HIT (low end); (3) FLOPs ×1.002–1.004 — MISS slightly (×1.0043);
+(4) v32_i worse than v32 — **FALSIFIED** (v32_i numerically better, intervals
+overlap heavily; the per-birth exactness of route (ii) did not buy score);
+(5) v32_uncomp within ±3% of v32 — HIT. Samuel: "I don't know". Strategist:
+κ4 half closes to ≤2.4e-8 P01-scale (55%) — **not supported** by this mechanism.
+
+**Knowledge delta.** The audit's structural finding was correct (v31 had zero
+distinct-index κ4 at birth; the oracle proves it) but its **score weight at
+1024×16 is ~3–4%**, not the 1.4× gap. Exact first-order completeness of one
+birth route does not translate proportionally into final-layer accuracy; the
+diagnostic ordering (i-only ≥ i+ii) is within noise and is NOT a promotion of
+v32_i (a diagnostic beating the primary opens a new contract on another block,
+as registered). The large remaining raw gap to the public 504aldo family is
+therefore NOT explained by the feed.
+
+### P4 live-shape meter (job 1464, label-free)
+
+`experiments/2026-09-16_stage2_p4/meter_strassen_depth.json`, one canonical
+1024×16 network (steady-state MLP index 1), f64 read-only weights.
+
+| arm | depth | C/B | ops | peak commit (Windows) |
+|---|---:|---:|---:|---:|
+| v31 | 4 | 0.30103 | 13,052 | 4.18 GB |
+| v31 | 5 | 0.28112 | 15,720 | 6.41 GB |
+| v31 | 6 | 0.27613 | 18,434 | **10.34 GB** |
+| v32 | 4 | 0.30232 | 13,850 | 4.30 GB |
+| v32 | 5 | 0.28242 | 16,518 | 6.53 GB |
+| v32_p4 (final var + blocksym) | 4 | 0.30016 | 14,493 | 4.30 GB |
+| **v32_p4** | **5** | **0.28020** | **17,483** | **6.53 GB** |
+| v32_p4 | 6 | 0.27491 | 20,519 | 10.44 GB |
+
+- Depth 5: **−6.6%** (my hand estimate said −9%; the glue grows). Depth 6: a
+  further −1.8% but **>8 GiB peak** and >20k ops — rejected.
+- Final-layer variance + block-symmetric covariance: **−0.72%** at depth 4.
+- **P4 gate (≤0.27 B, ≤20k ops, Linux 8 GiB) is NOT reachable** with these
+  exact savings: best memory-feasible point is 0.2802. The −7.3% exact saving
+  is still a supported cost reduction pending (a) raw parity on DESIGN and
+  (b) the real Linux 8-GiB enforcement at 6.5 GB Windows commit.
+- v32's measured op count is 13,850 (not the ≈13,300 predicted): +798 ops.
+
+### Where this leaves the release target
+
+Best supported bundle so far: v32 + P4(depth 5) ≈ raw ×0.965, C/B 0.2802 →
+score ratio ≈ 0.898 vs v31 → **≈7.9e-9 adjusted** (planning arithmetic, not a
+forecast). That is ~10% better than v31's graded 8.75e-9 and **far from the
+4.0–4.4e-9 major-release target.** N1 (the only lever sized for the target) is
+parked on economics. Per the handoff, this is not a package to upload merely to
+finish; the next steps are the remaining justified discriminators for the
+unexplained accuracy gap (below), then a Strategist Packet if they are exhausted.
