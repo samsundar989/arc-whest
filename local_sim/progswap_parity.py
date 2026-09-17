@@ -282,8 +282,14 @@ def declared(pairs):
     flops.configure(symmetry_warnings=False)
     L = lambda name: K._load(os.path.join(_ROOT, name))
     m32 = L(V32)
-    lam5 = float(L(V32)._K4_LAM[4])
     for arm, table in pairs:
+        # The lambda the reference must use is the one THIS ARM consumes, read
+        # off its own `_K4_LAM`. Taking it from v32 was correct only while every
+        # arm inherited v32's table; the branch-(b) diagnostic carries a
+        # different one, and the mismatch showed up as a 1e-5 "failure" in
+        # cov_out/g_out/K21 that was entirely the harness asking the reference a
+        # different question. Harness consistency, not a tolerance.
+        lam5 = float(L(arm)._K4_LAM[4])
         tb = [dict(output=list(k[0]), factors=list(k[1]), derivs=list(k[2]), coef=str(c))
               for k, c in SB.load_table(os.path.join(_ROOT, table)).items()
               if k[0] != (1, 2)]
