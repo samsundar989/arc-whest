@@ -52395,3 +52395,27 @@ a4r384 0.23–0.26, a4r512 0.25–0.28, a6r384 0.25–0.28, a3r256 0.20–0.23; 
 over v32 (joins: ~5 matmul-class + 2 QR per layer). Price gate for an accuracy screen,
 chosen now: a configuration is screened only if C/B ≤ 0.26 at depth 4 (≈ ≤ 0.24 with P4
 depth 5), since the release target needs ≤ ~0.20–0.22 B after all savings.
+
+### Same-state closure report RESULT (job 1599, label-free) — step-1 deliverable
+
+`experiments/2026-09-17_closure/same_state_1024.json` (canonical 1024×16 network, no truth; v17's
+live branch, no shape-gate override). **Adapters:** `ref_step` on each captured boundary reproduces
+each file's own mean row to 1.9–2.3e-7 (v32) and 6–8e-8 (v17) at layers 1,3,5,8,11,14.
+
+| layer | boundary v17 vs v32 (rel): C_off / D3 / D21 / dG | median skew / exkurt / corr (v32) | program change on B_v32, v17 prog: mu / cov_off / K21 / g_out | BUDGET 4: mu / cov_off / K21 / g_out |
+|---|---|---|---|---|
+| 1 | .000 / .001 / .002 / .037 | .007 / .010 / .026 | 2.5e-6 / 1.1e-3 / 3.5e-3 / 1.1e-2 | 2.3e-6 / 1.0e-3 / 3.9e-3 / 8.4e-3 |
+| 5 | .002 / .009 / .011 / .025 | .026 / .032 / .048 | 8.5e-6 / 1.6e-3 / 1.2e-2 / 3.4e-2 | 7.5e-6 / 2.1e-3 / 1.5e-2 / 3.3e-2 |
+| 8 | .003 / .011 / .014 / .079 | .043 / .041 / .059 | 1.3e-5 / 2.0e-3 / 1.7e-2 / 5.4e-2 | 1.1e-5 / 2.6e-3 / 2.0e-2 / 5.3e-2 |
+| 14 | .005 / .015 / .020 / .166 | .075 / .056 / .077 | 1.6e-5 / 2.3e-3 / 2.1e-2 / 8.4e-2 | 1.4e-5 / 2.8e-3 / 2.3e-2 / 8.3e-2 |
+
+Reciprocal boundaries (B_v17 through both programs) give the same deltas to ≤ 10% — the
+program difference, not the state difference, dominates the one-step change. Final rows on this
+network differ by only 1.1e-4 relative (the observed P11 raw gap is an average squared-error
+effect of similar size). Largest terms absent from v32 by Frobenius norm: `C·D21`, `C·D12`,
+`C·D3i/j` in (2,2) and, deeper, `C·D3j` in (2,1). Pre-activations are only mildly
+non-Gaussian at 1024 (|skew| ≤ 0.075, |exkurt| ≤ 0.056), so oracle family C's warning does
+not describe this regime. **Knowledge delta:** the states are near-identical except the
+transported core dG (up to 17%) and λ; per layer, both richer programs move K21 1–2% and the
+regenerated core 1–8%, rising with depth — consistent with a compounding closure effect, whose
+sign on accuracy is what job 1609 measures. Decides nothing.
