@@ -1,5 +1,32 @@
 # CURRENT_STATE.md — read this first
 
+## September 17 (evening): handoff-09-17 slice executed — release target UNMET; strategist decision needed
+
+**Latest packet:** `docs/STRATEGIST_PACKET_2026-09-17_slice.md` (self-contained). Narrative and
+pre-registered verdicts: `experiments/LOG.md` 2026-09-17 entries. Skeptic: `experiments/2026-09-17_skeptic/verdict.md`
+(PROVISIONAL; its follow-ups resolved by job 1642). No submission, designation, vault touch or new seed block.
+
+| step | result (P11 DESIGN, 24 nets, paired arithmetic) |
+|---|---|
+| 0 receipt name + PowerShell module path | fixed, tests 10/10, preflight GREEN 12/16 (job 1611); Skeptic ACCEPT |
+| 1 closure audit | v32 == upstream cost-≤2 closure; v17/v29 == pruned PAIR (+6 κ_iiij rows), coefficients agree; f64 reference == live; same-state report: states near-identical except transported core dG and λ |
+| 2 richer closure | BUDGET 4 0.835×, BUDGET 3 0.781×, PAIR 0.866× (κ_iiij = 0); readout-only null; protected D22 feed null; **with κ_iiij restored 1.189× over BUDGET 3 but still 0.929× of v32** |
+| 3 shared old-lineage coordinates | age 2–3 ranks ≤256 destroy accuracy (0.26–0.79×); calibrated label-free proxy; **age 4 rank 256 lean + P4 depth 5 = 0.2163 B, raw ×1.22, adjusted 1.149× over v32 / 1.065× over P4 alone** |
+| P4 depth 5 | exact: raw 1.0002, adjusted 1.079×, 6.53 GB Windows commit |
+
+**Best supported cost base:** `estimator_k3_v37_a4r256_p4d5.py` — P11 score 8.746e-9 ≈ **1.19× over v31**
+(projection ≈7.4e-9 public). 19,914 ops. Not DECIDE-tested, mini-run, Linux-memory-checked or certified.
+**Not a release** under the 2× / 4.4e-9 criterion. Fallbacks unchanged: v31 `#331317` (latest graded),
+F21 `#330950` (designated).
+
+**Next:** strategist answers packet §4 (source of v29's raw edge via reverse ablation on v17 vs fitting our
+own joint closure+core on a fresh DESIGN block; recent-lineage cost floor; whether a ≈1.19× canary is
+worth the evidence path). Do not repeat the step-2/3 arms. P11 is read ~13 times: new accuracy
+selection needs a new DESIGN block.
+
+---
+
+
 ## September 17 review: nonlinear closure mismatch found — next slice is defined, no major release yet
 
 > **Independent source/validation review:** principal P11 numbers reproduce, but the conclusion excluding κ4/closure interactions is rejected. Our actual nonlinear table has **25 terms**, public v17 **62+4**, including live mean products absent here. Protected-feed allocation before compression also differs. N1's tiny-width screen is exploratory and registration-deficient; it does not close live-shape compression. Stage 0 needs two integration fixes. See `docs/STRATEGIST_RESPONSE_2026-09-17.md` and its linked reviews.
