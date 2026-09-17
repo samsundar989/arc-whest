@@ -57,7 +57,7 @@ _ROOT = os.path.dirname(_HERE)
 SOURCE = os.path.join(_ROOT, "estimator_k3_v32.py")
 V32_SHA = "10869a6ca7b9b95005db3d63ea0cf63c44f070dd059553f492ad1cf12105657c"
 
-_BIV = ("C", "D21", "D12", "D22", "D3i", "D3j", "D4i", "D4j")
+_BIV = ("C", "D21", "D12", "D22", "D3i", "D3j", "D4i", "D4j", "Q31", "Q13")
 _LOWRANK = {"D22", "D3i", "D3j", "D4i", "D4j"}
 
 
@@ -142,7 +142,9 @@ def closure_program(table, v32_terms):
             uni.setdefault((factors, derivs[0]), {})[out[0]] = float(c)
         else:
             biv.setdefault((factors, derivs[0], derivs[1]), {})["%d%d" % out] = float(c)
-    return {"uni": [[list(f), k, cs] for (f, k), cs in uni.items()],
+    has_q = any(f in ("Q31", "Q13") for (fs, ki, kj) in biv for f in fs)
+    return {"has_q": has_q,
+            "uni": [[list(f), k, cs] for (f, k), cs in uni.items()],
             "biv": [[list(f), ki, kj, cs] for (f, ki, kj), cs in biv.items()]}
 
 
@@ -273,6 +275,11 @@ def _closure_apply(pK, cc, sigma, alpha, blocks, off_mask, last_layer, dtype):
     D22n = blocks["D22"] * (inv2[:, None] * inv2[None, :])
     nb = {"C": Cn, "D21": D21n, "D12": D21n.T, "D22": D22n,
           "D3i": D3n[:, None], "D3j": D3n[None, :], "D4i": D4n[:, None], "D4j": D4n[None, :]}
+    if "lam" in blocks and prog.get("has_q"):
+        # kappa_iiij of the carried model kappa4 = m Sym(G (x) I), G = diag(dG) + lam C_off:
+        # Q31_ij = (m/2) lam C_ij, normalised by s_i^3 s_j (Skeptic follow-up, 2026-09-17)
+        nb["Q31"] = Cn * inv2[:, None] * (0.5 * blocks["metric"] * blocks["lam"])
+        nb["Q13"] = nb["Q31"].T
     mons = []
     for fs, ki, kj, cs in prog["biv"]:
         m = nb[fs[0]]
@@ -362,7 +369,8 @@ _PROTECT_FEED = %r
     if _CLOSURE_SCOPE == "all" or (_CLOSURE_SCOPE == "last" and last_layer):
         _cl_blocks = {"D3": S[(3,)], "D4": S[(4,)]}
         if not last_layer:
-            _cl_blocks.update({"C11": S[(1, 1)], "D21": S[(2, 1)], "D22": S[(2, 2)]})
+            _cl_blocks.update({"C11": S[(1, 1)], "D21": S[(2, 1)], "D22": S[(2, 2)],
+                               "lam": float(_lam_prev), "metric": metric})
         _cl_H, _cl_nb = _closure_apply(pK, const["closure"], sigma, alpha, _cl_blocks,
                                        off_mask, last_layer, dtype)
 ''', "extras")

@@ -59,12 +59,13 @@ class _Sentinel:
     pass
 
 
-def run_live(mod, bd, force_generic=False, keep_hubs=False):
+def run_live(mod, bd, force_generic=False, keep_hubs=False, dtype=None, layer_index=0):
+    dtype = fnp.float64 if dtype is None else dtype
     n = bd["mu_pre"].shape[0]
     cap = {}
     sent = _Sentinel()
-    D3 = fnp.asarray(bd["D3"], dtype=fnp.float64)
-    D21 = fnp.asarray(bd["D21"], dtype=fnp.float64)
+    D3 = fnp.asarray(bd["D3"], dtype=dtype)
+    D21 = fnp.asarray(bd["D21"], dtype=dtype)
     mod._advance = lambda WT, tw: sent
     mod._dslice3 = lambda tw: D3
     mod._dslice21 = lambda tw, off: D21 * off
@@ -82,16 +83,16 @@ def run_live(mod, bd, force_generic=False, keep_hubs=False):
     mod._truncate = lambda tw, g, n_: tw
     if not keep_hubs:
         mod._HUB_ROUTES = ()
-    const = mod.Estimator()._constants(n, fnp.float64)
+    const = mod.Estimator()._constants(n, dtype)
     if force_generic:
         const["wick"] = dict(const["wick"], fast_1d=False)
-    W = fnp.asarray(np.eye(n), dtype=fnp.float64)
-    st = (fnp.asarray(bd["mu_pre"], dtype=fnp.float64), fnp.asarray(bd["cov_pre"], dtype=fnp.float64),
-          sent, 0.0, fnp.asarray(bd["dG"], dtype=fnp.float64))
+    W = fnp.asarray(np.eye(n), dtype=dtype)
+    st = (fnp.asarray(bd["mu_pre"], dtype=dtype), fnp.asarray(bd["cov_pre"], dtype=dtype),
+          sent, 0.0, fnp.asarray(bd["dG"], dtype=dtype))
     with flops.BudgetContext(flop_budget=2 ** 55, quiet=True):
         mu_out, cov_out, _tw, _c4, g_out = mod._layer(
-            W, st, mod._tables(), fnp.float64, const, bd["metric"], last_layer=False,
-            gens=None, layer_index=0)
+            W, st, mod._tables(), dtype, const, bd["metric"], last_layer=False,
+            gens=None, layer_index=layer_index)
     cap.update(mu_out=np.asarray(mu_out), cov_out=np.asarray(cov_out), g_out=np.asarray(g_out))
     return cap
 

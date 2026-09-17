@@ -52674,3 +52674,14 @@ vs f64 BUDGET-4 reference on a captured 1024×16 boundary; (b) generate and mete
 P4 d5 bundles; (c) ONE combined P11 design read: v32 control; v35_Q3q (BUDGET 3 + Q31/Q13 rows with
 κ_iiij = (m/2)λC) and v35_Q3 (re-run as its own same-run comparator) for C1; v32_p4d5,
 v37_a4r256_p4d5, v37_a4r384_p4d5 for C3 — under its own contract registered before submission.
+
+**Follow-up build (label-free).** `local_sim/closure/closure_budget3_q.json` = BUDGET 3 + single-factor
+Q31/Q13 rows (coefficient 1/6; equals v17's six oriented Q rows); `estimator_k3_v35_Q3q.py` — live ==
+f64 reference ≤ 1.1e-14 with λ ≠ 0, Q rows move cov by 1e-4–2e-4 relative, finite. Bundles
+`estimator_k3_v37_a4r256_p4d5.py`, `estimator_k3_v37_a4r384_p4d5.py`. `local_sim/closure_audit/live_check.py`
+(live f32/f64 closure layer vs f64 reference on captured 1024×16 boundaries; small-shape smoke f64
+≤ 1.7e-13, f32 ≤ 1.1e-4 on g_out). **Workload review:** (1) live_check at 1024 for v35_Q (BUDGET 4),
+v35_Q3q (BUDGET 3+Q), v35_off (BUDGET 2 baseline floor), layers 3/8: one v32 capture (4.3 GB) +
+f64 reference families (~1.1 GB) — declared 10 GiB, 2 CPUs, ~25 min; (2) meter v37_a4r256_p4d5,
+v37_a4r384_p4d5, v32_p4d5, v35_Q3q — declared 10 GiB (depth-5 v32 6.5 GB commit), ~25 min. Both
+pinned local, label-free.
