@@ -160,6 +160,7 @@ def main():
 
     a1 = cmp("A1", "v32", "chain3")
     a2 = cmp("A2", "v17", "chain4")
+    # control=chain3 so this reads "how much better v17 is than chain 3"
     cmp("D_chain3_vs_v17", "chain3", "v17")
     cmp("D_chain3_last", "v32", "chain3_last")
     cmp("D_v32_vs_v17", "v32", "v17")
@@ -188,6 +189,13 @@ def main():
                   "gain beyond v17 on this panel")
 
     # prediction checks, reported not gated
+    # DIRECTION. `cmp(tag, c, x)` reports control/candidate, so
+    # `D_chain3_vs_v17` with control=chain3 is v17_better_by = v17 over chain3:
+    # a value ABOVE 1 means v17 is ahead. Prediction 4 says chain 3 stays at
+    # least 5% WORSE than native v17, which is therefore `>= 1.05`, not `<= 0.95`.
+    # Caught by a synthetic dry-run of this module before the real artifact
+    # existed; the A1/A2/A3 GATES are untouched and this is a reported
+    # diagnostic, not a threshold.
     p4 = out["comparisons"]["D_chain3_vs_v17"]["raw_gain"]
     last_share = (abs(math.log(out["comparisons"]["D_chain3_last"]["raw_gain"]))
                   / max(abs(math.log(a1["raw_gain"])), 1e-12))
@@ -195,7 +203,8 @@ def main():
         "A1_passed": a1_pass, "A2_passed": a2_pass, "A3_passed": a3_pass,
         "reciprocity_log_gap": float(recip), "branch": branch,
         "H1_falsified": bool(not a1_pass and not a2_pass),
-        "prediction_4_chain3_at_least_5pct_worse_than_v17": bool(p4 <= 0.95),
+        "prediction_4_chain3_at_least_5pct_worse_than_v17": bool(p4 >= 1.05),
+        "chain3_over_v17_raw": float(1.0 / p4),
         "prediction_5_readout_share": float(last_share),
     }
     print()
@@ -206,7 +215,7 @@ def main():
     print(f"  BRANCH: {branch}")
     print(f"  prediction 4 (chain3 stays >=5% worse than v17 raw): "
           f"{out['verdict']['prediction_4_chain3_at_least_5pct_worse_than_v17']} "
-          f"(chain3/v17 raw {p4:.4f}x)")
+          f"(v17 is {p4:.4f}x better; chain3/v17 raw {1.0 / p4:.4f}x)")
     print(f"  prediction 5 (readout share < 0.3): {last_share:.3f}")
 
     if a.out:
