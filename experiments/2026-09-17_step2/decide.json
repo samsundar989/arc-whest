@@ -1,0 +1,160 @@
+{
+ "artifact": "s6_decide",
+ "score_artifact": "experiments/2026-09-17_step2/score.json",
+ "tier": "DESIGN (P11, exposed, reused)",
+ "arms": {
+  "v32": {
+   "sha256": "10869a6ca7b9b95005db3d63ea0cf63c44f070dd059553f492ad1cf12105657c",
+   "raw_mse": 3.3248923318277925e-08,
+   "c_over_b": 0.3023208955064547,
+   "score": 1.0051844272207226e-08
+  },
+  "R": {
+   "sha256": "617692be4228d0c22f09573bd689eb86fa4d508107c26ca00ad456c418020d4b",
+   "raw_mse": 3.3268438818604786e-08,
+   "c_over_b": 0.30232127981844314,
+   "score": 1.0057757001202173e-08
+  },
+  "Q": {
+   "sha256": "192080c274f218f01598ba7e1ab7be5bdb42ce2ddbba9834b707eebf5cda439b",
+   "raw_mse": 3.9423013742379e-08,
+   "c_over_b": 0.3052765154411645,
+   "score": 1.2034920263462601e-08
+  },
+  "P": {
+   "sha256": "1a25df161fede676ac0814a1e0d2022f0f58b37c467a242b212b30781f69b2f1",
+   "raw_mse": 3.3240908766292897e-08,
+   "c_over_b": 0.3034223589811518,
+   "score": 1.0086034952545837e-08
+  },
+  "QP": {
+   "sha256": "f4ff36a5fb1a3f8816d1c405f55729bb9034bc21ef18f05bf82a3bdf6390d9ad",
+   "raw_mse": 3.826356387293117e-08,
+   "c_over_b": 0.310013969092779,
+   "score": 1.1862239307882458e-08
+  }
+ },
+ "comparisons": {
+  "C1": {
+   "control": "v32",
+   "candidate": "Q",
+   "gate": 1.15,
+   "passed": false,
+   "gain": 0.8352231715837876,
+   "t95_diff": [
+    -2.4652995172655627e-09,
+    -1.5008524652451914e-09
+   ],
+   "raw_gain": 0.843388674837306,
+   "geometric_gain": 0.8358649055681736,
+   "n_candidate_better": 0,
+   "n": 24,
+   "reasons": [
+    "arithmetic gain 0.8352x is below the pre-registered gate 1.1500x",
+    "the candidate is WORSE than the control (0.8352x)",
+    "the t 95% interval on the paired difference does not lie strictly above zero [-2.4653e-09, -1.5009e-09]"
+   ]
+  },
+  "C2": {
+   "control": "v32",
+   "candidate": "QP",
+   "gate": 1.15,
+   "passed": false,
+   "gain": 0.8473816799099454,
+   "t95_diff": [
+    -2.259525187682301e-09,
+    -1.361264883668167e-09
+   ],
+   "raw_gain": 0.8689447597901157,
+   "geometric_gain": 0.8486554783743433,
+   "n_candidate_better": 0,
+   "n": 24,
+   "reasons": [
+    "arithmetic gain 0.8474x is below the pre-registered gate 1.1500x",
+    "the candidate is WORSE than the control (0.8474x)",
+    "the t 95% interval on the paired difference does not lie strictly above zero [-2.2595e-09, -1.3613e-09]"
+   ]
+  },
+  "C3": {
+   "control": "v32",
+   "candidate": "P",
+   "gate": 1.0,
+   "passed": false,
+   "gain": 0.996610096980679,
+   "t95_diff": [
+    -7.673724590165235e-11,
+    8.355885224429048e-12
+   ],
+   "raw_gain": 1.0002411050805313,
+   "geometric_gain": 0.9968355065124428,
+   "n_candidate_better": 9,
+   "n": 24,
+   "reasons": [
+    "arithmetic gain 0.9966x is below the pre-registered gate 1.0000x",
+    "the candidate is WORSE than the control (0.9966x)",
+    "the t 95% interval on the paired difference does not lie strictly above zero [-7.6737e-11, +8.3559e-12]"
+   ]
+  },
+  "C4": {
+   "control": "v32",
+   "candidate": "R",
+   "gate": 1.0,
+   "passed": false,
+   "gain": 0.999412122504626,
+   "t95_diff": [
+    -2.7495611641631382e-11,
+    1.5670153651735495e-11
+   ],
+   "raw_gain": 0.9994133929628237,
+   "geometric_gain": 0.999344400973629,
+   "n_candidate_better": 13,
+   "n": 24,
+   "reasons": [
+    "arithmetic gain 0.9994x is below the pre-registered gate 1.0000x",
+    "the candidate is WORSE than the control (0.9994x)",
+    "the t 95% interval on the paired difference does not lie strictly above zero [-2.7496e-11, +1.5670e-11]"
+   ]
+  },
+  "C5": {
+   "control": "Q",
+   "candidate": "QP",
+   "gate": 1.0,
+   "passed": true,
+   "gain": 1.0145571970939244,
+   "t95_diff": [
+    5.999358875119543e-11,
+    2.853683224090914e-10
+   ],
+   "raw_gain": 1.0303016695804454,
+   "geometric_gain": 1.0153022010147386,
+   "n_candidate_better": 19,
+   "n": 24,
+   "reasons": []
+  },
+  "C6": {
+   "control": "P",
+   "candidate": "QP",
+   "gate": 1.0,
+   "passed": false,
+   "gain": 0.8502639923849511,
+   "t95_diff": [
+    -2.2267560673649913e-09,
+    -1.3256526433082533e-09
+   ],
+   "raw_gain": 0.8687353032948544,
+   "geometric_gain": 0.8513495685396216,
+   "n_candidate_better": 0,
+   "n": 24,
+   "reasons": [
+    "arithmetic gain 0.8503x is below the pre-registered gate 1.0000x",
+    "the candidate is WORSE than the control (0.8503x)",
+    "the t 95% interval on the paired difference does not lie strictly above zero [-2.2268e-09, -1.3257e-09]"
+   ]
+  }
+ },
+ "base_for_cost_work": {
+  "arm": "v32",
+  "file": "estimator_k3_v32.py",
+  "rule": "no supported change"
+ }
+}

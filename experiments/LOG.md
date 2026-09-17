@@ -52419,3 +52419,44 @@ not describe this regime. **Knowledge delta:** the states are near-identical exc
 transported core dG (up to 17%) and λ; per layer, both richer programs move K21 1–2% and the
 regenerated core 1–8%, rising with depth — consistent with a compounding closure effect, whose
 sign on accuracy is what job 1609 measures. Decides nothing.
+
+### Step 2 RESULT (job 1609; 1607 had been placed on the 3080ti node and failed before any read): BUDGET-4 closure HURTS; protected feed null; base stays v32
+
+`experiments/2026-09-17_step2/{score.json,rows.jsonl,decide.json}`; verdict by the committed
+`local_sim/s6_decide.py`. P11 read registered with its actual launch timestamp. 0 failures;
+candidate SHAs equal the contract's.
+
+| comparison | gate | adjusted gain | raw gain | t95 (ctrl − cand) | better | verdict |
+|---|---|---:|---:|---|---:|---|
+| C1 v32 → Q | 1.15 | **0.8352×** | 0.8434× | [−2.47e-9, −1.50e-9] | 0/24 | FAIL (worse) |
+| C2 v32 → QP | 1.15 | 0.8474× | 0.8689× | [−2.26e-9, −1.36e-9] | 0/24 | FAIL (worse) |
+| C3 v32 → P | 1.00 | 0.9966× | 1.0002× | [−7.7e-11, +8.4e-12] | 9/24 | FAIL (null) |
+| C4 v32 → R | 1.00 | 0.9994× | 0.9994× | [−2.8e-11, +1.6e-11] | 13/24 | diagnostic: null |
+| C5 Q → QP | 1.00 | 1.0146× | 1.0303× | [+6.0e-11, +2.9e-10] | 19/24 | PASS |
+| C6 P → QP | 1.00 | 0.8503× | 0.8687× | [−2.23e-9, −1.33e-9] | 0/24 | FAIL |
+
+Raw MSE: v32 3.3249e-8, R 3.3268e-8, Q 3.9423e-8, P 3.3241e-8, QP 3.8264e-8 (averaged-truth noise
+≈2.38e-9). **Registered base rule → v32 ("no supported change").**
+
+**Predictions.** Builder: (1) R |Δ|<2% HIT; (2) Q 1.00–1.08, gate fails — gate fail HIT, direction
+**FALSIFIED** (−16%); (3) P within ±1.5% HIT; (4) QP within ±2% of Q HIT (+1.5%); (5) no failures,
+metered FLOPs HIT. Samuel: "I don't know" ×3.
+
+**Falsifier fires:** the independently derived, complete cost-≤4 closure — consumed coherently by
+centering, covariance, births and the regenerated core — is rejected on this base, and the harm is
+recurrent (R null). Protected placement of the D22 K21 content at rank 32 is not supported (null),
+though it recovers 1.5% on top of Q. **Scope:** this rejects BUDGET 4 over our carried blocks with
+κ_iiij = 0, λ/rank/sketch fixed, the (1,1,1) birth unenriched; it does not reject every finite rule.
+The same-state report showed BUDGET 4 moves K4 about 2× more than v17's pruned program at deep
+layers — the C-power and C²·X families are the ones BUDGET 4 has and PAIR/v17 lack.
+
+**One attribution diagnostic follows (same contract, promotes nothing, cannot become a base):**
+does the harm come from the cost-3 families (BUDGET 3 = C·X and C³ only; mean unchanged) or from
+the families outside PAIR (C³, C⁴, C²·X)? Arms from tables generated BEFORE any data
+(`closure_budget3.json`, `closure_pair.json`), Q-scope, no protection: `estimator_k3_v35_Q3.py`,
+`estimator_k3_v35_Qpair.py` vs v32. **Builder prediction:** B3 hurts (≥5% raw worse) because C·D22
+and C·D21 terms are in it; PAIR hurts less than B4 but still hurts. **Pre-registered consequence:**
+if both hurt by ≥5%, enriching our chain's closure by power-counting families is closed on this
+base and no further closure arm is built; if PAIR is within ±3% of v32 and B3 hurts, the C-power
+families are named as the harmful part — still no new arm without a new contract and Samuel's
+prediction. Either way the cost work proceeds on v32.
