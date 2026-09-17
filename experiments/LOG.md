@@ -52027,3 +52027,26 @@ non-unit variance and random W; (2) label-free continuous N1 cycle accuracy in
 the dense harness; (3) one diagnostic P11 read of v17's κ4 recipe on our base
 (v32_i + q31 + v17 λ) vs v32 + v17 λ. The Strategist Packet is marked
 superseded-in-part until these return.
+
+### Follow-up (1) RESULT: the (i)/(ii) split holds at non-unit variance — label-free
+
+`local_sim/k4feed_oracle_scaled.py` → `experiments/2026-09-16_stage1_k4feed/oracle_scaled.log`.
+Σ = s(I+εC), s ∈ {0.15, 0.5, 2.0}, two mean vectors (different w1:w3 ratios, so
+two independent equations for the two route coefficients): route (i)+(ii) matches
+exact to **2.2e-5–3.5e-5** everywhere; route (i) alone is off 3.4–4.3% on this C.
+Limit: within the scale-mixture law λ and g stay tied (λ ∝ d²s, g ∝ d²s²).
+**Reading:** v32_i's paired lead over v32 is not a wrong derivation; per-birth
+exactness is not what minimises final-layer error in this chain (error
+cancellation). v32_i vs v32 remains an open DESIGN question needing its own
+contract on another block before either is preferred for release.
+
+### Follow-up (3) DIAGNOSTIC (same contract): v17's joint κ4 recipe on our base
+
+Control `estimator_k3_v32_lam504.py` (v32 + v17 λ, raw 3.2469e-8 known). Arms:
+`estimator_k3_v32i_q31_lam504.py` (route-(i) feed + (3,1) rows + v17 λ — v17's
+recipe on our base) and `estimator_k3_v32i_q31.py` (same with our λ).
+**Builder prediction:** the recipe arm beats control by ≥5% raw iff the (3,1)
+benefit is a joint-package effect; I predict it does NOT (≤ +2%), given (3,1)
+hurt 8–22% with route (i)+(ii). Samuel: "I don't know" (gap-location
+diagnostics). Promotes nothing; a positive result opens our own joint λ fit plus
+a fresh SINGLE_USE block.
