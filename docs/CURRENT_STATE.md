@@ -1,6 +1,8 @@
 # CURRENT_STATE.md — read this first
 
-## September 17: audit refinements executed through the discriminators — no major release found; strategist packet ready
+## September 17: audit refinements executed through the discriminators — no major release found yet
+
+> **Skeptic 2026-09-17: A PROVISIONAL, B REJECT, C PROVISIONAL.** v32_i beats v32 (paired); N1 un-parked (0.17 gate was post-data; 0.20 target met by some configs; accuracy unmeasured); "exhausted" withdrawn. Follow-ups in progress — see LOG.
 
 **Active plan pointer:** `docs/CLAUDE_CODE_HANDOFF_NEXT_SUBMISSION_2026-09-16.md` (executed
 through stage 3) → **decision now with Samuel/strategist:** `docs/STRATEGIST_PACKET_2026-09-17.md`.

@@ -51984,3 +51984,46 @@ located in any single mechanism tested. → Strategist Packet.
 stage-0 instrument repairs. Steps 13–16 (-Full, incl. the official Phase-2 smoke
 that now runs cap-off) are NOT checked by this run; they are owed on any frozen
 release candidate before an approval request.
+
+---
+
+## 2026-09-17 — **Rule 2 Skeptic on the Sep-16 claims: A PROVISIONAL, B REJECT, C PROVISIONAL — retractions recorded**
+
+Fresh-context Skeptic (docs/SKEPTIC.md), raw rows recomputed; every quoted
+number reproduced. What failed is interpretation.
+
+**A (v32 supported improvement) — PROVISIONAL.** Paired on the binding statistic,
+the diagnostic **v32_i beats the primary v32**: score diff v32 − v32_i
++5.33e-11, t95 [+2.24e-11, +8.41e-11], 18/24. **RETRACTED:** my "intervals
+overlap heavily, within noise" — an unpaired reading. The pre-registered rule
+("a diagnostic beating v32 opens a new contract on a different block") fired and
+I did not follow it. Also: the κ4 oracle fixture (n=3, W=I, unit variance,
+uniform dG, λ/g fixed at 2) is one equation for two route coefficients — it
+cannot certify the (i)/(ii) split, and the real chain's variance falls
+2.00 → 0.146. The truth-read `ts` for job 1463 was hand-supplied (23:30Z) while
+the read occurred 19:29Z. v32 vs v31 itself stands (t95 [2.36e-10, 4.04e-10],
+23/24, geometric agrees, drop-top robust).
+
+**B (N1 parked on economics) — REJECT.** **RETRACTED:** the "≤ ~0.17 B" gate. It
+first appears in the entry committed with the first cost meter (34c2f3a), i.e.
+it was set after cost data, and is stricter than the pre-registered target
+(≤0.20 B at ≤5% raw loss). Metered configurations meeting 0.20 B exist
+(join-(b) r=128 a=2 0.179/0.195; fixed-basis r=128 a≤3 0.160–0.180). **Also
+RETRACTED:** "proxy rejected at n=40 and n=64" — at n=64 `proxy_informative` is
+TRUE (3/3, Spearman 0.72/0.55/0.61) and meanJ beats energy at r=n/8 on 2/3; only
+`proxy_pays` at r=n/4 failed. The verdict docstring was committed with its
+results (2f5aba1), so its pre-registration is unverifiable. N1 is **un-parked**:
+its question is accuracy of a continuous merged cycle, never measured.
+
+**C (discriminators exhausted) — PROVISIONAL.** Numbers accepted; interpretation
+not. Transplants changed one factor at a time on the v32 base; v17's κ4 package
+(route-(i) feed that overshoots + (3,1) rows that overshoot + λ fitted on that
+chain) was never run jointly on our base. v34 was built on v32, not the better
+v32_i. Oracles never saw non-unit variance. D2 is 3 nets, post-hoc reading.
+**RETRACTED:** "not transferable physics" and "discriminators exhausted".
+
+**Follow-ups, cheapest first (this session):** (1) label-free κ4 oracle at
+non-unit variance and random W; (2) label-free continuous N1 cycle accuracy in
+the dense harness; (3) one diagnostic P11 read of v17's κ4 recipe on our base
+(v32_i + q31 + v17 λ) vs v32 + v17 λ. The Strategist Packet is marked
+superseded-in-part until these return.

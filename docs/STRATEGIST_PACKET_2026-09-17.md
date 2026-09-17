@@ -1,5 +1,7 @@
 # Strategist packet — 17 September 2026
 
+> **PARTLY RETRACTED (Skeptic, 2026-09-17): A PROVISIONAL, B REJECT, C PROVISIONAL.** v32_i beats v32 paired; the N1 0.17 gate was set after data and N1 is un-parked (pre-registered target 0.20 B is met by some metered configs); "discriminators exhausted" is withdrawn — v17's joint κ4 recipe on our base was never tested. See `experiments/LOG.md` 2026-09-17. Do not act on §4–§6 until the follow-ups there return.
+
 *Self-contained: assumes no repository access and no shared chat history.
 Answers the 16-September audit and its execution handoff
 (`CLAUDE_CODE_HANDOFF_NEXT_SUBMISSION_2026-09-16.md`). Evidence labels:
