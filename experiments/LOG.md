@@ -52065,3 +52065,25 @@ age gate the metered cycle prices ≤ 0.20 B (join_b a=2; join_a a ≤ 3).
 Otherwise N1 stays parked on accuracy (not on the retracted 0.17 gate).
 **Builder prediction:** join_b a=2 r=n/8 loses 5–15%; join_a worse; r=n/4 < 3%.
 Limit: tiny widths do not certify 1024.
+
+### Follow-up (2) RESULT: continuous merged tier loses too much at affordable rank — N1 stays parked, on ACCURACY
+
+`experiments/2026-09-17_n1_cycle/{tiny_truth.npz,cycle_accuracy.json,cycle_accuracy.log}`
+(job 1526 truth; cross-replica MSE). Pooled raw loss vs the no-merge chain:
+
+| variant | n=64 | n=96 |
+|---|---:|---:|
+| delete tier a=2 / a=3 | +137% / +60% | +786% / +439% |
+| join_b a=2, r=n/8 / n/4 | −23% / −28% | **+98%** / +27% |
+| join_a a=2, r=n/8 / n/4 | +7% / +17% | +321% / +122% |
+| join_b a=3, r=n/8 / n/4 | −24% / −17% | +11.7% / −2.0% |
+| join_a a=3, r=n/8 / n/4 | −7% / −11% | +86% / +39% |
+
+n=64 is dominated by error cancellation (per-net losses of both signs up to ±50%;
+the estimator is far from truth at that width) and is uninformative. At n=96 the
+pre-registered rule — ≤5% at r=n/8 for a configuration priced ≤0.20 B (join_b a=2;
+join_a a≤3) — **FAILS** (+98%, +321%, +86%). join_b a=3 r=n/8 is +11.7% and prices
+0.2035 B; only r=n/4 (≈256 at 1024, 0.5–1.0 B) is within 5%.
+Builder prediction (join_b a=2 r=n/8 5–15%): FALSIFIED (much worse at n=96).
+**N1 merged-core remains parked, now on measured accuracy at the metered-affordable
+ranks** (tiny widths do not certify 1024; a 1024 test would need a new contract).

@@ -1,0 +1,28 @@
+64 0 delete_a2_r0:+540.60% delete_a3_r0:+229.09% join_b_a2_r8:+66.29% join_b_a2_r16:+4.81% join_a_a2_r8:+199.87% join_a_a2_r16:+152.25% join_b_a3_r8:-3.58% join_b_a3_r16:-3.92% join_a_a3_r8:+18.83% join_a_a3_r16:+13.03% (exact mse 9.747e-05)
+64 1 delete_a2_r0:+6.17% delete_a3_r0:+13.21% join_b_a2_r8:-45.58% join_b_a2_r16:-39.04% join_a_a2_r8:-36.96% join_a_a2_r16:-50.01% join_b_a3_r8:-31.81% join_b_a3_r16:-16.29% join_a_a3_r8:-46.36% join_a_a3_r16:-25.28% (exact mse 3.150e-04)
+64 2 delete_a2_r0:+68.24% delete_a3_r0:+18.34% join_b_a2_r8:-21.75% join_b_a2_r16:-23.96% join_a_a2_r8:-30.73% join_a_a2_r16:+85.40% join_b_a3_r8:-30.62% join_b_a3_r16:-33.67% join_a_a3_r8:+9.95% join_a_a3_r16:-41.23% (exact mse 1.567e-04)
+64 3 delete_a2_r0:+215.07% delete_a3_r0:+91.13% join_b_a2_r8:-34.33% join_b_a2_r16:-28.31% join_a_a2_r8:+13.90% join_a_a2_r16:-0.11% join_b_a3_r8:-16.15% join_b_a3_r16:-11.28% join_a_a3_r8:+37.54% join_a_a3_r16:+30.41% (exact mse 1.646e-04)
+  n=64 pooled delete_a2_r0: raw loss +137.28%
+  n=64 pooled delete_a3_r0: raw loss +60.47%
+  n=64 pooled join_b_a2_r8: raw loss -23.11%
+  n=64 pooled join_b_a2_r16: raw loss -27.59%
+  n=64 pooled join_a_a2_r8: raw loss +7.24%
+  n=64 pooled join_a_a2_r16: raw loss +16.97%
+  n=64 pooled join_b_a3_r8: raw loss -24.29%
+  n=64 pooled join_b_a3_r16: raw loss -17.24%
+  n=64 pooled join_a_a3_r8: raw loss -6.86%
+  n=64 pooled join_a_a3_r16: raw loss -11.10%
+96 0 delete_a2_r0:+1812.40% delete_a3_r0:+798.12% join_b_a2_r12:+388.27% join_b_a2_r24:+54.45% join_a_a2_r12:+932.74% join_a_a2_r24:+521.07% join_b_a3_r12:+97.97% join_b_a3_r24:+19.96% join_a_a3_r12:+249.68% join_a_a3_r24:+155.79% (exact mse 1.082e-05)
+96 1 delete_a2_r0:+628.97% delete_a3_r0:+391.23% join_b_a2_r12:+135.78% join_b_a2_r24:+65.53% join_a_a2_r12:+455.23% join_a_a2_r24:+180.07% join_b_a3_r12:+14.59% join_b_a3_r24:-5.41% join_a_a3_r12:+181.41% join_a_a3_r24:+88.63% (exact mse 2.569e-05)
+96 2 delete_a2_r0:+350.27% delete_a3_r0:+129.93% join_b_a2_r12:-14.13% join_b_a2_r24:-24.90% join_a_a2_r12:+113.17% join_a_a2_r24:-15.40% join_b_a3_r12:-37.85% join_b_a3_r24:-12.58% join_a_a3_r12:-9.14% join_a_a3_r24:-18.62% (exact mse 4.287e-05)
+96 3 delete_a2_r0:+1248.58% delete_a3_r0:+864.46% join_b_a2_r12:+127.43% join_b_a2_r24:+65.37% join_a_a2_r12:+273.64% join_a_a2_r24:+125.94% join_b_a3_r12:+56.26% join_b_a3_r24:+10.25% join_a_a3_r12:+82.35% join_a_a3_r24:+37.76% (exact mse 2.501e-05)
+  n=96 pooled delete_a2_r0: raw loss +785.63%
+  n=96 pooled delete_a3_r0: raw loss +439.47%
+  n=96 pooled join_b_a2_r12: raw loss +98.38%
+  n=96 pooled join_b_a2_r24: raw loss +27.20%
+  n=96 pooled join_a_a2_r12: raw loss +320.72%
+  n=96 pooled join_a_a2_r24: raw loss +122.16%
+  n=96 pooled join_b_a3_r12: raw loss +11.68%
+  n=96 pooled join_b_a3_r24: raw loss -1.98%
+  n=96 pooled join_a_a3_r12: raw loss +86.50%
+  n=96 pooled join_a_a3_r24: raw loss +39.35%
