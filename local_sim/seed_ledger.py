@@ -636,6 +636,7 @@ def finalize(
     *,
     ts: str,
     note: str = "",
+    block: str = "",
     path: str = LEDGER_PATH,
 ) -> str:
     """Close a claim's artifact by appending its sha256. Returns the hash.
@@ -644,10 +645,46 @@ def finalize(
     file that does not exist, so it cannot manufacture provenance for an artifact
     that was never produced, and it refuses to finalize an artifact no claim
     named, so a stray file cannot acquire the authority of a claimed one.
+
+    THE UNBOUND-CLAIM CASE, and why it needs `block` rather than a relaxation.
+    ``claim_range``'s ``artifact`` argument is optional, so a claim can be
+    recorded without naming the file it will produce -- which happened to P12 on
+    2026-09-17. Such a claim could never be closed: `finalize` matched on the
+    artifact name, and the claim carried none, so the seeds were spoken for and
+    the truth that came out of them could never be bound to them. That is a hole
+    in the provenance chain, not a nuisance.
+
+    Passing ``block`` binds an artifact to an UNBOUND claim, and only then. It
+    requires **exactly one** claim by this consumer in that block whose artifact
+    is empty; two candidates, or any claim that already names a different file,
+    is refused. A stray file still cannot acquire a claimed block's authority,
+    because the caller has to name the block and the block has to have exactly
+    one claim waiting for a name.
     """
     recs = ledger(path)
     owners = [c for c in recs if c.kind == "claim"
               and c.consumer == consumer and c.artifact == artifact]
+    if not owners and block:
+        unbound = [c for c in recs if c.kind == "claim"
+                   and c.consumer == consumer and c.block == block.upper()
+                   and not c.artifact]
+        already = [c for c in recs if c.kind == "finalize"
+                   and c.consumer == consumer and c.block == block.upper()]
+        if already:
+            raise PermissionError(
+                f"{block} already has a finalized artifact by {consumer!r} "
+                f"({already[0].artifact}); binding a second one would give two "
+                "files the authority of one claim."
+            )
+        if len(unbound) != 1:
+            raise PermissionError(
+                f"binding by block needs EXACTLY ONE unbound claim by "
+                f"{consumer!r} in {block}; found {len(unbound)}."
+            )
+        owners = unbound
+        note = (note or "artifact finalized") + (
+            f" [bound by block: the {block} claim was recorded without an "
+            "artifact name]")
     if not owners:
         raise PermissionError(
             f"no claim by {consumer!r} names artifact {artifact!r}. finalize() "
