@@ -52103,3 +52103,85 @@ numerically better, open); P4 exact cost 0.301 → 0.280 (parity run owed).
 Rejected with measurements: (3,1) route in every form, λ-profile transplant, κ4
 package transplant, N1 merged core at affordable rank (accuracy). No submission.
 Strategist Packet updated; decision with Samuel.
+
+## 2026-09-17 — independent review at the worker decision point: closure mismatch found
+
+**Request and scope.** Samuel requested validation of the worker's completed
+slice, updated research/architecture direction and a Claude Code handoff through
+a major next submission. Three bounded architecture/validation/frontier reviews
+ran, followed by a fresh-context Skeptic given raw source/contracts/JSON rather
+than the new Builder narratives. Chrome was used read-only to refresh the board
+and public discussion. No estimator or instrument was changed; no truth array,
+new seed block, vault, heavy workload or submission was used by this review.
+Small existing-row recomputations, fixture tests and deterministic algebra only.
+
+**CONFIRMED, existing evidence:** v32/v31 adjusted gain 1.0318263x; public
+v29/v32 adjusted gain 1.5448558x; the v34 and recipe-transplant negatives reproduce.
+No major release candidate exists. P11 per-replica noise is 4.7634e-9; the average
+of its two replicas used in these MSE rows has noise 2.3817e-9. The valid primary
+stage-1 contract predates the actual read despite its incorrect supplied timestamp.
+
+**New CONFIRMED source findings:** our v32 executes 25 nonlinear terms; public
+v17 executes 62 base terms plus four q31 rows. Its live final mean includes
+`D3^2*w(6,1)/72 + D3*D4*w(7,1)/144`, absent here. Many mixed covariance/birth/core
+terms differ as well. The public table's pruning was empirically selected; our
+new closure must be independently derived under a stated connected-diagram rule.
+The September 16 audit missed this larger mismatch. The worker's transplanted
+q31 coefficients match, but its complete nonlinear program does not.
+
+Public v17 also keeps certain diagonal/rank-one dG feed pieces outside its
+rank-truncated residual, while their repeated-support equivalents remain inside
+our residual. These placements can be exactly equivalent before truncation and
+different after it. The architecture report preserves a deterministic n=5
+algebra fixture demonstrating this. It does not establish a score benefit.
+
+**Correction to preceding synthesis:** the recipe negatives stand; the conclusion
+that they exclude the κ4 channel and isolate the K3 base is withdrawn. New
+independent Skeptic verdict: **REJECT** that equivalence/causal-exclusion claim,
+**ACCEPT** the narrow numerical negative and receipt defect; score gains from
+the newly identified mechanisms remain **SPECULATIVE**. Equal finite moments
+also do not define an exact ReLU law, and comparing the nonlinear consumers
+needs only O(n²) boundary arrays, not dense 1024³ state. Public v17's small-shape
+gate must not silently disable regeneration in a diagnostic.
+
+**Validation corrections:** stage 0 still has a producer/consumer filename defect
+(`report.json.receipt.json` versus `report.receipt.json`). The current Codex
+environment also exposes a Windows PowerShell 5.1/PowerShell 7 module-path mismatch
+that prevents wrapper hashing. Certification fixtures 14/14 and projector 87/87
+pass; wrapper 1/4 with inherited environment, 4/4 with a child-only path correction.
+No machine-wide settings were changed. Repair these bounded interfaces before
+costly release confirmation, using a cross-tool fixture.
+
+N1's last eight-network MC screen used literal unregistered seeds. Workerq 1526
+started 01:59:52Z, snapshot lacking the contract; commit fb981a1 added the contract
+at 02:00:27Z. This fails committed-before-truth provenance but does not prove
+results were seen before the rule was written. Retain it as exploratory,
+registration-deficient evidence, not a live-shape lane closure. Four-net paired
+intervals and strong width dependence further limit the result. Do not backdate
+or retro-register. Its 4 GiB RAM request was below measured 5.139 GiB; future requests
+need conservative measured margins and the required recorded optimization review.
+
+P4's tested depth-5 spelling is 0.2802036 B, 17,483 ops, 6.0838 GiB Windows commit;
+paired accuracy parity and enforced Linux memory are owed. No universal exact
+cost floor was established. P3 was cost-screened, not accuracy-screened.
+
+**External refresh:** Chrome showed rank 59/166, current leader rounded 2.4e-9,
+top-ten 3.8e-9, and 4.4e-9 around rank 13. Public reference remains 5.4e-9. ARC and
+504aldo remote heads are unchanged; no new public winning implementation was
+found. Primary literature provides scoped construction tools, not a proven
+replacement architecture. The independently implement-mechanisms policy already
+exists; no new organizer-question permission loop is needed.
+
+**Decision and continuity:** `docs/STRATEGIST_RESPONSE_2026-09-17.md` and
+`docs/CLAUDE_CODE_HANDOFF_2026-09-17.md` define the next slice: bounded integration
+fixes → independently generated connected nonlinear closure → equal-rank protected
+feed → shared old-source factors → major-release validation. New prospective
+base gate 1.15x adjusted; major-release gate 2.0x against frozen v31 with public
+projection <=4.4e-9 and deployment checks. These are future registration targets,
+not results or revisions of failed historical gates. Actual contracts/data and
+Samuel's new predictions remain required before strategic measurements.
+
+Supporting records: `docs/research/2026-09-17_architecture_review.md`,
+`2026-09-17_validation_review.md`, `2026-09-17_frontier_review.md`, and
+`2026-09-17_independent_skeptic.md`. CURRENT_STATE and the packet body were
+corrected; historical raw evidence remains unchanged. No upload or designation.

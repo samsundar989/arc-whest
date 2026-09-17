@@ -1,26 +1,36 @@
 # CURRENT_STATE.md — read this first
 
-## September 17: audit refinements executed through the discriminators — no major release found yet
+## September 17 review: nonlinear closure mismatch found — next slice is defined, no major release yet
 
-> **Skeptic 2026-09-17 A PROVISIONAL / B REJECT / C PROVISIONAL, follow-ups done:** route split exact at non-unit variance (v32_i vs v32 open); N1 parked on measured accuracy (n=96: +87–321% at affordable ranks), not the retracted 0.17 gate; v17's joint κ4 recipe on our base hurts (0.785×/0.887×). Strategist packet current; decision with Samuel.
+> **Independent source/validation review:** principal P11 numbers reproduce, but the conclusion excluding κ4/closure interactions is rejected. Our actual nonlinear table has **25 terms**, public v17 **62+4**, including live mean products absent here. Protected-feed allocation before compression also differs. N1's tiny-width screen is exploratory and registration-deficient; it does not close live-shape compression. Stage 0 needs two integration fixes. See `docs/STRATEGIST_RESPONSE_2026-09-17.md` and its linked reviews.
 
-**Active plan pointer:** `docs/CLAUDE_CODE_HANDOFF_NEXT_SUBMISSION_2026-09-16.md` (executed
-through stage 3) → **decision now with Samuel/strategist:** `docs/STRATEGIST_PACKET_2026-09-17.md`.
+**Active plan pointer:** `docs/CLAUDE_CODE_HANDOFF_2026-09-17.md` — independently derived
+connected nonlinear closure → controlled protected feed → shared old-source factors
+→ major-release evidence. `docs/STRATEGIST_PACKET_2026-09-17.md` has been corrected
+to remove superseded causal/provenance claims. New slice not yet executed; register
+its actual contracts and obtain required predictions before measurement.
 No submission, designation, vault touch or public fitting occurred. v31 `#331317` remains the
 latest graded file; F21 `#330950` the designated fallback.
 
 | stage | result (P11 DESIGN, 24 nets, paired arithmetic) |
 |---|---|
-| 0 instrument repairs | DONE: cap-off accuracy routing, streamed crash evidence + run receipts, content-hash identity, projection provenance refusals, runner-specific FLOPs, labelled timing forecasts |
+| 0 instrument repairs | Useful repairs landed; remaining receipt producer/discovery mismatch and child PowerShell/module compatibility must be fixed before release |
 | 1 distinct-index κ4 feed (v32) | real but small: **1.032×** score, t95 > 0, +0.43% cost — slice gate 1.5× FAILS; supported improvement |
 | 1b exact (3,1)+link bivariate κ4 (v34) | **worse: 0.924×** — falsified (also with 504aldo λ: 0.836×) |
 | diagnostics | λ profile swap +2.4%; public v17 raw 1.22× better, **public v29 1.545× better** than v32; v17's (3,1) rows (term-identical to ours) +15.9% in theirs, −8% in ours; gap grows at layers 4–10 |
 | 2 P3 κ3×C feed | derived exactly and built (13/13 parity); not screened — rank 32 costs ×1.069 |
-| 2 P4 exact cost | Strassen depth 5 −6.6%, trims −0.7% → C/B 0.2802; ≤0.27 not reachable within 8 GiB |
-| 3 N1 compression | parked: JᵀJ proxy rejected; best exact merged core 0.2035 B at r=128 vs 0.17 gate |
+| 2 P4 exact cost | Tested depth5+trims: C/B 0.2802, 17,483 ops, 6.0838 GiB Windows commit; paired raw parity and enforced Linux memory owed; no general cost floor proved |
+| 3 N1 compression | Tested tiny merged policies deprioritized; n64 proxy informative but did not pay; 0.17 gate retracted; latest truth screen used unregistered seeds and contract committed after sampling began |
 
 Best supported bundle ≈7.9e-9 (planning arithmetic; needs depth-5 raw parity, mini,
 Linux 8-GiB, Skeptic before any approval request). Target was 4.0–4.4e-9.
+
+**Live Chrome snapshot at this review:** rank **59/166**, top-ten boundary **3.8e-9**,
+approximately **4.4e-9 at rank13**; leading detailed score previously **2.448e-9**
+and current rounded board remains **2.4e-9**. No leader source is available.
+**Noise convention:** P11 has 4.7634e-9 per truth replica, **2.3817e-9 for the
+two-replica average used in these scores**. Historical sections below are dated
+records, not instructions to repeat completed work.
 
 ---
 
