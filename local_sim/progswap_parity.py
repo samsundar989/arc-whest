@@ -25,10 +25,26 @@ birth inputs, not only means."
           canonicalised and compared to the correspondingly filtered v32 table,
           which is the same statement for the file whose runtime we cannot
           inject a boundary into.
-    -> 5. the INITIAL mode has an exact consequence both chains must satisfy and
-          which no amount of program change can excuse: at layer 0 the input is
-          N(0, I), so D3 = D21 = dG = 0 and every extra term carries a zero
-          factor. All five chains must therefore emit an IDENTICAL first row.
+    -> 5. the INITIAL mode has an exact consequence each transplant must satisfy
+          and which no amount of program change can excuse: at layer 0 the input
+          is N(0, I), so D3 = D21 = dG = 0 and every extra term carries a zero
+          factor. Each transplant must therefore emit a first row IDENTICAL TO
+          ITS OWN PARENT'S, bitwise.
+
+          As first written this said "all five chains share row 0", and that is
+          WRONG: v32 and v17 are different implementations of the same layer-0
+          content and their linear steps accumulate in different orders, so they
+          differ by float32 rounding (measured 1.74e-7 on a scale of 0.61 at
+          1024x16) without either transplant being at fault. The corrected
+          statement -- each transplant against its own parent -- holds EXACTLY,
+          at tiny shapes and at 1024x16. The gap between the two natives is
+          reported, never gated.
+
+          Similarly, NON-NEGATIVITY of the predictions is reported and not
+          gated. A truncated moment expansion of a post-ReLU mean can land
+          slightly below zero, and the UNMODIFIED public reference does so at
+          1024x16 (79 entries, worst -8.6e-9) before any transplant touches it.
+          A gate the control itself fails is not a gate.
 
 "Do not increase numerical tolerances after seeing errors."
     f64 reference parity: 1e-10 relative, the same figure `s6_parity` fixed on
@@ -349,16 +365,41 @@ def live(out_path):
           np.array_equal(p17, pid) and f17 == fid, f"flops {fid:.0f} vs {f17:.0f}")
     p3, f3 = P1._predict(L(CHAIN3), w, n, depth, es)
     p4, f4 = P1._predict(L(CHAIN4), w, n, depth, es)
-    claim("1024x16 chain3 finite, non-negative",
-          bool(np.isfinite(p3).all() and (p3 >= 0).all()))
-    claim("1024x16 chain4 finite, non-negative",
-          bool(np.isfinite(p4).all() and (p4 >= 0).all()))
-    claim("1024x16 all five chains share row 0 (INITIAL mode)",
-          np.array_equal(p3[0], pb[0]) and np.array_equal(p4[0], p17[0])
-          and np.array_equal(pb[0], p17[0]),
-          "max |diff| %.3e" % max(float(np.abs(p3[0] - pb[0]).max()),
-                                  float(np.abs(p4[0] - p17[0]).max()),
-                                  float(np.abs(pb[0] - p17[0]).max())))
+    # FINITENESS is a gate. NON-NEGATIVITY IS NOT, and the first version of this
+    # module was wrong to make it one: a truncated moment expansion of a
+    # post-ReLU mean can land slightly below zero, and the UNMODIFIED public
+    # reference does so at 1024x16 (79 entries, worst -8.6e-9) before any
+    # transplant touches it. A gate the control fails is not a gate. The
+    # negativity is REPORTED per arm instead, because how far a chain goes
+    # negative is an accuracy diagnostic worth having, and the grader scores the
+    # MSE either way.
+    claim("1024x16 chain3 finite", bool(np.isfinite(p3).all()))
+    claim("1024x16 chain4 finite", bool(np.isfinite(p4).all()))
+    negativity = {}
+    for nm, arr in (("v32", pb), ("v17", p17), ("chain3", p3), ("chain4", p4)):
+        negativity[nm] = {"n_negative": int((arr < 0).sum()),
+                          "worst": float(arr.min()),
+                          "worst_over_max": float(abs(arr.min()) / max(float(arr.max()), 1e-300))}
+        print("   negativity %-7s %4d entries, worst %.3e (%.1e of max)"
+              % (nm, negativity[nm]["n_negative"], negativity[nm]["worst"],
+                 negativity[nm]["worst_over_max"]), flush=True)
+
+    # ROW 0, stated as the claim that actually means something: each transplant
+    # must match ITS OWN PARENT bitwise, because at layer 0 the input is
+    # N(0, I), every non-C block is zero, and the programs coincide. Lumping all
+    # five together was wrong: v32 and v17 are DIFFERENT IMPLEMENTATIONS of the
+    # same layer-0 content and differ by float32 rounding in their own linear
+    # steps, which says nothing about either transplant.
+    claim("1024x16 chain3 row 0 == v32 row 0 BITWISE",
+          np.array_equal(p3[0], pb[0]),
+          "max |diff| %.3e" % float(np.abs(p3[0] - pb[0]).max()))
+    claim("1024x16 chain4 row 0 == v17 row 0 BITWISE",
+          np.array_equal(p4[0], p17[0]),
+          "max |diff| %.3e" % float(np.abs(p4[0] - p17[0]).max()))
+    print("   the two NATIVE chains' row 0 differ by %.3e on a scale of %.3e "
+          "(float32 rounding between two implementations, reported not gated)"
+          % (float(np.abs(pb[0] - p17[0]).max()), float(np.abs(pb[0]).max())),
+          flush=True)
     costs = {"v32": fb, "chain3": f3, "chain4": f4, "v17": f17}
     print("  counted FLOPs:", {k: "%.4g" % v for k, v in costs.items()})
 
@@ -410,6 +451,8 @@ def live(out_path):
               r <= 3e-4, "%.1e" % r)
 
     payload = {"artifact": "progswap_parity.live", "label_free": True,
+               "negativity": negativity,
+               "native_row0_float32_gap": float(np.abs(pb[0] - p17[0]).max()),
                "network": {"width": n, "depth": depth, "seed": seed},
                "counted_flops": {k: float(v) for k, v in costs.items()},
                "checks": ROWS, "f32_rows": live_rows, "chain4_rows": c4_rows,

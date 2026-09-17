@@ -1,0 +1,209 @@
+{
+ "artifact": "progswap_parity.live",
+ "label_free": true,
+ "network": {
+  "width": 1024,
+  "depth": 16,
+  "seed": 90000016001
+ },
+ "counted_flops": {
+  "v32": 664655984232.0,
+  "chain3": 669165305636.0,
+  "chain4": 1076964926036.0,
+  "v17": 1082207899936.0
+ },
+ "checks": [
+  {
+   "check": "1024x16 v38_off == v32 bitwise + FLOPs",
+   "passed": true,
+   "detail": "flops 664655984232 vs 664655984232"
+  },
+  {
+   "check": "1024x16 v17_identity == v17 bitwise + FLOPs",
+   "passed": true,
+   "detail": "flops 1082207899936 vs 1082207899936"
+  },
+  {
+   "check": "1024x16 chain3 finite, non-negative",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "1024x16 chain4 finite, non-negative",
+   "passed": false,
+   "detail": ""
+  },
+  {
+   "check": "1024x16 all five chains share row 0 (INITIAL mode)",
+   "passed": false,
+   "detail": "max |diff| 1.742e-07"
+  },
+  {
+   "check": "L0 INITIAL f64 mu_out",
+   "passed": true,
+   "detail": "5.7e-14"
+  },
+  {
+   "check": "L0 INITIAL f64 cov_out",
+   "passed": true,
+   "detail": "1.0e-13"
+  },
+  {
+   "check": "L0 INITIAL f64 g_out",
+   "passed": true,
+   "detail": "1.0e-13"
+  },
+  {
+   "check": "L0 INITIAL f64 S3_birth",
+   "passed": true,
+   "detail": "1.4e-13"
+  },
+  {
+   "check": "L0 INITIAL f64 K21_birth",
+   "passed": true,
+   "detail": "1.7e-13"
+  },
+  {
+   "check": "L3 ORDINARY f64 mu_out",
+   "passed": true,
+   "detail": "4.5e-15"
+  },
+  {
+   "check": "L3 ORDINARY f64 cov_out",
+   "passed": true,
+   "detail": "8.1e-14"
+  },
+  {
+   "check": "L3 ORDINARY f64 g_out",
+   "passed": true,
+   "detail": "1.4e-13"
+  },
+  {
+   "check": "L3 ORDINARY f64 S3_birth",
+   "passed": true,
+   "detail": "1.1e-13"
+  },
+  {
+   "check": "L3 ORDINARY f64 K21_birth",
+   "passed": true,
+   "detail": "8.7e-13"
+  },
+  {
+   "check": "L8 ORDINARY f64 mu_out",
+   "passed": true,
+   "detail": "3.2e-15"
+  },
+  {
+   "check": "L8 ORDINARY f64 cov_out",
+   "passed": true,
+   "detail": "5.6e-14"
+  },
+  {
+   "check": "L8 ORDINARY f64 g_out",
+   "passed": true,
+   "detail": "4.1e-13"
+  },
+  {
+   "check": "L8 ORDINARY f64 S3_birth",
+   "passed": true,
+   "detail": "2.6e-13"
+  },
+  {
+   "check": "L8 ORDINARY f64 K21_birth",
+   "passed": true,
+   "detail": "8.6e-13"
+  },
+  {
+   "check": "L15 FINAL f64 mu_out",
+   "passed": true,
+   "detail": "1.9e-15"
+  },
+  {
+   "check": "chain4 L3 own row == f64 reference on the v32 program",
+   "passed": true,
+   "detail": "8.7e-08 (float32 chain vs float64 reference)"
+  },
+  {
+   "check": "chain4 L8 own row == f64 reference on the v32 program",
+   "passed": true,
+   "detail": "1.4e-07 (float32 chain vs float64 reference)"
+  },
+  {
+   "check": "chain4 L15 own row == f64 reference on the v32 program",
+   "passed": true,
+   "detail": "7.4e-08 (float32 chain vs float64 reference)"
+  },
+  {
+   "check": "native v17 L3 own row == f64 reference on ITS program",
+   "passed": true,
+   "detail": "1.1e-07"
+  },
+  {
+   "check": "native v17 L8 own row == f64 reference on ITS program",
+   "passed": true,
+   "detail": "1.2e-07"
+  },
+  {
+   "check": "native v17 L15 own row == f64 reference on ITS program",
+   "passed": true,
+   "detail": "1.2e-07"
+  }
+ ],
+ "f32_rows": [
+  {
+   "layer": 0,
+   "mode": "INITIAL",
+   "dtype": "f32",
+   "mu_out": 3.680143544836282e-05,
+   "cov_out": 6.95088180949522e-05,
+   "g_out": 5.682595709500737e-05
+  },
+  {
+   "layer": 3,
+   "mode": "ORDINARY",
+   "dtype": "f32",
+   "mu_out": 2.478817060828419e-06,
+   "cov_out": 3.395453814451733e-05,
+   "g_out": 8.954628121898583e-05
+  },
+  {
+   "layer": 8,
+   "mode": "ORDINARY",
+   "dtype": "f32",
+   "mu_out": 1.816697452765156e-06,
+   "cov_out": 3.8138349328441885e-05,
+   "g_out": 0.00012539442908086226
+  },
+  {
+   "layer": 15,
+   "mode": "FINAL",
+   "dtype": "f32",
+   "mu_out": 1.042532443390007e-06,
+   "cov_out": null,
+   "g_out": null
+  }
+ ],
+ "chain4_rows": [
+  {
+   "layer": 3,
+   "mu_out_vs_own_row": 8.723153506352058e-08
+  },
+  {
+   "layer": 8,
+   "mu_out_vs_own_row": 1.358510017318827e-07
+  },
+  {
+   "layer": 15,
+   "mu_out_vs_own_row": 7.39581980922679e-08
+  }
+ ],
+ "chain4_debug_copy_sha256": "79d65ea94040a2fb1f9e083be01f80ec393d64abe9b965d615b4696ca470b83f",
+ "sources": {
+  "estimator_k3_v32.py": "10869a6ca7b9b95005db3d63ea0cf63c44f070dd059553f492ad1cf12105657c",
+  "external/504aldo/estimators/estimator_v17.py": "3e5b611b42e52e1e1f2289e3c0d5b79e490736b6bb884e770a83cd24d51d8d94",
+  "estimator_k3_v38_v17prog.py": "2fe7ef1eb2b11bf477956daafacbf765bc165792680bd165e4278d1551469397",
+  "estimator_k3_v38_off.py": "0be3de0a97097cfc8e519fd40fb7edcc735e387d05e238f84549efa2ea26d8d4",
+  "_diag/estimator_v17_v32prog.py": "ee037c288792d31b41f3143df2fde0c93310cc4e50b095be672989aadf356ea9",
+  "_diag/estimator_v17_identity.py": "34ddccc2625b22f17fd1373f277e871a78c1d598dcdcb2923b3f57201b55d588"
+ }
+}
