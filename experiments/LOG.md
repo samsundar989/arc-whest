@@ -52931,8 +52931,19 @@ elementwise and is not inside `E`).
    1.01–1.08x, and reduces measured post-projection query error by 10–40%.
 7. **Release:** a candidate reaching the 2.0x gate against v31 on P13 — 35%.
 
-**Samuel's predictions (asked before the result existed, recorded verbatim in
-the RESULT entry below).**
+**Samuel's predictions — asked 2026-09-17 before any of this slice's data
+existed, recorded verbatim.** Three questions, one answer each:
+
+| question | answer |
+|---|---|
+| Does transplanting the COMPLETE v17 program into our chain improve raw MSE, and by how much? | **"I don't know"** |
+| Does the query-directed basis (right singular space of the consumed query, same age/rank) improve the adjusted score? | **"I don't know"** |
+| Do the slice's two bounded routes reach the 2.0x release gate over graded v31? | **"I don't know"** |
+
+An explicit "I don't know" is a valid answer and is the honest state of the
+human model here: the repository has never before run the reference's actual
+program on our chain, and the compression objective's defect was found by source
+audit two days ago, not by measurement.
 
 ### Gates, falsifiers and conditional branches — all declared now
 
