@@ -214,6 +214,29 @@ DECISION_BLOCKS = [
                                  "DESIGN tier: tuning is permitted, so any constant "
                                  "fitted on P11 needs its own fresh SINGLE_USE block "
                                  "before it can be submitted."),
+    # --- slice 2026-09-17b (reciprocal program attribution + query-directed
+    # storage), allocated 2026-09-17 BEFORE any of its data exists. P11 has been
+    # read about thirteen times and is RETIRED from new accuracy selection by the
+    # 2026-09-17 strategist response; P12 is the fresh reusable DESIGN panel the
+    # slice's attribution, own-candidate and compression reads all share, and P13
+    # is the untouched single-use block the one frozen release challenger is
+    # decided on. Two blocks, because a candidate chosen on the panel that also
+    # decides it is not evidence.
+    ("P12", 40_917_012_000, 96,  "PHASE-2 DESIGN block, allocated 2026-09-17 for "
+                                 "the reciprocal complete-program attribution "
+                                 "(five chains), the own coherent candidate's "
+                                 "accuracy screen and the query-directed "
+                                 "compression compare. 24 of 96 claimed for the "
+                                 "mint; DESIGN tier, so these reads are ONE "
+                                 "correlated corpus and any constant fitted here "
+                                 "needs P13 before it can be submitted."),
+    ("P13", 40_917_013_000, 128, "PHASE-2 fresh SINGLE-USE DECIDE block for the one "
+                                 "frozen major-release challenger of the "
+                                 "2026-09-17b slice: paired arithmetic adjusted "
+                                 "score against graded v31 at gate 2.0. Claim once, "
+                                 "read once, after the candidate and its contract "
+                                 "are frozen. No tuning, no selection, no "
+                                 "re-reading to find a better spelling."),
 ]
 
 # --- single-use blocks -------------------------------------------------------
@@ -236,6 +259,8 @@ SINGLE_USE_BLOCKS = {
     "P08": "the one Phase-2 T2 held-out read — allocated and claimed 2026-09-10, SPENT",
     "P09": "the one fresh Phase-2 F21 DECIDE read — registered 2026-09-12, unspent",
     "P10": "the one fresh Phase-2 F21 DECIDE read — registered 2026-09-13, unspent",
+    "P13": "the one fresh Phase-2 DECIDE read for the 2026-09-17b major-release "
+           "challenger — registered 2026-09-17, unspent",
 }
 
 # --- READ-COUNTED ARTIFACTS, owed --------------------------------------------

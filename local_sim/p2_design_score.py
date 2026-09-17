@@ -50,6 +50,14 @@ sys.path[:] = [p for p in sys.path if os.path.abspath(p or ".") != _HERE] + [_RO
 import numpy as np  # noqa: E402
 
 
+def _pkg_ver(name: str) -> str:
+    try:
+        import importlib.metadata as md
+        return md.version(name)
+    except Exception:
+        return "unknown"
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--control", required=True)
@@ -80,11 +88,20 @@ def main(argv=None) -> int:
                     help="stream every completed row (arm label, candidate sha256, "
                          "row) to this JSONL, flushed and fsynced as it lands, so "
                          "a crash keeps every finished network")
+    ap.add_argument("--pred-out", default="",
+                    help="DIRECTORY for per-network prediction sidecars: the "
+                         "FINAL-LAYER array each arm actually had scored, plus "
+                         "the run's source/config/truth/mint/package identity "
+                         "(`local_sim/design_sidecar.py`). Written append-only "
+                         "and fsynced per row, so a crash keeps every finished "
+                         "network. Costs ~96 KiB per arm at 24x1024 and is what "
+                         "the exact prediction-change decomposition needs.")
     a = ap.parse_args(argv)
 
     import flopscope as flops
     flops.configure(symmetry_warnings=False)
     import competition_score as cs
+    import design_sidecar as ds
     import lifecycle_eval as le
     import truth_reads as tr
 
@@ -96,6 +113,11 @@ def main(argv=None) -> int:
                     ts=a.ts, instrument=os.path.abspath(__file__),
                     result_artifact=a.out, note=a.note) as truth_path:
         z = dict(np.load(truth_path))
+
+    truth_sha = ds.sha_file(a.truth)
+    truth_meta = {k: (z[k].tolist() if hasattr(z[k], "tolist") else z[k])
+                  for k in ("mint", "mint_version", "provenance", "generator")
+                  if k in z}
 
     seeds = [int(s) for s in z["seeds"]][:a.n]
     n = len(seeds)
@@ -172,13 +194,69 @@ def main(argv=None) -> int:
                 os.fsync(fh.fileno())
         return sink
 
+    # ---- prediction sidecars (stage 0, handoff 2026-09-17b) ---------------- #
+    # Purely additive: the scorer's numbers are unchanged, and with no
+    # --pred-out nothing below runs. What it stores is the array the grader
+    # lifecycle ACTUALLY SCORED, after every zeroing, so a failed network
+    # contributes the zeros it was scored on.
+    pred_dir = os.path.abspath(a.pred_out) if a.pred_out else ""
+    pred_manifest = {
+        "control": a.control, "candidate": a.candidate,
+        "truth": os.path.relpath(a.truth, _ROOT).replace(chr(92), "/"),
+        "truth_sha256": truth_sha, "block": block, "n": n,
+        "width": width, "depth": depth,
+        "n_samples_per_replica": n_samples,
+        "truth_replicas": 2, "tier": "DESIGN",
+        "mint": dict(truth_meta) or {"mint": "mint_provenance.canonical_mint"},
+        "config": {"accuracy_only": accuracy_only,
+                   "local_seconds_caps": a.wall_caps,
+                   "official_samples": float(a.official_samples),
+                   "weights_mode": le.DEFAULT_WEIGHTS_MODE,
+                   "gate": a.gate,
+                   "ts": a.ts,
+                   "spec": le.dataclasses.asdict(spec)},
+        "packages": {"flopscope": _pkg_ver("flopscope"),
+                     "whestbench": _pkg_ver("whestbench"),
+                     "numpy": np.__version__,
+                     "python": sys.version.split()[0]},
+        "instrument_sha256": ds.sha_file(os.path.abspath(__file__)),
+        "sidecar_module_sha256": ds.sha_file(ds.__file__),
+        "arms": {},
+    }
+
     arms = {}
     for label, path in labels:
         t0 = time.perf_counter()
+        writer = None
+        preds = None
+        sink = _sink_for(label, path)
+        if pred_dir:
+            with open(path, "rb") as fh:
+                import hashlib as _h
+                _sha = _h.sha256(fh.read()).hexdigest()
+            writer = ds.ArmWriter(pred_dir, label, width=width,
+                                  candidate=path, candidate_sha256=_sha)
+            preds = []
+            _inner = sink
+
+            def sink(row, _w=writer, _p=preds, _i=_inner):
+                if _i is not None:
+                    _i(row)
+                _w.append(row, _p[-1])
+            pred_manifest["arms"][label] = {
+                "path": path, "candidate_sha256": _sha, "n_written": 0}
+            ds.write_manifest(pred_dir, pred_manifest)
         rows, prov = le.evaluate(path, seeds, y, spec=spec,
                                  gt_noise=None if gt_avg is None
                                  else list(gt_avg), progress_every=0,
-                                 evidence_sink=_sink_for(label, path))
+                                 predictions_out=preds,
+                                 evidence_sink=sink)
+        if writer is not None:
+            pred_manifest["arms"][label]["n_written"] = writer.n
+            pred_manifest["arms"][label]["rows_hash"] = le.rows_hash(rows)
+            pred_manifest["arms"][label]["n_failed"] = int(
+                sum(1 for r in rows if r.failed))
+            ds.write_manifest(pred_dir, pred_manifest)
         suite = le.score(rows, spec=spec)
         arms[label] = {"rows": rows, "suite": suite, "prov": prov,
                        "secs": time.perf_counter() - t0}
@@ -270,6 +348,9 @@ def main(argv=None) -> int:
             "accuracy_only": accuracy_only,
             "local_seconds_caps": a.wall_caps,
             "tier": "DESIGN", "promotes_nothing": True,
+            "truth_sha256": truth_sha,
+            "prediction_sidecars": (os.path.relpath(pred_dir, _ROOT).replace(
+                chr(92), "/") if pred_dir else None),
             "arms": {k: {"path": dict(labels)[k],
                          "objective": float(v["suite"].objective),
                          "raw_mse": float(v["suite"].mean_mse),

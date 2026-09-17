@@ -1,0 +1,358 @@
+{
+ "name": "v32_only",
+ "note": "the canonical program frozen v32 executes, in the generator's schema. DIAGNOSTIC: the table a v17-shaped chain is restricted to.",
+ "source": {
+  "estimator_k3_v32.py": "10869a6ca7b9b95005db3d63ea0cf63c44f070dd059553f492ad1cf12105657c"
+ },
+ "terms": [
+  {
+   "output": [
+    1
+   ],
+   "factors": [],
+   "derivs": [
+    0
+   ],
+   "coef": "1/1"
+  },
+  {
+   "output": [
+    1
+   ],
+   "factors": [
+    "D3"
+   ],
+   "derivs": [
+    3
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    1
+   ],
+   "factors": [
+    "D4"
+   ],
+   "derivs": [
+    4
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "C"
+   ],
+   "derivs": [
+    1,
+    1
+   ],
+   "coef": "1/1"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "C",
+    "C"
+   ],
+   "derivs": [
+    2,
+    2
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D12"
+   ],
+   "derivs": [
+    1,
+    2
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D21"
+   ],
+   "derivs": [
+    2,
+    1
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D22"
+   ],
+   "derivs": [
+    2,
+    2
+   ],
+   "coef": "1/4"
+  },
+  {
+   "output": [
+    2
+   ],
+   "factors": [],
+   "derivs": [
+    0
+   ],
+   "coef": "1/1"
+  },
+  {
+   "output": [
+    2
+   ],
+   "factors": [
+    "D3"
+   ],
+   "derivs": [
+    3
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    2
+   ],
+   "factors": [
+    "D4"
+   ],
+   "derivs": [
+    4
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "C"
+   ],
+   "derivs": [
+    1,
+    1
+   ],
+   "coef": "1/1"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "C",
+    "C"
+   ],
+   "derivs": [
+    2,
+    2
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D12"
+   ],
+   "derivs": [
+    1,
+    2
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D21"
+   ],
+   "derivs": [
+    2,
+    1
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D22"
+   ],
+   "derivs": [
+    2,
+    2
+   ],
+   "coef": "1/4"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "C"
+   ],
+   "derivs": [
+    1,
+    1
+   ],
+   "coef": "1/1"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "C",
+    "C"
+   ],
+   "derivs": [
+    2,
+    2
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D12"
+   ],
+   "derivs": [
+    1,
+    2
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D21"
+   ],
+   "derivs": [
+    2,
+    1
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D22"
+   ],
+   "derivs": [
+    2,
+    2
+   ],
+   "coef": "1/4"
+  },
+  {
+   "output": [
+    3
+   ],
+   "factors": [],
+   "derivs": [
+    0
+   ],
+   "coef": "1/1"
+  },
+  {
+   "output": [
+    3
+   ],
+   "factors": [
+    "D3"
+   ],
+   "derivs": [
+    3
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    3
+   ],
+   "factors": [
+    "D4"
+   ],
+   "derivs": [
+    4
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    4
+   ],
+   "factors": [],
+   "derivs": [
+    0
+   ],
+   "coef": "1/1"
+  },
+  {
+   "output": [
+    4
+   ],
+   "factors": [
+    "D3"
+   ],
+   "derivs": [
+    3
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    4
+   ],
+   "factors": [
+    "D4"
+   ],
+   "derivs": [
+    4
+   ],
+   "coef": "1/24"
+  }
+ ]
+}

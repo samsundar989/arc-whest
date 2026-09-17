@@ -52780,3 +52780,349 @@ External refresh through Samuel's Chrome: ownrank62/170; new leader#331393 publi
 Skeptic: rejects broad closure/floor/optimality claims, accepts narrow DESIGN evidence. Count-convention correction documented in review record. New handoff accepted as bounded prospective plan after adding swapped-program initial/recurrent/final parity checks, beyond native endpoint parity.
 
 Decision/next action: `docs/STRATEGIST_RESPONSE_2026-09-17_slice2.md` and `docs/CLAUDE_CODE_HANDOFF_2026-09-17_slice2.md`. Restore canonical GAME_PLAN/CLAUDE_CODE_HANDOFF pointers (previous contents archived). Reciprocal complete nonlinear-program attribution, own coherent candidate, one cross-term-aware query compression intervention, then one frozen major challenger through fresh DECIDE/CONFIRM/release. No interimcanary by default. One fresh reusable DESIGN panel; retire P11 from new accuracy selection. New predictions and committed contracts remain required before measurement. All new thresholds in the plan are PROPOSED/prospective, no historical gate altered. HUMAN_MODEL and unrelated untracked review artifacts untouched.
+
+---
+
+## 2026-09-17 (evening) — **CONTRACT (Rule 1): slice 2026-09-17b — reciprocal complete-program attribution, our own coherent candidate, query-directed storage, and one frozen major-release challenger**
+
+*Committed before any of this slice's data exists. Operative plan:
+`docs/GAME_PLAN.md` (2026-09-17 slice 2), strategist response
+`docs/STRATEGIST_RESPONSE_2026-09-17_slice2.md`, execution handoff
+`docs/CLAUDE_CODE_HANDOFF_2026-09-17_slice2.md`. One contract with explicit
+conditional branches, per the handoff's cadence section; a fresh contract is
+written only if a hypothesis actually changes.*
+
+### Questions
+
+**Q1 (attribution).** Does the COMPLETE nonlinear moment program the public
+reference executes carry its accuracy advantage over our chain — and does our
+program, transplanted into the reference's chain, cost it that advantage?
+
+**Q2 (own candidate).** If it does, can we derive the implicated connected
+operator families ourselves and recover a substantial fraction of the raw gap
+without destroying the adjusted economics?
+
+**Q3 (storage).** Does replacing the shared-coordinate join's *basis-selection
+objective* — not its rank, age, or any other algorithm choice — with the actual
+consumed-query error improve the adjusted score at fixed age 4 / rank 256?
+
+**Q4 (release).** Does one frozen candidate beat graded v31 by at least 2.0x
+adjusted on a fresh single-use block?
+
+### Evidence in hand
+
+- **CONFIRMED (source, label-free, this session).** `closure_audit/canon.py`
+  and `closure_audit/progswap.py`: the executed live program of public v17 is
+  **87 oriented terms and CONTAINS frozen v32's 27 EXACTLY**, same rational
+  coefficients, no term of ours absent from theirs. `v32_subset_of_v17: true`.
+  The reciprocal swap is therefore pure addition in one direction and pure
+  deletion in the other. No earlier arm tested this program: BUDGET 4 has 141
+  terms and omits six oriented Q31/Q13 rows, PAIR 114 and omits the same six,
+  Q3q 57 and omits 33 while adding 3.
+- **CONFIRMED (measured, P11, job 1499).** On our own networks v17 beats v32 by
+  **1.218x raw** at 1.63x its cost; v29 by **1.294x raw** at 0.84x its cost
+  (adjusted 1.545x). The local instrument reproduces the public ordering.
+- **CONFIRMED (measured, P11, job 1510).** `V17_NO_WK431` removes ~75% of
+  v17's raw edge over v32 — the kappa_iiij consumer rows are where most of it
+  lives. Those six rows are inside the 60 this slice transplants.
+- **CONFIRMED (measured, P11, job 1642).** Restoring kappa_iiij to BUDGET 3
+  recovers 1.189x but the consistent BUDGET-3 closure still loses 7% to v32.
+  a4r256 + P4 d5 pays 1.0654x over v32_p4d5 (adjusted), 0.8225x raw, C/B 0.2163.
+  F5's 1.15 gate FAILED at 1.1493 and stays failed.
+- **CONFIRMED (source).** `s7_build_shared.py:_shared_join_lean` selects its
+  basis from the range of `J diag(dJ) J^T`, where `dJ` is the joiner's column
+  energies. That is `U^T U` replaced by its DIAGONAL: it drops every
+  cross-column term and every A/M interaction, and the weights are captured
+  before the Wick scale while the join happens after. It is a heuristic, not
+  the projection error it is documented as bounding.
+- **CONFIRMED (arithmetic, strategist).** On one consistent P11 scale, 2x v31
+  means score <= 5.18588e-9, i.e. **1.68655x beyond the current cost base**,
+  not another 2x. At q = 0.216311 that is raw <= 2.39741e-8.
+- **SPECULATIVE.** That the program transfers; that the query-directed basis
+  retains more of the consumed contraction at equal rank; that either reaches
+  the 2x release gate.
+
+### Hypothesis and mechanism
+
+**H1.** The reference's advantage is carried by the 60 connected monomials its
+pK program executes and ours does not — principally the kappa_iiij/kappa_ijjj
+consumer rows and the C x D21/D22/D3/D4 families — and these act *recurrently*,
+through the covariance, the regenerated core and the source birth, not only at
+the readout. *Mechanism:* each missing monomial is a genuine connected
+contribution to `Cov(ReLU_i^a, ReLU_j^b)` at the carried cumulants' order; a
+program that keeps some and drops others is inconsistent at that order, and the
+inconsistency compounds through the recurrence. **This predicts the effect is
+reciprocal**: adding them to our chain helps by roughly what deleting them from
+theirs costs.
+
+**H2 (storage).** For frozen left factors `U = [LA | LP]` and legs
+`J = [A | M]`, the quantity the shared basis must preserve is the consumed
+contraction `E = U J^T = LA A^T + LP M^T`; the exact frozen-query error of an
+orthogonal projector `P = Q Q^T` is
+`||E(I-P)||_F^2 = tr((I-P) J U^T U J^T (I-P))`.
+The live join replaces `U^T U` by `diag(U^T U)`, which is exact only when U's
+columns are orthogonal and equal-normed. *Mechanism:* `Q = orth(E^T Omega)`
+approximates the right singular space of the actual query, so at equal rank it
+keeps more of what is consumed and less of what is not.
+
+### Interventions (the smallest that discriminate)
+
+**Stage 1 — five chains on one fresh DESIGN panel, one batch, one control run.**
+
+| arm | what | sha256 (16) |
+|---|---|---|
+| 1 | native frozen v32 (control) | `10869a6ca7b9b950` |
+| 2 | native pinned public v17 | `3e5b611b42e52e1e` |
+| 3 | `estimator_k3_v38_v17prog.py` — v32's tower, feed, sketch, rank and lambda, executing the COMPLETE v17 program | `2fe7ef1eb2b11bf4` |
+| 4 | `_diag/estimator_v17_v32prog.py` — v17's tower, feed and lambda, executing ONLY v32's program | `ee037c288792d31b` |
+| 5 | native pinned public v29 (reference endpoint; **NOT interchangeable with v17** — it also has rank-16 D21 feedback, adaptive lambda and nested old-source coordinates) | `d9b2c1141710063b` |
+
+Plus `estimator_k3_v38_v17prog_last.py` (`49f04cf121347816`), the same complete
+program at the FINAL layer only, so the readout and recurrent halves separate.
+
+Diagnostic copies live under `_diag/`, carry their parent's sha256 in a banner,
+and are labelled non-release. No reference byte, fitted table or empirical
+pruning mask enters any candidate. Reference flags
+(`V17_NO_FEED/NO_WK431/NO_REGEN/NO_CORR/LAM_SCALE`), the shape gate, correction
+mode, derivative conventions, orientation, masks, dtype and backend are frozen
+at their native values in every arm. **No cross-backend state conversion:** each
+chain runs its own complete third-order history end to end.
+
+**Stage 2 — own coherent candidate.** Independently derive the implicated
+connected families and their mean/covariance/birth/core consumers from our own
+generator (`local_sim/closure/generate.py`) and oracles, preserving exact
+deterministic identities, permutation equivariance, variance guards and
+shape-generic fallbacks. If a direct mathematical correction suffices, **no
+constant is fitted.** If the diagnosed interaction requires shrinkage, ONE
+bounded own fit is permitted under the parameter policy declared below.
+
+**Stage 3 — query-directed basis.** Change *only* basis selection inside
+`_shared_join_lean`, at fixed age 4 / rank 256 / passes / everything else:
+`Q = orth(E_oj^T Omega)` with `E_oj` the OLD-plus-JOINING contribution at one
+consistent temporal boundary (the recent lineages we retain exactly are not
+projected and are excluded).
+`E_oj^T Omega = Q_old (X_old^T Omega) + J_j (U_j^T Omega)`,
+where `X_old` is already computed by the contraction — so the proposal is
+~4 n^2 r + 2 n r^2 per pass, the same order as the live objective's 4 n^2 r.
+**Preregistered arms, declared now and not to be added later:**
+`qE` (pure consumed-query range) and `qEd` (`qE` plus a small explicitly
+derived D3-diagonal protection component, since `_dslice3` consumes the legs
+elementwise and is not inside `E`).
+
+**Stage 4 — one frozen challenger** against graded v31 on **P13**, single use.
+
+### Numbered predictions (Builder, before any data)
+
+1. **Chain 3 improves raw MSE over v32 on the panel**, gain 1.10–1.25x, t95 > 0
+   (60%). It will cost more: the 60 extra monomials add ~26 bivariate
+   einsum rows a layer, so I expect C/B to rise to 0.33–0.38 from 0.3023, and
+   the **adjusted** gain to be 0.95–1.15x — i.e. accuracy without economics.
+2. **Chain 4 loses raw accuracy relative to native v17**, gain 0.78–0.92x (65%),
+   and lands between v32 and v17 in raw MSE.
+3. **Reciprocity:** |log(chain3/v32) + log(chain4/v17)| < 0.35 in raw MSE, i.e.
+   the two directions agree on the program's worth to within about 40% (50%).
+4. **Chain 3 does NOT close the whole gap to native v17 raw** (2.73e-8-scale):
+   it stays at least 5% worse than v17 raw (70%), because v17 also differs in
+   its sketch rank, its protected feed and its birth bookkeeping.
+5. **The readout-only arm is a small fraction of the recurrent effect**:
+   |log gain(v17prog_last)| < 0.3 |log gain(v17prog)| (65%).
+6. **Stage 3:** the query-directed basis lowers the official-precision adjusted
+   score at fixed age4/rank256 with `decide(gate=1.0)` passing (55%), by
+   1.01–1.08x, and reduces measured post-projection query error by 10–40%.
+7. **Release:** a candidate reaching the 2.0x gate against v31 on P13 — 35%.
+
+**Samuel's predictions (asked before the result existed, recorded verbatim in
+the RESULT entry below).**
+
+### Gates, falsifiers and conditional branches — all declared now
+
+**Stage 1 is ATTRIBUTION, not promotion. It has no promotion gate.** Its
+executable verdicts (`local_sim/s9_decide.py`, committed with this entry):
+
+- **A1** chain3 vs v32, raw and adjusted, paired t95 reported. Gate for the
+  *attribution claim*: chain3 raw gain >= 1.10x with t95 > 0.
+- **A2** chain4 vs v17, raw and adjusted. Attribution gate: chain4 raw gain
+  <= 0.92x with t95 < 0.
+- **A3 reciprocity:** both A1 and A2 hold and the log-magnitudes agree to 0.35.
+- **Falsifier of H1:** A1 fails AND A2 fails — the program is not where the
+  accuracy lives, whichever chain runs it.
+
+**Branches, at most ONE taken (handoff: "at most one attribution branch"):**
+
+- **(a)** A3 holds → the program explains the gap → go directly to stage 2, our
+  own coherent implementation of those families.
+- **(b)** A2 holds but A1 fails (the reference loses the program's benefit but
+  our chain does not gain it) → ONE preregistered 2x2 of {v32 program, complete
+  program} x {v32 lambda/feed package, coherent lambda/feed package}, backend,
+  rank and storage fixed. Core-transport and projection formulas already agree
+  and do NOT count as a separate intervention.
+- **(c)** Neither holds (the complete program has little effect either way) →
+  test the remaining source-approximation package (sketch rank and protected
+  feed) reciprocally instead, choosing the ONE branch by whether native v29's
+  measured gain beyond v17 on this panel is mostly feedback (rank-16 D21) or
+  mostly adaptive core.
+
+Layer-block hybrids **within one backend** at predeclared boundaries 3, 6, 10,
+16 are permitted ONLY to localise an effect stage 1 has already demonstrated.
+No 16-layer-by-every-component grid.
+
+**Stage 2 screen (prospective, isolated).** `decide(gate=1.10)` on the ADJUSTED
+score, own uncompressed coherent candidate vs `estimator_k3_v32_p4d5.py`
+(`506a0c85d60a63b6`), on the panel. This is a NEW prospective accuracy-stage
+target. It does **not** relax the failed 1.15 base gate, which stays failed, and
+it is not the release criterion. A subthreshold result is retained as a
+diagnostic and never reported as a pass.
+
+**Bounded own-fit policy, fixed before any fitting.** Permitted only if a branch
+demonstrates that a direct mathematical correction is insufficient, and then:
+**at most FOUR declared global scalars** — (i) a coherent diagram-family damping
+`theta_fam in [0, 1.5]` shared by the newly added families, (ii) a smooth lambda
+scale `s_lam in [0.5, 1.5]`, (iii) a lambda depth tilt `t_lam in [-0.5, 0.5]`
+applied as `lam_l * s_lam * (1 + t_lam (l/(L-1) - 1/2))`, (iv) a birth-feed scale
+`s_feed in [0.5, 1.5]`. Ridge penalty `1e-3 * ||x - x0||^2` toward the
+unfitted values. **Network-level split of the panel: fit on the first 12 seeds,
+validate on the last 12**, declared here. **Maximum 40 candidate evaluations
+total**, coordinate/finite-difference, each priced at its full evaluation
+workload. NO per-neuron or per-network parameters, no copied public fit or
+pruning mask, no public-split fitting, no autonomous search loop. The selected
+policy is frozen before P13 is touched. A constant fitted on the DESIGN panel
+requires P13 before it can reach a submission.
+
+**Stage 3 screen (prospective).** At fixed age4/rank256, the query-directed arm
+vs the same-chain old-metric arm: `decide(gate=1.0)` on the OFFICIAL-PRECISION
+adjusted score, **no new failures**, AND a measured reduction in actual
+post-projection query error (the full recomputed `E`, `D3` and `D21` after
+projection, plus the next-layer and output displacement). If it passes, ONE
+preregistered cheaper setting is allowed: **default age3/rank192**, or
+age2/rank192 only if the label-free query/cost criterion
+`retained_query_energy(age2,r192) >= retained_query_energy(age3,r192)` measured
+BEFORE any truth read selects it. No other sweep.
+
+**Stage 4 gate (the release).** `competition_score.decide(control=v31 rows,
+candidate=frozen candidate rows, gate=2.0, interval="t")` on **P13**,
+SINGLE_USE, paired on canonical networks, counted FLOPs per network. The
+observed gate binds AND the official-precision/noise-aware comparison must
+support the same major-gain claim; both are reported. Truth precision and
+sample count are chosen here — **24 networks, two independent replicas of
+2^24 per replica**, the established figures — and are not enlarged until it
+passes.
+
+### Statistic
+
+Paired arithmetic adjusted score difference on common random numbers,
+studentised-t 95% interval, via `local_sim/competition_score.py`. Percentile and
+BCa bootstrap are refused (`docs/VALIDATION.md` §2b-i). The geometric mean of
+per-MLP ratios is a stability diagnostic with no authority. **Every comparison
+table carries all four columns: observed raw, observed adjusted, noise-corrected
+true-function adjusted, and estimated official-precision adjusted, each with its
+paired interval.** Cross-cost DESIGN candidates are selected prospectively by the
+**official-precision adjusted estimand**, supported by the observed and
+noise-corrected diagnostics; close ties stay ties and negative corrected rows are
+retained, never clipped. The historical "raw observed winner" rule is retired for
+new selections and no past F1–F5 verdict is changed.
+
+### Baseline and tier
+
+Controls: frozen `estimator_k3_v32.py` (accuracy attribution),
+`estimator_k3_v32_p4d5.py` (stage-2 screen), the same-chain old-metric a4r256 arm
+(stage-3 screen), graded `estimator_k3_v31.py` `6dde5fd43ad41e8e` / `#331317` /
+adjusted `8.7520303e-9` (release). v32, v32_p4d5, v37_a4r256_p4d5 and
+v37_a4r384_p4d5 are retained as controls; **rank256 and rank384 stay practically
+tied** and neither is retroactively promoted.
+
+### Seed blocks — registered and claimed BEFORE any truth exists
+
+- **P12** `[40,917,012,000 .. 40,917,012,095]`, **DESIGN**, 24 claimed for the
+  mint. The fresh reusable panel every read of this slice shares. **P11 is
+  retired from new accuracy selection** after ~13 reads.
+- **P13** `[40,917,013,000 .. 40,917,013,127]`, **SINGLE_USE**, untouched,
+  reserved for stage 4 alone. Claimed only once the candidate and its contract
+  are frozen.
+
+Both are registered in `seed_blocks.py` and `seed_ledger.TIERS`;
+`check_disjoint()` holds; every read goes through `truth_reads.reserve` with the
+actual UTC stamp.
+
+### Cost model — Phase 2, lambda = 0, so C = F
+
+Counted FLOPs only. Residual is **not a cost**: it is a 0.4 s per-MLP cliff, and
+headroom is reported as `0.4 / worst observed`, quoted against the worst run
+(`docs/VALIDATION.md` §2b-ii). §2b's three-residual-model rule is Phase-1 replay
+and does not apply. No local absolute wall time is quoted as authority; the
+authority is `--runner subprocess`. The known server `+2**24` FLOP offset
+(`+0.0122%`) is included near any score boundary. Operations <= 22,000 remains a
+forecast guard, not a substitute for residual feasibility.
+
+### Instrument change (IMPORTANT, prediction before implementation — recorded)
+
+`local_sim/design_sidecar.py` + `--pred-out` on `p2_design_score.py`: per-network
+FINAL-LAYER predictions as actually scored, append-only and fsynced per row, with
+the run's source/config/truth/mint/package identity. **Prediction, written before
+the tests were run:** the sidecars change no score (the scorer's numbers are
+byte-identical with and without `--pred-out`), cost under 100 KiB per arm at
+24x1024, and the exact identity
+`MSE(new) - MSE(old) = 2 mean((old-truth) delta) + mean(delta^2)` holds to
+float64 round-off. `local_sim/test_design_sidecars.py`: **all 19 checks pass**,
+including the five refusals (truncated stream, index/stream disagreement,
+tampered prediction, edited candidate, edited truth, missing package identity)
+and the incomplete-sidecar refusal.
+
+### Confounders, scope, and what must not change
+
+- v17 and v29 are **reference chains run unmodified for diagnosis**; their bytes,
+  their fitted tables and their pruning masks never enter a candidate. The
+  withdrawn provenance question is not reopened and organizers are not contacted.
+- Chains 3 and 4 differ from their parents in the nonlinear program ALONE; every
+  parity claim below is the evidence for that, and no numerical tolerance is
+  raised after seeing an error.
+- v17's mode-0 program and v32's layer-0 state both have every non-C block zero,
+  so the INITIAL mode is a *shared* boundary and all five chains must emit an
+  identical first row. A chain that does not has a transplant defect, not a
+  program result.
+- The panel is DESIGN: its reads are ONE correlated corpus, and nothing fitted on
+  it may be submitted without P13.
+- v31, F21, root `estimator.py`, `docs/HUMAN_MODEL.md`, the vault, the reference
+  sources and every frozen archive are untouched. No designation, by anyone.
+
+### Label-free gates passed BEFORE any truth read (this session, no job)
+
+`local_sim/progswap_parity.py` — **69/69**, artifact
+`experiments/2026-09-17b_progswap/parity_tiny.json`:
+
+1. `estimator_k3_v38_off.py` == frozen v32 **bitwise and in counted FLOPs** at
+   64x5 and 96x6.
+2. `_diag/estimator_v17_identity.py` (the same TERM_SPECS rewrite with **nothing
+   dropped**) == native v17 **bitwise and in counted FLOPs** — the rewrite
+   machinery's own no-op control.
+3. Chain 3's live `_layer` vs the independent float64 `closure_audit.ref_step` on
+   the COMPLETE v17 table, in all three availability modes — INITIAL (layer 0,
+   D3 = D21 = dG = 0), ORDINARY, FINAL — comparing **mu_out, cov_out, g_out, the
+   S3 birth slice and the K21 birth input**, not only the mean. Tolerance 1e-10,
+   fixed before the run; achieved ~1e-15.
+4. At the INITIAL boundary the complete program agrees with v32's own program
+   exactly, and chain 3's and chain 4's first rows equal their parents'.
+5. Chain 4's **compiled** availability programs `_term_prog(0/1/2)` canonicalise
+   to v32's program filtered for each mode (10 / 27 / 27 terms), while native
+   v17's carry 0 / 60 / 54 terms beyond v32.
+6. Chain 3's float32 worst row error is **8.27e-4 against v32's own 1.14e-3
+   floor** — inside the 2x + 1e-5 bound fixed before the run.
+
+A harness inconsistency was found and fixed BEFORE the first pass: the tiny
+fixtures carried `lam = 0` while `_layer` consumes `_K4_LAM[layer_index-1]`, and
+kappa_iiij = (m/2) lam C is exactly the block the complete program adds and the
+BUDGET tables never had. That is a fixture-versus-runtime disagreement, not a
+tolerance: the tolerance stayed 1e-10 and agreement went from 1e-2 to 1e-15.
+
+### Workload review (every heavy step through workerq, declared honestly)
+
+| job | what | declared |
+|---|---|---|
+| mint P12 | `p2_truth.py`, 24 nets x 2 replicas x 2^24, GPU | 8 GiB RAM, 6 GiB VRAM, 4 CPUs (P10 peaks 4,565 / 2,636 MiB; P11 took 1,072 s) |
+| live parity | `progswap_parity.py --live`, one 1024x16 network, 6 chains + boundary captures at layers 0/3/8/15 | 12 GiB, 4 CPUs (same_state's v32 capture alone held 4.3 GB; two captures plus f64 references) |
+| stage-1 batch | `p2_design_score.py`, control + 5 candidates x 24 nets, rows and predictions streamed | 10 GiB, 4 CPUs (job 1637: 6 arms, 72 min, <= 6.5 GB) |
+
+Jobs run **relative to the git snapshot with no `cd` into the live path** (the
+2026-09-17 Skeptic's provenance correction), write artifacts to absolute paths
+under `C:/Users/samsu/Documents/arc-whest/experiments/`, and P12's truth is
+added to `.gpuq.toml` passthrough before the first job that reads it. Queue waits
+are spent on independent work, never on a duplicate experiment.

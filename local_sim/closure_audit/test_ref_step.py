@@ -59,7 +59,8 @@ class _Sentinel:
     pass
 
 
-def run_live(mod, bd, force_generic=False, keep_hubs=False, dtype=None, layer_index=0):
+def run_live(mod, bd, force_generic=False, keep_hubs=False, dtype=None,
+             layer_index=0, last_layer=False):
     dtype = fnp.float64 if dtype is None else dtype
     n = bd["mu_pre"].shape[0]
     cap = {}
@@ -91,9 +92,14 @@ def run_live(mod, bd, force_generic=False, keep_hubs=False, dtype=None, layer_in
           sent, 0.0, fnp.asarray(bd["dG"], dtype=dtype))
     with flops.BudgetContext(flop_budget=2 ** 55, quiet=True):
         mu_out, cov_out, _tw, _c4, g_out = mod._layer(
-            W, st, mod._tables(), dtype, const, bd["metric"], last_layer=False,
-            gens=None, layer_index=layer_index)
-    cap.update(mu_out=np.asarray(mu_out), cov_out=np.asarray(cov_out), g_out=np.asarray(g_out))
+            W, st, mod._tables(), dtype, const, bd["metric"],
+            last_layer=last_layer, gens=None, layer_index=layer_index)
+    # The FINAL layer forms nothing but the mean -- `_layer` returns
+    # `(mu_out, None, None, 0.0, dG)` there -- so the other slots stay absent
+    # rather than being coerced into arrays that do not exist.
+    cap.update(mu_out=np.asarray(mu_out), g_out=np.asarray(g_out))
+    if cov_out is not None:
+        cap["cov_out"] = np.asarray(cov_out)
     return cap
 
 

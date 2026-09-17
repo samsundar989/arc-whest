@@ -117,6 +117,12 @@ TIERS: Dict[str, str] = {
     # several independent ones. A constant fitted here is fitted on DESIGN data
     # and needs a fresh single-use block before it reaches a submission.
     "P11": "DESIGN",
+    # Allocated 2026-09-17 for the reciprocal-attribution / query-compression
+    # slice. P12 is the fresh reusable DESIGN panel (P11 retired from new
+    # accuracy selection after ~13 reads); P13 is the untouched single-use block
+    # the one frozen release challenger is decided on.
+    "P12": "DESIGN",
+    "P13": "SINGLE_USE",
 }
 
 #: Strictness ordering, so a tier CHANGE can be judged as a tightening or a

@@ -1,0 +1,350 @@
+{
+ "artifact": "progswap_parity.tiny",
+ "checks": [
+  {
+   "check": "64x5 v38_off == v32 bitwise + FLOPs",
+   "passed": true,
+   "detail": "flops 38702094 vs 38702094"
+  },
+  {
+   "check": "64x5 v17_identity == v17 bitwise + FLOPs",
+   "passed": true,
+   "detail": "flops 41900725 vs 41900725"
+  },
+  {
+   "check": "64x5 chain4 differs from v17 (not a null edit)",
+   "passed": true,
+   "detail": "rel 1.86e-03"
+  },
+  {
+   "check": "64x5 chain4 row 0 == v17 row 0 (initial mode identical)",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "64x5 chain3 differs from v32 (not a null edit)",
+   "passed": true,
+   "detail": "rel 1.79e-03"
+  },
+  {
+   "check": "64x5 chain3 row 0 == v32 row 0 (initial mode identical)",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "64x5 chain3 finite and non-negative",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "96x6 v38_off == v32 bitwise + FLOPs",
+   "passed": true,
+   "detail": "flops 159165708 vs 159165708"
+  },
+  {
+   "check": "96x6 v17_identity == v17 bitwise + FLOPs",
+   "passed": true,
+   "detail": "flops 168791504 vs 168791504"
+  },
+  {
+   "check": "96x6 chain4 differs from v17 (not a null edit)",
+   "passed": true,
+   "detail": "rel 1.60e-03"
+  },
+  {
+   "check": "96x6 chain4 row 0 == v17 row 0 (initial mode identical)",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "96x6 chain3 differs from v32 (not a null edit)",
+   "passed": true,
+   "detail": "rel 1.35e-03"
+  },
+  {
+   "check": "96x6 chain3 row 0 == v32 row 0 (initial mode identical)",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "96x6 chain3 finite and non-negative",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "n=7 ORDINARY mu_out",
+   "passed": true,
+   "detail": "5.3e-17"
+  },
+  {
+   "check": "n=7 ORDINARY cov_out",
+   "passed": true,
+   "detail": "3.2e-16"
+  },
+  {
+   "check": "n=7 ORDINARY g_out",
+   "passed": true,
+   "detail": "4.2e-15"
+  },
+  {
+   "check": "n=7 ORDINARY S3_birth",
+   "passed": true,
+   "detail": "1.3e-15"
+  },
+  {
+   "check": "n=7 ORDINARY K21_birth",
+   "passed": true,
+   "detail": "1.6e-15"
+  },
+  {
+   "check": "n=7 FINAL mu_out",
+   "passed": true,
+   "detail": "5.3e-17"
+  },
+  {
+   "check": "n=7 INITIAL mu_out",
+   "passed": true,
+   "detail": "0.0e+00"
+  },
+  {
+   "check": "n=7 INITIAL cov_out",
+   "passed": true,
+   "detail": "0.0e+00"
+  },
+  {
+   "check": "n=7 INITIAL g_out",
+   "passed": true,
+   "detail": "9.6e-16"
+  },
+  {
+   "check": "n=7 INITIAL S3_birth",
+   "passed": true,
+   "detail": "0.0e+00"
+  },
+  {
+   "check": "n=7 INITIAL K21_birth",
+   "passed": true,
+   "detail": "9.2e-17"
+  },
+  {
+   "check": "n=7 INITIAL(vs v32 table) mu_out",
+   "passed": true,
+   "detail": "0.0e+00"
+  },
+  {
+   "check": "n=7 INITIAL(vs v32 table) cov_out",
+   "passed": true,
+   "detail": "0.0e+00"
+  },
+  {
+   "check": "n=7 INITIAL(vs v32 table) g_out",
+   "passed": true,
+   "detail": "9.6e-16"
+  },
+  {
+   "check": "n=7 INITIAL(vs v32 table) S3_birth",
+   "passed": true,
+   "detail": "0.0e+00"
+  },
+  {
+   "check": "n=7 INITIAL(vs v32 table) K21_birth",
+   "passed": true,
+   "detail": "9.2e-17"
+  },
+  {
+   "check": "n=9 ORDINARY mu_out",
+   "passed": true,
+   "detail": "2.1e-16"
+  },
+  {
+   "check": "n=9 ORDINARY cov_out",
+   "passed": true,
+   "detail": "4.8e-16"
+  },
+  {
+   "check": "n=9 ORDINARY g_out",
+   "passed": true,
+   "detail": "2.7e-15"
+  },
+  {
+   "check": "n=9 ORDINARY S3_birth",
+   "passed": true,
+   "detail": "1.4e-15"
+  },
+  {
+   "check": "n=9 ORDINARY K21_birth",
+   "passed": true,
+   "detail": "1.8e-15"
+  },
+  {
+   "check": "n=9 FINAL mu_out",
+   "passed": true,
+   "detail": "2.1e-16"
+  },
+  {
+   "check": "n=9 INITIAL mu_out",
+   "passed": true,
+   "detail": "0.0e+00"
+  },
+  {
+   "check": "n=9 INITIAL cov_out",
+   "passed": true,
+   "detail": "4.1e-17"
+  },
+  {
+   "check": "n=9 INITIAL g_out",
+   "passed": true,
+   "detail": "4.4e-16"
+  },
+  {
+   "check": "n=9 INITIAL S3_birth",
+   "passed": true,
+   "detail": "3.4e-16"
+  },
+  {
+   "check": "n=9 INITIAL K21_birth",
+   "passed": true,
+   "detail": "2.5e-16"
+  },
+  {
+   "check": "n=9 INITIAL(vs v32 table) mu_out",
+   "passed": true,
+   "detail": "0.0e+00"
+  },
+  {
+   "check": "n=9 INITIAL(vs v32 table) cov_out",
+   "passed": true,
+   "detail": "4.1e-17"
+  },
+  {
+   "check": "n=9 INITIAL(vs v32 table) g_out",
+   "passed": true,
+   "detail": "4.4e-16"
+  },
+  {
+   "check": "n=9 INITIAL(vs v32 table) S3_birth",
+   "passed": true,
+   "detail": "3.4e-16"
+  },
+  {
+   "check": "n=9 INITIAL(vs v32 table) K21_birth",
+   "passed": true,
+   "detail": "2.5e-16"
+  },
+  {
+   "check": "n=8 ORDINARY mu_out",
+   "passed": true,
+   "detail": "1.5e-16"
+  },
+  {
+   "check": "n=8 ORDINARY cov_out",
+   "passed": true,
+   "detail": "9.6e-16"
+  },
+  {
+   "check": "n=8 ORDINARY g_out",
+   "passed": true,
+   "detail": "2.9e-15"
+  },
+  {
+   "check": "n=8 ORDINARY S3_birth",
+   "passed": true,
+   "detail": "1.8e-15"
+  },
+  {
+   "check": "n=8 ORDINARY K21_birth",
+   "passed": true,
+   "detail": "2.9e-15"
+  },
+  {
+   "check": "n=8 FINAL mu_out",
+   "passed": true,
+   "detail": "1.5e-16"
+  },
+  {
+   "check": "n=8 INITIAL mu_out",
+   "passed": true,
+   "detail": "0.0e+00"
+  },
+  {
+   "check": "n=8 INITIAL cov_out",
+   "passed": true,
+   "detail": "3.7e-17"
+  },
+  {
+   "check": "n=8 INITIAL g_out",
+   "passed": true,
+   "detail": "1.2e-15"
+  },
+  {
+   "check": "n=8 INITIAL S3_birth",
+   "passed": true,
+   "detail": "4.4e-16"
+  },
+  {
+   "check": "n=8 INITIAL K21_birth",
+   "passed": true,
+   "detail": "3.2e-16"
+  },
+  {
+   "check": "n=8 INITIAL(vs v32 table) mu_out",
+   "passed": true,
+   "detail": "0.0e+00"
+  },
+  {
+   "check": "n=8 INITIAL(vs v32 table) cov_out",
+   "passed": true,
+   "detail": "3.7e-17"
+  },
+  {
+   "check": "n=8 INITIAL(vs v32 table) g_out",
+   "passed": true,
+   "detail": "1.2e-15"
+  },
+  {
+   "check": "n=8 INITIAL(vs v32 table) S3_birth",
+   "passed": true,
+   "detail": "4.4e-16"
+  },
+  {
+   "check": "n=8 INITIAL(vs v32 table) K21_birth",
+   "passed": true,
+   "detail": "3.2e-16"
+  },
+  {
+   "check": "chain4 _term_prog(0) == v32 program filtered for that mode",
+   "passed": true,
+   "detail": "10 terms vs 10"
+  },
+  {
+   "check": "chain4 _term_prog(1) == v32 program filtered for that mode",
+   "passed": true,
+   "detail": "27 terms vs 27"
+  },
+  {
+   "check": "chain4 _term_prog(2) == v32 program filtered for that mode",
+   "passed": true,
+   "detail": "27 terms vs 27"
+  },
+  {
+   "check": "native v17 _term_prog(0) still carries its extras",
+   "passed": true,
+   "detail": "10 terms, 0 beyond v32"
+  },
+  {
+   "check": "native v17 _term_prog(1) still carries its extras",
+   "passed": true,
+   "detail": "87 terms, 60 beyond v32"
+  },
+  {
+   "check": "native v17 _term_prog(2) still carries its extras",
+   "passed": true,
+   "detail": "81 terms, 54 beyond v32"
+  },
+  {
+   "check": "64x5 chain3 float32 worst row <= 2x v32 + 1e-5",
+   "passed": true,
+   "detail": "8.27e-04 vs 1.14e-03"
+  }
+ ]
+}

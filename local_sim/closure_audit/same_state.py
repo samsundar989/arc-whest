@@ -100,10 +100,17 @@ def capture_v32(w):
     return caps, pred
 
 
-def capture_v17(w, tmpdir):
+def capture_v17(w, tmpdir, source=None):
+    """Capture a v17-SHAPED chain's own boundaries.
+
+    `source` selects which v17-shaped file to instrument; it defaults to the
+    pinned public v17. The reciprocal program-swap experiment points it at its
+    own diagnostic copy so the copy is measured on ITS OWN native boundaries
+    rather than on the reference's.
+    """
     import flopscope as flops
     import k4feed_oracle as KO
-    src_path = os.path.join(ROOT, "external", "504aldo", "estimators", "estimator_v17.py")
+    src_path = source or os.path.join(ROOT, "external", "504aldo", "estimators", "estimator_v17.py")
     src = open(src_path, encoding="utf-8").read()
     old = "DEBUG.append(dict(layer=li, dG=dG, g_prev=g_prev, var_prev=var_prev,\n                                          lam=lam_prev, var=var, D3=D3, D21=D21))"
     new = ("DEBUG.append(dict(layer=li, dG=dG, g_prev=g_prev, var_prev=var_prev,\n                                          lam=lam_prev, var=var, D3=D3, D21=D21,"
