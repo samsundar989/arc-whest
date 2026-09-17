@@ -52548,3 +52548,15 @@ depth-4 arms (d5 changes FLOPs and float reassociation only); v32 base (closure 
 **Workload review.** control + 5 candidates × 24 nets; shared arms are cheaper and lighter (≤2.2 GB)
 than v32; d5 arm 6.5 GB commit. History: 5 arms 99 min / ≤5 GB (job 1609). **Declared 10 GiB, 4 CPUs**,
 pinned local (P11 truth only here), git snapshot with this contract, ~110 min.
+
+### Incident (2026-09-17, builder error): untracked v33 files regenerated
+
+Running `uv run python local_sim/s2_build_p3.py --help` (it has no argument parser) EMITTED its
+arms, overwriting the untracked `estimator_k3_v33.py` and `estimator_k3_v33_dense.py` the handoff
+asked to preserve, and creating `estimator_k3_v31p3.py`, `estimator_k3_v31p3_dense.py`,
+`estimator_k3_v33_uncomp.py` (the three new files were deleted again). The generator and its
+frozen input are unchanged since commit ecd0e41, which emitted them, and the generator is
+deterministic, so the rewritten bytes are expected to be identical — but no prior hash was
+recorded and `_snapshot_for_review.tgz` does not contain v33, so identity is **unverified**.
+Current SHAs: v33 `6cf50de8…`, v33_dense `31b45920…`. No v33 evidence depends on those bytes
+(P3 was never accuracy-screened). Lesson: never probe a generator with `--help`.
