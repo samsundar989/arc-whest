@@ -52479,3 +52479,72 @@ recent tower sets a floor ≈ a/⌈mean lineage count⌉ of today's tower whatev
 off and a3r256 again) × {depth 4, depth 5 + min block 32 (P4's spelling)}. **Declared 10 GiB,
 2 CPUs**, label-free, ~60 min (depth-5 off peaked 6.53 GB in job 1464). **Predictions:** a2r256
 d4 0.19–0.21; a3r256 d5 0.20–0.21; a2r192 d5 ≤ 0.18; ops at depth 5 +2.5k over depth 4.
+
+### Attribution diagnostic RESULT (job 1635): BUDGET 3 and PAIR also hurt — closure enrichment CLOSED on this base
+
+`experiments/2026-09-17_step2b/{score.json,rows.jsonl}`, P11, 0 failures, SHAs as committed.
+v32 → v35_Q3 (cost-3 families: C·X, C³): adjusted **0.7812×**, raw 0.7833×, t95 [−3.38e-9, −2.25e-9],
+0/24. v32 → v35_Qpair (≤2 factors, any cost): **0.8658×**, raw 0.8721×, t95 [−2.02e-9, −1.10e-9], 0/24.
+(BUDGET 4 was 0.8352×.) Builder prediction (B3 hurts ≥5%; PAIR hurts less than B4 but hurts):
+B3 HIT; PAIR hurts less HIT. **Registered consequence fires: both hurt ≥5% → enriching our
+chain's closure by power-counting families is closed on this base; no further closure arm.**
+Knowledge delta: the cost-3 families alone are the most harmful; adding cost-4 families recovers
+part of it. The public chain's better accuracy therefore does not come from its closure on our
+state and conventions; the same terms hurt here even when every coefficient is independently
+verified. Scope: our carried blocks, κ_iiij = 0, λ/rank/sketch as v32.
+
+### Step 3 price RESULT 2 (job 1636, label-free), `experiments/2026-09-17_step3/meter_shared_grid2.json`
+
+| arm | C/B d4 | ops d4 | C/B d5 | ops d5 | peak commit d4/d5 |
+|---|---:|---:|---:|---:|---|
+| off (= v32) | 0.30232 | 13,850 | 0.28242 | 16,518 | 4.30/6.53 GB |
+| a3r256 | 0.21756 | 18,623 | 0.20454 | 23,430 | 2.18/2.68 |
+| a3r192 | 0.19859 | 16,484 | 0.18576 | 21,291 | 2.17/2.67 |
+| a2r256 | 0.20056 | 19,033 | 0.18880 | 24,024 | 2.00/2.36 |
+| a2r192 | **0.17888** | 16,710 | 0.16735 | 21,701 | 1.99/2.35 |
+| a2r384 | 0.26312 | 19,033 | 0.24708 | 24,024 | 2.01/2.38 |
+| a3r384 | 0.27209 | 18,623 | 0.25540 | 23,430 | 2.19/2.69 |
+
+Predictions: a2r256 d4 0.19–0.21 HIT (0.2006); a3r256 d5 0.20–0.21 HIT (0.2045); a2r192 d5 ≤0.18 HIT
+(0.1674); ops +2.5k at d5 MISSED (+4.8–5.0k). Rank 384 loses its Strassen levels and costs more
+than rank 256 at this width. **Depth 5 pushes most shared arms past the 22,000-op gate** — the
+accuracy screen uses depth 4; op reduction is release engineering owed before any d5 bundle.
+Composition checked: P4 patches on the shared-off text == committed v32_p4 bitwise incl. FLOPs.
+
+---
+
+## 2026-09-17 — **CONTRACT (Rule 1): step 3 shared-coordinate accuracy screen + P4 depth-5 raw parity, P11 DESIGN**
+
+**Question.** At ≈0.18–0.22 B, how much accuracy does sharing old-lineage coordinates cost, and
+does any configuration improve the adjusted score by ≥1.15× over v32? Does P4 at depth 5 keep raw
+parity (owed since stage 2)?
+**Evidence.** CONFIRMED (above): prices, full-rank exact identity (s7_parity 10/10), memory halved.
+REPORTED (public F72): an age-gated shared basis worked on another chain at r=384/1024 with +8.4%
+raw single-tier. SPECULATIVE: at a=2–3 and r=192–256 our joins keep enough of the consumed
+directions. N1 merged-core tiny-width negatives were a different representation.
+**Hypothesis + mechanism.** Old lineages' legs are left-multiplied by the same maps; the consumed
+(2,1) contraction weights concentrate on few directions, so a weighted rank-r basis keeps most of
+the consumed energy; the exact recent lineages carry the fast-changing part.
+**Intervention.** `local_sim/s7_build_shared.py` arms from v32 (depth 4): `estimator_k3_v36_v32_a3r256.py`
+(37243bf7…), `…_a2r256.py` (af1c0a1b…), `…_a3r192.py` (67494367…), `…_a2r192.py` (4afae3b7…);
+parity arm `estimator_k3_v32_p4d5.py` (506a0c85…, `s4_build_p4.build(v32, final_var, blocksym, depth 5,
+min block 32)`).
+**Predictions (Builder).** (1) raw ratio vs v32: a3r256 1.03–1.08, a2r256 1.05–1.12, a3r192 1.05–1.12,
+a2r192 1.08–1.20; (2) adjusted gain: a3r256 ~1.30×, a2r192 ~1.45×; at least one passes 1.15 (75%);
+(3) at least one meets the intermediate target (≤0.20 B, ≤5% raw) (35%); (4) P4 d5 raw parity holds
+(ratio in [0.99,1.01]) (85%). **Samuel (asked 2026-09-17 before data, verbatim):** raw loss of the
+~0.20 B configuration "I don't know"; ≥1.15× adjusted "I don't know".
+**Gate / verdict (executable, `local_sim/s7_decide.py`, committed with this entry).** Each shared arm
+`decide(v32, arm, gate=1.15, interval="t")`; intermediate target = pass ∧ raw ratio ≤ 1.05 ∧ C/B ≤ 0.20;
+base = lowest score among target-met arms, else among gate-passing arms, else v32. P4: raw ratio in
+[0.99, 1.01]. Multiplicity (4 gates) recorded, DESIGN tier only.
+**Falsifier.** No shared arm with t95 above zero → sharing at these ranks costs more accuracy than it
+saves; a larger-rank/age design would need a new contract.
+**Baseline / statistic / data.** v32 same run; paired arithmetic adjusted score, studentised t;
+P11 DESIGN reused, registered read, actual launch timestamp. Cost model: counted FLOPs as metered
+(job 1636); residual as ops vs 22,000 (d4 arms 16.5–19.0k).
+**Scope / confounders.** One weighting rule, one power pass, deterministic sketch; P11 selection risk;
+depth-4 arms (d5 changes FLOPs and float reassociation only); v32 base (closure lane closed).
+**Workload review.** control + 5 candidates × 24 nets; shared arms are cheaper and lighter (≤2.2 GB)
+than v32; d5 arm 6.5 GB commit. History: 5 arms 99 min / ≤5 GB (job 1609). **Declared 10 GiB, 4 CPUs**,
+pinned local (P11 truth only here), git snapshot with this contract, ~110 min.
