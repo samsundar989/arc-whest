@@ -82,6 +82,15 @@ def run_live(mod, bd, force_generic=False, keep_hubs=False, dtype=None,
         return sent
     mod._append = app
     mod._truncate = lambda tw, g, n_: tw
+    # A COMPOSED candidate also carries the shared-coordinate join. This helper
+    # isolates the NONLINEAR STEP on an injected boundary, and the injected tower
+    # is a sentinel with no legs, so the join is neutralised here. It is not
+    # skipped as evidence: the join has its own gates (full-rank identity, the
+    # deterministic cancelling case, the metered cost) in `s10_parity.py` and
+    # `s11_parity.py`, which is where it belongs.
+    for _jn in ("_shared_join_lean", "_shared_join"):
+        if hasattr(mod, _jn):
+            setattr(mod, _jn, lambda tw: tw)
     if not keep_hubs:
         mod._HUB_ROUTES = ()
     const = mod.Estimator()._constants(n, dtype)
