@@ -51907,3 +51907,32 @@ guard over-charges 60·n²·depth; FLOPs measured in-run.
 **Data.** P11 DESIGN re-read; caps off; rows streamed. Workload review: same
 scorer/shape as job 1463 (peak ~4.3 GiB); 3 arms sequential; 8 GiB, 4 CPU,
 `--node local`.
+
+### Stage 1b RESULT (job 1521): the exact bivariate completion HURTS our chain — FALSIFIED
+
+`experiments/2026-09-16_stage1b_rep/{score.json,rows.jsonl}`, P11, 0 failures.
+
+| arm | raw MSE | C/B | score gain vs v32 | t95 on score diff | better |
+|---|---:|---:|---:|---|---:|
+| v32 control | 3.3249e-08 | 0.302321 | — | — | — |
+| **v34 (q31 + link)** | 3.5945e-08 | 0.302693 | **0.9239×** | [−9.29e-10, −7.28e-10] | **0/24** |
+| v34_q31 (rows only) | 3.6939e-08 | 0.302478 | 0.8996× | [−1.32e-9, −9.27e-10] | 0/24 |
+
+Cumulative v34 vs frozen v31 (paired on seeds with job 1463): 0.953× — worse.
+**Gate 1.08: FAIL. Secondary: FAIL (candidate worse). Falsifier fires.**
+Predictions: Builder (1)(2) FALSIFIED; (3) v34 ≥ v34_q31 HIT; (4) cost +0.06%
+HIT. Samuel: "I don't know".
+
+v17 ablations complete (`experiments/2026-09-16_diag_v17abl/`): NO_FEED raw
+2.9835e-8 (+9.3%), NO_WK431 3.1631e-8 (+15.9%), NO_REGEN 5.7380e-8 (2.10×).
+
+**Knowledge delta — the most important of the day.** The same (3,1) route that is
+worth +15.9% in v17 is worth −8% in ours, even derived exactly (and the exact
+form is less harmful than v17's rows). The feed is +9.3% in v17 and +3.6% in
+ours. **Per-birth first-order exactness is not transferring to final accuracy
+in our chain; the consumers help their κ4 state and not ours.** The
+discriminator that follows is therefore the state itself: D2 — a per-layer trace
+of dG / g / var / λ and the κ4 consumer inputs, v17 vs v32, on one 1024×16
+P11-independent network at identical incoming state where possible. No new
+consumer is built until that trace locates a state difference. v34 and
+v34_q31 are closed.
