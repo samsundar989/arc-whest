@@ -1,0 +1,2195 @@
+{
+ "base_table": "closure_pair.json",
+ "rule": "OUR OWN generator's rule, stated in full: every connected monomial the base table keeps, over the blocks our carried kappa4 model supplies INCLUDING kappa_iiij = Q31 = (m/2) lam C and its transpose Q13 (upstream cost 3), at the exponential expansion's own coefficient 1/(3! 1!) = 1/6. The base tables omitted Q entirely -- they were generated under 'kappa_iiij assumed zero' -- so every earlier arm built on them was MIXED-ORDER: it carried cost-4 blocks while dropping a cost-3 one. This is the consistent completion, derived here, not a mask read off any other implementation. Builder, 2026-09-17b.",
+ "schema": "arc-whest/relu-closure/v1",
+ "terms": [
+  {
+   "output": [
+    1
+   ],
+   "factors": [],
+   "derivs": [
+    0
+   ],
+   "coef": "1/1"
+  },
+  {
+   "output": [
+    1
+   ],
+   "factors": [
+    "D3"
+   ],
+   "derivs": [
+    3
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    1
+   ],
+   "factors": [
+    "D3",
+    "D3"
+   ],
+   "derivs": [
+    6
+   ],
+   "coef": "1/72"
+  },
+  {
+   "output": [
+    1
+   ],
+   "factors": [
+    "D3",
+    "D4"
+   ],
+   "derivs": [
+    7
+   ],
+   "coef": "1/144"
+  },
+  {
+   "output": [
+    1
+   ],
+   "factors": [
+    "D4"
+   ],
+   "derivs": [
+    4
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    1
+   ],
+   "factors": [
+    "D4",
+    "D4"
+   ],
+   "derivs": [
+    8
+   ],
+   "coef": "1/1152"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "C"
+   ],
+   "derivs": [
+    1,
+    1
+   ],
+   "coef": "1/1"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "C",
+    "C"
+   ],
+   "derivs": [
+    2,
+    2
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "C",
+    "D12"
+   ],
+   "derivs": [
+    2,
+    3
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "C",
+    "D21"
+   ],
+   "derivs": [
+    3,
+    2
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "C",
+    "D22"
+   ],
+   "derivs": [
+    3,
+    3
+   ],
+   "coef": "1/4"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "C",
+    "D3i"
+   ],
+   "derivs": [
+    4,
+    1
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "C",
+    "D3j"
+   ],
+   "derivs": [
+    1,
+    4
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "C",
+    "D4i"
+   ],
+   "derivs": [
+    5,
+    1
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "C",
+    "D4j"
+   ],
+   "derivs": [
+    1,
+    5
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D12"
+   ],
+   "derivs": [
+    1,
+    2
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D12",
+    "D12"
+   ],
+   "derivs": [
+    2,
+    4
+   ],
+   "coef": "1/8"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D12",
+    "D21"
+   ],
+   "derivs": [
+    3,
+    3
+   ],
+   "coef": "1/4"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D12",
+    "D22"
+   ],
+   "derivs": [
+    3,
+    4
+   ],
+   "coef": "1/8"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D12",
+    "D3i"
+   ],
+   "derivs": [
+    4,
+    2
+   ],
+   "coef": "1/12"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D12",
+    "D3j"
+   ],
+   "derivs": [
+    1,
+    5
+   ],
+   "coef": "1/12"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D12",
+    "D4i"
+   ],
+   "derivs": [
+    5,
+    2
+   ],
+   "coef": "1/48"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D12",
+    "D4j"
+   ],
+   "derivs": [
+    1,
+    6
+   ],
+   "coef": "1/48"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D21"
+   ],
+   "derivs": [
+    2,
+    1
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D21",
+    "D21"
+   ],
+   "derivs": [
+    4,
+    2
+   ],
+   "coef": "1/8"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D21",
+    "D22"
+   ],
+   "derivs": [
+    4,
+    3
+   ],
+   "coef": "1/8"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D21",
+    "D3i"
+   ],
+   "derivs": [
+    5,
+    1
+   ],
+   "coef": "1/12"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D21",
+    "D3j"
+   ],
+   "derivs": [
+    2,
+    4
+   ],
+   "coef": "1/12"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D21",
+    "D4i"
+   ],
+   "derivs": [
+    6,
+    1
+   ],
+   "coef": "1/48"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D21",
+    "D4j"
+   ],
+   "derivs": [
+    2,
+    5
+   ],
+   "coef": "1/48"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D22"
+   ],
+   "derivs": [
+    2,
+    2
+   ],
+   "coef": "1/4"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D22",
+    "D22"
+   ],
+   "derivs": [
+    4,
+    4
+   ],
+   "coef": "1/32"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D22",
+    "D3i"
+   ],
+   "derivs": [
+    5,
+    2
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D22",
+    "D3j"
+   ],
+   "derivs": [
+    2,
+    5
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D22",
+    "D4i"
+   ],
+   "derivs": [
+    6,
+    2
+   ],
+   "coef": "1/96"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "D22",
+    "D4j"
+   ],
+   "derivs": [
+    2,
+    6
+   ],
+   "coef": "1/96"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "Q13"
+   ],
+   "derivs": [
+    1,
+    3
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    1,
+    1
+   ],
+   "factors": [
+    "Q31"
+   ],
+   "derivs": [
+    3,
+    1
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "C"
+   ],
+   "derivs": [
+    1,
+    1
+   ],
+   "coef": "1/1"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "C",
+    "C"
+   ],
+   "derivs": [
+    2,
+    2
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "C",
+    "D12"
+   ],
+   "derivs": [
+    2,
+    3
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "C",
+    "D21"
+   ],
+   "derivs": [
+    3,
+    2
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "C",
+    "D22"
+   ],
+   "derivs": [
+    3,
+    3
+   ],
+   "coef": "1/4"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "C",
+    "D3i"
+   ],
+   "derivs": [
+    4,
+    1
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "C",
+    "D3j"
+   ],
+   "derivs": [
+    1,
+    4
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "C",
+    "D4i"
+   ],
+   "derivs": [
+    5,
+    1
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "C",
+    "D4j"
+   ],
+   "derivs": [
+    1,
+    5
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "D12"
+   ],
+   "derivs": [
+    1,
+    2
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "D12",
+    "D12"
+   ],
+   "derivs": [
+    2,
+    4
+   ],
+   "coef": "1/8"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "D12",
+    "D21"
+   ],
+   "derivs": [
+    3,
+    3
+   ],
+   "coef": "1/4"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "D12",
+    "D22"
+   ],
+   "derivs": [
+    3,
+    4
+   ],
+   "coef": "1/8"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "D12",
+    "D3i"
+   ],
+   "derivs": [
+    4,
+    2
+   ],
+   "coef": "1/12"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "D12",
+    "D3j"
+   ],
+   "derivs": [
+    1,
+    5
+   ],
+   "coef": "1/12"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "D12",
+    "D4i"
+   ],
+   "derivs": [
+    5,
+    2
+   ],
+   "coef": "1/48"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "D12",
+    "D4j"
+   ],
+   "derivs": [
+    1,
+    6
+   ],
+   "coef": "1/48"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "D21"
+   ],
+   "derivs": [
+    2,
+    1
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "D21",
+    "D21"
+   ],
+   "derivs": [
+    4,
+    2
+   ],
+   "coef": "1/8"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "D21",
+    "D22"
+   ],
+   "derivs": [
+    4,
+    3
+   ],
+   "coef": "1/8"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "D21",
+    "D3i"
+   ],
+   "derivs": [
+    5,
+    1
+   ],
+   "coef": "1/12"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "D21",
+    "D3j"
+   ],
+   "derivs": [
+    2,
+    4
+   ],
+   "coef": "1/12"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "D21",
+    "D4i"
+   ],
+   "derivs": [
+    6,
+    1
+   ],
+   "coef": "1/48"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "D21",
+    "D4j"
+   ],
+   "derivs": [
+    2,
+    5
+   ],
+   "coef": "1/48"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "D22"
+   ],
+   "derivs": [
+    2,
+    2
+   ],
+   "coef": "1/4"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "D22",
+    "D22"
+   ],
+   "derivs": [
+    4,
+    4
+   ],
+   "coef": "1/32"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "D22",
+    "D3i"
+   ],
+   "derivs": [
+    5,
+    2
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "D22",
+    "D3j"
+   ],
+   "derivs": [
+    2,
+    5
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "D22",
+    "D4i"
+   ],
+   "derivs": [
+    6,
+    2
+   ],
+   "coef": "1/96"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "D22",
+    "D4j"
+   ],
+   "derivs": [
+    2,
+    6
+   ],
+   "coef": "1/96"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "Q13"
+   ],
+   "derivs": [
+    1,
+    3
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    1,
+    2
+   ],
+   "factors": [
+    "Q31"
+   ],
+   "derivs": [
+    3,
+    1
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    2
+   ],
+   "factors": [],
+   "derivs": [
+    0
+   ],
+   "coef": "1/1"
+  },
+  {
+   "output": [
+    2
+   ],
+   "factors": [
+    "D3"
+   ],
+   "derivs": [
+    3
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    2
+   ],
+   "factors": [
+    "D3",
+    "D3"
+   ],
+   "derivs": [
+    6
+   ],
+   "coef": "1/72"
+  },
+  {
+   "output": [
+    2
+   ],
+   "factors": [
+    "D3",
+    "D4"
+   ],
+   "derivs": [
+    7
+   ],
+   "coef": "1/144"
+  },
+  {
+   "output": [
+    2
+   ],
+   "factors": [
+    "D4"
+   ],
+   "derivs": [
+    4
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    2
+   ],
+   "factors": [
+    "D4",
+    "D4"
+   ],
+   "derivs": [
+    8
+   ],
+   "coef": "1/1152"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "C"
+   ],
+   "derivs": [
+    1,
+    1
+   ],
+   "coef": "1/1"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "C",
+    "C"
+   ],
+   "derivs": [
+    2,
+    2
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "C",
+    "D12"
+   ],
+   "derivs": [
+    2,
+    3
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "C",
+    "D21"
+   ],
+   "derivs": [
+    3,
+    2
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "C",
+    "D22"
+   ],
+   "derivs": [
+    3,
+    3
+   ],
+   "coef": "1/4"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "C",
+    "D3i"
+   ],
+   "derivs": [
+    4,
+    1
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "C",
+    "D3j"
+   ],
+   "derivs": [
+    1,
+    4
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "C",
+    "D4i"
+   ],
+   "derivs": [
+    5,
+    1
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "C",
+    "D4j"
+   ],
+   "derivs": [
+    1,
+    5
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D12"
+   ],
+   "derivs": [
+    1,
+    2
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D12",
+    "D12"
+   ],
+   "derivs": [
+    2,
+    4
+   ],
+   "coef": "1/8"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D12",
+    "D21"
+   ],
+   "derivs": [
+    3,
+    3
+   ],
+   "coef": "1/4"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D12",
+    "D22"
+   ],
+   "derivs": [
+    3,
+    4
+   ],
+   "coef": "1/8"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D12",
+    "D3i"
+   ],
+   "derivs": [
+    4,
+    2
+   ],
+   "coef": "1/12"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D12",
+    "D3j"
+   ],
+   "derivs": [
+    1,
+    5
+   ],
+   "coef": "1/12"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D12",
+    "D4i"
+   ],
+   "derivs": [
+    5,
+    2
+   ],
+   "coef": "1/48"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D12",
+    "D4j"
+   ],
+   "derivs": [
+    1,
+    6
+   ],
+   "coef": "1/48"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D21"
+   ],
+   "derivs": [
+    2,
+    1
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D21",
+    "D21"
+   ],
+   "derivs": [
+    4,
+    2
+   ],
+   "coef": "1/8"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D21",
+    "D22"
+   ],
+   "derivs": [
+    4,
+    3
+   ],
+   "coef": "1/8"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D21",
+    "D3i"
+   ],
+   "derivs": [
+    5,
+    1
+   ],
+   "coef": "1/12"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D21",
+    "D3j"
+   ],
+   "derivs": [
+    2,
+    4
+   ],
+   "coef": "1/12"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D21",
+    "D4i"
+   ],
+   "derivs": [
+    6,
+    1
+   ],
+   "coef": "1/48"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D21",
+    "D4j"
+   ],
+   "derivs": [
+    2,
+    5
+   ],
+   "coef": "1/48"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D22"
+   ],
+   "derivs": [
+    2,
+    2
+   ],
+   "coef": "1/4"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D22",
+    "D22"
+   ],
+   "derivs": [
+    4,
+    4
+   ],
+   "coef": "1/32"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D22",
+    "D3i"
+   ],
+   "derivs": [
+    5,
+    2
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D22",
+    "D3j"
+   ],
+   "derivs": [
+    2,
+    5
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D22",
+    "D4i"
+   ],
+   "derivs": [
+    6,
+    2
+   ],
+   "coef": "1/96"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "D22",
+    "D4j"
+   ],
+   "derivs": [
+    2,
+    6
+   ],
+   "coef": "1/96"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "Q13"
+   ],
+   "derivs": [
+    1,
+    3
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    2,
+    1
+   ],
+   "factors": [
+    "Q31"
+   ],
+   "derivs": [
+    3,
+    1
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "C"
+   ],
+   "derivs": [
+    1,
+    1
+   ],
+   "coef": "1/1"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "C",
+    "C"
+   ],
+   "derivs": [
+    2,
+    2
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "C",
+    "D12"
+   ],
+   "derivs": [
+    2,
+    3
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "C",
+    "D21"
+   ],
+   "derivs": [
+    3,
+    2
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "C",
+    "D22"
+   ],
+   "derivs": [
+    3,
+    3
+   ],
+   "coef": "1/4"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "C",
+    "D3i"
+   ],
+   "derivs": [
+    4,
+    1
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "C",
+    "D3j"
+   ],
+   "derivs": [
+    1,
+    4
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "C",
+    "D4i"
+   ],
+   "derivs": [
+    5,
+    1
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "C",
+    "D4j"
+   ],
+   "derivs": [
+    1,
+    5
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D12"
+   ],
+   "derivs": [
+    1,
+    2
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D12",
+    "D12"
+   ],
+   "derivs": [
+    2,
+    4
+   ],
+   "coef": "1/8"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D12",
+    "D21"
+   ],
+   "derivs": [
+    3,
+    3
+   ],
+   "coef": "1/4"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D12",
+    "D22"
+   ],
+   "derivs": [
+    3,
+    4
+   ],
+   "coef": "1/8"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D12",
+    "D3i"
+   ],
+   "derivs": [
+    4,
+    2
+   ],
+   "coef": "1/12"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D12",
+    "D3j"
+   ],
+   "derivs": [
+    1,
+    5
+   ],
+   "coef": "1/12"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D12",
+    "D4i"
+   ],
+   "derivs": [
+    5,
+    2
+   ],
+   "coef": "1/48"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D12",
+    "D4j"
+   ],
+   "derivs": [
+    1,
+    6
+   ],
+   "coef": "1/48"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D21"
+   ],
+   "derivs": [
+    2,
+    1
+   ],
+   "coef": "1/2"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D21",
+    "D21"
+   ],
+   "derivs": [
+    4,
+    2
+   ],
+   "coef": "1/8"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D21",
+    "D22"
+   ],
+   "derivs": [
+    4,
+    3
+   ],
+   "coef": "1/8"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D21",
+    "D3i"
+   ],
+   "derivs": [
+    5,
+    1
+   ],
+   "coef": "1/12"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D21",
+    "D3j"
+   ],
+   "derivs": [
+    2,
+    4
+   ],
+   "coef": "1/12"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D21",
+    "D4i"
+   ],
+   "derivs": [
+    6,
+    1
+   ],
+   "coef": "1/48"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D21",
+    "D4j"
+   ],
+   "derivs": [
+    2,
+    5
+   ],
+   "coef": "1/48"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D22"
+   ],
+   "derivs": [
+    2,
+    2
+   ],
+   "coef": "1/4"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D22",
+    "D22"
+   ],
+   "derivs": [
+    4,
+    4
+   ],
+   "coef": "1/32"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D22",
+    "D3i"
+   ],
+   "derivs": [
+    5,
+    2
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D22",
+    "D3j"
+   ],
+   "derivs": [
+    2,
+    5
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D22",
+    "D4i"
+   ],
+   "derivs": [
+    6,
+    2
+   ],
+   "coef": "1/96"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "D22",
+    "D4j"
+   ],
+   "derivs": [
+    2,
+    6
+   ],
+   "coef": "1/96"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "Q13"
+   ],
+   "derivs": [
+    1,
+    3
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    2,
+    2
+   ],
+   "factors": [
+    "Q31"
+   ],
+   "derivs": [
+    3,
+    1
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    3
+   ],
+   "factors": [],
+   "derivs": [
+    0
+   ],
+   "coef": "1/1"
+  },
+  {
+   "output": [
+    3
+   ],
+   "factors": [
+    "D3"
+   ],
+   "derivs": [
+    3
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    3
+   ],
+   "factors": [
+    "D3",
+    "D3"
+   ],
+   "derivs": [
+    6
+   ],
+   "coef": "1/72"
+  },
+  {
+   "output": [
+    3
+   ],
+   "factors": [
+    "D3",
+    "D4"
+   ],
+   "derivs": [
+    7
+   ],
+   "coef": "1/144"
+  },
+  {
+   "output": [
+    3
+   ],
+   "factors": [
+    "D4"
+   ],
+   "derivs": [
+    4
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    3
+   ],
+   "factors": [
+    "D4",
+    "D4"
+   ],
+   "derivs": [
+    8
+   ],
+   "coef": "1/1152"
+  },
+  {
+   "output": [
+    4
+   ],
+   "factors": [],
+   "derivs": [
+    0
+   ],
+   "coef": "1/1"
+  },
+  {
+   "output": [
+    4
+   ],
+   "factors": [
+    "D3"
+   ],
+   "derivs": [
+    3
+   ],
+   "coef": "1/6"
+  },
+  {
+   "output": [
+    4
+   ],
+   "factors": [
+    "D3",
+    "D3"
+   ],
+   "derivs": [
+    6
+   ],
+   "coef": "1/72"
+  },
+  {
+   "output": [
+    4
+   ],
+   "factors": [
+    "D3",
+    "D4"
+   ],
+   "derivs": [
+    7
+   ],
+   "coef": "1/144"
+  },
+  {
+   "output": [
+    4
+   ],
+   "factors": [
+    "D4"
+   ],
+   "derivs": [
+    4
+   ],
+   "coef": "1/24"
+  },
+  {
+   "output": [
+    4
+   ],
+   "factors": [
+    "D4",
+    "D4"
+   ],
+   "derivs": [
+    8
+   ],
+   "coef": "1/1152"
+  }
+ ]
+}

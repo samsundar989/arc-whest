@@ -231,6 +231,51 @@ def tiny():
               got <= 2 * base + 1e-5, "%.2e vs %.2e" % (got, base))
 
 
+def declared(pairs):
+    """Three-mode f64 reference parity for ANY (arm file, declared table) pair.
+
+    Used for our OWN derived closures as well as the transplanted one: the gate
+    is identical, so an arm we derived and an arm we transplanted are held to
+    the same standard.
+    """
+    import flopscope as flops
+    import k4feed_oracle as K
+    import s6_build_closure as SB
+    import test_ref_step as T
+    from mint_provenance import canonical_mint
+    import s1_parity_v32 as P1
+
+    flops.configure(symmetry_warnings=False)
+    L = lambda name: K._load(os.path.join(_ROOT, name))
+    m32 = L(V32)
+    lam5 = float(L(V32)._K4_LAM[4])
+    for arm, table in pairs:
+        tb = [dict(output=list(k[0]), factors=list(k[1]), derivs=list(k[2]), coef=str(c))
+              for k, c in SB.load_table(os.path.join(_ROOT, table)).items()
+              if k[0] != (1, 2)]
+        print("  %s  <-  %s  (%d oriented terms)" % (arm, table, len(tb)))
+        for n, seed, vs in ((7, 1, 1.0), (8, 3, 3.0)):
+            bd = T.fixture(n, 20260917_30 + seed, vs)
+            bd["lam"] = lam5
+            _ref_parity(L(arm), bd, tb, f"{os.path.basename(arm)[:-3]} n={n} ORDINARY",
+                        layer_index=5)
+            _ref_parity(L(arm), bd, tb, f"{os.path.basename(arm)[:-3]} n={n} FINAL",
+                        last_layer=True, layer_index=5)
+            b0 = _initial_boundary(n, 20260917_40 + seed)
+            _ref_parity(L(arm), b0, tb, f"{os.path.basename(arm)[:-3]} n={n} INITIAL",
+                        layer_index=0)
+        for wd, dp, sd in ((64, 5, 90000000811),):
+            w, es, _ = canonical_mint(wd, dp, sd)
+            pb, _fb = P1._predict(m32, w, wd, dp, es)
+            pa, _fa = P1._predict(L(arm), w, wd, dp, es)
+            claim(f"{os.path.basename(arm)[:-3]} {wd}x{dp} row 0 == v32 row 0 (initial mode)",
+                  np.array_equal(pa[0], pb[0]))
+            claim(f"{os.path.basename(arm)[:-3]} {wd}x{dp} finite, non-negative, moves",
+                  bool(np.isfinite(pa).all() and (pa >= 0).all()
+                       and not np.array_equal(pa, pb)),
+                  "rel vs v32 %.2e" % rel(pa, pb))
+
+
 def canon_mode0_drop():
     """The blocks v17's mode 0 does not have. v32's layer 0 has them all zero."""
     return {"D21", "D12", "D22", "D3", "D3i", "D3j", "D4", "D4i", "D4j",
@@ -388,12 +433,17 @@ def _sha(path):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--live", action="store_true")
+    ap.add_argument("--declared", action="append", default=[],
+                    help="ARM=TABLE, repeatable: three-mode reference parity for "
+                         "an arm against its own declared closure table")
     ap.add_argument("--out", default="")
     a = ap.parse_args()
     print("=" * 96)
     print("RECIPROCAL PROGRAM-SWAP PARITY -- label-free, decides nothing, gates the truth read")
     print("=" * 96)
-    if a.live:
+    if a.declared:
+        declared([tuple(x.split("=", 1)) for x in a.declared])
+    elif a.live:
         live(a.out)
     else:
         tiny()
