@@ -52050,3 +52050,18 @@ benefit is a joint-package effect; I predict it does NOT (≤ +2%), given (3,1)
 hurt 8–22% with route (i)+(ii). Samuel: "I don't know" (gap-location
 diagnostics). Promotes nothing; a positive result opens our own joint λ fit plus
 a fresh SINGLE_USE block.
+
+### Follow-up (2) REGISTERED (before truth exists): continuous N1 merged-tier accuracy at tiny width
+
+`local_sim/n1_tiny_truth.py` (job 1526, GPU MC: n ∈ {64, 96}, depth 12, 4
+self-minted nets each, seeds 90_000_019_000+97n+net outside every block, 2 × 2^27)
+and `local_sim/n1_cycle_accuracy.py` (dense v32_dense lineage harness).
+Variants: exact; delete tier; join_b (energy HOSVD re-projection at every join);
+join_a (fixed basis transported with the lineages); a ∈ {2, 3}; r ∈ {n/8, n/4}.
+Statistic: pooled final-layer cross-replica MSE ratio vs exact.
+**Pre-registered reading:** N1 proceeds to a registered 1024 accuracy design only
+if join_b or join_a at **r = n/8** shows **≤ 5% raw loss at both widths** for an
+age gate the metered cycle prices ≤ 0.20 B (join_b a=2; join_a a ≤ 3).
+Otherwise N1 stays parked on accuracy (not on the retracted 0.17 gate).
+**Builder prediction:** join_b a=2 r=n/8 loses 5–15%; join_a worse; r=n/4 < 3%.
+Limit: tiny widths do not certify 1024.
