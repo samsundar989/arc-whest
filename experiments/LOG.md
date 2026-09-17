@@ -52646,3 +52646,31 @@ executed-program audit, independent closure generator/oracles, float64 reference
 parity, reciprocal same-state report, calibrated label-free compression proxy, step-0 receipt/shell
 fixes (preflight GREEN job 1611). Per the handoff: independent Skeptic on these claims, then a
 current Strategist Packet; no submission request.
+
+## 2026-09-17 — **Rule 2 Skeptic on the slice: PROVISIONAL** (C1 PROVISIONAL · C2 ACCEPT · C3 PROVISIONAL · C4 ACCEPT · C5 ACCEPT)
+
+Verdict saved verbatim: `experiments/2026-09-17_skeptic/verdict.md`. Every quoted number reproduced from
+rows; SHAs, commit order before each job, registered reads and unchanged gates confirmed.
+
+**RETRACTIONS / CORRECTIONS (recorded, historical lines not rewritten):**
+1. "Closure enrichment by power-counting families is **closed** on this base" → **withdrawn as
+   worded.** Measured scope only: with κ_iiij = 0, an unenriched (1,1,1) birth and v32's λ. κ_iiij
+   (Q31 = (m/2)λC in our own κ4 model) has cost 3 — the same order the arms added — so the tested
+   tables were mixed-order; the joint arm was never run. "The public chain's better accuracy does not
+   come from its closure on our state" → **withdrawn** (v17's program itself was never run on our base).
+2. "v32's program equals BUDGET 2 exactly" → *equals BUDGET 2 minus its five (1,2)-orientation rows,
+   which v32 derives by transposition*. v17 has **six** oriented Q31/Q13 rows, not four.
+3. "Shared-coordinate route closed at affordable cost" → **withdrawn as worded.** True only against the
+   ≤5%-raw intermediate target. On adjusted score the calibrated proxy forecasts **a4r256 lean + P4 d5
+   ≈ 0.216 B, ≈1.17× over v32 / ≈1.08× over v32+P4 d5 (unverified)**; ages 3–4 × ranks 256/384/512
+   only were priced.
+4. **Provenance:** jobs 1609, 1635, 1637 (and meters) `cd` into the live repository, so they executed
+   on the **live worktree**, not the git snapshot the LOG described. Harmless here (scored arm files
+   committed once, never modified; row SHAs match) but the statement was wrong. Future truth-bearing
+   submits run relative to the snapshot working directory (no `cd` to the live path).
+
+**Follow-ups taken (cheapest discriminators, in order):** (a) label-free live float32 v35_Q `_layer`
+vs f64 BUDGET-4 reference on a captured 1024×16 boundary; (b) generate and meter a4r256/a4r384 lean +
+P4 d5 bundles; (c) ONE combined P11 design read: v32 control; v35_Q3q (BUDGET 3 + Q31/Q13 rows with
+κ_iiij = (m/2)λC) and v35_Q3 (re-run as its own same-run comparator) for C1; v32_p4d5,
+v37_a4r256_p4d5, v37_a4r384_p4d5 for C3 — under its own contract registered before submission.
