@@ -53229,3 +53229,125 @@ networks, rows and predictions streamed. History: 6 arms in 72 min at <= 6.5 GB
 (job 1637); v17 runs at C/B 0.49 and v29 at 0.25, so the two reference arms are
 the slow ones. Estimate ~150 min. **Declared 12 GiB, 4 CPUs**, pinned local, git
 snapshot, no `cd` into the live path. One control execution, not two.
+
+## 2026-09-17 (evening) — **LABEL-FREE RESULTS, before any of this slice's truth was scored**: the cost ladder, the query-error instrument, and two of my own checks corrected
+
+All of this is `--query-error` / meter / parity work: **no truth, no score, no
+promotion.** It is recorded here because it decides which preregistered branch is
+taken, and because two of the checks I wrote were wrong in a way worth keeping.
+
+### The cost ladder at 1024x16 (job 1661, `experiments/2026-09-17b_query/cost_ladder.json`)
+
+The shared-coordinate chain, same everything, only the age gate and the shared
+rank moving:
+
+| age / rank | C/B | operations | peak commit | max-norm displacement vs a4r256 |
+|---|---:|---:|---:|---:|
+| 4 / 256 (the cost base) | **0.21631** | 19,914 | 4.16 GB | — |
+| 3 / 192 | 0.18326 | 18,961 | 3.47 GB | 2.269e-4 |
+| 2 / 192 | 0.16484 | 19,227 | 2.79 GB | 4.197e-4 |
+| 2 / 128 | 0.13858 | 19,227 | 2.78 GB | 7.422e-4 |
+| 1 / 128 | 0.11453 | 17,883 | 2.28 GB | 1.034e-3 |
+| 1 / 96 | **0.10362** | 16,319 | 2.17 GB | 1.064e-3 |
+
+**The multiplier floor is reachable on cost alone.** `max(0.1, C/B)` stops paying
+below 0.1, and age 1 / rank 96 prices at 0.10362 with 16,319 operations and
+2.17 GB — comfortably inside every deployment constraint. That settles a question
+the strategist left open: no universal cost floor forbids it.
+
+What forbids it is accuracy, and the displacement column says so quantitatively.
+Anchoring on the one point where both the displacement and the scored raw error
+are known — a4r256 + P4 d5 on P11, final-row displacement (2-norm) 8.142e-5
+against the uncompressed chain, measured raw penalty +7.18e-9 — the quadratic
+part `mean(delta^2)` accounts for about 2.0e-9 of that and the cross term
+`2 mean((old - truth) delta)` for the other ~5.2e-9. The displacement is
+**aligned with the error it is adding to**, which is what makes the penalty grow
+faster than the norm suggests. At age3/rank192 the displacement is 2.799e-4 —
+3.4x larger, so roughly an order of magnitude more added error — against a cost
+saving of only 15%. That is the shape of the wall, and it is why ages 2 and 3
+"destroyed accuracy" in the completed slice.
+
+### The consumed-query basis, measured at 1024x16 (jobs 1658, 1659, 1660)
+
+`local_sim/s10_parity.py --query-error` runs each arm against the SAME chain with
+sharing off and reports the real post-projection error of every consumer:
+
+| setting | arm | C/B | final-row | all-rows | D3 | D21 |
+|---|---|---:|---:|---:|---:|---:|
+| a4/r256 | surrogate | 0.21623 | 8.142e-5 | 5.139e-5 | 2.254e-2 | 3.069e-2 |
+| a4/r256 | **query basis** | 0.22123 | **7.340e-5** | **4.576e-5** | **1.847e-2** | **2.785e-2** |
+| a4/r256 | query + D3 protection | 0.22157 | 8.251e-5 | 5.089e-5 | 2.116e-2 | 3.137e-2 |
+| a3/r192 | surrogate | 0.18318 | 2.799e-4 | 1.678e-4 | 7.471e-2 | 9.587e-2 |
+| a3/r192 | **query basis** | 0.18869 | **2.203e-4** | **1.449e-4** | **6.211e-2** | **8.591e-2** |
+| a3/r192 | query + D3 protection | 0.18907 | 2.444e-4 | 1.594e-4 | 6.928e-2 | 9.454e-2 |
+| a2/r192 | surrogate | 0.16475 | 4.332e-4 | 3.195e-4 | 1.458e-1 | 1.777e-1 |
+| a2/r192 | **query basis** | 0.17072 | **3.735e-4** | **2.728e-4** | **1.199e-1** | **1.567e-1** |
+| a2/r192 | query + D3 protection | 0.17113 | 4.193e-4 | 2.921e-4 | 1.297e-1 | 1.680e-1 |
+
+Three statements, all label-free:
+
+1. **The query basis retains more of every consumer at every setting**, by 10–21%
+   on the final-row displacement, for +2.3% to +3.6% of `C`. Whether that is a
+   net gain on the ADJUSTED score is the preregistered screen's question, not
+   this instrument's.
+2. **The preregistered D3-protection arm `qEd` LOSES to the plain query basis at
+   all three settings.** It was declared before the measurement precisely so it
+   could lose cleanly; reserving 16 of 256 columns for the elementwise consumer
+   costs more query retention than it buys D3 retention.
+3. **The cheaper-setting criterion, evaluated as registered:** retained query
+   energy at age3/rank192 (1 − 1.449e-4) **exceeds** age2/rank192
+   (1 − 2.728e-4). The criterion therefore does **not** select age2, and the
+   registered default **age3/rank192** stands — *if* the fixed-rank screen passes
+   at all. Decided by `local_sim/s12_decide.py`, before the screen's data existed.
+
+An earlier reading of this instrument at **n = 512, rank 256** had the query
+basis WORSE on every consumer. That is `r = n/2`, where the compression is mild
+and the surrogate is adequate; the effect appears only where the projection is
+actually aggressive. Recorded because it is the honest shape of the finding and
+because a single non-live-shape measurement would have closed the lane wrongly.
+
+### Live-shape endpoint parity (job 1664, after two of my checks were corrected)
+
+Job 1662 reported two failures at 1024x16. **Neither was a chain defect. Both
+were checks of mine asserting something the CONTROL does not satisfy.**
+
+1. *"all five chains share row 0"* — wrong. Measured:
+   `|v32 - chain3|` row 0 = **0.0e+00**, `|v17 - chain4|` row 0 = **0.0e+00**,
+   and `|v32 - v17|` row 0 = **1.742e-7** on a scale of 0.610. The gap is between
+   the two NATIVE chains: two different implementations of the same layer-0
+   content whose linear steps accumulate in different orders. The meaningful
+   claim — each transplant against ITS OWN PARENT, bitwise — holds exactly, at
+   tiny shapes and at 1024x16. Corrected to that; the native gap is reported.
+2. *"finite, non-negative"* — non-negativity is not a property of this method.
+   **Unmodified public v17 emits 79 negative entries at 1024x16, worst
+   −8.608e-9**, before any transplant touches it; chain 4 emits 457, worst
+   −1.736e-5 (4.5e-6 of its own maximum); v32 and chain 3 emit none. A gate the
+   control fails is not a gate. Finiteness stays a gate; negativity is now
+   reported per arm, and chain 4's larger excursion is an accuracy signal to read
+   beside its score, not a validity problem — the grader scores the MSE either way.
+
+No numerical tolerance was raised. The f64 reference tolerance stayed 1e-10 and
+was met at 1e-13 to 1e-15 in all three availability modes at the live shape.
+
+### Counted FLOPs at 1024x16, and a prediction of mine that is now dead
+
+| chain | counted FLOPs | C/B |
+|---|---:|---:|
+| frozen v32 | 6.6466e11 | 0.30229 |
+| chain 3 (v32 + the COMPLETE v17 program) | 6.6917e11 | 0.30434 |
+| chain 4 (v17 + only v32's program) | 1.0770e12 | 0.48978 |
+| native v17 | 1.0822e12 | 0.49216 |
+
+**The complete program costs +0.68% of `C`.** My prediction 1 said C/B would rise
+to 0.33–0.38; it rose to 0.3043. Recorded as a miss (the pre-data amendment
+already called it, from the v35 meter). The consequence is the one that matters:
+if the program carries accuracy, it carries it essentially free, so chain 3's
+adjusted gain will track its raw gain almost exactly.
+
+### The composer
+
+`local_sim/s11_build_candidate.py` runs the four generators in the forced order
+(closure -> shared coordinates -> join basis -> P4) with asserted anchors, so the
+file that gets screened is the file that gets certified. Verified: the NULL
+composition reproduces frozen `estimator_k3_v37_a4r256_p4d5.py` **bitwise and in
+counted FLOPs** at 64x5 and 96x6.
