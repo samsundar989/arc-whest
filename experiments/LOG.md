@@ -53469,3 +53469,90 @@ contention against the 30 s/network this host managed uncontended on job 1637, s
 batch B is submitted **after** batch A finishes rather than beside it — the queue
 wait is spent on label-free work, which is what it is for. **Declared 12 GiB,
 4 CPUs**, pinned local, git snapshot, no `cd` into the live path.
+
+## 2026-09-17 (evening) — **CONTRACT AMENDMENT 3 (pre-data): one more batch-B arm, and the P3 integration that is refused rather than forced**
+
+*Committed before batch B is submitted and before any arm of it is scored. It adds
+one arm and records one refusal; no gate, branch rule or verdict changes.*
+
+### The added arm: `estimator_k3_v42_b4q_p3_uncompressed.py`
+
+Our own consistent BUDGET4+Q closure **and** the kappa3 x C distinct-index birth
+feed, on the uncompressed chain with P4 depth 5 — the two accuracy mechanisms
+this slice holds, together, with the cost half deliberately left off so the
+measurement is of ACCURACY and nothing else.
+
+It exists because the two mechanisms act in different places — the closure enriches
+the nonlinear moment program that forms `pK`, P3 enriches the SOURCE BORN at each
+layer — so whether they add, overlap or interfere is a real question that neither
+arm alone answers, and it costs one arm to ask.
+
+Verified before this was written: `progswap_parity --declared` **20/20**, with
+four explicitly-scoped skips (below).
+
+**Prediction 13 (Builder, before data).** The combined arm's raw gain over v32 is
+within 15% of the PRODUCT of the two separate raw gains (55%) — i.e. they mostly
+add rather than overlap, because they enrich different objects. If the combined
+gain is materially BELOW the product, the two are correcting the same error and
+the release candidate should carry whichever is cheaper, not both.
+
+### The refusal, recorded because refusals are results too
+
+`s11_build_candidate.py` now **refuses** to compose P3 together with the
+shared-coordinate tower. Both generators extend `_Tower.__slots__` and
+`__init__`, and P3's patches anchor on exactly the consumers — `_dslice3`,
+`_dslice21`, `_append` — that `s7_build_shared` rewrites. Both orders were tried
+and both stopped at a count-asserted anchor, which is what those assertions are
+for. The integration is mechanical but has three collision points, each a place
+to get it wrong silently, so it is **deferred until P3 is shown to pay on its
+own** — which is what `estimator_k3_v33.py` is in batch B to establish. A file
+whose patches half-landed would be worse than not having one.
+
+The consequence for the release path is explicit: **if P3 pays, the release
+candidate cannot carry both P3 and the compressed storage without that
+integration being done and gated first.** That is a known, stated limitation of
+tonight's candidate set, not something discovered later.
+
+### Two scope corrections to the parity harness, stated not relaxed
+
+1. `run_live`'s injected tower now presents `F = None` and `_p3 = None`. The
+   harness supplies the O(n^2) boundary directly and builds no carried history,
+   so a chain carrying the birth feed must read "no history yet" off the sentinel
+   rather than raise on a missing attribute.
+2. `K21_birth` is **skipped** for a P3-carrying arm, with its measured value
+   printed rather than dropped. `ref_step` evaluates a closure table; P3 is not a
+   closure term — it adds beta1 + beta2 to the NEWBORN source — so `K21` differs
+   by design, and its exact gate is `s2_parity_p3.py`'s newborn-delta check
+   (== beta1+beta2 on distinct entries, exactly 0 on repeated, 2.3e-16).
+
+   **The skip is self-checking.** At the INITIAL boundary, where the carried
+   tower is empty and P3 can contribute nothing, the same comparison reads
+   **1.1e-16 and 1.2e-16**; in ORDINARY mode it reads 5.1e-3 and 1.2e-2. The
+   difference is P3's contribution and nothing else, which is exactly what a skip
+   has to demonstrate before it is allowed to be a skip.
+
+### Batch B, as submitted
+
+Control `estimator_k3_v32_p4d5.py` (`506a0c85d60a63b6`). Candidates, all
+label-free-verified before submission:
+
+| arm | sha256 (16) | what it answers |
+|---|---|---|
+| `estimator_k3_v39_v37_a4r256_p4d5_qoff.py` | `446de4a975219a9a` | the cost base, and the stage-3 screen's control |
+| `estimator_k3_v39_v37_a4r256_p4d5_qE.py` | `fb94cddf914cd7d8` | stage 3: the consumed-query basis |
+| `estimator_k3_v39_v37_a4r256_p4d5_qEd.py` | `74cb93cf7672974f` | stage 3: the preregistered D3-protected secondary |
+| `estimator_k3_v33.py` | `6cf50de8e1401ad3` | P3 alone (amendment 2) |
+| `estimator_k3_v42_b4q_p3_uncompressed.py` | `49c1f420bee40398` | closure + P3, uncompressed (this amendment) |
+| composed, gram basis | *(closure chosen by amendment 2's rule)* | the release candidate, old objective |
+| composed, qE basis | *(same closure)* | the release candidate, new objective |
+
+The stage-3 comparison is formed OFFLINE from these rows by `s12_decide.py`,
+paired on the same networks under common random numbers.
+
+### Unchanged
+
+Every gate, falsifier, branch rule, statistic, seed block, cost model, fit policy
+and scope line stands. Stage 2's screen is still `decide(gate=1.10)` adjusted vs
+`v32_p4d5`; stage 3's is still its three registered conditions; the release gate
+is still 2.0x on untouched P13. F5 stays failed, P11 stays retired, no
+designation is authorised.
