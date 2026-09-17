@@ -1,0 +1,105 @@
+{
+ "artifact": "s10_parity.tiny",
+ "checks": [
+  {
+   "check": "64x5 qoff == base bitwise + FLOPs",
+   "passed": true,
+   "detail": "flops 36354510 vs 36354510"
+  },
+  {
+   "check": "96x6 qoff == base bitwise + FLOPs",
+   "passed": true,
+   "detail": "flops 146527404 vs 146527404"
+  },
+  {
+   "check": "64x6 qE full-rank == uncompressed (all rows)",
+   "passed": true,
+   "detail": "rel 1.9e-16, 3 joins, max ko 3"
+  },
+  {
+   "check": "64x6 qEd full-rank == uncompressed (all rows)",
+   "passed": true,
+   "detail": "rel 1.9e-16, 3 joins, max ko 3"
+  },
+  {
+   "check": "64x7 rank16 qoff finite, non-negative, joins",
+   "passed": true,
+   "detail": "3 joins, rel vs qoff 0.00e+00"
+  },
+  {
+   "check": "64x7 rank16 qE finite, non-negative, joins",
+   "passed": true,
+   "detail": "3 joins, rel vs qoff 6.24e-04"
+  },
+  {
+   "check": "64x7 rank16 qEd finite, non-negative, joins",
+   "passed": true,
+   "detail": "3 joins, rel vs qoff 8.23e-04"
+  },
+  {
+   "check": "qE equivariance <= 100x the base's own floor",
+   "passed": true,
+   "detail": "3.23e-02 vs floor 3.23e-02"
+  },
+  {
+   "check": "qEd equivariance <= 100x the base's own floor",
+   "passed": true,
+   "detail": "3.23e-02 vs floor 3.23e-02"
+  },
+  {
+   "check": "(b) qE rank-1 basis captures the cancelling query direction",
+   "passed": true,
+   "detail": "|<q, (e1+e2)/sqrt2>| = 1.000000"
+  },
+  {
+   "check": "(b) qEd rank-1 basis captures the cancelling query direction",
+   "passed": true,
+   "detail": "|<q, (e1+e2)/sqrt2>| = 1.000000"
+  },
+  {
+   "check": "(b) the OLD diagonal surrogate does NOT capture it",
+   "passed": true,
+   "detail": "|<q, (e1+e2)/sqrt2>| = 0.707107  (the defect, reproduced)"
+  },
+  {
+   "check": "(a) qoff full-rank projector is the identity on the legs",
+   "passed": true,
+   "detail": "0.0e+00"
+  },
+  {
+   "check": "(a) qE full-rank projector is the identity on the legs",
+   "passed": true,
+   "detail": "2.2e-16"
+  },
+  {
+   "check": "(a) qEd full-rank projector is the identity on the legs",
+   "passed": true,
+   "detail": "2.2e-16"
+  },
+  {
+   "check": "(c) qoff rank-2 relative query error",
+   "passed": true,
+   "detail": "0.0622 (optimal 0.0302)"
+  },
+  {
+   "check": "(c) qE rank-2 relative query error",
+   "passed": true,
+   "detail": "0.0302 (optimal 0.0302)"
+  },
+  {
+   "check": "(c) qE beats the diagonal surrogate under heterogeneous scaling",
+   "passed": true,
+   "detail": "0.0302"
+  },
+  {
+   "check": "(c) qEd rank-2 relative query error",
+   "passed": true,
+   "detail": "0.0302 (optimal 0.0302)"
+  },
+  {
+   "check": "(c) qEd beats the diagonal surrogate under heterogeneous scaling",
+   "passed": true,
+   "detail": "0.0302"
+  }
+ ]
+}
