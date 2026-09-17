@@ -41,6 +41,14 @@ passthrough = [
   # Ignored by `*.npz` / `*.f32`, but resolved from _ROOT = the snapshot root,
   # so they are invisible to a job unless linked here.
   "local_sim/sobol_dirnum.npz",                       # Sobol direction numbers
+
+  # --- the pinned public reference tree, gitignored (`.gitignore:57 external/`)
+  # The 2026-09-17b reciprocal program-swap experiment runs public v17 and v29
+  # unmodified as DIAGNOSTIC arms and parses their term tables, so a job that
+  # cannot see this path dies at import (job 1657). It is read-only reference
+  # material: nothing writes through it, and none of its bytes reach a
+  # candidate or a submission.
+  "external/504aldo",                                 # 2.8 MB, read-only
   "experiments/2026-08-21_p2_cp1/truth_P01.npz",      # P01 labels, 1024x16
   "experiments/2026-09-16_p11/truth_P11.npz",         # P11 labels, 1024x16 -- Slice 7 accuracy corpus
   "experiments/2026-09-17b_p12/truth_P12.npz",        # P12 labels, 1024x16 -- slice 2026-09-17b DESIGN panel
