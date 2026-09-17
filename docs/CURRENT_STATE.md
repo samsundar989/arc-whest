@@ -1,5 +1,28 @@
 # CURRENT_STATE.md — read this first
 
+## September 17: audit refinements executed through the discriminators — no major release found; strategist packet ready
+
+**Active plan pointer:** `docs/CLAUDE_CODE_HANDOFF_NEXT_SUBMISSION_2026-09-16.md` (executed
+through stage 3) → **decision now with Samuel/strategist:** `docs/STRATEGIST_PACKET_2026-09-17.md`.
+No submission, designation, vault touch or public fitting occurred. v31 `#331317` remains the
+latest graded file; F21 `#330950` the designated fallback.
+
+| stage | result (P11 DESIGN, 24 nets, paired arithmetic) |
+|---|---|
+| 0 instrument repairs | DONE: cap-off accuracy routing, streamed crash evidence + run receipts, content-hash identity, projection provenance refusals, runner-specific FLOPs, labelled timing forecasts |
+| 1 distinct-index κ4 feed (v32) | real but small: **1.032×** score, t95 > 0, +0.43% cost — slice gate 1.5× FAILS; supported improvement |
+| 1b exact (3,1)+link bivariate κ4 (v34) | **worse: 0.924×** — falsified (also with 504aldo λ: 0.836×) |
+| diagnostics | λ profile swap +2.4%; public v17 raw 1.22× better, **public v29 1.545× better** than v32; v17's (3,1) rows (term-identical to ours) +15.9% in theirs, −8% in ours; gap grows at layers 4–10 |
+| 2 P3 κ3×C feed | derived exactly and built (13/13 parity); not screened — rank 32 costs ×1.069 |
+| 2 P4 exact cost | Strassen depth 5 −6.6%, trims −0.7% → C/B 0.2802; ≤0.27 not reachable within 8 GiB |
+| 3 N1 compression | parked: JᵀJ proxy rejected; best exact merged core 0.2035 B at r=128 vs 0.17 gate |
+
+Best supported bundle ≈7.9e-9 (planning arithmetic; needs depth-5 raw parity, mini,
+Linux 8-GiB, Skeptic before any approval request). Target was 4.0–4.4e-9.
+
+---
+
+
 **September 16 independent strategy review:**
 [`research/2026-09-16_strategy_and_implementation_plan.md`](research/2026-09-16_strategy_and_implementation_plan.md)
 contains the live Chrome competition audit, architecture/validation/literature reviews,
