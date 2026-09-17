@@ -52217,3 +52217,45 @@ Mutation check: the previous wrapper fails the poisoned-success and clean cross-
 
 **Prediction (before the run):** affected default preflight GREEN 12/16, four `-Full` skips,
 same as job 1524. The four Full steps stay owed on the actual release candidate.
+
+## 2026-09-17 — Step 1 build checkpoint (commit 0ca79e9) and the live-shape meter's workload review
+
+**Built, label-free, no truth, no seed block.**
+- `local_sim/closure_audit/canon.py` → `experiments/2026-09-17_closure/canon_programs.json`:
+  the executed nonlinear programs in one oriented canonical form. v32 = 27 oriented
+  terms (25 table rows, (1,1)/(2,2) symmetrised). Public v17 live mode-1 program =
+  v32's terms + 60 more (mean `D3²/72·w(6,1)`, `D3·D4/144·w(7,1)`; 26/17/15 mixed terms
+  in (1,1)/(2,1)/(2,2); four `Q31/Q13` rows). **Every shared coefficient agrees.**
+  v29's table is term-identical to v17's.
+- `local_sim/closure/` (independent derivation agent, told not to read 504aldo or our
+  tables): exp-cumulant-operator generator with upstream power counting
+  `cost(v)=sum(v)-1-[all even]`, rules BUDGET 2/3/4 and PAIR, connected pK convention.
+  **Cross-checks:** BUDGET 2 == v32's executed program exactly (27/27 terms and
+  coefficients); v17's non-Q program ⊂ BUDGET 4 and ⊂ PAIR with identical coefficients —
+  v17 is a pruned PAIR closure. Term sets match upstream `get_all_terms(k_max=B+1)`.
+  Oracles: w(k,p) closed forms vs quadrature < 1e-15; pK→K conversion exact on 25 random
+  discrete laws; polynomial exactness of the full operator; realizable-law asymptotic
+  slopes (mean error order 2.00 → 3.03 from BUDGET 2 → 4 in family A); **strongly
+  non-Gaussian family C: BUDGET 4's mean is WORSE (260% vs 35% relative error)**.
+  Provenance caveat from the agent itself: some oracle pass criteria (b-plateau, d-bound)
+  were written after a first run; treat those as diagnostics, not pre-set gates.
+- `local_sim/closure_audit/ref_step.py` float64 reference step; `test_ref_step.py` 18/18:
+  reproduces LIVE v32 `_layer` (injected boundary, f64) mu/cov/g/S3/K21 ≤ 4e-14; fast
+  univariate path == generic loop bitwise.
+- `local_sim/s6_build_closure.py` → `estimator_k3_v35_{off,R,Q,P,QP}` (+ dense parity
+  arms) from frozen v32 by asserted patches. `local_sim/s6_parity.py` **55/55**: off == v32
+  bitwise incl. FLOPs; R rows 0..d-2 == v32 bitwise; Q live == BUDGET-4 reference ≤ 5e-14;
+  protected content == reference D22-driven K21 ≤ 8e-16; P_dense == v32_dense and
+  QP_dense == Q_dense ≤ 3e-16 on real tiny chains; float32, equivariance, guard, finite.
+  Tiny-shape cost only (not live): Q ×1.08–1.12, P ×1.014–1.017, QP ×1.14–1.19.
+
+**Heavy-work review for the live meter (before submission).** What: `s2_cost_meter.py`,
+five candidates (v32, v35_R, v35_Q, v35_P, v35_QP) at the shipped depth-4 spelling, one
+canonical 1024×16 network (seed 90_000_016_001, outside every block), float64 read-only
+weights, each in a fresh subprocess so peaks are its own. Label-free, no truth, CPU only.
+History: job 1464 (9 rows incl. a 10 GB depth-6 row) peaked 9.30 GiB over 39 min;
+depth-4 rows peaked 4.2–4.3 GB commit. Q/QP add a (34,1024,1024) float32 monomial stack
+(130 MB) plus einsum temporaries per layer — estimate +0.5–1.5 GB. **Declared 8 GiB RAM,
+2 CPUs, no GPU**, live worktree (exact-byte candidate SHAs; nothing under the candidate
+paths is edited while it runs). Expected ~15 min. Prediction: v35_R ×1.0000–1.0005,
+v35_P ×1.001–1.005, v35_Q ×1.005–1.03, ops +200 to +1,500 over v32's 13,850.
