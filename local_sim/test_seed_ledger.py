@@ -270,6 +270,73 @@ def t_artifact_finalization():
             check("finalize REFUSES an artifact no claim named", True)
 
 
+def t_unbound_claim_binding():
+    head("7d. a claim recorded WITHOUT an artifact name can still be closed -- by block, once")
+    # `claim_range`'s `artifact` is optional, so a claim can be recorded without
+    # naming the file it will produce. P12 was claimed that way on 2026-09-17 and
+    # could not be finalized at all: the seeds were spoken for and the truth that
+    # came out of them could never be bound to them. That is a hole in the
+    # provenance chain, and closing it must not open a route for a stray file to
+    # acquire a claimed block's authority.
+    with tempfile.TemporaryDirectory() as d:
+        p = os.path.join(d, "l.jsonl")
+        art = os.path.join(d, "truth_X.npz")
+        rel = os.path.relpath(art, _ROOT)
+        with open(art, "wb") as fh:
+            fh.write(b"truth-unbound")
+
+        SL.claim_range("D18", 30_806_018_500, 8, "mint.py", ts=TS, path=p)
+        check("the claim carries no artifact name", SL.ledger(p)[0].artifact == "")
+        try:
+            SL.finalize("mint.py", rel, ts=TS, path=p)
+            check("without a block the unbound claim still REFUSES", False)
+        except PermissionError:
+            check("without a block the unbound claim still REFUSES", True)
+
+        digest = SL.finalize("mint.py", rel, ts=TS, block="D18", path=p)
+        check("binding by block records the real hash",
+              digest == SL._sha256(rel) and len(digest) == 64)
+        check("the binding is recorded as such",
+              any("bound by block" in f.note for f in SL.finalizations(p)))
+        check("after binding the ledger is clean",
+              SL.check_ledger(p, verbose=False) == [])
+        check("binding does not consume seeds", SL.consumed_seeds("D18", p) == 8)
+
+        art2 = os.path.join(d, "truth_Y.npz")
+        with open(art2, "wb") as fh:
+            fh.write(b"a different file")
+        rel2 = os.path.relpath(art2, _ROOT)
+        try:
+            SL.finalize("mint.py", rel2, ts=TS, block="D18", path=p)
+            check("a SECOND artifact cannot bind to the same block", False)
+        except PermissionError:
+            check("a SECOND artifact cannot bind to the same block", True)
+
+    with tempfile.TemporaryDirectory() as d:
+        p = os.path.join(d, "l.jsonl")
+        art = os.path.join(d, "truth_Z.npz")
+        rel = os.path.relpath(art, _ROOT)
+        with open(art, "wb") as fh:
+            fh.write(b"z")
+        SL.claim_range("D18", 30_806_018_520, 4, "mint.py", ts=TS, path=p)
+        SL.claim_range("D18", 30_806_018_530, 4, "mint.py", ts=TS, path=p)
+        try:
+            SL.finalize("mint.py", rel, ts=TS, block="D18", path=p)
+            check("TWO unbound claims in one block is ambiguous and REFUSED", False)
+        except PermissionError:
+            check("TWO unbound claims in one block is ambiguous and REFUSED", True)
+
+    with tempfile.TemporaryDirectory() as d:
+        p = os.path.join(d, "l.jsonl")
+        rel = os.path.relpath(os.path.join(d, "never_written.npz"), _ROOT)
+        SL.claim_range("D18", 30_806_018_540, 4, "mint.py", ts=TS, path=p)
+        try:
+            SL.finalize("mint.py", rel, ts=TS, block="D18", path=p)
+            check("binding by block still REFUSES a file that never existed", False)
+        except FileNotFoundError:
+            check("binding by block still REFUSES a file that never existed", True)
+
+
 def t_absent_artifact_is_reported_not_failed():
     head("7c. a gitignored artifact absent from a fresh clone is REPORTED, not failed")
     # *.npz is gitignored, so a fresh clone legitimately has none of them. A gate
@@ -540,6 +607,7 @@ def main():
         t_hard_collision_on_decision,
         t_artifact_hash,
         t_artifact_finalization,
+        t_unbound_claim_binding,
         t_absent_artifact_is_reported_not_failed,
         t_scan_catches_a_new_literal,
         t_real_ledger_readonly,

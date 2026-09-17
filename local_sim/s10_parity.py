@@ -321,8 +321,15 @@ def main_tiny():
 # the query-error instrument: the ACTUAL post-projection error of every consumer
 # --------------------------------------------------------------------------- #
 
-def query_error(width, depth, seed, out_path):
-    """Per layer, per arm: the real error of E, D3, D21, and of the whole output."""
+def query_error(width, depth, seed, out_path, age=None, rank=None):
+    """Per layer, per arm: the real error of E, D3, D21, and of the whole output.
+
+    `age`/`rank` override the arms' own settings, which is how the PREREGISTERED
+    cheaper-setting criterion is evaluated: the contract permits ONE cheaper
+    configuration, default age3/rank192, with age2/rank192 taken only if a
+    LABEL-FREE query/cost criterion measured BEFORE any truth read selects it.
+    This is that measurement, and it chooses nothing on its own.
+    """
     import flopscope as flops
     import k4feed_oracle as K
     from mint_provenance import canonical_mint
@@ -334,10 +341,18 @@ def query_error(width, depth, seed, out_path):
     w, es, _ = canonical_mint(width, depth, seed)
     import harness
 
+    over = {}
+    if age is not None:
+        over["_SHARED_AGE"] = int(age)
+    if rank is not None:
+        over["_SHARED_RANK"] = int(rank)
+    tagsuffix = "" if not over else "_a%sr%s" % (age, rank)
+
     def run(path, on=True):
         p = _variant(os.path.join(_ROOT, path), tmp,
-                     os.path.basename(path)[:-3] + ("_on" if on else "_off"),
-                     _SHARED_ON=on)
+                     os.path.basename(path)[:-3] + tagsuffix
+                     + ("_on" if on else "_off"),
+                     _SHARED_ON=on, **over)
         mod = K._load(p)
         caps = {}
         orig21 = mod._dslice21
@@ -377,6 +392,7 @@ def query_error(width, depth, seed, out_path):
     ref_caps, ref_pred, ref_f = run(arms["qoff"], on=False)
     out = {"artifact": "s10_parity.query_error", "label_free": True,
            "network": {"width": width, "depth": depth, "seed": seed},
+           "overrides": {"age": age, "rank": rank},
            "uncompressed_flops": ref_f, "arms": {}}
     for t in ("qoff", "qE", "qEd"):
         caps, pred, f = run(arms[t], on=True)
@@ -427,13 +443,15 @@ def main():
     ap.add_argument("--width", type=int, default=1024)
     ap.add_argument("--depth", type=int, default=16)
     ap.add_argument("--seed", type=int, default=90_000_016_001)
+    ap.add_argument("--age", type=int, default=None)
+    ap.add_argument("--rank", type=int, default=None)
     ap.add_argument("--out", default="")
     a = ap.parse_args()
     print("=" * 96)
     print("STAGE-3 QUERY BASIS -- label-free, decides nothing, gates the truth read")
     print("=" * 96)
     if a.query_error:
-        query_error(a.width, a.depth, a.seed, a.out)
+        query_error(a.width, a.depth, a.seed, a.out, a.age, a.rank)
         return 0
     main_tiny()
     if a.out:
