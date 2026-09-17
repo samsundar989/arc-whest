@@ -53351,3 +53351,121 @@ adjusted gain will track its raw gain almost exactly.
 file that gets screened is the file that gets certified. Verified: the NULL
 composition reproduces frozen `estimator_k3_v37_a4r256_p4d5.py` **bitwise and in
 counted FLOPs** at 64x5 and 96x6.
+
+## 2026-09-17 (evening) — **CONTRACT AMENDMENT 2 (pre-data): batch B's arms, the P3 birth feed, and the rule that picks the composed candidate**
+
+*Written and committed before batch B exists and before batch A (job 1663) has
+produced a single candidate arm's rows. It adds arms, a prediction and a
+selection RULE; it relaxes no gate and changes no verdict.*
+
+### Why one more batch and not three
+
+Batch A (running) answers the attribution question and the stage-2 screen's
+accuracy question on one control run. What is left needs truth: the stage-3
+screen's own comparison, the one finished-but-unmeasured accuracy lever this
+repository holds, and the composed candidate itself. Running those as three
+separate batches would cost three control executions and three queue waits. They
+go in **one batch B**, control `estimator_k3_v32_p4d5.py` (`506a0c85d60a63b6`),
+with the stage-3 comparison formed OFFLINE from batch B's own rows — paired on
+the same networks under common random numbers, which is stricter than pairing
+across two runs, not looser. `local_sim/s12_decide.py`, committed before any of
+it, does that pairing.
+
+### The added arm: P3, the kappa3 x covariance distinct-index birth feed
+
+`estimator_k3_v33.py`. It is **ours**: derived in `local_sim/k3feed_oracle.py`
+against an exact all-distinct oracle, built by `local_sim/s2_build_p3.py`,
+re-verified today at **13/13** (`s2_parity_p3.py`) — flags-off bitwise identity
+with the base at 64x5 and 96x6 including counted FLOPs, the newborn difference
+equal to beta1+beta2 on distinct entries and exactly zero on repeated ones to
+2.3e-16, dense chain == factored chain to 1.7e-12, float32 error BELOW the base's
+own, equivariance within 1.5x, and the guard over-predicting at both shapes.
+
+It has never been screened on truth. It is the one accuracy lever in this
+repository that is finished, exactly checked, priced and unmeasured — Slice 7's
+item 2, built on 2026-09-16 and left unscored when the slice ran out of arms.
+
+**Mechanism.** To first order in kappa3 and in the covariance, an all-distinct
+output entry of the newborn third-order source receives, summed over the six role
+assignments, `(1/2) kappa3_dds C_dt w3_d w1_s w1_t` and
+`(1/2) kappa3_dds C_st w2_d w2_s w1_t`. v32 carries **neither**. The oracle says
+beta1 + beta2 + gamma closes the exact response to 1.5e-4 and beta1 + beta2 alone
+leaves about 20% of it; gamma is a Hadamard product of the whole incoming tensor
+with C, has no cheap factored form, and is deliberately **not** implemented. So
+this arm adds roughly four fifths of a response our chain has been missing since
+the factored tower existed.
+
+**Cost**, already metered: projected x1.0686 at 1024x16 (rank 32), x1.44–1.65 at
+tiny shapes where the O(k n^2 r) work is a larger fraction.
+
+**Prediction 11 (Builder, before data).** P3 improves raw MSE over v32_p4d5 by
+1.02–1.10x with t95 > 0 (55%); at +6.9% cost its ADJUSTED gain is 0.96–1.03x, so
+I expect it to be accuracy-positive and economics-neutral-to-slightly-negative
+(60%). If its raw gain is below 1.02x the 20% the oracle says beta1+beta2 leaves
+on the table is not where our remaining error is, and the birth-feed lane closes
+for this representation.
+
+### The composed candidates, and the RULE that picks them, stated before the data
+
+`local_sim/s11_build_candidate.py` composes one file through the four generators
+in the forced order — closure, shared old-lineage coordinates, join basis, P4 —
+with asserted anchors. Its NULL composition reproduces frozen
+`estimator_k3_v37_a4r256_p4d5.py` **bitwise and in counted FLOPs** at 64x5 and
+96x6, which is what licenses using it for a release file.
+
+Batch B carries **two** composed arms, and which closure they carry is decided by
+a rule fixed here, not by looking:
+
+> **The composed candidate's closure is the batch-A arm with the best
+> OFFICIAL-PRECISION ADJUSTED score among `{v32 (i.e. no closure change),
+> chain3's program, v40_b4q, v40_pairq}`**, using `p2_design_score.py`'s own
+> `forecast_gain` column, with ties inside the paired studentised-t interval
+> broken toward the CHEAPER arm and then toward the simpler table. Chain 3's
+> program is eligible as a *table* — `closure_v17_complete.json` — only as a
+> DIAGNOSTIC composition that is never submitted; if it wins, the submitted
+> candidate carries our own `closure_budget4_q.json` or `closure_pair_q.json`,
+> whichever scored better, and the gap between them is reported as the cost of
+> not importing the reference's pruning mask.
+
+The two composed arms differ ONLY in the join basis: one `gram` (the frozen
+objective), one `qE` (the consumed-query objective). That makes the stage-3
+question answerable on the composed file itself and not only on the bare chain.
+
+**Prediction 12.** The composed candidate lands at an adjusted P12 score between
+**6.3e-9 and 8.0e-9**, i.e. **1.30x to 1.65x over graded v31's 8.752e-9** (60%),
+and **does not reach the 2.0x release gate** (75%).
+
+### The arithmetic that makes prediction 12 what it is, written down now
+
+On one consistent panel scale a 2.0x release needs score <= **5.186e-9**. At the
+cost base's q = 0.2163 that is raw <= **2.398e-8**. The compression penalty
+measured on P11 is **+7.18e-9** of raw, so the UNCOMPRESSED chain would have to
+reach raw **1.68e-8** — against frozen v32's 3.325e-8, a **1.98x** accuracy
+improvement. For scale, on our own networks public v17's complete program buys
+**1.218x** and public v29's whole chain buys **1.294x**, and the September-17
+board leader's public raw of 1.655e-8 is about **1.97e-8** on this panel's scale,
+i.e. about **1.69x** better than v32.
+
+**So a 2.0x release requires matching or beating the current board leader's
+accuracy.** That is the precise size of the gate, it is stated here before the
+data rather than discovered after it, and it is why prediction 12 puts 75% on
+missing it. The slice is still worth finishing: an attributed mechanism and a
+1.3–1.65x certified candidate are real, and the decision about what to do with a
+candidate that improves the score by a third while missing the declared gate is
+**Samuel's**, taken on the exact file and its exact numbers.
+
+### Unchanged
+
+Every gate, falsifier, branch rule, statistic, seed block, cost model, fit policy
+and scope line stands. `s9_decide.py`'s A1/A2/A3 read chain 3 and chain 4 alone.
+The stage-2 screen stays `decide(gate=1.10)` adjusted vs `v32_p4d5`; the stage-3
+screen stays its three registered conditions; the release gate stays 2.0x on
+P13, single use, untouched. F5's failed 1.15 gate stays failed. P11 stays retired.
+No designation is authorised and none will be made.
+
+**Workload review.** Batch B: control + 6 candidates x 24 networks, rows and
+predictions streamed, arms sequential. Batch A is measuring ~2 min/network under
+contention against the 30 s/network this host managed uncontended on job 1637, so
+batch B is submitted **after** batch A finishes rather than beside it — the queue
+wait is spent on label-free work, which is what it is for. **Declared 12 GiB,
+4 CPUs**, pinned local, git snapshot, no `cd` into the live path.
