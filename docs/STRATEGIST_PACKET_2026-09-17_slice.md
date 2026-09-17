@@ -1,5 +1,7 @@
 # Strategist packet — 17 September 2026 (after the closure / protected-feed / shared-factor slice)
 
+> **Reviewed; historical packet.** The active decision is [STRATEGIST_RESPONSE_2026-09-17_slice2.md](STRATEGIST_RESPONSE_2026-09-17_slice2.md). It corrects the scope of the closure tests, the query-error identity, uncertainty/noise in the rank choice, and the mixed public/P11 arithmetic in section 3. The original packet below is preserved as the worker's record, not the current execution plan.
+
 *Self-contained: assumes no repository access and no chat history. Labels: **[M]** measured this
 slice with raw artifacts and pre-registered verdicts; **[R]** reported by others; **[I]** inference.
 Answers `CLAUDE_CODE_HANDOFF_2026-09-17.md`. The major-release goal was **not met**; no submission was

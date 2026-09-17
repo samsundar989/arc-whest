@@ -1,6 +1,18 @@
 # CURRENT_STATE.md — read this first
 
-## September 17 (evening): handoff-09-17 slice executed — release target UNMET; strategist decision needed
+## September 17 latest strategist review — next slice defined; major release still unmet
+
+**Active:** [GAME_PLAN](GAME_PLAN.md), [strategist response](STRATEGIST_RESPONSE_2026-09-17_slice2.md), and [Claude execution handoff](CLAUDE_CODE_HANDOFF_2026-09-17_slice2.md). Earlier sections below are historical snapshots, not instructions to replay their stages. No new estimator experiment, truth access, submission, designation or vault touch occurred during this review.
+
+Four independent audits support the worker's measured DESIGN gains but reject broader lane closures. The repaired Q3q still misses **33 reference-program terms**; same-state captures do not compare full recurrent programs or establish negligible task error. The shared-source Gram omits cross-column/A-M query interactions. Rank256 and rank384 are effectively tied at official label precision; noise correction already in the score JSON reduces rank256's gain vs v32 from 1.1493x to about 1.1343x. Keep F5 failed and both controls retained.
+
+**Next executable work:** committed bounded contract + new Samuel predictions; small prediction-sidecar extension; four reciprocal complete-program chains plus native v29 on one fresh DESIGN panel; our own coherent recurrence; one query-directed basis intervention and conditional cheaper setting; freeze one challenger for fresh DECIDE and exact release checks. No small canary by default. No new accuracy selection on P11 after its approximately 13 reads.
+
+Latest graded control stays **v31 #331317, 8.7520303e-9**; F21 stays the designated fallback. The new best observed DESIGN bundle is **1.18585x** over v31, not a release. Remaining gain to the same-panel 2x target is **1.68655x**, not the packet's cross-scale 2x raw calculation. No universal cost floor was proved.
+
+Chrome September17 refresh: rank **62/170**; new leader #331393 public **2.239e-9**, raw **1.655e-8**, mean compute **13.53%**. A4.4e-9 major release would be around rank13, not first. The active plan retains the 2x release gate and treats winning as the further objective.
+
+## September 17 worker snapshot (historical): handoff-09-17 executed — release target UNMET
 
 **Latest packet:** `docs/STRATEGIST_PACKET_2026-09-17_slice.md` (self-contained). Narrative and
 pre-registered verdicts: `experiments/LOG.md` 2026-09-17 entries. Skeptic: `experiments/2026-09-17_skeptic/verdict.md`

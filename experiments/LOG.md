@@ -52766,3 +52766,17 @@ score-positive at age 4 despite +22% raw error, because the price falls 23%; the
 predicted the loss. (iii) Closure and cost results are now attributed; no remaining in-handoff lever
 reaches the major-release criterion. Per the handoff: current Strategist Packet, fallback retained,
 no submission request.
+
+## 2026-09-17 — strategist review of completed slice at 38b240d (ROUTINE review/docs; no new science run)
+
+Question: why does the completed closure/shared-factor slice miss the major-release goal, and what bounded next work can resolve the remaining gap?
+
+Evidence reviewed: followupF score/rows/decide, followup meter, same_state_1024, existing Skeptic verdict, source tables and shared-factor implementation, job1642 receipt and committed contract, earlier same-P11 v31 rows. Three parallel read-only audits plus a fresh-context Skeptic; detailed record: `docs/research/2026-09-17_slice2_review.md`. The validation reviewer reran lightweight wrapper tests:10/10 pass. No model run, heavy workload, new truth read, seed allocation, vault touch, upload or designation.
+
+Knowledge delta (CONFIRMED source/existing-artifact analysis): Q3q's executed ordinary-mode program still misses33 reference terms and adds3 (excluding redundant1,2orientation); the one-step report is not recurrent-program equivalence. Join weighting omits query cross terms and uses stale importance; it is a heuristic, not the asserted exact projection error. Rank256/rank384 are statistically unresolved, and noise-corrected/official-precision point ordering reverses insignificantly. Existing F1–F5 arithmetic and source hashes reproduce; failed1.15gate stays failed. Latest observed gain over v31 is1.1858519, not a major release. The packet mixes public target/P11raw when claiming another2x raw is necessary; same-panel remaining factor is1.68655. Tested policy costs are not a global cost lower bound.
+
+External refresh through Samuel's Chrome: ownrank62/170; new leader#331393 publicadjusted2.239e-9, raw1.655e-8, meancompute13.53%;4.4e-9aboutrank13, top-ten3.8e-9. New discussion18219 reiterates scorefloor but has no leading new estimator. Literature revisited: ARC2605.05179v2, goal-oriented tensors2508.11139, vector-valued reduction1801.07922; these support a query-preservation hypothesis, not guaranteed gains.
+
+Skeptic: rejects broad closure/floor/optimality claims, accepts narrow DESIGN evidence. Count-convention correction documented in review record. New handoff accepted as bounded prospective plan after adding swapped-program initial/recurrent/final parity checks, beyond native endpoint parity.
+
+Decision/next action: `docs/STRATEGIST_RESPONSE_2026-09-17_slice2.md` and `docs/CLAUDE_CODE_HANDOFF_2026-09-17_slice2.md`. Restore canonical GAME_PLAN/CLAUDE_CODE_HANDOFF pointers (previous contents archived). Reciprocal complete nonlinear-program attribution, own coherent candidate, one cross-term-aware query compression intervention, then one frozen major challenger through fresh DECIDE/CONFIRM/release. No interimcanary by default. One fresh reusable DESIGN panel; retire P11 from new accuracy selection. New predictions and committed contracts remain required before measurement. All new thresholds in the plan are PROPOSED/prospective, no historical gate altered. HUMAN_MODEL and unrelated untracked review artifacts untouched.
