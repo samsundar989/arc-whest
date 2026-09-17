@@ -51977,3 +51977,10 @@ discriminators this session can justify are exhausted: feed (3.6%), λ profile
 (2.4%), (3,1) route and its completion (negative), λ×(3,1) (negative). Public
 v29 remains 1.545× better than v32 on P11 at 0.84× cost; its advantage is not
 located in any single mechanism tested. → Strategist Packet.
+
+### Stage-0 affected preflight (job 1524): GREEN 12/16, 4 Full skips
+
+`experiments/2026-09-17_preflight/preflight_default.log`, live worktree after all
+stage-0 instrument repairs. Steps 13–16 (-Full, incl. the official Phase-2 smoke
+that now runs cap-off) are NOT checked by this run; they are owed on any frozen
+release candidate before an approval request.
