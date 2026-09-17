@@ -131,6 +131,75 @@ def _shared_join(tw):
 '''
 
 
+_LEAN_RUNTIME = r'''
+
+def _full_legs_lean(tw):
+    """LEAN: both old legs formed by ONE product, `Q @ [FA | FM]`."""
+    if not tw.ko:
+        return tw.A_L, tw.M
+    if tw._legs is None:
+        c = tw.FA.shape[1]
+        F = _mm(tw.Q, fnp.concatenate([tw.FA, tw.FM], axis=1))
+        tw._legs = (fnp.concatenate([F[:, :c], tw.A_L], axis=1),
+                    fnp.concatenate([F[:, c:], tw.M], axis=1))
+    return tw._legs
+
+
+def _shared_contract_lean(tw, LA, LP, A_L, M):
+    """LEAN: `[LA | LP] @ [A | M]^T` as ONE product per part (old via Q, recent exact)."""
+    n = LA.shape[0]
+    c = tw.ko * n
+    if _SHARED_ON and _shared_rank(n) and (tw.k - tw.ko) >= _SHARED_AGE:
+        tw._wts = ((LA[:, c:c + n] * LA[:, c:c + n]).sum(axis=0),
+                   (LP[:, c:c + n] * LP[:, c:c + n]).sum(axis=0))
+    rec = _mm(fnp.concatenate([LA[:, c:], LP[:, c:]], axis=1),
+              fnp.concatenate([tw.A_L if tw.ko else A_L, tw.M if tw.ko else M], axis=1).T)
+    if not tw.ko:
+        return rec
+    FF = fnp.concatenate([tw.FA, tw.FM], axis=1)
+    old = _mm(_mm(fnp.concatenate([LA[:, :c], LP[:, :c]], axis=1), FF.T), tw.Q.T)
+    return old + rec
+
+
+def _shared_join_lean(tw):
+    """LEAN join: the range finder's four leg products fused into two."""
+    n = tw.A_L.shape[0]
+    r = _shared_rank(n)
+    if not r or (tw.k - tw.ko) < _SHARED_AGE or tw._wts is None:
+        return tw
+    J = fnp.concatenate([tw.A_L[:, :n], tw.M[:, :n]], axis=1)
+    dA, dM = tw._wts
+    dJ = fnp.concatenate([dA, dM])
+    if tw.ko:
+        Om = tw.Q
+    else:
+        X = J * fnp.sqrt(dJ)
+        Om = X[:, fnp.argsort((X * X).sum(axis=0))[-r:]]
+    for _p in range(int(_SHARED_PASSES)):
+        Y = _mm(J, (J.T @ Om) * dJ[:, None])
+        if tw.ko:
+            Y = Y + tw.Q @ (tw.Sg @ (tw.Q.T @ Om))
+        Om, _ = fnp.linalg.qr(Y)
+    Qn = Om
+    FJ = Qn.T @ J
+    Sj = (FJ * dJ) @ FJ.T
+    if tw.ko:
+        T = Qn.T @ tw.Q
+        c = tw.FA.shape[1]
+        FF = T @ fnp.concatenate([tw.FA, tw.FM], axis=1)
+        FA = fnp.concatenate([FF[:, :c], FJ[:, :n]], axis=1)
+        FM = fnp.concatenate([FF[:, c:], FJ[:, n:]], axis=1)
+        Sg = (T @ tw.Sg) @ T.T + Sj
+    else:
+        FA, FM, Sg = FJ[:, :n], FJ[:, n:], Sj
+    out = _Tower(tw.A_D, tw.A_L[:, n:], tw.M[:, n:], tw.w2b, tw.k,
+                 tw.Z, tw.L, tw.sb, tw.eb)
+    out.Y, out.CA, out.CB = tw.Y, tw.CA, tw.CB
+    out.Q, out.FA, out.FM, out.ko, out.Sg = Qn, FA, FM, tw.ko + 1, Sg
+    return out
+'''
+
+
 def _func_span(body, name):
     i = body.index("def %s(" % name)
     j = body.find("\ndef ", i + 1)
@@ -162,7 +231,7 @@ def _patch(body, old, new, why, count=1):
     return body.replace(old, new)
 
 
-def build(src, age, rank, passes, force, on=True):
+def build(src, age, rank, passes, force, on=True, lean=False):
     b = src
     b = _patch(b, '''                 "Y", "CA", "CB", "_hub")''',
                '''                 "Y", "CA", "CB", "_hub",
@@ -205,7 +274,14 @@ _SHARED_FORCE = %r
 
 _P2_RANK = ''' % (bool(on), age, rank, passes, bool(force)), "flags")
     fb = "def _proj_coef_d4_r2(n):"
-    b = _patch(b, fb, _RUNTIME.lstrip("\n") + "\n\n" + fb, "runtime")
+    b = _patch(b, fb, _RUNTIME.lstrip("\n") + (_LEAN_RUNTIME if lean else "") + "\n\n" + fb, "runtime")
+    if lean:
+        # LEAN spelling: the same mathematics with fused products (fewer metered
+        # operations). Screened non-lean arms are untouched by this flag.
+        b = _patch(b, "    A_L, M = _full_legs(tw)", "    A_L, M = _full_legs_lean(tw)", "lean-legs", count=4)
+        b = _patch(b, "        acc = _shared_contract(tw, LA, LP, A_L, M)",
+                   "        acc = _shared_contract_lean(tw, LA, LP, A_L, M)", "lean-contract")
+        b = _patch(b, "            adv = _shared_join(adv)", "            adv = _shared_join_lean(adv)", "lean-join")
     return b
 
 
