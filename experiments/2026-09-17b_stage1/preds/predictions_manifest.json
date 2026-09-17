@@ -47,6 +47,13 @@
   "control": {
    "path": "estimator_k3_v32.py",
    "candidate_sha256": "10869a6ca7b9b95005db3d63ea0cf63c44f070dd059553f492ad1cf12105657c",
+   "n_written": 24,
+   "rows_hash": "1abc0bf8b2ea7953b472bacd0390a0657bd61db4fcb1543e8a9abcf6646888fa",
+   "n_failed": 0
+  },
+  "cand0": {
+   "path": "external/504aldo/estimators/estimator_v17.py",
+   "candidate_sha256": "3e5b611b42e52e1e1f2289e3c0d5b79e490736b6bb884e770a83cd24d51d8d94",
    "n_written": 0
   }
  },

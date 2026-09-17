@@ -47,9 +47,31 @@ All heavy work uses workerq with an optimization review and conservative resourc
 
 There is no small canary by default. Its release overhead does not resolve the current accuracy gap. A server-only uncertainty can justify a separately explained exception after a concrete package exists. No new designation is authorized.
 
-## Status
+## Status — updated 2026-09-17 evening, slice IN EXECUTION
 
-- Research/source/validation review: complete; no new strategic experiment run by the strategist.
-- Execution: not started; new contract and Samuel's predictions required before measurement.
-- Submission: no new candidate approved or submitted.
-- If both bounded routes fail: retain the best artifact, record scoped falsifiers and the unresolved mechanism; do not manufacture a positive result or cycle through the same failed arms.
+- **Contract committed before data** (`experiments/LOG.md`, `CONTRACT (Rule 1): slice
+  2026-09-17b`) with two pre-data amendments. **Samuel's three predictions recorded
+  verbatim: "I don't know" to all three.**
+- **Panel minted:** P12, 24 networks x 2 replicas of 2^24, independence ratio 1.0121,
+  truth noise 4.4961e-9 per replica. P13 registered and untouched for the release gate.
+- **Label-free gates, all passed before any truth read:** 69/69 (transplant, tiny),
+  28/28 (transplant, 1024x16), 48/48 (our own derived closures), 17/17 (the new
+  compressor), 31/31 (the composed candidate). Two of my own checks were
+  mis-specified -- they asserted properties the unmodified reference itself fails --
+  and are corrected with the measurements that show why. No tolerance was raised.
+- **Stage 1 batch running** (9 arms x 24 networks on P12); control v32 done: raw
+  3.061e-8, C/B 0.30232, 0 failures.
+- **Two label-free findings that reshape the plan:**
+  the complete nonlinear program costs **+0.68% of C**, so accuracy from it is
+  nearly free; and the multiplier floor **is** reachable on cost alone (age1/rank96
+  prices at C/B 0.10362) but the displacement it costs is an order of magnitude
+  more error than it saves in cost.
+- **The size of the gate, written down before the data:** a 2.0x release needs the
+  uncompressed chain at raw 1.68e-8 against v32's 3.325e-8 -- a 1.98x accuracy
+  improvement -- when v17's complete program buys 1.218x and v29's whole chain
+  1.294x on our own networks, and the board leader sits at about 1.69x. **A 2.0x
+  release therefore requires matching the current leader's accuracy.**
+- Submission: none, none approved, none authorised. No designation.
+- If the gate is missed: the best artifact is retained and certified, the precise
+  obstacle is stated with its arithmetic, and the decision about a sub-gate
+  candidate is Samuel's, taken on the exact file and its exact numbers.
