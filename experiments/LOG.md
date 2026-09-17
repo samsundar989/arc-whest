@@ -52259,3 +52259,14 @@ depth-4 rows peaked 4.2–4.3 GB commit. Q/QP add a (34,1024,1024) float32 monom
 2 CPUs, no GPU**, live worktree (exact-byte candidate SHAs; nothing under the candidate
 paths is edited while it runs). Expected ~15 min. Prediction: v35_R ×1.0000–1.0005,
 v35_P ×1.001–1.005, v35_Q ×1.005–1.03, ops +200 to +1,500 over v32's 13,850.
+
+**Heavy-work review, same-state report (2026-09-17, before submission).**
+`local_sim/closure_audit/same_state.py`, label-free (canonical 1024×16 network, seed
+90_000_016_001 outside every block, no truth). One process, sequential: v32 `predict`
+(history ≤4.3 GB commit) with boundary capture at layers 1,3,5,8,11,14 (f64 copies,
+~20 MB/layer); public v17 `predict` from a debug copy that only adds `mu_pre`/`C_off` to
+its own `V17_DEBUG` record (its stacks ~1–3 GB); then float64 `ref_step` of three
+programs on 12 boundaries, one at a time (BUDGET-4 families ~1.1 GB transient). No shape
+gate override at 1024×16 (v17's live branch). **Declared 12 GiB RAM, 2 CPUs, no GPU**,
+live worktree, ~30 min, rows persisted per layer. Tiny forced-gate smoke (48×6): adapters
+reproduce each file's own mean row to 1.2e-7 / 1.1e-7.
