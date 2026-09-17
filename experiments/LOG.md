@@ -52372,3 +52372,26 @@ single sketch. v32 bytes, λ, rank, Strassen, hubs unchanged. Tiny-width oracles
 rows streamed to JSONL. History: 3 arms ~50 min / peak 4.64 GiB (job 1521), 4 arms 87 min / 4.95
 GiB (job 1463); metered arms peak 4.31 GB commit. Estimate ~105 min, ~5.2 GiB. **Declared 8 GiB,
 4 CPUs, no GPU**, git snapshot containing this contract; candidate SHAs verified afterwards.
+
+## 2026-09-17 — Step 3 build (IMPORTANT → STRATEGIC once measured): shared coordinates for OLD lineages
+
+`local_sim/s7_build_shared.py` → `estimator_k3_v36_v32_{off,a4r384,a4r512,a6r384,a3r256}.py`
+(+ `v36_v32_dense_{full_a2,full_a3,off}` parity arms). Not N1: every lineage keeps its own
+factors; only the left space of OLD legs is shared, `A_L = Q FA`, `M = Q FM`, `Q (n,r)`.
+Transport exact inside span(Q); the only approximation is the join, a range finder on the
+weighted Gram `A d(a) A^T + M d(m) M^T + Q Sg Q^T` with `a_c, m_c` the joiner's column
+energies in that layer's `LA A^T + LP M^T` contraction. Consumers form old legs; the two
+dense contractions split through `Q`. Active only on the exact tower (`gens is None`), r < n.
+`local_sim/s7_parity.py` **10/10**: off == v32 bitwise + FLOPs; forced full rank == v32_dense
+≤ 3e-16 with 2–4 real joins; rank-16 path at 64×7 runs (3 joins), finite; equivariance 1.80e-14
+vs v32's 1.84e-14; guard over-predicts.
+
+**Heavy-work review, grid meter (before submission).** `s2_cost_meter.py` on v36_v32
+{off, a4r384, a4r512, a6r384, a3r256}, depth-4 Strassen, one canonical 1024×16 network,
+fresh subprocess per arm, label-free. Formed old legs are transient (same size as today's
+legs); factors add `(r, k_old n)` ×2 (≤ 0.2 GB at r=512). Expect ≤ 4.5 GB commit per arm.
+**Declared 8 GiB, 2 CPUs**, live worktree, ~20 min. **Predictions (before data):** C/B
+a4r384 0.23–0.26, a4r512 0.25–0.28, a6r384 0.25–0.28, a3r256 0.20–0.23; ops +300 to +1,200
+over v32 (joins: ~5 matmul-class + 2 QR per layer). Price gate for an accuracy screen,
+chosen now: a configuration is screened only if C/B ≤ 0.26 at depth 4 (≈ ≤ 0.24 with P4
+depth 5), since the release target needs ≤ ~0.20–0.22 B after all savings.
