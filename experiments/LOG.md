@@ -51861,3 +51861,49 @@ response and the (3,1) rows are the table route for it; NO_FEED costs ≤5%
 Strategist's small-shape proxy predicted the (3,1) consumer at 0–9%; this read
 discriminates. Diagnostics promote nothing; a located mechanism is re-derived
 independently (oracle first) in our own file under a new contract.
+
+### Attribution RESULT (job 1510): v17's (3,1) consumer carries ~75% of its accuracy edge
+
+`experiments/2026-09-16_diag_v17abl/score_no_wk431.json`. v17 with
+`V17_NO_WK431=1`: raw **3.1631e-08** (unablated 2.7301e-08, **+15.9%**); vs v32
+3.3249e-08 the edge falls from 1.218× to 1.051× → ~75% of log-gap. Builder
+prediction (NO_WK431 → ≥3.1e-8): HIT. The strategist's small-shape proxy
+(0–9%) does NOT transfer to 1024×16. NO_FEED / NO_REGEN resubmitted as jobs
+1519/1520 (1511/1512 were placed on the 3080ti node despite `--node local`
+and failed before any read: the repo path there does not hold this tree).
+
+---
+
+## 2026-09-16 — **CONTRACT (Rule 1): Stage 1b — complete first-order κ4 (×C) bivariate slices (v34), P11**
+
+**Question.** Does adding the complete first-order κ4 and κ4×C content of the
+bivariate moment slices improve P11 accuracy at unchanged cost?
+**Evidence.** CONFIRMED (exact law, `experiments/2026-09-16_stage1b_rep/oracle.log`):
+v32 carries 0% of the odd-ε cov(0,1) κ4×C response and 12% of κ3(0,0,1)'s;
+q31 rows alone give 71% / 130% (overshoot); q31 + link terms give 99.99% /
+100.00%. CONFIRMED (job 1510): v17's (3,1) rows are worth 15.9% raw on P11 and
+~75% of its edge. SPECULATIVE: the complete version beats rows-only.
+**Mechanism.** The bivariate slices feed covariance, (2,1) sources and the κ4
+core every layer; a missing κ4_aaab term and missing link terms bias them at
+order κ4·C, compounding with depth.
+**Intervention.** `estimator_k3_v34.py` (= v32 + q31 + link, `local_sim/s5_build_rep.py`)
+vs `estimator_k3_v32.py`. Diagnostic: `estimator_k3_v34_q31.py` (q31 rows only).
+Parity `s5_parity_rep.py` 13/13 (nesting bitwise, exact law all three slices,
+float32, equivariance, guard, same gens).
+**Predictions.** Builder: (1) v34 better than v32 on ≥ 20/24; (2) raw gain
+1.08–1.20×; (3) v34 ≥ v34_q31 (the complete form does not lose to the
+overshooting rows); (4) counted FLOPs ≤ +0.1%. Samuel: **"I don't know"**
+(asked 2026-09-16, verbatim).
+**Gate (binding, on the isolated change v34 vs v32).**
+`decide(v32_scores, v34_scores, gate=1.08, interval="t")` AND counted FLOPs
+ratio ≤ 1.005. 1.08 ≈ half of v17's measured (3,1) effect, chosen now.
+**Secondary (pre-registered):** t95 > 0 at ≤ +0.5% cost but gain < 1.08 →
+supported improvement for the bundle, not a pass. Cumulative v34 vs frozen v31
+is reported by pairing on seeds with job 1463's v31 rows (deterministic arms,
+identical networks). v34_q31 promotes nothing.
+**Falsifier.** v34 not better (t95 ≤ 0).
+**Baseline.** v32 `10869a6c…`, same run. **Cost model:** O(n²) elementwise,
+guard over-charges 60·n²·depth; FLOPs measured in-run.
+**Data.** P11 DESIGN re-read; caps off; rows streamed. Workload review: same
+scorer/shape as job 1463 (peak ~4.3 GiB); 3 arms sequential; 8 GiB, 4 CPU,
+`--node local`.
