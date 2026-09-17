@@ -52460,3 +52460,22 @@ if both hurt by ≥5%, enriching our chain's closure by power-counting families 
 base and no further closure arm is built; if PAIR is within ±3% of v32 and B3 hurts, the C-power
 families are named as the harmful part — still no new arm without a new contract and Samuel's
 prediction. Either way the cost work proceeds on v32.
+
+### Step 3 price RESULT 1 (job 1610) and FLOP attribution (job 1619, label-free)
+
+`experiments/2026-09-17_step3/{meter_shared_grid.json,profile.json}`. C/B at Strassen depth 4:
+off 0.30232 (== v32) · a4r384 **0.28007** · a4r512 0.32231 (dearer than off) · a6r384 0.29300 ·
+a3r256 **0.21756**; ops 17.4–20.2k; peak commit **2.2–2.8 GB (v32 4.3 GB)**. Predictions (C/B
+a4r384 0.23–0.26 etc.; ops +300–1,200): **MISSED** — savings far smaller, ops +3.5–6.3k.
+Price gate (≤0.26 at depth 4): only a3r256 passes of these five.
+
+**Why (profile):** the exact RECENT lineages dominate. At a4r384 the `(n,4n)` recent contractions
+and transports (depth-4 Strassen leaves `(2401,64,256)`) cost ~0.12 B; old-part products at rank
+384 get only depth-2 Strassen (leaves `(49,96,·)`), ~0.5× an exact product rather than r/n = 0.375×,
+~0.06 B; joins (range finder `(n,n)@(n,r)`, projections, rotations) ~0.02 B. So at age gate a the
+recent tower sets a floor ≈ a/⌈mean lineage count⌉ of today's tower whatever the rank.
+
+**Second price grid (before any accuracy data):** a2r192, a2r256, a2r384, a3r192, a3r384 (plus
+off and a3r256 again) × {depth 4, depth 5 + min block 32 (P4's spelling)}. **Declared 10 GiB,
+2 CPUs**, label-free, ~60 min (depth-5 off peaked 6.53 GB in job 1464). **Predictions:** a2r256
+d4 0.19–0.21; a3r256 d5 0.20–0.21; a2r192 d5 ≤ 0.18; ops at depth 5 +2.5k over depth 4.
