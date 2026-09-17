@@ -51936,3 +51936,24 @@ of dG / g / var / λ and the κ4 consumer inputs, v17 vs v32, on one 1024×16
 P11-independent network at identical incoming state where possible. No new
 consumer is built until that trace locates a state difference. v34 and
 v34_q31 are closed.
+
+### D2 RESULT (job 1522): the gap accumulates at layers 4–10, exactly where the λ tables diverge
+
+`experiments/2026-09-16_diag_gap/d2_trace.json`, 3 P11 nets. Per-layer MSE ratio
+v32/v17: L0–L3 0.99–1.03; L4–L10 rising to 1.13–1.29; L11–L15 flat 1.16–1.28.
+κ4 state tracks closely (dG/var within ~1% at L1–L3, v17 ~5–20% larger by L15;
+g_prev likewise). λ: v17 0.0100–0.0113 at L3–L9; ours falls 0.0098 → 0.0046 (L10).
+Final-layer MSE per net: v17 2.38/2.69/2.85e-8 vs v32 3.03/3.29/3.42e-8.
+
+**Interpretation (INFERRED):** not a transport or consumer-formula bug (formulas
+identical, early layers identical); the accumulating error coincides with λ's
+mid-depth profile. D1 alone gave 2.4% because λ acts mainly through the (3,1)
+term (∝ λ C_off) that our chain lacked, and our label-free λ table was never
+selected with that consumer present — an interaction hypothesis.
+
+**Next DIAGNOSTIC (same contract):** control `estimator_k3_v32_lam504.py`;
+arms `estimator_k3_v34_lam504.py` (q31+link, v17 λ) and
+`estimator_k3_v34_q31_lam504.py` (q31 rows, v17 λ). Builder prediction: both
+beat the control by ≥5% raw, v34_q31_lam504 ≥ v34_lam504. **If it holds, no
+imported constant ships:** the path is our OWN per-layer λ fit on DESIGN for the
+consumer-complete chain, frozen, then a fresh SINGLE_USE DECIDE block.
