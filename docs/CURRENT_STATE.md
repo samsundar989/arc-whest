@@ -1,5 +1,84 @@
 # CURRENT_STATE.md — read this first
 
+## September 17 (evening) — slice 2026-09-17b IN PROGRESS: contract committed, panel minted, stage-1 batch running
+
+**Operative:** the Rule-1 contract at the bottom of [experiments/LOG.md](../experiments/LOG.md)
+(`CONTRACT (Rule 1): slice 2026-09-17b`) and its pre-data amendment, both committed before any
+of this slice's data existed. Plan: [GAME_PLAN](GAME_PLAN.md), [strategist response](STRATEGIST_RESPONSE_2026-09-17_slice2.md),
+[handoff](CLAUDE_CODE_HANDOFF_2026-09-17_slice2.md).
+
+### The source finding this slice is built on
+
+`local_sim/closure_audit/progswap.py`: **public v17's executed nonlinear program (87 oriented
+terms) CONTAINS frozen v32's 27 exactly**, with identical rational coefficients and no term of
+ours absent from theirs. The reciprocal swap is therefore pure addition one way and pure
+deletion the other. No earlier arm ran that program: BUDGET 4 has 141 terms and omits the six
+kappa_iiij rows, PAIR 114 and omits the same six, Q3q 57 and omits 33 while adding 3.
+
+Structurally, the 60 terms the reference drops from our BUDGET-4 table are **every three- and
+four-factor monomial** (27), `D22xD22` and `D4xD4` entirely (7), and a per-output subset of the
+remaining two-factor families (26). That is an empirical mask and **it is not imported.** Our own
+stated rule instead: every arm ever screened on this base was **mixed-order** — the BUDGET and
+PAIR tables were generated under "kappa_iiij assumed zero" while carrying cost-4 blocks, and
+`kappa_iiij = (m/2) lam C` has cost 3. `closure_budget4_q.json` (147) and `closure_pair_q.json`
+(120) are that completion, derived here.
+
+### State of the slice
+
+| item | status |
+|---|---|
+| Rule-1 contract + Samuel's three predictions (all **"I don't know"**) | committed before data, `aba5373` / `90753cb` |
+| Prediction sidecars (`design_sidecar.py`, `--pred-out`) | landed, **19/19** tests incl. five refusals |
+| Seed blocks **P12** (DESIGN, 24 claimed) and **P13** (SINGLE_USE, untouched) | registered, disjoint, P11 retired from new accuracy selection |
+| P12 truth minted | job 1650, `92a3228e…`, independence ratio **1.0121**, truth noise **4.4961e-9**/replica |
+| Reciprocal chains + own closures, label-free gates | **69/69** (transplant) + **48/48** (own tables), three availability modes against the independent f64 reference |
+| Stage-3 consumed-query basis | built; **17/17** label-free, including the cancelling case the old surrogate provably misses |
+| Stage-1 batch (9 arms x 24 nets on P12) | **running**, job 1663 |
+| Submission / designation / vault | none, and none authorised |
+
+### Measured, label-free, at the LIVE 1024x16 shape (jobs 1658/1659)
+
+The shared-coordinate join's basis objective, replaced by the actual consumed query's right
+singular space, against the same chain's own diagonal surrogate:
+
+| setting | arm | C/B | final-row displacement | D3 | D21 |
+|---|---|---:|---:|---:|---:|
+| age4 / rank256 | surrogate | 0.21623 | 8.142e-5 | 2.254e-2 | 3.069e-2 |
+| age4 / rank256 | **query basis** | 0.22123 | **7.340e-5** | **1.847e-2** | **2.785e-2** |
+| age3 / rank192 | surrogate | 0.18318 | 2.799e-4 | 7.471e-2 | 9.587e-2 |
+| age3 / rank192 | **query basis** | 0.18869 | **2.203e-4** | **6.211e-2** | **8.591e-2** |
+
+The query basis retains more of every consumer at both settings, for +2.3% and +3.0% of `C`.
+The preregistered D3-protection arm (`qEd`) is **worse than the plain query basis at both** —
+a clean negative on a secondary that was declared before the measurement. At n=512 with
+r = n/2 the query basis was *worse*; the effect appears only where the compression is
+actually aggressive.
+
+### The release arithmetic, stated plainly
+
+On one consistent panel scale, 2x over graded v31 means score <= **5.186e-9**. What that costs
+in raw error at each achievable cost:
+
+| C/B | raw MSE must be <= |
+|---:|---:|
+| 0.100 (the multiplier floor) | 5.186e-8 |
+| 0.150 | 3.457e-8 |
+| 0.183 (age3/rank192) | 2.834e-8 |
+| 0.216 (the current cost base) | 2.398e-8 |
+| 0.280 (v32 + P4 d5) | 1.852e-8 |
+
+The three measured bundles score **8.75e-9 (C/B 0.216), 8.84e-9 (0.260), 9.32e-9 (0.280)** —
+flat to 6% across a 30% cost range, which says the compression trade already sits near its own
+optimum and **cost alone cannot reach the gate.** Closing it needs the raw error at the current
+operating point to improve by about **1.69x**, which is 1.53x beyond public v29's raw on our own
+networks. That is the honest size of the remaining problem, and the stage-1 batch is what
+measures whether the program route moves it.
+
+Latest graded control stays **v31 #331317, 8.7520303e-9**; F21 stays the designated fallback.
+
+---
+
+
 ## September 17 latest strategist review — next slice defined; major release still unmet
 
 **Active:** [GAME_PLAN](GAME_PLAN.md), [strategist response](STRATEGIST_RESPONSE_2026-09-17_slice2.md), and [Claude execution handoff](CLAUDE_CODE_HANDOFF_2026-09-17_slice2.md). Earlier sections below are historical snapshots, not instructions to replay their stages. No new estimator experiment, truth access, submission, designation or vault touch occurred during this review.
