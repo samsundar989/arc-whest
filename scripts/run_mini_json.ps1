@@ -106,13 +106,32 @@ function Assert-Utf8NoBom([string]$Path) {
     return $b.Length
 }
 
+function Sha256-Hex([string]$Path) {
+    # Plain .NET, streamed. NOT Get-FileHash: in Windows PowerShell 5.1 that is a
+    # script function in the Microsoft.PowerShell.Utility module, auto-loaded by
+    # PSModulePath. A driver that puts PowerShell 7's modules first (Codex does)
+    # makes it unloadable, and every hash below fails. Validation review 09-17 §3.
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    $fs = [System.IO.File]::Open($Path, [System.IO.FileMode]::Open,
+        [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+    try { $h = $sha.ComputeHash($fs) } finally { $fs.Dispose(); $sha.Dispose() }
+    return ([System.BitConverter]::ToString($h) -replace '-', '').ToLowerInvariant()
+}
+
+function Receipt-PathFor([string]$Report) {
+    # CANONICAL receipt name: <report stem>.receipt.json -- the name
+    # `local_sim/predict_public.py::find_receipt` discovers. (Until 2026-09-17
+    # this wrote <report>.receipt.json, which the projector never found.)
+    return [System.IO.Path]::ChangeExtension($Report, ".receipt.json")
+}
+
 function File-Record([string]$Path) {
     if (-not (Test-Path -LiteralPath $Path)) { return @{ path = $Path; exists = $false } }
     return @{
         path   = $Path
         exists = $true
         bytes  = (Get-Item -LiteralPath $Path).Length
-        sha256 = (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
+        sha256 = Sha256-Hex $Path
     }
 }
 
@@ -133,13 +152,16 @@ if ($DebugTracebacks) { $whestArgs += "--debug" }
 # estimator before launch and again after; a change in between refuses the receipt.
 function Source-Sha([string]$Path) {
     if (-not (Test-Path -LiteralPath $Path)) { return $null }
-    return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
+    return Sha256-Hex $Path
 }
 $srcFull = [System.IO.Path]::GetFullPath($Estimator)
 $srcShaBefore = Source-Sha $srcFull
 
 $Out = [System.IO.Path]::GetFullPath($Out)
 if (Test-Path -LiteralPath $Out) { throw "refusing to overwrite existing evidence: $Out" }
+$receiptPath = Receipt-PathFor $Out
+if ($receiptPath -eq $Out) { throw "the report may not itself be named *.receipt.json: $Out" }
+if (Test-Path -LiteralPath $receiptPath) { throw "refusing to overwrite an existing receipt: $receiptPath" }
 $dir = Split-Path -Parent $Out
 if ($dir -and -not (Test-Path -LiteralPath $dir)) { New-Item -ItemType Directory -Force $dir | Out-Null }
 
@@ -232,7 +254,7 @@ if ($published) {
     $receipt = [ordered]@{
         schema         = "arc-whest.run_receipt/1"
         report_path    = $Out
-        report_sha256  = (Get-FileHash -LiteralPath $Out -Algorithm SHA256).Hash.ToLowerInvariant()
+        report_sha256  = Sha256-Hex $Out
         source_path    = $Estimator
         source_sha256  = $(if ($srcShaBefore -eq $srcShaAfter) { $srcShaBefore } else { $null })
         source_changed_during_run = ($srcShaBefore -ne $srcShaAfter)
@@ -243,7 +265,6 @@ if ($published) {
                                      ended_utc = (Get-Date).ToUniversalTime().ToString("o"); arguments = $allArgs;
                                      exit_code = $whestExit }
     }
-    $receiptPath = "$Out.receipt.json"
     Write-NewFileAtomic $receiptPath ($receipt | ConvertTo-Json -Depth 6)
     $null = Assert-Utf8NoBom $receiptPath
     Write-Host "receipt -> $receiptPath"

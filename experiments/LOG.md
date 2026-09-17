@@ -52185,3 +52185,35 @@ Supporting records: `docs/research/2026-09-17_architecture_review.md`,
 `2026-09-17_validation_review.md`, `2026-09-17_frontier_review.md`, and
 `2026-09-17_independent_skeptic.md`. CURRENT_STATE and the packet body were
 corrected; historical raw evidence remains unchanged. No upload or designation.
+
+---
+
+## 2026-09-17 — Handoff 09-17 step 0 (IMPORTANT, instrument): receipt name + child PowerShell module path
+
+**Defects (validation review §2–3, reproduced here before the fix).**
+(a) `scripts/run_mini_json.ps1` wrote `<report>.receipt.json`; `predict_public.find_receipt`
+discovers `<report stem>.receipt.json`. (b) Every hash in the wrapper used `Get-FileHash`,
+a *script function* of Windows PowerShell 5.1's `Microsoft.PowerShell.Utility` module that
+autoloads via `PSModulePath`. Reproduced with a Core-only Utility manifest prepended to a
+child's `PSModulePath`: `CouldNotAutoloadMatchingModule`; the .NET SHA-256 in the same
+process worked. This driver's own environment is clean (old suite 4/4 here), which is why
+the two drivers disagreed.
+
+**Fix.** Wrapper: streamed `System.Security.Cryptography.SHA256` for all hashes (no module
+import); canonical receipt `<report stem>.receipt.json` (`[IO.Path]::ChangeExtension`),
+refused before launch if it already exists. Projector: canonical first, legacy
+`<report>.receipt.json` still accepted, two differing receipts refused. No machine-wide
+setting touched. Existing backfilled receipts already use the canonical name.
+
+**Tests.** `local_sim/test_run_mini_json.py` 4 → 10: inherited / clean
+(`System32\WindowsPowerShell\v1.0\Modules` only) / poisoned (Core-only Utility first)
+child environments; the REAL `estimator_k3_v31.py` hashed; wrapper output → default
+`find_receipt` → `load_receipt` → `bind_candidate_source` VERIFIED, wrong file refused even
+with the override; truncated JSON + nonzero exit and valid-JSON + exit 1 under the poisoned
+path; pre-existing receipt refused before launch; legacy/conflict discovery. 10/10.
+Mutation check: the previous wrapper fails the poisoned-success and clean cross-tool tests.
+`test_predict_public` 87/87, `test_certify_instrument_repairs` 14/14,
+`verify_portability` 103/0.
+
+**Prediction (before the run):** affected default preflight GREEN 12/16, four `-Full` skips,
+same as job 1524. The four Full steps stay owed on the actual release candidate.

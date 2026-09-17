@@ -327,9 +327,18 @@ def find_receipt(report_path: str, explicit: str = "") -> Optional[str]:
         if not os.path.exists(explicit):
             raise ProjectionRefused(f"receipt not found: {explicit}")
         return explicit
-    stem = os.path.splitext(report_path)[0]
-    cand = stem + ".receipt.json"
-    return cand if os.path.exists(cand) else None
+    # Canonical: <report stem>.receipt.json, which scripts/run_mini_json.ps1
+    # writes since 2026-09-17. Before that it wrote <report>.receipt.json and this
+    # never found it (validation review 09-17 §2); that legacy name is still
+    # accepted, and two receipts that disagree are refused rather than chosen.
+    canonical = os.path.splitext(report_path)[0] + ".receipt.json"
+    legacy = report_path + ".receipt.json"
+    found = [p for p in (canonical, legacy) if os.path.exists(p)]
+    if len(found) == 2 and _sha256(canonical) != _sha256(legacy):
+        raise ProjectionRefused(
+            f"two different receipts for {report_path}: {canonical} and "
+            f"{legacy}. Remove the wrong one or pass the receipt explicitly")
+    return found[0] if found else None
 
 
 def load_receipt(receipt_path: Optional[str], report_path: str,
