@@ -51957,3 +51957,23 @@ arms `estimator_k3_v34_lam504.py` (q31+link, v17 λ) and
 beat the control by ≥5% raw, v34_q31_lam504 ≥ v34_lam504. **If it holds, no
 imported constant ships:** the path is our OWN per-layer λ fit on DESIGN for the
 consumer-complete chain, frozen, then a fresh SINGLE_USE DECIDE block.
+
+### λ × (3,1) interaction RESULT (job 1523): FALSIFIED
+
+`experiments/2026-09-16_diag_gap/score_lamxq31.json`. Control v32 + v17 λ
+(raw 3.2469e-8). v34 + v17 λ: raw 3.8772e-8, score 0.8364× (0/24, t95
+[−2.13e-9, −1.71e-9]); v34_q31 + v17 λ: raw 4.1663e-8, 0.7789× (0/24).
+Builder prediction (≥5% better): FALSIFIED. With their λ the (3,1) route hurts
+MORE.
+
+**Term-by-term check (source, CONFIRMED):** our q31 pK rows equal v17's `wk431`
+rows exactly — K(1,1) `(m/12)λC(w11·w31 + w31·w11)`; K(2,1) `(m/12)λC(w12_a
+w31_b + w32_a w11_b)`; K(2,2) `(m/6)λC w12 w32` symmetrised. **Identical terms
+are +15.9% in v17 and −8% (our λ) / −22% (their λ) in ours.** Together with v17
+NO_REGEN at 5.74e-8 (much worse than our non-regen lineage), the INFERRED
+reading is that v17's κ4 terms partly cancel errors specific to their K3 base
+chain; the terms are not transferable physics for ours. The remaining
+discriminators this session can justify are exhausted: feed (3.6%), λ profile
+(2.4%), (3,1) route and its completion (negative), λ×(3,1) (negative). Public
+v29 remains 1.545× better than v32 on P11 at 0.84× cost; its advantage is not
+located in any single mechanism tested. → Strategist Packet.
