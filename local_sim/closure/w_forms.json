@@ -1,0 +1,469 @@
+{
+ "forms": [
+  {
+   "P_Phi": [
+    0,
+    1
+   ],
+   "P_phi": [
+    1
+   ],
+   "branch": "partial_gaussian_moment",
+   "k": 0,
+   "p": 1,
+   "sigma_exp": 1
+  },
+  {
+   "P_Phi": [
+    1
+   ],
+   "P_phi": [],
+   "branch": "partial_gaussian_moment",
+   "k": 1,
+   "p": 1,
+   "sigma_exp": 0
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    1
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 2,
+   "p": 1,
+   "sigma_exp": -1
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    0,
+    -1
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 3,
+   "p": 1,
+   "sigma_exp": -2
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    -1,
+    0,
+    1
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 4,
+   "p": 1,
+   "sigma_exp": -3
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    0,
+    3,
+    0,
+    -1
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 5,
+   "p": 1,
+   "sigma_exp": -4
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    3,
+    0,
+    -6,
+    0,
+    1
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 6,
+   "p": 1,
+   "sigma_exp": -5
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    0,
+    -15,
+    0,
+    10,
+    0,
+    -1
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 7,
+   "p": 1,
+   "sigma_exp": -6
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    -15,
+    0,
+    45,
+    0,
+    -15,
+    0,
+    1
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 8,
+   "p": 1,
+   "sigma_exp": -7
+  },
+  {
+   "P_Phi": [
+    1,
+    0,
+    1
+   ],
+   "P_phi": [
+    0,
+    1
+   ],
+   "branch": "partial_gaussian_moment",
+   "k": 0,
+   "p": 2,
+   "sigma_exp": 2
+  },
+  {
+   "P_Phi": [
+    0,
+    2
+   ],
+   "P_phi": [
+    2
+   ],
+   "branch": "partial_gaussian_moment",
+   "k": 1,
+   "p": 2,
+   "sigma_exp": 1
+  },
+  {
+   "P_Phi": [
+    2
+   ],
+   "P_phi": [],
+   "branch": "partial_gaussian_moment",
+   "k": 2,
+   "p": 2,
+   "sigma_exp": 0
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    2
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 3,
+   "p": 2,
+   "sigma_exp": -1
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    0,
+    -2
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 4,
+   "p": 2,
+   "sigma_exp": -2
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    -2,
+    0,
+    2
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 5,
+   "p": 2,
+   "sigma_exp": -3
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    0,
+    6,
+    0,
+    -2
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 6,
+   "p": 2,
+   "sigma_exp": -4
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    6,
+    0,
+    -12,
+    0,
+    2
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 7,
+   "p": 2,
+   "sigma_exp": -5
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    0,
+    -30,
+    0,
+    20,
+    0,
+    -2
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 8,
+   "p": 2,
+   "sigma_exp": -6
+  },
+  {
+   "P_Phi": [
+    0,
+    3,
+    0,
+    1
+   ],
+   "P_phi": [
+    2,
+    0,
+    1
+   ],
+   "branch": "partial_gaussian_moment",
+   "k": 0,
+   "p": 3,
+   "sigma_exp": 3
+  },
+  {
+   "P_Phi": [
+    3,
+    0,
+    3
+   ],
+   "P_phi": [
+    0,
+    3
+   ],
+   "branch": "partial_gaussian_moment",
+   "k": 1,
+   "p": 3,
+   "sigma_exp": 2
+  },
+  {
+   "P_Phi": [
+    0,
+    6
+   ],
+   "P_phi": [
+    6
+   ],
+   "branch": "partial_gaussian_moment",
+   "k": 2,
+   "p": 3,
+   "sigma_exp": 1
+  },
+  {
+   "P_Phi": [
+    6
+   ],
+   "P_phi": [],
+   "branch": "partial_gaussian_moment",
+   "k": 3,
+   "p": 3,
+   "sigma_exp": 0
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    6
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 4,
+   "p": 3,
+   "sigma_exp": -1
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    0,
+    -6
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 5,
+   "p": 3,
+   "sigma_exp": -2
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    -6,
+    0,
+    6
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 6,
+   "p": 3,
+   "sigma_exp": -3
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    0,
+    18,
+    0,
+    -6
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 7,
+   "p": 3,
+   "sigma_exp": -4
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    18,
+    0,
+    -36,
+    0,
+    6
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 8,
+   "p": 3,
+   "sigma_exp": -5
+  },
+  {
+   "P_Phi": [
+    3,
+    0,
+    6,
+    0,
+    1
+   ],
+   "P_phi": [
+    0,
+    5,
+    0,
+    1
+   ],
+   "branch": "partial_gaussian_moment",
+   "k": 0,
+   "p": 4,
+   "sigma_exp": 4
+  },
+  {
+   "P_Phi": [
+    0,
+    12,
+    0,
+    4
+   ],
+   "P_phi": [
+    8,
+    0,
+    4
+   ],
+   "branch": "partial_gaussian_moment",
+   "k": 1,
+   "p": 4,
+   "sigma_exp": 3
+  },
+  {
+   "P_Phi": [
+    12,
+    0,
+    12
+   ],
+   "P_phi": [
+    0,
+    12
+   ],
+   "branch": "partial_gaussian_moment",
+   "k": 2,
+   "p": 4,
+   "sigma_exp": 2
+  },
+  {
+   "P_Phi": [
+    0,
+    24
+   ],
+   "P_phi": [
+    24
+   ],
+   "branch": "partial_gaussian_moment",
+   "k": 3,
+   "p": 4,
+   "sigma_exp": 1
+  },
+  {
+   "P_Phi": [
+    24
+   ],
+   "P_phi": [],
+   "branch": "partial_gaussian_moment",
+   "k": 4,
+   "p": 4,
+   "sigma_exp": 0
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    24
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 5,
+   "p": 4,
+   "sigma_exp": -1
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    0,
+    -24
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 6,
+   "p": 4,
+   "sigma_exp": -2
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    -24,
+    0,
+    24
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 7,
+   "p": 4,
+   "sigma_exp": -3
+  },
+  {
+   "P_Phi": [],
+   "P_phi": [
+    0,
+    72,
+    0,
+    -24
+   ],
+   "branch": "delta_derivative_hermite",
+   "k": 8,
+   "p": 4,
+   "sigma_exp": -4
+  }
+ ],
+ "normalised_spelling": "W(k,p) := sigma^(k-p) w(k,p) = P_phi phi + P_Phi Phi is dimensionless; a term coef*prod(kappa_v)*w(k_i,a)_i*w(k_j,b)_j equals sigma_i^a sigma_j^b * coef * prod(kappa_v / (sigma_i^v_i sigma_j^v_j)) * W(k_i,a)_i * W(k_j,b)_j",
+ "schema": "arc-whest/relu-closure/v1/w_forms",
+ "statement": "w(k,p) = sigma^sigma_exp * (P_phi(alpha) phi(alpha) + P_Phi(alpha) Phi(alpha)), alpha = mu/sigma, polynomials as ascending integer coefficient lists"
+}
