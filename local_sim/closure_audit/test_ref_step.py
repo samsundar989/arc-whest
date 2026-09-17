@@ -56,7 +56,24 @@ def fixture(n, seed, var_scale=1.0):
 
 
 class _Sentinel:
-    pass
+    """The injected tower. It has NO legs, deliberately.
+
+    `run_live` supplies the O(n^2) boundary (`D3`, `D21`, `dG`) directly, so the
+    carried tower is a placeholder and anything a candidate reads off it must
+    read as absent. `F` is P3's carried left factor and `_p3` its per-layer
+    cache; both are `None` here, which is how a chain carrying the kappa3 x C
+    birth feed sees "no history yet" rather than raising. That is the right
+    neutralisation for a ONE-STEP nonlinear check -- P3's contribution comes from
+    the carried tower, which this harness does not build, and P3 has its own
+    gates in `s2_parity_p3.py`.
+    """
+
+    F = None
+    _p3 = None
+    R3 = None
+    R4 = None
+    Q = None
+    ko = 0
 
 
 def run_live(mod, bd, force_generic=False, keep_hubs=False, dtype=None,

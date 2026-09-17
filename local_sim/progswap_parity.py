@@ -124,8 +124,19 @@ def _initial_boundary(n, seed):
             "dG": np.zeros(n), "metric": 2.0, "lam": 0.0}
 
 
-def _ref_parity(mod, bd, table, tag, *, last_layer=False, layer_index=0):
-    """One live `_layer` against the float64 reference on the SAME boundary."""
+def _ref_parity(mod, bd, table, tag, *, last_layer=False, layer_index=0,
+               skip=()):
+    """One live `_layer` against the float64 reference on the SAME boundary.
+
+    `skip` names comparisons the reference CANNOT make for this arm, with the
+    reason stated by the caller. There is exactly one such case today: an arm
+    carrying the P3 birth feed adds beta1 + beta2 content to the NEWBORN source,
+    which `ref_step` does not model at all -- it evaluates a closure table, and
+    P3 is not a closure term. Its `K21_birth` therefore differs BY DESIGN, and
+    the difference has its own exact gate in `s2_parity_p3.py` (newborn delta ==
+    beta1+beta2 on distinct entries, 0 on repeated, 2.3e-16). A skipped
+    comparison is PRINTED with its measured value, never silently dropped.
+    """
     import ref_step
     import test_ref_step as T
     ref = ref_step.step(bd, table, want_families=True)
@@ -149,6 +160,13 @@ def _ref_parity(mod, bd, table, tag, *, last_layer=False, layer_index=0):
                       ("g_out", live["g_out"], ref["g_out"]),
                       ("S3_birth", live["sb"], ref["K"][(3,)] - w1 ** 3 * bd["D3"]),
                       ("K21_birth", K21, ref["K"][(2, 1)])):
+        if key in skip:
+            print(f"        SKIPPED (out of the reference's scope) {tag} {key} "
+                  f"= %.1e" % rel(a, b), flush=True)
+            ROWS.append({"check": f"{tag} {key}", "passed": None,
+                         "detail": "skipped: out of the reference's scope; "
+                                   "measured %.3e" % rel(a, b)})
+            continue
         claim(f"{tag} {key}", rel(a, b) <= REF_TOL, "%.1e" % rel(a, b))
 
 
@@ -273,13 +291,14 @@ def declared(pairs):
         for n, seed, vs in ((7, 1, 1.0), (8, 3, 3.0)):
             bd = T.fixture(n, 20260917_30 + seed, vs)
             bd["lam"] = lam5
+            sk = {"K21_birth"} if "_p3" in os.path.basename(arm) else ()
             _ref_parity(L(arm), bd, tb, f"{os.path.basename(arm)[:-3]} n={n} ORDINARY",
-                        layer_index=5)
+                        layer_index=5, skip=sk)
             _ref_parity(L(arm), bd, tb, f"{os.path.basename(arm)[:-3]} n={n} FINAL",
                         last_layer=True, layer_index=5)
             b0 = _initial_boundary(n, 20260917_40 + seed)
             _ref_parity(L(arm), b0, tb, f"{os.path.basename(arm)[:-3]} n={n} INITIAL",
-                        layer_index=0)
+                        layer_index=0, skip=sk)
         for wd, dp, sd in ((64, 5, 90000000811),):
             w, es, _ = canonical_mint(wd, dp, sd)
             pb, _fb = P1._predict(m32, w, wd, dp, es)

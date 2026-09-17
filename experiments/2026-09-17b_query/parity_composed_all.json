@@ -1,0 +1,470 @@
+{
+ "artifact": "s11_parity",
+ "checks": [
+  {
+   "check": "64x5 cost half OFF == closure-only within the LEAN gap the frozen base itself shows",
+   "passed": true,
+   "detail": "rel 1.63e-07 (frozen base 8.14e-08)   FLOPs +0.2215% (frozen base +0.2540%)"
+  },
+  {
+   "check": "64x5 composed row 0 == v32 row 0 bitwise",
+   "passed": true,
+   "detail": "max |diff| 0.00e+00"
+  },
+  {
+   "check": "64x5 composed finite, and it moves",
+   "passed": true,
+   "detail": "rel vs v32 3.79e-03  cost x1.0858"
+  },
+  {
+   "check": "96x6 cost half OFF == closure-only within the LEAN gap the frozen base itself shows",
+   "passed": true,
+   "detail": "rel 1.78e-07 (frozen base 1.58e-07)   FLOPs +0.2109% (frozen base +0.2316%)"
+  },
+  {
+   "check": "96x6 composed row 0 == v32 row 0 bitwise",
+   "passed": true,
+   "detail": "max |diff| 0.00e+00"
+  },
+  {
+   "check": "96x6 composed finite, and it moves",
+   "passed": true,
+   "detail": "rel vs v32 1.69e-03  cost x1.0186"
+  },
+  {
+   "check": "64x6 full-rank shared basis == sharing off (all rows)",
+   "passed": true,
+   "detail": "rel 2.7e-16, 3 joins, max ko 3"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=7 ORDINARY mu_out",
+   "passed": true,
+   "detail": "7.7e-17"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=7 ORDINARY cov_out",
+   "passed": true,
+   "detail": "2.6e-16"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=7 ORDINARY g_out",
+   "passed": true,
+   "detail": "4.0e-15"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=7 ORDINARY S3_birth",
+   "passed": true,
+   "detail": "4.7e-15"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=7 ORDINARY K21_birth",
+   "passed": true,
+   "detail": "1.4e-15"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=7 FINAL mu_out",
+   "passed": true,
+   "detail": "7.7e-17"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=7 INITIAL mu_out",
+   "passed": true,
+   "detail": "0.0e+00"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=7 INITIAL cov_out",
+   "passed": true,
+   "detail": "5.4e-17"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=7 INITIAL g_out",
+   "passed": true,
+   "detail": "6.2e-16"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=7 INITIAL S3_birth",
+   "passed": true,
+   "detail": "5.2e-16"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=7 INITIAL K21_birth",
+   "passed": true,
+   "detail": "5.5e-17"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=8 ORDINARY mu_out",
+   "passed": true,
+   "detail": "3.2e-16"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=8 ORDINARY cov_out",
+   "passed": true,
+   "detail": "6.9e-16"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=8 ORDINARY g_out",
+   "passed": true,
+   "detail": "3.0e-15"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=8 ORDINARY S3_birth",
+   "passed": true,
+   "detail": "1.0e-15"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=8 ORDINARY K21_birth",
+   "passed": true,
+   "detail": "6.7e-16"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=8 FINAL mu_out",
+   "passed": true,
+   "detail": "3.2e-16"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=8 INITIAL mu_out",
+   "passed": true,
+   "detail": "0.0e+00"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=8 INITIAL cov_out",
+   "passed": true,
+   "detail": "2.0e-17"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=8 INITIAL g_out",
+   "passed": true,
+   "detail": "8.5e-16"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=8 INITIAL S3_birth",
+   "passed": true,
+   "detail": "3.3e-16"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_qE_p4d5 n=8 INITIAL K21_birth",
+   "passed": true,
+   "detail": "1.0e-16"
+  },
+  {
+   "check": "64x5 composed float32 worst row <= 2x v32 + 1e-5",
+   "passed": true,
+   "detail": "5.78e-04 vs 7.97e-04"
+  },
+  {
+   "check": "96x6 composed equivariance <= 100x v32's floor",
+   "passed": true,
+   "detail": "5.47e-02 vs floor 5.47e-02"
+  },
+  {
+   "check": "64x5 cost half OFF == closure-only within the LEAN gap the frozen base itself shows",
+   "passed": true,
+   "detail": "rel 2.44e-07 (frozen base 8.14e-08)   FLOPs +0.2129% (frozen base +0.2540%)"
+  },
+  {
+   "check": "64x5 composed row 0 == v32 row 0 bitwise",
+   "passed": true,
+   "detail": "max |diff| 0.00e+00"
+  },
+  {
+   "check": "64x5 composed finite, and it moves",
+   "passed": true,
+   "detail": "rel vs v32 4.11e-03  cost x1.1325"
+  },
+  {
+   "check": "96x6 cost half OFF == closure-only within the LEAN gap the frozen base itself shows",
+   "passed": true,
+   "detail": "rel 1.58e-07 (frozen base 1.58e-07)   FLOPs +0.2050% (frozen base +0.2316%)"
+  },
+  {
+   "check": "96x6 composed row 0 == v32 row 0 bitwise",
+   "passed": true,
+   "detail": "max |diff| 0.00e+00"
+  },
+  {
+   "check": "96x6 composed finite, and it moves",
+   "passed": true,
+   "detail": "rel vs v32 1.63e-03  cost x1.0504"
+  },
+  {
+   "check": "64x6 full-rank shared basis == sharing off (all rows)",
+   "passed": true,
+   "detail": "rel 2.7e-16, 3 joins, max ko 3"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=7 ORDINARY mu_out",
+   "passed": true,
+   "detail": "7.7e-17"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=7 ORDINARY cov_out",
+   "passed": true,
+   "detail": "2.6e-16"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=7 ORDINARY g_out",
+   "passed": true,
+   "detail": "3.9e-15"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=7 ORDINARY S3_birth",
+   "passed": true,
+   "detail": "4.7e-15"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=7 ORDINARY K21_birth",
+   "passed": true,
+   "detail": "1.2e-15"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=7 FINAL mu_out",
+   "passed": true,
+   "detail": "7.7e-17"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=7 INITIAL mu_out",
+   "passed": true,
+   "detail": "0.0e+00"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=7 INITIAL cov_out",
+   "passed": true,
+   "detail": "5.4e-17"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=7 INITIAL g_out",
+   "passed": true,
+   "detail": "6.7e-16"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=7 INITIAL S3_birth",
+   "passed": true,
+   "detail": "5.2e-16"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=7 INITIAL K21_birth",
+   "passed": true,
+   "detail": "5.6e-17"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=8 ORDINARY mu_out",
+   "passed": true,
+   "detail": "3.2e-16"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=8 ORDINARY cov_out",
+   "passed": true,
+   "detail": "6.9e-16"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=8 ORDINARY g_out",
+   "passed": true,
+   "detail": "2.9e-15"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=8 ORDINARY S3_birth",
+   "passed": true,
+   "detail": "1.0e-15"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=8 ORDINARY K21_birth",
+   "passed": true,
+   "detail": "2.5e-16"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=8 FINAL mu_out",
+   "passed": true,
+   "detail": "3.2e-16"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=8 INITIAL mu_out",
+   "passed": true,
+   "detail": "0.0e+00"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=8 INITIAL cov_out",
+   "passed": true,
+   "detail": "2.0e-17"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=8 INITIAL g_out",
+   "passed": true,
+   "detail": "8.6e-16"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=8 INITIAL S3_birth",
+   "passed": true,
+   "detail": "3.3e-16"
+  },
+  {
+   "check": "estimator_k3_v41_b4q_a4r256_gram_p4d5 n=8 INITIAL K21_birth",
+   "passed": true,
+   "detail": "1.0e-16"
+  },
+  {
+   "check": "64x5 composed float32 worst row <= 2x v32 + 1e-5",
+   "passed": true,
+   "detail": "5.70e-04 vs 7.97e-04"
+  },
+  {
+   "check": "96x6 composed equivariance <= 100x v32's floor",
+   "passed": true,
+   "detail": "5.47e-02 vs floor 5.47e-02"
+  },
+  {
+   "check": "64x5 cost half OFF == closure-only within the LEAN gap the frozen base itself shows",
+   "passed": true,
+   "detail": "rel 1.63e-07 (frozen base 8.14e-08)   FLOPs +0.2215% (frozen base +0.2540%)"
+  },
+  {
+   "check": "64x5 composed row 0 == v32 row 0 bitwise",
+   "passed": true,
+   "detail": "max |diff| 0.00e+00"
+  },
+  {
+   "check": "64x5 composed finite, and it moves",
+   "passed": true,
+   "detail": "rel vs v32 3.79e-03  cost x1.0858"
+  },
+  {
+   "check": "96x6 cost half OFF == closure-only within the LEAN gap the frozen base itself shows",
+   "passed": true,
+   "detail": "rel 1.78e-07 (frozen base 1.58e-07)   FLOPs +0.2109% (frozen base +0.2316%)"
+  },
+  {
+   "check": "96x6 composed row 0 == v32 row 0 bitwise",
+   "passed": true,
+   "detail": "max |diff| 0.00e+00"
+  },
+  {
+   "check": "96x6 composed finite, and it moves",
+   "passed": true,
+   "detail": "rel vs v32 1.69e-03  cost x1.0186"
+  },
+  {
+   "check": "64x6 full-rank shared basis == sharing off (all rows)",
+   "passed": true,
+   "detail": "rel 2.7e-16, 3 joins, max ko 3"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=7 ORDINARY mu_out",
+   "passed": true,
+   "detail": "7.7e-17"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=7 ORDINARY cov_out",
+   "passed": true,
+   "detail": "2.6e-16"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=7 ORDINARY g_out",
+   "passed": true,
+   "detail": "4.0e-15"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=7 ORDINARY S3_birth",
+   "passed": true,
+   "detail": "4.7e-15"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=7 ORDINARY K21_birth",
+   "passed": true,
+   "detail": "1.4e-15"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=7 FINAL mu_out",
+   "passed": true,
+   "detail": "7.7e-17"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=7 INITIAL mu_out",
+   "passed": true,
+   "detail": "0.0e+00"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=7 INITIAL cov_out",
+   "passed": true,
+   "detail": "5.4e-17"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=7 INITIAL g_out",
+   "passed": true,
+   "detail": "6.2e-16"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=7 INITIAL S3_birth",
+   "passed": true,
+   "detail": "5.2e-16"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=7 INITIAL K21_birth",
+   "passed": true,
+   "detail": "5.5e-17"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=8 ORDINARY mu_out",
+   "passed": true,
+   "detail": "3.2e-16"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=8 ORDINARY cov_out",
+   "passed": true,
+   "detail": "6.9e-16"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=8 ORDINARY g_out",
+   "passed": true,
+   "detail": "3.0e-15"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=8 ORDINARY S3_birth",
+   "passed": true,
+   "detail": "1.0e-15"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=8 ORDINARY K21_birth",
+   "passed": true,
+   "detail": "6.7e-16"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=8 FINAL mu_out",
+   "passed": true,
+   "detail": "3.2e-16"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=8 INITIAL mu_out",
+   "passed": true,
+   "detail": "0.0e+00"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=8 INITIAL cov_out",
+   "passed": true,
+   "detail": "2.0e-17"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=8 INITIAL g_out",
+   "passed": true,
+   "detail": "8.5e-16"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=8 INITIAL S3_birth",
+   "passed": true,
+   "detail": "3.3e-16"
+  },
+  {
+   "check": "estimator_k3_v41_pairq_a4r256_gram_p4d5 n=8 INITIAL K21_birth",
+   "passed": true,
+   "detail": "1.0e-16"
+  },
+  {
+   "check": "64x5 composed float32 worst row <= 2x v32 + 1e-5",
+   "passed": true,
+   "detail": "5.78e-04 vs 7.97e-04"
+  },
+  {
+   "check": "96x6 composed equivariance <= 100x v32's floor",
+   "passed": true,
+   "detail": "5.47e-02 vs floor 5.47e-02"
+  }
+ ]
+}
