@@ -52597,3 +52597,15 @@ proxy (raw MSE added ≈ mean squared deviation when the deviation is large). A 
 join (rank 256/384/512, passes 1/3, weights consumption/uniform, age 3/4) at 1024×16 on two canonical
 networks selects at most two configurations for ONE further registered P11 read; it adds no truth
 read of its own.
+
+**Heavy-work review, label-free join proxy (before submission).** `local_sim/s7_proxy.py`: exact v32 and
+32 shared configurations (4 P11-screened calibration arms; lean arm with knobs age 3/4 × rank
+256/384/512 × passes 1/3 × weights cons/sqrt/unif, reduced grid) on 2 canonical 1024×16 networks
+(seeds 90_000_016_001/002, no block), final-row deviation MSE from exact v32, C/B, ops. One process,
+sequential, ≤ 3.8 GB per run. **Declared 10 GiB, 2 CPUs**, ~80 min, pinned local, live worktree.
+Calibration rule (set now): proxy usable only if calibration arms' dev_mse ordering matches their
+P11 raw-MSE increases and magnitudes within 2×. Selection rule (set now): at most two lean
+configurations with dev_mse ≤ 1.7e-9 (≈5% of v32 raw) and bundle C/B (with P4 d5) ≤ 0.22, lowest
+C/B first; if none, the shared-coordinate route is closed at affordable cost and a Strategist
+Packet follows. The lean generator gained `_SHARED_WEIGHTS` (default "cons"; lean/v37 files
+regenerated, never truth-scored).

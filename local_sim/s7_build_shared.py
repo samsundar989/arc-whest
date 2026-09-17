@@ -170,6 +170,10 @@ def _shared_join_lean(tw):
     J = fnp.concatenate([tw.A_L[:, :n], tw.M[:, :n]], axis=1)
     dA, dM = tw._wts
     dJ = fnp.concatenate([dA, dM])
+    if _SHARED_WEIGHTS == "sqrt":
+        dJ = fnp.sqrt(dJ)
+    elif _SHARED_WEIGHTS == "unif":
+        dJ = dJ * 0.0 + 1.0
     if tw.ko:
         Om = tw.Q
     else:
@@ -271,8 +275,10 @@ _SHARED_AGE = %d
 _SHARED_RANK = %d
 _SHARED_PASSES = %d
 _SHARED_FORCE = %r
+#: LEAN join weighting of the joiner's columns: "cons" (consumption energy), "sqrt", "unif".
+_SHARED_WEIGHTS = "cons"
 
-_P2_RANK = ''' % (bool(on), age, rank, passes, bool(force)), "flags")
+_P2_RANK =''' % (bool(on), age, rank, passes, bool(force)), "flags")
     fb = "def _proj_coef_d4_r2(n):"
     b = _patch(b, fb, _RUNTIME.lstrip("\n") + (_LEAN_RUNTIME if lean else "") + "\n\n" + fb, "runtime")
     if lean:

@@ -72,8 +72,10 @@ _SHARED_AGE = 2
 _SHARED_RANK = 256
 _SHARED_PASSES = 1
 _SHARED_FORCE = False
+#: LEAN join weighting of the joiner's columns: "cons" (consumption energy), "sqrt", "unif".
+_SHARED_WEIGHTS = "cons"
 
-_P2_RANK = 32
+_P2_RANK =32
 
 #: STAGE 1 distinct-index kappa4 feed routes; () is v31 exactly.
 _HUB_ROUTES = ('i', 'ii')
@@ -429,6 +431,10 @@ def _shared_join_lean(tw):
     J = fnp.concatenate([tw.A_L[:, :n], tw.M[:, :n]], axis=1)
     dA, dM = tw._wts
     dJ = fnp.concatenate([dA, dM])
+    if _SHARED_WEIGHTS == "sqrt":
+        dJ = fnp.sqrt(dJ)
+    elif _SHARED_WEIGHTS == "unif":
+        dJ = dJ * 0.0 + 1.0
     if tw.ko:
         Om = tw.Q
     else:
