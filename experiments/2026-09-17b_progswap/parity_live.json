@@ -1,6 +1,29 @@
 {
  "artifact": "progswap_parity.live",
  "label_free": true,
+ "negativity": {
+  "v32": {
+   "n_negative": 0,
+   "worst": 0.0,
+   "worst_over_max": 0.0
+  },
+  "v17": {
+   "n_negative": 79,
+   "worst": -8.607536017279926e-09,
+   "worst_over_max": 2.2469775988513527e-09
+  },
+  "chain3": {
+   "n_negative": 0,
+   "worst": 0.0,
+   "worst_over_max": 0.0
+  },
+  "chain4": {
+   "n_negative": 457,
+   "worst": -1.7360336642013863e-05,
+   "worst_over_max": 4.532049663527935e-06
+  }
+ },
+ "native_row0_float32_gap": 1.7423925702253484e-07,
  "network": {
   "width": 1024,
   "depth": 16,
@@ -24,19 +47,24 @@
    "detail": "flops 1082207899936 vs 1082207899936"
   },
   {
-   "check": "1024x16 chain3 finite, non-negative",
+   "check": "1024x16 chain3 finite",
    "passed": true,
    "detail": ""
   },
   {
-   "check": "1024x16 chain4 finite, non-negative",
-   "passed": false,
+   "check": "1024x16 chain4 finite",
+   "passed": true,
    "detail": ""
   },
   {
-   "check": "1024x16 all five chains share row 0 (INITIAL mode)",
-   "passed": false,
-   "detail": "max |diff| 1.742e-07"
+   "check": "1024x16 chain3 row 0 == v32 row 0 BITWISE",
+   "passed": true,
+   "detail": "max |diff| 0.000e+00"
+  },
+  {
+   "check": "1024x16 chain4 row 0 == v17 row 0 BITWISE",
+   "passed": true,
+   "detail": "max |diff| 0.000e+00"
   },
   {
    "check": "L0 INITIAL f64 mu_out",
