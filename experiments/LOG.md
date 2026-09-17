@@ -52609,3 +52609,40 @@ configurations with dev_mse ≤ 1.7e-9 (≈5% of v32 raw) and bundle C/B (with P
 C/B first; if none, the shared-coordinate route is closed at affordable cost and a Strategist
 Packet follows. The lean generator gained `_SHARED_WEIGHTS` (default "cons"; lean/v37 files
 regenerated, never truth-scored).
+
+### Join proxy RESULT (job 1639, label-free): proxy CALIBRATED; no affordable shared configuration — route CLOSED at affordable cost
+
+`experiments/2026-09-17_step3/proxy.json`. **Calibration (rule set before data): PASS** — dev_mse vs the
+P11 raw-MSE increases: a3r256 2.04e-8 vs 2.54e-8; a3r192 5.41e-8 vs 6.34e-8; a2r256 7.70e-8 vs 9.07e-8;
+a2r192 1.56e-7 vs 1.83e-7 (same order, within 25%).
+
+| config (lean) | dev_mse (2 nets) | C/B d4 |
+|---|---:|---:|
+| a3r256 p1 cons / sqrt / unif | 2.04e-8 / 2.20e-8 / 2.15e-8 | 0.2175 |
+| a4r256 p1 cons | 5.43e-9 | 0.2329 |
+| a3r384 p1 cons / sqrt | 2.91e-9 / 2.58e-9 | 0.2720 |
+| **a4r384 p1 cons** | **4.25e-10** | **0.2800** |
+| a3r512 p1 cons | 1.97e-10 | 0.3207 |
+| a4r512 p1 cons | 1.66e-11 | 0.3222 |
+| 3 power passes (any) | ≤ 15% better | +0.03–0.06 B |
+
+**Knowledge delta.** Damage is set by age and rank; the join weighting (consumption / sqrt / uniform)
+and extra passes change it by ≤ 15%. The only configurations under the 1.7e-9 bar (a4r384, a*r512)
+cost ≥ 0.280 B at depth 4 — no cheaper than v32 + P4 depth 5 (0.2802) — because the exact recent
+lineages set the floor and rank ≥ 384 forfeits Strassen levels. **Registered selection rule: none
+qualifies (bundle ≤ 0.22 B) → the shared-coordinate route is closed at affordable cost on this
+tower.** A bundle v32 + P4 d5 + a4r384 lean would forecast ≈ 1.15× over v32 (≈ 1.19× over v31,
+≈ 7.3e-9 public) — planning arithmetic, far below the 2× / 4.4e-9 release target, and not offered
+as a release.
+
+## 2026-09-17 — Slice synthesis: **release target UNMET**; supported pieces; Skeptic next
+
+Supported on P11 (DESIGN): v32 over v31 1.032× (earlier); **P4 at depth 5 exact, +7.9% adjusted, raw
+parity 1.0002**; lean shared spelling cuts ops; memory halves under sharing. Rejected with
+measurements: BUDGET-4, BUDGET-3 and PAIR closures (0.78–0.87×, recurrent harm; readout-only null);
+protected D22 feed at rank 32 (null); shared old-lineage coordinates at ranks ≤ 256 (0.26–0.79×) and,
+by calibrated proxy, at every configuration cheaper than 0.28 B. Instrument delivered: canonical
+executed-program audit, independent closure generator/oracles, float64 reference step with live
+parity, reciprocal same-state report, calibrated label-free compression proxy, step-0 receipt/shell
+fixes (preflight GREEN job 1611). Per the handoff: independent Skeptic on these claims, then a
+current Strategist Packet; no submission request.
