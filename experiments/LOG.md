@@ -53137,3 +53137,95 @@ Jobs run **relative to the git snapshot with no `cd` into the live path** (the
 under `C:/Users/samsu/Documents/arc-whest/experiments/`, and P12's truth is
 added to `.gpuq.toml` passthrough before the first job that reads it. Queue waits
 are spent on independent work, never on a duplicate experiment.
+
+## 2026-09-17 (evening) — **CONTRACT AMENDMENT (pre-data): three arms added to the stage-1 batch, and why the cost argument in prediction 1 is already wrong**
+
+*Written and committed BEFORE the P12 mint finished and before any arm was
+scored. It adds arms and predictions; it removes nothing, relaxes no gate, and
+changes no verdict rule.*
+
+### What changed my mind, and it is a MEASUREMENT, not a hunch
+
+`experiments/2026-09-17_closure/meter_v35.json`, already in the repository:
+
+| arm | C/B | operations |
+|---|---:|---:|
+| frozen v32 | 0.30232 | 13,850 |
+| v35_R (readout-only enrichment) | 0.30232 | 13,905 |
+| **v35_Q — the full BUDGET-4 closure, recurrent** | **0.30528** | 17,820 |
+| v35_QP | 0.31001 | 19,639 |
+
+**Enriching the nonlinear program costs about 1% of `C`, not 10–25%.** Every
+extra monomial is an `(n, n)` elementwise product and two `(n,)` Wick scales
+inside one fused `einsum`; none of them is a matmul, and the tower's `n^3`
+products are what `C` is made of. My own prediction 1 above says "C/B to rise to
+0.33–0.38 from 0.3023" and it is already contradicted by a number that was in
+the repository when I wrote it. **Recorded as a miss, not repaired**: the
+prediction stands as written and will be scored against the measured C/B.
+
+The consequence is not cosmetic. If the program carries accuracy, it carries it
+almost free, so the **adjusted** gain will be close to the **raw** gain — and
+the release arithmetic changes with it.
+
+### The arms added, with their own rule stated before any data
+
+The reference's 87-term program is our BUDGET-4 table minus 60 terms plus the
+six kappa_iiij rows. Structurally the 60 it drops are: **every three- and
+four-factor monomial** (27), `D22xD22` and `D4xD4` entirely (7), and a per-output
+subset of the remaining two-factor families (26). That is an empirical mask and
+**we do not import it.**
+
+What we can state as OUR rule, and it is not a rule invented to fit the answer:
+**every arm ever screened on this base was mixed-order.** `closure_budget4.json`
+and `closure_pair.json` were generated under the declared assumption
+"kappa_iiij assumed zero" (`local_sim/closure/README.md`) while carrying
+cost-4 blocks, and `kappa_iiij = (m/2) lam C` has upstream cost **3**. Follow-up
+F measured what that inconsistency costs on the smaller table: the same repair
+took BUDGET 3 from 0.7812x to 0.9292x of v32, a 1.1894x recovery. **BUDGET 4 and
+PAIR have never been run with it.** Completing them is our generator's own rule
+carried through, at the exponential expansion's own coefficient
+`1/(3! 1!) = 1/6`.
+
+| added arm | table | oriented terms | sha256 (16) |
+|---|---|---:|---|
+| `estimator_k3_v40_b4q.py` | `closure_budget4_q.json` | 147 | `5e04fd115da49c63` |
+| `estimator_k3_v40_pairq.py` | `closure_pair_q.json` | 120 | `7e5c24d33c279199` |
+| `estimator_k3_v32_p4d5.py` | — (the stage-2 screen's control) | — | `506a0c85d60a63b6` |
+
+`v32_p4d5` is added because the stage-2 screen is declared against it; scoring it
+in the SAME batch pairs it on the same networks under common random numbers
+instead of across two runs.
+
+Held to the identical gate as the transplanted chain, and passed before this was
+written: `progswap_parity.py --declared`, **48/48** — three-mode float64
+reference parity (initial / ordinary / final) on mu_out, cov_out, g_out, the S3
+birth slice and the K21 birth input; identical first row to v32; finite and
+non-negative. Artifact `experiments/2026-09-17b_progswap/parity_own_tables.json`.
+
+### Additional numbered predictions (Builder, before any data)
+
+8. **v40_b4q beats v32 on raw MSE**, gain 1.05–1.20x, t95 > 0 (55%). Mechanism:
+   the same inconsistency repair that moved BUDGET 3 by 1.1894x, applied to a
+   table that is otherwise strictly richer. Its cost lands at C/B 0.305–0.312,
+   so the adjusted gain is within 3% of the raw gain (80%).
+9. **v40_pairq is within 3% of v40_b4q on raw MSE** (60%): the 27 three- and
+   four-factor monomials that separate them are the highest-order, smallest
+   families in the table.
+10. **At least one of {chain3, v40_b4q, v40_pairq} beats v32 on raw by >= 1.10x**
+    (70%) — this is the union of predictions 1 and 8 and is the one I would bet
+    on if forced to bet on a single statement in this slice.
+
+### What is NOT changed
+
+Every gate, falsifier, branch rule, statistic, seed block, cost model and
+scope line above stands exactly as committed. `s9_decide.py`'s A1/A2/A3 read
+chain 3 and chain 4 and nothing else; the added arms are reported beside them
+and cannot change an attribution verdict. The stage-2 screen
+(`decide(gate=1.10)` adjusted vs `v32_p4d5`) and the release gate (2.0x on P13)
+are untouched. F5's failed 1.15 gate stays failed. P11 stays retired.
+
+**Workload review, revised.** One batch: control v32 + **8** candidates x 24
+networks, rows and predictions streamed. History: 6 arms in 72 min at <= 6.5 GB
+(job 1637); v17 runs at C/B 0.49 and v29 at 0.25, so the two reference arms are
+the slow ones. Estimate ~150 min. **Declared 12 GiB, 4 CPUs**, pinned local, git
+snapshot, no `cd` into the live path. One control execution, not two.
