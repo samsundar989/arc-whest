@@ -52685,3 +52685,52 @@ v35_Q3q (BUDGET 3+Q), v35_off (BUDGET 2 baseline floor), layers 3/8: one v32 cap
 f64 reference families (~1.1 GB) — declared 10 GiB, 2 CPUs, ~25 min; (2) meter v37_a4r256_p4d5,
 v37_a4r384_p4d5, v32_p4d5, v35_Q3q — declared 10 GiB (depth-5 v32 6.5 GB commit), ~25 min. Both
 pinned local, label-free.
+
+### Follow-up (a) RESULT (job 1640, label-free): no live-shape implementation defect
+
+`experiments/2026-09-17_followup/live_check.json` (canonical 1024×16 network by default — the job set no
+width override; the artifact itself does not record width, a gap noted here). Live `_layer` on captured
+v32 boundaries at layers 3 and 8 vs the f64 reference of each arm's declared table:
+f64 ≤ 8.8e-13 for v35_off (BUDGET 2), v35_Q (BUDGET 4), v35_Q3q (BUDGET 3+Q); **f32 errors identical
+to BUDGET 2's own floor** (mu 1.8–2.5e-6, cov 3.4–3.8e-5, g 0.85–1.3e-4, S3 0.7–1.7e-4, K21 3.9–4.5e-4),
+0 non-finite entries. Skeptic C1 alternative (c) — a live-shape float32 defect — is excluded at these layers.
+
+### Follow-up meter (job 1641, label-free), `experiments/2026-09-17_followup/meter.json`
+
+v37_a4r256_p4d5 C/B **0.21631**, 19,914 ops, 4.47 GB commit; v37_a4r384_p4d5 0.26022, 19,914 ops,
+4.48 GB; v32_p4d5 0.28020, 17,483 ops, **6.53 GB commit** (release caveat vs 8,192 MB); v35_Q3q
+0.30332, 15,411 ops. Skeptic's a4r256 bundle forecast 0.216 B: HIT.
+
+---
+
+## 2026-09-17 — **CONTRACT (Rule 1): Skeptic follow-ups F — κ_iiij-joint closure (C1) and a4 shared bundles on the adjusted objective (C3), P11 DESIGN**
+
+**Questions.** C1: does restoring κ_iiij = (m/2)λC — the cost-3 block the BUDGET-3 table omitted —
+remove the closure's harm? C3: does shared old-lineage storage at age 4 improve the ADJUSTED score on
+top of the verified P4 depth-5 saving?
+**Evidence.** CONFIRMED: Q3 0.7812×, Q 0.8352× vs v32; R null; live f32 at floor (above);
+single-factor Q rows coefficients == v17's. CONFIRMED (proxy, calibrated 1.17–1.25×): a4r256 added
+MSE ≈ 5.4e-9 (2 nets), a4r384 ≈ 4.2e-10. CONFIRMED (meter): bundle prices above. SPECULATIVE: both
+mechanisms (Skeptic C1(b), C3 forecast ≈1.08× over v32+P4 d5).
+**Mechanisms.** C1: a closure consistent to cost 3 in every block available in our κ4 model avoids
+mixed-order bias of repeated slices. C3: age-4 recent tower + rank-256 shared old legs keeps most
+consumed energy at 0.216 B.
+**Arms (committed, SHAs):** control `estimator_k3_v32.py` (10869a6c); `estimator_k3_v35_Q3.py` (034ff6d4,
+same-run comparator); `estimator_k3_v35_Q3q.py` (2e3aa7b3); `estimator_k3_v32_p4d5.py` (506a0c85);
+`estimator_k3_v37_a4r256_p4d5.py` (ecbec3aa); `estimator_k3_v37_a4r384_p4d5.py` (3bba6960).
+**Predictions (Builder).** (1) Q3q vs Q3: partial recovery, gain 1.02–1.12×, t95 > 0 (55%); (2) Q3q vs v32
+still worse, gain 0.80–0.95 → "partial" (60%), "stands" 25%, "wrong" 15%; (3) a4r256 bundle vs
+v32_p4d5: 1.03–1.12× passing gate 1.00 (60%); (4) a4r384 bundle vs v32_p4d5: 1.03–1.07× (60%);
+(5) cost base vs v32: 1.12–1.25×, gate 1.15 passes (45%). **Samuel (asked 2026-09-17 before data,
+verbatim):** κ_iiij arm "I don't know"; a4r256 "I don't know".
+**Gates / verdict (executable, `local_sim/s8_decide.py`, committed with this entry):** F1 Q3→Q3q gate
+1.00; F2 v32→Q3q gate 1.00 with outcomes pass → "C1 lane closure WRONG", gain ≤ 0.80 → "C1 stands as
+worded", else "partial"; F3 v32_p4d5→a4r256 bundle gate 1.00; F4 v32_p4d5→a4r384 bundle gate 1.00;
+cost base = lowest score among passing bundles else v32_p4d5; F5 v32→cost base gate 1.15 (reported).
+**Falsifiers.** C1: Q3q not better than Q3 (F1 t95 ≤ 0) → κ_iiij inconsistency does not explain the
+harm. C3: neither bundle passes F3/F4 → shared storage does not pay on the adjusted objective at age 4.
+**Statistic / data / scope.** Paired arithmetic adjusted score, studentised t; P11 DESIGN (≈13th read,
+design tier only, registered read with actual timestamp); caps off. Everything else as v32.
+**Workload review.** 6 arms × 24 nets; history 6 arms (job 1637) 72 min, ≤ 6.5 GB (depth-5 arm).
+**Declared 10 GiB, 4 CPUs**, pinned local, **git snapshot, no `cd` to the live path** (Skeptic protocol
+correction), ~90 min.

@@ -1,0 +1,186 @@
+{
+ "artifact": "closure_audit.live_check",
+ "label_free": true,
+ "rows": [
+  {
+   "arm": "estimator_k3_v35_off.py",
+   "table": "local_sim/closure/closure_budget2.json",
+   "layer": 3,
+   "dtype": "f64",
+   "ref_nonfinite_family_entries": 0,
+   "live_nonfinite": 0,
+   "rel": {
+    "mu_out": 4.468195282803982e-15,
+    "cov_out": 8.075674367747818e-14,
+    "g_out": 2.1236630506831117e-13,
+    "S3": 1.6519487994842085e-13,
+    "K21": 8.746817337644766e-13
+   }
+  },
+  {
+   "arm": "estimator_k3_v35_off.py",
+   "table": "local_sim/closure/closure_budget2.json",
+   "layer": 3,
+   "dtype": "f32",
+   "ref_nonfinite_family_entries": 0,
+   "live_nonfinite": 0,
+   "rel": {
+    "mu_out": 2.4769155997551365e-06,
+    "cov_out": 3.399622245733404e-05,
+    "g_out": 8.713751970717083e-05,
+    "S3": 6.714074385023352e-05,
+    "K21": 0.0003909324952499169
+   }
+  },
+  {
+   "arm": "estimator_k3_v35_off.py",
+   "table": "local_sim/closure/closure_budget2.json",
+   "layer": 8,
+   "dtype": "f64",
+   "ref_nonfinite_family_entries": 0,
+   "live_nonfinite": 0,
+   "rel": {
+    "mu_out": 3.223102964662035e-15,
+    "cov_out": 5.571108076278949e-14,
+    "g_out": 4.1544711825863035e-13,
+    "S3": 4.62217150530392e-13,
+    "K21": 8.660651042707991e-13
+   }
+  },
+  {
+   "arm": "estimator_k3_v35_off.py",
+   "table": "local_sim/closure/closure_budget2.json",
+   "layer": 8,
+   "dtype": "f32",
+   "ref_nonfinite_family_entries": 0,
+   "live_nonfinite": 0,
+   "rel": {
+    "mu_out": 1.8165919005184688e-06,
+    "cov_out": 3.809619325311799e-05,
+    "g_out": 0.00012842089040163368,
+    "S3": 0.0001638171126084442,
+    "K21": 0.00045129237647029363
+   }
+  },
+  {
+   "arm": "estimator_k3_v35_Q.py",
+   "table": "local_sim/closure/closure_budget4.json",
+   "layer": 3,
+   "dtype": "f64",
+   "ref_nonfinite_family_entries": 0,
+   "live_nonfinite": 0,
+   "rel": {
+    "mu_out": 4.468194801710211e-15,
+    "cov_out": 8.07540724422557e-14,
+    "g_out": 3.118354088648819e-13,
+    "S3": 1.0720427933883039e-13,
+    "K21": 8.78285779007191e-13
+   }
+  },
+  {
+   "arm": "estimator_k3_v35_Q.py",
+   "table": "local_sim/closure/closure_budget4.json",
+   "layer": 3,
+   "dtype": "f32",
+   "ref_nonfinite_family_entries": 0,
+   "live_nonfinite": 0,
+   "rel": {
+    "mu_out": 2.4788699633732384e-06,
+    "cov_out": 3.381028492136213e-05,
+    "g_out": 0.00011401337371455226,
+    "S3": 6.823854031604784e-05,
+    "K21": 0.00039301461854175505
+   }
+  },
+  {
+   "arm": "estimator_k3_v35_Q.py",
+   "table": "local_sim/closure/closure_budget4.json",
+   "layer": 8,
+   "dtype": "f64",
+   "ref_nonfinite_family_entries": 0,
+   "live_nonfinite": 0,
+   "rel": {
+    "mu_out": 3.2383783337183723e-15,
+    "cov_out": 5.57164573555174e-14,
+    "g_out": 3.722722451474659e-13,
+    "S3": 5.944516290242358e-13,
+    "K21": 8.708345285961293e-13
+   }
+  },
+  {
+   "arm": "estimator_k3_v35_Q.py",
+   "table": "local_sim/closure/closure_budget4.json",
+   "layer": 8,
+   "dtype": "f32",
+   "ref_nonfinite_family_entries": 0,
+   "live_nonfinite": 0,
+   "rel": {
+    "mu_out": 1.8169511469093002e-06,
+    "cov_out": 3.8337320518607175e-05,
+    "g_out": 0.00012543286385965484,
+    "S3": 0.00017163788386036452,
+    "K21": 0.0004545426052787776
+   }
+  },
+  {
+   "arm": "estimator_k3_v35_Q3q.py",
+   "table": "local_sim/closure/closure_budget3_q.json",
+   "layer": 3,
+   "dtype": "f64",
+   "ref_nonfinite_family_entries": 0,
+   "live_nonfinite": 0,
+   "rel": {
+    "mu_out": 4.468195282803982e-15,
+    "cov_out": 8.075674367747818e-14,
+    "g_out": 2.0999577276045418e-13,
+    "S3": 1.6519487994842085e-13,
+    "K21": 8.759484335167872e-13
+   }
+  },
+  {
+   "arm": "estimator_k3_v35_Q3q.py",
+   "table": "local_sim/closure/closure_budget3_q.json",
+   "layer": 3,
+   "dtype": "f32",
+   "ref_nonfinite_family_entries": 0,
+   "live_nonfinite": 0,
+   "rel": {
+    "mu_out": 2.4769155997551365e-06,
+    "cov_out": 3.399622245733404e-05,
+    "g_out": 8.469285984450627e-05,
+    "S3": 6.714074385023352e-05,
+    "K21": 0.00039190909605554353
+   }
+  },
+  {
+   "arm": "estimator_k3_v35_Q3q.py",
+   "table": "local_sim/closure/closure_budget3_q.json",
+   "layer": 8,
+   "dtype": "f64",
+   "ref_nonfinite_family_entries": 0,
+   "live_nonfinite": 0,
+   "rel": {
+    "mu_out": 3.223102964662035e-15,
+    "cov_out": 5.571108076278949e-14,
+    "g_out": 4.012622452263694e-13,
+    "S3": 4.62217150530392e-13,
+    "K21": 8.671447921825871e-13
+   }
+  },
+  {
+   "arm": "estimator_k3_v35_Q3q.py",
+   "table": "local_sim/closure/closure_budget3_q.json",
+   "layer": 8,
+   "dtype": "f32",
+   "ref_nonfinite_family_entries": 0,
+   "live_nonfinite": 0,
+   "rel": {
+    "mu_out": 1.8165919005184688e-06,
+    "cov_out": 3.809619325311799e-05,
+    "g_out": 0.0001217348585917198,
+    "S3": 0.0001638171126084442,
+    "K21": 0.000452501873465502
+   }
+  }
+ ]
+}
