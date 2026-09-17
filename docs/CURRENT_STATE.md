@@ -2,7 +2,7 @@
 
 ## September 17: audit refinements executed through the discriminators — no major release found yet
 
-> **Skeptic 2026-09-17: A PROVISIONAL, B REJECT, C PROVISIONAL.** v32_i beats v32 (paired); N1 un-parked (0.17 gate was post-data; 0.20 target met by some configs; accuracy unmeasured); "exhausted" withdrawn. Follow-ups in progress — see LOG.
+> **Skeptic 2026-09-17 A PROVISIONAL / B REJECT / C PROVISIONAL, follow-ups done:** route split exact at non-unit variance (v32_i vs v32 open); N1 parked on measured accuracy (n=96: +87–321% at affordable ranks), not the retracted 0.17 gate; v17's joint κ4 recipe on our base hurts (0.785×/0.887×). Strategist packet current; decision with Samuel.
 
 **Active plan pointer:** `docs/CLAUDE_CODE_HANDOFF_NEXT_SUBMISSION_2026-09-16.md` (executed
 through stage 3) → **decision now with Samuel/strategist:** `docs/STRATEGIST_PACKET_2026-09-17.md`.

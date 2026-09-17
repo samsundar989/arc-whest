@@ -1,6 +1,10 @@
 # Strategist packet — 17 September 2026
 
-> **PARTLY RETRACTED (Skeptic, 2026-09-17): A PROVISIONAL, B REJECT, C PROVISIONAL.** v32_i beats v32 paired; the N1 0.17 gate was set after data and N1 is un-parked (pre-registered target 0.20 B is met by some metered configs); "discriminators exhausted" is withdrawn — v17's joint κ4 recipe on our base was never tested. See `experiments/LOG.md` 2026-09-17. Do not act on §4–§6 until the follow-ups there return.
+> **UPDATED after the independent Skeptic (A PROVISIONAL, B REJECT, C PROVISIONAL) and its three follow-ups (2026-09-17):**
+> (1) the (i)/(ii) route split is exact at non-unit variance — v32_i's paired lead over v32 (t95 [+2.2e-11, +8.4e-11]) is error cancellation, not a derivation error; the v32 vs v32_i choice needs its own contract.
+> (2) The N1 "0.17 B" gate was post-data and is retracted; N1 is now parked on MEASURED accuracy: continuous merged tier at n=96 loses +98% (join_b a=2 r=n/8), +86% (fixed basis a=3) — only r=n/4 (0.5–1.0 B at 1024) is within 5%.
+> (3) v17's joint κ4 recipe on our base hurts (0.785× with v17 λ, 0.887× with ours; 0/24). The κ4-channel conclusions in §4 therefore STAND; §3's "rejected at n=40 and n=64" for the JᵀJ proxy is corrected: informative at n=64 (3/3), did not pay at r=n/4.
+
 
 *Self-contained: assumes no repository access and no shared chat history.
 Answers the 16-September audit and its execution handoff

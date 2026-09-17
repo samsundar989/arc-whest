@@ -52087,3 +52087,19 @@ join_a a≤3) — **FAILS** (+98%, +321%, +86%). join_b a=3 r=n/8 is +11.7% and 
 Builder prediction (join_b a=2 r=n/8 5–15%): FALSIFIED (much worse at n=96).
 **N1 merged-core remains parked, now on measured accuracy at the metered-affordable
 ranks** (tiny widths do not certify 1024; a 1024 test would need a new contract).
+
+### Follow-up (3) RESULT (job 1525): v17's joint κ4 recipe on our base also HURTS
+
+`experiments/2026-09-16_diag_gap/score_recipe.json`. Control v32 + v17 λ (raw
+3.2469e-8). Route-(i) feed + (3,1) rows + v17 λ: raw 4.1330e-8, **0.7852×**
+(0/24, t95 [−3.01e-9, −2.36e-9]); same with our λ: raw 3.6605e-8, **0.8865×**
+(0/24). Builder prediction (no gain): HIT. The joint-package hypothesis is
+rejected: v17's κ4 recipe does not transfer to our K3 base in any tested
+combination. Claim C's re-opened question is answered; the gap to v17/v29 is
+located in the K3 base/closure, not the κ4 channel [I].
+
+**Session synthesis (2026-09-17).** Supported: v32 vs v31 +3.2% (v32_i
+numerically better, open); P4 exact cost 0.301 → 0.280 (parity run owed).
+Rejected with measurements: (3,1) route in every form, λ-profile transplant, κ4
+package transplant, N1 merged core at affordable rank (accuracy). No submission.
+Strategist Packet updated; decision with Samuel.
