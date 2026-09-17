@@ -52734,3 +52734,35 @@ design tier only, registered read with actual timestamp); caps off. Everything e
 **Workload review.** 6 arms × 24 nets; history 6 arms (job 1637) 72 min, ≤ 6.5 GB (depth-5 arm).
 **Declared 10 GiB, 4 CPUs**, pinned local, **git snapshot, no `cd` to the live path** (Skeptic protocol
 correction), ~90 min.
+
+### Follow-up F RESULT (job 1642, git snapshot, no `cd`): κ_iiij explains most of the closure harm but not all; a4r256 shared bundle PAYS on the adjusted objective
+
+`experiments/2026-09-17_followupF/{score.json,rows.jsonl,decide.json}` (committed `s8_decide.py`), P11,
+0 failures; candidate SHAs in the artifact == committed LF files (the snapshot did not rewrite them).
+
+| | adjusted | raw | t95 (ctrl − cand) | better | verdict |
+|---|---:|---:|---|---:|---|
+| F1 Q3 → Q3q | **1.1894×** | 1.1901× | [+1.87e-9, +2.22e-9] | 24/24 | PASS |
+| F2 v32 → Q3q | 0.9292× | 0.9322× | [−1.26e-9, −2.75e-10] | 7/24 | fail → **"partial"** |
+| F3 v32_p4d5 → v37_a4r256_p4d5 | **1.0654×** | 0.8225× | [+3.71e-10, +7.73e-10] | 21/24 | PASS |
+| F4 v32_p4d5 → v37_a4r384_p4d5 | 1.0537× | 0.9786× | [+4.00e-10, +5.51e-10] | 24/24 | PASS |
+| F5 v32 → a4r256 bundle (gate 1.15) | 1.1493× | 0.8223× | [+1.08e-9, +1.53e-9] | 24/24 | fail (gain < 1.15) |
+
+Scores: v32 1.0052e-8 · Q3 1.2868e-8 · Q3q 1.0818e-8 · v32_p4d5 9.3182e-9 · **a4r256 bundle 8.7462e-9
+(raw 4.0434e-8, C/B 0.2163)** · a4r384 bundle 8.8432e-9 (raw 3.3983e-8, C/B 0.2602).
+**Cost base (registered rule): `estimator_k3_v37_a4r256_p4d5.py`.** Against v31 on P11 (score
+1.0372e-8, job 1463) ≈ **1.19×**; planning projection from v31's graded 8.752e-9 ≈ 7.4e-9 — **the 2× /
+4.4e-9 release target is not met.**
+
+Predictions: (1) Q3q vs Q3 1.02–1.12× — direction HIT, magnitude above range (1.19×); (2) "partial" HIT;
+(3) a4r256 bundle 1.03–1.12× HIT; (4) a4r384 1.03–1.07× HIT; (5) cost base vs v32 1.12–1.25× HIT,
+gate 1.15 (45%) failed by 0.0007. Samuel: "I don't know" ×2. Skeptic C3 forecast (≈1.08× over
+p4d5; proxy added error 5.4e-9 ×1.2): raw added 7.2e-9 measured, gain 1.065× — close.
+
+**Knowledge delta.** (i) The step-2 closure harm was mostly the κ_iiij mixed-order inconsistency the
+Skeptic named: restoring it recovers 1.19×, but the consistent BUDGET-3 closure still loses 7% to
+v32 (7/24) — the closure lane is narrowed, not reopened. (ii) Shared old-lineage storage is
+score-positive at age 4 despite +22% raw error, because the price falls 23%; the calibrated proxy
+predicted the loss. (iii) Closure and cost results are now attributed; no remaining in-handoff lever
+reaches the major-release criterion. Per the handoff: current Strategist Packet, fallback retained,
+no submission request.

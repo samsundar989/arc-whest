@@ -1,0 +1,125 @@
+{
+ "artifact": "s8_decide",
+ "tier": "DESIGN (P11, reused)",
+ "arms": {
+  "v32": {
+   "sha256": "10869a6ca7b9b95005db3d63ea0cf63c44f070dd059553f492ad1cf12105657c",
+   "raw": 3.3248923318277925e-08,
+   "c_over_b": 0.3023208955064547,
+   "score": 1.0051844272207226e-08
+  },
+  "Q3": {
+   "sha256": "034ff6d42d0bad7b5e12001a9b59d42ba740d88043b779b05591ac7cec48cd01",
+   "raw": 4.244478901682669e-08,
+   "c_over_b": 0.30316072126242943,
+   "score": 1.2867592852172823e-08
+  },
+  "Q3q": {
+   "sha256": "2e3aa7b30549925b18c260229302ba61b5b850f003d922e846ec199758d6022b",
+   "raw": 3.566634913336012e-08,
+   "c_over_b": 0.30331820325318404,
+   "score": 1.081825293573155e-08
+  },
+  "p4d5": {
+   "sha256": "506a0c85d60a63b66789b549dca19042f84a736e8d0f3da89f5b30b1f5ee545a",
+   "raw": 3.3255247000596455e-08,
+   "c_over_b": 0.2802036537550521,
+   "score": 9.318241716093863e-09
+  },
+  "a4r256": {
+   "sha256": "ecbec3aaf7d55c6e42cea36b0efc631b2f757c5bd00d3d924987542dc783e6c2",
+   "raw": 4.043362563284821e-08,
+   "c_over_b": 0.21631129453726317,
+   "score": 8.746249903476463e-09
+  },
+  "a4r384": {
+   "sha256": "3bba69602f912de35a00b0ed0780fde681667ebb4dd398040e75af2fc5de7cf4",
+   "raw": 3.398320025382873e-08,
+   "c_over_b": 0.26022178798393725,
+   "score": 8.843169131467502e-09
+  }
+ },
+ "comparisons": {
+  "F1": {
+   "control": "Q3",
+   "candidate": "Q3q",
+   "gate": 1.0,
+   "passed": true,
+   "gain": 1.1894335368765985,
+   "raw_gain": 1.1900514083491218,
+   "t95": [
+    1.8743018505258584e-09,
+    2.2243779823566858e-09
+   ],
+   "better": 24,
+   "reasons": []
+  },
+  "F2": {
+   "control": "v32",
+   "candidate": "Q3q",
+   "gate": 1.0,
+   "passed": false,
+   "gain": 0.9291559674119878,
+   "raw_gain": 0.9322211026970214,
+   "t95": [
+    -1.2577973069589252e-09,
+    -2.7502002008972297e-10
+   ],
+   "better": 7,
+   "reasons": [
+    "arithmetic gain 0.9292x is below the pre-registered gate 1.0000x",
+    "the candidate is WORSE than the control (0.9292x)",
+    "the t 95% interval on the paired difference does not lie strictly above zero [-1.2578e-09, -2.7502e-10]"
+   ]
+  },
+  "F3": {
+   "control": "p4d5",
+   "candidate": "a4r256",
+   "gate": 1.0,
+   "passed": true,
+   "gain": 1.0653985215297868,
+   "raw_gain": 0.8224651259960212,
+   "t95": [
+    3.7084149804133257e-10,
+    7.731421271934675e-10
+   ],
+   "better": 21,
+   "reasons": []
+  },
+  "F4": {
+   "control": "p4d5",
+   "candidate": "a4r384",
+   "gate": 1.0,
+   "passed": true,
+   "gain": 1.053721983325623,
+   "raw_gain": 0.9785790258776391,
+   "t95": [
+    3.995476556899193e-10,
+    5.505975135628039e-10
+   ],
+   "better": 24,
+   "reasons": []
+  },
+  "F5": {
+   "control": "v32",
+   "candidate": "a4r256",
+   "gate": 1.15,
+   "passed": false,
+   "gain": 1.1492747615422942,
+   "raw_gain": 0.8223087293776236,
+   "t95": [
+    1.0775551204559659e-09,
+    1.53363361700556e-09
+   ],
+   "better": 24,
+   "reasons": [
+    "arithmetic gain 1.1493x is below the pre-registered gate 1.1500x"
+   ]
+  }
+ },
+ "C1": "partial: kappa_iiij recovers part (per F1); closure still not supported on this base",
+ "cost_base": {
+  "arm": "a4r256",
+  "file": "estimator_k3_v37_a4r256_p4d5.py"
+ }
+}
