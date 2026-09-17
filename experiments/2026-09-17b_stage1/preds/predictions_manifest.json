@@ -54,7 +54,58 @@
   "cand0": {
    "path": "external/504aldo/estimators/estimator_v17.py",
    "candidate_sha256": "3e5b611b42e52e1e1f2289e3c0d5b79e490736b6bb884e770a83cd24d51d8d94",
-   "n_written": 0
+   "n_written": 24,
+   "rows_hash": "85cb8b3a71981ea327c3777aed74c73871fc02512a099675b3ce98b3606b4f72",
+   "n_failed": 0
+  },
+  "cand1": {
+   "path": "estimator_k3_v38_v17prog.py",
+   "candidate_sha256": "2fe7ef1eb2b11bf477956daafacbf765bc165792680bd165e4278d1551469397",
+   "n_written": 24,
+   "rows_hash": "5acc50eb4abc42c3a514ef2c8e2e8517b5ab662f5e5a4b0b01e18235c79a896c",
+   "n_failed": 0
+  },
+  "cand2": {
+   "path": "estimator_k3_v38_v17prog_last.py",
+   "candidate_sha256": "49f04cf1213478165ac81375f792ef7e8375b8cc3f0bb0df786a27afa16a9528",
+   "n_written": 24,
+   "rows_hash": "55154a1552644a8942c903eecf185e5bd48c13aa619db95c0e2f585ade13d475",
+   "n_failed": 0
+  },
+  "cand3": {
+   "path": "_diag/estimator_v17_v32prog.py",
+   "candidate_sha256": "ee037c288792d31b41f3143df2fde0c93310cc4e50b095be672989aadf356ea9",
+   "n_written": 24,
+   "rows_hash": "1946f1190e4cc6778eb25a91cc19ab5fef93344dd97603a0e9c6e196bead0fb3",
+   "n_failed": 0
+  },
+  "cand4": {
+   "path": "external/504aldo/estimators/estimator_v29.py",
+   "candidate_sha256": "d9b2c1141710063b445cfcdf0fbb99885d69072628757aedbe1a81cff63b9074",
+   "n_written": 24,
+   "rows_hash": "1ed05ef1e8e0b7fbc2a704e6c03fb555be5f778a4bf1aeb321e433146fb2c46c",
+   "n_failed": 0
+  },
+  "cand5": {
+   "path": "estimator_k3_v40_b4q.py",
+   "candidate_sha256": "5e04fd115da49c6381a405302b71d9739fbe00d0aa026c55a39ca70632f4c11f",
+   "n_written": 24,
+   "rows_hash": "fd92eb2d9e5e3086b415f4bdc8de831006f8b69f5fa74f63c19050a8f28a2309",
+   "n_failed": 0
+  },
+  "cand6": {
+   "path": "estimator_k3_v40_pairq.py",
+   "candidate_sha256": "7e5c24d33c279199c5284e6997157f98772a3ddb8bee753baf219628721cc4d5",
+   "n_written": 24,
+   "rows_hash": "a789323656d9e6f18c6e966d55ef87b2ddb58faf01e8f79ba953ef902ef3189b",
+   "n_failed": 0
+  },
+  "cand7": {
+   "path": "estimator_k3_v32_p4d5.py",
+   "candidate_sha256": "506a0c85d60a63b66789b549dca19042f84a736e8d0f3da89f5b30b1f5ee545a",
+   "n_written": 24,
+   "rows_hash": "e87a46540dbf4d3e938e4ad61bd069ff8809683671282900f5f976d8d2c73a0e",
+   "n_failed": 0
   }
  },
  "artifact": "design_score.prediction_sidecars",

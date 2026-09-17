@@ -1,0 +1,93 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260916233642
+Username: SAM_MEGA_PC\samsu
+RunAs User: SAM_MEGA_PC\samsu
+Configuration Name: 
+Machine: SAM_MEGA_PC (Microsoft Windows NT 10.0.26200.0)
+Host Application: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/preflight.ps1 -Log C:/Users/samsu/Documents/arc-whest/experiments/2026-09-17_step0/preflight_default_live.log
+Process ID: 40944
+PSVersion: 5.1.26100.9444
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9444
+BuildVersion: 10.0.26100.9444
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+preflight -- arc-whest
+repo:    C:\Users\samsu\Documents\arc-whest
+shipped: estimator.py   archive: estimator_v2_6_1.py
+HEAD:    338a498569610973e80937ba681de63701905fcc
+worktree: DIRTY at start --
+    ?? _snapshot_for_review.tgz
+    ?? estimator_k3_v33.py
+    ?? estimator_k3_v33_dense.py
+    ?? experiments/2026-09-17_closure/
+    ?? experiments/2026-09-17_step0/
+    ?? local_sim/closure/
+    ?? local_sim/closure_audit/
+  (steps 15/16 regenerate tracked evidence, so the tree is
+   EXPECTED to be dirty at the END of a -Full run)
+
+=== 1. official stack + round configuration ===
+
+  PASS  1. official stack + round configuration
+
+=== 2. mint provenance + dataset pin ===
+
+
+  PASS  2. mint provenance + dataset pin
+
+=== 3. invariant suite ===
+
+
+  PASS  3. invariant suite
+
+=== 4. whest validate ===
+  child stdout encoding: utf-8
+
+  PASS  4. whest validate
+
+=== 5. ship-file identity vs estimator_v2_6_1.py ===
+
+  PASS  5. ship-file identity vs estimator_v2_6_1.py
+
+=== 6. vault seal (counter vs log) ===
+
+  PASS  6. vault seal (counter vs log)
+
+=== 7. seed ledger (consumption + source scan) + enforcement labels ===
+
+
+  PASS  7. seed ledger (consumption + source scan) + enforcement labels
+
+=== 8. canonical scorer + the binding gate ===
+
+  FAIL  8. canonical scorer + the binding gate -- exit code 1
+
+=== 9. seed-ledger refusals + the truth-read register ===
+
+
+  PASS  9. seed-ledger refusals + the truth-read register
+
+=== 10. vault integrity (array hashes + seed->weights) ===
+
+  PASS  10. vault integrity (array hashes + seed->weights)
+
+=== 11. lifecycle evaluator + the certification consumers' mutation battery ===
+
+
+  PASS  11. lifecycle evaluator + the certification consumers' mutation battery
+
+=== 12. counted-FLOP anchor vs the official runner ===
+
+  PASS  12. counted-FLOP anchor vs the official runner
+
+PREFLIGHT RED -- failed: 8. canonical scorer + the binding gate
+Do not promote, do not submit, do not spend a decision block.
+**********************
+Windows PowerShell transcript end
+End time: 20260916234556
+**********************

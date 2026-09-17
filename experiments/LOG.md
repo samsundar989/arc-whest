@@ -53556,3 +53556,97 @@ and scope line stands. Stage 2's screen is still `decide(gate=1.10)` adjusted vs
 `v32_p4d5`; stage 3's is still its three registered conditions; the release gate
 is still 2.0x on untouched P13. F5 stays failed, P11 stays retired, no
 designation is authorised.
+
+## 2026-09-17 (late) — **CONTRACT AMENDMENT 4 (pre-data): batch B's final arm list, including branch (b)'s two missing cells**
+
+*Committed before batch B is submitted and before any of its arms is scored.
+Branch (b) is not a new hypothesis — it is the branch stage 1's own registered
+verdict selected — so this amendment names its arms rather than opening a contract.*
+
+### Branch (b), as the contract defined it
+
+"ONE preregistered 2x2 of {v32 program, complete program} x {v32 lambda/feed
+package, coherent lambda/feed package}, backend, rank and storage fixed."
+
+Two of the four cells are already measured on P12 by batch A: v32 (3.0610e-8) and
+chain 3 (2.8422e-8). Batch B supplies the other two, on the SAME networks:
+
+| arm | sha256 (16) | cell |
+|---|---|---|
+| `estimator_k3_v32_lam504.py` | `3087d91c...` | our program x the reference lambda table |
+| `estimator_k3_v38_v17prog_lam504.py` | `485a2a9b0fd83006` | the complete program x the reference lambda table |
+
+Both are **DIAGNOSTIC**, banner-labelled, never packaged, never submitted. The
+reference's fitted lambda table is an oracle here and nothing else: **if the
+interaction is real, the production answer is our own bounded four-parameter fit
+under the contract's declared fit policy** — parameter groups, ranges, ridge, the
+12/12 network split of P12 and the 40-evaluation cap, all already fixed — and
+never this table.
+
+`progswap_parity --declared` on the new cell: **24/24**. That run also found and
+fixed a harness bug worth recording: `declared` mode took lambda from v32 for
+every arm, which was right only while every arm inherited v32's table. It now
+reads the arm's own `_K4_LAM[4]`. The mismatch had shown up as 1e-5 "failures" in
+cov_out, g_out and K21_birth that were entirely the harness asking the reference a
+different question. 18/24 to 24/24, tolerance unchanged at 1e-10, base suite
+re-verified at 69/69.
+
+**Prediction 14 (Builder, before data).** The lambda table is NOT the interaction:
+the complete program's raw gain with the reference lambda stays within 4% of its
+gain with ours, i.e. cell4/cell3 in [1.04, 1.12] against chain3/v32's 1.0770
+(60%). Mechanism for the prediction: the 2026-09-16 D1 diagnostic already measured
+the reference lambda table on our program at **-2.4% raw**, far below its 10%
+consequence threshold. If prediction 14 holds, the interaction is in the
+regenerated core's *construction* rather than its scale, and the remaining lead is
+the core itself — which is a new hypothesis and would need a new contract, not
+this one.
+
+### The composed candidate's closure, resolved by the registered rule
+
+Amendment 2 fixed the rule: best OFFICIAL-PRECISION adjusted among
+{v32, chain3's program, b4q, pairq}, with chain 3's program eligible only as a
+diagnostic. Measured: chain3 **1.0761x**, v32_p4d5 1.0791x (a cost effect, not a
+closure), pairq **1.0476x**, b4q 1.0150x. Chain 3's program wins and is not
+shippable, so **the candidate carries `closure_pair_q.json`**, and the
+**1.0761 vs 1.0476** gap is the measured price of not importing the reference's
+pruning mask. Recorded as such.
+
+### Batch B, as submitted
+
+Control `estimator_k3_v32_p4d5.py` (`506a0c85d60a63b6`), the stage-2 screen's
+registered control. Candidates:
+
+| arm | sha256 (16) | question |
+|---|---|---|
+| `estimator_k3_v39_v37_a4r256_p4d5_qoff.py` | `446de4a975219a9a` | the cost base; stage 3's control |
+| `estimator_k3_v39_v37_a4r256_p4d5_qE.py` | `fb94cddf914cd7d8` | stage 3: the consumed-query basis |
+| `estimator_k3_v39_v37_a4r256_p4d5_qEd.py` | `74cb93cf7672974f` | stage 3: the preregistered D3-protected secondary |
+| `estimator_k3_v33.py` | `6cf50de8e1401ad3` | P3, the kappa3 x C birth feed, alone |
+| `estimator_k3_v42_pairq_p3_uncompressed.py` | `098862f664b3bc0e` | our closure AND P3, uncompressed |
+| `estimator_k3_v41_pairq_a4r256_gram_p4d5.py` | `1649056ab80732e7` | the release candidate, old join objective |
+| `estimator_k3_v41_pairq_a4r256_qE_p4d5.py` | `5a810ad2df64bda5` | the release candidate, new join objective |
+| `estimator_k3_v32_lam504.py` | `3087d91c...` | branch (b) cell 3 |
+| `estimator_k3_v38_v17prog_lam504.py` | `485a2a9b0fd83006` | branch (b) cell 4 |
+
+Label-free before submission: composed arms **93/93** and **31/31**; closure+P3
+**20/20** with four self-checking scoped skips; branch-(b) cell **24/24**; the
+transplant suite **69/69** tiny and **28/28** at 1024x16.
+
+**Prediction 15.** The composed candidate scores **7.3e-9 to 8.1e-9** on P12,
+i.e. **1.18x to 1.31x over graded v31's panel-scaled 9.55e-9** (65%), and does
+**not** reach 2.0x (90%, raised from prediction 12's 75% now that stage 1 has
+measured how little the closure route carries).
+
+**Workload review.** Control + 9 candidates x 24 networks, sequential, rows and
+predictions streamed. Batch A ran 9 arms in 1h53m uncontended, and batch B's arms
+are cheaper on average (no v17-class arm except the two 0.49-B diagnostics).
+Estimate ~2h. **Declared 12 GiB, 4 CPUs**, pinned local, git snapshot, no `cd`
+into the live path.
+
+### Unchanged
+
+Stage 2's screen stays `decide(gate=1.10)` adjusted vs `v32_p4d5`. Stage 3's stays
+its three registered conditions with the cheaper setting already selected
+label-free as age3/rank192 (age2/rank192 was NOT selected by the registered
+criterion). The release gate stays 2.0x on untouched P13. F5 stays failed, P11
+stays retired, no designation is authorised.
