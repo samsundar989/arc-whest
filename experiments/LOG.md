@@ -52560,3 +52560,40 @@ deterministic, so the rewritten bytes are expected to be identical — but no pr
 recorded and `_snapshot_for_review.tgz` does not contain v33, so identity is **unverified**.
 Current SHAs: v33 `6cf50de8…`, v33_dense `31b45920…`. No v33 evidence depends on those bytes
 (P3 was never accuracy-screened). Lesson: never probe a generator with `--help`.
+
+### Step 3 accuracy RESULT (job 1637): shared coordinates at r ≤ 256 DESTROY accuracy — falsifier fires; P4 depth-5 raw parity HOLDS
+
+`experiments/2026-09-17_step3acc/{score.json,rows.jsonl,decide.json}` (committed `s7_decide.py`), P11,
+0 failures, SHAs as registered.
+
+| arm | C/B | raw ratio vs v32 | adjusted gain | t95 (v32 − arm) | better |
+|---|---:|---:|---:|---|---:|
+| a3r256 | 0.2176 | **1.764** | 0.7876× | [−3.32e-9, −2.10e-9] | 0/24 |
+| a2r256 | 0.2006 | 3.727 | 0.4044× | [−1.62e-8, −1.34e-8] | 0/24 |
+| a3r192 | 0.1986 | 2.908 | 0.5235× | [−1.00e-8, −8.30e-9] | 0/24 |
+| a2r192 | 0.1789 | 6.514 | 0.2595× | [−3.13e-8, −2.61e-8] | 0/24 |
+| **v32_p4d5** | 0.2802 | **1.0002** | **1.0787×** (gate 1.00 PASS) | [+6.9e-10, +7.8e-10] | 24/24 |
+
+Base rule → **v32 ("no supported shared configuration")**. Predictions: raw ratios 1.03–1.20
+**FALSIFIED** (1.76–6.51); ≥1 passes 1.15 (75%) FALSIFIED; intermediate target (35%) not met;
+P4 parity (85%) HIT. Samuel: "I don't know" ×2.
+
+**Knowledge delta.** With this join (joiner-column consumption weights, stored Sg, one power pass,
+Q or norm-selected sketch), ranks n/5–n/4 lose most of the old-lineage information: loss grows
+steeply as age falls (a2 ≫ a3) and rank falls. P4 at depth 5 is a supported exact saving (+7.9%
+adjusted, 24/24) and becomes part of any bundle.
+
+### Lean spelling meter (job 1638, label-free), `experiments/2026-09-17_step3/meter_lean_bundles.json`
+
+Fused products cut operations without changing the mathematics (f64 3.5e-16): d4 a3r256
+18,623 → 15,650, a2r192 16,710 → 14,467 (FLOPs unchanged to 1e-4). Bundles with P4 at depth 5
+(`estimator_k3_v37_*_p4d5.py`): C/B 0.1648–0.2020 at **18,961–20,676 ops**, all under 22,000;
+peak commit 3.0–3.7 GB.
+
+**Next (label-free, no truth):** the result is too far from the public F72 report (+8.4% at r=384)
+to accept as the limit of the idea without checking the join. Because this damage is ≫ label noise,
+the deviation of an arm's prediction from exact v32 on canonical networks is a valid label-free
+proxy (raw MSE added ≈ mean squared deviation when the deviation is large). A proxy sweep of the
+join (rank 256/384/512, passes 1/3, weights consumption/uniform, age 3/4) at 1024×16 on two canonical
+networks selects at most two configurations for ONE further registered P11 read; it adds no truth
+read of its own.

@@ -1,0 +1,106 @@
+{
+ "artifact": "s7_decide",
+ "tier": "DESIGN (P11, reused)",
+ "arms": {
+  "estimator_k3_v36_v32_a3r256.py": {
+   "sha256": "37243bf768fbe1d6042ea03d5144ad0c2659b5183a51336df57f5269f78733fa",
+   "gate": 1.15,
+   "passed": false,
+   "gain": 0.78763345049682,
+   "t95": [
+    -3.3245144873956207e-09,
+    -2.0959650082008417e-09
+   ],
+   "better": 0,
+   "raw_ratio": 1.7642846443029427,
+   "c_over_b": 0.21755815090818942,
+   "score": 1.2762084020005456e-08,
+   "reasons": [
+    "arithmetic gain 0.7876x is below the pre-registered gate 1.1500x",
+    "the candidate is WORSE than the control (0.7876x)",
+    "the t 95% interval on the paired difference does not lie strictly above zero [-3.3245e-09, -2.0960e-09]"
+   ],
+   "intermediate_target_met": false
+  },
+  "estimator_k3_v36_v32_a2r256.py": {
+   "sha256": "af1c0a1b6ae318a3444793e1cede82022fe8aebab45d5db3830343be26a741be",
+   "gate": 1.15,
+   "passed": false,
+   "gain": 0.40443602825603026,
+   "t95": [
+    -1.6193023490979308e-08,
+    -1.341124457545424e-08
+   ],
+   "better": 0,
+   "raw_ratio": 3.7270396863167456,
+   "c_over_b": 0.20056461367403244,
+   "score": 2.4853978305424005e-08,
+   "reasons": [
+    "arithmetic gain 0.4044x is below the pre-registered gate 1.1500x",
+    "the candidate is WORSE than the control (0.4044x)",
+    "the t 95% interval on the paired difference does not lie strictly above zero [-1.6193e-08, -1.3411e-08]"
+   ],
+   "intermediate_target_met": false
+  },
+  "estimator_k3_v36_v32_a3r192.py": {
+   "sha256": "674943677f8f75f051b28a2760e1f8017df2f1638f7561ceaa97e0bd89b2b9e9",
+   "gate": 1.15,
+   "passed": false,
+   "gain": 0.523456117724794,
+   "t95": [
+    -9.998432981104836e-09,
+    -8.30355922532434e-09
+   ],
+   "better": 0,
+   "raw_ratio": 2.9082072916885475,
+   "c_over_b": 0.1985923552647364,
+   "score": 1.9202840375421812e-08,
+   "reasons": [
+    "arithmetic gain 0.5235x is below the pre-registered gate 1.1500x",
+    "the candidate is WORSE than the control (0.5235x)",
+    "the t 95% interval on the paired difference does not lie strictly above zero [-9.9984e-09, -8.3036e-09]"
+   ],
+   "intermediate_target_met": false
+  },
+  "estimator_k3_v36_v32_a2r192.py": {
+   "sha256": "4afae3b7b4efb758f187fb12f2ee9eddbf8c97a43ff49fa0f387567f7cdd6f11",
+   "gate": 1.15,
+   "passed": false,
+   "gain": 0.2594512696276217,
+   "t95": [
+    -3.129666727437541e-08,
+    -2.6085056271381584e-08
+   ],
+   "better": 0,
+   "raw_ratio": 6.514080443468534,
+   "c_over_b": 0.17887895440162538,
+   "score": 3.874270604508572e-08,
+   "reasons": [
+    "arithmetic gain 0.2595x is below the pre-registered gate 1.1500x",
+    "the candidate is WORSE than the control (0.2595x)",
+    "the t 95% interval on the paired difference does not lie strictly above zero [-3.1297e-08, -2.6085e-08]"
+   ],
+   "intermediate_target_met": false
+  },
+  "estimator_k3_v32_p4d5.py": {
+   "sha256": "506a0c85d60a63b66789b549dca19042f84a736e8d0f3da89f5b30b1f5ee545a",
+   "gate": 1.0,
+   "passed": true,
+   "gain": 1.078727573126412,
+   "t95": [
+    6.888906588026273e-10,
+    7.783144534240987e-10
+   ],
+   "better": 24,
+   "raw_ratio": 1.0001901920930791,
+   "c_over_b": 0.2802036537550521,
+   "score": 9.318241716093863e-09,
+   "reasons": [],
+   "p4_raw_parity_holds": true
+  }
+ },
+ "base": {
+  "file": "estimator_k3_v32.py",
+  "rule": "no supported shared configuration"
+ }
+}
