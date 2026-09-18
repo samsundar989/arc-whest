@@ -97,7 +97,7 @@ def fixture(directory):
 
 def save(directory, result):
     for name in ("result.json","manifest.json"):
-        (directory/name).write_text(json.dumps(result,indent=2),encoding="utf-8")
+        (directory/name).write_text(json.dumps(result,indent=2,sort_keys=True),encoding="utf-8")
 
 
 def refuses(directory, mutation, needle):
@@ -131,6 +131,12 @@ def main():
         refuses(directory,lambda p,r:r["evaluations"][17].update(split="fit"),"split leakage")
         refuses(directory,lambda p,r:r["evaluations"][0].update(rows_hash="0"*64),"rows_hash mismatch")
         refuses(directory,lambda p,r:r["evaluations"][0].update(sha256="0"*64),"source or row byte SHA")
+        refuses(directory,lambda p,r:r["evaluations"][0]["parameters"].pop("s_lam"),
+                "parameter names/order mismatch")
+        refuses(directory,lambda p,r:r["evaluations"][0]["parameters"].update(extra=1.),
+                "parameter names/order mismatch")
+        refuses(directory,lambda p,r:r["evaluations"][0]["parameters"].update(s_lam=1.15),
+                "candidate differs from maintained generator")
         refuses(directory,lambda p,r:r["evaluations"][0].update(official_precision_score=1.),"official mismatch")
         refuses(directory,lambda p,r:r.update(selected_parameters=dict.fromkeys(driver.NAMES,1.3)),"selected parameters differ")
         refuses(directory,lambda p,r:r["evaluations"][17]["provenance"].update(
@@ -183,7 +189,7 @@ def main():
             rec["rows_hash"]=le.rows_hash([le.EvidenceRow(**x) for x in lines])
             rec["provenance"]["rows_hash"]=rec["rows_hash"]
         refuses(directory,forged_source_pair,"candidate differs from maintained generator")
-    print("own-fit verifier synthetic regressions passed: valid fixture + 17 refusals")
+    print("own-fit verifier synthetic regressions passed: valid fixture + 20 refusals")
 
 
 if __name__=="__main__":

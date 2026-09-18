@@ -130,13 +130,15 @@ def verify(directory: str | Path, *, root: Path = ROOT) -> dict:
                 provenance.get("setup_called") is not True):
             raise ValueError(f"evaluation {index}: lifecycle spec mismatch")
         params = rec.get("parameters")
-        if not isinstance(params, dict) or list(params) != list(driver.NAMES):
+        if not isinstance(params, dict) or set(params) != set(driver.NAMES):
             raise ValueError(f"evaluation {index}: parameter names/order mismatch")
-        for key, val, (lo, hi) in zip(driver.NAMES, params.values(), driver.BOUNDS):
+        for key, (lo, hi) in zip(driver.NAMES, driver.BOUNDS):
+            val = params[key]
             if not isinstance(val, (int, float)) or not math.isfinite(val) or not lo <= val <= hi:
                 raise ValueError(f"evaluation {index}: invalid {key}")
         with tempfile.TemporaryDirectory(prefix="own_fit_source_verify_") as tmp:
-            expected_sha = gen.emit(Path(tmp) / "generated.py", **params)
+            expected_sha = gen.emit(Path(tmp) / "generated.py",
+                                    **{key: params[key] for key in driver.NAMES})
         if rec["sha256"] != expected_sha:
             raise ValueError(f"evaluation {index}: candidate differs from maintained generator")
         raw = rows_path.read_text(encoding="utf-8").splitlines()
