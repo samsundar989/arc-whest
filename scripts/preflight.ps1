@@ -159,6 +159,26 @@ $ErrorActionPreference = "Stop"
 $repo = Split-Path -Parent $PSScriptRoot
 Set-Location $repo
 
+# The refusal suite creates a deliberate bad seed literal while it tests the
+# source scanner. Two broad preflights must not overlap: the other's step-7
+# scan could see that fixture and report a false failure. A named kernel mutex
+# serializes the whole gate, including cleanup; an abandoned owner is safe to
+# take over because its temporary files use unique names.
+$script:PreflightMutex = New-Object System.Threading.Mutex($false, "Global\arc_whest_preflight")
+$script:MutexHeld = $false
+Write-Host "preflight lock: waiting for other broad gates (up to 30 minutes)"
+try {
+    $script:MutexHeld = $script:PreflightMutex.WaitOne([TimeSpan]::FromMinutes(30))
+} catch [System.Threading.AbandonedMutexException] {
+    $script:MutexHeld = $true
+    Write-Host "preflight lock: prior owner ended; taking recovered lock"
+}
+if (-not $script:MutexHeld) {
+    $script:PreflightMutex.Dispose()
+    throw "timed out waiting for the broad-preflight lock"
+}
+Write-Host "preflight lock: acquired"
+
 # --- the gate OWNS its children's text encoding --------------------------------
 # `whest validate` prints a Unicode box-drawing table. On Windows, Python resolves
 # a REDIRECTED stdout to the ANSI codepage (cp1252 here) regardless of `chcp
@@ -215,6 +235,14 @@ function Restore-CallerEncoding {
     if ($script:Transcribing) {
         try { Stop-Transcript | Out-Null } catch { }
         $script:Transcribing = $false
+    }
+    if ($script:MutexHeld) {
+        $script:PreflightMutex.ReleaseMutex()
+        $script:MutexHeld = $false
+    }
+    if ($script:PreflightMutex) {
+        $script:PreflightMutex.Dispose()
+        $script:PreflightMutex = $null
     }
 }
 
