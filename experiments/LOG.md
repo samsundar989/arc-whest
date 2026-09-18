@@ -54897,6 +54897,17 @@ not count as a complete decision. Expected duration exceeds 30 minutes.
 The source snapshot is frozen at submission, and output paths are absolute
 so workerq writes to the live evidence directory.
 
+**P12 query dispatch and reader readiness.** Workerq `#1885` was submitted
+from the committed exact control/rank32 source pair with snapshot
+`644700e86`, 12 GiB RAM, 0 GPU and 4 CPUs, using precisely the registered
+24-network control/candidate, timestamp, gate, cap mode, sample count and
+three exclusive output paths. The query decision reader's snapshot-root
+repair was preregistered in `93d8cd8`, committed/reviewed in `c7f7cf5`,
+passed focused synthetic tests and standard preflight GREEN 12/16, and
+received fresh-context independent Skeptic ACCEPT. It changes no measured
+source, scorer, score convention or gate. The job remains running; no
+partial accuracy result is interpreted.
+
 ### IMPORTANT prediction: query snapshot-root decision reader, before editing
 
 The registered one-pair P12 score will run in an immutable workerq snapshot with an absolute workspace output path. The query reader currently asks `design_sidecar.verify` to check against a supplied `source_root`, but `_source` restricts files to the checkout and the recorded `prediction_sidecars` path is resolved from the checkout. This can refuse a valid snapshot before opening score rows. Prediction: adding explicit `--run-root`, binding both frozen sources and recorded arm paths to it, and resolving the recorded sidecar path from it will accept a correct snapshot/output pairing. Changed source bytes, a wrong recorded sidecar path, mismatched dependency bytes, or a role swap will still refuse. The paired arithmetic score, gate 1.05, and new-failure veto remain unchanged. Verification will use a small synthetic snapshot plus tamper checks and standard preflight; no P12 score, truth, or active output will be read during the repair.
