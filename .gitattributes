@@ -44,3 +44,7 @@ experiments/vault/*.jsonl text eol=lf
 experiments/2026-09-18_own_fit/*.json -text -diff
 experiments/2026-09-18_own_fit/*.jsonl -text -diff
 experiments/2026-09-18_own_fit_verified_summary.json -text -diff
+
+# Complete-candidate meter producer JSON is CRLF; preserve reviewed SHA-256s.
+experiments/2026-09-18_s17_meter.json -text -diff
+experiments/2026-09-18_s17_meter_grader_twin.json -text -diff
