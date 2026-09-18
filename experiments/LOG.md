@@ -54654,3 +54654,12 @@ TOTAL_EVALS` (19). Its four focused label-free tests pass and a SHA-pinned
 C11 dry-run reports both `scheduled_evaluations` and `max_evaluations` as 19.
 Only the cap constant changed; trial construction and scheduling code were
 not edited. A quiet standard preflight and focused Skeptic re-review remain.
+
+**Conditional-tool gate after cap repair.** One nonoverlapping standard
+preflight completed **GREEN 12/16, four Full-tier checks skipped**, exit 0,
+in `experiments/2026-09-18_s17_conditional_tools_preflight_final.log`.
+The query decision reader's fresh Skeptic ACCEPTS the narrow label-free
+instrument in `experiments/2026-09-18_s17_query_reader_skeptic.md`, with
+no P12 score inference. The fit instrument's initial PROVISIONAL verdict is
+preserved; a focused re-review of the cap correction is pending. The P12
+factorial source snapshot is separate and remains unchanged.
