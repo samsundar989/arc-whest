@@ -22,10 +22,15 @@
     },
     "experimental_finalist": null,
     "best_complete_p12_design_arm": {
-      "path": "estimator_k3_v42_pairq_p3_uncompressed.py",
-      "sha256": "098862f664b3bc0e550e81649e4caefacae8d9779366ee2dfd477a37737bdb88",
-      "official_precision_adjusted_p12": 6.79884472878824e-9,
-      "status": "24-network DESIGN only; uncompressed and not release qualified"
+      "path": "estimator_k3_v43_complete_c10.py",
+      "sha256": "fd8d497db6dfbc3affcf579119c7115c3aee4d190a3e92fec4d85c366152d1bf",
+      "official_precision_adjusted_p12": 6.486609e-9,
+      "status": "24-network DESIGN forecast; Linux 8 GiB gate passed; full candidate certificate workerq 1904 running; no upload approval"
+    },
+    "fixed_p14_design_trial": {
+      "path": "estimator_k3_v45_p2_diag.py",
+      "sha256": "fc8e547435e026f70b2e8e95954daf9a61337ae1747f32fc0aa0b61d10e6b855",
+      "status": "P14 truth finalized; paired C10/v45 score workerq 1920 queued; no measured accuracy result or upload approval"
     },
     "own_fit_selected_design_arm": {
       "path": "experiments/2026-09-18_own_fit/eval_18_validation.py",
@@ -34,11 +39,11 @@
       "status": "12-network within-fit DESIGN only; caps disabled; no compressed composition"
     }
   },
-  "contract": "experiments/LOG.md:2026-09-17b",
+  "contract": "experiments/LOG.md:2026-09-18 P14 birth and C10 diagnostic",
   "stage": {
-    "completed": ["stage1", "batch_b_p12_synthesis"],
-    "active_or_recovery": "All bounded September17b/September18 discriminators complete; corrected storage lane closed, own fit #1748 verified; no supported finalist. See docs/STRATEGIST_PACKET_2026-09-18.md",
+    "completed": ["stage1", "batch_b_p12_synthesis", "p14_two_replica_truth"],
+    "active_or_recovery": "P14 fixed birth-diagonal pair workerq 1920 queued; same-closure label-free reference meter workerq 1921 queued; C10 full diagnostic certificate workerq 1904 running",
     "decide": "P13 truth-read spent=0; preserve for one frozen finalist",
-    "release": "No finalist is frozen or approved for submission"
+    "release": "No 2x finalist is frozen or approved for submission; C10 diagnostic also needs exact-file approval"
   }
 }

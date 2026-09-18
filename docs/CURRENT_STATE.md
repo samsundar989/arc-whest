@@ -9,7 +9,8 @@ birth-diagonal candidate `estimator_k3_v45_p2_diag.py`, SHA-256
 24 new networks, paired official-precision arithmetic gate 1.05, and two
 `2^24`-sample truth replicas. Samuel answered “i dont know” to all three
 pre-result predictions. Independent and source-bound tiny algebra checks pass;
-P14 truth is minting under workerq #1901 and has not been scored. P13 remains
+P14 truth #1901 succeeded and its two-replica artifact and live-ledger hash are
+finalized; paired C10/v45 score #1920 is queued and has not returned. P13 remains
 untouched.
 
 A separate committed C10 diagnostic-upload contract asks whether exact
@@ -19,14 +20,16 @@ three predictions. Candidate-specific `whest validate` passes. Linux memory
 gate workerq #1891 **passed** on WSL Linux under an applied 8,192 MiB
 `RLIMIT_AS`, with VmPeak 5,754.75 MiB, both enforcement controls and three
 candidate predicts passing. Full candidate certificate workerq #1904 is
-queued; clean official mini and independent certificate Skeptic remain pending.
+running; clean official mini and independent certificate Skeptic remain pending.
 No upload approval has been requested. Exact-file approval remains required.
 
 Iteration-tool changes and same-closure reference construction are in progress.
-The source/seed instrument preflight passed GREEN 12/16 and fresh P14 seeds
-were claimed in the live ledger before immutable workerq #1901 began truth
-minting. The reference feasibility note and generator are committed; the
-generator and P14 reader have only narrow truth-free provisional reviews.
+The source/seed instrument preflight passed GREEN 12/16 after P14 truth
+finalization. The reference feasibility note and generator are committed;
+label-free full-shape meter #1921 is queued. Its independent review accepted
+the repaired math/cost instrument but held dispatch until this GREEN gate.
+The iteration-tool host reservation still has a purpose/snapshot binding gap
+under repair; P13 remains untouched.
 The major 2x objective remains unproven and unsubmitted.
 
 ---
