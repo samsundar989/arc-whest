@@ -38,3 +38,9 @@ experiments/2026-08-21_phase2_manifest/cache/*.raw -text -diff
 experiments/vault/*.md text eol=lf
 experiments/vault/*.json text eol=lf
 experiments/vault/*.jsonl text eol=lf
+
+# #1748 producer JSON contains CRLF and its manifest hashes exact row bytes.
+# Preserve this one fit archive verbatim across commits and checkouts.
+experiments/2026-09-18_own_fit/*.json -text -diff
+experiments/2026-09-18_own_fit/*.jsonl -text -diff
+experiments/2026-09-18_own_fit_verified_summary.json -text -diff
