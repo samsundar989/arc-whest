@@ -55,3 +55,6 @@ experiments/2026-09-18_s17_factorial/** -text -diff
 # Fixed query engineering job JSON contains producer-specific line endings.
 experiments/2026-09-18_s17_query_meter.json -text -diff
 experiments/2026-09-18_s17_query_continuation.json -text -diff
+
+# Complete fixed query comparison keeps exact failed and control predictions.
+experiments/2026-09-18_s17_query_accuracy/** -text -diff

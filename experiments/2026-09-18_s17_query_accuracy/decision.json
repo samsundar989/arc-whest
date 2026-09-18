@@ -1,0 +1,63 @@
+{
+  "QUERY_SCORE_PASSED": false,
+  "artifact": "s17_query_decide",
+  "new_failed_identities": [],
+  "observed": {
+    "candidate_mean": 1.1871553943047497e-08,
+    "control_mean": 6.961690453741375e-09,
+    "difference": -4.909863489306123e-09,
+    "gain": 0.5864177922401175,
+    "t95": [
+      -5.424873860654168e-09,
+      -4.394853117958078e-09
+    ],
+    "verdict": {
+      "ci": [
+        -5.424873860654168e-09,
+        -4.394853117958078e-09
+      ],
+      "gate": 1.05,
+      "interval": "t",
+      "passed": false,
+      "reasons": [
+        "arithmetic gain 0.5864x is below the pre-registered gate 1.0500x",
+        "the candidate is WORSE than the control (0.5864x)",
+        "the t 95% interval on the paired difference does not lie strictly above zero [-5.4249e-09, -4.3949e-09]"
+      ]
+    }
+  },
+  "official": {
+    "candidate_mean": 1.1422669241396387e-08,
+    "control_mean": 6.486609023811495e-09,
+    "difference": -4.9360602175848925e-09,
+    "gain": 0.5678715619553846,
+    "t95": [
+      -5.451542434658374e-09,
+      -4.420578000511411e-09
+    ],
+    "verdict": {
+      "ci": [
+        -5.451542434658374e-09,
+        -4.420578000511411e-09
+      ],
+      "gate": 1.05,
+      "interval": "t",
+      "passed": false,
+      "reasons": [
+        "arithmetic gain 0.5679x is below the pre-registered gate 1.0500x",
+        "the candidate is WORSE than the control (0.5679x)",
+        "the t 95% interval on the paired difference does not lie strictly above zero [-5.4515e-09, -4.4206e-09]"
+      ]
+    }
+  },
+  "prediction_manifest_sha256": "5816c2a99f7006036f759f49da1cbf9b90d1c004c75aee1f52abcc73b52075bb",
+  "promotes_nothing": true,
+  "score_sha256": "443af882a7fe36ac02fba484257de7f9490d982fd6ff97c41e97d690db883652",
+  "source_sha256": {
+    "approx": "96e87025e55367cdf9951bf9666cc8da98b439c0c6359f1c5dc2fce622cded2b",
+    "exact": "fd8d497db6dfbc3affcf579119c7115c3aee4d190a3e92fec4d85c366152d1bf"
+  },
+  "tier": "DESIGN",
+  "truth_noise_floor": 2.2480709584398425e-09,
+  "truth_sha256": "92a3228edee16080795c4a1ea0124b8c7bd1f7f7ecf7c84ad078edc4eca756b2"
+}
