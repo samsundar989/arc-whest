@@ -22,7 +22,8 @@ gate uncompressed. The reference-lambda diagnostic reveals an interaction but
 is not a shippable source. No candidate qualifies for P13.
 
 Corrected qE/qEd versioned files passed tiny algebra and `whest validate`, with
-no truth run. A label-free complete-query audit of those sources is in progress.
+no truth run. The source override for a complete label-free query audit is ready;
+that full-shape audit has not run.
 Samuel's three predictions for the new corrected-objective comparison were
 requested and remain pending; do not touch new strategic decision data before
 recording them and committing the new contract. P13 remains untouched, and no
@@ -43,6 +44,12 @@ was cancelled before execution because workerq treated `--vram 0` as one GPU.
 On #1748 completion, reconcile its P12 truth-read receipt from the immutable
 snapshot, verify all 19 complete evaluations and paired held-out comparison,
 then synthesize before any finalist choice. No fit accuracy result exists yet.
+Read-only fit and corrected-storage result adapters now pass synthetic provenance
+refusals (valid fit plus 17 forged cases; corrected storage 10/10) and independent
+Skeptic review. Final-byte standard preflight is GREEN 12/16; see the LOG tail,
+`experiments/2026-09-18_verifiers_skeptic.md` and
+`experiments/2026-09-18_verifiers_preflight.log`. The fit reader has not seen a
+real result, and the corrected reader has no new score or query artifact yet.
 
 ---
 
