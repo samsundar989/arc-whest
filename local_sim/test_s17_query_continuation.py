@@ -59,6 +59,23 @@ class ContinuationAuditTest(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "layer index"):
                 trace.trace(query, "line", None)
 
+    def test_no_approximate_branch_refused(self) -> None:
+        trace = object.__new__(audit.QueryTrace)
+        trace.events = [{"layer": 2, "branch": "rank_fallback"},
+                        {"layer": 3, "branch": "deficient_fallback"}]
+        with self.assertRaisesRegex(RuntimeError, "no approximate"):
+            trace.summary()
+
+    def test_displacement_before_first_approximate_branch_refused(self) -> None:
+        exact = np.ones((4, 2))
+        approx = exact.copy()
+        approx[1, 0] += 0.01
+        with self.assertRaisesRegex(RuntimeError, "before first"):
+            audit.validate_prebranch_identity(exact, approx, 2)
+        approx[1, 0] = 1.0
+        approx[2, 0] += 0.01
+        audit.validate_prebranch_identity(exact, approx, 2)
+
     def test_exclusive_output_refuses_overwrite(self) -> None:
         with TemporaryDirectory() as td:
             out = Path(td) / "report.json"

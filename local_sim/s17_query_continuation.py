@@ -114,9 +114,20 @@ class QueryTrace:
         if not self.events:
             raise RuntimeError("no old-query branch observed")
         first = next((e["layer"] for e in self.events if e["branch"] == "approximate"), None)
+        if first is None:
+            raise RuntimeError("no approximate old-query branch observed")
         return {"branch_counts": counts, "first_approximate_layer": first,
                 "first_old_query_layer": min(e["layer"] for e in self.events),
                 "events": self.events}
+
+
+def validate_prebranch_identity(exact: np.ndarray, approx: np.ndarray,
+                                first_approximate_layer: int) -> None:
+    if not 0 <= first_approximate_layer < exact.shape[0]:
+        raise RuntimeError("first approximate query layer outside prediction")
+    if not np.array_equal(exact[:first_approximate_layer],
+                          approx[:first_approximate_layer]):
+        raise RuntimeError("prediction displacement before first approximate query")
 
 
 def _predict(name: str, weights_np: list[np.ndarray], estimator_seed: int,
@@ -174,6 +185,9 @@ def run(exact_path: Path, approx_path: Path) -> dict:
         raise RuntimeError("source changed during paired execution")
     if _pinned_stack() != stack:
         raise RuntimeError("meter/package stack changed during paired execution")
+    predictions = describe_predictions(e, a)
+    query_trace = trace.summary()
+    validate_prebranch_identity(e, a, query_trace["first_approximate_layer"])
     return {
         "status": "complete", "role": "label-free continuation diagnostic",
         "fixture": {"width": anchor.WIDTH, "depth": anchor.DEPTH,
@@ -182,8 +196,8 @@ def run(exact_path: Path, approx_path: Path) -> dict:
                     "mint_sha256": hashlib.sha256(Path(anchor.__file__).with_name("mint_provenance.py").read_bytes()).hexdigest()},
         "exact": {"source": exact_name, "sha256": exact_sha, "counted_flops": ef},
         "approx": {"source": approx_name, "sha256": approx_sha, "counted_flops": af},
-        "predictions": describe_predictions(e, a),
-        "query_trace": trace.summary(), "meter_stack": stack,
+        "predictions": predictions,
+        "query_trace": query_trace, "meter_stack": stack,
         "instrument_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
     }
 
