@@ -54711,6 +54711,60 @@ will store all 16 measured files byte for byte: each staged blob will match
 producer SHA-256s. It will not change numeric values, source identities,
 paired results, the frozen estimator archives, or the untouched P13.
 
+**Raw archive result.** Commit `87b0a75` added all 16 factorial files,
+including the six normally ignored `.f32` prediction arrays, under the
+exact-path recursive `-text -diff` rule. Every staged blob matched its
+no-filter raw-worktree blob. A fresh detached checkout reproduced the three
+recorded SHA-256s above exactly. The numeric result and source files were
+not changed.
+
+### Concrete conditional query experiment registration, before source emission or measurement
+
+The accepted selected exact gram file is
+`estimator_k3_v43_complete_c10.py` SHA-256
+`fd8d497db6dfbc3affcf579119c7115c3aee4d190a3e92fec4d85c366152d1bf`.
+Emit exactly one new root-level
+`estimator_k3_v44_c10_query_rank32.py` with
+`local_sim/s17_query_cost.py --base estimator_k3_v43_complete_c10.py
+--output estimator_k3_v44_c10_query_rank32.py --rank 32`. Preserve the
+rank-deficient/zero-sketch exact fallback and the frozen C10 controls.
+This one sketch is the handoff's fixed old-D21 query approximation, not a
+rank search. Pin its produced SHA before measurement.
+
+Meter exact C10 and new approximate **complete files** at 1024x16 with
+`s17_meter_exports.py`, f64-readonly grader twin, one sequential process,
+output `experiments/2026-09-18_s17_query_meter.json`. The engineering
+screen is at least 5% complete counted-FLOP reduction from C10's
+480,850,933,121 FLOPs, hence approximate FLOPs <=456,808,386,464,
+with no new deployment/resource/numerical obstacle. Independently audit
+the complete recurrent path and actual approximate/fallback branch events
+with `s17_query_continuation.py`, output
+`experiments/2026-09-18_s17_query_continuation.json`. Both are label-free
+and do not touch any seed block. Use workerq with no GPU, 8 GiB RAM/2 CPUs
+for the two-source meter and 12 GiB RAM/2 CPUs for the continuation; the
+six-source corrected meter peaked at 4.04 GiB and the factorial peaked at
+7.68 GiB, so these requests remain conservative.
+
+**Pre-submission optimization review.** Both jobs reuse frozen sources and
+the existing grader-twin/continuation instruments; no duplicate truth,
+model loader, worker pool, cached labels, prefetch, or large in-memory MLP
+panel is introduced. The meter runs two sources sequentially, not six;
+the continuation runs only its fixed exact/approx pair with streaming
+diagnostics. Using smaller local probes would fail the complete-file cost
+and recurrence questions, so retain full 1024x16. Both outputs are
+exclusive and atomically written. A crash preserves the source and does
+not license partial pass. No P12 accuracy read occurs before the price and
+continuation gates are reviewed.
+
+If both engineering checks pass and a fresh Skeptic accepts them, execute
+exactly one paired P12 DESIGN 24-network comparison of approximate source
+against exact C10, with official-precision paired arithmetic t gate 1.05
+and no newly failed MLPs. Freeze source hashes, read timestamp and paths
+in a further pre-dispatch entry. If either engineering check fails, retain
+exact C10 without a P12 query accuracy retry. The fit trigger then uses
+only the accepted whole package; its pre-query 31.7% gap does not authorize
+a fit now. P13 remains untouched until the unchanged dual 2x case exists.
+
 ### IMPORTANT prediction: snapshot-root decision-reader repair, before editing
 
 Workerq #1882 SUCCEEDED in 7192.79 s, peak 7861.51 MiB, and wrote 144
