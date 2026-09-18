@@ -233,10 +233,19 @@ def execute(source: Path, expected_sha: str, out_dir: Path, ts: str):
         return score
 
     point, base, held_base, held, history = coordinate_fit(evaluate, center)
+    selected_sha = sha(render(src, center, has_controls, point))
+    selected_fit = [rec["index"] for rec in manifest["evaluations"][:17]
+                    if rec["sha256"] == selected_sha]
+    if not selected_fit or manifest["evaluations"][18]["sha256"] != selected_sha:
+        raise ValueError("selected source lacks an exact first12/last12 match")
     manifest.update({"status": "complete", "selected_parameters": dict(zip(NAMES, point)),
                      "frozen_default_fit_score": base, "heldout_default_official_score": held_base,
                      "heldout_selected_official_score": held, "evaluations_used": len(history),
-                     "selected_evaluation_index": 18})
+                     "default_fit_evaluation_index": 0,
+                     "default_validation_evaluation_index": 17,
+                     "selected_fit_evaluation_index": selected_fit[-1],
+                     "selected_validation_evaluation_index": 18,
+                     "selected_source_sha256_after_fit": selected_sha})
     old._atomic_json(out_dir / "manifest.json", manifest)
     old._atomic_json(out_dir / "result.json", manifest)
     return manifest
