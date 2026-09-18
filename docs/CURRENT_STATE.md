@@ -1,5 +1,42 @@
 # CURRENT_STATE.md — read this first
 
+## September 18 — strategist response delivered: execute the complete-candidate slice
+
+**Active:** [GAME_PLAN](GAME_PLAN.md), [strategist response](STRATEGIST_RESPONSE_2026-09-18.md),
+and [Claude execution handoff](CLAUDE_CODE_HANDOFF_2026-09-18.md). The request for a
+strategist at the end of the worker session has now been answered. A fresh
+[Skeptic](research/2026-09-18_next_slice_skeptic.md) **ACCEPTS the research plan**;
+this is not acceptance of an implemented candidate or a release claim.
+
+Three independent source/evidence/literature reviews support the worker's no-release
+decision. Important refinements: the conditional P3 adjusted comparison also included
+P4; the fitted source lacks P4 and compression; no same-panel P12/v31 anchor exists.
+The complete P3+shared-storage composition remains unimplemented. The bounded fit
+was completed, but its endpoint does not establish an optimum or another large gain.
+All historical negative/incomplete gates retain their outcomes.
+
+**Next:** localized generator integration; fixed compressed default/fitted x P3off/on
+factorial with **gram join, age4/rank256, P4d5** and actual v31 control; one conditional
+rank32 old-D21 readout-cost test; one conditional fit of the complete package; then
+P13/release only for a frozen dual2x-supported finalist. The prospective gram choice
+avoids old-qE's exact-query join dependency. Preserve exact gram column statistics;
+remove the unused exact Xold stash in the approximate readout branch rather than
+paying for both computations. No ordinary rank grid or new broad tensor/core rewrite.
+
+Chrome refreshed: rank **63/171**, displayed lead about **2.20e-9**, our latest still
+v31. The leaderboard's rounded display still links #331393; retain prior precise
+detail evidence separately. Approximately4.4e-9 remains an intermediate rank13 scale.
+
+Review artifacts: [worker evidence](research/2026-09-18_worker_evidence_review.md),
+[architecture](research/2026-09-18_next_architecture_review.md),
+[frontier follow-up](research/2026-09-18_frontier_followup.md). No new estimator run,
+truth-array read, seed claim, candidate/instrument edit, gate execution, submission,
+designation or vault activity occurred in this review. The new contract and Samuel's
+new predictions are still required before strategic measurements. P13 remains
+untouched as last verified by the worker; verify current status before execution.
+
+---
+
 ## September 18 — bounded experiments complete; no qualifying finalist
 
 Commit `8cae199` records the repaired stage-3 decision adapter, its query-evidence

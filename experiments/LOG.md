@@ -54196,3 +54196,51 @@ Workerq #1748 **SUCCEEDED** (exit 0, 12,878.98 s, measured peak 6,284.99 MiB) wi
 On the **12 within-fit held-out P12 networks**, the own default versus fitted source has observed adjusted `8.9700664689e-9 -> 7.9181225549e-9`, and estimated official-precision adjusted `8.3143343913e-9 -> 7.2623442310e-9`, **1.144855x**. Paired official-precision arithmetic control-minus-fitted difference is `+1.0519901603e-9`, studentised-t 95% `[+0.8034595146e-9,+1.3005208061e-9]`; all 12 pairs favor the fit. Raw MSE `2.9443474473e-8 -> 2.5988725838e-8` against averaged truth-noise floor `2.2271138918e-9`. Mean counted FLOPs `669,940,797,469 -> 669,988,045,853`, zero saved failures under **disabled DESIGN caps**. Worst local residual is 5.7464 s and wall 45.2432 s for selected source; these are not server timing predictions and cannot establish the 0.4 s residual cap. The full evaluated source is uncompressed. P12's last 12 are held out from this coordinate fit, but were previously exposed to other DESIGN arms.
 
 Independent fresh-context result Skeptic `experiments/2026-09-18_own_fit_result_skeptic.md` independently checked all 19 hashes, ordered row identities, deterministic selection, score arithmetic, interval, cost, noise and caps; **PROVISIONAL** for the narrow within-fit DESIGN gain and **REJECTS** a release inference. This comparison is against the own default, not v32's separate stage-2 gate or graded v31's P13 2.0x gate. The uncompressed `estimator_k3_v42_pairq_p3_uncompressed.py` remains the lowest complete P12 adjusted DESIGN arm (`6.7988447e-9` over 24), but its shared-storage composition and release timing are untested; its score cannot be multiplied by the fit gain. The corrected fixed-rank storage discriminator lost. No evidence-supported frozen combined finalist meets the preregistered 2x v31 release requirements, so **do not spend P13** or claim release certification. The strongest verified artifacts and remaining causal obstacle are recorded in `docs/STRATEGIST_PACKET_2026-09-18.md` for a new bounded research contract. No submission approval is requested because there is no qualifying package.
+
+## 2026-09-18 — worker decision-point review and new strategist response
+
+Samuel requested validation, deeper research, an updated plan and a Claude Code
+handoff. Three separate agents reviewed raw evidence/source, architecture/cost and
+primary literature, followed by a fresh-context independent Skeptic. This session
+performed source/hash checks and lightweight retrospective calculations on saved
+rows/predictions only. No truth arrays, new seeds, estimator executions, heavy jobs,
+instrument/candidate edits, promotions, submissions, designations or vault activity.
+
+Deliverables: `docs/STRATEGIST_RESPONSE_2026-09-18.md`,
+`docs/CLAUDE_CODE_HANDOFF_2026-09-18.md`, updated GAME_PLAN/CURRENT_STATE/active
+handoff, and four review documents under `docs/research/2026-09-18_*` named
+worker_evidence_review, next_architecture_review, frontier_followup and
+next_slice_skeptic. Previous active plan/handoff archived before replacement.
+
+Knowledge delta: worker's scoped results and no-release decision reproduce. The
+P3-on-PAIR+Q adjusted comparison also changes P4; the fit lacks P4/compression.
+The complete source interaction remains unimplemented, and no P12 v31 anchor exists.
+Fit training endpoint slopes are small but nonzero; a bounded search is not an
+optimality proof. Saved prediction polarization supports fixed scalar error geometry,
+not a causal layer or a learned blend without a new contract. A naive two-file blend
+is too expensive. The fit saved no final predictions.
+
+Source-cost review rejects an unpriced tensor-residual/Tucker/CUR shortcut. A limited
+new intervention can approximate old D21 readout while retaining stored source
+representation and exact represented D3/thin consumers. Crucial dependency: old-qE's
+join needs exact Xold; the prospective **gram** package avoids that consumer. Its
+wrapper's now-unused exact stash must also be removed in the approximate branch.
+Whole-cycle accounting and a real truth comparison remain required; no gain is assumed.
+
+Prospective next slice: localized P3/shared/fit/P4 integration; complete compressed
+four-arm factorial with matched implementation and v31; one fixed rank32 query-cost
+test; one conditional fit of the full package; then unchanged dual2x P13/release if
+qualified. P12 reuse stays exposed DESIGN. Exact six comparisons, incumbent order,
+5% cost/1.05 query score gates, dual25% fit trigger and full24 evidence assembly are
+specified prospectively in the response, NOT executed or retroactively registered here.
+Builder must commit its Rule1 contract and obtain Samuel's new predictions first.
+
+Skeptic initially PROVISIONAL; fixes added explicit direct package comparisons,
+deterministic selection, exact field/control meanings, query-stash accounting,
+sketch coverage/fallback and full24 source-bound fit assembly. Final verdict
+**ACCEPT for the revised research plan**, not implementation/accuracy/release.
+Historical corrected-storage and other failed gates remain failed.
+
+Chrome refreshed board: our rank63/171; displayed lead about2.20e-9 still links331393;
+v31 remains our latest. No newly public winning implementation was located in primary
+research. No current artifact proves the next submission will meet2x or win.
