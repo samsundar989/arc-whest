@@ -54499,3 +54499,71 @@ and retain the six source identities. A larger, non-cast difference falsifies
 the simple correction and requires renewed cost investigation. This is a
 cost-instrument repair, not a new accuracy arm or a release pass. Rerun the
 complete meter once before P12 labels; keep the original artifact as evidence.
+
+### Corrected complete-file cost gate and P12 dispatch record, before labels
+
+Workerq #1881 **SUCCEEDED** in 604.52 s, measured peak 4,038.58 MiB under
+0 GPU/12 GiB/2 CPU. Immutable snapshot `559a1aa94`; corrected artifact
+`experiments/2026-09-18_s17_meter_grader_twin.json` SHA-256
+`fb96f44f960714c7e22fe9524d2f6cceed416c74b8f6588b2e4db4e931b06373`.
+The same six source hashes are pinned in the decision reader. Each complete
+operation ledger sums exactly to its total. Relative to the preserved f32
+meter, every source gained **exactly** 16 cast calls and 33,554,432 FLOPs,
+with no other operation discrepancy. The preregistered repair prediction held.
+
+| source role | complete counted FLOPs | calls |
+|---|---:|---:|
+| C00 | 480,803,684,737 | 23,315 |
+| C10 | 480,850,933,121 | 23,421 |
+| C01 | 539,824,988,905 | 26,287 |
+| C11 | 539,872,237,289 | 26,393 |
+| fitted dense P4 sentinel | 621,351,716,893 | 20,990 |
+| graded v31 | 661,961,618,994 | 13,053 |
+
+P3's matched incremental bill is **59,021,304,168** FLOPs in C01:C00 and
+C11:C10. C11 is 24.55% of the 2^41 budget. The carried conservative graded
+residual law at 13.4 microseconds/call projects C11 to 0.3537 s, hard-cliff
+headroom ~1.131x; C01 ~1.136x. Both exceed the 22k-op working margin gate,
+so deployment risk remains. This is a model, not observed server residual or
+Linux8GiB proof. The fresh independent meter Skeptic **ACCEPTS proceeding
+with P12 DESIGN accuracy**, not release, in
+`experiments/2026-09-18_s17_meter_final_skeptic.md`; the original provisional
+review is preserved. Quiet-tree standard preflight after final instrument
+edits is **GREEN 12/16**, transcript
+`experiments/2026-09-18_s17_preflight_quiet_final.log`; Full-tier checks remain
+unrun. P12/P13/public/vault have not been read in this new slice yet.
+
+**Exact next read, frozen before dispatch.** Run one `p2_design_score.py`
+DESIGN comparison on the existing P12 truth SHA above, 24 ordered identities,
+registration timestamp `2026-09-18T08:38:31Z`, C00 control, candidates in
+exact order C10,C01,C11,graded v31,fitted dense P4 sentinel. Supply
+`--gate 1.0 --wall-caps off --official-samples 1e9`, stream rows to
+`experiments/2026-09-18_s17_factorial/rows.jsonl`, predictions to
+`experiments/2026-09-18_s17_factorial/predictions`, and score JSON to
+`experiments/2026-09-18_s17_factorial/score.json`. The scorer's truth-read
+receipt will explicitly record this deliberate P12 DESIGN reuse; it is
+correlated with all prior P12 work and licenses no fresh confirmation.
+
+**Job optimization review for this dispatch.** Prior ten-arm batch B's peak
+was 8.074 GiB; added P3 state is represented by the corrected six-source
+meter's 4.04-GiB peak, so request a conservative **12 GiB RAM, 0 GPU, 4
+CPUs**. One truth file is opened once; no duplicate dataset, model loader,
+worker pool, large prefetch, or concurrent arm copies. Each of six frozen
+sources runs sequentially over all 24 MLPs, with row fsync and final-prediction
+sidecars. Reusing an existing C00 result would save 24 runs but requires exact
+source/config/dependency identity the historical sidecar cannot establish;
+rerun C00 instead of weakening provenance. No pass is omitted; a crash retains
+partial evidence and does not silently resume. The prior 240-network batch
+took 72 minutes, so expect this 144-network job to exceed 30 minutes; this
+review precedes submission. Cost caps are disabled together for DESIGN
+accuracy as the protocol requires; deployment certification remains separate.
+
+**Query-audit instrument knowledge delta (IMPORTANT).** The label-free
+`s17_query_continuation.py` is committed, with source/package/anchor pins,
+actual branch/fallback layer trace, refusal of absent approximation or
+pre-branch displacement, shape/nonfinite checks and exclusive atomic output.
+Eight tiny synthetic tests pass. Three fresh-context reviews are preserved:
+the first two were PROVISIONAL and prompted those repairs; the final
+`experiments/2026-09-18_s17_query_audit_final_skeptic.md` remains PROVISIONAL
+only for selected-pair lineage and actual full-shape behavior, which cannot
+exist before the factorial. It carries no truth, score or release inference.

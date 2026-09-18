@@ -5,8 +5,11 @@ fitted dense P4 sentinel are emitted as new versioned files. Tiny independent
 tensor and complete full-rank recurrent parity, disabled-feature identity,
 fallback, and source-bound reader tests pass; fresh Skeptics accepted narrow
 source parity and instrument readiness. The LOG holds the pre-data contract.
-Samuel answered “I don't know” to all three new predictions before data; full
-shape metering, P12 factorial, query discriminator and fit have not run.
+Samuel answered “I don't know” to all three new predictions before data.
+Corrected f64-readonly full-shape metering is complete and independently
+accepted for DESIGN dispatch; P12 factorial, query discriminator and fit have
+not run. C11 costs 539.872 billion counted FLOPs and 26,393 calls, so its
+conservative residual margin needs candidate-specific release evidence.
 The ordered conditional stages and dual2x release gate below remain binding.
 
 **Active September 18, after the worker decision-point review.** The strategist response is delivered and independently accepted as a research plan. Execute [Claude handoff](CLAUDE_CODE_HANDOFF_2026-09-18.md), with mechanisms, prospective gates and limits in [strategist response](STRATEGIST_RESPONSE_2026-09-18.md). The previous plan is preserved in [archive](archive/GAME_PLAN_before_2026-09-18_complete_candidate.md).

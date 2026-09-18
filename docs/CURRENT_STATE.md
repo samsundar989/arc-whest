@@ -1,22 +1,25 @@
 # CURRENT_STATE.md — read this first
 
-## September 18 — complete-candidate implementation, before measurement
+## September 18 — complete-candidate package metered; P12 factorial next
 
 The pre-data Rule-1 contract for the dated complete-candidate slice is recorded
 at the end of `experiments/LOG.md` in commit `0c3cb95`; Samuel answered “I don't
-know” to all three new predictions, now recorded before measurement. Four exact compressed arms and the fitted dense
+know” to all three new predictions before measurement. Four exact compressed
+arms and the fitted dense
 P4 sentinel are emitted and source-hash pinned by the new six-arm decision
 reader. Tiny P3 tensor, compensation, fallback and full-recurrence parity
 checks pass. A fresh source Skeptic accepted narrow parity after one required
 fixture was added; a fresh instrument Skeptic accepted the repaired reader
 after sample/config/row and role-swap refusal tests. Query-cost code has only
-isolated tiny tests and remains conditional on the factorial result. Standard
-preflight after final source edits is GREEN 12/16 (four Full-tier checks skipped).
+isolated tiny tests and remains conditional on the factorial result. The
+corrected f64-readonly grader-twin meter prices all six frozen exports; C11
+costs 539.872 billion FLOPs and 26,393 calls. A fresh Skeptic accepts the cost
+evidence for P12 DESIGN, while the modeled residual margin remains tight.
+Final standard preflight is GREEN 12/16 (four Full-tier checks skipped).
 
 **No new P12 truth, P13, public or vault read has occurred in this slice.**
-Next: commit the prediction addendum, meter complete exports through workerq,
-then run the one pinned six-arm P12
-factorial and its independent result Skeptic. Keep the registered query, fit
+Next: run the one pinned six-arm P12 factorial and its independent result
+Skeptic. Keep the registered query, fit
 and release branches conditional; the 2x requirement is unchanged.
 
 ---
