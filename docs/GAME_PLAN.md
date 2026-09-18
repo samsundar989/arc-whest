@@ -5,7 +5,7 @@ fitted dense P4 sentinel are emitted as new versioned files. Tiny independent
 tensor and complete full-rank recurrent parity, disabled-feature identity,
 fallback, and source-bound reader tests pass; fresh Skeptics accepted narrow
 source parity and instrument readiness. The LOG holds the pre-data contract.
-Samuel's three new predictions have been solicited and remain pending; full
+Samuel answered “I don't know” to all three new predictions before data; full
 shape metering, P12 factorial, query discriminator and fit have not run.
 The ordered conditional stages and dual2x release gate below remain binding.
 

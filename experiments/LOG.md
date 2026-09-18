@@ -54284,8 +54284,15 @@ its complete provenance matches. No additional dense factorial or public fit.
 survive compression, but the interaction sign is uncertain; (2) a fixed
 rank32 old-query readout may save roughly 0.02B FLOPs net, while accuracy is
 uncertain; (3) an unfit complete file is unlikely to meet dual 2x v31.
-Samuel's three prospective predictions are separately solicited and must be
-recorded in this entry before the first strategic measurement.
+Samuel's three prospective predictions, recorded verbatim before the first
+strategic measurement:
+
+1. “For this new slice, do you predict the complete P3 plus frozen fit package
+   will beat the compressed default on P12?” — **“I don't know.”**
+2. “Do you predict the rank32 old-query approximation will save at least 5%
+   total FLOPs and improve adjusted score?” — **“I don't know.”**
+3. “Do you predict the final complete package will clear the existing 2× v31
+   release gate in both score conventions?” — **“I don't know.”**
 
 **Factorial gate and selection.** All six P12 paired arithmetic comparisons
 are C10:C00, C01:C00, C11:C10, C11:C01, C11:C00 and C01:C10; each runs
@@ -54429,6 +54436,6 @@ The run overlapped the final source/reader edits. The quiet-tree rerun
 `experiments/2026-09-18_s17_preflight_final.log` is also **GREEN 12/16**
 (four named Full-tier checks skipped). Focused integration, query and
 factorial-reader synthetic tests pass. This is instrument/source verification,
-not release certification or a P12 score. Samuel's new predictions have not
-yet been received or recorded; no strategic measurement may start until they
-are recorded and the contract is committed.
+not release certification or a P12 score. Samuel's three new “I don't know”
+predictions are now recorded above, before any strategic measurement. This
+contract/prediction addendum must be committed before the first workerq meter.
