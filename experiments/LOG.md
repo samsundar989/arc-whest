@@ -54671,6 +54671,46 @@ the SHA-pinned dry run, four tiny tests, and quiet GREEN preflight. The
 original PROVISIONAL verdict remains in the record. No complete-package
 fit or P12 result is implied.
 
+### P12 complete factorial result and raw-archive prediction
+
+Workerq `#1882` **SUCCEEDED** with exit 0 in 7,192.79 s, measured peak
+7,861.51 MiB under 12 GiB RAM/0 GPU/4 CPUs. Its immutable source snapshot
+is `7f374d2df`. All 144 rows, six 24-row prediction sidecars and the
+score artifact are present. The snapshot-aware reader, after its committed
+prediction/repair, focused synthetic test, independent Skeptic and GREEN
+12/16 preflight, verified those source/dependency/sidecar identities and
+wrote `experiments/2026-09-18_s17_factorial/decision.json`. The raw score,
+decision and prediction-manifest SHA-256s are respectively
+`9048ac53e8a289c3cc413122c5d881f6fb88830d414b108db9ed9719d6800cac`,
+`d1410c5aab13e4d940b5a38b4f7ac0a8b5e03b6b17e428b154e4a554149123d7`,
+and `a72ace6272f50d5783b4d65532ddf48d3f17862260bfd0e798abffab2ae74a9b`.
+
+The independent fresh-context result Skeptic **ACCEPTS** the narrow exposed
+P12 DESIGN factorial and deterministic **C10** selection in
+`experiments/2026-09-18_s17_factorial_result_skeptic.md`. C10's observed
+and official adjusted scores are `6.96169045e-9` and `6.48660902e-9`,
+with mean counted FLOPs 480,850,933,121; raw MSE `3.18371415e-8` against
+truth noise `2.24807096e-9`. All six arms have zero failed networks. Against
+C00, C10 passes paired arithmetic t gate 1.0 (official gain 1.11384x).
+C01 and C11 do not displace C10: official gains versus C10 are 0.93698x
+and 0.95274x. C11's lower raw MSE does not pay for its larger complete
+FLOP bill. The same-panel v31 observed and official adjusted means are
+`9.51468422e-9` and `8.86066516e-9`; C10 is 1.36672x/1.36599x better,
+short of dual 2x. The needed further reductions to both half-v31 means are
+31.664% and 31.700%, above the registered 25% engineering fit trigger.
+Therefore the complete-package fit branch is **stopped**. The fixed query
+cost experiment on selected C10 remains required. No P13, public, vault or
+release inference follows from this reused P12 DESIGN panel.
+
+**Raw archive preservation prediction, before adding the factorial outputs.**
+The job produced text files with Windows line endings. Git's general
+`text eol=lf` normalization would alter some raw artifact bytes. Marking
+only `experiments/2026-09-18_s17_factorial/**` as `-text -diff` before add
+will store all 16 measured files byte for byte: each staged blob will match
+`git hash-object --no-filters` and a fresh checkout will reproduce the
+producer SHA-256s. It will not change numeric values, source identities,
+paired results, the frozen estimator archives, or the untouched P13.
+
 ### IMPORTANT prediction: snapshot-root decision-reader repair, before editing
 
 Workerq #1882 SUCCEEDED in 7192.79 s, peak 7861.51 MiB, and wrote 144
