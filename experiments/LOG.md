@@ -54896,3 +54896,7 @@ identity matching, so rerun it. No pass is omitted; partial artifacts do
 not count as a complete decision. Expected duration exceeds 30 minutes.
 The source snapshot is frozen at submission, and output paths are absolute
 so workerq writes to the live evidence directory.
+
+### IMPORTANT prediction: query snapshot-root decision reader, before editing
+
+The registered one-pair P12 score will run in an immutable workerq snapshot with an absolute workspace output path. The query reader currently asks `design_sidecar.verify` to check against a supplied `source_root`, but `_source` restricts files to the checkout and the recorded `prediction_sidecars` path is resolved from the checkout. This can refuse a valid snapshot before opening score rows. Prediction: adding explicit `--run-root`, binding both frozen sources and recorded arm paths to it, and resolving the recorded sidecar path from it will accept a correct snapshot/output pairing. Changed source bytes, a wrong recorded sidecar path, mismatched dependency bytes, or a role swap will still refuse. The paired arithmetic score, gate 1.05, and new-failure veto remain unchanged. Verification will use a small synthetic snapshot plus tamper checks and standard preflight; no P12 score, truth, or active output will be read during the repair.
