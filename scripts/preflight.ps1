@@ -42,7 +42,7 @@
                             THE gate -- still refuses percentile/BCa, still
                             requires a pre-registered threshold, and still
                             follows arithmetic when the estimands disagree
-    9. seed-ledger refusals - 66/66 negative tests: every guard still FIRES
+    9. seed-ledger refusals - 75/75 negative tests: every guard still FIRES
    10. vault integrity    - array sha256s vs the manifest and the seed->weights
                             map, not merely the counter. Costs no touch.
    11. lifecycle evaluator - 56/56. The canonical grader lifecycle (one Estimator,
@@ -426,7 +426,7 @@ Step "8. canonical scorer + the binding gate" {
 
 # --- 9. the seed ledger's refusals actually fire --------------------------------
 # Step 7 proves the ledger is CONSISTENT. It cannot prove the guards still refuse.
-# These are 66 negative tests: unregistered block, range leaving its block, any
+# These are 75 negative tests: unregistered block, range leaving its block, any
 # overlap in a DECISION block, a second claim on a SINGLE_USE one, a hand-edited
 # ledger, an artifact rewritten after its claim.
 Step "9. seed-ledger refusals + the truth-read register" {

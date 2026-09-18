@@ -1,0 +1,121 @@
+## Independent Skeptic verdict
+
+### 1. Decision instrument — REJECT
+
+**Strongest challenge**  
+The prior SHA/layer repair is incomplete. Missing setting and score-shape metadata still fail open, and arm paths are compared only by basename rather than exact path.
+
+**Raw falsification evidence**
+
+```text
+missing_overrides_and_score_shape_rc 0 screen_fields ['qE', 'qEd']
+aliased_score_paths_rc 0 stderr
+```
+
+The synthetic artifact omitted:
+
+- `overrides`, so it did not declare age 4/rank 256;
+- score-artifact `width` and `depth`;
+- exact scored paths, replacing them with nonexistent paths having the expected basenames.
+
+It was nevertheless accepted.
+
+**Static cause**
+
+- [s12_decide.py](/C:/Users/samsu/Documents/arc-whest/local_sim/s12_decide.py:209) validates the age/rank setting only when `overrides4` is truthy. Missing settings therefore pass.
+- [s12_decide.py](/C:/Users/samsu/Documents/arc-whest/local_sim/s12_decide.py:213) compares width/depth only if those fields exist in the score artifact. Missing shape metadata passes.
+- [s12_decide.py](/C:/Users/samsu/Documents/arc-whest/local_sim/s12_decide.py:102) reduces scored and measured paths to basenames. A nonexistent alias path with the same basename and SHA passes.
+
+**Repairs that did survive**
+
+The focused suite passed **9/9**:
+
+```text
+Ran 9 tests in 5.718s
+OK
+```
+
+This included stale SHA refusal, identically truncated layer refusal, missing-E refusal, changed failure identity, score-row identity mismatches, and official-precision reversal.
+
+The canonical scoring path is otherwise sound:
+
+- paired identities are enforced;
+- failure identities, not counts, determine S2;
+- official-precision per-network scores feed `decide(gate=1.0, interval="t")`;
+- missing required metric layers fail S3.
+
+**Producer E/energy identity — ACCEPT as a subcomponent**
+
+- `E` is captured from the actual contraction.
+- Post-Wick reconstruction uses left `gate²`, right `gate`, and old lineage.
+- Retained energy is `||EQ||² / ||E||²`.
+- The suite independently verified  
+  `||E||² = ||EQ||² + ||E−EQQᵀ||²`.
+- The real tiny producer emitted E evidence and retained energy for every arm.
+
+This does not rescue the overall decision adapter because artifact binding remains fail-open.
+
+**Old query artifacts**
+
+They remain insufficient: they lack explicit E/true retained-energy evidence, complete expected-domain metadata, and the newly required source/setting binding. The reader does not synthesize those fields.
+
+**Cheapest repair**
+
+Require, rather than conditionally inspect:
+
+1. score `width` and `depth`;
+2. exactly `{"age": 4, "rank": 256}` for the main artifact;
+3. canonicalized exact arm paths matching the score artifact—not merely basenames.
+
+Add one regression containing all three omissions used above.
+
+---
+
+### 2. DESIGN control reuse — ACCEPT
+
+The prior missing tier check is repaired mechanically:
+
+- [p2_design_score.py](/C:/Users/samsu/Documents/arc-whest/local_sim/p2_design_score.py:265) requires `om["tier"] == "DESIGN"`.
+- Strict reuse also requires present source bytes and full manifest/JSONL row binding.
+
+Raw adversarial results:
+
+```text
+PASS reuse refuses otherwise-valid DECIDE source manifest
+     ValueError: frozen control reuse requires a DESIGN source tier
+
+PASS changed MSE and matching manifest row hash refuse reuse
+     ValueError: arm control row 0: full evidence/index row mismatch
+
+PASS reuse skips only frozen control evaluation
+PASS reused control timing is not transferred
+all sidecar tests passed
+```
+
+I found no remaining route to reuse DECIDE evidence or transfer prior timing.
+
+---
+
+### 3. Maintained label repair — ACCEPT
+
+The live refusal suite reported:
+
+```text
+75/75 checks passed
+```
+
+The label checker then verified every maintained occurrence:
+
+```text
+PASS preflight.ps1 claims seed_ledger_refusals = 75/75
+PASS VALIDATION.md claims seed_ledger_refusals = 75/75
+PASS every count in preflight.ps1 is claimed or explicitly exempt
+PASS every count in VALIDATION.md is claimed or explicitly exempt
+39/39 checks passed
+```
+
+It also deliberately mutated both 75/75 labels to 76/76 and detected both mismatches. Final SHA checks confirmed `preflight.ps1` and `VALIDATION.md` were unchanged.
+
+### Remaining limits
+
+No batch-B partial rows, truth arrays, seed blocks, or vault data were inspected. No candidate accuracy, stage-3 outcome, promotion, submission, or release inference is made. Tests used temporary scratch files; no persistent repository changes were made.

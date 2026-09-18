@@ -1,14 +1,14 @@
 # GAME_PLAN — coherent accuracy and query-directed storage
 
-**Active: September 17, 2026, after worker commit 38b240d.** This is the sole active ordering. The prior plan is retained in `archive/GAME_PLAN_before_2026-09-17_slice2.md`. Earlier dated handoffs are historical.
+**Active execution order, reconciled September 18, 2026.** The committed September17b contract and its amendments in `experiments/LOG.md` remain binding. The September18 [strategy review](research/2026-09-18_strategy_review.md) identifies repairs and conditional follow-up; it does not change any gate or branch rule. The prior plan is retained in `archive/GAME_PLAN_before_2026-09-17_slice2.md`.
 
-Read [CURRENT_STATE](CURRENT_STATE.md), the LOG tail, [strategist response](STRATEGIST_RESPONSE_2026-09-17_slice2.md), and [execution handoff](CLAUDE_CODE_HANDOFF_2026-09-17_slice2.md). The response contains the source audit, corrected arithmetic and research references. This plan has not yet been executed or preregistered as an experiment.
+Read [CURRENT_STATE](CURRENT_STATE.md), the LOG tail, [strategist response](STRATEGIST_RESPONSE_2026-09-17_slice2.md), and [execution handoff](CLAUDE_CODE_HANDOFF_2026-09-17_slice2.md). The response contains the source audit, corrected arithmetic and research references. Stage 1 is complete; batch B was submitted as workerq #1668 and was still running at the September18 review.
 
 ## Objective
 
 Deliver a frozen, independently validated candidate with at least 2x adjusted-score gain over graded v31, and approximately 4.0–4.4e-9 public performance. A 4.4e-9 result is a major intermediate advance, not a win: the September 17 leader reports 2.239e-9 and the top-ten boundary is about 3.8e-9. Final prizes depend on fresh private evaluation, not optimizing exposed networks.
 
-Current best observed DESIGN bundle is about 1.186x over v31. Its rank256/rank384 alternatives are practically tied at official label precision. Neither is certified or promoted. Graded v31 and designated F21 remain unchanged.
+The older approximately 1.186x DESIGN bundle over v31 failed its separate 1.15 base gate versus v32. Stage 1 of September17b selected registered branch (b); its own PAIR+Q closure gained 1.047650x at official precision against v32. Batch B must be completed and judged with the repaired instrument before selecting a finalist. Graded v31 and designated F21 remain unchanged.
 
 ## Target architecture
 
@@ -21,7 +21,19 @@ Current best observed DESIGN bundle is about 1.186x over v31. Its rank256/rank38
 
 We retain this architecture family. Its precise closure/core/storage combination is not yet validated as state of the art. The next work identifies that combination rather than adding isolated terms to an unmatched chain.
 
-## Ordered next slice
+## Reconciled execution order
+
+The stage table below records the September17b contract historically. The operative next steps are:
+
+1. Finish workerq #1668 and preserve its rows; repair `s12_decide.py` with official-precision pairing, canonical failures and complete query checks. Obtain an independent Skeptic verdict before applying it to saved data. Missing E evidence stays missing.
+2. Synthesize branch (b), P3, stage 3 storage and composed arms together on P12. Separate executed-file findings from intended-objective claims. Keep P13 untouched until one supported candidate is frozen.
+3. Correct qE/qEd through the maintained source and prove the post-Wick consumer identities, rank selection and recurrent continuation on asymmetric tiny cases. Seek independent algebra review before any costly accuracy evaluation. Then preregister one fixed-storage comparison, obtain Samuel's predictions, and use DESIGN only within its permitted scope.
+4. If P3 pays alone, integrate its shared-storage collisions and prove parity before composition. Otherwise isolate one earliest causal complete-state operator discrepancy. Permit at most one new accuracy and one storage discriminator before synthesis; retain the established architecture family and closed lanes.
+5. Freeze at most one finalist, use fresh P13 exactly once under the existing dual 2x gate, then complete finalist-specific official subprocess, Linux memory, public CONFIRM, preflight and Skeptic checks. Prepare exact bytes and evidence for Samuel's per-submission approval; do not upload without it.
+
+Prediction manifests and frozen-control reuse may shorten DESIGN iteration only after complete identity verification. They cannot supply missing stage-3 E data or authorize DECIDE reuse. Heavy jobs require workerq, a recorded optimization review and conservative resources.
+
+## September17b stage map (historical contract)
 
 | Stage | Concrete deliverable | Decision |
 |---|---|---|
@@ -47,7 +59,7 @@ All heavy work uses workerq with an optimization review and conservative resourc
 
 There is no small canary by default. Its release overhead does not resolve the current accuracy gap. A server-only uncertainty can justify a separately explained exception after a concrete package exists. No new designation is authorized.
 
-## Status — updated 2026-09-17 evening, slice IN EXECUTION
+## Status snapshot — September 17 evening (historical; see reconciled order above)
 
 - **Contract committed before data** (`experiments/LOG.md`, `CONTRACT (Rule 1): slice
   2026-09-17b`) with two pre-data amendments. **Samuel's three predictions recorded
@@ -59,8 +71,9 @@ There is no small canary by default. Its release overhead does not resolve the c
   compressor), 31/31 (the composed candidate). Two of my own checks were
   mis-specified -- they asserted properties the unmodified reference itself fails --
   and are corrected with the measurements that show why. No tolerance was raised.
-- **Stage 1 batch running** (9 arms x 24 networks on P12); control v32 done: raw
-  3.061e-8, C/B 0.30232, 0 failures.
+- **Stage 1 batch was running at this snapshot** (9 arms x 24 networks on P12); it
+  subsequently completed and selected registered branch (b). Batch B was submitted
+  as workerq #1668 and remains the pending score artifact at this plan revision.
 - **Two label-free findings that reshape the plan:**
   the complete nonlinear program costs **+0.68% of C**, so accuracy from it is
   nearly free; and the multiplier floor **is** reachable on cost alone (age1/rank96

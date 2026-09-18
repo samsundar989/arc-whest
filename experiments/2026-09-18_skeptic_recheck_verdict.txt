@@ -1,0 +1,115 @@
+## Independent Skeptic verdict
+
+### 1. Stage-3 decision instrument — REJECT
+
+**Strongest challenge**  
+The repaired producer now captures the required quantities, but the decision adapter does not bind the query-evidence artifact to the scored candidates or prove complete expected-layer coverage. A stale or mismatched artifact can therefore satisfy S3.
+
+**Evidence**
+
+- Actual post-Wick `E` is now constructed with the required left `gate²`, right `gate`, and old lineage in [s10_parity.py](C:/Users/samsu/Documents/arc-whest/local_sim/s10_parity.py:343).
+- `E` is captured from the real contraction at [s10_parity.py](C:/Users/samsu/Documents/arc-whest/local_sim/s10_parity.py:394).
+- Retained energy has the correct same-state definition:
+  `||EQ||² / ||E||²`, with the checked identity  
+  `||E||² = ||EQ||² + ||E-EQQᵀ||²`, at [s10_parity.py](C:/Users/samsu/Documents/arc-whest/local_sim/s10_parity.py:324).
+- The producer records per-layer `E`, `D3`, `D21`, `mu_out`, and `cov_out`, plus output displacement, at [s10_parity.py](C:/Users/samsu/Documents/arc-whest/local_sim/s10_parity.py:451).
+- Official-precision per-network scores are constructed before the binding `decide(gate=1.0)` call at [s12_decide.py](C:/Users/samsu/Documents/arc-whest/local_sim/s12_decide.py:102) and [s12_decide.py](C:/Users/samsu/Documents/arc-whest/local_sim/s12_decide.py:190).
+- Canonical row pairing, index-to-seed equality, and changed failure identities are enforced at [s12_decide.py](C:/Users/samsu/Documents/arc-whest/local_sim/s12_decide.py:155) and [s12_decide.py](C:/Users/samsu/Documents/arc-whest/local_sim/s12_decide.py:193).
+
+But:
+
+- `_qe()` discards the producer’s network identity, arm paths, arm SHA-256 values, and overrides. S3 consumes only summarized metrics at [s12_decide.py](C:/Users/samsu/Documents/arc-whest/local_sim/s12_decide.py:56). Nothing proves the supplied query artifact belongs to the files and setting represented by the score artifact.
+- “Complete layers” only means the control and candidate list the same layers. It does not compare them with the expected depth or producer network metadata at [s12_decide.py](C:/Users/samsu/Documents/arc-whest/local_sim/s12_decide.py:115). Matching omissions in both arms can pass.
+- The tiny run demonstrated structurally incomplete metric domains: at depth five, `D3` was absent at layer 0, `D21` absent at layers 0 and 4, and final-layer covariance absent. Some omissions are naturally defined by the recurrence, but the instrument has no canonical expected-domain declaration distinguishing legitimate absence from missing capture.
+
+**Raw tests**
+
+`local_sim.test_s12_decide`: **7/7 passed**, including:
+
+- observed-pass/official-precision-fail reversal;
+- missing/duplicate/mismatched score identities;
+- changed failure identity;
+- missing `E`;
+- same-state projection identity;
+- nonuniform post-Wick left-square plus old lineage;
+- real tiny producer emitting `E` and retained energy.
+
+These tests establish the repaired arithmetic and producer functionality, but not artifact-to-score binding or expected-layer completeness.
+
+**Historical s10 artifacts**
+
+They remain insufficient. Earlier artifacts contain neither explicit `E` nor genuine retained-query energy, and were generated before the post-Wick correction. They cannot be upgraded by the new reader or used to satisfy the repaired S3 gate.
+
+**Unresolved limitations**
+
+No candidate accuracy, stage-3 outcome, or release eligibility was inspected or inferred.
+
+**Cheapest correction**
+
+Bind S3 to:
+
+- query artifact network width/depth and declared setting;
+- exact arm path and SHA-256 matching the score artifact;
+- an explicit expected metric-domain per depth, allowing only recurrence-defined omissions.
+
+Add regressions for a stale SHA artifact and identical missing layers in both arms.
+
+---
+
+### 2. Reuse infrastructure — REJECT
+
+**Strongest challenge**  
+The original manifest/JSONL binding defect is fixed, and timing transfer is correctly prohibited. However, reuse does not verify that the source manifest itself is DESIGN tier, despite claiming DESIGN-only reuse.
+
+**Evidence for the repair**
+
+- Every new JSONL index row embeds the complete `EvidenceRow` used for scoring at [design_sidecar.py](C:/Users/samsu/Documents/arc-whest/local_sim/design_sidecar.py:105).
+- Strict verification compares manifest `evidence_rows` with those independently fsynced JSONL records at [design_sidecar.py](C:/Users/samsu/Documents/arc-whest/local_sim/design_sidecar.py:227).
+- Scoring-relevant fields, failure identity, candidate hash, source bytes, truth, dependency closure, configuration, environment, packages, and ordered seeds are checked.
+- Atomic manifest replacement is implemented at [design_sidecar.py](C:/Users/samsu/Documents/arc-whest/local_sim/design_sidecar.py:131).
+- Reused timing is explicitly replaced with `None` at [p2_design_score.py](C:/Users/samsu/Documents/arc-whest/local_sim/p2_design_score.py:334) and in emitted rows at lines 453–457.
+- Failed controls are refused.
+
+**Remaining defect**
+
+- The source manifest’s `tier` is neither required by `design_sidecar.verify()` nor checked by the reuse branch.
+- [p2_design_score.py](C:/Users/samsu/Documents/arc-whest/local_sim/p2_design_score.py:258) checks that the *new invocation* is accuracy-only with lambda zero, but it never requires `om["tier"] == "DESIGN"`.
+- Therefore the implementation’s “DESIGN only” claim is conventionally true for manifests generated by this tool, but not mechanically enforced against an externally constructed or relabelled source cache.
+
+**Raw tests**
+
+`test_design_sidecars.py`: all checks passed, including:
+
+- control execution skipped while candidate executes;
+- score equality under reuse;
+- no timing transfer;
+- partial run refusal;
+- altered MSE plus recomputed manifest row hash refusal;
+- missing source and changed dependency refusal;
+- atomic publication.
+
+The manifest-to-JSONL row-binding rejection from the first verdict is closed.
+
+**Cheapest correction**
+
+Require the manifest to contain `tier`, and during reuse refuse unless it is exactly `DESIGN`. Add one regression using an otherwise valid manifest labelled `DECIDE` or `SINGLE_USE`.
+
+---
+
+### 3. Enforcement-label correction — ACCEPT
+
+The two edits correctly change `66/66` to `75/75` in:
+
+- [scripts/preflight.ps1](C:/Users/samsu/Documents/arc-whest/scripts/preflight.ps1:45)
+- [docs/VALIDATION.md](C:/Users/samsu/Documents/arc-whest/docs/VALIDATION.md:202)
+- [docs/VALIDATION.md](C:/Users/samsu/Documents/arc-whest/docs/VALIDATION.md:898)
+
+The actual lightweight suite completed with:
+
+```text
+75/75 checks passed
+```
+
+The edits are narrow labels only and agree with the executable count.
+
+No repository files were edited. I did not inspect batch-B partial accuracy rows, truth arrays, seed blocks, or the vault.

@@ -1,0 +1,7 @@
+You are a fresh-context independent Skeptic for arc-whest. Work read-only. Do not assume any builder explanation; inspect raw files.
+
+Read AGENTS.md, docs/SKEPTIC.md, docs/VALIDATION.md, docs/CURRENT_STATE.md, docs/GOTCHAS.md, the operative September17b contract in experiments/LOG.md (about lines 52786-53050), and the September18 validation and architecture audits.
+
+Review the current git diff plus untracked source/test files for these bounded changes: local_sim/s12_decide.py, local_sim/test_s12_decide.py, local_sim/design_sidecar.py, local_sim/p2_design_score.py, local_sim/test_design_sidecars.py, experiments/candidate_manifest.json, local_sim/s13_correct_query_objective.py, local_sim/test_s13_correct_query_objective.py, estimator_k3_v42_pairq_a4r256_qEc_p4d5.py, estimator_k3_v42_pairq_a4r256_qEdc_p4d5.py. Try to falsify official-precision score decisions, canonical pairing and failure semantics, stage-3 E/query/continuation gates, safe DESIGN control reuse, and corrected post-Wick qE/qEd algebra. Run only lightweight synthetic tests or source checks. Do not read partial batch B accuracy rows, truth arrays, seed blocks, or vault; do not edit files.
+
+Return ACCEPT/REJECT separately for the decision instrument, reuse infrastructure, and corrected algebra, with exact file/line and raw test evidence, blockers, and cheapest fixes. Do not infer an accuracy gain from algebraic parity.

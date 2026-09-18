@@ -53650,3 +53650,167 @@ its three registered conditions with the cheaper setting already selected
 label-free as age3/rank192 (age2/rank192 was NOT selected by the registered
 criterion). The release gate stays 2.0x on untouched P13. F5 stays failed, P11
 stays retired, no designation is authorised.
+
+## 2026-09-18 UTC (September 17 evening Central) — independent repository, Chrome and literature review
+
+Research/documentation slice requested by Samuel, with separate architecture,
+validation and primary-literature agents, followed by a fresh-context Skeptic.
+No candidate or instrument edits, estimator execution, truth-array reads, seed claims,
+vault activity, submissions or designations. Batch B job 1668 remained running;
+partial accuracy outputs were not analysed. Existing completed stage-1 artifacts and
+tiny synthetic/algebra fixtures were sufficient for the review.
+
+Deliverable: [strategy and implementation plan](../docs/research/2026-09-18_strategy_review.md).
+Evidence: [Chrome snapshot](../docs/research/2026-09-18_competition_snapshot.md),
+[architecture](../docs/research/2026-09-18_architecture_audit.md),
+[validation](../docs/research/2026-09-18_validation_audit.md),
+[literature](../docs/research/2026-09-18_frontier_research.md),
+[independent Skeptic](../docs/research/2026-09-18_skeptic_verdict.md).
+
+Knowledge delta: s12's registered official-precision selector actually gates observed
+scores, omits identity pairing and complete failure semantics, and lacks parts of its
+stated S3 evidence. Synthetic fixtures reproduce incorrect acceptance. qE uses a
+mixed Wick boundary; qEd omits an A factor and, after the first join, the joining
+lineage's birth-weight offset. Independent tiny algebra and frozen-function execution
+confirm the discrepancies. These do not establish that corrected methods improve
+accuracy or reverse the pending real verdict. Current label-free results are scoped
+to the executed files. Repair/review before using those gates; saved rows can support
+score recomputation without rerunning estimators.
+
+Fresh lightweight instrument checks: projector 87/87, mini wrapper 10/10,
+certification repair 14/14. Previous receipt/module-path defects remain fixed.
+Local whestbench0.16.1/flopscope0.12.1/NumPy2.2.6 match the live server; OS, Python
+patch level and timings are not identical. v31's existing projection error is0.45%,
+one validation observation rather than general forecast calibration.
+
+Live board: v31 remains latest, rank62/170; clean lead2.239e-9 vs our8.752e-9.
+Newer2.220e-9 detail row has a timeout and inconsistent presentation. New primary
+external evidence: tim8es E008 raw TensorSketch and E009 simple future-weight basis
+tests failed their own gates. The recommended next work is precise query-objective
+repair, synthesis of batch B, then one identified accuracy or storage mechanism;
+conditional thin core residual and aggregate-query interpolation are hypotheses only.
+
+Skeptic **ACCEPT** for the bounded plan; **REJECT** for claiming current stage3
+implements its registered gate/mechanism. No promotion, gate change, P13 consumption,
+submission approval or operative-contract replacement follows from this review.
+
+### 2026-09-18 — IMPORTANT instrument repair prediction, before edits
+
+Question: Does the stage-3 verdict adapter enforce its registered estimand and
+pairing? Prediction: the audit's synthetic unequal-cost fixture will fail S1 at
+official precision although observed scores pass; mismatched or duplicated
+network identities will be refused; a candidate that fails a different network
+will fail S2 even when failure counts tie. Existing query-error artifacts have no
+explicit E measurement, so they cannot establish the complete registered S3.
+The intervention is restricted to `s12_decide.py`, shared row scoring where needed,
+and focused synthetic regression tests. No seed, estimator, gate, or truth is changed.
+The result will be reviewed by an independent Skeptic before any stage-3 inference.
+
+### 2026-09-18 — IMPORTANT prediction-sidecar durability and reuse prediction, before scorer edits
+
+Prediction: atomic manifest replacement and strict source/dependency/environment
+verification will preserve the interpretation of completed sidecars, while synthetic
+interruption, missing-source and dependency-tamper cases will refuse reuse. Opt-in
+frozen-control reuse on DESIGN runs will require complete ordered network, truth,
+mint, evaluator, configuration and numerical identities; it will never transfer
+timing observations or automatically reuse a DECIDE block. No score gate, candidate
+formula or truth is changed. Focused tests, preflight and independent Skeptic review
+precede reliance on the instrument.
+
+### 2026-09-18 — IMPORTANT query-evidence producer prediction, before edits
+
+The repaired stage-3 decision correctly refuses an absent explicit E field. Prediction:
+capturing the actual old-plus-joining post-projection E contraction and complete
+layer identities in `s10_parity.query_error` will make this missing-evidence case
+measurable without changing estimator outputs. A same-state orthogonal projection
+will satisfy the proposed retained-energy identity
+`||E Q||_F^2 / ||E||_F^2 = 1 - ||E(I-QQ^T)||_F^2 / ||E||_F^2`
+within numerical tolerance. This is a label-free instrument repair, not a claim
+that historical artifacts contain E or that the query method improves accuracy.
+The existing stage-3 gates stay fixed; targeted producer-to-verdict tests,
+preflight and independent Skeptic review are required before interpretation.
+
+### 2026-09-18 — fresh-context Skeptic on first repair pass
+
+Raw verdict: `experiments/2026-09-18_skeptic_verdict.txt` (read-only independent
+Codex session). It **REJECTED** complete decision-instrument readiness because
+`s10_parity.query_error` does not emit E or same-state retained-energy evidence;
+the repaired `s12_decide` correctly fails absent E. It **REJECTED** frozen-control
+reuse because manifest `evidence_rows` were not yet bound to verified prediction
+JSONL metadata. It **ACCEPTED** corrected qE/qEd post-Wick and D3 algebra only,
+with no accuracy or release inference. The read-only sandbox prevented its
+temporary-file tests; the builder's targeted tests are a separate observation.
+Both rejected gaps are concrete fixes now in progress. No stage-3 verdict,
+candidate promotion, P13 touch or submission follows from this review.
+
+### 2026-09-18 — IMPORTANT preflight enforcement-label prediction, before edit
+
+The seed-ledger refusal suite currently reports 75/75 while two maintained
+labels still claim 66/66; enforcement correctly rejects that mismatch at
+preflight step 7. Prediction: updating only the current labels in
+`scripts/preflight.ps1` and `docs/VALIDATION.md` to 75/75 will restore the
+label check, while its deliberate wrong-count mutation tests continue to
+refuse. Historical transcripts retain their original counts. No guard logic,
+seed ledger, estimator or score changes. A fresh preflight and independent
+Skeptic will review the repair.
+
+### 2026-09-18 — second fresh-context Skeptic, instrument follow-up
+
+Raw verdict: `experiments/2026-09-18_skeptic_recheck_verdict.txt`.
+The independent reviewer confirmed the official-precision synthetic reversal,
+canonical row/failure checks, same-state E energy identity, row-bound sidecar
+reuse and 75/75 label correction. It **REJECTED** final stage-3 readiness
+because a query artifact could be stale or mismatched in path/SHA/setting and
+expected layer coverage was not yet proven. It **REJECTED** final reuse readiness
+because the source manifest tier was not checked. Both are being repaired with
+negative fixtures; the 75/75 label correction was **ACCEPTED**. Historical
+query-error artifacts still lack explicit E and cannot satisfy S3. No accuracy
+claim or promotion follows.
+
+### 2026-09-18 — corrected objective implementation, label-free only
+
+`local_sim/s13_correct_query_objective.py` emitted new pairq/P4 age4-rank256
+files, leaving frozen archives unchanged. The qEc file is
+`estimator_k3_v42_pairq_a4r256_qEc_p4d5.py` SHA-256
+`e3ed3fb8339f66373107fd0cf92844009039ed03a6b595425a81c9374f4e4d69`;
+qEdc is `estimator_k3_v42_pairq_a4r256_qEdc_p4d5.py` SHA-256
+`f579e32e00e87c394b80562571c25afce2174412e5b171ace143f55821efae33`.
+The tiny independent-action tests pass 5/5: asymmetric nonuniform gates,
+post-Wick direct and projected action, joining-lineage D3 coefficients, rank
+below width, and a complete six-layer recurrence with three-plus joins and
+full-rank uncompressed parity. Both files pass `whest validate`. The first
+fresh-context Skeptic **ACCEPTED the algebra only**; its read-only sandbox
+prevented repeating the temporary-file full-chain test. These are implementation
+findings, not DESIGN accuracy evidence. No score, P13 or public result has been
+read for the corrected files.
+
+### 2026-09-18 — independent instrument/reuse closure
+
+The third Skeptic (`experiments/2026-09-18_skeptic_final_verdict.txt`) **ACCEPTED**
+DESIGN-only reuse and the 75/75 enforcement labels, but **REJECTED** stage-3
+artifact binding for optional score shape/setting fields and basename-only
+paths. The same independent reviewer then retested the repaired adapter
+(`experiments/2026-09-18_skeptic_closure_verdict.txt`) and **ACCEPTED**:
+missing age/rank, missing width/depth, aliased paths and even matching forged
+SHAs all refuse. The focused suite passed 10/10. Source/file binding now
+uses exact canonical paths, explicit live shape and setting, and current
+source hashes. The producer reports explicit E, true same-state retained
+query energy and expected layer domains; historical artifacts remain missing
+E and cannot be made into a stage-3 pass. Preflight on these bytes is pending.
+No batch-B result was selected or interpreted during instrument repair.
+
+Final verification: `experiments/2026-09-18_instrument_preflight.log` reports
+**GREEN 12/12** standard steps on final instrument bytes. Focused stage-3
+adapter/producer tests passed 10/10; direct seed-ledger refusals 75/75 and
+enforcement labels 39/39. The initial stale-label refusal found three current
+count claims rather than the two predicted; all three were updated without
+changing guard logic. The instrument is ready to recompute saved score rows,
+while absent historical E evidence remains absent.
+
+The fixed-storage qEd comparator did not exist with pairq closure. The maintained
+`s11_build_candidate.emit` generated
+`estimator_k3_v42_pairq_a4r256_qEd_old_p4d5.py` with the old qEd objective,
+pairq closure, age4/rank256, D3 reserve16 and P4 depth5. SHA-256
+`d4e6f587c3827b39b47bdbf9d7d27b3cd7432cf1ef1c821d3f3aa047a2eedb55`;
+`whest validate` passed. This is an exact code comparator for the prospective
+corrected qEdc arm, not accuracy evidence or a selected candidate.

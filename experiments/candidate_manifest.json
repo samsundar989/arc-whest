@@ -1,0 +1,32 @@
+{
+  "artifact": "candidate_inventory",
+  "version": 1,
+  "as_of": "2026-09-18",
+  "roles": {
+    "legacy_shipped": {
+      "path": "estimator.py",
+      "sha256": "00240eb1e60810f5e9a6f743b8ad89a1533cfd8671c08e07525f1ed1de54d9ec",
+      "status": "legacy root file; not the latest graded candidate"
+    },
+    "latest_graded": {
+      "path": "estimator_k3_v31.py",
+      "sha256": "6dde5fd43ad41e8ec7199b742dd554d22d506c9cf85a532027e86a590d0a787c",
+      "submission_id": 331317,
+      "status": "graded control"
+    },
+    "designated_fallback": {
+      "path": "estimator_k3_strassen_L4_f21.py",
+      "sha256": "d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94",
+      "submission_id": 330950,
+      "status": "existing designation"
+    },
+    "experimental_finalist": null
+  },
+  "contract": "experiments/LOG.md:2026-09-17b",
+  "stage": {
+    "completed": ["stage1"],
+    "active_or_recovery": "Check workerq and complete batch B; do not infer results from partial rows",
+    "decide": "P13 status must be independently verified before use",
+    "release": "No finalist is frozen or approved for submission"
+  }
+}

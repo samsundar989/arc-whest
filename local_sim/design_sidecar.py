@@ -48,8 +48,10 @@ finished network -- the same discipline `--rows-jsonl` already has.
 from __future__ import annotations
 
 import hashlib
+import dataclasses
 import json
 import os
+import tempfile
 from typing import Any, Dict, List, Optional, Sequence
 
 import numpy as np
@@ -117,7 +119,8 @@ class ArmWriter:
                "n_ops": float(row.n_ops), "gt_noise": float(row.gt_noise),
                "failed": bool(row.failed), "error_code": row.error_code,
                "nonfinite": bool(row.nonfinite),
-               "candidate_sha256": self.candidate_sha256}
+               "candidate_sha256": self.candidate_sha256,
+               "evidence_row": dataclasses.asdict(row)}
         with open(self._index, "a", encoding="utf-8") as fh:
             fh.write(json.dumps(rec) + "\n")
             fh.flush()
@@ -126,16 +129,28 @@ class ArmWriter:
 
 
 def write_manifest(directory: str, payload: Dict[str, Any]) -> str:
-    """(Re)write the run manifest. Called after every arm, not only at the end."""
+    """Atomically publish the run manifest after every arm.
+
+    A crash can leave the previous complete snapshot, never a truncated JSON
+    file that falsely appears to describe the newly completed arm.
+    """
     os.makedirs(directory, exist_ok=True)
     out = dict(payload)
     out["artifact"] = ARTIFACT
     out["version"] = VERSION
     path = os.path.join(directory, MANIFEST)
-    with open(path, "w", encoding="utf-8", newline="\n") as fh:
-        json.dump(out, fh, indent=1, default=str)
-        fh.flush()
-        os.fsync(fh.fileno())
+    fd, temporary = tempfile.mkstemp(prefix=".predictions_manifest-",
+                                      suffix=".tmp", dir=directory)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as fh:
+            json.dump(out, fh, indent=1, default=str, allow_nan=False)
+            fh.write("\n")
+            fh.flush()
+            os.fsync(fh.fileno())
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
     return path
 
 
@@ -183,6 +198,8 @@ def load_arm(directory: str, arm: str, *, width: int,
 
 
 def verify(directory: str, *, check_sources: bool = True,
+           require_present_sources: bool = False,
+           require_full_row_binding: bool = False,
            root: Optional[str] = None) -> Dict[str, Any]:
     """Verify a whole sidecar directory against its manifest. Raises on any defect."""
     mpath = os.path.join(directory, MANIFEST)
@@ -207,8 +224,42 @@ def verify(directory: str, *, check_sources: bool = True,
                     f"{r['candidate_sha256']}, the manifest says "
                     f"{info['candidate_sha256']} -- the source changed under "
                     "the run and the sidecar is not one candidate's output")
+        if "evidence_rows" in info:
+            if len(info["evidence_rows"]) != len(loaded[arm]["rows"]):
+                raise ValueError(f"arm {arm}: evidence/index row count mismatch")
+            for k, (full, index) in enumerate(zip(info["evidence_rows"],
+                                                    loaded[arm]["rows"])):
+                if require_full_row_binding and "evidence_row" not in index:
+                    raise ValueError(f"arm {arm} row {k}: missing independent "
+                                     "full evidence row in prediction index")
+                if "evidence_row" in index and full != index["evidence_row"]:
+                    raise ValueError(f"arm {arm} row {k}: full evidence/index "
+                                     "row mismatch")
+                # The prediction index was fsynced with each scored array.
+                # A changed full-row MSE plus a recomputed rows_hash must not
+                # become reusable merely by rewriting the manifest.
+                shared = (("index", "index"), ("input_seed", "seed"),
+                          ("candidate_sha256", "candidate_sha256"),
+                          ("mse", "mse"), ("flops_used", "flops_used"),
+                          ("n_ops", "n_ops"), ("gt_noise", "gt_noise"),
+                          ("error_code", "error_code"),
+                          ("nonfinite", "nonfinite"))
+                for full_key, index_key in shared:
+                    if full.get(full_key) != index.get(index_key):
+                        raise ValueError(f"arm {arm} row {k}: evidence/index "
+                                         f"{full_key} mismatch")
+                failed = bool(full.get("budget_exhausted") or
+                              full.get("time_exhausted") or
+                              full.get("residual_exhausted") or
+                              full.get("combined_exhausted") or
+                              full.get("error_code"))
+                if failed != index.get("failed"):
+                    raise ValueError(f"arm {arm} row {k}: evidence/index "
+                                     "failure mismatch")
         if check_sources:
             p = os.path.join(root, info["path"])
+            if require_present_sources and not os.path.isfile(p):
+                raise FileNotFoundError(f"arm {arm}: source missing: {p}")
             if os.path.exists(p) and sha_file(p) != info["candidate_sha256"]:
                 raise ValueError(
                     f"arm {arm}: {info['path']} now hashes "
@@ -216,10 +267,18 @@ def verify(directory: str, *, check_sources: bool = True,
                     f"{info['candidate_sha256']}")
     if check_sources:
         tp = os.path.join(root, man["truth"])
+        if require_present_sources and not os.path.isfile(tp):
+            raise FileNotFoundError(f"truth source missing: {tp}")
         if os.path.exists(tp) and sha_file(tp) != man["truth_sha256"]:
             raise ValueError(f"truth {man['truth']} now hashes {sha_file(tp)}, "
                              f"the sidecar was produced against "
                              f"{man['truth_sha256']}")
+        for rel, expected in man.get("dependency_sha256", {}).items():
+            p = os.path.join(root, rel)
+            if require_present_sources and not os.path.isfile(p):
+                raise FileNotFoundError(f"dependency source missing: {p}")
+            if os.path.exists(p) and sha_file(p) != expected:
+                raise ValueError(f"dependency {rel} hash mismatch")
     return {"manifest": man, "arms": loaded}
 
 

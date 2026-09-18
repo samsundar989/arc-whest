@@ -146,6 +146,79 @@ def main():
               v["manifest"]["config"]["accuracy_only"] is True
               and v["manifest"]["config"]["local_seconds_caps"] == "off")
 
+        # Reuse is explicit, complete and numerical only. Count evaluator calls
+        # to prove that the control is skipped while the new candidate executes.
+        eval_original = le.evaluate
+        calls = []
+        def counted_evaluate(candidate, *args, **kwargs):
+            calls.append(candidate)
+            return eval_original(candidate, *args, **kwargs)
+        le.evaluate = counted_evaluate
+        try:
+            reused_out = os.path.join(tmp, "reused.json")
+            reused_preds = os.path.join(tmp, "reused_preds")
+            rc = pds.main(["--control", ctrl, "--candidate", cand,
+                           "--truth", truth, "--n", str(n),
+                           "--ts", "2026-09-18T00:00:00Z", "--block", "INFRA_TEST",
+                           "--out", reused_out, "--pred-out", reused_preds,
+                           "--reuse-control", preds_dir])
+        finally:
+            le.evaluate = eval_original
+        check("frozen control reuse returns 0", rc == 0)
+        check("reuse skips only frozen control evaluation", calls == [cand],
+              str(calls))
+        reused_report = json.load(open(reused_out, encoding="utf-8"))
+        check("reused control score matches original",
+              reused_report["arms"]["control"]["objective"] ==
+              json.load(open(out, encoding="utf-8"))["arms"]["control"]["objective"])
+        check("reused control timing is not transferred",
+              reused_report["arms"]["control"]["seconds"] is None
+              and all(r["wall_time_s"] is None for r in
+                      reused_report["arms"]["control"]["rows"]))
+        check("reused sidecar verifies", ds.verify(reused_preds,
+              root=_ROOT, require_present_sources=True)["arms"]["control"]["n"] == n)
+        incomplete = os.path.join(tmp, "incomplete_reuse")
+        shutil.copytree(preds_dir, incomplete)
+        broken = json.load(open(os.path.join(incomplete, ds.MANIFEST),
+                                encoding="utf-8"))
+        broken["run_complete"] = False
+        ds.write_manifest(incomplete, broken)
+        raises("reuse refuses partial prior run",
+               lambda: pds.main(["--control", ctrl, "--candidate", cand,
+                                 "--truth", truth, "--n", str(n),
+                                 "--ts", "2026-09-18T00:00:01Z",
+                                 "--block", "INFRA_TEST", "--pred-out",
+                                 os.path.join(tmp, "partial_target"),
+                                 "--reuse-control", incomplete]), "incomplete")
+        wrong_tier = os.path.join(tmp, "single_use_reuse")
+        shutil.copytree(preds_dir, wrong_tier)
+        tier_manifest = json.load(open(os.path.join(wrong_tier, ds.MANIFEST),
+                                       encoding="utf-8"))
+        tier_manifest["tier"] = "DECIDE"
+        ds.write_manifest(wrong_tier, tier_manifest)
+        raises("reuse refuses otherwise-valid DECIDE source manifest",
+               lambda: pds.main(["--control", ctrl, "--candidate", cand,
+                                 "--truth", truth, "--n", str(n),
+                                 "--ts", "2026-09-18T00:00:02Z",
+                                 "--block", "INFRA_TEST", "--pred-out",
+                                 os.path.join(tmp, "wrong_tier_target"),
+                                 "--reuse-control", wrong_tier]),
+               "requires a DESIGN source tier")
+        forged = os.path.join(tmp, "forged_rows")
+        shutil.copytree(preds_dir, forged)
+        forged_manifest = json.load(open(os.path.join(forged, ds.MANIFEST),
+                                         encoding="utf-8"))
+        old_arm = forged_manifest["arms"]["control"]
+        old_arm["evidence_rows"][0]["mse"] *= 0.5
+        old_arm["rows_hash"] = le.rows_hash([
+            le.EvidenceRow(**row) for row in old_arm["evidence_rows"]])
+        ds.write_manifest(forged, forged_manifest)
+        raises("changed MSE and matching manifest row hash refuse reuse",
+               lambda: ds.verify(forged, root=_ROOT,
+                                 require_present_sources=True,
+                                 require_full_row_binding=True),
+               "full evidence/index row mismatch")
+
         # --- 8  the exact identity ----------------------------------------- #
         dec = ds.prediction_change(v["arms"]["control"]["predictions"],
                                    v["arms"]["candidate"]["predictions"], y)
@@ -237,6 +310,31 @@ def main():
         json.dump(man, open(os.path.join(d9, ds.MANIFEST), "w", encoding="utf-8"))
         raises("manifest missing package identity refused",
                lambda: ds.verify(d9, root=_ROOT), "missing")
+
+        # Recovery and reuse require a readable last complete manifest and
+        # independently present source bytes, not just stored hash strings.
+        d10 = os.path.join(tmp, "missing_source")
+        shutil.copytree(preds_dir, d10)
+        man = json.load(open(os.path.join(d10, ds.MANIFEST), encoding="utf-8"))
+        man["arms"]["candidate"]["path"] = os.path.join(tmp, "absent.py")
+        ds.write_manifest(d10, man)
+        raises("strict reuse refuses missing candidate source",
+               lambda: ds.verify(d10, root=_ROOT,
+                                 require_present_sources=True), "source missing")
+        check("diagnostic historical read still allows missing source",
+              ds.verify(d10, root=_ROOT)["manifest"]["n"] == n)
+
+        d11 = os.path.join(tmp, "dependency")
+        shutil.copytree(preds_dir, d11)
+        man = json.load(open(os.path.join(d11, ds.MANIFEST), encoding="utf-8"))
+        man["dependency_sha256"] = {os.path.relpath(cand, _ROOT): "0" * 64}
+        ds.write_manifest(d11, man)
+        raises("strict reuse refuses changed dependency bytes",
+               lambda: ds.verify(d11, root=_ROOT,
+                                 require_present_sources=True), "hash mismatch")
+        check("atomic publication leaves no pending manifest",
+              not any(name.startswith(".predictions_manifest-")
+                      for name in os.listdir(d11)))
     finally:
         tr.reserve = _orig_reserve
         sl.TIERS.clear()

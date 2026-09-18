@@ -40,8 +40,10 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import platform
 import sys
 import time
+import dataclasses
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
@@ -96,6 +98,11 @@ def main(argv=None) -> int:
                          "and fsynced per row, so a crash keeps every finished "
                          "network. Costs ~96 KiB per arm at 24x1024 and is what "
                          "the exact prediction-change decomposition needs.")
+    ap.add_argument("--reuse-control", default="",
+                    help="DESIGN only: reuse a complete frozen control from a "
+                         "prior --pred-out directory after strict full-identity "
+                         "verification. Refuses legacy/incomplete manifests; "
+                         "never reuses timing or DECIDE evidence.")
     a = ap.parse_args(argv)
 
     import flopscope as flops
@@ -104,6 +111,8 @@ def main(argv=None) -> int:
     import design_sidecar as ds
     import lifecycle_eval as le
     import truth_reads as tr
+    if a.reuse_control and not a.pred_out:
+        ap.error("--reuse-control requires --pred-out for a new evidence record")
 
     block = a.block or tr.resolve_block(a.truth)
     with tr.reserve(block, a.truth, consumer="local_sim/p2_design_score.py",
@@ -221,6 +230,21 @@ def main(argv=None) -> int:
                      "python": sys.version.split()[0]},
         "instrument_sha256": ds.sha_file(os.path.abspath(__file__)),
         "sidecar_module_sha256": ds.sha_file(ds.__file__),
+        "ordered_network_seeds": seeds,
+        # Conservatively bind the entire local evaluator source tree. This can
+        # cause a harmless cache miss after an unrelated lab edit, never an
+        # unsafe reuse after a transitive import changes.
+        "dependency_sha256": {
+            os.path.relpath(os.path.join(_HERE, name), _ROOT).replace(chr(92), "/"):
+                ds.sha_file(os.path.join(_HERE, name))
+            for name in sorted(os.listdir(_HERE)) if name.endswith(".py")},
+        "numerical_environment": {
+            "platform": platform.platform(), "machine": platform.machine(),
+            "python": sys.version, "executable": sys.executable,
+            "numpy_build": str(np.__config__.CONFIG),
+            "threads": {key: os.environ.get(key) for key in
+                        ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS",
+                         "MKL_NUM_THREADS", "NUMEXPR_NUM_THREADS")}},
         "arms": {},
     }
 
@@ -230,6 +254,45 @@ def main(argv=None) -> int:
         writer = None
         preds = None
         sink = _sink_for(label, path)
+        reused = False
+        if label == "control" and a.reuse_control:
+            if not accuracy_only or spec.lam != 0:
+                raise ValueError("control reuse is DESIGN accuracy-only with lambda zero")
+            old = ds.verify(a.reuse_control, root=_ROOT,
+                            require_present_sources=True,
+                            require_full_row_binding=True)
+            om = old["manifest"]
+            if om.get("tier") != "DESIGN":
+                raise ValueError("frozen control reuse requires a DESIGN source tier")
+            if om.get("run_complete") is not True:
+                raise ValueError("frozen control source run is incomplete")
+            for key in ("truth_sha256", "block", "n", "width", "depth",
+                        "n_samples_per_replica", "truth_replicas", "mint",
+                        "packages", "instrument_sha256",
+                        "sidecar_module_sha256", "ordered_network_seeds",
+                        "dependency_sha256", "numerical_environment"):
+                if key not in om or om[key] != pred_manifest[key]:
+                    raise ValueError(f"frozen control identity mismatch: {key}")
+            # Timestamp is a read-register event, not evaluator configuration.
+            # All numerical/protocol controls, including the registered gate,
+            # must match. No automatic DECIDE recovery is provided.
+            old_cfg = dict(om["config"])
+            new_cfg = dict(pred_manifest["config"])
+            old_cfg.pop("ts", None); new_cfg.pop("ts", None)
+            if old_cfg != new_cfg:
+                raise ValueError("frozen control configuration mismatch")
+            old_arm = om["arms"].get("control", {})
+            if (old_arm.get("candidate_sha256") != ds.sha_file(path)
+                    or old_arm.get("evidence_rows") is None
+                    or old_arm.get("rows_hash") is None):
+                raise ValueError("frozen control lacks exact source or complete evidence rows")
+            rows = [le.EvidenceRow(**r) for r in old_arm["evidence_rows"]]
+            if (len(rows) != n or [r.input_seed for r in rows] != seeds
+                    or le.rows_hash(rows) != old_arm["rows_hash"]):
+                raise ValueError("frozen control evidence rows mismatch")
+            if any(r.failed for r in rows):
+                raise ValueError("failed frozen control is not reusable")
+            reused = True
         if pred_dir:
             with open(path, "rb") as fh:
                 import hashlib as _h
@@ -246,33 +309,51 @@ def main(argv=None) -> int:
             pred_manifest["arms"][label] = {
                 "path": path, "candidate_sha256": _sha, "n_written": 0}
             ds.write_manifest(pred_dir, pred_manifest)
-        rows, prov = le.evaluate(path, seeds, y, spec=spec,
-                                 gt_noise=None if gt_avg is None
-                                 else list(gt_avg), progress_every=0,
-                                 predictions_out=preds,
-                                 evidence_sink=sink)
+        if reused:
+            for row, prediction in zip(rows, old["arms"]["control"]["predictions"]):
+                preds.append(prediction)
+                if sink is not None:
+                    sink(row)
+            prov = {"candidate_sha256": ds.sha_file(path),
+                    "reused_numerical_evidence": True}
+        else:
+            rows, prov = le.evaluate(path, seeds, y, spec=spec,
+                                     gt_noise=None if gt_avg is None
+                                     else list(gt_avg), progress_every=0,
+                                     predictions_out=preds,
+                                     evidence_sink=sink)
         if writer is not None:
             pred_manifest["arms"][label]["n_written"] = writer.n
             pred_manifest["arms"][label]["rows_hash"] = le.rows_hash(rows)
+            pred_manifest["arms"][label]["evidence_rows"] = [
+                dataclasses.asdict(row) for row in rows]
+            pred_manifest["arms"][label]["reused_numerical_evidence"] = reused
             pred_manifest["arms"][label]["n_failed"] = int(
                 sum(1 for r in rows if r.failed))
             ds.write_manifest(pred_dir, pred_manifest)
         suite = le.score(rows, spec=spec)
         arms[label] = {"rows": rows, "suite": suite, "prov": prov,
-                       "secs": time.perf_counter() - t0}
+                       "secs": None if reused else time.perf_counter() - t0,
+                       "reused": reused}
         f = float(np.mean([r.flops_used for r in rows]))
         wall = [r.wall_time_s for r in rows]
         print(f"  {label:<10} score {suite.objective:.6e}   "
               f"raw MSE {suite.mean_mse:.6e}   C/B {f / 2 ** 41:.6f}   "
               f"mult {suite.mean_multiplier:.6f}   failed {suite.n_failed}/{n}"
-              f"   {arms[label]['secs']:.0f}s")
-        print(f"             ADVISORY local wall: median "
-              f"{float(np.median(wall)):.1f}s  worst {float(np.max(wall)):.1f}s"
-              f"   -- LOCAL seconds, gates nothing, not the server's")
+              + ("   reused frozen numerical evidence" if reused else
+                 f"   {arms[label]['secs']:.0f}s"))
+        if not reused:
+            print(f"             ADVISORY local wall: median "
+                  f"{float(np.median(wall)):.1f}s  worst {float(np.max(wall)):.1f}s"
+                  f"   -- LOCAL seconds, gates nothing, not the server's")
         if suite.n_failed:
             print(f"             *** {suite.n_failed} FAILED. With caps off "
                   "this is a real failure, not a timing artefact -- read the "
                   "flags before trusting any number above.")
+
+    if pred_dir:
+        pred_manifest["run_complete"] = True
+        ds.write_manifest(pred_dir, pred_manifest)
 
     c_rows = [r.to_row() for r in arms["control"]["rows"]]
     comparisons = {}
@@ -362,6 +443,7 @@ def main(argv=None) -> int:
                          "candidate_sha256": v["prov"].get("candidate_sha256",
                                                            ""),
                          "seconds": v["secs"],
+                         "reused_numerical_evidence": v["reused"],
                          # PER-MLP ROWS, not just their hash. Without these
                          # nobody can recompute the interval, find the biggest
                          # mover, or inspect a guarded row -- a Skeptic could
@@ -370,9 +452,11 @@ def main(argv=None) -> int:
                                    "mse": float(r.mse),
                                    "flops_used": float(r.flops_used),
                                    "gt_noise": float(r.gt_noise),
-                                   "wall_time_s": float(r.wall_time_s),
+                                   "wall_time_s": (None if v["reused"] else
+                                                   float(r.wall_time_s)),
                                    "residual_wall_time_s":
-                                       float(r.residual_wall_time_s),
+                                       (None if v["reused"] else
+                                        float(r.residual_wall_time_s)),
                                    "failed": bool(r.failed),
                                    "error_code": r.error_code,
                                    "nonfinite": bool(r.nonfinite)}

@@ -1,0 +1,32 @@
+## Decision instrument — ACCEPT
+
+All three prior counterexamples now fail closed:
+
+```text
+absent_overrides       rc=1  ValueError: age4 query artifact has wrong override setting
+absent_score_width     rc=1  ValueError: stage-3 score artifact must explicitly identify live 1024x16 shape
+absent_score_depth     rc=1  ValueError: stage-3 score artifact must explicitly identify live 1024x16 shape
+aliased_score_paths    rc=1  ValueError: query evidence path differs for qoff
+```
+
+Source identity also survives a stronger attack where both artifacts contain the same forged SHA:
+
+```text
+forged_matching_sha    rc=1  ValueError: query evidence source SHA differs for qoff
+```
+
+The adapter now requires:
+
+- exact `{"age": 4, "rank": 256}` overrides;
+- explicit score shape `1024 × 16`;
+- exact canonical relative arm paths, not merely matching basenames;
+- agreement between score SHA, query SHA, and the current canonical source bytes.
+
+The focused suite passed:
+
+```text
+Ran 10 tests in 6.766s
+OK
+```
+
+Remaining blocking counterexample: **none found for these issues**. The run emitted unclosed-file `ResourceWarning`s from the producer, but they do not weaken the fail-closed identity checks. No batch-B results, truth, seed blocks, or vault evidence were inspected, and no files were edited.

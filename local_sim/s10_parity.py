@@ -321,6 +321,33 @@ def main_tiny():
 # the query-error instrument: the ACTUAL post-projection error of every consumer
 # --------------------------------------------------------------------------- #
 
+def _retained_energy(E, Q):
+    """Same-state orthogonal right-query energy, with a complement check.
+
+    For P=QQ^T, ||E||_F^2 = ||EQ||_F^2 + ||E-EQQ^T||_F^2.
+    This is a query-space quantity; it is never inferred from output displacement.
+    """
+    E, Q = np.asarray(E, dtype=np.float64), np.asarray(Q, dtype=np.float64)
+    total = float(np.sum(E * E))
+    kept = E @ Q
+    projected = kept @ Q.T
+    retained = float(np.sum(kept * kept))
+    lost = float(np.sum((E - projected) ** 2))
+    if not np.allclose(Q.T @ Q, np.eye(Q.shape[1]), rtol=1e-5, atol=1e-5):
+        raise AssertionError("query basis is not orthonormal")
+    if not np.isclose(total, retained + lost, rtol=1e-5, atol=1e-8):
+        raise AssertionError("query-energy complement identity failed")
+    return retained, total
+
+
+def _wicked_query(U, J, old, old_basis, gate):
+    """Full post-Wick E at the same join boundary, including old lineages."""
+    pre = np.asarray(U, dtype=np.float64) @ np.asarray(J, dtype=np.float64).T
+    if old is not None:
+        pre = pre + np.asarray(old, dtype=np.float64) @ np.asarray(old_basis, dtype=np.float64).T
+    gate = np.asarray(gate, dtype=np.float64).reshape(-1)
+    return (gate[:, None] ** 2) * pre * gate[None, :]
+
 def query_error(width, depth, seed, out_path, age=None, rank=None):
     """Per layer, per arm: the real error of E, D3, D21, and of the whole output.
 
@@ -355,9 +382,38 @@ def query_error(width, depth, seed, out_path, age=None, rank=None):
                      _SHARED_ON=on, **over)
         mod = K._load(p)
         caps = {}
+        energy = []
+        pending_query = {}
         orig21 = mod._dslice21
         orig3 = mod._dslice3
+        orig_contract = mod._shared_contract_lean
+        orig_wick = mod._wick_tower
+        orig_join = mod._shared_join_lean
         state = {"l": 0}
+
+        def contract(tw, LA, LP, A_L, M):
+            v = orig_contract(tw, LA, LP, A_L, M)
+            caps.setdefault(state["l"], {})["E"] = np.asarray(v, dtype=np.float64)
+            return v
+
+        def wick(col, tw):
+            out = orig_wick(col, tw)
+            if tw._qU is not None:
+                UA, UP = tw._qU
+                J = np.concatenate([np.asarray(tw.A_L[:, :tw.A_L.shape[0]]),
+                                    np.asarray(tw.M[:, :tw.M.shape[0]])], axis=1)
+                U = np.concatenate([np.asarray(UA), np.asarray(UP)], axis=1)
+                pending_query[id(out)] = _wicked_query(
+                    U, J, tw._qold if tw.ko else None, tw.Q, col)
+            return out
+
+        def join(tw):
+            out = orig_join(tw)
+            same_state = pending_query.pop(id(tw), None)
+            if out.ko > tw.ko and same_state is not None:
+                kept, total = _retained_energy(same_state, out.Q)
+                energy.append({"layer": state["l"], "kept": kept, "total": total})
+            return out
 
         def d21(tw, off):
             v = orig21(tw, off)
@@ -382,24 +438,27 @@ def query_error(width, depth, seed, out_path, age=None, rank=None):
             return o
 
         mod._dslice21, mod._dslice3, mod._layer = d21, d3, layer
+        mod._shared_contract_lean = contract
+        mod._wick_tower, mod._shared_join_lean = wick, join
         mlp = harness.MLP(weights=[np.asarray(x) for x in w], width=width,
                           depth=depth, seed=es)
         ctx = flops.BudgetContext(flop_budget=2 ** 41, quiet=True)
         with ctx:
             pred = np.asarray(mod.Estimator().predict(mlp, 2 ** 41), dtype=np.float64)
-        return caps, pred, float(ctx.flops_used)
+        return caps, pred, float(ctx.flops_used), energy
 
-    ref_caps, ref_pred, ref_f = run(arms["qoff"], on=False)
+    ref_caps, ref_pred, ref_f, _ = run(arms["qoff"], on=False)
     out = {"artifact": "s10_parity.query_error", "label_free": True,
            "network": {"width": width, "depth": depth, "seed": seed},
-           "overrides": {"age": age, "rank": rank},
+           "overrides": {"age": 4 if age is None else age,
+                         "rank": 256 if rank is None else rank},
            "uncompressed_flops": ref_f, "arms": {}}
     for t in ("qoff", "qE", "qEd"):
-        caps, pred, f = run(arms[t], on=True)
+        caps, pred, f, energy = run(arms[t], on=True)
         rows = []
         for l in sorted(set(caps) & set(ref_caps)):
             r = {"layer": l}
-            for key in ("D3", "D21", "mu_out", "cov_out"):
+            for key in ("E", "D3", "D21", "mu_out", "cov_out"):
                 if key in caps[l] and key in ref_caps[l]:
                     a, b = caps[l][key], ref_caps[l][key]
                     nb = float(np.linalg.norm(b))
@@ -410,6 +469,11 @@ def query_error(width, depth, seed, out_path, age=None, rank=None):
             "sha256": __import__("hashlib").sha256(
                 open(os.path.join(_ROOT, arms[t]), "rb").read()).hexdigest(),
             "flops": f, "c_over_b": f / 2 ** 41,
+            "retained_query_energy": (sum(e["kept"] for e in energy) /
+                                       sum(e["total"] for e in energy)
+                                       if energy and sum(e["total"] for e in energy) > 0
+                                       else None),
+            "query_energy_joins": energy,
             "final_row_rel_vs_uncompressed":
                 float(np.linalg.norm(pred[-1] - ref_pred[-1])
                       / max(np.linalg.norm(ref_pred[-1]), 1e-300)),

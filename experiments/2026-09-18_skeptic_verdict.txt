@@ -1,0 +1,99 @@
+## Skeptic verdicts
+
+### 1. Decision instrument — REJECT
+
+**Strongest challenge**  
+The repaired score arithmetic, identity pairing, and failure-identity logic look correct, but the complete stage-3 gate is not executable with the repository’s actual query-error producer.
+
+**Evidence**
+
+- Official-precision scores are now constructed before the binding decision at [s12_decide.py](C:/Users/samsu/Documents/arc-whest/local_sim/s12_decide.py:99) and passed to `decide(gate=1.0, interval="t")` at [line 184](C:/Users/samsu/Documents/arc-whest/local_sim/s12_decide.py:184).
+- Canonical row alignment and explicit index-to-seed equality are enforced at [lines 149–159](C:/Users/samsu/Documents/arc-whest/local_sim/s12_decide.py:149).
+- New failure identities—not merely counts—fail S2 at [lines 187–190](C:/Users/samsu/Documents/arc-whest/local_sim/s12_decide.py:187).
+- Missing E evidence safely fails S3 through [lines 107–117](C:/Users/samsu/Documents/arc-whest/local_sim/s12_decide.py:107).
+- However, `s10_parity.query_error()` only emits `D3`, `D21`, `mu_out`, and `cov_out` at [s10_parity.py:402](C:/Users/samsu/Documents/arc-whest/local_sim/s10_parity.py:402). It emits neither `E` nor `retained_query_energy`.
+- Consequently, all existing artifacts from that producer necessarily fail the repaired E gate, and the cheaper-setting branch cannot have the registered energy evidence required by [s12_decide.py:213](C:/Users/samsu/Documents/arc-whest/local_sim/s12_decide.py:213).
+
+**Raw test evidence**
+
+- The focused suite could not execute its temporary-file tests because this read-only environment provides no writable temporary directory. These were infrastructure errors, not assertion failures.
+- Static inspection confirms the synthetic tests cover unequal-cost reversal, identity mismatches, changed failure identity, and missing E at [test_s12_decide.py:45](C:/Users/samsu/Documents/arc-whest/local_sim/test_s12_decide.py:45).
+- No partial batch rows or protected accuracy artifacts were read.
+
+**Cheapest fix**
+
+Extend `s10_parity.query_error()` to emit:
+
+1. Explicit recomputed post-projection E error per layer.
+2. A precisely defined `retained_query_energy`.
+3. Complete layer identities for each arm.
+
+Then add an end-to-end fixture from that producer into `s12_decide`, rather than testing against a hand-authored richer JSON schema.
+
+Checklist triggered: 1, 4, 13, 17.
+
+---
+
+### 2. DESIGN control-reuse infrastructure — REJECT
+
+**Strongest challenge**  
+Reuse validates the prediction sidecar and separately validates manifest `evidence_rows`, but never proves those two descriptions belong to the same numerical rows.
+
+**Evidence**
+
+- Strict reuse correctly binds truth, block, dimensions, seeds, mint, packages, evaluator hashes, dependencies, environment, and configuration at [p2_design_score.py:261](C:/Users/samsu/Documents/arc-whest/local_sim/p2_design_score.py:261).
+- Timing is correctly excluded from reuse at [lines 332–344](C:/Users/samsu/Documents/arc-whest/local_sim/p2_design_score.py:332).
+- Atomic manifest publication is correctly implemented at [design_sidecar.py:129](C:/Users/samsu/Documents/arc-whest/local_sim/design_sidecar.py:129).
+- The integrity gap is at [p2_design_score.py:281](C:/Users/samsu/Documents/arc-whest/local_sim/p2_design_score.py:281): scoring rows are reconstructed from manifest `evidence_rows`, while predictions come from `old["arms"]["control"]["predictions"]`.
+- `design_sidecar.verify()` verifies the binary predictions against JSONL hashes at [design_sidecar.py:159](C:/Users/samsu/Documents/arc-whest/local_sim/design_sidecar.py:159), but does not compare manifest `evidence_rows` with the JSONL row metadata.
+- An altered manifest can therefore carry self-consistent `evidence_rows` plus a recomputed `rows_hash`, while retaining unrelated valid prediction sidecars. Reuse would combine their scores and predictions.
+
+**Cheapest fix**
+
+During strict reuse, compare every scoring-relevant manifest row against its corresponding verified JSONL row:
+
+- index and seed
+- MSE and GT noise
+- FLOPs and operation count
+- failure, nonfinite, and error code
+- candidate hash
+
+Prefer reconstructing reusable `EvidenceRow` objects directly from one canonical verified row record rather than keeping duplicate row authorities. Add a tampered-`evidence_rows` regression test.
+
+Checklist triggered: 10, 14, 17.
+
+---
+
+### 3. Corrected post-Wick qE/qEd algebra — ACCEPT
+
+**Strongest challenge attempted**  
+I tested whether the correction merely changed comments or an isolated toy expression while leaving the recurrent representation inconsistent.
+
+**Evidence**
+
+- Post-Wick stashed left factors now receive the required squared left gate at [qEc estimator:1036](C:/Users/samsu/Documents/arc-whest/estimator_k3_v42_pairq_a4r256_qEc_p4d5.py:1036).
+- The corrected qEd summand uses `A_L²·M·w2b` and offsets into the joining lineage with `c = ko*n` at [qEdc estimator:678](C:/Users/samsu/Documents/arc-whest/estimator_k3_v42_pairq_a4r256_qEdc_p4d5.py:678).
+- The independent direct/post-Wick and projected identities passed.
+- The D3 square/lineage identity passed.
+- The deliberately nonuniform gate changed the selected rank-one direction as expected.
+- The source-transform anchor/refusal test passed.
+
+Raw result:
+
+```text
+test_post_wick_query_direct_and_projected ... ok
+test_d3_summand_uses_square_and_joining_lineage ... ok
+test_nonuniform_gate_changes_rank_one_choice ... ok
+test_emitted_source_has_both_corrections ... ok
+
+Ran 4 tests in 0.085s
+OK
+```
+
+The full generated-estimator recurrence test was not executable because it requires a writable temporary directory. That is the remaining verification limitation, not contrary algebraic evidence.
+
+**Important scope**
+
+This accepts the corrected algebra only. It establishes no accuracy gain, score improvement, promotion, or stage-3 pass. The contract explicitly requires fresh score and complete query evidence before any such inference.
+
+Checklist triggered: 14, 17.
