@@ -1,0 +1,280 @@
+{
+  "budget": 2199023255552,
+  "input_weight_dtype": "f64_readonly",
+  "meter": "local_sim/p2_flop_anchor.py::_run_arm(grader,f64_readonly)",
+  "meter_sha256": "2b6dd48789ff85efd68b7c6d5a1d885f0c17f18da02defd48eacce56aa48cd10",
+  "shape": {
+    "depth": 16,
+    "width": 1024
+  },
+  "sources": [
+    {
+      "grader": {
+        "budget": 2199023255552,
+        "cb": 0.21866568800805908,
+        "ops": {
+          "add": {
+            "calls": 8886.0,
+            "flops": 14169855006.0
+          },
+          "argsort": {
+            "calls": 16.0,
+            "flops": 704512.0
+          },
+          "array": {
+            "calls": 63.0,
+            "flops": 491.0
+          },
+          "asarray": {
+            "calls": 1.0,
+            "flops": 32768.0
+          },
+          "astype": {
+            "calls": 82.0,
+            "flops": 35813376.0
+          },
+          "clip": {
+            "calls": 16.0,
+            "flops": 32768.0
+          },
+          "concatenate": {
+            "calls": 3499.0,
+            "flops": 25055682560.0
+          },
+          "diag": {
+            "calls": 15.0,
+            "flops": 15360.0
+          },
+          "diagonal": {
+            "calls": 31.0,
+            "flops": 0.0
+          },
+          "einsum": {
+            "calls": 106.0,
+            "flops": 3775373312.0
+          },
+          "eye": {
+            "calls": 2.0,
+            "flops": 2048.0
+          },
+          "getitem": {
+            "calls": 16.0,
+            "flops": 3014656.0
+          },
+          "isfinite": {
+            "calls": 154.0,
+            "flops": 47329280.0
+          },
+          "linalg.qr": {
+            "calls": 41.0,
+            "flops": 2831242616.0
+          },
+          "matmul": {
+            "calls": 425.0,
+            "flops": 421627084800.0
+          },
+          "maximum": {
+            "calls": 17.0,
+            "flops": 49152.0
+          },
+          "multiply": {
+            "calls": 5048.0,
+            "flops": 4879675452.0
+          },
+          "ones": {
+            "calls": 2.0,
+            "flops": 1049600.0
+          },
+          "ones_like": {
+            "calls": 16.0,
+            "flops": 16384.0
+          },
+          "reshape": {
+            "calls": 151.0,
+            "flops": 511920128.0
+          },
+          "sqrt": {
+            "calls": 18.0,
+            "flops": 20480.0
+          },
+          "stack": {
+            "calls": 338.0,
+            "flops": 428483584.0
+          },
+          "stats.norm.cdf": {
+            "calls": 32.0,
+            "flops": 3145728.0
+          },
+          "stats.norm.pdf": {
+            "calls": 32.0,
+            "flops": 1769472.0
+          },
+          "subtract": {
+            "calls": 3972.0,
+            "flops": 6710357504.0
+          },
+          "sum": {
+            "calls": 190.0,
+            "flops": 578755524.0
+          },
+          "true_divide": {
+            "calls": 94.0,
+            "flops": 189440.0
+          },
+          "where": {
+            "calls": 154.0,
+            "flops": 189317120.0
+          },
+          "zeros": {
+            "calls": 4.0,
+            "flops": 0.0
+          }
+        },
+        "total": 480850933121.0
+      },
+      "name": "estimator_k3_v43_complete_c10.py",
+      "sha256": "fd8d497db6dfbc3affcf579119c7115c3aee4d190a3e92fec4d85c366152d1bf"
+    },
+    {
+      "grader": {
+        "budget": 2199023255552,
+        "cb": 0.20660812218511637,
+        "ops": {
+          "abs": {
+            "calls": 10.0,
+            "flops": 320.0
+          },
+          "add": {
+            "calls": 8166.0,
+            "flops": 13404189726.0
+          },
+          "argsort": {
+            "calls": 16.0,
+            "flops": 704512.0
+          },
+          "array": {
+            "calls": 63.0,
+            "flops": 491.0
+          },
+          "asarray": {
+            "calls": 1.0,
+            "flops": 32768.0
+          },
+          "astype": {
+            "calls": 82.0,
+            "flops": 35813376.0
+          },
+          "clip": {
+            "calls": 16.0,
+            "flops": 32768.0
+          },
+          "concatenate": {
+            "calls": 3199.0,
+            "flops": 23383408640.0
+          },
+          "diag": {
+            "calls": 25.0,
+            "flops": 15360.0
+          },
+          "diagonal": {
+            "calls": 31.0,
+            "flops": 0.0
+          },
+          "einsum": {
+            "calls": 106.0,
+            "flops": 3775373312.0
+          },
+          "eye": {
+            "calls": 2.0,
+            "flops": 2048.0
+          },
+          "getitem": {
+            "calls": 16.0,
+            "flops": 3014656.0
+          },
+          "isfinite": {
+            "calls": 154.0,
+            "flops": 47329280.0
+          },
+          "linalg.qr": {
+            "calls": 51.0,
+            "flops": 2872748756.0
+          },
+          "matmul": {
+            "calls": 475.0,
+            "flops": 397980999680.0
+          },
+          "max": {
+            "calls": 20.0,
+            "flops": 620.0
+          },
+          "maximum": {
+            "calls": 17.0,
+            "flops": 49152.0
+          },
+          "min": {
+            "calls": 10.0,
+            "flops": 310.0
+          },
+          "multiply": {
+            "calls": 5048.0,
+            "flops": 4879675452.0
+          },
+          "ones": {
+            "calls": 2.0,
+            "flops": 1049600.0
+          },
+          "ones_like": {
+            "calls": 16.0,
+            "flops": 16384.0
+          },
+          "reshape": {
+            "calls": 151.0,
+            "flops": 511920128.0
+          },
+          "sqrt": {
+            "calls": 18.0,
+            "flops": 20480.0
+          },
+          "stack": {
+            "calls": 338.0,
+            "flops": 428483584.0
+          },
+          "stats.norm.cdf": {
+            "calls": 32.0,
+            "flops": 3145728.0
+          },
+          "stats.norm.pdf": {
+            "calls": 32.0,
+            "flops": 1769472.0
+          },
+          "subtract": {
+            "calls": 3612.0,
+            "flops": 6238006784.0
+          },
+          "sum": {
+            "calls": 190.0,
+            "flops": 578755524.0
+          },
+          "true_divide": {
+            "calls": 94.0,
+            "flops": 189440.0
+          },
+          "where": {
+            "calls": 154.0,
+            "flops": 189317120.0
+          },
+          "zeros": {
+            "calls": 4.0,
+            "flops": 0.0
+          }
+        },
+        "total": 454336065471.0
+      },
+      "name": "estimator_k3_v44_c10_query_rank32.py",
+      "sha256": "96e87025e55367cdf9951bf9666cc8da98b439c0c6359f1c5dc2fce622cded2b"
+    }
+  ],
+  "status": "complete",
+  "wrapper_sha256": "0e210a48928a0bfb9fe0793b0e03d62b1256c05897bbcff2c6c4b82fa83c4299"
+}

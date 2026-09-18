@@ -51,3 +51,7 @@ experiments/2026-09-18_s17_meter_grader_twin.json -text -diff
 
 # Complete-candidate factorial rows and sidecars are exact producer evidence.
 experiments/2026-09-18_s17_factorial/** -text -diff
+
+# Fixed query engineering job JSON contains producer-specific line endings.
+experiments/2026-09-18_s17_query_meter.json -text -diff
+experiments/2026-09-18_s17_query_continuation.json -text -diff
