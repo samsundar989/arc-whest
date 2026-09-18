@@ -54611,3 +54611,21 @@ instrument prediction and authorizes no P12 read, candidate choice, or claim.
 
 Question: can the bounded 19-evaluation own-fit schedule be attached to an exact selected complete-package source without altering its baseline or leaking last-12 labels into selection? Prediction: on tiny synthetic sources, source-hash pinning and exact baseline copying preserve selected bytes; each of 16 coordinate trials changes only four asserted controls, is clipped to registered bounds, and the final two calls evaluate default/selected on last12 after freeze. Scalar rows and final predictions retain source/seed identity per evaluation. Any baseline byte drift, schedule overflow, premature validation call, or identity mismatch must abort. This is an IMPORTANT instrument change; no P12 labels or candidate score are consumed while implementing it. The eventual strategic fit remains conditional on the preregistered trigger and a separate workerq review.
 
+
+### Query decision-reader result (IMPORTANT, instrument only)
+
+Added `local_sim/s17_query_decide.py` and synthetic checks without opening P12
+truth, the active factorial score, or its sidecars. The reader requires exact
+and approximate source paths plus SHA-256s, checks 24 ordered P12 identities,
+score/sidecar rows and source/config hashes, uses the canonical paired arithmetic
+`decide(gate=1.05, interval="t")` on the official-precision conversion, and
+refuses a candidate with a newly failed identity. Synthetic tests reproduce an
+observed gain above 1.05 that reverses at official precision, check a new failed
+identity, and refuse 11 provenance/role/row mutations. `py_compile` and the
+focused test pass. Standard preflight transcript
+`experiments/2026-09-18_s17_query_reader_preflight.log` is **RED 11/12**:
+the lifecycle suite's shared temporary `_lifecycle_slowsetup_tmp.py` vanished
+while two agents' broad preflights overlapped. This is a concurrent preflight
+collision, not a query-reader test failure; retain the RED transcript. A single
+quiet-tree standard preflight must run after both instrument commits. No
+P12 verdict or promotion is inferred here; independent Skeptic remains required.
