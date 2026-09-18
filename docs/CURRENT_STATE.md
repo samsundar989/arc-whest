@@ -35,8 +35,14 @@ driver are source-only, targeted-tested and independently accepted in
 `experiments/2026-09-18_fit_driver_skeptic.md`; neither has read fit labels.
 The LOG tail records the dimensionless ridge objective, exact coordinate
 schedule, 40-evaluation cap, and workerq optimization review before data.
-After final preflight and commit, submit only this registered fit through
-workerq; then synthesize its paired held-out score before any finalist choice.
+Final standard preflight passed 12/16 on the scientific source bytes. The
+registered fit is workerq **#1748**, submitted from commit `6c4c02a` with
+0 GPUs, 12 GiB RAM and 4 CPUs. It was QUEUED for CPU capacity at the last
+status check; do not bypass the queue. A first mistaken queue request (#1747)
+was cancelled before execution because workerq treated `--vram 0` as one GPU.
+On #1748 completion, reconcile its P12 truth-read receipt from the immutable
+snapshot, verify all 19 complete evaluations and paired held-out comparison,
+then synthesize before any finalist choice. No fit accuracy result exists yet.
 
 ---
 

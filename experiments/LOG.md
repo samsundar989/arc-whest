@@ -54081,3 +54081,14 @@ uses `--gpus 0` and omits `--vram`; the driver dry-run metadata says
 The registered RAM/CPU envelope, candidate schedule, score/statistic, block
 and all gates are unchanged. Resubmit only after the corrected source/contract
 is committed and verify requested_gpu_count=0 before allowing it to run.
+
+**Dispatch record.** Commit `6c4c02a` contains the CPU-only correction.
+Workerq **#1748** was submitted from that committed source and is QUEUED with
+`requested_gpu_count=0`, 12,288 MiB RAM and four CPUs (verified through
+`workerq show 1748 --json`). Its immutable snapshot is
+`52fc7792a0cea00ab6fba1d13a2531a325e27dd7`. The broker reports CPU
+reservation pressure as the reason for waiting; do not bypass it. No fit
+result or P12 read has occurred at this entry. Job #1747 remains cancelled
+without execution. On completion, verify all 19 evaluation manifests/rows,
+source hashes, the first-12/last-12 split, the truth-read receipt, failure
+identities and matched held-out paired score before any candidate choice.
