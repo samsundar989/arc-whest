@@ -1885,6 +1885,22 @@ and looked hung for minutes while progressing normally. Use `python -u` when
 you intend to watch a redirected run, or you will debug a buffer.
 
 **A `nohup ... &` inside the Bash tool does not survive its parent shell here.**
+**A copied workerq snapshot cannot enforce a SINGLE_USE read cap by itself.**
+Its `experiments/truth_reads.jsonl` and ledger lock are copies; two snapshots
+can each see an unused block. For any future SINGLE_USE worker job, finish its
+contract and validation package, then call
+`truth_reads.py --prepare-snapshot` **on the host before snapshot dispatch**,
+with absolute paths to the live authority register and ledger. Pass the returned
+token and those same live paths to the worker's
+`truth_reads.consume_snapshot_reservation()` context manager. The worker checks
+truth and instrument bytes, activates the token once under the host lock, and
+records completion or abort there. Ordinary `truth_reads.reserve()` inside a
+snapshot is unsafe for this tier. Preparation spends the one look even if the
+job never runs, so do it only when the frozen job is ready to dispatch. The
+sacrificial two-snapshot race and mutation checks live in
+`local_sim/test_snapshot_reservation.py`; they touched no protected truth.
+
+**A `nohup ... &` inside the Bash tool does not survive its parent shell here.**
 One `edge_cases.py` run died silently at 68 lines. Use the tool's own
 background mode, which does survive, and redirect inside the command if the
 full transcript is wanted — the task output file keeps only the tail.
