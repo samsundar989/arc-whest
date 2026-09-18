@@ -1891,10 +1891,11 @@ can each see an unused block. For any future SINGLE_USE worker job, finish its
 contract and validation package, then call
 `truth_reads.py --prepare-snapshot` **on the host before snapshot dispatch**,
 with absolute paths to the live authority register and ledger. Pass the returned
-token and those same live paths to the worker's
-`truth_reads.consume_snapshot_reservation()` context manager. The worker checks
-truth and instrument bytes, activates the token once under the host lock, and
-records completion or abort there. Ordinary `truth_reads.reserve()` inside a
+token, the exact frozen worker Git HEAD, consumer, purpose and those same live
+paths to the worker's `truth_reads.load_snapshot_truth()` entrypoint. The
+worker derives its own Git HEAD, checks truth and instrument bytes, activates
+the token once under the host lock, and records completion or abort there.
+Ordinary `truth_reads.reserve()` inside a
 snapshot is unsafe for this tier. Preparation spends the one look even if the
 job never runs, so do it only when the frozen job is ready to dispatch. The
 sacrificial two-snapshot race and mutation checks live in

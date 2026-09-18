@@ -60,6 +60,7 @@ import hashlib
 import json
 import os
 import re
+import subprocess
 import sys
 import time
 import uuid
@@ -152,6 +153,9 @@ class Read:
     receipt_created_utc: str = ""
     receipt_completed_utc: str = ""
     elapsed_seconds: Optional[float] = None
+    snapshot_id: str = ""
+    authority_register: str = ""
+    authority_ledger: str = ""
 
     @property
     def counts_against_cap(self) -> bool:
@@ -322,7 +326,7 @@ def reserve(
 
 def prepare_snapshot_reservation(
     block: str, artifact: str, *, consumer: str, purpose: str,
-    instrument: str, path: str, ledger_path: str, ts: str = "",
+    instrument: str, snapshot_id: str, path: str, ledger_path: str, ts: str = "",
 ) -> str:
     """Spend a SINGLE_USE look on the host BEFORE creating a worker snapshot.
 
@@ -335,6 +339,10 @@ def prepare_snapshot_reservation(
         raise ValueError("snapshot preparation is only for SINGLE_USE blocks")
     if not os.path.isabs(path) or not os.path.isabs(ledger_path):
         raise ValueError("snapshot authority paths must be absolute")
+    if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", snapshot_id):
+        raise ValueError("snapshot_id must be an immutable Git/source digest")
+    if not consumer or not purpose:
+        raise ValueError("snapshot consumer and purpose are required")
     if resolve_block(artifact, block) != block:
         raise ReadRefused("artifact block differs")
     digest = _sha256_file(artifact)
@@ -352,6 +360,9 @@ def prepare_snapshot_reservation(
                      instrument_sha256=instrument_digest, purpose=purpose,
                      ts=ts or now, reservation=token, status=_OPEN,
                      note="host reservation before worker snapshot",
+                     snapshot_id=snapshot_id,
+                     authority_register=os.path.normcase(os.path.realpath(path)),
+                     authority_ledger=os.path.normcase(os.path.realpath(ledger_path)),
                      receipt_created_utc=now,
                      timestamp_source=("supplied_historical" if ts else
                                        "automatic_runtime")), path)
@@ -361,6 +372,7 @@ def prepare_snapshot_reservation(
 @contextlib.contextmanager
 def consume_snapshot_reservation(
     token: str, block: str, artifact: str, *, instrument: str,
+    consumer: str, purpose: str, snapshot_id: str,
     path: str, ledger_path: str,
 ):
     """Activate one host token once, then yield the worker's exact truth file.
@@ -382,6 +394,11 @@ def consume_snapshot_reservation(
         opens = [r for r in records if r.status == _OPEN]
         if (len(opens) != 1 or len(records) != 1 or
                 opens[0].block != block or
+                opens[0].consumer != consumer or
+                opens[0].purpose != purpose or
+                opens[0].snapshot_id != snapshot_id or
+                opens[0].authority_register != os.path.normcase(os.path.realpath(path)) or
+                opens[0].authority_ledger != os.path.normcase(os.path.realpath(ledger_path)) or
                 opens[0].artifact_sha256 != digest or
                 opens[0].instrument_sha256 != instrument_digest):
             raise ReadRefused("snapshot token missing, spent or bound to other bytes")
@@ -401,6 +418,29 @@ def consume_snapshot_reservation(
                                         receipt_completed_utc=now,
                                         elapsed_seconds=time.perf_counter() - t0),
                     path)
+
+
+def load_snapshot_truth(
+    token: str, block: str, artifact: str, *, instrument: str,
+    consumer: str, purpose: str, path: str, ledger_path: str,
+    snapshot_root: str = _ROOT,
+):
+    """The worker entrypoint: prove its Git snapshot, activate, then load.
+
+    A caller cannot nominate a convenient snapshot ID: it is read from the
+    worker checkout itself. The host reservation must have recorded that ID.
+    """
+    import numpy as np
+
+    snapshot_id = subprocess.check_output(
+        ["git", "-C", snapshot_root, "rev-parse", "HEAD"],
+        text=True).strip().lower()
+    with consume_snapshot_reservation(
+            token, block, artifact, instrument=instrument,
+            consumer=consumer, purpose=purpose, snapshot_id=snapshot_id,
+            path=path, ledger_path=ledger_path) as resolved:
+        with np.load(resolved) as z:
+            return {k: z[k] for k in z.files}
 
 
 def load_truth(block: str, artifact: str, **kw):
@@ -487,6 +527,8 @@ def main(argv=None) -> int:
     ap.add_argument("--instrument", default="")
     ap.add_argument("--consumer", default="")
     ap.add_argument("--purpose", default="")
+    ap.add_argument("--snapshot-id", default="",
+                    help="frozen worker Git HEAD or source digest")
     ap.add_argument("--authority-register", default="")
     ap.add_argument("--authority-ledger", default="")
     ap.add_argument("--json", action="store_true")
@@ -494,12 +536,14 @@ def main(argv=None) -> int:
 
     if a.prepare_snapshot:
         if not all((a.block, a.truth, a.instrument, a.consumer, a.purpose,
+                    a.snapshot_id,
                     a.authority_register, a.authority_ledger)):
             ap.error("snapshot preparation needs block, truth, instrument, "
-                     "consumer, purpose and both host authority paths")
+                     "consumer, purpose, snapshot ID and both host authority paths")
         token = prepare_snapshot_reservation(
             a.block, a.truth, consumer=a.consumer, purpose=a.purpose,
-            instrument=a.instrument, path=a.authority_register,
+            instrument=a.instrument, snapshot_id=a.snapshot_id,
+            path=a.authority_register,
             ledger_path=a.authority_ledger)
         print(json.dumps({"block": a.block, "reservation": token,
                           "authority_register": a.authority_register,
