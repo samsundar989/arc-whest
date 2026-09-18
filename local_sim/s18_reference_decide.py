@@ -13,9 +13,10 @@ import numpy as np  # noqa: E402
 import competition_score as cs  # noqa: E402
 import design_sidecar as ds  # noqa: E402
 import s18_reference_score as scorer  # noqa: E402
+from seed_blocks import seeds as registered_seeds  # noqa: E402
 
 N = 24
-SEED0 = 40_919_015_000
+P15_SEEDS = registered_seeds("P15")[:N]
 WIDTH, DEPTH = 1024, 16
 SAMPLES = 2**24
 GATE = 1.10
@@ -43,7 +44,7 @@ def _arm(directory, role):
     if (m["arm"] != ROLES[role] or m["block"] != "P15" or
             (m["n"], m["width"], m["depth"], m["n_samples_per_replica"]) !=
             (N, WIDTH, DEPTH, SAMPLES) or
-            m["ordered_network_seeds"] != list(range(SEED0, SEED0 + N)) or
+            m["ordered_network_seeds"] != P15_SEEDS or
             m["config"] != {"input_weight_dtype": "f64_readonly",
                             "diagnostic_budget": scorer.DIAGNOSTIC_BUDGET,
                             "official_budget": scorer.OFFICIAL_BUDGET,
@@ -75,7 +76,7 @@ def _arm(directory, role):
     for i, (r, idx, pred) in enumerate(zip(rows, loaded["rows"], loaded["predictions"])):
         mse = float(np.mean((pred - target[i]) ** 2))
         if (r["failed"] or idx["failed"] or r["index"] != i or
-                r["input_seed"] != SEED0 + i or
+                r["input_seed"] != P15_SEEDS[i] or
                 r["mse"] != mse or r["gt_noise_averaged"] != float(noise[i]) or
                 idx["gt_noise"] != float(noise[i]) or
                 r["scalar_materializations_total"] != 0 or

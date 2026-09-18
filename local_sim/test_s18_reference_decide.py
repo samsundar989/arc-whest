@@ -40,7 +40,7 @@ class TestReferenceDecide(unittest.TestCase):
                 scorer.score_loaded(name, truth, path, block="P99", synthetic_fixture=True)
             with (patch.object(reader, "N", 2), patch.object(reader, "WIDTH", 8),
                   patch.object(reader, "DEPTH", 6), patch.object(reader, "SAMPLES", 8),
-                  patch.object(reader, "SEED0", 998_001),
+                  patch.object(reader, "P15_SEEDS", [998_001, 998_002]),
                   patch.object(reader.scorer, "verify", wraps=scorer.verify) as verify):
                 # Fixture provenance uses P99. Permit only this synthetic block here.
                 original = reader.scorer.verify

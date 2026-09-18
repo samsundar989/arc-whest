@@ -35,6 +35,14 @@ def fixture(path, *, n=1, width=8, depth=6):
 
 
 class TestReferenceScore(unittest.TestCase):
+    def test_p15_contract_refuses_wrong_seeds_and_sample_count(self):
+        expected = scorer.registered_seeds("P15")[:24]
+        with self.assertRaisesRegex(ValueError, "P15 truth"):
+            scorer._p15_contract(expected[:-1], 2**24)
+        with self.assertRaisesRegex(ValueError, "P15 truth"):
+            scorer._p15_contract(expected, 8)
+        scorer._p15_contract(expected, 2**24)
+
     def test_tiny_complete_and_tamper(self):
         with tempfile.TemporaryDirectory() as tmp:
             truth = Path(tmp) / "truth_P99.npz"

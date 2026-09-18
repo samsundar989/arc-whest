@@ -33,6 +33,7 @@ from p2_weff import MaterializationCounter  # noqa: E402
 import s18_same_closure_reference as ref  # noqa: E402
 sys.path.append(str(HERE))  # the generator deliberately removes the shim directory
 import truth_reads as tr  # noqa: E402
+from seed_blocks import seeds as registered_seeds  # noqa: E402
 
 ARMS = ("C10", *ref.SWITCHES)
 DIAGNOSTIC_BUDGET = 2**55
@@ -89,6 +90,12 @@ def _source(arm):
     return ref.load(arm), hashlib.sha256(source.encode("utf-8")).hexdigest()
 
 
+def _p15_contract(seeds, samples):
+    expected = registered_seeds("P15")[:24]
+    if list(map(int, seeds)) != expected or int(samples) != 2**24:
+        raise ValueError("P15 truth must be the registered first 24 seeds and 2^24 samples per replica")
+
+
 def _operations(ctx):
     namespaces = ctx.summary_dict(by_namespace=True).get("by_namespace") or {}
     ops = {}
@@ -141,6 +148,8 @@ def score_loaded(arm, truth_path, out_dir, *, block, synthetic_fixture=False):
     with np.load(truth_path, allow_pickle=False) as archive:
         z = {k: archive[k] for k in archive.files}
     seeds, width, depth, provenance = _truth(z, block)
+    if block.upper() == "P15":
+        _p15_contract(seeds, z["n_samples"])
     if not synthetic_fixture and (width, depth) != (1024, 16):
         raise ValueError("reference diagnostic requires complete Phase-2 shape")
     truth_sha = sha(truth_path)
