@@ -91,7 +91,7 @@ CAPS: Dict[str, Optional[int]] = {
 
 #: Statuses a read line can carry. `reserved` is written before the labels are
 #: exposed; exactly one of `completed`/`aborted` follows it.
-_OPEN, _DONE, _ABORT = "reserved", "completed", "aborted"
+_OPEN, _TAKEN, _DONE, _ABORT = "reserved", "activated", "completed", "aborted"
 
 
 class ReadRefused(PermissionError):
@@ -320,6 +320,89 @@ def reserve(
             _append(done, path)
 
 
+def prepare_snapshot_reservation(
+    block: str, artifact: str, *, consumer: str, purpose: str,
+    instrument: str, path: str, ledger_path: str, ts: str = "",
+) -> str:
+    """Spend a SINGLE_USE look on the host BEFORE creating a worker snapshot.
+
+    Return an opaque token to pass as a worker argument. Both register paths
+    must be absolute host paths shared by every snapshot. This exposes no
+    labels. A failed dispatch still spends the look, as a crash after exposure
+    could otherwise be relabeled a failed dispatch.
+    """
+    if tier_of(block) != "SINGLE_USE":
+        raise ValueError("snapshot preparation is only for SINGLE_USE blocks")
+    if not os.path.isabs(path) or not os.path.isabs(ledger_path):
+        raise ValueError("snapshot authority paths must be absolute")
+    if resolve_block(artifact, block) != block:
+        raise ReadRefused("artifact block differs")
+    digest = _sha256_file(artifact)
+    instrument_digest = _sha256_file(instrument)
+    if not digest or not instrument_digest:
+        raise FileNotFoundError("snapshot artifact and instrument must exist")
+    now = (_dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds")
+           .replace("+00:00", "Z"))
+    token = uuid.uuid4().hex
+    with ledger_lock(ledger_path):
+        if spent(block, path) >= CAPS["SINGLE_USE"]:
+            raise ReadRefused(f"{block} SINGLE_USE host authority is already spent")
+        _append(Read(block=block, artifact=_rel(artifact),
+                     artifact_sha256=digest, consumer=consumer,
+                     instrument_sha256=instrument_digest, purpose=purpose,
+                     ts=ts or now, reservation=token, status=_OPEN,
+                     note="host reservation before worker snapshot",
+                     receipt_created_utc=now,
+                     timestamp_source=("supplied_historical" if ts else
+                                       "automatic_runtime")), path)
+    return token
+
+
+@contextlib.contextmanager
+def consume_snapshot_reservation(
+    token: str, block: str, artifact: str, *, instrument: str,
+    path: str, ledger_path: str,
+):
+    """Activate one host token once, then yield the worker's exact truth file.
+
+    The host register, not a copied snapshot lock, serializes activations.
+    Completion and abort are appended to the same host register.
+    """
+    if tier_of(block) != "SINGLE_USE" or not token:
+        raise ReadRefused("a SINGLE_USE snapshot token is required")
+    if not os.path.isabs(path) or not os.path.isabs(ledger_path):
+        raise ValueError("snapshot authority paths must be absolute")
+    resolve_block(artifact, block)
+    digest = _sha256_file(artifact)
+    instrument_digest = _sha256_file(instrument)
+    if not digest or not instrument_digest:
+        raise FileNotFoundError("worker artifact and instrument must exist")
+    with ledger_lock(ledger_path):
+        records = [r for r in reads(path) if r.reservation == token]
+        opens = [r for r in records if r.status == _OPEN]
+        if (len(opens) != 1 or len(records) != 1 or
+                opens[0].block != block or
+                opens[0].artifact_sha256 != digest or
+                opens[0].instrument_sha256 != instrument_digest):
+            raise ReadRefused("snapshot token missing, spent or bound to other bytes")
+        rec = opens[0]
+        _append(dataclasses.replace(rec, status=_TAKEN,
+                                    note=rec.note + " | activated in worker"), path)
+    ok = False
+    t0 = time.perf_counter()
+    try:
+        yield artifact if os.path.isabs(artifact) else os.path.join(_ROOT, artifact)
+        ok = True
+    finally:
+        now = (_dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds")
+               .replace("+00:00", "Z"))
+        with ledger_lock(ledger_path):
+            _append(dataclasses.replace(rec, status=(_DONE if ok else _ABORT),
+                                        receipt_completed_utc=now,
+                                        elapsed_seconds=time.perf_counter() - t0),
+                    path)
+
+
 def load_truth(block: str, artifact: str, **kw):
     """The ONE way protected truth enters a process. Reserves, then loads.
 
@@ -395,11 +478,33 @@ def audit_direct_loads(root: str = _ROOT) -> List[Dict[str, Any]]:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("--prepare-snapshot", action="store_true",
+                    help="host-only SINGLE_USE reservation before workerq dispatch")
     ap.add_argument("--audit", action="store_true",
                     help="scan local_sim/ for direct loads of truth artifacts")
     ap.add_argument("--block", default="", help="report on one block")
+    ap.add_argument("--truth", default="")
+    ap.add_argument("--instrument", default="")
+    ap.add_argument("--consumer", default="")
+    ap.add_argument("--purpose", default="")
+    ap.add_argument("--authority-register", default="")
+    ap.add_argument("--authority-ledger", default="")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
+
+    if a.prepare_snapshot:
+        if not all((a.block, a.truth, a.instrument, a.consumer, a.purpose,
+                    a.authority_register, a.authority_ledger)):
+            ap.error("snapshot preparation needs block, truth, instrument, "
+                     "consumer, purpose and both host authority paths")
+        token = prepare_snapshot_reservation(
+            a.block, a.truth, consumer=a.consumer, purpose=a.purpose,
+            instrument=a.instrument, path=a.authority_register,
+            ledger_path=a.authority_ledger)
+        print(json.dumps({"block": a.block, "reservation": token,
+                          "authority_register": a.authority_register,
+                          "authority_ledger": a.authority_ledger}))
+        return 0
 
     if a.audit:
         hits = audit_direct_loads()
