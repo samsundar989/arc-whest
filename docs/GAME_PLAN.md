@@ -19,9 +19,10 @@ feasibility note specifies separate no-share and full-P2 operators, plus their
 combined diagnostic reference. Full-shape label-free meter #1921 succeeded;
 independent review accepted one-network offline feasibility, including complete
 cost and memory, without accuracy evidence or deployment clearance. P15 DESIGN
-seeds are registered but unclaimed. Finish the one-arm scorer's preflight and
-fresh Skeptic, then commit a prospective fresh-truth attribution contract and
-obtain Samuel's predictions before drawing truth. Compare one operator at a time
+seeds are registered but unclaimed. The four-arm prospective fresh-truth
+attribution contract is committed; scorer/reader preflight and fresh Skeptic
+accepted the narrow instrument. Obtain Samuel's predictions before drawing
+truth. Compare one operator at a time
 with complete endogenous continuation and keep closure, controls and P4 fixed.
 Implement only a recurrent mechanism supported by that attribution. P13 and
 the observed-and-official-precision paired 2x major-release gate remain
