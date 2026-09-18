@@ -54469,3 +54469,14 @@ match under the exact fallback. A nonfinite row, hash mismatch, or displacement
 before any eligible query falsifies the instrument assumptions. The audit
 cannot predict score direction or establish the 5% complete-FLOP gate. No
 truth, P12 label, source selection or promotion is allowed in this tool.
+
+**IMPORTANT repair prediction before query-audit edits.** The first independent
+Skeptic was PROVISIONAL (`experiments/2026-09-18_s17_query_audit_skeptic.md`):
+the tool did not pin anchor/package versions, identify the first eligible
+approximate-query layer, or exclude concurrent output overwrite. Prediction:
+the selected source will trigger rank32 old-query only after initial layers;
+the trace will record its first layer and any q>=r/deficient fallback. Source
+and package pinning plus exclusive output creation will preserve a valid
+deterministic report or fail closed on drift/concurrency. An event before an
+eligible branch or missing layer index falsifies the instrument and aborts.
+This repair changes no estimator math and uses no labels/full-shape run.
