@@ -124,6 +124,7 @@ TIERS: Dict[str, str] = {
     "P12": "DESIGN",
     "P13": "SINGLE_USE",
     "P14": "DESIGN",
+    "P15": "DESIGN",
 }
 
 #: Strictness ordering, so a tier CHANGE can be judged as a tightening or a

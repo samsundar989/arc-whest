@@ -242,6 +242,11 @@ DECISION_BLOCKS = [
                                  "and subsequent bounded same-closure attribution. "
                                  "DESIGN evidence may select a mechanism but grants "
                                  "no release authority; P13 remains untouched."),
+    ("P15", 40_919_015_000, 96, "PHASE-2 DESIGN block allocated 2026-09-18 "
+                                 "for fresh same-closure storage-versus-closure "
+                                 "attribution. Registration draws no network; "
+                                 "a separate prospective contract fixes the "
+                                 "experiment before any claim. P13 is untouched."),
 ]
 
 # --- single-use blocks -------------------------------------------------------
