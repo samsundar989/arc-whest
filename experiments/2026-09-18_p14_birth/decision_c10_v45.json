@@ -1,0 +1,59 @@
+{
+  "BIRTH_SCORE_PASSED": false,
+  "artifact": "s18_birth_decide",
+  "new_failed_identities": [],
+  "observed": {
+    "candidate_mean": 7.166956683522097e-09,
+    "control_mean": 7.2012965555624485e-09,
+    "difference": 3.4339872040351736e-11,
+    "gain": 1.004791416155661,
+    "t95": [
+      1.506394008165018e-11,
+      5.361580399905329e-11
+    ],
+    "verdict": {
+      "ci": [
+        1.506394008165018e-11,
+        5.361580399905329e-11
+      ],
+      "gate": 1.05,
+      "interval": "t",
+      "passed": false,
+      "reasons": [
+        "arithmetic gain 1.0048x is below the pre-registered gate 1.0500x"
+      ]
+    }
+  },
+  "official": {
+    "candidate_mean": 6.713479056063853e-09,
+    "control_mean": 6.747819855180985e-09,
+    "difference": 3.4340799117133367e-11,
+    "gain": 1.0051152016458762,
+    "t95": [
+      1.5064891605866973e-11,
+      5.361670662839976e-11
+    ],
+    "verdict": {
+      "ci": [
+        1.5064891605866973e-11,
+        5.361670662839976e-11
+      ],
+      "gate": 1.05,
+      "interval": "t",
+      "passed": false,
+      "reasons": [
+        "arithmetic gain 1.0051x is below the pre-registered gate 1.0500x"
+      ]
+    }
+  },
+  "prediction_manifest_sha256": "d90a3301c411d3ac56fea4ec49d25a31a5bf2629613153e3a24305db8ef0b5f3",
+  "promotes_nothing": true,
+  "score_sha256": "7fd2e6daac0beedc082e55be7e0dc69b9f99a5e0b49da25fdacb67a333f17edb",
+  "source_sha256": {
+    "approx": "fc8e547435e026f70b2e8e95954daf9a61337ae1747f32fc0aa0b61d10e6b855",
+    "exact": "fd8d497db6dfbc3affcf579119c7115c3aee4d190a3e92fec4d85c366152d1bf"
+  },
+  "tier": "DESIGN",
+  "truth_noise_floor": 2.145838031613149e-09,
+  "truth_sha256": "71f55716d91fa25421d249fc3bc864ce71a2f233037c43f54d75f1b22bed61ad"
+}

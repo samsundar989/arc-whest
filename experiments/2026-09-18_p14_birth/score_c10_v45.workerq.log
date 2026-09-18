@@ -1,0 +1,79 @@
+worker-q: job #1920 starting at 2026-09-18T22:27:02.316598+00:00
+worker-q: cwd=C:\Users\samsu\.local\state\gpuq\snapshots\1920\job-1920
+worker-q: snapshot=git 9791a99e0d7b6c3ef61088e6016da3211e1e49d0
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['uv', 'run', 'python', 'local_sim/p2_design_score.py', '--control', 'estimator_k3_v43_complete_c10.py', '--candidate', 'estimator_k3_v45_p2_diag.py', '--truth', 'experiments/2026-09-18_p14_birth/truth_P14.npz', '--n', '24', '--ts', '2026-09-18T22:20:00Z', '--block', 'P14', '--note', 'fixed-p2-birth-diagonal', '--gate', '1.05', '--wall-caps', 'off', '--official-samples', '1000000000', '--out', 'C:/Users/samsu/Documents/arc-whest/experiments/2026-09-18_p14_birth/score_c10_v45.json', '--rows-jsonl', 'C:/Users/samsu/Documents/arc-whest/experiments/2026-09-18_p14_birth/score_c10_v45.rows.jsonl', '--pred-out', 'C:/Users/samsu/Documents/arc-whest/experiments/2026-09-18_p14_birth/pred_c10_v45']
+worker-q: ------------------------------------------------------------
+C:\Users\samsu\.local\state\gpuq\snapshots\1920\job-1920\local_sim\p2_design_score.py:129: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+C:\Users\samsu\.local\state\gpuq\snapshots\1920\job-1920\local_sim\lifecycle_eval.py:620: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+C:\Users\samsu\.local\state\gpuq\snapshots\1920\job-1920\estimator_k3_v43_complete_c10.py:344: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\.local\state\gpuq\snapshots\1920\job-1920\estimator_k3_v43_complete_c10.py:345: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\.local\state\gpuq\snapshots\1920\job-1920\estimator_k3_v43_complete_c10.py:419: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\.local\state\gpuq\snapshots\1920\job-1920\estimator_k3_v43_complete_c10.py:420: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\.local\state\gpuq\snapshots\1920\job-1920\local_sim\lifecycle_eval.py:620: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+C:\Users\samsu\.local\state\gpuq\snapshots\1920\job-1920\estimator_k3_v45_p2_diag.py:344: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\.local\state\gpuq\snapshots\1920\job-1920\estimator_k3_v45_p2_diag.py:345: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\.local\state\gpuq\snapshots\1920\job-1920\estimator_k3_v45_p2_diag.py:419: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\.local\state\gpuq\snapshots\1920\job-1920\estimator_k3_v45_p2_diag.py:420: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+================================================================================================
+DESIGN-TIER PAIRED SCORE -- licenses a contract, never a promotion
+================================================================================================
+  control    estimator_k3_v43_complete_c10.py
+  candidate  estimator_k3_v45_p2_diag.py
+  truth      experiments\2026-09-18_p14_birth\truth_P14.npz   block P14   24 nets   1024x16   2 replicas x 16,777,216
+  *** ALL LOCAL-SECONDS CAPS OFF -- ACCURACY-ONLY. Residual,
+  *** wall and predict timeout are all disarmed together. This
+  *** run is NOT deployment evidence for any of them, and its
+  *** failure accounting cannot see a timing violation.
+  *** (Armed, this host's ~73 s/MLP blows the 120 s wall on
+  *** some networks and scores them at zero-prediction MSE --
+  *** which measures the host, not the candidate.)
+
+  control    score 7.201297e-09   raw MSE 3.293291e-08   C/B 0.218666   mult 0.218666   failed 0/24   1570s
+             ADVISORY local wall: median 63.7s  worst 76.9s   -- LOCAL seconds, gates nothing, not the server's
+  candidate  score 7.166957e-09   raw MSE 3.277580e-08   C/B 0.218666   mult 0.218666   failed 0/24   1400s
+             ADVISORY local wall: median 59.0s  worst 73.0s   -- LOCAL seconds, gates nothing, not the server's
+
+================================================================================================
+  candidate  vs  control
+================================================================================================
+NOISE-AWARE  n = 24
+  observed adjusted difference      +3.433987e-11
+  true-function difference          +3.434083e-11
+  forecast at official precision    +3.434080e-11
+  label-noise bias in `observed`    -9.592644e-16   (-0.00% of it)
+  networks whose corrected MSE went negative: 0 (RETAINED, never clipped)
+  - paired on 24 matched MLP identities
+
+  PAIRED arithmetic score difference (the binding statistic)
+    mean difference   +3.433987e-11
+    studentised-t 95% [+1.5064e-11, +5.3616e-11]
+    arithmetic gain   1.0048x   candidate better on 19/24   sign p 0.0066
+    geometric gain    1.0050x   DIAGNOSTIC ONLY, no authority
+    noise-corrected gain 1.0051x   (observed 1.0048x)
+      control true-function mean 6.732075e-09, candidate 6.697735e-09
+      The label floor sits in both arms and cancels from the
+      DIFFERENCE, not from the RATIO. Quote this one for a
+      public forecast; quote the observed one for this run.
+
+VERDICT  FAIL   arithmetic gain 1.0048x   gate 1.0500x
+  t 95% CI on the paired difference [+1.5064e-11, +5.3616e-11]   excludes zero: True
+  n = 24, candidate better on 19, sign-test p = 0.0066
+  DIAGNOSTIC geometric 1.0050x
+  DIAGNOSTIC biggest single mover carries 19.7% of the delta
+  - arithmetic gain 1.0048x is below the pre-registered gate 1.0500x
+
+  -> C:/Users/samsu/Documents/arc-whest/experiments/2026-09-18_p14_birth/score_c10_v45.json
+worker-q: ------------------------------------------------------------
+worker-q: job #1920 SUCCEEDED (exit code 0) at 2026-09-18T23:16:37.724574+00:00
