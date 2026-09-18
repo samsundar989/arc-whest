@@ -66,6 +66,7 @@ experiments/2026-09-18_p14_birth/** -text -diff
 experiments/2026-09-18_iteration_tools_preflight*.log -text -diff
 experiments/2026-09-18_iteration_tools_mutex_preflight.log -text -diff
 experiments/2026-09-18_s18_branch_preflight*.log -text -diff
+experiments/2026-09-18_p15_instrument_preflight.log -text -diff
 
 # C10 diagnostic Linux/certificate/mini producer evidence is byte-preserved.
 experiments/2026-09-18_c10_diagnostic/** -text -diff
