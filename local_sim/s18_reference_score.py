@@ -115,7 +115,8 @@ def _identity(arm, truth_path, truth_sha, block, seeds, width, depth, provenance
                     for p in (HERE / "lifecycle_eval.py", HERE / "mint_provenance.py",
                               HERE / "competition_score.py", HERE / "design_sidecar.py",
                               HERE / "p2_weff.py", HERE / "s18_same_closure_reference.py",
-                              HERE / "s18_reference_score.py", HERE / "p2_truth.py")}
+                              HERE / "s18_reference_score.py", HERE / "p2_truth.py",
+                              HERE / "seed_blocks.py")}
     return {"artifact": ARTIFACT, "tier": "DESIGN", "arm": arm,
             "truth": str(Path(truth_path).resolve()), "truth_sha256": truth_sha,
             "block": block, "ordered_network_seeds": [int(s) for s in seeds],
