@@ -1,6 +1,6 @@
 # CURRENT_STATE.md — read this first
 
-## September 18 — corrected storage lane closed; own fit running
+## September 18 — bounded experiments complete; no qualifying finalist
 
 Commit `8cae199` records the repaired stage-3 decision adapter, its query-evidence
 producer, atomic/verified DESIGN sidecars, a candidate inventory, corrected
@@ -39,30 +39,33 @@ failures, averaged truth-noise floor **2.2481e-9**. The independent score
 Skeptic accepted the negative result; the corrected storage lane is **closed**.
 P13 remains untouched, and no submission has been approved.
 
-The original September17b branch-(b) contract also permits one bounded own
-four-parameter fit. Its own-source generator and fixed 19-evaluation/12+12 P12
-driver are source-only, targeted-tested and independently accepted in
-`experiments/2026-09-18_own_fit_source_skeptic.md` and
-`experiments/2026-09-18_fit_driver_skeptic.md`; neither has read fit labels.
-The LOG tail records the dimensionless ridge objective, exact coordinate
-schedule, 40-evaluation cap, and workerq optimization review before data.
-Final standard preflight passed 12/16 on the scientific source bytes. The
-registered fit is workerq **#1748**, submitted from commit `6c4c02a` with
-0 GPUs, 12 GiB RAM and 4 CPUs. It started at **2026-09-18T03:05:45Z** after a
-CPU-capacity wait; do not inspect or select from its partial output. A first mistaken queue request (#1747)
-was cancelled before execution because workerq treated `--vram 0` as one GPU.
-On #1748 completion, reconcile its P12 truth-read receipt from the immutable
-snapshot, verify all 19 complete evaluations and paired held-out comparison,
-then synthesize before any finalist choice. No fit accuracy result exists yet.
-Read-only fit and corrected-storage result adapters now pass synthetic provenance
-refusals (valid fit plus 17 forged cases; corrected storage 11/11 after the
-snapshot-root repair) and independent Skeptic review. Final-byte standard
-preflight is GREEN 12/16; see the LOG tail,
-`experiments/2026-09-18_verifiers_skeptic.md` and
-`experiments/2026-09-18_verifiers_preflight.log`. The fit reader has not seen a
-real result. The corrected reader has verified the completed score and query
-artifacts; see its verdict and fresh Skeptic under
-`experiments/2026-09-18_corrected_storage/`.
+The original September17b branch-(b) bounded own four-parameter fit, workerq
+**#1748**, **SUCCEEDED** from frozen snapshot `52fc779` (0 GPUs/12 GiB/4 CPUs,
+measured peak 6.14 GiB). Its exact 19 source/row pairs, selection and 12+12 P12
+split passed the reviewed strict verifier after a documented sorted-JSON reader
+repair. A Git line-ending repair now preserves all manifest-hashed raw bytes
+through a fresh checkout; a separate Skeptic accepted that archive repair.
+The selected controls are `(theta_fam,s_lam,t_lam,s_feed) =
+(0.625,1.225,-0.1,1.0)`. On the fit-held-out last 12 P12 networks, the own
+default to fitted official-precision adjusted score is **8.3143e-9 ->
+7.2623e-9**, **1.144855x**, paired difference **+1.0520e-9** with t95
+**[+0.8035,+1.3005]e-9**, truth floor **2.2271e-9**, near-identical
+669.94/669.99 billion counted FLOPs and zero saved failures. The fresh result
+Skeptic accepted only the narrow within-fit DESIGN gain as **PROVISIONAL** for
+release: caps were disabled; selected worst local residual was 5.746 s,
+and this is neither a paired v31 comparison nor a compressed composition.
+Its exact selected file is `experiments/2026-09-18_own_fit/eval_18_validation.py`,
+SHA-256 `f59b9d52605fb9dcb4cf6718f6eb90c055df589e3e7c935b5b27e799055d879a`.
+The uncompressed P3 composition remains the lowest complete 24-network P12
+DESIGN score at 6.7988e-9, but its compression and release limits are untested.
+P12 DESIGN reads spent = 4; P13 SINGLE_USE spent = **0**. No measured candidate
+supports the preregistered 2x v31 release gate. Do not select a finalist,
+spend P13, run candidate release certification, or ask for upload approval
+without new evidence. The self-contained
+[Strategist Packet](STRATEGIST_PACKET_2026-09-18.md) states the remaining causal
+obstacle and one bounded research question. The LOG tail, raw fit directory,
+`experiments/2026-09-18_own_fit_verified_summary.json`, and three independent
+Skeptic verdicts retain the full recovery trail.
 
 ---
 

@@ -20,12 +20,24 @@
       "submission_id": 330950,
       "status": "existing designation"
     },
-    "experimental_finalist": null
+    "experimental_finalist": null,
+    "best_complete_p12_design_arm": {
+      "path": "estimator_k3_v42_pairq_p3_uncompressed.py",
+      "sha256": "098862f664b3bc0e550e81649e4caefacae8d9779366ee2dfd477a37737bdb88",
+      "official_precision_adjusted_p12": 6.79884472878824e-9,
+      "status": "24-network DESIGN only; uncompressed and not release qualified"
+    },
+    "own_fit_selected_design_arm": {
+      "path": "experiments/2026-09-18_own_fit/eval_18_validation.py",
+      "sha256": "f59b9d52605fb9dcb4cf6718f6eb90c055df589e3e7c935b5b27e799055d879a",
+      "official_precision_adjusted_p12_heldout": 7.2623442309645265e-9,
+      "status": "12-network within-fit DESIGN only; caps disabled; no compressed composition"
+    }
   },
   "contract": "experiments/LOG.md:2026-09-17b",
   "stage": {
     "completed": ["stage1", "batch_b_p12_synthesis"],
-    "active_or_recovery": "Own PAIR+Q bounded P12 fit is workerq #1748 (running since 2026-09-18T03:05:45Z, CPU-only); corrected storage fixed-rank lane closed after #1756/#1764 query and #1765 P12 score failures",
+    "active_or_recovery": "All bounded September17b/September18 discriminators complete; corrected storage lane closed, own fit #1748 verified; no supported finalist. See docs/STRATEGIST_PACKET_2026-09-18.md",
     "decide": "P13 truth-read spent=0; preserve for one frozen finalist",
     "release": "No finalist is frozen or approved for submission"
   }
