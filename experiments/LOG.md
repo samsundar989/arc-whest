@@ -54586,3 +54586,10 @@ original CRLF bytes restored. The independent fresh-context Skeptic ACCEPTS
 this narrow evidence-preservation repair in
 `experiments/2026-09-18_s17_archive_skeptic.md`. No estimator, label, gate,
 source identity, or frozen archive changed.
+
+**P12 factorial dispatch.** Workerq job `#1882` was submitted from commit
+`40f5505` with snapshot `7f374d2df`, requested 12 GiB RAM, 0 GPU and
+4 CPUs. Its argv exactly matches the frozen six-arm order, P12 truth path,
+timestamp, 24-network count, gate 1.0, cap mode, official sample count and
+three output paths above. It began running at 2026-09-18T08:43:46Z. No
+source, reader or sidecar code will change while it runs.
