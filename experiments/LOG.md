@@ -54606,3 +54606,8 @@ observed gain exceeds 1.05 but whose official-precision gain does not will
 fail the registered official gate. A newly failed candidate identity will
 also fail the decision even if its arithmetic gate passes. This is an
 instrument prediction and authorizes no P12 read, candidate choice, or claim.
+
+### IMPORTANT prediction before generic complete-package fit producer
+
+Question: can the bounded 19-evaluation own-fit schedule be attached to an exact selected complete-package source without altering its baseline or leaking last-12 labels into selection? Prediction: on tiny synthetic sources, source-hash pinning and exact baseline copying preserve selected bytes; each of 16 coordinate trials changes only four asserted controls, is clipped to registered bounds, and the final two calls evaluate default/selected on last12 after freeze. Scalar rows and final predictions retain source/seed identity per evaluation. Any baseline byte drift, schedule overflow, premature validation call, or identity mismatch must abort. This is an IMPORTANT instrument change; no P12 labels or candidate score are consumed while implementing it. The eventual strategic fit remains conditional on the preregistered trigger and a separate workerq review.
+
