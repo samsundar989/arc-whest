@@ -8,8 +8,11 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.metadata
 import json
 import os
+import sys
+import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -56,7 +59,68 @@ def _source(path: Path) -> tuple[str, str]:
     return resolved.name, hashlib.sha256(resolved.read_bytes()).hexdigest()
 
 
-def _predict(name: str, weights_np: list[np.ndarray], estimator_seed: int) -> tuple[np.ndarray, float]:
+def _pinned_stack() -> dict:
+    pinned_path = Path(anchor.__file__).with_name("grader_stack.json")
+    pin = json.loads(pinned_path.read_text(encoding="utf-8"))["pinned"]
+    installed = {"flopscope_version": importlib.metadata.version("flopscope"),
+                 "whestbench_version": importlib.metadata.version("whestbench")}
+    if installed != pin:
+        raise RuntimeError(f"grader package stack drift: {installed} != {pin}")
+    return {"installed": installed, "pin_sha256": hashlib.sha256(pinned_path.read_bytes()).hexdigest(),
+            "anchor_sha256": hashlib.sha256(Path(anchor.__file__).read_bytes()).hexdigest()}
+
+
+def _query_lines(source: Path) -> dict[int, str]:
+    lines = source.read_text(encoding="utf-8").splitlines()
+    markers = {
+        "rank_fallback": "old = _mm(_mm(LL, FF.T), tw.Q.T)",
+        "approximate": "old = _mm(U, _mm(_mm(_mm(U.T, LL), FF.T), tw.Q.T))",
+    }
+    rank_lines = [i for i, line in enumerate(lines, 1) if line.strip() == markers["rank_fallback"]]
+    approx_lines = [i for i, line in enumerate(lines, 1) if line.strip() == markers["approximate"]]
+    if len(rank_lines) != 2 or len(approx_lines) != 1 or not (rank_lines[0] < rank_lines[1] < approx_lines[0]):
+        raise ValueError("approximate query branch signatures changed")
+    return {rank_lines[0]: "rank_fallback", rank_lines[1]: "deficient_fallback",
+            approx_lines[0]: "approximate"}
+
+
+class QueryTrace:
+    """Observe executed branch lines; never change the estimator's data path."""
+
+    def __init__(self, source: Path):
+        self.path = str(source.resolve())
+        self.lines = _query_lines(source)
+        self.events: list[dict] = []
+
+    def trace(self, frame, event, arg):
+        if event == "call":
+            if frame.f_code.co_filename == self.path and frame.f_code.co_name == "_shared_contract_lean":
+                return self.trace
+            return None
+        if event == "line" and frame.f_lineno in self.lines:
+            caller = frame.f_back
+            while caller is not None and not (caller.f_code.co_name == "_layer" and
+                                               caller.f_code.co_filename == self.path):
+                caller = caller.f_back
+            if caller is None or not isinstance(caller.f_locals.get("layer_index"), int):
+                raise RuntimeError("query trace could not bind a layer index")
+            self.events.append({"layer": caller.f_locals["layer_index"],
+                                "branch": self.lines[frame.f_lineno]})
+        return self.trace
+
+    def summary(self) -> dict:
+        counts = {kind: sum(e["branch"] == kind for e in self.events)
+                  for kind in ("rank_fallback", "deficient_fallback", "approximate")}
+        if not self.events:
+            raise RuntimeError("no old-query branch observed")
+        first = next((e["layer"] for e in self.events if e["branch"] == "approximate"), None)
+        return {"branch_counts": counts, "first_approximate_layer": first,
+                "first_old_query_layer": min(e["layer"] for e in self.events),
+                "events": self.events}
+
+
+def _predict(name: str, weights_np: list[np.ndarray], estimator_seed: int,
+             trace: QueryTrace | None = None) -> tuple[np.ndarray, float]:
     import flopscope as flops
     import flopscope.numpy as fnp
 
@@ -77,10 +141,17 @@ def _predict(name: str, weights_np: list[np.ndarray], estimator_seed: int) -> tu
         seed = 0
 
     est.setup(Context())
-    with flops.BudgetContext(flop_budget=anchor.BUDGET, quiet=True) as ctx:
-        pred = anchor.materialise_like_grader(est.predict(mlp, anchor.BUDGET),
-                                               anchor.DEPTH, anchor.WIDTH)
-        counted = float(ctx.flops_used)
+    previous_trace = sys.gettrace()
+    try:
+        if trace is not None:
+            sys.settrace(trace.trace)
+        with flops.BudgetContext(flop_budget=anchor.BUDGET, quiet=True) as ctx:
+            pred = anchor.materialise_like_grader(est.predict(mlp, anchor.BUDGET),
+                                                   anchor.DEPTH, anchor.WIDTH)
+            counted = float(ctx.flops_used)
+    finally:
+        if trace is not None:
+            sys.settrace(previous_trace)
     arr = np.asarray(pred, dtype=np.float64)
     if arr.shape != (anchor.DEPTH, anchor.WIDTH):
         raise ValueError(f"{name}: wrong prediction shape {arr.shape}")
@@ -88,6 +159,7 @@ def _predict(name: str, weights_np: list[np.ndarray], estimator_seed: int) -> tu
 
 
 def run(exact_path: Path, approx_path: Path) -> dict:
+    stack = _pinned_stack()
     exact_name, exact_sha = _source(exact_path)
     approx_name, approx_sha = _source(approx_path)
     if exact_name == approx_name or exact_sha == approx_sha:
@@ -95,8 +167,13 @@ def run(exact_path: Path, approx_path: Path) -> dict:
     weights, seed = anchor._mint_weights()
     fixture_sha = hashlib.sha256(b"".join(np.ascontiguousarray(w).tobytes()
                                             for w in weights)).hexdigest()
+    trace = QueryTrace(ROOT / approx_name)
     e, ef = _predict(exact_name, weights, seed)
-    a, af = _predict(approx_name, weights, seed)
+    a, af = _predict(approx_name, weights, seed, trace)
+    if _source(exact_path) != (exact_name, exact_sha) or _source(approx_path) != (approx_name, approx_sha):
+        raise RuntimeError("source changed during paired execution")
+    if _pinned_stack() != stack:
+        raise RuntimeError("meter/package stack changed during paired execution")
     return {
         "status": "complete", "role": "label-free continuation diagnostic",
         "fixture": {"width": anchor.WIDTH, "depth": anchor.DEPTH,
@@ -106,8 +183,31 @@ def run(exact_path: Path, approx_path: Path) -> dict:
         "exact": {"source": exact_name, "sha256": exact_sha, "counted_flops": ef},
         "approx": {"source": approx_name, "sha256": approx_sha, "counted_flops": af},
         "predictions": describe_predictions(e, a),
+        "query_trace": trace.summary(), "meter_stack": stack,
         "instrument_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
     }
+
+
+def write_exclusive(out: Path, result: dict) -> None:
+    if out.exists():
+        raise FileExistsError(out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    tmp = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=out.parent,
+                                         prefix=out.name + ".", suffix=".tmp",
+                                         delete=False) as fh:
+            tmp = Path(fh.name)
+            json.dump(result, fh, sort_keys=True, indent=2, allow_nan=False)
+            fh.write("\n")
+            fh.flush()
+            os.fsync(fh.fileno())
+        # Same-directory hard link is atomic and refuses an output created by
+        # another process while these two full estimators were running.
+        os.link(tmp, out)
+    finally:
+        if tmp is not None:
+            tmp.unlink(missing_ok=True)
 
 
 def main() -> None:
@@ -119,14 +219,7 @@ def main() -> None:
     if args.out.exists():
         raise FileExistsError(args.out)
     result = run(args.exact, args.approx)
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    tmp = args.out.with_name(args.out.name + ".tmp")
-    with tmp.open("w", encoding="utf-8") as fh:
-        json.dump(result, fh, sort_keys=True, indent=2, allow_nan=False)
-        fh.write("\n")
-        fh.flush()
-        os.fsync(fh.fileno())
-    os.replace(tmp, args.out)
+    write_exclusive(args.out, result)
     print(args.out)
 
 

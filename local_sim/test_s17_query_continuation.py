@@ -2,6 +2,10 @@
 from __future__ import annotations
 
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from types import SimpleNamespace
+from unittest.mock import patch
 
 import numpy as np
 
@@ -29,6 +33,51 @@ class ContinuationAuditTest(unittest.TestCase):
             audit.describe_predictions(a, a[:1])
         with self.assertRaisesRegex(ValueError, "nonfinite"):
             audit.describe_predictions(a, np.array([[1.0, np.nan], [1.0, 1.0]]))
+
+    def test_stack_drift_refused(self) -> None:
+        with patch.object(audit.importlib.metadata, "version", side_effect=["0.0", "0.16.1"]):
+            with self.assertRaisesRegex(RuntimeError, "stack drift"):
+                audit._pinned_stack()
+
+    def test_branch_trace_binds_layer_and_refuses_missing_layer(self) -> None:
+        with TemporaryDirectory() as td:
+            source = Path(td) / "query.py"
+            source.write_text("\n".join([
+                "old = _mm(_mm(LL, FF.T), tw.Q.T)",
+                "old = _mm(_mm(LL, FF.T), tw.Q.T)",
+                "old = _mm(U, _mm(_mm(_mm(U.T, LL), FF.T), tw.Q.T))",
+            ]), encoding="utf-8")
+            trace = audit.QueryTrace(source)
+            layer = SimpleNamespace(f_code=SimpleNamespace(co_name="_layer", co_filename=str(source)),
+                                    f_locals={"layer_index": 4}, f_back=None)
+            query = SimpleNamespace(f_code=SimpleNamespace(co_name="_shared_contract_lean",
+                                                         co_filename=str(source)),
+                                    f_lineno=3, f_back=layer)
+            trace.trace(query, "line", None)
+            self.assertEqual(trace.summary()["first_approximate_layer"], 4)
+            layer.f_locals.clear()
+            with self.assertRaisesRegex(RuntimeError, "layer index"):
+                trace.trace(query, "line", None)
+
+    def test_exclusive_output_refuses_overwrite(self) -> None:
+        with TemporaryDirectory() as td:
+            out = Path(td) / "report.json"
+            audit.write_exclusive(out, {"a": 1})
+            with self.assertRaises(FileExistsError):
+                audit.write_exclusive(out, {"a": 2})
+            self.assertEqual(out.read_text(encoding="utf-8"), '{\n  "a": 1\n}\n')
+            self.assertEqual(list(Path(td).glob("*.tmp")), [])
+
+    def test_changed_source_refused_after_predictions(self) -> None:
+        source_records = [("exact.py", "a"), ("approx.py", "b"),
+                          ("exact.py", "changed"), ("approx.py", "b")]
+        with patch.object(audit, "_pinned_stack", return_value={"pin": "fixed"}), \
+             patch.object(audit, "_source", side_effect=source_records), \
+             patch.object(audit.anchor, "_mint_weights", return_value=([np.ones((2, 2))], 3)), \
+             patch.object(audit, "QueryTrace"), \
+             patch.object(audit, "_predict", return_value=(np.ones((2, 2)), 10.0)):
+            with self.assertRaisesRegex(RuntimeError, "source changed"):
+                audit.run(Path("exact.py"), Path("approx.py"))
 
 
 if __name__ == "__main__":
