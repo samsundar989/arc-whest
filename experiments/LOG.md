@@ -54835,3 +54835,14 @@ CPUs, snapshot `b4900d1ef`) and `#1884` (full-recurrence continuation,
 frozen rank32 source and began running. They use the exact commands and
 exclusive output paths above. Their separate snapshots prevent any later
 documentation edit from changing the measured source bytes.
+
+**Query raw-archive prediction before Git add.** Workerq #1883 and #1884
+both SUCCEEDED (104.83 s and 109.37 s; peaks 2,575.11 and 3,471.36 MiB).
+The raw meter SHA-256 is
+`89d4d572a75a7d802d1d462a9bc5e99a5569230720d620bff66397be9dcdd8a8`;
+the raw continuation SHA-256 is
+`a983574e3c211757155f32e6323624885fe3b9294e956689fef56534f5ab100f`.
+Prediction: marking only these two paths `-text -diff` will preserve their
+producer bytes across a fresh checkout, with staged blob IDs equal to
+raw no-filter IDs, without changing cost or recurrence values. These are
+label-free artifacts; the independent engineering Skeptic remains pending.
