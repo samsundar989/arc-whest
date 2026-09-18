@@ -60,6 +60,23 @@ def _pkg_ver(name: str) -> str:
         return "unknown"
 
 
+def _numerical_config(config):
+    """Fields that can change prediction, cost or local failure behavior."""
+    return {k: v for k, v in config.items()
+            if k not in ("gate", "ts", "official_samples")}
+
+
+def _reuse_arm(manifest, source_sha):
+    """Select an old complete arm by bytes, independent of its old role."""
+    matches = [label for label, arm in manifest["arms"].items()
+               if arm.get("candidate_sha256") == source_sha
+               and arm.get("evidence_rows") is not None
+               and arm.get("rows_hash") is not None]
+    if len(matches) != 1:
+        raise ValueError("frozen numerical source must have exactly one complete matching arm")
+    return matches[0]
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--control", required=True)
@@ -99,20 +116,26 @@ def main(argv=None) -> int:
                          "network. Costs ~96 KiB per arm at 24x1024 and is what "
                          "the exact prediction-change decomposition needs.")
     ap.add_argument("--reuse-control", default="",
-                    help="DESIGN only: reuse a complete frozen control from a "
+                    help="DESIGN only: reuse a complete frozen arm from a "
                          "prior --pred-out directory after strict full-identity "
                          "verification. Refuses legacy/incomplete manifests; "
                          "never reuses timing or DECIDE evidence.")
+    ap.add_argument("--reuse-root", default="",
+                    help="explicit immutable source root for a prior snapshot; "
+                         "requires --reuse-control and binds recorded paths/bytes")
     a = ap.parse_args(argv)
 
     import flopscope as flops
     flops.configure(symmetry_warnings=False)
     import competition_score as cs
     import design_sidecar as ds
+    from artifact_identity import resolve as resolve_artifact
     import lifecycle_eval as le
     import truth_reads as tr
     if a.reuse_control and not a.pred_out:
         ap.error("--reuse-control requires --pred-out for a new evidence record")
+    if a.reuse_root and not a.reuse_control:
+        ap.error("--reuse-root requires --reuse-control")
 
     block = a.block or tr.resolve_block(a.truth)
     with tr.reserve(block, a.truth, consumer="local_sim/p2_design_score.py",
@@ -258,10 +281,18 @@ def main(argv=None) -> int:
         if label == "control" and a.reuse_control:
             if not accuracy_only or spec.lam != 0:
                 raise ValueError("control reuse is DESIGN accuracy-only with lambda zero")
-            old = ds.verify(a.reuse_control, root=_ROOT,
+            old_root = os.path.abspath(a.reuse_root) if a.reuse_root else _ROOT
+            old = ds.verify(a.reuse_control, root=old_root,
                             require_present_sources=True,
                             require_full_row_binding=True)
             om = old["manifest"]
+            if a.reuse_root:
+                resolve_artifact(old_root, om["truth"], sha256=om["truth_sha256"])
+                for rel, digest in om.get("dependency_sha256", {}).items():
+                    resolve_artifact(old_root, rel, sha256=digest)
+                for info in om["arms"].values():
+                    resolve_artifact(old_root, info["path"],
+                                     sha256=info["candidate_sha256"])
             if om.get("tier") != "DESIGN":
                 raise ValueError("frozen control reuse requires a DESIGN source tier")
             if om.get("run_complete") is not True:
@@ -273,19 +304,13 @@ def main(argv=None) -> int:
                         "dependency_sha256", "numerical_environment"):
                 if key not in om or om[key] != pred_manifest[key]:
                     raise ValueError(f"frozen control identity mismatch: {key}")
-            # Timestamp is a read-register event, not evaluator configuration.
-            # All numerical/protocol controls, including the registered gate,
-            # must match. No automatic DECIDE recovery is provided.
-            old_cfg = dict(om["config"])
-            new_cfg = dict(pred_manifest["config"])
-            old_cfg.pop("ts", None); new_cfg.pop("ts", None)
-            if old_cfg != new_cfg:
-                raise ValueError("frozen control configuration mismatch")
-            old_arm = om["arms"].get("control", {})
-            if (old_arm.get("candidate_sha256") != ds.sha_file(path)
-                    or old_arm.get("evidence_rows") is None
-                    or old_arm.get("rows_hash") is None):
-                raise ValueError("frozen control lacks exact source or complete evidence rows")
+            # Role, registered gate, timestamp and official-sample forecast
+            # are analysis metadata. They cannot change the saved prediction,
+            # local failure behavior or counted FLOPs.
+            if _numerical_config(om["config"]) != _numerical_config(pred_manifest["config"]):
+                raise ValueError("frozen control numerical configuration mismatch")
+            old_label = _reuse_arm(om, ds.sha_file(path))
+            old_arm = om["arms"][old_label]
             rows = [le.EvidenceRow(**r) for r in old_arm["evidence_rows"]]
             if (len(rows) != n or [r.input_seed for r in rows] != seeds
                     or le.rows_hash(rows) != old_arm["rows_hash"]):
@@ -310,7 +335,7 @@ def main(argv=None) -> int:
                 "path": path, "candidate_sha256": _sha, "n_written": 0}
             ds.write_manifest(pred_dir, pred_manifest)
         if reused:
-            for row, prediction in zip(rows, old["arms"]["control"]["predictions"]):
+            for row, prediction in zip(rows, old["arms"][old_label]["predictions"]):
                 preds.append(prediction)
                 if sink is not None:
                     sink(row)
