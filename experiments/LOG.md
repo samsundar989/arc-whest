@@ -54670,3 +54670,23 @@ the corrected 19-evaluation label-free instrument in
 the SHA-pinned dry run, four tiny tests, and quiet GREEN preflight. The
 original PROVISIONAL verdict remains in the record. No complete-package
 fit or P12 result is implied.
+
+### IMPORTANT prediction: snapshot-root decision-reader repair, before editing
+
+Workerq #1882 SUCCEEDED in 7192.79 s, peak 7861.51 MiB, and wrote 144
+factorial rows. Its immutable run snapshot is
+`C:/Users/samsu/.local/state/gpuq/snapshots/1882/job-1882` (commit
+`7f374d2df`); the output directory is the absolute
+`C:/Users/samsu/Documents/arc-whest/experiments/2026-09-18_s17_factorial`.
+Strict read stopped closed before any P12 decision: current-checkout
+`local_sim/audit_constants.py` raw bytes differ from the snapshot's LF bytes,
+and the score's `prediction_sidecars` path is relative to the snapshot,
+traversing to the absolute output. No P12 labels or outcomes were inspected.
+
+Prediction: an explicit immutable `--run-root` will let the reader verify
+source, truth, and dependency bytes against the exact run snapshot, while
+resolving the score's sidecar path from that root will identify the supplied
+absolute prediction directory. Existing same-root synthetic behavior will
+stay valid. A changed source/dependency byte, altered sidecar path, or role
+swap must still fail closed. This is path/provenance instrument repair only;
+the scorer, estimator, evidence files, gates, and P12 decision remain untouched.
