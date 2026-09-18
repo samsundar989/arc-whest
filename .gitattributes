@@ -58,3 +58,6 @@ experiments/2026-09-18_s17_query_continuation.json -text -diff
 
 # Complete fixed query comparison keeps exact failed and control predictions.
 experiments/2026-09-18_s17_query_accuracy/** -text -diff
+
+# Fresh P14 producer artifacts retain exact bytes and SHA-256s across checkouts.
+experiments/2026-09-18_p14_birth/** -text -diff
