@@ -54567,3 +54567,13 @@ the first two were PROVISIONAL and prompted those repairs; the final
 `experiments/2026-09-18_s17_query_audit_final_skeptic.md` remains PROVISIONAL
 only for selected-pair lineage and actual full-shape behavior, which cannot
 exist before the factorial. It carries no truth, score or release inference.
+
+**IMPORTANT archive-byte prediction before repair.** The two newly committed
+meter JSON files have producer CRLF bytes, while `.gitattributes` currently
+marks them text/eol=lf. `git rev-parse HEAD:path` differs from
+`git hash-object --no-filters path` for both. Prediction: adding only these
+two exact paths as `-text -diff` and re-adding them will make their Git blob
+IDs equal the no-filter worktree IDs, without changing either raw SHA-256,
+numeric field, source hash, Skeptic verdict or historical archive. A fresh
+checkout must reproduce the producer SHA-256s exactly. This repairs evidence
+preservation only; it is not a cost or score change.
