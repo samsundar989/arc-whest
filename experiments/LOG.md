@@ -54593,3 +54593,16 @@ source identity, or frozen archive changed.
 timestamp, 24-network count, gate 1.0, cap mode, official sample count and
 three output paths above. It began running at 2026-09-18T08:43:46Z. No
 source, reader or sidecar code will change while it runs.
+
+### IMPORTANT prediction before strict query-score reader implementation
+
+The conditional rank32 query accuracy comparison needs a new read-only
+instrument. Before editing its arithmetic, predict that a complete synthetic
+two-arm score artifact with matching frozen source bytes, P12 ordered rows,
+and verified prediction sidecars will reproduce the canonical observed and
+official-precision paired scores. Tampered source roles, sample/config fields,
+sidecar rows or network identities will be refused; a synthetic case whose
+observed gain exceeds 1.05 but whose official-precision gain does not will
+fail the registered official gate. A newly failed candidate identity will
+also fail the decision even if its arithmetic gate passes. This is an
+instrument prediction and authorizes no P12 read, candidate choice, or claim.
