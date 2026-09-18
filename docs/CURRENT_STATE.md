@@ -21,8 +21,8 @@ score; PAIR+Q plus P3 improves conditionally and passes the stage-2 DESIGN score
 gate uncompressed. The reference-lambda diagnostic reveals an interaction but
 is not a shippable source. No candidate qualifies for P13.
 
-Corrected qE/qEd versioned files passed tiny algebra and `whest validate`, with
-no truth run. The source override for a complete label-free query audit is ready.
+Corrected qE/qEd versioned files passed tiny algebra and `whest validate`.
+Their full-shape query audits are complete; the P12 truth score run is active.
 Samuel answered "i dont know" to all three requested corrected-objective
 predictions; the LOG records this verbatim in commit `bc0c21b`, before new
 measurement. The old and corrected full-shape label-free audits #1756/#1764
