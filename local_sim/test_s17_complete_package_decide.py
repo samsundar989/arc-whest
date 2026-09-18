@@ -5,7 +5,9 @@ import copy
 import dataclasses
 import hashlib
 import json
+import os
 from pathlib import Path
+import shutil
 import tempfile
 from unittest.mock import patch
 
@@ -15,15 +17,15 @@ import s15_own_fit_driver as p12
 import s17_complete_package_decide as decision
 
 
-def fixture(directory):
-    root = decision.ROOT
+def fixture(directory, root=None):
+    root = Path(root) if root is not None else decision.ROOT
     sources = {label: str(root / decision.ROLE_PATHS[label])
                for label in decision.LABELS}
     hashes = {label: hashlib.sha256(Path(path).read_bytes()).hexdigest()
               for label, path in sources.items()}
     seeds = list(p12.SEEDS)
     labels = ("control", "cand0", "cand1", "cand2", "cand3", "cand4")
-    relpred = Path(directory).relative_to(root).as_posix()
+    relpred = os.path.relpath(directory, root).replace("\\", "/")
     spec = dataclasses.asdict(le.LifecycleSpec(
         width=1024, depth=16, flop_budget=2**41, lam=0.,
         residual_wall_time_limit_s=None, wall_time_limit_s=None,
@@ -131,6 +133,38 @@ def main():
                 pass
             else:
                 raise AssertionError(f"accepted tampered {name}")
+        snapshot = directory / "snapshot"
+        snapshot.mkdir()
+        output = directory / "external-output" / "predictions"
+        output.mkdir(parents=True)
+        (output / "predictions_manifest.json").write_text("{}", encoding="utf-8")
+        for role in decision.LABELS:
+            shutil.copyfile(sources[role], snapshot / decision.ROLE_PATHS[role])
+        snap_score, snap_side, snap_sources = fixture(output, snapshot)
+        snap_path = output.parent / "score.json"
+        snap_path.write_text(json.dumps(snap_score), encoding="utf-8")
+        with patch.object(decision.ds, "verify", return_value=snap_side) as verify:
+            decision.synthesize(snap_path, output, snap_sources, run_root=snapshot)
+            assert verify.call_args.kwargs["root"] == str(snapshot.resolve())
+        bad_path = copy.deepcopy(snap_score)
+        bad_path["prediction_sidecars"] = "predictions"
+        snap_path.write_text(json.dumps(bad_path), encoding="utf-8")
+        with patch.object(decision.ds, "verify", return_value=snap_side):
+            try:
+                decision.synthesize(snap_path, output, snap_sources, run_root=snapshot)
+            except ValueError as exc:
+                assert "prediction directory" in str(exc)
+            else:
+                raise AssertionError("accepted wrong snapshot-relative prediction path")
+        snap_path.write_text(json.dumps(snap_score), encoding="utf-8")
+        (snapshot / decision.ROLE_PATHS["C00"]).write_bytes(b"tampered source")
+        with patch.object(decision.ds, "verify", return_value=snap_side):
+            try:
+                decision.synthesize(snap_path, output, snap_sources, run_root=snapshot)
+            except ValueError as exc:
+                assert "source path or bytes differ" in str(exc)
+            else:
+                raise AssertionError("accepted tampered snapshot source")
         print(f"valid fixture and {len(cases)} provenance tamper refusals passed")
 
 

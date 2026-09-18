@@ -54690,3 +54690,20 @@ absolute prediction directory. Existing same-root synthetic behavior will
 stay valid. A changed source/dependency byte, altered sidecar path, or role
 swap must still fail closed. This is path/provenance instrument repair only;
 the scorer, estimator, evidence files, gates, and P12 decision remain untouched.
+
+**Snapshot-root reader result (instrument only).**
+`s17_complete_package_decide.py` now accepts `--run-root`, defaulting to the
+current checkout for old callers. It passes that root to strict sidecar
+verification, binds frozen source roles under it, and resolves the score's
+`prediction_sidecars` path from it before comparing to `--pred-out`. The
+synthetic reader test passes its original valid fixture and 17 tamper refusals,
+plus an external absolute output reached by a snapshot-relative path, a wrong
+recorded path refusal, and changed snapshot source-byte refusal. A metadata
+check confirms the real #1882 recorded path resolves from its immutable
+snapshot to the supplied output; no scored rows were read. The independent
+Skeptic ACCEPTS this narrow repair in
+`experiments/2026-09-18_s17_snapshot_reader_skeptic.md`; its noted limit is
+that mocked synthetic sidecars do not themselves execute truth/dependency
+hash checks, which are verified by inspecting `design_sidecar.verify`.
+Standard preflight is GREEN 12/16 (four Full-tier checks skipped), exit 0;
+transcript `experiments/2026-09-18_s17_snapshot_reader_preflight.log`.

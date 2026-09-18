@@ -68,14 +68,15 @@ def _verdict(v):
             "ci": list(v.ci), "reasons": list(v.reasons)}
 
 
-def synthesize(score_path, prediction_dir, sources):
+def synthesize(score_path, prediction_dir, sources, run_root=None):
+    run_root = Path(run_root).resolve() if run_root is not None else ROOT
     d = json.loads(Path(score_path).read_text(encoding="utf-8"))
     if (d.get("tier") != "DESIGN" or d.get("block") != "P12" or
             d.get("n") != 24 or d.get("width") != 1024 or
             d.get("depth") != 16 or d.get("accuracy_only") is not True or
             d.get("local_seconds_caps") != "off"):
         raise ValueError("expected complete P12 DESIGN 1024x16 accuracy run")
-    side = ds.verify(str(prediction_dir), root=str(ROOT),
+    side = ds.verify(str(prediction_dir), root=str(run_root),
                      require_present_sources=True, require_full_row_binding=True)
     man = side["manifest"]
     if (man.get("run_complete") is not True or man.get("block") != "P12" or
@@ -101,8 +102,9 @@ def synthesize(score_path, prediction_dir, sources):
             man.get("control") != d.get("control") or
             man.get("candidate") != d.get("candidate")):
         raise ValueError("score/sidecar sample count, shape, protocol or configuration differs")
-    if d.get("prediction_sidecars", "").replace("\\", "/") != str(
-            Path(prediction_dir).resolve().relative_to(ROOT)).replace("\\", "/"):
+    recorded_sidecars = d.get("prediction_sidecars")
+    if (not isinstance(recorded_sidecars, str) or
+            (run_root / recorded_sidecars).resolve() != Path(prediction_dir).resolve()):
         raise ValueError("score points to a different prediction directory")
     seeds = [int(x) for x in man["ordered_network_seeds"]]
     if seeds != list(p12.SEEDS):
@@ -120,9 +122,9 @@ def synthesize(score_path, prediction_dir, sources):
         key = "control" if i == 0 else f"cand{i-1}"
         arm = d["arms"][key]
         source = Path(sources[label]).resolve()
-        registered = ROOT / ROLE_PATHS[label]
+        registered = run_root / ROLE_PATHS[label]
         if (source != registered.resolve() or
-                source != (ROOT / arm["path"]).resolve() or
+                source != (run_root / arm["path"]).resolve() or
                 _sha(source) != ROLE_SHA256[label] or
                 arm["candidate_sha256"] != ROLE_SHA256[label]):
             raise ValueError(f"{label}: source path or bytes differ")
@@ -215,12 +217,13 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--score", required=True)
     ap.add_argument("--pred-out", required=True)
+    ap.add_argument("--run-root", help="immutable root used by the scoring run; defaults to this checkout")
     for label in LABELS:
         ap.add_argument("--"+label.lower(), required=True)
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     sources = {label: getattr(a, label.lower()) for label in LABELS}
-    result = synthesize(a.score, a.pred_out, sources)
+    result = synthesize(a.score, a.pred_out, sources, run_root=a.run_root)
     dest = Path(a.out)
     if dest.exists():
         raise FileExistsError(dest)
