@@ -54648,3 +54648,9 @@ test falsifies the narrow repair. The first single preflight was interrupted
 at step 3 because this finding already required a source edit; no verdict is
 claimed from that incomplete transcript. No P12 truth or factorial output was
 read for this repair.
+
+**Cap disclosure result.** The new producer now sets `MAX_EVALS =
+TOTAL_EVALS` (19). Its four focused label-free tests pass and a SHA-pinned
+C11 dry-run reports both `scheduled_evaluations` and `max_evaluations` as 19.
+Only the cap constant changed; trial construction and scheduling code were
+not edited. A quiet standard preflight and focused Skeptic re-review remain.
