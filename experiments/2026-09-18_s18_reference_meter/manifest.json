@@ -1,0 +1,9 @@
+{
+  "arms": {
+    "full_p2": "948e0814750a8ba1ad2f51a008491c9832028bc4cfa48286bc65e8fdb3c3455d",
+    "unshared": "a2ca4705fe07699e4d098eccb5d3a804051e50f592ab011127d065c9ea7167ff",
+    "unshared_full_p2": "88e63f008e3551fff7640a7e2723e66f8e03da791a426776b2c745b50d346401"
+  },
+  "artifact": "s18_same_closure_reference_meter_group",
+  "status": "complete"
+}

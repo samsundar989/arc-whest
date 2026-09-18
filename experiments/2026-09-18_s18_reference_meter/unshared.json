@@ -1,0 +1,156 @@
+{
+  "arm": "unshared",
+  "artifact": "s18_same_closure_reference_meter",
+  "control_sha256": "fd8d497db6dfbc3affcf579119c7115c3aee4d190a3e92fec4d85c366152d1bf",
+  "dependency_sha256": {
+    "local_sim/lifecycle_eval.py": "3dd70cc83aea67d096edf76128a5fe2d2ffa0c43a572ef2b7f9eccf4d744f2e0",
+    "local_sim/mint_provenance.py": "48aef520b7cef454a629a937420c440f67eafc0cb872a6b2ac875b5f576936e2"
+  },
+  "deployable_cost_claim": false,
+  "depth": 16,
+  "diagnostic_budget": 36028797018963968,
+  "final_prediction_sha256": "0177a421cfbb7396e3111d5388720f1dc747f79ab0b6d01d2311c392a6a36cb8",
+  "flops_used": 620811636765,
+  "generator_sha256": "874e284155ed79a4be274f4f3dc2c6ddf6a7c2da5d3f12c210913a9bfdf91f54",
+  "input_seed": 19990918,
+  "input_weight_dtype": "f64_readonly",
+  "last_run": {
+    "depth": 16,
+    "generations": null,
+    "mode": "full",
+    "projected_flops": 1068603162624,
+    "width": 1024
+  },
+  "meter_sha256": "0f98d9559a1ccdf7fcfd657c6c3aa55011359e2bcd50bdb3083b6fda8e2b1f90",
+  "official_budget": 2199023255552,
+  "operation_calls": 19380,
+  "operations": {
+    "add": {
+      "calls": 6948,
+      "flops": 21737051166
+    },
+    "argsort": {
+      "calls": 15,
+      "flops": 614400
+    },
+    "array": {
+      "calls": 63,
+      "flops": 491
+    },
+    "asarray": {
+      "calls": 1,
+      "flops": 32768
+    },
+    "astype": {
+      "calls": 82,
+      "flops": 35813376
+    },
+    "clip": {
+      "calls": 16,
+      "flops": 32768
+    },
+    "concatenate": {
+      "calls": 2599,
+      "flops": 39722838016
+    },
+    "diag": {
+      "calls": 15,
+      "flops": 15360
+    },
+    "diagonal": {
+      "calls": 31,
+      "flops": 0
+    },
+    "einsum": {
+      "calls": 106,
+      "flops": 3775373312
+    },
+    "eye": {
+      "calls": 2,
+      "flops": 2048
+    },
+    "getitem": {
+      "calls": 15,
+      "flops": 1966080
+    },
+    "isfinite": {
+      "calls": 154,
+      "flops": 47329280
+    },
+    "linalg.qr": {
+      "calls": 30,
+      "flops": 124518420
+    },
+    "matmul": {
+      "calls": 269,
+      "flops": 537923670016
+    },
+    "maximum": {
+      "calls": 17,
+      "flops": 49152
+    },
+    "multiply": {
+      "calls": 4992,
+      "flops": 4953600060
+    },
+    "ones": {
+      "calls": 2,
+      "flops": 1049600
+    },
+    "ones_like": {
+      "calls": 16,
+      "flops": 16384
+    },
+    "reshape": {
+      "calls": 151,
+      "flops": 511920128
+    },
+    "sqrt": {
+      "calls": 17,
+      "flops": 18432
+    },
+    "stack": {
+      "calls": 338,
+      "flops": 428483584
+    },
+    "stats.norm.cdf": {
+      "calls": 32,
+      "flops": 3145728
+    },
+    "stats.norm.pdf": {
+      "calls": 32,
+      "flops": 1769472
+    },
+    "subtract": {
+      "calls": 3018,
+      "flops": 10799205888
+    },
+    "sum": {
+      "calls": 167,
+      "flops": 553614276
+    },
+    "true_divide": {
+      "calls": 94,
+      "flops": 189440
+    },
+    "where": {
+      "calls": 154,
+      "flops": 189317120
+    },
+    "zeros": {
+      "calls": 4,
+      "flops": 0
+    }
+  },
+  "peak_process_rss_bytes": 11151691776,
+  "scalar_materializations": {
+    "__bool__": 0,
+    "__float__": 0,
+    "__index__": 0,
+    "__int__": 0
+  },
+  "scalar_materializations_total": 0,
+  "source_sha256": "3fe4fe05b22b93669eeeb86811225ace0f38d415ee3efbbd0edbf667882d27c5",
+  "status": "complete",
+  "width": 1024
+}

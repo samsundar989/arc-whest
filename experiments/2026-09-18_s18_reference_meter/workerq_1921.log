@@ -1,0 +1,42 @@
+worker-q: job #1921 starting at 2026-09-18T23:06:50.517720+00:00
+worker-q: cwd=C:\Users\samsu\.local\state\gpuq\snapshots\1921\job-1921
+worker-q: snapshot=git 5e793065898c82ee6ef874f7066842fd0eb0aa1a
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['uv', 'run', 'python', '-W', 'ignore', 'local_sim/s18_reference_meter.py', '--all', '--out', 'C:/Users/samsu/Documents/arc-whest/experiments/2026-09-18_s18_reference_meter']
+worker-q: ------------------------------------------------------------
+C:\Users\samsu\.local\state\gpuq\snapshots\1921\job-1921\local_sim\s18_reference_meter.py:95: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+C:\Users\samsu\.local\state\gpuq\snapshots\1921\job-1921\estimator_k3_v43_complete_c10.py:344: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\.local\state\gpuq\snapshots\1921\job-1921\estimator_k3_v43_complete_c10.py:345: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\.local\state\gpuq\snapshots\1921\job-1921\estimator_k3_v43_complete_c10.py:419: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\.local\state\gpuq\snapshots\1921\job-1921\estimator_k3_v43_complete_c10.py:420: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-18_s18_reference_meter\unshared.json
+C:\Users\samsu\.local\state\gpuq\snapshots\1921\job-1921\local_sim\s18_reference_meter.py:95: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+C:\Users\samsu\.local\state\gpuq\snapshots\1921\job-1921\estimator_k3_v43_complete_c10.py:344: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\.local\state\gpuq\snapshots\1921\job-1921\estimator_k3_v43_complete_c10.py:345: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\.local\state\gpuq\snapshots\1921\job-1921\estimator_k3_v43_complete_c10.py:419: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\.local\state\gpuq\snapshots\1921\job-1921\estimator_k3_v43_complete_c10.py:420: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-18_s18_reference_meter\full_p2.json
+C:\Users\samsu\.local\state\gpuq\snapshots\1921\job-1921\local_sim\s18_reference_meter.py:95: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+C:\Users\samsu\.local\state\gpuq\snapshots\1921\job-1921\estimator_k3_v43_complete_c10.py:344: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\.local\state\gpuq\snapshots\1921\job-1921\estimator_k3_v43_complete_c10.py:345: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\.local\state\gpuq\snapshots\1921\job-1921\estimator_k3_v43_complete_c10.py:419: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\.local\state\gpuq\snapshots\1921\job-1921\estimator_k3_v43_complete_c10.py:420: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-18_s18_reference_meter\unshared_full_p2.json
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-18_s18_reference_meter\manifest.json
+worker-q: ------------------------------------------------------------
+worker-q: job #1921 SUCCEEDED (exit code 0) at 2026-09-18T23:12:07.339690+00:00
