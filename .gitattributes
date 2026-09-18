@@ -61,3 +61,6 @@ experiments/2026-09-18_s17_query_accuracy/** -text -diff
 
 # Fresh P14 producer artifacts retain exact bytes and SHA-256s across checkouts.
 experiments/2026-09-18_p14_birth/** -text -diff
+
+# Exact preflight transcripts from the bounded iteration-tool repair.
+experiments/2026-09-18_iteration_tools_preflight*.log -text -diff
