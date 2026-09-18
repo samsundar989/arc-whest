@@ -25,12 +25,14 @@
       "path": "estimator_k3_v43_complete_c10.py",
       "sha256": "fd8d497db6dfbc3affcf579119c7115c3aee4d190a3e92fec4d85c366152d1bf",
       "official_precision_adjusted_p12": 6.486609e-9,
-      "status": "24-network DESIGN forecast; Linux 8 GiB and MATH/LOCAL checks passed; full certificate REFUSED at 23421 vs 22000 predicted-call screen; full mini workerq 1938 queued; no upload approval"
+      "status": "24-network DESIGN forecast; Linux 8 GiB and MATH/LOCAL checks passed; full certificate REFUSED at 23421 vs 22000 predicted-call screen; full mini workerq 1938 running; server residual unmeasured; no upload approval"
     },
     "fixed_p14_design_trial": {
       "path": "estimator_k3_v45_p2_diag.py",
       "sha256": "fc8e547435e026f70b2e8e95954daf9a61337ae1747f32fc0aa0b61d10e6b855",
-      "status": "P14 truth finalized; paired C10/v45 score workerq 1920 queued; no measured accuracy result or upload approval"
+      "official_precision_adjusted_p14": 6.713479056063853e-9,
+      "official_precision_paired_gain_p14": 1.0051152016458762,
+      "status": "P14 two-replica DESIGN paired score complete and fresh Skeptic accepted: fails prospective 1.05 material-gain gate, zero new failures, midpoint truth-noise floor 2.145838031613149e-9; no candidate certificate or upload approval"
     },
     "own_fit_selected_design_arm": {
       "path": "experiments/2026-09-18_own_fit/eval_18_validation.py",
@@ -41,8 +43,8 @@
   },
   "contract": "experiments/LOG.md:2026-09-18 P14 birth and C10 diagnostic",
   "stage": {
-    "completed": ["stage1", "batch_b_p12_synthesis", "p14_two_replica_truth"],
-    "active_or_recovery": "P14 fixed birth-diagonal pair workerq 1920 running; same-closure label-free reference meter workerq 1921 running; C10 narrowed diagnostic full mini workerq 1938 queued after certificate predicted-margin refusal",
+    "completed": ["stage1", "batch_b_p12_synthesis", "p14_two_replica_truth", "p14_fixed_birth_failed_materiality", "same_closure_reference_meter_narrow_feasibility"],
+    "active_or_recovery": "C10 narrowed diagnostic full mini workerq 1938 running after certificate predicted-margin refusal; P15 DESIGN registry unclaimed, reference scorer combined preflight and fresh Skeptic pending before strategic truth contract",
     "decide": "P13 truth-read spent=0; preserve for one frozen finalist",
     "release": "No 2x finalist is frozen or approved for submission; C10 diagnostic also needs exact-file approval"
   }

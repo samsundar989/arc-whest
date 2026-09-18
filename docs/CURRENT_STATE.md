@@ -2,16 +2,17 @@
 
 ## September 18 execution checkpoint — deep plan underway
 
-The reviewed handoff is in execution. A committed prospective P14 DESIGN
-contract (`experiments/LOG.md`, commits `cbee174`, `1f41272`) fixes one C10
-birth-diagonal candidate `estimator_k3_v45_p2_diag.py`, SHA-256
+The reviewed handoff is in execution. Fixed P2 birth-diagonal v45, SHA-256
 `fc8e547435e026f70b2e8e95954daf9a61337ae1747f32fc0aa0b61d10e6b855`,
-24 new networks, paired official-precision arithmetic gate 1.05, and two
-`2^24`-sample truth replicas. Samuel answered “i dont know” to all three
-pre-result predictions. Independent and source-bound tiny algebra checks pass;
-P14 truth #1901 succeeded and its two-replica artifact and live-ledger hash are
-finalized; paired C10/v45 score #1920 is queued and has not returned. P13 remains
-untouched.
+was tested against frozen C10 on 24 new P14 DESIGN networks with two `2^24`
+truth replicas. Samuel answered “i dont know” to all three pre-result predictions.
+The [strict decision](../experiments/2026-09-18_p14_birth/decision_c10_v45.json)
+reports official-precision paired gain **1.005115x**, positive difference
+`3.43408e-11` (t95 `[1.50649e-11, 5.36167e-11]`), zero new failures and
+scored midpoint truth-noise floor `2.145838e-9`. It **fails** the prospective
+1.05 material-gain gate. A fresh Skeptic ACCEPTS that narrow conclusion;
+the fixed v45 trial is closed for material gain, without claiming zero benefit
+or closing all possible variants. P13 remains untouched.
 
 A separate committed C10 diagnostic-upload contract asks whether exact
 `estimator_k3_v43_complete_c10.py` survives server residual/memory limits;
@@ -25,21 +26,29 @@ by the conservative server-predicted 22,000-call screen**: exact C10 uses
 MATH and 22 LOCAL checks passed, including zero scalar conversions and a clean
 two-row official subprocess smoke. This is not server residual proof. The
 prospectively narrowed diagnostic asks the server to measure that uncertainty;
-full 100-row official mini #1938 is queued and independent review is active.
+full 100-row official mini #1938 is running; preliminary independent review is
+PROVISIONAL until the complete mini and exact source receipt can be examined.
 No upload approval has been requested. Exact-file approval remains required.
 
 Bounded iteration-tool changes and same-closure reference construction are complete.
 The source/seed instrument preflight passed GREEN 12/16 after P14 truth
-finalization. The reference feasibility note and generator are committed;
-label-free full-shape meter #1921 is queued. Its independent review accepted
-the repaired math/cost instrument but held dispatch until this GREEN gate.
+finalization. Label-free full-shape meter #1921 succeeded and a fresh Skeptic
+ACCEPTS its narrow one-network feasibility result: unshared/rank32 costs
+620.812 billion FLOPs and 10,635 MiB peak RSS; shared/full-P2 costs
+1,459.350 billion and 5,937 MiB; combined costs 1,599.311 billion and
+10,860 MiB. These are high-budget offline references with **no truth accuracy
+result**; both unshared arms exceed the server's 8 GiB memory cap by RSS alone.
 The repaired host SINGLE_USE reservation passed a fresh Skeptic, but the first
 P13 scorer still must wire its only truth open to the verified loader and test
 real snapshot behavior before access. A separate tiny same-state branch probe
 passed fresh independent structural review: join first changes at layer 4;
 full-P2 must branch before the first birth because stored lineage ranks are
-uniform. It is not a width-1024 accuracy or cost result. P13 remains untouched.
-The major 2x objective remains unproven and unsubmitted.
+uniform. It is not a width-1024 accuracy result. Fresh P15 DESIGN seeds are
+registered but unclaimed; the one-arm reference scorer has four passing
+synthetic tests, with combined standard preflight and fresh instrument Skeptic
+still pending. A separately committed strategic contract, Samuel's predictions
+and a claimed fresh block must precede truth. P13 remains untouched. The major
+2x objective remains unproven and unsubmitted.
 
 ---
 

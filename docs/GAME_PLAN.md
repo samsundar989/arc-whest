@@ -5,21 +5,27 @@
 Execute the reviewed [deep handoff](CODEX_EXECUTION_HANDOFF_2026-09-18_DEEP_PLAN.md)
 under the committed contracts at the end of `experiments/LOG.md`. The bounded
 instrument/preflight gate is GREEN, and P14 two-replica truth has been minted
-and finalized. Fixed v45 birth-diagonal compensation is being scored against
-C10 on P14 by workerq #1920; independently review its complete paired result.
+and finalized. Fixed v45 birth-diagonal compensation failed its prospective
+1.05 material-gain gate: official paired gain 1.005115x on 24 P14 DESIGN
+networks, with zero failures and a positive paired interval. A fresh Skeptic
+accepted that narrow result; do not retry damping or rank variations here.
 In parallel, certify exact C10 for one individually approved server diagnostic;
 workerq #1891 passed WSL Linux memory enforcement, while full certificate #1904
 refused only its conservative 22,000-call server forecast (C10: 23,421 calls).
 The diagnostic is prospectively narrowed to actual server residual measurement;
-full official mini #1938 is queued, and exact-file approval remains required.
+full official mini #1938 is running, and exact-file approval remains required.
 The same-closure reference
 feasibility note specifies separate no-share and full-P2 operators, plus their
-combined diagnostic reference. Full-shape label-free meter #1921 is running;
-build and price those before a new
-prospective truth contract; continue both arms endogenously and keep closure,
-controls and P4 fixed. Implement only a recurrent mechanism supported by that
-attribution. P13 and the observed-and-official-precision paired 2x major-release
-gate remain reserved for a complete frozen finalist. No candidate currently
+combined diagnostic reference. Full-shape label-free meter #1921 succeeded;
+independent review accepted one-network offline feasibility, including complete
+cost and memory, without accuracy evidence or deployment clearance. P15 DESIGN
+seeds are registered but unclaimed. Finish the one-arm scorer's preflight and
+fresh Skeptic, then commit a prospective fresh-truth attribution contract and
+obtain Samuel's predictions before drawing truth. Compare one operator at a time
+with complete endogenous continuation and keep closure, controls and P4 fixed.
+Implement only a recurrent mechanism supported by that attribution. P13 and
+the observed-and-official-precision paired 2x major-release gate remain
+reserved for a complete frozen finalist. No candidate currently
 qualifies as that finalist.
 
 ---
