@@ -68,8 +68,8 @@ def plan():
             "ridge":RIDGE,"max_evaluations":MAX_EVALS,
             "scheduled_evaluations":TOTAL_EVALS,"full_network_runs":FIT_N*TOTAL_EVALS,
             "validation_rule":"matched default and selected points, last 12 only after fit freeze; never refit",
-            "workerq_request":{"ram_gib":12,"vram_gib":0,"cpus":4},
-            "workerq_line":"workerq submit --project arc-whest --ram 12 --vram 0 --cpus 4 -- uv run python local_sim/s15_own_fit_driver.py --execute --out-dir <absolute-path> --ts <registered-utc>",
+            "workerq_request":{"ram_gib":12,"gpu_count":0,"cpus":4},
+            "workerq_line":"workerq submit --project arc-whest --gpus 0 --ram 12 --cpus 4 -- uv run python local_sim/s15_own_fit_driver.py --execute --out-dir <absolute-path> --ts <registered-utc>",
             "optimization_review":"Reuse one truth load and the existing grader lifecycle; stream each row and atomic evaluation checkpoint. Do not cache 12 large MLP weight sets or bypass metered estimator work. Each candidate is priced on all 12 fit networks; matched default and selected validation are priced on all 12 held-out networks. 19 evaluations are below the 40 cap. Source stays per-candidate frozen; no automatic DECIDE reuse."}
 
 

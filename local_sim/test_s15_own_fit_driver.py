@@ -16,6 +16,9 @@ class OwnFitSchedule(unittest.TestCase):
         self.assertEqual(p["scheduled_evaluations"],19)
         self.assertLessEqual(p["scheduled_evaluations"],p["max_evaluations"])
         self.assertEqual(p["full_network_runs"],228)
+        self.assertEqual(p["workerq_request"]["gpu_count"],0)
+        self.assertIn("--gpus 0",p["workerq_line"])
+        self.assertNotIn("--vram",p["workerq_line"])
 
     def test_scheduler_never_reads_validation_before_freeze(self):
         calls=[]

@@ -54036,7 +54036,7 @@ truth, load it once, process one candidate and MLP at a time, stream/fsync each
 row, atomically checkpoint each evaluation and the frozen baseline, and retain
 all generated exact-source arms. This avoids duplicate truth and concurrent
 model copies without changing score arithmetic or evidence. The expected
-peak is at least batch B's measured 8074 MiB; request **12 GiB RAM, 0 VRAM,
+peak is at least batch B's measured 8074 MiB; request **12 GiB RAM, no GPU,
 4 CPUs** through workerq, not a direct shell run. The 19 fixed candidate
 evaluations are expected to be long-running, so checkpoints are required;
 recovery must refuse an existing nonempty output directory unless separately
@@ -54047,7 +54047,7 @@ driver and final preflight are required before the first label read.
 **Pre-run verification on final bytes.** Own controls source SHA-256
 `30a4d71969c2d329e632230106e33f0c151956352815e0fa897784b1023c7b4e`;
 fixed fit driver SHA-256
-`8e02c16ec7347a3b77cf5cf9e0a0c7a32bfdfda2c9809465e730753530130b00`;
+`72ddbe46eaec25b6e167bb5e52ebbfbeb56ed1295c18c048d98d9a597dfa9a64c`;
 frozen own PAIR+Q base SHA-256
 `7e5c24d33c279199c5284e6997157f98772a3ddb8bee753baf219628721cc4d5`.
 Actual `Estimator.predict` default parity and nonzero depth-tilt checks passed;
@@ -54063,10 +54063,21 @@ claimed P12 start and count repaired that source-scan issue, and the Skeptic
 rechecked identity. Neither preflight read fit labels.
 
 **Fixed workerq invocation to submit after this contract commit:**
-`workerq submit --project arc-whest --ram 12 --vram 0 --cpus 4 -- uv run
+`workerq submit --project arc-whest --gpus 0 --ram 12 --cpus 4 -- uv run
 python local_sim/s15_own_fit_driver.py --execute --out-dir
 C:/Users/samsu/Documents/arc-whest/experiments/2026-09-18_own_fit --ts
 <UTC timestamp captured at submission>`. The output directory is dedicated
 and must be empty. The job will execute from the committed snapshot and
 write rows/manifests to that explicit live path. No root estimator, P13, public
 split, or vault data is involved.
+
+**Queue syntax correction before any fit data.** The first submission attempt,
+workerq #1747, specified `--vram 0`; workerq interpreted the presence of that
+flag as **one GPU** despite zero requested VRAM. Job #1747 was still QUEUED,
+never started or read truth, and was cancelled. `workerq submit --help`
+confirms that its GPU default is one, so the CPU-only command above explicitly
+uses `--gpus 0` and omits `--vram`; the driver dry-run metadata says
+`gpu_count: 0`.
+The registered RAM/CPU envelope, candidate schedule, score/statistic, block
+and all gates are unchanged. Resubmit only after the corrected source/contract
+is committed and verify requested_gpu_count=0 before allowing it to run.
