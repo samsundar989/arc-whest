@@ -54828,3 +54828,10 @@ The meter and recurrence audit can run independently after this commit.
 Both are source- and branch-bound and contain no P12 labels. Their raw
 artifacts and independent Skeptic verdict will determine eligibility for
 the one registered P12 accuracy comparison.
+
+**Query engineering dispatch.** Workerq jobs `#1883` (meter, 8 GiB/0 GPU/2
+CPUs, snapshot `b4900d1ef`) and `#1884` (full-recurrence continuation,
+12 GiB/0 GPU/2 CPUs, snapshot `5206d6653`) were submitted from the
+frozen rank32 source and began running. They use the exact commands and
+exclusive output paths above. Their separate snapshots prevent any later
+documentation edit from changing the measured source bytes.
