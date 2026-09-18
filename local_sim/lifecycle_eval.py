@@ -77,6 +77,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import tempfile
 import sys
 import time
 from dataclasses import dataclass
@@ -1170,7 +1171,8 @@ def _self_test() -> int:
     check("L4: a failure is priced at multiplier EXACTLY 1.0, not the 0.1 floor",
           all(m == 1.0 for m in mults), f"{mults}")
 
-    broken = os.path.join(_HERE, "_lifecycle_broken_tmp.py")
+    fd, broken = tempfile.mkstemp(prefix="_lifecycle_broken_", suffix=".py", dir=_HERE)
+    os.close(fd)
     try:
         with open(broken, "w", encoding="utf-8") as fh:
             fh.write(
@@ -1239,7 +1241,8 @@ def _self_test() -> int:
           all(r.time_exhausted and not r.residual_exhausted for r in w_rows),
           "time_exhausted set, residual_exhausted clear")
 
-    slow = os.path.join(_HERE, "_lifecycle_slow_tmp.py")
+    fd, slow = tempfile.mkstemp(prefix="_lifecycle_slow_", suffix=".py", dir=_HERE)
+    os.close(fd)
     try:
         with open(slow, "w", encoding="utf-8") as fh:
             fh.write(_src([
@@ -1282,7 +1285,8 @@ def _self_test() -> int:
           f"C = {over.effective_compute():.3e} vs B = 2.72e11")
 
     head("4b. SETUP failure is a REFUSAL, because the grader aborts the whole run")
-    slowsetup = os.path.join(_HERE, "_lifecycle_slowsetup_tmp.py")
+    fd, slowsetup = tempfile.mkstemp(prefix="_lifecycle_slowsetup_", suffix=".py", dir=_HERE)
+    os.close(fd)
     try:
         with open(slowsetup, "w", encoding="utf-8") as fh:
             fh.write(_src([

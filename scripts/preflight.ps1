@@ -32,11 +32,7 @@
     5. ship-file identity - estimator.py matches its version archive
     6. vault seal         - touch counter still agrees with the log
     7. seed ledger        - consumption is recorded, and no source file draws
-                            seeds the ledger has never heard of, AND (WP0B,
-                            2026-08-31) local_sim/test_enforcement_labels.py
-                            --labels-only: every coverage count stated in THIS
-                            docstring and in VALIDATION.md section 7 is checked
-                            against the suite it names. Two commands, one step.
+                            seeds the ledger has never heard of.
     8. canonical scorer   - 134/134, the competition identity is still bitwise
                             equal to the installed whestbench, AND decide() --
                             THE gate -- still refuses percentile/BCa, still
@@ -51,7 +47,9 @@
                             a run-level refusal the way the grader treats it, the
                             immutable evidence rows every comparison uses, and --
                             since 2026-08-24 -- a spec that NAMES its round and
-                            records any deviation from it.
+                            records any deviation from it. The final command
+                            checks prose coverage counts against same-run suite
+                            receipts from steps 1, 3, 8, 9 and 11.
    12. counted-FLOP anchor - op by op against a real `whest run --profile --json`
                             report. THE check that says the local meter bills what
                             the grader bills. It REFUSES when the report is absent:
@@ -173,8 +171,12 @@ Set-Location $repo
 # restores whatever the caller had.
 $script:PrevPyIoEnc = $env:PYTHONIOENCODING
 $script:PrevPyUtf8  = $env:PYTHONUTF8
+$script:PrevReceiptDir = $env:ARC_WHEST_LABEL_RECEIPTS
 $env:PYTHONIOENCODING = "utf-8"
 $env:PYTHONUTF8       = "1"
+$script:ReceiptDir = Join-Path ([System.IO.Path]::GetTempPath()) ("arc_whest_preflight_" + [guid]::NewGuid().ToString("N"))
+New-Item -ItemType Directory -Path $script:ReceiptDir | Out-Null
+$env:ARC_WHEST_LABEL_RECEIPTS = $script:ReceiptDir
 
 $failures = New-Object System.Collections.ArrayList
 $skipped  = New-Object System.Collections.ArrayList
@@ -200,6 +202,16 @@ function Restore-CallerEncoding {
     # preflight must not silently change the encoding of the shell that ran it.
     $env:PYTHONIOENCODING = $script:PrevPyIoEnc
     $env:PYTHONUTF8       = $script:PrevPyUtf8
+    $env:ARC_WHEST_LABEL_RECEIPTS = $script:PrevReceiptDir
+    if ($script:ReceiptDir -and (Test-Path $script:ReceiptDir)) {
+        $target = [System.IO.Path]::GetFullPath($script:ReceiptDir)
+        $tempRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
+        if (-not $target.StartsWith($tempRoot, [System.StringComparison]::OrdinalIgnoreCase) -or
+            -not ([System.IO.Path]::GetFileName($target) -match '^arc_whest_preflight_[0-9a-f]{32}$')) {
+            throw "unsafe preflight receipt cleanup path: $target"
+        }
+        Remove-Item -LiteralPath $target -Recurse -Force
+    }
     if ($script:Transcribing) {
         try { Stop-Transcript | Out-Null } catch { }
         $script:Transcribing = $false
@@ -290,7 +302,7 @@ if ($gitDirty) {
 # invisible: the package still exports LAMBDA_FLOPS_PER_SECOND = 1e11 as a
 # DEPRECATED ALIAS for the Phase-1 rate, while the live rate is 0.
 Step "1. official stack + round configuration" {
-    uv run python local_sim/official_config.py
+    uv run python local_sim/test_enforcement_labels.py --emit-receipt official_config
 }
 
 # --- 2. provenance: are our mints still the grader's mints? -------------------
@@ -315,7 +327,7 @@ Step "2. mint provenance + dataset pin" {
 # EXECUTED -- an independent Skeptic found it cited as "a gate" while this file
 # and certify_candidate.py both ran only edge_cases.py. It is a gate now.
 Step "3. invariant suite" {
-    uv run python local_sim/edge_cases.py
+    uv run python local_sim/test_enforcement_labels.py --emit-receipt edge_cases
     if ($LASTEXITCODE -ne 0) { return }
     uv run python local_sim/test_edge_cases_inv9.py estimator.py
 }
@@ -398,20 +410,8 @@ print('  seal consistent')
 # ended up measuring two "independent" kills on the same 24 networks. This step
 # re-validates the consumption ledger and statically scans the tree for seed
 # literals and seeds() calls that the ledger does not record.
-Step "7. seed ledger (consumption + source scan) + enforcement labels" {
+Step "7. seed ledger (consumption + source scan)" {
     uv run python local_sim/seed_ledger.py --check --scan
-    if ($LASTEXITCODE -ne 0) { return }
-    # WP0B built local_sim/test_enforcement_labels.py so a stale coverage label
-    # in THIS docstring or in VALIDATION.md section 7 is a red test rather than
-    # documentation drift -- and then wired it into nothing, which is the exact
-    # defect it was built to fix, on itself. An independent Skeptic pointed that
-    # out and found two labels still false. It runs here now, as a second
-    # command in an existing step, so the denominator stays SIXTEEN.
-    #
-    # --labels-only: the guard-mutation mirror (its section C) costs ~4 minutes
-    # and rebuilds two suites in scratch. It is not gate-cheap. Run the full
-    # suite deliberately: uv run python local_sim/test_enforcement_labels.py
-    uv run python local_sim/test_enforcement_labels.py --labels-only
 }
 
 # --- 8. the canonical competition scorer ---------------------------------------
@@ -421,7 +421,7 @@ Step "7. seed ledger (consumption + source scan) + enforcement labels" {
 # the real scoring loop INCLUDING both failure paths -- and carries the graded
 # fixture where the arithmetic and geometric estimands pick opposite winners.
 Step "8. canonical scorer + the binding gate" {
-    uv run python local_sim/test_competition_score.py
+    uv run python local_sim/test_enforcement_labels.py --emit-receipt competition_score
 }
 
 # --- 9. the seed ledger's refusals actually fire --------------------------------
@@ -430,7 +430,7 @@ Step "8. canonical scorer + the binding gate" {
 # overlap in a DECISION block, a second claim on a SINGLE_USE one, a hand-edited
 # ledger, an artifact rewritten after its claim.
 Step "9. seed-ledger refusals + the truth-read register" {
-    uv run python local_sim/test_seed_ledger.py
+    uv run python local_sim/test_enforcement_labels.py --emit-receipt seed_ledger_refusals
     if ($LASTEXITCODE -ne 0) { return }
     # SECOND COMMAND, ONE STEP -- the denominator stays SIXTEEN.
     #
@@ -465,7 +465,7 @@ Step "10. vault integrity (array hashes + seed->weights)" {
 # suite pins that lifecycle, the six failure paths, and the immutable evidence
 # rows -- the object every future candidate comparison is scored through.
 Step "11. lifecycle evaluator + the certification consumers' mutation battery" {
-    uv run python local_sim/lifecycle_eval.py --self-test
+    uv run python local_sim/test_enforcement_labels.py --emit-receipt lifecycle
     if ($LASTEXITCODE -ne 0) { return }
     # SECOND COMMAND, ONE STEP -- the denominator stays SIXTEEN.
     #
@@ -478,6 +478,11 @@ Step "11. lifecycle evaluator + the certification consumers' mutation battery" {
     # no subprocess, no candidate execution -- so it belongs in the cheap gate;
     # the expensive candidate run stays queued.
     uv run python local_sim/test_linux_memory_binding.py
+    if ($LASTEXITCODE -ne 0) { return }
+    # The five measured suites above already ran in this preflight. Validate
+    # prose counts against their exact-source, same-run receipts now that the
+    # last suite has completed. A missing or changed receipt is a red gate.
+    uv run python local_sim/test_enforcement_labels.py --labels-only
 }
 
 # --- 12. the counted-FLOP anchor against the OFFICIAL runner --------------------

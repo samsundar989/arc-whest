@@ -34,7 +34,7 @@ and removed; the two documents are opened for reading and mutated only as
 strings.
 
 **But it RUNS other suites, and one of them writes.** `test_seed_ledger.py`
-creates `local_sim/_ledger_scan_tmp/` to prove the source scan catches a real
+creates an isolated `local_sim/_ledger_scan_*/` to prove the source scan catches a real
 seed literal in a real file, and removes it in a `finally`. That is a write
 under the repository, and the first version of this docstring said there were
 none — while section R hashed only the two documents, so its own proof could not
@@ -49,12 +49,17 @@ Run:  uv run python local_sim/test_enforcement_labels.py
 from __future__ import annotations
 
 import argparse
+import hashlib
+import importlib.metadata
+import json
 import os
+import platform
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
+from pathlib import Path
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
@@ -201,19 +206,97 @@ def _run(argv, cwd=_ROOT, env=None):
                           text=True, cwd=cwd, env=env, errors="replace")
 
 
+def _receipt_identity(key, ledger_path=None):
+    """Conservative closure for a count receipt, including runtime identity.
+
+    A receipt only represents a suite executed earlier in the SAME preflight.
+    """
+    paths = [Path(PREFLIGHT), Path(VALIDATION), Path(_ROOT) / "estimator.py",
+             Path(_ROOT) / "pyproject.toml", Path(_ROOT) / "uv.lock",
+             Path(ledger_path) if ledger_path is not None else
+             Path(_ROOT) / "experiments" / "seed_ledger.jsonl"]
+    paths.extend(p for p in Path(_HERE).glob("*.py")
+                 if not p.name.startswith("_lifecycle_"))
+    paths.extend(p for p in (Path(_ROOT) / "scripts").rglob("*")
+                 if p.is_file() and p.suffix in (".py", ".ps1"))
+    payload = {}
+    for p in paths:
+        if p.is_file():
+            name = ("experiments/seed_ledger.jsonl" if ledger_path is not None
+                    and p == Path(ledger_path) else
+                    str(p.relative_to(_ROOT)).replace("\\", "/"))
+            payload[name] = hashlib.sha256(p.read_bytes()).hexdigest()
+    versions = {}
+    for name in ("numpy", "flopscope", "whestbench"):
+        try:
+            versions[name] = importlib.metadata.version(name)
+        except importlib.metadata.PackageNotFoundError:
+            versions[name] = None
+    payload.update({"suite": key, "python": sys.version,
+                    "executable": sys.executable, "platform": platform.platform(),
+                    "packages": versions})
+    return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+
+
+def _count(key, stdout):
+    pat = SUITES[key][1]
+    for line in reversed(stdout.splitlines()):
+        m = re.match(pat, line.strip())
+        if m:
+            return int(m.group(1)), int(m.group(2))
+    return None, None
+
+
+def _receipt_path(key):
+    directory = os.environ.get("ARC_WHEST_LABEL_RECEIPTS")
+    return Path(directory) / (key + ".json") if directory else None
+
+
 def measure(key, cwd=_ROOT):
-    """Run a suite and read the count IT reports. Returns (passed, total, rc)."""
+    """Read same-preflight receipt, or execute a standalone suite."""
+    receipt = _receipt_path(key) if cwd == _ROOT else None
+    if receipt is not None:
+        try:
+            saved = json.loads(receipt.read_text(encoding="utf-8"))
+            identity = _receipt_identity(key)
+            proof = hashlib.sha256(f"{identity}:{saved.get('passed')}:{saved.get('total')}:0".encode()).hexdigest()
+            if saved.get("identity") == identity and saved.get("proof") == proof \
+                    and saved.get("rc") == 0 \
+                    and type(saved.get("passed")) is int \
+                    and saved["passed"] == saved.get("total"):
+                print(f"  same-run receipt: {key} exact source/configuration match")
+                return saved["passed"], saved["total"], 0
+        except (OSError, ValueError, KeyError) as exc:
+            raise ValueError(f"missing/invalid same-run receipt for {key}: {exc}") from exc
+        raise ValueError(f"tampered or stale same-run receipt for {key}")
     argv, pat, _ = SUITES[key]
     argv = [os.path.join(cwd, a) if a.endswith(".py") else a for a in argv]
     p = _run(argv, cwd=cwd)
-    m = None
-    for line in reversed((p.stdout or "").splitlines()):
-        m = re.match(pat, line.strip())
-        if m:
-            break
-    if not m:
-        return None, None, p.returncode
-    return int(m.group(1)), int(m.group(2)), p.returncode
+    passed, total = _count(key, p.stdout or "")
+    return passed, total, p.returncode
+
+
+def emit_receipt(key):
+    """Run the real suite once, relay its output, then publish its count."""
+    receipt = _receipt_path(key)
+    if receipt is None:
+        raise ValueError("ARC_WHEST_LABEL_RECEIPTS is required")
+    argv = SUITES[key][0]
+    p = _run(argv)
+    sys.stdout.write(p.stdout or "")
+    sys.stderr.write(p.stderr or "")
+    passed, total = _count(key, p.stdout or "")
+    if p.returncode != 0 or passed is None or passed != total:
+        return p.returncode or 1
+    identity = _receipt_identity(key)
+    proof = hashlib.sha256(f"{identity}:{passed}:{total}:0".encode()).hexdigest()
+    receipt.parent.mkdir(parents=True, exist_ok=True)
+    tmp = receipt.with_name(receipt.name + "." + str(os.getpid()) + ".tmp")
+    tmp.write_text(json.dumps({"identity": identity, "passed": passed,
+                               "total": total, "rc": 0,
+                               "proof": proof}), encoding="utf-8")
+    os.replace(tmp, receipt)
+    return 0
 
 
 # --------------------------------------------------------------------------- #
@@ -494,7 +577,11 @@ def main():
                     help="also run shape parity (~480 s) and carriers (~130 s)")
     ap.add_argument("--labels-only", action="store_true",
                     help="skip the guard-mutation mirror (sections C)")
+    ap.add_argument("--emit-receipt", choices=SUITES,
+                    help="preflight: run this suite once and issue a same-run count receipt")
     a = ap.parse_args()
+    if a.emit_receipt:
+        raise SystemExit(emit_receipt(a.emit_receipt))
 
     print("WP0B - the enforcement layer's stated coverage, under test\n")
     import hashlib
@@ -514,9 +601,9 @@ def main():
     # `test_seed_ledger.py` writes here to prove the source scan catches a real
     # literal in a real file, and removes it in a `finally`. Checking the
     # residue is what lets the docstring above make a claim it can support.
-    scan_tmp = os.path.join(_HERE, "_ledger_scan_tmp")
-    check("R: local_sim/_ledger_scan_tmp/ left by no child",
-          not os.path.exists(scan_tmp),
+    scan_tmp = list(Path(_HERE).glob("_ledger_scan_*/"))
+    check("R: no local_sim/_ledger_scan_*/ left by a child",
+          not scan_tmp,
           "the one repository write this suite's children make, cleaned up")
 
     print()

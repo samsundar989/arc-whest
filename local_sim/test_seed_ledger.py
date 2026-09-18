@@ -363,17 +363,10 @@ def t_absent_artifact_is_reported_not_failed():
 
 def t_scan_catches_a_new_literal():
     head("8. the source scan catches the failure that actually happened")
-    tmp_dir = os.path.join(_ROOT, "local_sim", "_ledger_scan_tmp")
-    # Clear any corpse first. This test writes a real seed literal into the real
-    # tree; a hard kill between the write and the `finally` leaves it there, and
-    # since 2026-08-20 preflight's ledger step (--scan) runs BEFORE its refusals
-    # step -- step 7 before step 9 after the 2026-08-24 renumber -- so the
-    # leftover would fail the gate on every subsequent run. The scan's message
-    # names the file, so it is self-diagnosing rather than mysterious -- but
-    # clearing it here means the next run repairs it without anyone reading that
-    # message. The directory is gitignored so it can never be committed.
-    shutil.rmtree(tmp_dir, ignore_errors=True)
-    os.makedirs(tmp_dir, exist_ok=True)
+    # Each run owns only its own directory. Removing a fixed name here caused
+    # overlapping preflights to delete each other's live refusal fixture.
+    tmp_dir = tempfile.mkdtemp(prefix="_ledger_scan_",
+                               dir=os.path.join(_ROOT, "local_sim"))
     probe = os.path.join(tmp_dir, "sneaky_probe.py")
     try:
         with open(probe, "w", encoding="utf-8") as fh:
