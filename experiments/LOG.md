@@ -53981,9 +53981,17 @@ Stop this storage lane after one primary and one diagnostic comparison if the
 primary fails. Independent Skeptic reviews the algebra, instrument, complete
 query evidence and final comparison before a finalist is chosen.
 
-**Samuel's required predictions:** requested before new data; PENDING. The
-contract must be committed with his verbatim answers (including "I don't know"
-if that is his answer) before any new strategic measurement touches this panel.
+**Samuel's required predictions, recorded before new data:** Samuel answered
+"i dont know" to the three-part request, and repeated "i dont know" when the
+same questions were restated. Record the verbatim answer for each:
+
+1. qEc versus executed old qE adjusted score: **"i dont know"**.
+2. Full recurrent E/query error: **"i dont know"**.
+3. Eventual combined candidate clearing the 2× v31 release gate: **"i dont know"**.
+
+These answers provide no directional forecast. The fixed gate, controls, source
+identities, block and stopping rule above remain unchanged; commit this entry
+before the corrected full-shape query or P12 DESIGN score measurement.
 
 ## 2026-09-18 — pre-data clarification of September17b branch-(b) own fit
 

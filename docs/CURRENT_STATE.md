@@ -24,10 +24,11 @@ is not a shippable source. No candidate qualifies for P13.
 Corrected qE/qEd versioned files passed tiny algebra and `whest validate`, with
 no truth run. The source override for a complete label-free query audit is ready;
 that full-shape audit has not run.
-Samuel's three predictions for the new corrected-objective comparison were
-requested and remain pending; do not touch new strategic decision data before
-recording them and committing the new contract. P13 remains untouched, and no
-submission has been approved.
+Samuel answered "i dont know" to all three requested corrected-objective
+predictions; the LOG records this verbatim before the new measurement. The
+fixed-storage contract is now eligible for its label-free full-shape audit and
+P12 DESIGN comparison after the prediction commit. P13 remains untouched,
+and no submission has been approved.
 
 The original September17b branch-(b) contract also permits one bounded own
 four-parameter fit. Its own-source generator and fixed 19-evaluation/12+12 P12
