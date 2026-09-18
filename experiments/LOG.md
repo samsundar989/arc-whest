@@ -54663,3 +54663,10 @@ instrument in `experiments/2026-09-18_s17_query_reader_skeptic.md`, with
 no P12 score inference. The fit instrument's initial PROVISIONAL verdict is
 preserved; a focused re-review of the cap correction is pending. The P12
 factorial source snapshot is separate and remains unchanged.
+
+**Fit instrument re-review.** The focused fresh-context Skeptic ACCEPTS
+the corrected 19-evaluation label-free instrument in
+`experiments/2026-09-18_s17_fit_instrument_reskeptic.md`, after checking
+the SHA-pinned dry run, four tiny tests, and quiet GREEN preflight. The
+original PROVISIONAL verdict remains in the record. No complete-package
+fit or P12 result is implied.
