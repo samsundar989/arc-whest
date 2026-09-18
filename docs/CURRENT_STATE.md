@@ -22,14 +22,14 @@ gate uncompressed. The reference-lambda diagnostic reveals an interaction but
 is not a shippable source. No candidate qualifies for P13.
 
 Corrected qE/qEd versioned files passed tiny algebra and `whest validate`, with
-no truth run. The source override for a complete label-free query audit is ready;
-that full-shape audit has not run.
+no truth run. The source override for a complete label-free query audit is ready.
 Samuel answered "i dont know" to all three requested corrected-objective
 predictions; the LOG records this verbatim in commit `bc0c21b`, before new
-measurement. The fixed old-source full-shape label-free audit is workerq
-**#1756**, queued at the last status check under RAM pressure with 0 GPUs,
-16 GiB RAM and four CPUs. After it completes and verifies, run the corrected
-audit on the same network, then the paired P12 DESIGN score comparison. P13
+measurement. The fixed old-source full-shape label-free audit #1756 **SUCCEEDED**
+and its complete artifact passed strict identity/coverage checks. The corrected
+audit is workerq **#1764**, running at the last check with 0 GPUs, 16 GiB RAM
+and four CPUs on the same network. Compare both complete artifacts, then run
+the paired P12 DESIGN score comparison if protocol checks pass. P13
 remains untouched, and no submission has been approved.
 
 The original September17b branch-(b) contract also permits one bounded own
