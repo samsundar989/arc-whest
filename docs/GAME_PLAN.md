@@ -1,5 +1,36 @@
 # GAME_PLAN — measure and optimize the complete candidate
 
+## Active September 18 execution program
+
+Execute the reviewed [deep handoff](CODEX_EXECUTION_HANDOFF_2026-09-18_DEEP_PLAN.md)
+under the committed contracts at the end of `experiments/LOG.md`. First close
+the bounded instrument/preflight gate, mint and score fixed v45 birth-diagonal
+compensation on new P14 DESIGN, and independently review that paired result.
+In parallel, certify exact C10 for one individually approved server diagnostic;
+workerq #1891 is the queued Linux memory gate. The same-closure reference
+feasibility note specifies separate no-share and full-P2 operators, plus their
+combined diagnostic reference. Build and price those label-free before a new
+prospective truth contract; continue both arms endogenously and keep closure,
+controls and P4 fixed. Implement only a recurrent mechanism supported by that
+attribution. P13 and the observed-and-official-precision paired 2x major-release
+gate remain reserved for a complete frozen finalist. No candidate currently
+qualifies as that finalist.
+
+---
+
+**Current planning layer, September 18 deep review:** follow the
+[deep strategy review](STRATEGY_REVIEW_2026-09-18_DEEP_AUDIT.md) and its independent
+Skeptic qualifications for the next implementation/research sequence. It proposes
+a cheap P2 diagonal-preservation test, then a bounded full-recurrence error-budget
+diagnostic before building a new representation; it is not an executable
+pre-registration. The historical slice below is complete and must not be rerun.
+Samuel now allows individually approved diagnostic uploads without the 2x
+major-release milestone. The major-release target and per-file approval remain.
+No new candidate has been certified or approved. See CURRENT_STATE for this
+policy's exact scope and the latest rank64/172, leading-reference2.158e-9 snapshot.
+Statements below about absent P12 controls/compositions or earlier ranks describe
+the historical plan, not the present inventory.
+
 **Measured outcome, September 18.** The complete-candidate slice ran through
 its registered stopping rules. The same-panel P12 factorial selected exact
 `estimator_k3_v43_complete_c10.py` at 6.48661e-9 official adjusted score,

@@ -1,5 +1,60 @@
 # CURRENT_STATE.md — read this first
 
+## September 18 execution checkpoint — deep plan underway
+
+The reviewed handoff is in execution. A committed prospective P14 DESIGN
+contract (`experiments/LOG.md`, commits `cbee174`, `1f41272`) fixes one C10
+birth-diagonal candidate `estimator_k3_v45_p2_diag.py`, SHA-256
+`fc8e547435e026f70b2e8e95954daf9a61337ae1747f32fc0aa0b61d10e6b855`,
+24 new networks, paired official-precision arithmetic gate 1.05, and two
+`2^24`-sample truth replicas. Samuel answered “i dont know” to all three
+pre-result predictions. Independent and source-bound tiny algebra checks pass;
+no P14 truth has been minted or scored yet. P13 remains untouched.
+
+A separate committed C10 diagnostic-upload contract asks whether exact
+`estimator_k3_v43_complete_c10.py` survives server residual/memory limits;
+it does not claim a 2x release. Samuel likewise answered “i dont know” to its
+three predictions. Candidate-specific `whest validate` passes. Linux memory
+gate workerq job #1891 is queued for RAM; no upload approval has been requested.
+The full candidate certificate, clean mini and independent certificate Skeptic
+are pending. Exact-file approval remains required.
+
+Iteration-tool changes and same-closure reference construction are in progress.
+The source/seed instrument preflight must be green before P14 truth dispatch;
+the reference feasibility note is committed, while its generator is provisional
+and has produced no evidence. The major 2x objective remains unproven and
+unsubmitted.
+
+---
+
+## September 18 — deep repo, Chrome and literature review
+
+The current research recommendation and implementation order are in the
+[deep strategy review](STRATEGY_REVIEW_2026-09-18_DEEP_AUDIT.md), with separate
+architecture, validation, literature and dated competition evidence reports.
+Retain the cumulant family, but no winning configuration has been demonstrated.
+C10's same-prediction score at the 0.1 floor would still be about 2.97e-9,
+above the newly inspected clean leading submission #331502 at 2.158e-9.
+The next program is one cheap P2 birth-diagonal hypothesis, then bounded
+full-recurrence error attribution before another representation is built.
+The implementation plan removes duplicated checks/control runs and centralizes
+artifact/decision interfaces while retaining the existing evaluator and safeguards.
+
+**Samuel's explicit prospective policy choice:** individually approved diagnostic
+uploads are allowed without the 2x major-release milestone. The 2x major-release
+target remains, as do exact-file approval, candidate validation and independent
+review. No particular upload is approved here. A diagnostic needs its own narrow
+contract and candidate certificate; it must not consume P13 as a shortcut or tune
+constants against public results. This supersedes the earlier blanket instruction
+not to start certification until 2x only for an explicitly scoped diagnostic.
+
+No new experiment, truth-array read, seed claim, estimator change or submission
+occurred during this review. P13 remains untouched. Read the new review and its
+independent Skeptic qualifications before registering the next scientific slice;
+the historical completed-slice facts and stopping rules below remain intact.
+
+---
+
 ## September 18 — complete-candidate slice measured; no 2x finalist
 
 The dated handoff's finite experiment is complete through its stopping
