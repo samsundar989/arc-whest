@@ -45,6 +45,8 @@ Prediction manifests and frozen-control reuse may shorten DESIGN iteration only 
 
 The handoff specifies arms, conditional branches, instrumentation, resource review, statistics and completion requirements. Those are prospective proposals: commit the actual contract before measurement. The existing failed 1.15 base gate stays failed.
 
+The September18 read-only causal-gap review of the saved complete-state trace and stage-1/3 rows does **not** identify the first operator whose change helps final truth error. A fresh-context Skeptic rejected selecting a transported fourth-core residual from those artifacts: the sampled states already differ at layer 1, and the measured 2×2 varies a reference lambda table with the program rather than isolating fourth-core birth/feed. Keep that residual conditional until an isolated operator intervention supplies a mechanism; the LOG records the evidence limit.
+
 ## Why this differs from the completed slice
 
 Q3q still misses 33 terms from the working reference program. Same-state relative norms do not measure estimation-error relevance, and the capture is not sufficient for continuation of the third-order tensor. The current join Gram drops cross-column and A/M terms. These are concrete unresolved questions, not permission to repeat broad closure or rank sweeps.
