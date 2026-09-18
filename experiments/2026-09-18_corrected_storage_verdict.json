@@ -1,0 +1,144 @@
+{
+  "artifact": "s16_corrected_storage_decide",
+  "tier": "DESIGN (P12)",
+  "contract": "experiments/LOG.md 2026-09-18 corrected-storage discriminator",
+  "gate": 1.0,
+  "score_artifact": "experiments/2026-09-18_corrected_storage_score.json",
+  "query_old_artifact": "experiments/2026-09-18_corrected_storage/query_old.json",
+  "query_corrected_artifact": "experiments/2026-09-18_corrected_storage/query_corrected.json",
+  "truth_sha256": "92a3228edee16080795c4a1ea0124b8c7bd1f7f7ecf7c84ad078edc4eca756b2",
+  "comparisons": {
+    "primary": {
+      "control": "old_qE",
+      "candidate": "qEc",
+      "observed_gain": 0.9449373077619014,
+      "control_raw_mse": 3.386033461024359e-08,
+      "candidate_raw_mse": 3.5831546322621456e-08,
+      "control_observed_score": 7.572508665965751e-09,
+      "candidate_observed_score": 8.013768324907558e-09,
+      "observed_difference": -4.4125965894180777e-10,
+      "observed_t95": [
+        -5.743437294915318e-10,
+        -3.081755883920837e-10
+      ],
+      "official_precision_gain": 0.9413864570630501,
+      "control_official_precision_score": 7.0866209186818526e-09,
+      "candidate_official_precision_score": 7.527855181591188e-09,
+      "official_precision_difference": -4.412342629093363e-10,
+      "official_precision_t95": [
+        -5.743180744452744e-10,
+        -3.0815045137339827e-10
+      ],
+      "truth_noise_floor": 2.2480709584398425e-09,
+      "control_failures": [],
+      "new_failed_identities": [],
+      "query_condition": false,
+      "query_detail": {
+        "E": [
+          0.024713480338350368,
+          0.02968599093289185
+        ],
+        "D3": [
+          0.013584734833166951,
+          0.01680405791657066
+        ],
+        "D21": [
+          0.01999549879642238,
+          0.02428062518946759
+        ],
+        "mu_out": [
+          3.5390660758893264e-05,
+          4.500226640841498e-05
+        ],
+        "cov_out": [
+          0.0018414443679723334,
+          0.002266883384222714
+        ],
+        "final_row": [
+          7.405217614221849e-05,
+          0.00010304816011988009
+        ]
+      },
+      "control_flops_mean": 491788484993.0,
+      "candidate_flops_mean": 491814189441.0,
+      "query_audit_flops": [
+        491609541047.0,
+        491635245495.0
+      ],
+      "score_decide": {
+        "passed": false,
+        "gain": 0.9413864570630501,
+        "ci": [
+          -5.743180744452744e-10,
+          -3.0815045137339827e-10
+        ],
+        "reasons": [
+          "arithmetic gain 0.9414x is below the pre-registered gate 1.0000x",
+          "the candidate is WORSE than the control (0.9414x)",
+          "the t 95% interval on the paired difference does not lie strictly above zero [-5.7432e-10, -3.0815e-10]"
+        ]
+      },
+      "PRIMARY_SCREEN_PASSED": false
+    },
+    "secondary_diagnostic": {
+      "control": "old_qEd",
+      "candidate": "qEdc",
+      "observed_gain": 0.9398266808610704,
+      "control_raw_mse": 3.521964816085207e-08,
+      "candidate_raw_mse": 3.747178745072688e-08,
+      "control_observed_score": 7.88873776484688e-09,
+      "candidate_observed_score": 8.393821888115805e-09,
+      "observed_difference": -5.05084123268925e-10,
+      "observed_t95": [
+        -6.414456177521359e-10,
+        -3.6872262878571403e-10
+      ],
+      "official_precision_gain": 0.9361277077028896,
+      "control_official_precision_score": 7.4020953925981196e-09,
+      "candidate_official_precision_score": 7.907142723893623e-09,
+      "official_precision_difference": -5.050473312955022e-10,
+      "official_precision_t95": [
+        -6.41408826219585e-10,
+        -3.6868583637141945e-10
+      ],
+      "truth_noise_floor": 2.2480709584398425e-09,
+      "control_failures": [],
+      "new_failed_identities": [],
+      "query_condition": false,
+      "query_detail": {
+        "E": [
+          0.02769890351001323,
+          0.03282828951229262
+        ],
+        "D3": [
+          0.015614410474155412,
+          0.018765588869051854
+        ],
+        "D21": [
+          0.022519307164494552,
+          0.02695961127322946
+        ],
+        "mu_out": [
+          3.9254787524523865e-05,
+          4.852202390000217e-05
+        ],
+        "cov_out": [
+          0.0020815117604804146,
+          0.0025182409353823507
+        ],
+        "final_row": [
+          8.292215102594119e-05,
+          0.00011104894696056489
+        ]
+      },
+      "control_flops_mean": 492552274305.0,
+      "candidate_flops_mean": 492589513089.0,
+      "query_audit_flops": [
+        492373330359.0,
+        492410569143.0
+      ],
+      "score_decide": null
+    }
+  },
+  "PRIMARY_SCREEN_PASSED": false
+}

@@ -1,6 +1,6 @@
 # CURRENT_STATE.md — read this first
 
-## September 18 — corrected query condition failed; P12 score and own fit running
+## September 18 — corrected storage lane closed; own fit running
 
 Commit `8cae199` records the repaired stage-3 decision adapter, its query-evidence
 producer, atomic/verified DESIGN sidecars, a candidate inventory, corrected
@@ -22,7 +22,7 @@ gate uncompressed. The reference-lambda diagnostic reveals an interaction but
 is not a shippable source. No candidate qualifies for P13.
 
 Corrected qE/qEd versioned files passed tiny algebra and `whest validate`.
-Their full-shape query audits are complete; the P12 truth score run is active.
+Their full-shape query audits and paired P12 DESIGN score comparison are complete.
 Samuel answered "i dont know" to all three requested corrected-objective
 predictions; the LOG records this verbatim in commit `bc0c21b`, before new
 measurement. The old and corrected full-shape label-free audits #1756/#1764
@@ -31,10 +31,13 @@ qEc raised complete recurrent E error from 0.0247135 to 0.0296860 and worsened
 all five continuation checks, despite slightly higher same-state retained query
 energy. A fresh Skeptic **REJECTED** the registered query subcondition; see
 `experiments/2026-09-18_corrected_storage/query_skeptic.md`. The fixed four-arm
-P12 DESIGN score comparison is workerq **#1765**, running at the last check;
-do not interpret partial rows. No corrected storage arm can pass this
-preregistered complete query screen, regardless of its eventual P12 score. P13
-remains untouched, and no submission has been approved.
+P12 DESIGN score job #1765 **SUCCEEDED** and passed strict snapshot-sidecar
+verification after a reviewed source-root path repair. Official-precision old
+qE → qEc score is **7.0866e-9 → 7.5279e-9**, paired difference
+**−4.4123e-10** (t95 **[−5.7432e-10, −3.0815e-10]**), gain **0.9414×**, zero
+failures, averaged truth-noise floor **2.2481e-9**. The independent score
+Skeptic accepted the negative result; the corrected storage lane is **closed**.
+P13 remains untouched, and no submission has been approved.
 
 The original September17b branch-(b) contract also permits one bounded own
 four-parameter fit. Its own-source generator and fixed 19-evaluation/12+12 P12
@@ -52,11 +55,14 @@ On #1748 completion, reconcile its P12 truth-read receipt from the immutable
 snapshot, verify all 19 complete evaluations and paired held-out comparison,
 then synthesize before any finalist choice. No fit accuracy result exists yet.
 Read-only fit and corrected-storage result adapters now pass synthetic provenance
-refusals (valid fit plus 17 forged cases; corrected storage 10/10) and independent
-Skeptic review. Final-byte standard preflight is GREEN 12/16; see the LOG tail,
+refusals (valid fit plus 17 forged cases; corrected storage 11/11 after the
+snapshot-root repair) and independent Skeptic review. Final-byte standard
+preflight is GREEN 12/16; see the LOG tail,
 `experiments/2026-09-18_verifiers_skeptic.md` and
 `experiments/2026-09-18_verifiers_preflight.log`. The fit reader has not seen a
-real result, and the corrected reader has no new score or query artifact yet.
+real result. The corrected reader has verified the completed score and query
+artifacts; see its verdict and fresh Skeptic under
+`experiments/2026-09-18_corrected_storage/`.
 
 ---
 
