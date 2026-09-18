@@ -54577,3 +54577,12 @@ IDs equal the no-filter worktree IDs, without changing either raw SHA-256,
 numeric field, source hash, Skeptic verdict or historical archive. A fresh
 checkout must reproduce the producer SHA-256s exactly. This repairs evidence
 preservation only; it is not a cost or score change.
+
+**Archive-byte result, before P12 dispatch.** Commit `363ee3d` applied the
+two-path `-text -diff` correction. A fresh detached checkout reproduced both
+recorded producer SHA-256s; committed blob IDs match raw no-filter worktree
+blob IDs. The parent and repaired JSON values are identical, with only the
+original CRLF bytes restored. The independent fresh-context Skeptic ACCEPTS
+this narrow evidence-preservation repair in
+`experiments/2026-09-18_s17_archive_skeptic.md`. No estimator, label, gate,
+source identity, or frozen archive changed.
