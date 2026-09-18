@@ -54480,3 +54480,22 @@ and package pinning plus exclusive output creation will preserve a valid
 deterministic report or fail closed on drift/concurrency. An event before an
 eligible branch or missing layer index falsifies the instrument and aborts.
 This repair changes no estimator math and uses no labels/full-shape run.
+
+### IMPORTANT prediction before grader-twin meter repair
+
+Workerq #1880 completed six sequential real-flopscope source meters at
+1024x16 with 0 GPU/12 GiB/2 CPUs. Raw JSON is
+`experiments/2026-09-18_s17_meter.json` SHA-256
+`6cb72d19f0143af9e41abf21f84a6bc988ccd6fdd61f4f9492e7f17671dd5f1d`.
+All six source SHA-256 identities match the pinned roles and each operation
+ledger sums exactly to its total. The independent meter Skeptic found that
+`s17_meter_exports.py` used `_run_arm(..., "grader")` with its default f32
+input weights; VALIDATION §2b-iii requires the `f64_readonly` grader twin.
+The f32 cost is not the final official-precision cost reference. Before the
+repair's data, predict: passing `input_weight_dtype="f64_readonly"` for every
+source will add the known in-window weight casts (~33,554,432 FLOPs and 16
+calls per source), leave other operation totals and predictions unchanged,
+and retain the six source identities. A larger, non-cast difference falsifies
+the simple correction and requires renewed cost investigation. This is a
+cost-instrument repair, not a new accuracy arm or a release pass. Rerun the
+complete meter once before P12 labels; keep the original artifact as evidence.
