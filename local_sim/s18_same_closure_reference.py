@@ -58,7 +58,7 @@ def load(name: str):
     return module
 
 
-def offline_predict(mod, mlp, *, diagnostic_budget: int = 2**55):
+def offline_predict(mod, mlp, *, diagnostic_budget: int = 2**55, estimator=None):
     """Count *all* math under flopscope; refuse silent generation caps.
 
     Caller owns a ``flopscope.BudgetContext`` with this same high budget and
@@ -67,7 +67,7 @@ def offline_predict(mod, mlp, *, diagnostic_budget: int = 2**55):
     """
     if diagnostic_budget <= 2**41:
         raise ValueError("diagnostic budget must exceed official limit")
-    est = mod.Estimator()
+    est = estimator if estimator is not None else mod.Estimator()
     out = est.predict(mlp, diagnostic_budget)
     rec = est.last_run
     if rec["mode"] != "full" or rec["generations"] is not None:
