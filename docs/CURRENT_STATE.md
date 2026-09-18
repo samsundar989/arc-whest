@@ -25,10 +25,12 @@ Corrected qE/qEd versioned files passed tiny algebra and `whest validate`, with
 no truth run. The source override for a complete label-free query audit is ready;
 that full-shape audit has not run.
 Samuel answered "i dont know" to all three requested corrected-objective
-predictions; the LOG records this verbatim before the new measurement. The
-fixed-storage contract is now eligible for its label-free full-shape audit and
-P12 DESIGN comparison after the prediction commit. P13 remains untouched,
-and no submission has been approved.
+predictions; the LOG records this verbatim in commit `bc0c21b`, before new
+measurement. The fixed old-source full-shape label-free audit is workerq
+**#1756**, queued at the last status check under RAM pressure with 0 GPUs,
+16 GiB RAM and four CPUs. After it completes and verifies, run the corrected
+audit on the same network, then the paired P12 DESIGN score comparison. P13
+remains untouched, and no submission has been approved.
 
 The original September17b branch-(b) contract also permits one bounded own
 four-parameter fit. Its own-source generator and fixed 19-evaluation/12+12 P12
