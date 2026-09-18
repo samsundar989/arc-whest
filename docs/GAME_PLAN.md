@@ -2,13 +2,13 @@
 
 **Active execution order, reconciled September 18, 2026.** The committed September17b contract and its amendments in `experiments/LOG.md` remain binding. The September18 [strategy review](research/2026-09-18_strategy_review.md) identifies repairs and conditional follow-up; it does not change any gate or branch rule. The prior plan is retained in `archive/GAME_PLAN_before_2026-09-17_slice2.md`.
 
-Read [CURRENT_STATE](CURRENT_STATE.md), the LOG tail, [strategist response](STRATEGIST_RESPONSE_2026-09-17_slice2.md), and [execution handoff](CLAUDE_CODE_HANDOFF_2026-09-17_slice2.md). The response contains the source audit, corrected arithmetic and research references. Stage 1 is complete; batch B was submitted as workerq #1668 and was still running at the September18 review.
+Read [CURRENT_STATE](CURRENT_STATE.md), the LOG tail, [strategist response](STRATEGIST_RESPONSE_2026-09-17_slice2.md), and [execution handoff](CLAUDE_CODE_HANDOFF_2026-09-17_slice2.md). The response contains the source audit, corrected arithmetic and research references. Stage 1 and batch B are complete; workerq #1668 succeeded. The September18 review's running status is historical.
 
 ## Objective
 
 Deliver a frozen, independently validated candidate with at least 2x adjusted-score gain over graded v31, and approximately 4.0–4.4e-9 public performance. A 4.4e-9 result is a major intermediate advance, not a win: the September 17 leader reports 2.239e-9 and the top-ten boundary is about 3.8e-9. Final prizes depend on fresh private evaluation, not optimizing exposed networks.
 
-The older approximately 1.186x DESIGN bundle over v31 failed its separate 1.15 base gate versus v32. Stage 1 of September17b selected registered branch (b); its own PAIR+Q closure gained 1.047650x at official precision against v32. Batch B must be completed and judged with the repaired instrument before selecting a finalist. Graded v31 and designated F21 remain unchanged.
+The older approximately 1.186x DESIGN bundle over v31 failed its separate 1.15 base gate versus v32. Stage 1 of September17b selected registered branch (b); its own PAIR+Q closure gained 1.047650x at official precision against v32. Batch B is synthesized from saved P12 rows with the repaired scorer. Executed qE passes only its score subcondition; missing E evidence prevents the complete stage-3 screen. PAIR+Q plus P3 passes the stage-2 DESIGN score gate uncompressed, while isolated P3 hurts adjusted score. No finalist is selected. Graded v31 and designated F21 remain unchanged.
 
 ## Target architecture
 
@@ -25,11 +25,11 @@ We retain this architecture family. Its precise closure/core/storage combination
 
 The stage table below records the September17b contract historically. The operative next steps are:
 
-1. Finish workerq #1668 and preserve its rows; repair `s12_decide.py` with official-precision pairing, canonical failures and complete query checks. Obtain an independent Skeptic verdict before applying it to saved data. Missing E evidence stays missing.
-2. Synthesize branch (b), P3, stage 3 storage and composed arms together on P12. Separate executed-file findings from intended-objective claims. Keep P13 untouched until one supported candidate is frozen.
-3. Correct qE/qEd through the maintained source and prove the post-Wick consumer identities, rank selection and recurrent continuation on asymmetric tiny cases. Seek independent algebra review before any costly accuracy evaluation. Then preregister one fixed-storage comparison, obtain Samuel's predictions, and use DESIGN only within its permitted scope.
-4. If P3 pays alone, integrate its shared-storage collisions and prove parity before composition. Otherwise isolate one earliest causal complete-state operator discrepancy. Permit at most one new accuracy and one storage discriminator before synthesis; retain the established architecture family and closed lanes.
-5. Freeze at most one finalist, use fresh P13 exactly once under the existing dual 2x gate, then complete finalist-specific official subprocess, Linux memory, public CONFIRM, preflight and Skeptic checks. Prepare exact bytes and evidence for Samuel's per-submission approval; do not upload without it.
+1. **Completed:** #1668 succeeded, saved rows and receipts verify, `s12_decide.py` repairs passed preflight and independent Skeptic, and P12 synthesis has a fresh independent PROVISIONAL verdict. The old query artifacts lack E and do not pass full stage 3.
+2. **In progress:** corrected qE/qEd were emitted as new versioned files through the maintained source and passed asymmetric, nonuniform-gate, rank-selection and recurrent tiny tests with an independent algebra review. Extend the label-free query instrument to run their full E/D3/D21/continuation audit at fixed age4/rank256.
+3. **Next measurement:** preregister one bounded corrected-versus-existing storage comparison, record Samuel's three requested predictions, and commit the contract before new strategic data. Include complete metered cost; do not relabel the historical executed qE/qEd results. P12 may be reused only as DESIGN within its recorded permissions; fresh DECIDE requires a new single-use block.
+4. **Conditional accuracy discriminator:** isolated P3 failed, so its conditional PAIR+Q interaction does not license an untested compressed release claim. The branch-(b) reference-lambda interaction falsified the prior no-interaction prediction but is diagnostic-only. The one permitted own PAIR+Q fit is prepared under the original contract: 19 candidate evaluations on the fixed P12 12/12 split, an explicitly scaled ridge objective, a frozen coordinate schedule, and independent source/driver Skeptic review. Complete final preflight and commit before workerq execution. Treat the held-out matched default comparison as DESIGN evidence, not a release gate. Do not assume separate gains multiply.
+5. Freeze at most one finalist only when DESIGN supports its full file. Use fresh P13 exactly once under the existing dual 2x gate, then complete finalist-specific official subprocess, Linux memory, public CONFIRM, preflight and Skeptic checks. Prepare exact bytes and evidence for Samuel's per-submission approval; do not upload without it.
 
 Prediction manifests and frozen-control reuse may shorten DESIGN iteration only after complete identity verification. They cannot supply missing stage-3 E data or authorize DECIDE reuse. Heavy jobs require workerq, a recorded optimization review and conservative resources.
 

@@ -53814,3 +53814,259 @@ pairq closure, age4/rank256, D3 reserve16 and P4 depth5. SHA-256
 `d4e6f587c3827b39b47bdbf9d7d27b3cd7432cf1ef1c821d3f3aa047a2eedb55`;
 `whest validate` passed. This is an exact code comparator for the prospective
 corrected qEdc arm, not accuracy evidence or a selected candidate.
+
+## 2026-09-18 ? P12 workerq receipt continuity repair (ROUTINE)
+
+Jobs 1663 (stage 1) and 1668 (batch B) executed from isolated git snapshots. Their `truth_reads.jsonl` files each recorded one complete P12 DESIGN reservation/read, but neither pair was copied back with the score artifacts. The workspace register therefore understated P12 by two reads. Read-only inspection verified both snapshot receipt pairs against the final score artifacts: the same P12 truth SHA-256 `92a3228edee16080795c4a1ea0124b8c7bd1f7f7ecf7c84ad078edc4eca756b2`, instrument SHA-256 `869d4ce567d5f0ef70f0fe9aeadc9d504aa14e9801350445c2aa6ec04231f5aa`, and exact result paths. No matching reservation existed in the workspace register.
+
+Under `seed_ledger.ledger_lock`, appended the four **exact snapshot lines** (reserved then completed for each job) to `experiments/truth_reads.jsonl`, preserving IDs `08a3dfb68be24b33` and `e29cf761976e4626`, timestamps and elapsed-read fields. `truth_reads.status`: P12 DESIGN spent = 2; P13 SINGLE_USE spent = 0. No labels, seed block, score, candidate or vault artifact was opened or changed for this ledger repair.
+
+Batch-B `design_sidecar.verify` reads all 10 complete arm sidecars, 24 predictions each, zero failed rows; each prediction stream and per-row hash verifies. The historical manifest is complete on disk, but it predates atomic manifest publication and cannot acquire crash-atomic provenance retrospectively. Source snapshots: `C:/Users/samsu/.local/state/gpuq/snapshots/{1663,1668}/job-{1663,1668}/experiments/truth_reads.jsonl`.
+
+### 2026-09-18 — IMPORTANT prediction for label-free source override
+
+Question: can the existing query-error instrument compare corrected pairq
+sources on one uncompressed reference without altering its measurements?
+Prediction before edit: specifying its three default source paths explicitly
+will reproduce the default numerical fields and source hashes; specifying the
+old/corrected pairq files will retain complete E, D3, D21, next-state and output
+displacements, same-state retained query energy and metered FLOPs against one
+qoff-off reference. Missing, incomplete, or out-of-repository paths will refuse
+before prediction. This is an instrument extension only: no labels, decision
+block, truth, score gate, or historical artifact changes.
+
+## 2026-09-18 — September17b completed P12 synthesis (DESIGN, no release promotion)
+
+Workerq #1668 finished successfully: 10 arms × 24 canonical P12 networks,
+zero failed rows, peak measured RAM 8074 MiB. Stage-1 and batch-B score files
+have the same P12 truth SHA and ordered network identities; the repeated
+`v32_p4d5` control has the same source SHA. The two-replica averaged-truth MSE
+floor is 2.248071e-9 (4.496142e-9 per replica). Full saved-row arithmetic,
+source hashes and 95% studentised-t intervals are in
+`experiments/2026-09-17b_stage3/synthesis.json`, produced by the read-only
+`synthesize_completed.py` through `competition_score`. The independent raw
+artifact review is `experiments/2026-09-18_stage3_skeptic_verdict.md`:
+**PROVISIONAL**, with no finalist promotion.
+
+At official truth precision, executed qE versus its registered qoff control
+has a 1.0242× adjusted-score gain, paired arithmetic difference +0.1732e-9,
+t95 [+0.0487,+0.2977]e-9, at counted cost 0.2213 versus 0.2163 of budget.
+Executed qEd is 0.9874×, difference −0.0939e-9, t95
+[−0.2172,+0.0293]e-9. Both have zero failures. These are **score-only**
+results: the historical query artifacts omit explicit E and true same-state
+retained energy, so the registered three-condition stage-3 screen cannot pass.
+The old qE/qEd objectives also do not implement the intended post-Wick/D3
+actions. The composed old-gram versus old-qE comparison is 1.0195×,
+difference +0.1384e-9, t95 [−0.0055,+0.2823]e-9, unresolved.
+The corresponding **observed-precision** gains/differences are qE
+1.0212×/+0.1623e-9, qEd 0.9867×/−0.1055e-9, and composed old-qE
+1.0168×/+0.1276e-9. They are separate from the registered official-precision
+estimand and do not replace its gate.
+
+The own uncompressed PAIR+Q plus P3 arm passes the registered stage-2
+`decide(gate=1.10)` DESIGN score condition versus v32_p4d5: 1.1718×,
+difference +1.168e-9, t95 [+0.904,+1.433]e-9. Its score is 6.7988e-9,
+cost 0.3094 B. The **isolated** P3 arm has raw gain 1.0120× with an interval
+crossing zero, but adjusted gain 0.9280× and difference −0.6670e-9 with t95
+[−0.961,−0.373]e-9. P3 is a conditional interaction with PAIR+Q, not an
+independent improvement. No compressed P3 file has passed correctness or cost
+tests, so separate effects must not be multiplied.
+At observed precision, the PAIR+Q+P3 stage-2 gain/difference is
+1.1479×/+1.1048e-9, and isolated P3 is 0.9271×/−0.7271e-9.
+
+The registered branch-(b) reference-lambda diagnostic supports a program ×
+lambda interaction: complete-program gain increases from 1.0770× raw on native
+lambda to 1.1876× raw with the reference lambda table. The latter table changes
+the v32 program negligibly (raw 1.0046×, t95 spans zero), but changes the
+complete program 1.1078× raw, 24/24 positive. Prediction 14 (within 4% of the
+native program gain) is falsified. Reference lambda and reference closure arms
+have official-precision program gains 1.0761×/+0.6077e-9 (native) and
+1.1969×/+1.4071e-9 (reference), versus observed-precision gains
+1.0697×/+0.6032e-9 and 1.1796×/+1.4027e-9 respectively. They
+remain diagnostic-only and cannot be shipped; the location of the causal
+operator difference is not established. The bounded own-fit option exists in
+the original contract but has not been exercised.
+
+The lowest official-precision P12 score among the measured shippable compressed
+arms is the **executed** PAIR+Q/qE composition at 7.0866e-9, counted cost
+0.2236 B; it has neither a complete stage-3 gate nor fresh release evidence.
+The best measured uncompressed own arm is PAIR+Q+P3 at 6.7988e-9, but it costs
+0.3094 B and is not a compressed finalist. These P12 DESIGN figures are not a
+paired v31 release comparison. P13 is untouched (truth-read spent=0). No arm
+is frozen for P13, and no submission is authorized.
+
+## 2026-09-18 — CONTRACT (Rule 1, pre-data): corrected post-Wick query objective at fixed storage
+
+**Question.** Does giving the compression basis the actual post-Wick consumer
+weights protect the old-plus-joining query under complete recurrent use, and
+improve adjusted score enough to pay its metered cost? This is one storage
+discriminator, not a new closure/rank search. No corrected-source truth result
+exists when this contract is written.
+
+**Evidence.** CONFIRMED: tiny asymmetric direct-action, projected-action and
+multi-lineage continuation tests found that old qE omitted the left w1² factor,
+while qEd omitted an A factor and used the wrong joining-lineage birth offset.
+CONFIRMED: executed old qE improves its qoff score-only P12 comparison 1.0242×,
+but the historical artifacts lack E and cannot pass complete stage 3.
+CONFIRMED: corrected qEc/qEdc are versioned, grader-valid sources with no truth
+run. INFERRED: nonuniform gates may cause old pre-Wick rank allocation to miss
+post-Wick directions. SPECULATIVE: repairing that allocation will improve final
+adjusted score rather than merely the immediate query norm.
+
+**Hypothesis/mechanism.** At a shared join, the actual queried old-plus-joining
+matrix is gated on both sides. A basis selected from pre-gate left factors can
+spend rank on directions that the ReLU gate suppresses and omit surviving
+directions. qEc selects from the corrected same-boundary post-Wick action;
+qEdc additionally corrects D3 protection. No new covariance/core physics is
+claimed.
+
+**Intervention and control.** The PRIMARY paired comparison is corrected qEc
+`estimator_k3_v42_pairq_a4r256_qEc_p4d5.py` versus executed old qE
+`estimator_k3_v41_pairq_a4r256_qE_p4d5.py`. The SECONDARY diagnostic is
+corrected qEdc `estimator_k3_v42_pairq_a4r256_qEdc_p4d5.py` versus the
+fixed-stack old qEd comparator
+`estimator_k3_v42_pairq_a4r256_qEd_old_p4d5.py`. Pairq closure, age4/rank256,
+D3 reserve, P4 depth, and all non-basis paths stay fixed. Run the complete
+label-free query audit and one full-shape cost probe before truth. There is no
+fallback candidate chosen by whichever secondary score looks best.
+
+**Predictions (Builder, pre-data).** (1) qEc lowers the mean complete-state E
+relative error versus old qE by roughly 10–30% at fixed rank, though downstream
+feedback may be smaller. (2) qEc improves official-precision adjusted P12 score
+by roughly 1–5% if its added query work stays below 5% of counted cost. (3)
+qEdc lowers D3 error relative to old qEd but may not improve adjusted score;
+predicted range 0.98–1.05×. These are hypotheses, not measurements.
+
+**Gate and falsifier.** The primary isolated difference is old qE minus qEc,
+not a total versus qoff. At the DESIGN tier, call
+`competition_score.decide(control=old_qE, candidate=qEc, gate=1.0,
+interval="t")` on official-precision adjusted paired score, with no newly
+failed identity. Also require a measured reduction of complete recomputed E
+error and no deterioration in the registered D3/D21, next-state and output
+continuation checks on the same label-free networks. Missing evidence is a
+failure, not a proxy. Reject this mechanism if qEc fails either score or
+complete-query condition. The secondary qEdc comparison is diagnostic only;
+it cannot rescue a failed primary gate without a new contract.
+This isolated corrected-versus-old test does not replace September17b's
+registered qE-versus-qoff stage-3 screen: that original official-precision
+score, failure, and complete E/D3/D21/next-state/output condition must still
+be satisfied on a finalist before stage-3 promotion.
+
+**Baseline/tier/statistic.** P12 is a reusable DESIGN panel under its recorded
+permissions (24 ordered canonical networks, two independent 2²⁴-replica truth
+estimates, common random numbers). Existing old-qE saved predictions may be
+reused only after complete source/dependency/configuration/ordered-network/
+truth/mint/evaluator/numerical-environment verification; no timing is reused
+across environments. Corrected predictions are newly evaluated. Report raw
+MSE, observed and official-precision adjusted scores, paired arithmetic
+control-minus-candidate difference with studentised-t interval, truth-noise
+floor and failures. P12 is not a release DECIDE and cannot qualify P13 by itself.
+
+**Cost model and workload review.** Phase 2 has λ=0, so counted C=F and
+residual is a separate 0.4 s cliff. Freeze the complete counted-FLOP bill on
+one live 1024×16 network, including basis construction, all joins and final
+readout; compare to old qE on the same shape and report worst residual
+headroom only from a compatible official-package subprocess run. Heavy
+label-free and accuracy jobs go through workerq with conservative RAM/CPU.
+Reuse P12 truth; reuse old-qE predictions only if the strict manifest identity
+check accepts them, otherwise rerun that control. Keep one model loaded
+at a time, stream rows and small sidecars, avoid duplicate mint/loaders and
+unnecessary passes. No checkpoint is needed for one-network cost; streamed
+per-arm rows permit recovery of a long accuracy job. These optimizations
+preserve math and full evidence. Local wall time is never quoted as authority.
+
+**Scope/stopping.** No age/rank sweep, no gate change, no P13, no vault,
+no public fitting, no reference-table import, no root-estimator replacement.
+Stop this storage lane after one primary and one diagnostic comparison if the
+primary fails. Independent Skeptic reviews the algebra, instrument, complete
+query evidence and final comparison before a finalist is chosen.
+
+**Samuel's required predictions:** requested before new data; PENDING. The
+contract must be committed with his verbatim answers (including "I don't know"
+if that is his answer) before any new strategic measurement touches this panel.
+
+## 2026-09-18 — pre-data clarification of September17b branch-(b) own fit
+
+The existing contract permits at most four own global controls, ridge
+`1e-3 ||x−x0||²`, first-12 P12 network fit, last-12 validation, and at most
+40 candidate evaluations. Source-only implementation exposed one ambiguity:
+raw adjusted scores are O(1e-8), so adding a literal dimensionless 1e-3
+penalty to an unscaled score would freeze every parameter regardless of the
+data. Before any fit labels are read, define the training objective as
+
+`mean_official_precision_adjusted(x, first12) /
+ mean_official_precision_adjusted(x0, first12) + 1e-3 ||x−x0||²`,
+
+with `x0=(theta_fam=1, s_lam=1, t_lam=0, s_feed=1)` from the **own** PAIR+Q
+source. Compute and freeze the denominator before evaluating any nondefault
+arm; that default evaluation counts toward the 40-evaluation cap. After the
+training choice is frozen, evaluate **both** default and selected parameter
+vectors on the last 12 for a paired held-out comparison; both validation
+evaluations count. The denominator normalization
+does not change the registered stage-2 or P13 gates, which remain on unscaled
+per-network competition score. No reference lambda table or closure mask is
+allowed in a production source. A deterministic coordinate schedule and its
+maximum evaluation count must be committed before the first fit read.
+
+Builder prediction before fit data: the own four-control fit may recover a
+small portion of the diagnostic reference-lambda interaction, but its 12-seed
+validation adjusted gain over the own default is likely 1.00–1.08× and is
+unlikely by itself to meet the 2× v31 release target. Samuel's original
+September17b predictions were recorded verbatim before any P12 data; this
+conditional fit is the already registered branch-(b) option, not a new gate.
+
+**Fixed coordinate schedule before data.** `local_sim/s15_own_fit_driver.py`
+prints the dry-run plan. Evaluation 0 is the default x0 baseline on first-12
+P12. Two passes visit theta_fam, s_lam, t_lam, s_feed in that order; each
+coordinate tests negative then positive step from the current incumbent,
+retains the lowest dimensionless penalized training objective among incumbent
+and both trials, and keeps incumbent on ties. Pass-1 steps are respectively
+(0.25, 0.15, 0.20, 0.15); pass-2 steps are half those values. Parameters are
+clamped to the registered ranges. No early stop or extra evaluation is
+permitted. These are 1+2×4×2=17 training candidate evaluations, followed by
+matched default and frozen selected-vector evaluations on last-12 P12,
+**19 total and 228 complete MLP predictions**, below the registered 40 cap.
+The last 12 cannot
+alter the selected parameters. Failure or incomplete rows abort and retain
+evidence; no zero fallback is silently optimized. Every full evaluation is
+metered under the grader lifecycle.
+
+**Pre-submission optimization review.** Use the existing already minted P12
+truth, load it once, process one candidate and MLP at a time, stream/fsync each
+row, atomically checkpoint each evaluation and the frozen baseline, and retain
+all generated exact-source arms. This avoids duplicate truth and concurrent
+model copies without changing score arithmetic or evidence. The expected
+peak is at least batch B's measured 8074 MiB; request **12 GiB RAM, 0 VRAM,
+4 CPUs** through workerq, not a direct shell run. The 19 fixed candidate
+evaluations are expected to be long-running, so checkpoints are required;
+recovery must refuse an existing nonempty output directory unless separately
+reviewed, rather than inventing a fresh DECIDE. The exact workerq command is
+recorded by the dry-run plan before submission. A fresh Skeptic review of the
+driver and final preflight are required before the first label read.
+
+**Pre-run verification on final bytes.** Own controls source SHA-256
+`30a4d71969c2d329e632230106e33f0c151956352815e0fa897784b1023c7b4e`;
+fixed fit driver SHA-256
+`8e02c16ec7347a3b77cf5cf9e0a0c7a32bfdfda2c9809465e730753530130b00`;
+frozen own PAIR+Q base SHA-256
+`7e5c24d33c279199c5284e6997157f98772a3ddb8bee753baf219628721cc4d5`.
+Actual `Estimator.predict` default parity and nonzero depth-tilt checks passed;
+focused source/driver/query tests passed 20/20. A changed-control emitted
+single-file estimator passed `whest validate` (contract only). Independent
+fresh-context Skeptics accepted the source controls, fit driver and query
+source override in `experiments/2026-09-18_*_skeptic.md`. Standard preflight
+on final source bytes is GREEN **12/16** (four full steps intentionally
+skipped): `experiments/2026-09-18_prefit_preflight_green.log`. Its prior run
+was RED at seed static-scan steps 7/9 because the exclusive end literal
+P12+24 appeared unclaimed; constructing the same exact 24 seeds from the
+claimed P12 start and count repaired that source-scan issue, and the Skeptic
+rechecked identity. Neither preflight read fit labels.
+
+**Fixed workerq invocation to submit after this contract commit:**
+`workerq submit --project arc-whest --ram 12 --vram 0 --cpus 4 -- uv run
+python local_sim/s15_own_fit_driver.py --execute --out-dir
+C:/Users/samsu/Documents/arc-whest/experiments/2026-09-18_own_fit --ts
+<UTC timestamp captured at submission>`. The output directory is dedicated
+and must be empty. The job will execute from the committed snapshot and
+write rows/manifests to that explicit live path. No root estimator, P13, public
+split, or vault data is involved.

@@ -348,7 +348,27 @@ def _wicked_query(U, J, old, old_basis, gate):
     gate = np.asarray(gate, dtype=np.float64).reshape(-1)
     return (gate[:, None] ** 2) * pre * gate[None, :]
 
-def query_error(width, depth, seed, out_path, age=None, rank=None):
+def _query_sources(overrides=None):
+    """Resolve one complete three-arm source set inside the repository."""
+    defaults = {t: "estimator_k3_v39_%s_%s.py" % (STEM, t)
+                for t in ("qoff", "qE", "qEd")}
+    if overrides is None:
+        return defaults
+    if set(overrides) != set(defaults):
+        raise ValueError("source overrides must name qoff, qE and qEd together")
+    resolved = {}
+    for arm, path in overrides.items():
+        source = os.path.realpath(os.path.join(_ROOT, path))
+        if os.path.commonpath([_ROOT, source]) != _ROOT or not os.path.isfile(source):
+            raise ValueError("source override must be an existing repository file")
+        rel = os.path.relpath(source, _ROOT).replace("\\", "/")
+        if not rel.endswith(".py"):
+            raise ValueError("source override must be a Python source file")
+        resolved[arm] = rel
+    return resolved
+
+
+def query_error(width, depth, seed, out_path, age=None, rank=None, sources=None):
     """Per layer, per arm: the real error of E, D3, D21, and of the whole output.
 
     `age`/`rank` override the arms' own settings, which is how the PREREGISTERED
@@ -357,14 +377,13 @@ def query_error(width, depth, seed, out_path, age=None, rank=None):
     LABEL-FREE query/cost criterion measured BEFORE any truth read selects it.
     This is that measurement, and it chooses nothing on its own.
     """
+    arms = _query_sources(sources)
     import flopscope as flops
     import k4feed_oracle as K
     from mint_provenance import canonical_mint
 
     flops.configure(symmetry_warnings=False)
     tmp = tempfile.mkdtemp(prefix="s10q_")
-    arms = {t: "estimator_k3_v39_%s_%s.py" % (STEM, t)
-            for t in ("qoff", "qE", "qEd")}
     w, es, _ = canonical_mint(width, depth, seed)
     import harness
 
@@ -509,13 +528,19 @@ def main():
     ap.add_argument("--seed", type=int, default=90_000_016_001)
     ap.add_argument("--age", type=int, default=None)
     ap.add_argument("--rank", type=int, default=None)
+    ap.add_argument("--qoff-source", default="")
+    ap.add_argument("--qe-source", default="")
+    ap.add_argument("--qed-source", default="")
     ap.add_argument("--out", default="")
     a = ap.parse_args()
     print("=" * 96)
     print("STAGE-3 QUERY BASIS -- label-free, decides nothing, gates the truth read")
     print("=" * 96)
     if a.query_error:
-        query_error(a.width, a.depth, a.seed, a.out, a.age, a.rank)
+        supplied = (a.qoff_source, a.qe_source, a.qed_source)
+        sources = (dict(zip(("qoff", "qE", "qEd"), supplied))
+                   if any(supplied) else None)
+        query_error(a.width, a.depth, a.seed, a.out, a.age, a.rank, sources)
         return 0
     main_tiny()
     if a.out:

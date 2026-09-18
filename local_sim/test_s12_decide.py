@@ -154,6 +154,41 @@ class Stage3Verdict(unittest.TestCase):
                 self.assertGreaterEqual(arm["retained_query_energy"], 0)
                 self.assertLessEqual(arm["retained_query_energy"], 1.00001)
 
+    def test_query_source_overrides_preserve_defaults_and_refuse_partial(self):
+        from s10_parity import _query_sources, query_error
+        defaults = _query_sources()
+        with tempfile.TemporaryDirectory() as tmp:
+            a = query_error(16, 5, 90_000_016_001,
+                            str(pathlib.Path(tmp) / "default.json"), age=2, rank=4)
+            b = query_error(16, 5, 90_000_016_001,
+                            str(pathlib.Path(tmp) / "explicit.json"), age=2, rank=4,
+                            sources=defaults)
+        self.assertEqual(a, b)
+        with self.assertRaisesRegex(ValueError, "together"):
+            _query_sources({"qE": defaults["qE"]})
+        with self.assertRaisesRegex(ValueError, "existing repository"):
+            _query_sources({**defaults, "qEd": "../missing.py"})
+
+    def test_pairq_source_override_has_one_reference_and_complete_fields(self):
+        from s10_parity import query_error
+        pairq = {
+            "qoff": "estimator_k3_v41_pairq_a4r256_gram_p4d5.py",
+            "qE": "estimator_k3_v42_pairq_a4r256_qEc_p4d5.py",
+            "qEd": "estimator_k3_v42_pairq_a4r256_qEdc_p4d5.py",
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            result = query_error(16, 5, 90_000_016_001,
+                                 str(pathlib.Path(tmp) / "pairq.json"), age=2, rank=4,
+                                 sources=pairq)
+        self.assertEqual([result["arms"][k]["path"] for k in pairq], list(pairq.values()))
+        self.assertGreater(result["uncompressed_flops"], 0)
+        for arm in result["arms"].values():
+            self.assertGreater(arm["flops"], 0)
+            self.assertIsNotNone(arm["retained_query_energy"])
+            self.assertTrue(arm["query_energy_joins"])
+            for layer in arm["per_layer"][1:-1]:
+                self.assertTrue(all(k in layer for k in ("E", "D3", "D21", "mu_out", "cov_out")))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -75,7 +75,44 @@
   "cand3": {
    "path": "estimator_k3_v41_pairq_a4r256_gram_p4d5.py",
    "candidate_sha256": "1649056ab80732e7c54ada3a0e90bbc09fc0437b8684e51037c20b2a0348ed6a",
-   "n_written": 0
+   "n_written": 24,
+   "rows_hash": "e279ca5aff40703ec9aa764d9d3321f34029775a0dd03c9a7e2a60cb31b4da14",
+   "n_failed": 0
+  },
+  "cand4": {
+   "path": "estimator_k3_v41_pairq_a4r256_qE_p4d5.py",
+   "candidate_sha256": "5a810ad2df64bda55cd21133bf0f04f35ac7714fa8d27b905c58c34092e007e3",
+   "n_written": 24,
+   "rows_hash": "ae84e3abc735ae5590433c6c8e887126076e61afd227e2172a55e2796ba8e055",
+   "n_failed": 0
+  },
+  "cand5": {
+   "path": "estimator_k3_v33.py",
+   "candidate_sha256": "6cf50de8e1401ad333d74f357736b877d0e2d500b979cb141162ee2e3b645707",
+   "n_written": 24,
+   "rows_hash": "a950686bb511d880a0cb154ab2b7806f7acb486366426bbb0d6383a4f7aaea6a",
+   "n_failed": 0
+  },
+  "cand6": {
+   "path": "estimator_k3_v42_pairq_p3_uncompressed.py",
+   "candidate_sha256": "098862f664b3bc0e550e81649e4caefacae8d9779366ee2dfd477a37737bdb88",
+   "n_written": 24,
+   "rows_hash": "3ed0c532fdab75f55b1bd0eb50972cf50f3e757a2c591d8418a53bda8c8ea967",
+   "n_failed": 0
+  },
+  "cand7": {
+   "path": "estimator_k3_v32_lam504.py",
+   "candidate_sha256": "3087d91c92eb2221190b9fc34ed2dd97c955c554aec331954055e4fb4a4d687a",
+   "n_written": 24,
+   "rows_hash": "63a9d7a38f81069313ce6ac38486f75d3c285ad5685aa90eedd418f39c71bc0d",
+   "n_failed": 0
+  },
+  "cand8": {
+   "path": "estimator_k3_v38_v17prog_lam504.py",
+   "candidate_sha256": "485a2a9b0fd830064103fbeaf73b1b3e9bde4db3649f2df1dd312d7c0b53ca66",
+   "n_written": 24,
+   "rows_hash": "aeda44af710a6fe5274e68d20c6059840ced07261bf3beedde089dc34e7d95df",
+   "n_failed": 0
   }
  },
  "artifact": "design_score.prediction_sidecars",

@@ -1,5 +1,76 @@
 # CURRENT_STATE.md — read this first
 
+## September 18 — batch B synthesized; corrected objective awaits prediction and DESIGN test
+
+Commit `8cae199` records the repaired stage-3 decision adapter, its query-evidence
+producer, atomic/verified DESIGN sidecars, a candidate inventory, corrected
+qE/qEd versioned files and the fixed-storage old-qEd comparator. Standard
+preflight passed 12/12; focused adapter tests 10/10; independent Skeptic
+accepted the final identity/score checks and DESIGN reuse. The complete
+transcript and Skeptic verdicts are under `experiments/2026-09-18_*`.
+
+Workerq #1668 **SUCCEEDED** on its frozen `553e9ac` snapshot. All 240 batch-B
+rows and 10 prediction sidecars verify; P12 truth-read receipts from both jobs
+are reconciled into the workspace register. See the paired saved-row analysis
+[`synthesis.json`](../experiments/2026-09-17b_stage3/synthesis.json), the LOG
+tail, and the [fresh scientific Skeptic](../experiments/2026-09-18_stage3_skeptic_verdict.md).
+The Skeptic's verdict is **PROVISIONAL**: executed qE gains 1.0242× versus qoff
+on the score-only official-precision comparison, but historical query artifacts
+lack explicit E and cannot satisfy the full S3 gate. Isolated P3 hurts adjusted
+score; PAIR+Q plus P3 improves conditionally and passes the stage-2 DESIGN score
+gate uncompressed. The reference-lambda diagnostic reveals an interaction but
+is not a shippable source. No candidate qualifies for P13.
+
+Corrected qE/qEd versioned files passed tiny algebra and `whest validate`, with
+no truth run. A label-free complete-query audit of those sources is in progress.
+Samuel's three predictions for the new corrected-objective comparison were
+requested and remain pending; do not touch new strategic decision data before
+recording them and committing the new contract. P13 remains untouched, and no
+submission has been approved.
+
+The original September17b branch-(b) contract also permits one bounded own
+four-parameter fit. Its own-source generator and fixed 19-evaluation/12+12 P12
+driver are source-only, targeted-tested and independently accepted in
+`experiments/2026-09-18_own_fit_source_skeptic.md` and
+`experiments/2026-09-18_fit_driver_skeptic.md`; neither has read fit labels.
+The LOG tail records the dimensionless ridge objective, exact coordinate
+schedule, 40-evaluation cap, and workerq optimization review before data.
+After final preflight and commit, submit only this registered fit through
+workerq; then synthesize its paired held-out score before any finalist choice.
+
+---
+
+## September 18 UTC / September 17 evening — independent review: stage-3 interpretation needs repair
+
+Read [strategy and implementation review](research/2026-09-18_strategy_review.md),
+[validation audit](research/2026-09-18_validation_audit.md), and
+[architecture audit](research/2026-09-18_architecture_audit.md) before interpreting the
+active stage-3 screen. Stage 1 is complete; batch B job **1668 was RUNNING** at this
+review. Its partial accuracy results were not analysed. The committed September17b
+contract remains operative; no gates, candidate bytes, P13, vault or submissions changed.
+
+**Confirmed instrument defects:** `s12_decide.py` gates observed rather than its
+registered official-precision score, does not enforce paired identities, and does
+not implement all stated query checks. Failure identity/fallback handling also needs
+repair. Recompute only after a reviewed repair, using saved rows; no estimator rerun
+is required to repair that arithmetic.
+**Confirmed objective mismatches:** qE retains pre-Wick left factors at a post-Wick
+join; qEd omits an A factor and uses the wrong lineage's birth weights after the
+first join. Independent tiny algebra/source checks reproduce these discrepancies.
+The executed files' label-free findings remain valid; they do not establish the
+intended objectives or a scientific closure of query-directed compression.
+
+The [independent Skeptic](research/2026-09-18_skeptic_verdict.md) accepts the bounded
+repair/research plan and rejects the claim that stage 3 already implements its
+registered gate/mechanism. There is no demonstrated winning configuration yet.
+[Live Chrome snapshot](research/2026-09-18_competition_snapshot.md): latest submission
+remains v31 #331317, rank **62/170**, adjusted **8.752e-9**. Clean leading reference
+#331393 is **2.239e-9**; newer #331435 displays **2.220e-9** but includes a
+TIME_EXHAUSTED row and inconsistent page summaries. Use the clean reference for
+planning; do not infer failure-score semantics from that UI inconsistency.
+
+---
+
 ## September 17 (evening) — slice 2026-09-17b IN PROGRESS: contract committed, panel minted, stage-1 batch running
 
 **Operative:** the Rule-1 contract at the bottom of [experiments/LOG.md](../experiments/LOG.md)

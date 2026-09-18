@@ -24,9 +24,9 @@
   },
   "contract": "experiments/LOG.md:2026-09-17b",
   "stage": {
-    "completed": ["stage1"],
-    "active_or_recovery": "Check workerq and complete batch B; do not infer results from partial rows",
-    "decide": "P13 status must be independently verified before use",
+    "completed": ["stage1", "batch_b_p12_synthesis"],
+    "active_or_recovery": "Own PAIR+Q bounded P12 fit ready for final preflight/workerq; corrected qE/qEd truth comparison awaits Samuel predictions",
+    "decide": "P13 truth-read spent=0; preserve for one frozen finalist",
     "release": "No finalist is frozen or approved for submission"
   }
 }
