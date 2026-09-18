@@ -1,0 +1,83 @@
+{
+ "control": "estimator_k3_v32_p4d5.py",
+ "candidate": "estimator_k3_v39_v37_a4r256_p4d5_qoff.py,estimator_k3_v39_v37_a4r256_p4d5_qE.py,estimator_k3_v39_v37_a4r256_p4d5_qEd.py,estimator_k3_v41_pairq_a4r256_gram_p4d5.py,estimator_k3_v41_pairq_a4r256_qE_p4d5.py,estimator_k3_v33.py,estimator_k3_v42_pairq_p3_uncompressed.py,estimator_k3_v32_lam504.py,estimator_k3_v38_v17prog_lam504.py",
+ "truth": "experiments/2026-09-17b_p12/truth_P12.npz",
+ "truth_sha256": "92a3228edee16080795c4a1ea0124b8c7bd1f7f7ecf7c84ad078edc4eca756b2",
+ "block": "P12",
+ "n": 24,
+ "width": 1024,
+ "depth": 16,
+ "n_samples_per_replica": 16777216.0,
+ "truth_replicas": 2,
+ "tier": "DESIGN",
+ "mint": {
+  "mint": "mint_provenance.canonical_mint"
+ },
+ "config": {
+  "accuracy_only": true,
+  "local_seconds_caps": "off",
+  "official_samples": 1000000000.0,
+  "weights_mode": "f64_readonly",
+  "gate": null,
+  "ts": "2026-09-17T22:38:39Z",
+  "spec": {
+   "width": 1024,
+   "depth": 16,
+   "flop_budget": 2199023255552,
+   "setup_timeout_s": 1000000000.0,
+   "wall_time_limit_s": null,
+   "residual_wall_time_limit_s": null,
+   "predict_timeout_s": 1000000000.0,
+   "memory_limit_mb": 8192,
+   "lam": 0.0,
+   "floor": 0.1,
+   "seed": 0,
+   "round_tag": "v2-phase2"
+  }
+ },
+ "packages": {
+  "flopscope": "0.12.1",
+  "whestbench": "0.16.1",
+  "numpy": "2.2.6",
+  "python": "3.10.19"
+ },
+ "instrument_sha256": "869d4ce567d5f0ef70f0fe9aeadc9d504aa14e9801350445c2aa6ec04231f5aa",
+ "sidecar_module_sha256": "afc23a54a546c492b8edf81204f1a924541c2c6d4734c37625f7bd1d27d584c4",
+ "arms": {
+  "control": {
+   "path": "estimator_k3_v32_p4d5.py",
+   "candidate_sha256": "506a0c85d60a63b66789b549dca19042f84a736e8d0f3da89f5b30b1f5ee545a",
+   "n_written": 24,
+   "rows_hash": "e87a46540dbf4d3e938e4ad61bd069ff8809683671282900f5f976d8d2c73a0e",
+   "n_failed": 0
+  },
+  "cand0": {
+   "path": "estimator_k3_v39_v37_a4r256_p4d5_qoff.py",
+   "candidate_sha256": "446de4a975219a9ab1af00e33ebb45c511b5d7c32041eedb743cf4711140e80d",
+   "n_written": 24,
+   "rows_hash": "4cf359d6f5a131035f17cfe3c4541f3b6eadfee1d419f14cb88a19e55cf1c3b9",
+   "n_failed": 0
+  },
+  "cand1": {
+   "path": "estimator_k3_v39_v37_a4r256_p4d5_qE.py",
+   "candidate_sha256": "fb94cddf914cd7d8e0cabc1e6b7f04fcb37b6325e915a77c9bfd168065212cdc",
+   "n_written": 24,
+   "rows_hash": "bb5c5f43bac9147aeaba5184810018a980aaea6faf82533b5d26ca39bd1240b9",
+   "n_failed": 0
+  },
+  "cand2": {
+   "path": "estimator_k3_v39_v37_a4r256_p4d5_qEd.py",
+   "candidate_sha256": "74cb93cf7672974fe80080aede3d6cb0c1ffdd46b7c83d8bcbbaebc2bb37aabd",
+   "n_written": 24,
+   "rows_hash": "029b1afb6f7012918260cd9f7882ce2fe0dc731a142cc7e9e356d4f644ef7950",
+   "n_failed": 0
+  },
+  "cand3": {
+   "path": "estimator_k3_v41_pairq_a4r256_gram_p4d5.py",
+   "candidate_sha256": "1649056ab80732e7c54ada3a0e90bbc09fc0437b8684e51037c20b2a0348ed6a",
+   "n_written": 0
+  }
+ },
+ "artifact": "design_score.prediction_sidecars",
+ "version": 1
+}
