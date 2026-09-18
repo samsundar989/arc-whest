@@ -1,0 +1,340 @@
+{
+  "arms": {
+    "C00": {
+      "failed_seeds": [],
+      "mean_flops": 480803684737.0,
+      "observed": 7.700056713456024e-09,
+      "official": 7.2250219649991045e-09,
+      "path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1882\\job-1882\\estimator_k3_v43_complete_c00.py",
+      "raw_mse": 3.521729204554921e-08,
+      "sha256": "39d9a37a3567bb4d268b89b6e7c6913f23f254a4b52cb4191243b80eab5b0c42",
+      "truth_noise": 2.2480709584398425e-09
+    },
+    "C01": {
+      "failed_seeds": [],
+      "mean_flops": 539824988905.0,
+      "observed": 7.45620145712578e-09,
+      "official": 6.9228535732477356e-09,
+      "path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1882\\job-1882\\estimator_k3_v43_complete_c01.py",
+      "raw_mse": 3.037347425423794e-08,
+      "sha256": "7c0fcbcbce92c4f29e712c49e8b08d5dbe0eae2fc101b52f0cb363e79c2cdac8",
+      "truth_noise": 2.2480709584398425e-09
+    },
+    "C10": {
+      "failed_seeds": [],
+      "mean_flops": 480850933121.0,
+      "observed": 6.961690453741375e-09,
+      "official": 6.486609023811495e-09,
+      "path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1882\\job-1882\\estimator_k3_v43_complete_c10.py",
+      "raw_mse": 3.183714151570408e-08,
+      "sha256": "fd8d497db6dfbc3affcf579119c7115c3aee4d190a3e92fec4d85c366152d1bf",
+      "truth_noise": 2.2480709584398425e-09
+    },
+    "C11": {
+      "failed_seeds": [],
+      "mean_flops": 539872237289.0,
+      "observed": 7.341736959782457e-09,
+      "official": 6.80834239443145e-09,
+      "path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1882\\job-1882\\estimator_k3_v43_complete_c11.py",
+      "raw_mse": 2.9904575926664734e-08,
+      "sha256": "95cf412792abf4ec3d0dd21f33414be113e8bf5600b5714c61a301b1f53a4768",
+      "truth_noise": 2.2480709584398425e-09
+    },
+    "sentinel": {
+      "failed_seeds": [],
+      "mean_flops": 621351716893.0,
+      "observed": 7.335510068456862e-09,
+      "official": 6.7216136572864775e-09,
+      "path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1882\\job-1882\\estimator_k3_v43_fitted_uncompressed_p4d5.py",
+      "raw_mse": 2.5961072921039847e-08,
+      "sha256": "ebc0ee2ca107f39c8db06fc33d8b464b759ab09c0b3754ab99153d40c94073ca",
+      "truth_noise": 2.2480709584398425e-09
+    },
+    "v31": {
+      "failed_seeds": [],
+      "mean_flops": 661961618994.0,
+      "observed": 9.514684215256737e-09,
+      "official": 8.860665161016427e-09,
+      "path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1882\\job-1882\\estimator_k3_v31.py",
+      "raw_mse": 3.16075906188947e-08,
+      "sha256": "6dde5fd43ad41e8ec7199b742dd554d22d506c9cf85a532027e86a590d0a787c",
+      "truth_noise": 2.2480709584398425e-09
+    }
+  },
+  "comparisons": {
+    "C00:C01": {
+      "new_failed_seeds": [],
+      "noise_corrected_difference": 3.041929901374373e-10,
+      "observed": {
+        "ci": [
+          4.184705691030895e-11,
+          4.458634557501783e-10
+        ],
+        "gain": 1.0327050251703158,
+        "passed": true,
+        "reasons": []
+      },
+      "official": {
+        "ci": [
+          1.0119965514332236e-10,
+          5.031371283594169e-10
+        ],
+        "gain": 1.0436479536298515,
+        "passed": true,
+        "reasons": []
+      }
+    },
+    "C00:C10": {
+      "new_failed_seeds": [],
+      "noise_corrected_difference": 7.38414561941392e-10,
+      "observed": {
+        "ci": [
+          6.161104213214756e-10,
+          8.606220981078219e-10
+        ],
+        "gain": 1.1060613459648776,
+        "passed": true,
+        "reasons": []
+      },
+      "official": {
+        "ci": [
+          6.161569083728891e-10,
+          8.606689740023297e-10
+        ],
+        "gain": 1.11383651126143,
+        "passed": true,
+        "reasons": []
+      }
+    },
+    "C00:C11": {
+      "new_failed_seeds": [],
+      "noise_corrected_difference": 4.18705789707504e-10,
+      "observed": {
+        "ci": [
+          7.918952171370124e-11,
+          6.374499856334324e-10
+        ],
+        "gain": 1.0488058555674793,
+        "passed": true,
+        "reasons": []
+      },
+      "official": {
+        "ci": [
+          1.3826828342114474e-10,
+          6.95090857714163e-10
+        ],
+        "gain": 1.061201324261902,
+        "passed": true,
+        "reasons": []
+      }
+    },
+    "C01:C11": {
+      "new_failed_seeds": [],
+      "noise_corrected_difference": 1.1451279957006662e-10,
+      "observed": {
+        "ci": [
+          -6.93037077588637e-12,
+          2.35859365462533e-10
+        ],
+        "gain": 1.015590928682184,
+        "passed": false,
+        "reasons": [
+          "the t 95% interval on the paired difference does not lie strictly above zero [-6.9304e-12, +2.3586e-10]"
+        ]
+      },
+      "official": {
+        "ci": [
+          -6.883749835191707e-12,
+          2.3590610746776e-10
+        ],
+        "gain": 1.0168192450059421,
+        "passed": false,
+        "reasons": [
+          "the t 95% interval on the paired difference does not lie strictly above zero [-6.8837e-12, +2.3591e-10]"
+        ]
+      }
+    },
+    "C10:C01": {
+      "new_failed_seeds": [],
+      "noise_corrected_difference": -4.342215718039547e-10,
+      "observed": {
+        "ci": [
+          -6.697549111183726e-10,
+          -3.192670956504374e-10
+        ],
+        "gain": 0.9336778913193381,
+        "passed": false,
+        "reasons": [
+          "arithmetic gain 0.9337x is below the pre-registered gate 1.0000x",
+          "the candidate is WORSE than the control (0.9337x)",
+          "the t 95% interval on the paired difference does not lie strictly above zero [-6.6975e-10, -3.1927e-10]"
+        ]
+      },
+      "official": {
+        "ci": [
+          -6.101196395703098e-10,
+          -2.623694593021696e-10
+        ],
+        "gain": 0.9369848654430539,
+        "passed": false,
+        "reasons": [
+          "arithmetic gain 0.9370x is below the pre-registered gate 1.0000x",
+          "the candidate is WORSE than the control (0.9370x)",
+          "the t 95% interval on the paired difference does not lie strictly above zero [-6.1012e-10, -2.6237e-10]"
+        ]
+      }
+    },
+    "C10:C11": {
+      "new_failed_seeds": [],
+      "noise_corrected_difference": -3.197087722338881e-10,
+      "observed": {
+        "ci": [
+          -5.84911147476359e-10,
+          -1.7518186460580438e-10
+        ],
+        "gain": 0.9482347967350299,
+        "passed": false,
+        "reasons": [
+          "arithmetic gain 0.9482x is below the pre-registered gate 1.0000x",
+          "the candidate is WORSE than the control (0.9482x)",
+          "the t 95% interval on the paired difference does not lie strictly above zero [-5.8491e-10, -1.7518e-10]"
+        ]
+      },
+      "official": {
+        "ci": [
+          -5.254724606403258e-10,
+          -1.1799428059958524e-10
+        ],
+        "gain": 0.9527442434618004,
+        "passed": false,
+        "reasons": [
+          "arithmetic gain 0.9527x is below the pre-registered gate 1.0000x",
+          "the candidate is WORSE than the control (0.9527x)",
+          "the t 95% interval on the paired difference does not lie strictly above zero [-5.2547e-10, -1.1799e-10]"
+        ]
+      }
+    },
+    "v31:C00": {
+      "new_failed_seeds": [],
+      "noise_corrected_difference": 1.6294289642837088e-09,
+      "observed": {
+        "ci": [
+          1.5057407093122774e-09,
+          2.1235142942891525e-09
+        ],
+        "gain": 1.2356641735676583,
+        "passed": true,
+        "reasons": []
+      },
+      "official": {
+        "ci": [
+          1.3292492456985344e-09,
+          1.9420371463361106e-09
+        ],
+        "gain": 1.226385913280407,
+        "passed": true,
+        "reasons": []
+      }
+    },
+    "v31:C01": {
+      "new_failed_seeds": [],
+      "noise_corrected_difference": 1.9336219544211464e-09,
+      "observed": {
+        "ci": [
+          1.7334617755629329e-09,
+          2.383503740698984e-09
+        ],
+        "gain": 1.2760766014662461,
+        "passed": true,
+        "reasons": []
+      },
+      "official": {
+        "ci": [
+          1.6130480310346607e-09,
+          2.2625751445027235e-09
+        ],
+        "gain": 1.279915148755573,
+        "passed": true,
+        "reasons": []
+      }
+    },
+    "v31:C10": {
+      "new_failed_seeds": [],
+      "noise_corrected_difference": 2.3678435262251007e-09,
+      "observed": {
+        "ci": [
+          2.272944907055023e-09,
+          2.833042615975704e-09
+        ],
+        "gain": 1.3667203789768223,
+        "passed": true,
+        "reasons": []
+      },
+      "official": {
+        "ci": [
+          2.09708729263182e-09,
+          2.6510249817780434e-09
+        ],
+        "gain": 1.3659934071084108,
+        "passed": true,
+        "reasons": []
+      }
+    },
+    "v31:C11": {
+      "new_failed_seeds": [],
+      "noise_corrected_difference": 2.0481347539912125e-09,
+      "observed": {
+        "ci": [
+          1.8284558773586456e-09,
+          2.5174386335899186e-09
+        ],
+        "gain": 1.29597182075271,
+        "passed": true,
+        "reasons": []
+      },
+      "official": {
+        "ci": [
+          1.708129322344519e-09,
+          2.396516210825434e-09
+        ],
+        "gain": 1.30144235522931,
+        "passed": true,
+        "reasons": []
+      }
+    }
+  },
+  "factorial_interaction_official": 6.239017623713244e-10,
+  "fit_reduction_needed": {
+    "observed": 0.31663981051158885,
+    "official": 0.3170032964457946
+  },
+  "half_v31_targets": {
+    "observed": 4.757342107628369e-09,
+    "official": 4.4303325805082134e-09
+  },
+  "prediction_manifest_sha256": "a72ace6272f50d5783b4d65532ddf48d3f17862260bfd0e798abffab2ae74a9b",
+  "promotes_nothing": true,
+  "score_artifact": "C:/Users/samsu/Documents/arc-whest/experiments/2026-09-18_s17_factorial/score.json",
+  "score_sha256": "9048ac53e8a289c3cc413122c5d881f6fb88830d414b108db9ed9719d6800cac",
+  "selection": {
+    "incumbent": "C10",
+    "trace": [
+      {
+        "accepted": true,
+        "candidate": "C10",
+        "prior": "C00"
+      },
+      {
+        "accepted": false,
+        "candidate": "C01",
+        "prior": "C10"
+      },
+      {
+        "accepted": false,
+        "candidate": "C11",
+        "prior": "C10"
+      }
+    ]
+  },
+  "tier": "DESIGN"
+}

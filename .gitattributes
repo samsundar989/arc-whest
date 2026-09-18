@@ -48,3 +48,6 @@ experiments/2026-09-18_own_fit_verified_summary.json -text -diff
 # Complete-candidate meter producer JSON is CRLF; preserve reviewed SHA-256s.
 experiments/2026-09-18_s17_meter.json -text -diff
 experiments/2026-09-18_s17_meter_grader_twin.json -text -diff
+
+# Complete-candidate factorial rows and sidecars are exact producer evidence.
+experiments/2026-09-18_s17_factorial/** -text -diff
