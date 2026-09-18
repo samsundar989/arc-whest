@@ -87,6 +87,17 @@ def main():
         assert out["observed"]["gain"] > 1.05
         assert out["official"]["gain"] < 1.0
         assert not out["QUERY_SCORE_PASSED"]
+        windows_truth = copy.deepcopy(score)
+        windows_truth["truth"] = score["truth"].replace("/", "\\")
+        assert run(windows_truth, side)["QUERY_SCORE_PASSED"] is False
+        wrong_truth = copy.deepcopy(windows_truth)
+        wrong_truth["truth"] = wrong_truth["truth"].replace("truth_P12.npz", "truth_P13.npz")
+        try:
+            run(wrong_truth, side)
+        except ValueError as exc:
+            assert "provenance" in str(exc)
+        else:
+            raise AssertionError("accepted different Windows-spelled truth target")
         s = copy.deepcopy(score); v = copy.deepcopy(side)
         changed = s["arms"]["candidate"]
         changed["rows"][0]["failed"] = True

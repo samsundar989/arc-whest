@@ -100,10 +100,13 @@ def synthesize(score_path, prediction_dir, exact_path, exact_sha,
         predict_timeout_s=1e9, setup_timeout_s=1e9))
     cfg = man.get("config", {})
     seeds = [int(s) for s in man.get("ordered_network_seeds", [])]
+    score_truth = d.get("truth")
     if (man.get("run_complete") is not True or
             seeds != list(p12.SEEDS) or man.get("tier") != d["tier"] or
+            not isinstance(score_truth, str) or
+            man.get("truth") != score_truth.replace("\\", "/") or
             any(man.get(k) != d.get(k) for k in ("block", "n", "width", "depth",
-                "truth", "truth_sha256", "n_samples_per_replica", "control", "candidate")) or
+                "truth_sha256", "n_samples_per_replica", "control", "candidate")) or
             man.get("truth_replicas") != 2 or
             cfg.get("accuracy_only") is not True or cfg.get("local_seconds_caps") != "off" or
             cfg.get("official_samples") != 1e9 or cfg.get("gate") != 1.05 or
