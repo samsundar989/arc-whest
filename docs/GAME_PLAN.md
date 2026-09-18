@@ -3,14 +3,16 @@
 ## Active September 18 execution program
 
 Execute the reviewed [deep handoff](CODEX_EXECUTION_HANDOFF_2026-09-18_DEEP_PLAN.md)
-under the committed contracts at the end of `experiments/LOG.md`. First close
-the bounded instrument/preflight gate, mint and score fixed v45 birth-diagonal
-compensation on new P14 DESIGN, and independently review that paired result.
+under the committed contracts at the end of `experiments/LOG.md`. The bounded
+instrument/preflight gate is GREEN, and P14 two-replica truth has been minted
+and finalized. Fixed v45 birth-diagonal compensation is being scored against
+C10 on P14 by workerq #1920; independently review its complete paired result.
 In parallel, certify exact C10 for one individually approved server diagnostic;
 workerq #1891 passed WSL Linux memory enforcement and full certificate #1904
-is queued. The same-closure reference
+is running. The same-closure reference
 feasibility note specifies separate no-share and full-P2 operators, plus their
-combined diagnostic reference. Build and price those label-free before a new
+combined diagnostic reference. Full-shape label-free meter #1921 is queued;
+build and price those before a new
 prospective truth contract; continue both arms endogenously and keep closure,
 controls and P4 fixed. Implement only a recurrent mechanism supported by that
 attribution. P13 and the observed-and-official-precision paired 2x major-release
