@@ -23,13 +23,17 @@ candidate predicts passing. Full candidate certificate workerq #1904 is
 running; clean official mini and independent certificate Skeptic remain pending.
 No upload approval has been requested. Exact-file approval remains required.
 
-Iteration-tool changes and same-closure reference construction are in progress.
+Bounded iteration-tool changes and same-closure reference construction are complete.
 The source/seed instrument preflight passed GREEN 12/16 after P14 truth
 finalization. The reference feasibility note and generator are committed;
 label-free full-shape meter #1921 is queued. Its independent review accepted
 the repaired math/cost instrument but held dispatch until this GREEN gate.
-The iteration-tool host reservation still has a purpose/snapshot binding gap
-under repair; P13 remains untouched.
+The repaired host SINGLE_USE reservation passed a fresh Skeptic, but the first
+P13 scorer still must wire its only truth open to the verified loader and test
+real snapshot behavior before access. A separate tiny same-state branch probe
+passed fresh independent structural review: join first changes at layer 4;
+full-P2 must branch before the first birth because stored lineage ranks are
+uniform. It is not a width-1024 accuracy or cost result. P13 remains untouched.
 The major 2x objective remains unproven and unsubmitted.
 
 ---
