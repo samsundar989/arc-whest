@@ -64,3 +64,6 @@ experiments/2026-09-18_p14_birth/** -text -diff
 
 # Exact preflight transcripts from the bounded iteration-tool repair.
 experiments/2026-09-18_iteration_tools_preflight*.log -text -diff
+
+# C10 diagnostic Linux/certificate/mini producer evidence is byte-preserved.
+experiments/2026-09-18_c10_diagnostic/** -text -diff
