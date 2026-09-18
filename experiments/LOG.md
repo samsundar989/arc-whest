@@ -54846,3 +54846,53 @@ Prediction: marking only these two paths `-text -diff` will preserve their
 producer bytes across a fresh checkout, with staged blob IDs equal to
 raw no-filter IDs, without changing cost or recurrence values. These are
 label-free artifacts; the independent engineering Skeptic remains pending.
+
+**Query engineering result and one P12 read registration, before labels.**
+The independent fresh-context Skeptic **ACCEPTS narrow engineering
+eligibility** in `experiments/2026-09-18_s17_query_engineering_skeptic.md`.
+The f64-readonly complete-file meter sums to exact C10
+480,850,933,121 FLOPs/23,421 calls and rank32 approximate
+454,336,065,471 FLOPs/22,151 calls: 26,514,867,650 FLOPs or **5.51415539%**
+saved, 2,472,320,993 FLOPs below the preregistered 5% ceiling. The
+full-recurrence audit executes ten approximate branches at layers 5–14,
+zero fallback branches on this fixture, finite `(16,1024)` output,
+identical rows through the prebranch layer and final relative L2
+displacement `1.3824e-4`. That displacement is descriptive, not an
+accuracy selector. The approximation reduces calls by 1,270 but remains
+151 above the conservative 22,000-call working margin. At carried 13.4
+microseconds/call its modeled residual is 0.2968234 s, 1.3476x headroom
+to the hard 0.4 s cliff. Exact C10 already exceeded the working margin
+by 1,421 calls; this is a preexisting deployment risk, not a new obstacle
+to the one DESIGN comparison. No server residual, Linux8GiB, or P12
+accuracy claim follows. Both raw engineering JSONs were archived under
+exact `-text -diff` rules; a fresh checkout reproduced their recorded
+producer SHA-256s exactly. Historical failed query gates remain failed.
+
+**Exact next P12 DESIGN read.** Run once on the existing P12 truth SHA
+`92a3228edee16080795c4a1ea0124b8c7bd1f7f7ecf7c84ad078edc4eca756b2`,
+24 ordered seeds, registration timestamp `2026-09-18T11:01:59Z`, control
+`estimator_k3_v43_complete_c10.py` SHA
+`fd8d497db6dfbc3affcf579119c7115c3aee4d190a3e92fec4d85c366152d1bf`,
+candidate `estimator_k3_v44_c10_query_rank32.py` SHA
+`96e87025e55367cdf9951bf9666cc8da98b439c0c6359f1c5dc2fce622cded2b`.
+Supply `--gate 1.05 --wall-caps off --official-samples 1000000000` to
+`p2_design_score.py`, rows
+`experiments/2026-09-18_s17_query_accuracy/rows.jsonl`, prediction
+sidecars `.../predictions`, score
+`experiments/2026-09-18_s17_query_accuracy/score.json`. The strict
+source-bound query reader will apply the official-precision paired
+arithmetic studentised-t gate 1.05 and no-new-failures rule; scorer's
+observed convention is retained as a diagnostic. Do not reuse the
+factorial C10 sidecar: its gate/configuration differs. This is another
+explicit correlated P12 DESIGN reuse, no new seed block, no P13.
+
+**Job optimization review before dispatch.** The preceding 144-row six-arm
+job took 7,192.79 s and peaked at 7.68 GiB, while this job runs two arms
+sequentially over 48 MLP evaluations. Request 12 GiB RAM, 0 GPU, 4 CPUs.
+Open one truth file once, one estimator at a time, no duplicated loader,
+cached network panel, worker pool or prefetch. Stream/fsync each scalar
+row and final-prediction sidecar; reuse of factorial control would weaken
+identity matching, so rerun it. No pass is omitted; partial artifacts do
+not count as a complete decision. Expected duration exceeds 30 minutes.
+The source snapshot is frozen at submission, and output paths are absolute
+so workerq writes to the live evidence directory.
