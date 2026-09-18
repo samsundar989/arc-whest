@@ -54092,3 +54092,15 @@ result or P12 read has occurred at this entry. Job #1747 remains cancelled
 without execution. On completion, verify all 19 evaluation manifests/rows,
 source hashes, the first-12/last-12 split, the truth-read receipt, failure
 identities and matched held-out paired score before any candidate choice.
+
+### IMPORTANT prediction before the fit-result reader is written
+
+The queued fit emits one atomic per-evaluation manifest and fsynced row stream.
+A read-only verification/synthesis adapter should refuse missing or duplicate
+evaluation indices, split leakage, mismatched 12-network identities, changed
+source/row hashes, failure fallback ambiguity and selected parameters that
+differ from the frozen training result. On synthetic complete rows, it should
+reproduce `competition_score`'s paired arithmetic held-out difference and
+official-precision adjustment without a new truth read. It will make no
+promotion boolean and no release claim. This prediction precedes the adapter
+implementation and any job result read.
