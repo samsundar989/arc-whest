@@ -2,8 +2,9 @@
 
 ## September 18 — complete-candidate implementation, before measurement
 
-The Rule-1 contract for the dated complete-candidate slice is drafted at the
-end of `experiments/LOG.md`. Four exact compressed arms and the fitted dense
+The pre-data Rule-1 contract for the dated complete-candidate slice is recorded
+at the end of `experiments/LOG.md` in commit `0c3cb95`; it awaits Samuel's
+prediction addendum before measurement. Four exact compressed arms and the fitted dense
 P4 sentinel are emitted and source-hash pinned by the new six-arm decision
 reader. Tiny P3 tensor, compensation, fallback and full-recurrence parity
 checks pass. A fresh source Skeptic accepted narrow parity after one required
@@ -15,7 +16,7 @@ preflight after final source edits is GREEN 12/16 (four Full-tier checks skipped
 **No new P12 truth, P13, public or vault read has occurred in this slice.**
 Samuel's three new predictions are still required by AGENTS.md and the dated
 handoff before the contract can be finalized and any full-shape/cost/accuracy
-measurement dispatched. Next: record his answers verbatim, commit the contract,
+measurement dispatched. Next: record his answers verbatim and commit the addendum,
 meter complete exports through workerq, then run the one pinned six-arm P12
 factorial and its independent result Skeptic. Keep the registered query, fit
 and release branches conditional; the 2x requirement is unchanged.
