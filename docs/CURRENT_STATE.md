@@ -1,6 +1,6 @@
 # CURRENT_STATE.md — read this first
 
-## September 18 — batch B synthesized; corrected objective awaits prediction and DESIGN test
+## September 18 — corrected query condition failed; P12 score and own fit running
 
 Commit `8cae199` records the repaired stage-3 decision adapter, its query-evidence
 producer, atomic/verified DESIGN sidecars, a candidate inventory, corrected
@@ -25,11 +25,15 @@ Corrected qE/qEd versioned files passed tiny algebra and `whest validate`, with
 no truth run. The source override for a complete label-free query audit is ready.
 Samuel answered "i dont know" to all three requested corrected-objective
 predictions; the LOG records this verbatim in commit `bc0c21b`, before new
-measurement. The fixed old-source full-shape label-free audit #1756 **SUCCEEDED**
-and its complete artifact passed strict identity/coverage checks. The corrected
-audit is workerq **#1764**, running at the last check with 0 GPUs, 16 GiB RAM
-and four CPUs on the same network. Compare both complete artifacts, then run
-the paired P12 DESIGN score comparison if protocol checks pass. P13
+measurement. The old and corrected full-shape label-free audits #1756/#1764
+**SUCCEEDED** on the same network with complete source/identity/layer checks.
+qEc raised complete recurrent E error from 0.0247135 to 0.0296860 and worsened
+all five continuation checks, despite slightly higher same-state retained query
+energy. A fresh Skeptic **REJECTED** the registered query subcondition; see
+`experiments/2026-09-18_corrected_storage/query_skeptic.md`. The fixed four-arm
+P12 DESIGN score comparison is workerq **#1765**, running at the last check;
+do not interpret partial rows. No corrected storage arm can pass this
+preregistered complete query screen, regardless of its eventual P12 score. P13
 remains untouched, and no submission has been approved.
 
 The original September17b branch-(b) contract also permits one bounded own
