@@ -54439,3 +54439,19 @@ factorial-reader synthetic tests pass. This is instrument/source verification,
 not release certification or a P12 score. Samuel's three new “I don't know”
 predictions are now recorded above, before any strategic measurement. This
 contract/prediction addendum must be committed before the first workerq meter.
+
+### Meter launch correction, before any estimator execution
+
+Prediction addendum commit `69552da` precedes all strategic measurement.
+Workerq #1879 requested 0 GPU/12 GiB/2 CPUs but failed in 1.14 s before
+importing the meter or executing any estimator: PowerShell stripped the nested
+Python `-c` string quotes, giving `NameError: local_sim`. Its snapshot/log
+preserve the malformed command. No cost, network, truth or score exists from
+that job. The replacement `local_sim/s17_meter_exports.py` is a file-backed
+orchestration wrapper around the existing official-anchored
+`p2_flop_anchor._run_arm(source, "grader")`, one source at a time. It adds no
+cost-model math, hashes source/meter/wrapper, and atomically writes the
+complete per-op JSON. `py_compile` and `--help` pass. The prior workload
+optimization review and 12-GiB/2-CPU request remain valid; the six-root-file
+run repeats only the fixed canonical mint's negligible setup per source to
+preserve the anchored meter rather than introduce a new sharing path.
