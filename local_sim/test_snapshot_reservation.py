@@ -1,6 +1,9 @@
 """Sacrificial host register shared by two copied worker snapshots."""
 
 import tempfile
+import json
+import subprocess
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from threading import Barrier
@@ -114,5 +117,19 @@ with tempfile.TemporaryDirectory(prefix="arc_whest_snapshot_test_") as temp:
         pass
     assert tr.spent("P08", str(aborted_register)) == 1
     assert [r.status for r in tr.reads(str(aborted_register))][-1] == "aborted"
+
+    cli_register = root / "cli_reads.jsonl"
+    cli_ledger = root / "cli_ledger.jsonl"
+    cli_ledger.write_text("", encoding="utf-8")
+    cli = subprocess.run([
+        sys.executable, str(Path(tr.__file__)), "--prepare-snapshot",
+        "--block", "P08", "--truth", str(host_truth),
+        "--instrument", str(host_instrument), "--consumer", "cli test",
+        "--purpose", "no-label preparation", "--authority-register",
+        str(cli_register), "--authority-ledger", str(cli_ledger)],
+        text=True, capture_output=True, check=True)
+    cli_data = json.loads(cli.stdout)
+    assert cli_data["block"] == "P08" and cli_data["reservation"]
+    assert tr.spent("P08", str(cli_register)) == 1
 
 print("snapshot reservation: host pre-reserve, two-snapshot race, byte swap and repeat refused")
