@@ -1,5 +1,14 @@
 # GAME_PLAN — measure and optimize the complete candidate
 
+**Execution checkpoint, September 18:** Four gram/P4 compressed arms and the
+fitted dense P4 sentinel are emitted as new versioned files. Tiny independent
+tensor and complete full-rank recurrent parity, disabled-feature identity,
+fallback, and source-bound reader tests pass; fresh Skeptics accepted narrow
+source parity and instrument readiness. The LOG holds the pre-data contract.
+Samuel's three new predictions have been solicited and remain pending; full
+shape metering, P12 factorial, query discriminator and fit have not run.
+The ordered conditional stages and dual2x release gate below remain binding.
+
 **Active September 18, after the worker decision-point review.** The strategist response is delivered and independently accepted as a research plan. Execute [Claude handoff](CLAUDE_CODE_HANDOFF_2026-09-18.md), with mechanisms, prospective gates and limits in [strategist response](STRATEGIST_RESPONSE_2026-09-18.md). The previous plan is preserved in [archive](archive/GAME_PLAN_before_2026-09-18_complete_candidate.md).
 
 ## Objective and architecture

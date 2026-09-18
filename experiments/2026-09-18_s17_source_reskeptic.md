@@ -1,0 +1,13 @@
+## Skeptic verdict: ACCEPT
+
+**Strongest challenge**  The new complete-recurrence comparison uses the frozen dense-history P3 implementation as its reference, so it tests the shared-storage composition rather than independently rederiving every P3 coefficient. Its forced-full-rank, tiny-network setting also says nothing about rank-256 compression error or full-shape cost.
+
+**Evidence for it**  `local_sim/test_s17_complete.py::test_complete_recurrence` loads `estimator_k3_v42_pairq_p3_uncompressed.py` as the reference, sets the C01 shared join to age 2/rank 16/force, and checks 16x8 networks only. `local_sim/s6_parity.py::layer_loop` runs the live `_layer` recurrence in float64. The separate dense-tensor test checks the P3 D3/D21 tensor, but not an independent complete network recurrence.
+
+**Evidence for the original claim**  I reran `uv run python local_sim/test_s17_complete.py`: all four tiny checks passed, including every-layer comparison on two independently minted 16x8 networks with at least four forced joins, row-relative error at most `2e-10`, disabled C00 bitwise output/FLOP identity against frozen v41, tensor D3/D21 parity, birth-compensation algebra, truncation and a finite budget fallback. The frozen dense reference has P3 and P4 enabled, as does C01. Source inspection finds P3 `F/R3/R4/w3b` transported through advance, Wick, append, both joins and truncation; `_p3_parts` reconstructs shared A/M; D21 adds P3 LA/LP before the exact gram-column statistics and retains the thin `TT @ F.T` contribution. The new fitted-uncompressed-plus-P4 sentinel regenerates byte-identically from the pinned own-control base and P4 builder (SHA-256 `ebc0ee2ca107f39c8db06fc33d8b464b759ab09c0b3754ab99153d40c94073ca`). I also reran the seven isolated query tests; they pass.
+
+**Unresolved ambiguity**  The earlier missing complete recurrent parity check is closed for the forced-full-rank tiny composition. The registered full 1024x16 counted-FLOP/resource meter, query transform in full-file continuation, compressed-rank behavior and paired P12 truth comparison remain separate future engineering and measurement stages. This verdict is not a cost, accuracy, release or query-eligibility decision. No truth or full-shape file was read/run in this review.
+
+**Cheapest discriminating follow-up**  Execute the already registered label-free full-shape meter and full-file query continuation before P12 labels. These engineering checks need no new seed block; the subsequent accuracy decision uses the registered exposed P12 DESIGN panel.
+
+**Checklist items triggered**  9 and 14 remain open for the full-file query/cost audit; 18 was addressed for tiny complete-recurrence parity. No statistical gate or promotion claim was reviewed.

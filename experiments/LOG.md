@@ -54244,3 +54244,191 @@ Historical corrected-storage and other failed gates remain failed.
 Chrome refreshed board: our rank63/171; displayed lead about2.20e-9 still links331393;
 v31 remains our latest. No newly public winning implementation was located in primary
 research. No current artifact proves the next submission will meet2x or win.
+
+## 2026-09-18 — PRE-DATA contract: complete compressed candidate slice
+
+**Question.** Do compensated rank32 P3 and the frozen own controls improve the
+actual age4/rank256 gram, P4d5/min32 compressed recurrence enough to justify
+one query-cost intervention, one conditional complete-package fit, and the
+unchanged dual-2x v31 release test?
+
+**Evidence.** CONFIRMED: uncompressed P3+P4 has official adjusted P12 DESIGN
+mean 6.7988447e-9; fitted own uncompressed source improves its own default
+1.144855x on exposed last12 P12. CONFIRMED: corrected qEc lost; old-qE versus
+gram is inconclusive; P12 v31 anchor absent; P13 untouched. INFERRED: P3's
+compressed incremental bill is nearer 59B counted FLOPs than an unmatched
+net cost comparison. SPECULATIVE: the gains survive shared storage and interact.
+
+**Hypothesis/mechanism.** A compensated P3 thin feed corrects represented K3
+birth/propagation error while frozen global controls correct scale and tilt;
+shared A/M reconstruction can preserve both within a smaller source basis.
+The controls and feed may interact, so only a complete matched factorial can
+estimate their joint recurrence effect. A rank32 range approximation of the
+old aggregate D21 readout may reduce its contraction bill while retaining
+source representation, gram join and exact D3/thin consumers; feedback can
+change later accuracy, requiring a truth comparison.
+
+**Intervention and frozen identities.** Emit new versioned sources through
+maintained generators; frozen archives are immutable. C00 = default
+(theta_fam,s_lam,t_lam,s_feed)=(1,1,0,1), P3 off; C10 =
+(.625,1.225,-.1,1), P3 off; C01 = default, compensated P3 rank32;
+C11 = frozen fit, compensated P3 rank32. All four use gram join,
+age4/rank256 shared storage and P4 depth5/min32. C00's reference is
+`estimator_k3_v41_pairq_a4r256_gram_p4d5.py`, subject to exact-source
+identity before cache reuse. Graded `estimator_k3_v31.py` is the same-panel
+release control. One fitted-uncompressed-plus-P4 sentinel normalizes the
+implementation cost; existing uncompressed P3+P4 is diagnostic only when
+its complete provenance matches. No additional dense factorial or public fit.
+
+**Predictions.** Builder: (1) C11 should improve on C00 if both mechanisms
+survive compression, but the interaction sign is uncertain; (2) a fixed
+rank32 old-query readout may save roughly 0.02B FLOPs net, while accuracy is
+uncertain; (3) an unfit complete file is unlikely to meet dual 2x v31.
+Samuel's three prospective predictions are separately solicited and must be
+recorded in this entry before the first strategic measurement.
+
+**Factorial gate and selection.** All six P12 paired arithmetic comparisons
+are C10:C00, C01:C00, C11:C10, C11:C01, C11:C00 and C01:C10; each runs
+`competition_score.decide(gate=1.0, interval="t")` for observed and official
+precision. Lower official mean plus passing direct official gate against BOTH
+C00 and the current incumbent plus no new failed identities against either
+are required to replace incumbent. Visit C10,C01,C11 from initial C00;
+ties/unsupported improvements keep incumbent. Report the four simple effects,
+two direct comparisons and factorial interaction. Correlated P12 reuse is
+DESIGN selection, not independent confirmation.
+
+**Query gate.** On the chosen gram package, one fixed rank32 two-pass range
+readout of old D21 only, with exact-query fallback for q>=r, rank-deficient
+fallback, deterministic/permutation and signed-cancellation tests. Keep exact
+gram join column energies and all represented-source/D3/thin consumers.
+The frozen sketch is the first `q=min(32,n)` columns of transported Q; it is
+deterministic and row-permutation equivariant under the source's corresponding
+transport. Compute `Y=L[F^T(Q^T Omega)]`, QR to U, then
+`U[(U^T L)F^T Q^T]`. The exact branch applies when q>=r or QR's largest
+absolute diagonal is zero or its smallest is at most `1e-10` times the largest.
+No orthonormal-Q assumption or unpriced exact Xold stash is allowed.
+Before labels require valid tiny/full recurrence numerics, no new resource
+obstacle and >=5% complete counted-FLOP saving against the exact-query file.
+If eligible, compare on paired P12 once with official-precision
+`decide(gate=1.05, interval="t")` and no new failed identities. Otherwise
+retain the exact-query package. No rank/sketch grid or retry. Full-continuation
+displacement is diagnostic, not an accuracy selector.
+
+**Fit trigger and finite schedule.** Fit only if the accepted complete package
+improves on C00 and separately in observed and official precision satisfies
+`max(0,1-(mean_v31/2)/mean_candidate)<=.25` on the same full24 P12 panel.
+Initialize at its frozen control vector. Use theta_fam,s_lam,t_lam,s_feed,
+bounds (0..1.5,.5..1.5,-.5..0.5,.5..1.5), coordinate order as written;
+two passes with steps (.25,.15,.20,.15) then (.125,.075,.10,.075), negative
+then positive trials, clipped to bounds. One baseline plus sixteen trials
+on first12, followed by matched initializer and frozen selected-vector
+last12: 19 scheduled evaluations, cap 19; repeated points reuse only exact
+source/identity results but retain their scheduled record and do not open
+replacement trials. Minimize first12 official adjusted mean divided by frozen
+initializer mean plus `1e-3 ||x-x0||^2`, ridge center x0=initializer; retain
+incumbent on exact ties, no early stop or validation refit. Save source, rows
+and final predictions for every evaluation. If selected source lacks exactly
+matching first12 rows, allow one frozen first12 evaluation, never refit.
+Readiness uses exact-source matched full24 rows only.
+
+**Release gate.** A whole frozen source needs both observed and official P12
+DESIGN `decide(gate=2.0, interval="t")` versus same-panel v31 to justify one
+untouched P13 SINGLE_USE evaluation. P13 must pass the unchanged dual2x
+contract with no new failures; no selection/refit on it. Then exact-file
+official subprocess, Linux8GiB, read-only public CONFIRM, projection,
+preflight and independent Skeptic precede per-submission upload approval.
+No upload or designation is authorized here.
+
+**Baseline, tier, statistic.** P12's existing 24 minted identities starting
+40917012000, exact truth `experiments/2026-09-17b_p12/truth_P12.npz`
+SHA-256 `92a3228edee16080795c4a1ea0124b8c7bd1f7f7ecf7c84ad078edc4eca756b2`;
+register one deliberate reuse via seed_ledger and truth-read receipt before
+labels. All P12 rows are exposed DESIGN. Pair common networks, use canonical
+noise-corrected/official-precision score, arithmetic control-minus-candidate
+differences and studentised-t interval; quote raw MSE with truth noise and
+failed identities. P13 remains single use and unclaimed until release case.
+
+**Counted-FLOP and resource model.** Phase2 lambda=0, so score cost is counted
+FLOPs; residual is a 0.4s failure cliff, report worst observed headroom
+`0.4/max_residual`, never a local-to-server time prediction. Baseline gram
+complete source is approximately 0.49e12 FLOPs/MLP; P3 may add ~0.059e12,
+global controls near zero, P4 fixed across arms. Query sketch hypothesized
+net ~0.02e12 saving; the engineering gate is measured >=5% whole file.
+Meter full 1024x16 exports before truth, including QR, reconstruction, birth,
+joins, thin terms, fallback and pruning. Model/host memory and the server's
+8GiB limit separately. Heavy jobs go through workerq after a recorded
+optimization review and conservative RAM/CPU request; one MLP/arm resident,
+reuse pinned truth, atomic row/prediction sidecars and checkpoints, no duplicate
+loaders or unnecessary passes. These save memory without changing arithmetic.
+Do not underdeclare memory to gain queue priority. Finalist must separately
+prove Linux8GiB and current provenance-specific FLOP offset.
+
+**Falsifier and scope.** Failure of integration identities, cost feasibility,
+direct paired gates, query engineering/accuracy gate, dual25% fit trigger, or
+dual2x release case stops the corresponding branch. Preserve the fully measured
+package and exact remaining accuracy/cost/deployment gap. No P11 selection,
+P13 early touch, vault, public fitting, historical failure reversal,
+unpriced tensor rewrite or multiplication of separate gains. After every
+IMPORTANT/STRATEGIC result, provide contract/diff/protocol/raw artifacts to
+a fresh-context Skeptic before relying on it.
+
+### Pre-label implementation and instrument review
+
+The four new source roles are `estimator_k3_v43_complete_c00.py` (SHA-256
+`39d9a37a3567bb4d268b89b6e7c6913f23f254a4b52cb4191243b80eab5b0c42`),
+`estimator_k3_v43_complete_c10.py` (`fd8d497db6dfbc3affcf579119c7115c3aee4d190a3e92fec4d85c366152d1bf`),
+`estimator_k3_v43_complete_c01.py` (`7c0fcbcbce92c4f29e712c49e8b08d5dbe0eae2fc101b52f0cb363e79c2cdac8`),
+and `estimator_k3_v43_complete_c11.py` (`95cf412792abf4ec3d0dd21f33414be113e8bf5600b5714c61a301b1f53a4768`).
+The fitted dense P4 sentinel is `estimator_k3_v43_fitted_uncompressed_p4d5.py`
+(`ebc0ee2ca107f39c8db06fc33d8b464b759ab09c0b3754ab99153d40c94073ca`).
+Graded v31 is `estimator_k3_v31.py` (`6dde5fd43ad41e8ec7199b742dd554d22d506c9cf85a532027e86a590d0a787c`).
+All six are pinned by path and hash in `s17_complete_package_decide.py`.
+
+**Knowledge delta, IMPORTANT source/instrument only:** new `s17_build_complete.py`
+integrates P3 state into the gram shared tower; tiny independent dense D3/D21
+with nonsymmetric D21/nonuniform gates, compensation, disabled identity,
+multiple joins, fallback and complete forced-full-rank recurrence pass.
+Full-recurrence rows match frozen uncompressed P3+P4 through at least four
+joins on two tiny networks within 2e-10 row-relative error. The sentinel
+matches frozen fitted source plus P4 in tiny output/FLOPs. `s17_query_cost.py`
+builds an asserted rank32 old-query replacement, but only isolated tiny
+operator tests have passed; complete-file cost/continuation remains pending.
+The first fresh source Skeptic was PROVISIONAL on missing recurrence parity;
+after the added fixture a second fresh Skeptic **ACCEPTED narrow parity** in
+`experiments/2026-09-18_s17_source_reskeptic.md`. Neither reviewed a truth score.
+
+The first decision-reader Skeptic **REJECTED** missing score/sidecar sample
+binding. After sample/config/row repairs a second was PROVISIONAL on positional
+method roles. The final reader binds exact six source roles; a valid synthetic
+fixture and 17 metadata/role tamper refusals pass. The third fresh Skeptic
+**ACCEPTED instrument readiness**, `experiments/2026-09-18_s17_instrument_final_skeptic.md`.
+This is no scientific result. P12 truth, P13, public and vault remain unread by
+this new slice. Existing historical outcomes are unchanged.
+
+**Pre-submission workload optimization review, frozen before jobs.** The first
+full-shape meter will evaluate one source/MLP at a time using the existing
+real-flopscope 1024x16 emitter, not a duplicate estimator loader or unmetered
+math; preserve per-op totals, source hash and peak workerq memory. Request
+12 GiB RAM, 0 VRAM, 2 CPUs based conservatively on earlier K3 metering and
+the ~8.074 GiB peak of the larger 240-row batch B; increase if measured
+headroom requires it, never underdeclare. The one six-arm P12 comparison is
+144 sequential MLP evaluations, loads the already minted truth once, streams
+and fsyncs rows/final predictions, and makes no duplicated dataset or worker
+prefetch; request 12 GiB RAM, 0 VRAM, 4 CPUs. Its source snapshot is fixed at
+submission, so later edits cannot alter the job. Cache reuse is refused unless
+full identity matches. Do not reduce sample count or omit v31/sentinel for
+speed. The query cost job likewise uses one source at a time and keeps exact
+and approximate sources both metered; the full recurrent displacement audit
+is paired on the same label-free network. The conditional fit uses the same
+two-pass 19-evaluation plan, sequential one MLP/arm at a time, checkpointing
+each evaluation; it will be separately reviewed before dispatch if triggered.
+
+**Gate status before labels.** Standard preflight is GREEN 12/16, four named
+Full-tier checks skipped; transcript `experiments/2026-09-18_s17_preflight.log`.
+The run overlapped the final source/reader edits. The quiet-tree rerun
+`experiments/2026-09-18_s17_preflight_final.log` is also **GREEN 12/16**
+(four named Full-tier checks skipped). Focused integration, query and
+factorial-reader synthetic tests pass. This is instrument/source verification,
+not release certification or a P12 score. Samuel's new predictions have not
+yet been received or recorded; no strategic measurement may start until they
+are recorded and the contract is committed.
