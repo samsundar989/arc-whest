@@ -54908,6 +54908,64 @@ received fresh-context independent Skeptic ACCEPT. It changes no measured
 source, scorer, score convention or gate. The job remains running; no
 partial accuracy result is interpreted.
 
+### Fixed rank32 query accuracy result; finite slice stopping decision
+
+Workerq `#1885` **SUCCEEDED** on immutable snapshot `644700e86`, exit 0,
+2,132.15 s, peak 4,685.30 MiB under 12 GiB/0 GPU/4 CPUs. It wrote all
+48 P12 DESIGN rows and both final-prediction sidecars. The strict reader,
+after its reviewed snapshot-root and Windows truth-path spelling repairs,
+verified source/dependency/configuration/truth/row/prediction identities
+and wrote `experiments/2026-09-18_s17_query_accuracy/decision.json`.
+The independent fresh-context result Skeptic **ACCEPTS the rejection** in
+`experiments/2026-09-18_s17_query_result_skeptic.md`, independently
+recomputing all 24 paired rows. The three producer SHA-256s for score,
+decision, prediction manifest are respectively
+`443af882a7fe36ac02fba484257de7f9490d982fd6ff97c41e97d690db883652`,
+`1a0cea2b468d370a8ae19be81899f33aa8d0eda64c2c1a8e4de77f51001d5853`,
+and `5816c2a99f7006036f759f49da1cbf9b90d1c004c75aee1f52abcc73b52075bb`.
+
+| whole file | raw MSE (truth-noise floor 2.24807096e-9) | observed adjusted | official adjusted | counted FLOPs | failures |
+|---|---:|---:|---:|---:|---:|
+| exact C10 | 3.18371415e-8 | 6.96169045e-9 | 6.48660902e-9 | 480,850,933,121 | 0 |
+| rank32 old query | 5.74592800e-8 | 1.18715539e-8 | 1.14226692e-8 | 454,336,065,471 | 0 |
+
+The rank32 candidate has paired official arithmetic gain **0.567872x**
+versus exact C10; candidate improvement difference **-4.93606022e-9**,
+studentised-t 95% interval **[-5.45154243e-9,-4.42057800e-9]**.
+Observed gain is 0.586418x, difference -4.90986349e-9, t95
+[-5.42487386e-9,-4.39485312e-9]. Every one of the 24 pairs worsens;
+there are no newly failed identities. It **fails** the registered 1.05
+official gate decisively. The 5.514% full-file FLOP saving is real but
+far smaller than the recurrence-driven accuracy loss. The one fixed
+rank32 experiment is closed; no alternative rank/sketch retry is licensed
+in this slice. Historical query failures remain failed.
+
+Retain exact `estimator_k3_v43_complete_c10.py` SHA
+`fd8d497db6dfbc3affcf579119c7115c3aee4d190a3e92fec4d85c366152d1bf`
+as the strongest accepted **complete compressed package**. Against
+same-panel v31 its observed/official adjusted gains are only
+1.36672x/1.36599x, with 31.664%/31.700% further mean reductions needed
+to even reach both half-v31 mean targets. These exceed the registered
+25% engineering fit trigger, so do **not** run the bounded complete-package
+fit. The unchanged paired dual2x P12 readiness case is absent; do **not**
+consume untouched P13 or start release certification/upload approval.
+Its 23,421 calls model to 0.31384 s residual (1.2745x hard-cliff
+headroom) at the carried 13.4 microseconds/call, above the conservative
+22,000-call working margin; server residual and Linux8GiB are untested.
+The specific obstacle is recurrence accuracy at a lower old-query cost,
+and the exact C10 package still needs a large score gain without losing
+its resource margin. This research fallback is not completion of the
+original substantially-better-next-submission objective.
+
+**Exact archive prediction before Git add.** The eight query comparison
+files include producer-specific Windows line endings and ignored `.f32`
+prediction arrays. Marking only
+`experiments/2026-09-18_s17_query_accuracy/**` as `-text -diff`, then
+force-adding the two `.f32` arrays, should make every staged blob equal
+its no-filter raw blob and reproduce the three SHA-256s above in a fresh
+checkout. Numeric values, source identities, decision, and P13 will not
+change. Preserve all raw files, including this failed candidate.
+
 ### IMPORTANT prediction: query snapshot-root decision reader, before editing
 
 The registered one-pair P12 score will run in an immutable workerq snapshot with an absolute workspace output path. The query reader currently asks `design_sidecar.verify` to check against a supplied `source_root`, but `_source` restricts files to the checkout and the recorded `prediction_sidecars` path is resolved from the checkout. This can refuse a valid snapshot before opening score rows. Prediction: adding explicit `--run-root`, binding both frozen sources and recorded arm paths to it, and resolving the recorded sidecar path from it will accept a correct snapshot/output pairing. Changed source bytes, a wrong recorded sidecar path, mismatched dependency bytes, or a role swap will still refuse. The paired arithmetic score, gate 1.05, and new-failure veto remain unchanged. Verification will use a small synthetic snapshot plus tamper checks and standard preflight; no P12 score, truth, or active output will be read during the repair.
