@@ -54455,3 +54455,17 @@ complete per-op JSON. `py_compile` and `--help` pass. The prior workload
 optimization review and 12-GiB/2-CPU request remain valid; the six-root-file
 run repeats only the fixed canonical mint's negligible setup per source to
 preserve the anchored meter rather than introduce a new sharing path.
+
+### IMPORTANT prediction before query-continuation instrument edits
+
+Question: can one label-free paired full-recurrence audit expose the rank32
+old-query approximation's downstream displacement without treating it as an
+accuracy selector? Prediction, before `s17_query_continuation.py` edits: exact
+and rank32 sources on the same canonical network will produce finite,
+shape-matched predictions; the approximate branch will show nonzero cumulative
+displacement after its first eligible old-D21 query, while source hashes and
+the deterministic fixture hash remain stable across reruns. Early layers may
+match under the exact fallback. A nonfinite row, hash mismatch, or displacement
+before any eligible query falsifies the instrument assumptions. The audit
+cannot predict score direction or establish the 5% complete-FLOP gate. No
+truth, P12 label, source selection or promotion is allowed in this tool.
