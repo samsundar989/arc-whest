@@ -1,0 +1,1689 @@
+{
+  "base_source_sha256": "7e5c24d33c279199c5284e6997157f98772a3ddb8bee753baf219628721cc4d5",
+  "block": "P12",
+  "bounds": [
+    [
+      0.0,
+      1.5
+    ],
+    [
+      0.5,
+      1.5
+    ],
+    [
+      -0.5,
+      0.5
+    ],
+    [
+      0.5,
+      1.5
+    ]
+  ],
+  "coordinate_order": [
+    "theta_fam",
+    "s_lam",
+    "t_lam",
+    "s_feed"
+  ],
+  "default": [
+    1.0,
+    1.0,
+    0.0,
+    1.0
+  ],
+  "dependency_sha256": {
+    "competition_score.py": "94f01b3d5a6320ed3beb99436df7b80901bfd9a21f48ffe7861513a9f7fd2c61",
+    "lifecycle_eval.py": "de5f9c98bcb9629369b630977fd504d7985cb1570acc36f2a7767bb3a2effa50",
+    "mint_provenance.py": "48aef520b7cef454a629a937420c440f67eafc0cb872a6b2ac875b5f576936e2",
+    "official_config.py": "a70b456c20e0445d8b9b29eed89be4a9ea7da0eaaceed3daac452f7f9588ccca",
+    "truth_reads.py": "eb02e12f2dcbe1b1bf660ae4f9fa98d38d988a8ad2f968725453312b6ad52114"
+  },
+  "driver_sha256": "72ddbe46eaec25b6e167bb5e52ebbfeb56ed1295c18c048d98d9a597dfa9a64c",
+  "early_stop": false,
+  "evaluations": [
+    {
+      "candidate": "eval_00_fit.py",
+      "gt_noise_mean": 2.26902802503473e-09,
+      "index": 0,
+      "mean_flops": 669940797469.0,
+      "n": 12,
+      "n_failed": 0,
+      "observed_score": 8.76613763451901e-09,
+      "official_precision_score": 8.098064723466543e-09,
+      "parameters": {
+        "s_feed": 1.0,
+        "s_lam": 1.0,
+        "t_lam": 0.0,
+        "theta_fam": 1.0
+      },
+      "provenance": {
+        "backend": {
+          "flopscope": "0.12.1+np2.2.6",
+          "flopscope_path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1748\\job-1748\\.venv\\lib\\site-packages\\flopscope",
+          "numpy": "2.2.6",
+          "python": "3.10.19"
+        },
+        "candidate": "../../../../../../Documents/arc-whest/experiments/2026-09-18_own_fit/eval_00_fit.py",
+        "candidate_sha256": "95dac27482c3b5f257859a959c4107d0f1c2bbc991afb5527901abc63b288822",
+        "host_cold_start_s": 0.24,
+        "lifecycle": "grader",
+        "n_mlps": 12,
+        "objective_is_graded": false,
+        "residual_is_graded": false,
+        "residual_measurement_path": "runner=local (in-process BudgetContext)",
+        "round_deviations": {
+          "predict_timeout_s": [
+            1000000000.0,
+            30.0
+          ],
+          "residual_wall_time_limit_s": [
+            null,
+            0.4
+          ],
+          "setup_timeout_s": [
+            1000000000.0,
+            5.0
+          ],
+          "wall_time_limit_s": [
+            null,
+            120.0
+          ]
+        },
+        "round_tag": "v2-phase2",
+        "rows_hash": "cd22eae8cb283e123488c947a9790c81715ed26c1a89e469369b8dbba2268f53",
+        "setup_called": true,
+        "setup_error": "",
+        "setup_seconds": 0.009284300002036616,
+        "setup_timed_out": false,
+        "setup_timeout_s": 1000000000.0,
+        "spec": {
+          "depth": 16,
+          "floor": 0.1,
+          "flop_budget": 2199023255552,
+          "lam": 0.0,
+          "memory_limit_mb": 8192,
+          "predict_timeout_s": 1000000000.0,
+          "residual_wall_time_limit_s": null,
+          "round_tag": "v2-phase2",
+          "seed": 0,
+          "setup_timeout_s": 1000000000.0,
+          "wall_time_limit_s": null,
+          "width": 1024
+        },
+        "truth_sha256": "0eee0bae5208b9d41826a3c074362ab44b3ebe13fb5b3a9db1ddeb1687723d1c",
+        "weights_mode": "f64_readonly",
+        "weights_mode_is_grader_default": true
+      },
+      "rows": "eval_00_fit.jsonl",
+      "rows_file_sha256": "3662aaae9e3bfaffdc3a0ce7bdae55336acba9d93c186bf134b5b17c9affffda",
+      "rows_hash": "cd22eae8cb283e123488c947a9790c81715ed26c1a89e469369b8dbba2268f53",
+      "sha256": "95dac27482c3b5f257859a959c4107d0f1c2bbc991afb5527901abc63b288822",
+      "split": "fit"
+    },
+    {
+      "candidate": "eval_01_fit.py",
+      "gt_noise_mean": 2.26902802503473e-09,
+      "index": 1,
+      "mean_flops": 669988045853.0,
+      "n": 12,
+      "n_failed": 0,
+      "observed_score": 8.22903840459227e-09,
+      "official_precision_score": 7.560918376890752e-09,
+      "parameters": {
+        "s_feed": 1.0,
+        "s_lam": 1.0,
+        "t_lam": 0.0,
+        "theta_fam": 0.75
+      },
+      "penalized_fit_objective": 0.9337322884101555,
+      "provenance": {
+        "backend": {
+          "flopscope": "0.12.1+np2.2.6",
+          "flopscope_path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1748\\job-1748\\.venv\\lib\\site-packages\\flopscope",
+          "numpy": "2.2.6",
+          "python": "3.10.19"
+        },
+        "candidate": "../../../../../../Documents/arc-whest/experiments/2026-09-18_own_fit/eval_01_fit.py",
+        "candidate_sha256": "93cfee56045ce6f42ec045c6a91d911a31ceae6a05fb53e263ae4952a1f5dbae",
+        "host_cold_start_s": 0.24,
+        "lifecycle": "grader",
+        "n_mlps": 12,
+        "objective_is_graded": false,
+        "residual_is_graded": false,
+        "residual_measurement_path": "runner=local (in-process BudgetContext)",
+        "round_deviations": {
+          "predict_timeout_s": [
+            1000000000.0,
+            30.0
+          ],
+          "residual_wall_time_limit_s": [
+            null,
+            0.4
+          ],
+          "setup_timeout_s": [
+            1000000000.0,
+            5.0
+          ],
+          "wall_time_limit_s": [
+            null,
+            120.0
+          ]
+        },
+        "round_tag": "v2-phase2",
+        "rows_hash": "2138fe3ae592a15bdb9ead39e6f52a4d2bafd32e2c52217e436490439a08466d",
+        "setup_called": true,
+        "setup_error": "",
+        "setup_seconds": 0.16038990000379272,
+        "setup_timed_out": false,
+        "setup_timeout_s": 1000000000.0,
+        "spec": {
+          "depth": 16,
+          "floor": 0.1,
+          "flop_budget": 2199023255552,
+          "lam": 0.0,
+          "memory_limit_mb": 8192,
+          "predict_timeout_s": 1000000000.0,
+          "residual_wall_time_limit_s": null,
+          "round_tag": "v2-phase2",
+          "seed": 0,
+          "setup_timeout_s": 1000000000.0,
+          "wall_time_limit_s": null,
+          "width": 1024
+        },
+        "truth_sha256": "0eee0bae5208b9d41826a3c074362ab44b3ebe13fb5b3a9db1ddeb1687723d1c",
+        "weights_mode": "f64_readonly",
+        "weights_mode_is_grader_default": true
+      },
+      "rows": "eval_01_fit.jsonl",
+      "rows_file_sha256": "31703bb90597cf5b423694ab92506deeab7f4b34752cdc00a0fbde58d7e55355",
+      "rows_hash": "2138fe3ae592a15bdb9ead39e6f52a4d2bafd32e2c52217e436490439a08466d",
+      "sha256": "93cfee56045ce6f42ec045c6a91d911a31ceae6a05fb53e263ae4952a1f5dbae",
+      "split": "fit"
+    },
+    {
+      "candidate": "eval_02_fit.py",
+      "gt_noise_mean": 2.26902802503473e-09,
+      "index": 2,
+      "mean_flops": 669988045853.0,
+      "n": 12,
+      "n_failed": 0,
+      "observed_score": 9.784084674171e-09,
+      "official_precision_score": 9.115964646469484e-09,
+      "parameters": {
+        "s_feed": 1.0,
+        "s_lam": 1.0,
+        "t_lam": 0.0,
+        "theta_fam": 1.25
+      },
+      "penalized_fit_objective": 1.1257591889945044,
+      "provenance": {
+        "backend": {
+          "flopscope": "0.12.1+np2.2.6",
+          "flopscope_path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1748\\job-1748\\.venv\\lib\\site-packages\\flopscope",
+          "numpy": "2.2.6",
+          "python": "3.10.19"
+        },
+        "candidate": "../../../../../../Documents/arc-whest/experiments/2026-09-18_own_fit/eval_02_fit.py",
+        "candidate_sha256": "b54b0836d4ca919ff996565e8427000fe2ec49e63b35f70e39f644bfde5da36f",
+        "host_cold_start_s": 0.24,
+        "lifecycle": "grader",
+        "n_mlps": 12,
+        "objective_is_graded": false,
+        "residual_is_graded": false,
+        "residual_measurement_path": "runner=local (in-process BudgetContext)",
+        "round_deviations": {
+          "predict_timeout_s": [
+            1000000000.0,
+            30.0
+          ],
+          "residual_wall_time_limit_s": [
+            null,
+            0.4
+          ],
+          "setup_timeout_s": [
+            1000000000.0,
+            5.0
+          ],
+          "wall_time_limit_s": [
+            null,
+            120.0
+          ]
+        },
+        "round_tag": "v2-phase2",
+        "rows_hash": "ff32a95324929b79ed13b414b06ab4a58c4ca7553fae951d532e20735d81881a",
+        "setup_called": true,
+        "setup_error": "",
+        "setup_seconds": 0.016678999993018806,
+        "setup_timed_out": false,
+        "setup_timeout_s": 1000000000.0,
+        "spec": {
+          "depth": 16,
+          "floor": 0.1,
+          "flop_budget": 2199023255552,
+          "lam": 0.0,
+          "memory_limit_mb": 8192,
+          "predict_timeout_s": 1000000000.0,
+          "residual_wall_time_limit_s": null,
+          "round_tag": "v2-phase2",
+          "seed": 0,
+          "setup_timeout_s": 1000000000.0,
+          "wall_time_limit_s": null,
+          "width": 1024
+        },
+        "truth_sha256": "0eee0bae5208b9d41826a3c074362ab44b3ebe13fb5b3a9db1ddeb1687723d1c",
+        "weights_mode": "f64_readonly",
+        "weights_mode_is_grader_default": true
+      },
+      "rows": "eval_02_fit.jsonl",
+      "rows_file_sha256": "9aa0107b3c141d88b70cb65b9b1186394ff23b63605caf469c8f1973d117d919",
+      "rows_hash": "ff32a95324929b79ed13b414b06ab4a58c4ca7553fae951d532e20735d81881a",
+      "sha256": "b54b0836d4ca919ff996565e8427000fe2ec49e63b35f70e39f644bfde5da36f",
+      "split": "fit"
+    },
+    {
+      "candidate": "eval_03_fit.py",
+      "gt_noise_mean": 2.26902802503473e-09,
+      "index": 3,
+      "mean_flops": 669988045853.0,
+      "n": 12,
+      "n_failed": 0,
+      "observed_score": 8.634503816157158e-09,
+      "official_precision_score": 7.96638378845564e-09,
+      "parameters": {
+        "s_feed": 1.0,
+        "s_lam": 0.85,
+        "t_lam": 0.0,
+        "theta_fam": 0.75
+      },
+      "penalized_fit_objective": 0.9838242093657491,
+      "provenance": {
+        "backend": {
+          "flopscope": "0.12.1+np2.2.6",
+          "flopscope_path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1748\\job-1748\\.venv\\lib\\site-packages\\flopscope",
+          "numpy": "2.2.6",
+          "python": "3.10.19"
+        },
+        "candidate": "../../../../../../Documents/arc-whest/experiments/2026-09-18_own_fit/eval_03_fit.py",
+        "candidate_sha256": "1eed908a36503a62a90c31bd141f6e4603ecff0d0251e2c64e79d13d08ab8cc6",
+        "host_cold_start_s": 0.24,
+        "lifecycle": "grader",
+        "n_mlps": 12,
+        "objective_is_graded": false,
+        "residual_is_graded": false,
+        "residual_measurement_path": "runner=local (in-process BudgetContext)",
+        "round_deviations": {
+          "predict_timeout_s": [
+            1000000000.0,
+            30.0
+          ],
+          "residual_wall_time_limit_s": [
+            null,
+            0.4
+          ],
+          "setup_timeout_s": [
+            1000000000.0,
+            5.0
+          ],
+          "wall_time_limit_s": [
+            null,
+            120.0
+          ]
+        },
+        "round_tag": "v2-phase2",
+        "rows_hash": "ea6612e2d5714866bfd778166fb259ddc690636ce94b5aa8e8a0a282f7313ac0",
+        "setup_called": true,
+        "setup_error": "",
+        "setup_seconds": 0.011103600001661107,
+        "setup_timed_out": false,
+        "setup_timeout_s": 1000000000.0,
+        "spec": {
+          "depth": 16,
+          "floor": 0.1,
+          "flop_budget": 2199023255552,
+          "lam": 0.0,
+          "memory_limit_mb": 8192,
+          "predict_timeout_s": 1000000000.0,
+          "residual_wall_time_limit_s": null,
+          "round_tag": "v2-phase2",
+          "seed": 0,
+          "setup_timeout_s": 1000000000.0,
+          "wall_time_limit_s": null,
+          "width": 1024
+        },
+        "truth_sha256": "0eee0bae5208b9d41826a3c074362ab44b3ebe13fb5b3a9db1ddeb1687723d1c",
+        "weights_mode": "f64_readonly",
+        "weights_mode_is_grader_default": true
+      },
+      "rows": "eval_03_fit.jsonl",
+      "rows_file_sha256": "1a7fbadbed15ed1abbed7ffb9b1e1c38f0cebe3f246c971a40ae5205745b0fe6",
+      "rows_hash": "ea6612e2d5714866bfd778166fb259ddc690636ce94b5aa8e8a0a282f7313ac0",
+      "sha256": "1eed908a36503a62a90c31bd141f6e4603ecff0d0251e2c64e79d13d08ab8cc6",
+      "split": "fit"
+    },
+    {
+      "candidate": "eval_04_fit.py",
+      "gt_noise_mean": 2.26902802503473e-09,
+      "index": 4,
+      "mean_flops": 669988045853.0,
+      "n": 12,
+      "n_failed": 0,
+      "observed_score": 7.978499131973089e-09,
+      "official_precision_score": 7.3103791042715705e-09,
+      "parameters": {
+        "s_feed": 1.0,
+        "s_lam": 1.15,
+        "t_lam": 0.0,
+        "theta_fam": 0.75
+      },
+      "penalized_fit_objective": 0.9028166221723419,
+      "provenance": {
+        "backend": {
+          "flopscope": "0.12.1+np2.2.6",
+          "flopscope_path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1748\\job-1748\\.venv\\lib\\site-packages\\flopscope",
+          "numpy": "2.2.6",
+          "python": "3.10.19"
+        },
+        "candidate": "../../../../../../Documents/arc-whest/experiments/2026-09-18_own_fit/eval_04_fit.py",
+        "candidate_sha256": "e98d06d9a0342f4c1ce60076f364f7d9c989e9ca3de0b9c4bfa72630fc46eedc",
+        "host_cold_start_s": 0.24,
+        "lifecycle": "grader",
+        "n_mlps": 12,
+        "objective_is_graded": false,
+        "residual_is_graded": false,
+        "residual_measurement_path": "runner=local (in-process BudgetContext)",
+        "round_deviations": {
+          "predict_timeout_s": [
+            1000000000.0,
+            30.0
+          ],
+          "residual_wall_time_limit_s": [
+            null,
+            0.4
+          ],
+          "setup_timeout_s": [
+            1000000000.0,
+            5.0
+          ],
+          "wall_time_limit_s": [
+            null,
+            120.0
+          ]
+        },
+        "round_tag": "v2-phase2",
+        "rows_hash": "ec39b5b7284f341cc7da797c02604d178704c702d57286701d7df9422c15ac88",
+        "setup_called": true,
+        "setup_error": "",
+        "setup_seconds": 0.011376900016330183,
+        "setup_timed_out": false,
+        "setup_timeout_s": 1000000000.0,
+        "spec": {
+          "depth": 16,
+          "floor": 0.1,
+          "flop_budget": 2199023255552,
+          "lam": 0.0,
+          "memory_limit_mb": 8192,
+          "predict_timeout_s": 1000000000.0,
+          "residual_wall_time_limit_s": null,
+          "round_tag": "v2-phase2",
+          "seed": 0,
+          "setup_timeout_s": 1000000000.0,
+          "wall_time_limit_s": null,
+          "width": 1024
+        },
+        "truth_sha256": "0eee0bae5208b9d41826a3c074362ab44b3ebe13fb5b3a9db1ddeb1687723d1c",
+        "weights_mode": "f64_readonly",
+        "weights_mode_is_grader_default": true
+      },
+      "rows": "eval_04_fit.jsonl",
+      "rows_file_sha256": "8fbdb913a43fb383b0118ad7aeafc2f37677ffbfe77cb2b8b2edb36bcb486f25",
+      "rows_hash": "ec39b5b7284f341cc7da797c02604d178704c702d57286701d7df9422c15ac88",
+      "sha256": "e98d06d9a0342f4c1ce60076f364f7d9c989e9ca3de0b9c4bfa72630fc46eedc",
+      "split": "fit"
+    },
+    {
+      "candidate": "eval_05_fit.py",
+      "gt_noise_mean": 2.26902802503473e-09,
+      "index": 5,
+      "mean_flops": 669988045853.0,
+      "n": 12,
+      "n_failed": 0,
+      "observed_score": 8.001656557557967e-09,
+      "official_precision_score": 7.333536529856449e-09,
+      "parameters": {
+        "s_feed": 1.0,
+        "s_lam": 1.15,
+        "t_lam": -0.2,
+        "theta_fam": 0.75
+      },
+      "penalized_fit_objective": 0.9057162468327591,
+      "provenance": {
+        "backend": {
+          "flopscope": "0.12.1+np2.2.6",
+          "flopscope_path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1748\\job-1748\\.venv\\lib\\site-packages\\flopscope",
+          "numpy": "2.2.6",
+          "python": "3.10.19"
+        },
+        "candidate": "../../../../../../Documents/arc-whest/experiments/2026-09-18_own_fit/eval_05_fit.py",
+        "candidate_sha256": "0fca94a51e735e602c94413c389f32d418759801c638882f0dfff96dad51cf69",
+        "host_cold_start_s": 0.24,
+        "lifecycle": "grader",
+        "n_mlps": 12,
+        "objective_is_graded": false,
+        "residual_is_graded": false,
+        "residual_measurement_path": "runner=local (in-process BudgetContext)",
+        "round_deviations": {
+          "predict_timeout_s": [
+            1000000000.0,
+            30.0
+          ],
+          "residual_wall_time_limit_s": [
+            null,
+            0.4
+          ],
+          "setup_timeout_s": [
+            1000000000.0,
+            5.0
+          ],
+          "wall_time_limit_s": [
+            null,
+            120.0
+          ]
+        },
+        "round_tag": "v2-phase2",
+        "rows_hash": "ed88300d5e4932c981f2e938cee17a305a6fcbe97cd55ca3707bbee9e2bff604",
+        "setup_called": true,
+        "setup_error": "",
+        "setup_seconds": 0.03254660000675358,
+        "setup_timed_out": false,
+        "setup_timeout_s": 1000000000.0,
+        "spec": {
+          "depth": 16,
+          "floor": 0.1,
+          "flop_budget": 2199023255552,
+          "lam": 0.0,
+          "memory_limit_mb": 8192,
+          "predict_timeout_s": 1000000000.0,
+          "residual_wall_time_limit_s": null,
+          "round_tag": "v2-phase2",
+          "seed": 0,
+          "setup_timeout_s": 1000000000.0,
+          "wall_time_limit_s": null,
+          "width": 1024
+        },
+        "truth_sha256": "0eee0bae5208b9d41826a3c074362ab44b3ebe13fb5b3a9db1ddeb1687723d1c",
+        "weights_mode": "f64_readonly",
+        "weights_mode_is_grader_default": true
+      },
+      "rows": "eval_05_fit.jsonl",
+      "rows_file_sha256": "20223c7ae0851a6957054953427b8130d205ec39fb45a49eed9375ad11b51277",
+      "rows_hash": "ed88300d5e4932c981f2e938cee17a305a6fcbe97cd55ca3707bbee9e2bff604",
+      "sha256": "0fca94a51e735e602c94413c389f32d418759801c638882f0dfff96dad51cf69",
+      "split": "fit"
+    },
+    {
+      "candidate": "eval_06_fit.py",
+      "gt_noise_mean": 2.26902802503473e-09,
+      "index": 6,
+      "mean_flops": 669988045853.0,
+      "n": 12,
+      "n_failed": 0,
+      "observed_score": 7.98886704069437e-09,
+      "official_precision_score": 7.320747012992851e-09,
+      "parameters": {
+        "s_feed": 1.0,
+        "s_lam": 1.15,
+        "t_lam": 0.2,
+        "theta_fam": 0.75
+      },
+      "penalized_fit_objective": 0.9041369167952334,
+      "provenance": {
+        "backend": {
+          "flopscope": "0.12.1+np2.2.6",
+          "flopscope_path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1748\\job-1748\\.venv\\lib\\site-packages\\flopscope",
+          "numpy": "2.2.6",
+          "python": "3.10.19"
+        },
+        "candidate": "../../../../../../Documents/arc-whest/experiments/2026-09-18_own_fit/eval_06_fit.py",
+        "candidate_sha256": "323088cd816081a5938190c0de0d6a70731ffde1b1f61ff8814a12cbe05f8e26",
+        "host_cold_start_s": 0.24,
+        "lifecycle": "grader",
+        "n_mlps": 12,
+        "objective_is_graded": false,
+        "residual_is_graded": false,
+        "residual_measurement_path": "runner=local (in-process BudgetContext)",
+        "round_deviations": {
+          "predict_timeout_s": [
+            1000000000.0,
+            30.0
+          ],
+          "residual_wall_time_limit_s": [
+            null,
+            0.4
+          ],
+          "setup_timeout_s": [
+            1000000000.0,
+            5.0
+          ],
+          "wall_time_limit_s": [
+            null,
+            120.0
+          ]
+        },
+        "round_tag": "v2-phase2",
+        "rows_hash": "14587d4be929f4543aa5aa1936aba2c455a39e879ae6254a20d36996e294182f",
+        "setup_called": true,
+        "setup_error": "",
+        "setup_seconds": 0.03140229999553412,
+        "setup_timed_out": false,
+        "setup_timeout_s": 1000000000.0,
+        "spec": {
+          "depth": 16,
+          "floor": 0.1,
+          "flop_budget": 2199023255552,
+          "lam": 0.0,
+          "memory_limit_mb": 8192,
+          "predict_timeout_s": 1000000000.0,
+          "residual_wall_time_limit_s": null,
+          "round_tag": "v2-phase2",
+          "seed": 0,
+          "setup_timeout_s": 1000000000.0,
+          "wall_time_limit_s": null,
+          "width": 1024
+        },
+        "truth_sha256": "0eee0bae5208b9d41826a3c074362ab44b3ebe13fb5b3a9db1ddeb1687723d1c",
+        "weights_mode": "f64_readonly",
+        "weights_mode_is_grader_default": true
+      },
+      "rows": "eval_06_fit.jsonl",
+      "rows_file_sha256": "ab26c40111ae7689e66e1adb3536384373153a6963ce1b9070106785a8bb77af",
+      "rows_hash": "14587d4be929f4543aa5aa1936aba2c455a39e879ae6254a20d36996e294182f",
+      "sha256": "323088cd816081a5938190c0de0d6a70731ffde1b1f61ff8814a12cbe05f8e26",
+      "split": "fit"
+    },
+    {
+      "candidate": "eval_07_fit.py",
+      "gt_noise_mean": 2.26902802503473e-09,
+      "index": 7,
+      "mean_flops": 669988076573.0,
+      "n": 12,
+      "n_failed": 0,
+      "observed_score": 7.991884032806742e-09,
+      "official_precision_score": 7.323763974470875e-09,
+      "parameters": {
+        "s_feed": 0.85,
+        "s_lam": 1.15,
+        "t_lam": 0.0,
+        "theta_fam": 0.75
+      },
+      "penalized_fit_objective": 0.9044919701868211,
+      "provenance": {
+        "backend": {
+          "flopscope": "0.12.1+np2.2.6",
+          "flopscope_path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1748\\job-1748\\.venv\\lib\\site-packages\\flopscope",
+          "numpy": "2.2.6",
+          "python": "3.10.19"
+        },
+        "candidate": "../../../../../../Documents/arc-whest/experiments/2026-09-18_own_fit/eval_07_fit.py",
+        "candidate_sha256": "082da9a1b51ca427270ba975d718bfec0f424dc5e8c65beed641945bbafd6753",
+        "host_cold_start_s": 0.24,
+        "lifecycle": "grader",
+        "n_mlps": 12,
+        "objective_is_graded": false,
+        "residual_is_graded": false,
+        "residual_measurement_path": "runner=local (in-process BudgetContext)",
+        "round_deviations": {
+          "predict_timeout_s": [
+            1000000000.0,
+            30.0
+          ],
+          "residual_wall_time_limit_s": [
+            null,
+            0.4
+          ],
+          "setup_timeout_s": [
+            1000000000.0,
+            5.0
+          ],
+          "wall_time_limit_s": [
+            null,
+            120.0
+          ]
+        },
+        "round_tag": "v2-phase2",
+        "rows_hash": "30d43cb0a4df176cf95f9337bcd6181bae6f6ff8cfc58daaa64da4c0959cc4bb",
+        "setup_called": true,
+        "setup_error": "",
+        "setup_seconds": 0.0125934999960009,
+        "setup_timed_out": false,
+        "setup_timeout_s": 1000000000.0,
+        "spec": {
+          "depth": 16,
+          "floor": 0.1,
+          "flop_budget": 2199023255552,
+          "lam": 0.0,
+          "memory_limit_mb": 8192,
+          "predict_timeout_s": 1000000000.0,
+          "residual_wall_time_limit_s": null,
+          "round_tag": "v2-phase2",
+          "seed": 0,
+          "setup_timeout_s": 1000000000.0,
+          "wall_time_limit_s": null,
+          "width": 1024
+        },
+        "truth_sha256": "0eee0bae5208b9d41826a3c074362ab44b3ebe13fb5b3a9db1ddeb1687723d1c",
+        "weights_mode": "f64_readonly",
+        "weights_mode_is_grader_default": true
+      },
+      "rows": "eval_07_fit.jsonl",
+      "rows_file_sha256": "e1bf87909cb1661a48a584fb700b97a4ba6e5ed98d49b5005d215bf184f65cce",
+      "rows_hash": "30d43cb0a4df176cf95f9337bcd6181bae6f6ff8cfc58daaa64da4c0959cc4bb",
+      "sha256": "082da9a1b51ca427270ba975d718bfec0f424dc5e8c65beed641945bbafd6753",
+      "split": "fit"
+    },
+    {
+      "candidate": "eval_08_fit.py",
+      "gt_noise_mean": 2.26902802503473e-09,
+      "index": 8,
+      "mean_flops": 669988076573.0,
+      "n": 12,
+      "n_failed": 0,
+      "observed_score": 7.98158824011683e-09,
+      "official_precision_score": 7.313468181780961e-09,
+      "parameters": {
+        "s_feed": 1.15,
+        "s_lam": 1.15,
+        "t_lam": 0.0,
+        "theta_fam": 0.75
+      },
+      "penalized_fit_objective": 0.9032205809053698,
+      "provenance": {
+        "backend": {
+          "flopscope": "0.12.1+np2.2.6",
+          "flopscope_path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1748\\job-1748\\.venv\\lib\\site-packages\\flopscope",
+          "numpy": "2.2.6",
+          "python": "3.10.19"
+        },
+        "candidate": "../../../../../../Documents/arc-whest/experiments/2026-09-18_own_fit/eval_08_fit.py",
+        "candidate_sha256": "8a7bda2c83813ee146e09f7eeaaba2020e8bcc6e3fb9dc7791f091518e8431cd",
+        "host_cold_start_s": 0.24,
+        "lifecycle": "grader",
+        "n_mlps": 12,
+        "objective_is_graded": false,
+        "residual_is_graded": false,
+        "residual_measurement_path": "runner=local (in-process BudgetContext)",
+        "round_deviations": {
+          "predict_timeout_s": [
+            1000000000.0,
+            30.0
+          ],
+          "residual_wall_time_limit_s": [
+            null,
+            0.4
+          ],
+          "setup_timeout_s": [
+            1000000000.0,
+            5.0
+          ],
+          "wall_time_limit_s": [
+            null,
+            120.0
+          ]
+        },
+        "round_tag": "v2-phase2",
+        "rows_hash": "c47b84bb7eafe25dec69c7c3fa09a9b9e23c9aa012543c054c144399d0f32553",
+        "setup_called": true,
+        "setup_error": "",
+        "setup_seconds": 0.016883400006918237,
+        "setup_timed_out": false,
+        "setup_timeout_s": 1000000000.0,
+        "spec": {
+          "depth": 16,
+          "floor": 0.1,
+          "flop_budget": 2199023255552,
+          "lam": 0.0,
+          "memory_limit_mb": 8192,
+          "predict_timeout_s": 1000000000.0,
+          "residual_wall_time_limit_s": null,
+          "round_tag": "v2-phase2",
+          "seed": 0,
+          "setup_timeout_s": 1000000000.0,
+          "wall_time_limit_s": null,
+          "width": 1024
+        },
+        "truth_sha256": "0eee0bae5208b9d41826a3c074362ab44b3ebe13fb5b3a9db1ddeb1687723d1c",
+        "weights_mode": "f64_readonly",
+        "weights_mode_is_grader_default": true
+      },
+      "rows": "eval_08_fit.jsonl",
+      "rows_file_sha256": "9b33e4d373206e40c414d7ee2d56ff6edf98f50dfd735b2c42fa7c27e0a9d9b3",
+      "rows_hash": "c47b84bb7eafe25dec69c7c3fa09a9b9e23c9aa012543c054c144399d0f32553",
+      "sha256": "8a7bda2c83813ee146e09f7eeaaba2020e8bcc6e3fb9dc7791f091518e8431cd",
+      "split": "fit"
+    },
+    {
+      "candidate": "eval_09_fit.py",
+      "gt_noise_mean": 2.26902802503473e-09,
+      "index": 9,
+      "mean_flops": 669988045853.0,
+      "n": 12,
+      "n_failed": 0,
+      "observed_score": 7.954673354627996e-09,
+      "official_precision_score": 7.2865533269264785e-09,
+      "parameters": {
+        "s_feed": 1.0,
+        "s_lam": 1.15,
+        "t_lam": 0.0,
+        "theta_fam": 0.625
+      },
+      "penalized_fit_objective": 0.8999525902300729,
+      "provenance": {
+        "backend": {
+          "flopscope": "0.12.1+np2.2.6",
+          "flopscope_path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1748\\job-1748\\.venv\\lib\\site-packages\\flopscope",
+          "numpy": "2.2.6",
+          "python": "3.10.19"
+        },
+        "candidate": "../../../../../../Documents/arc-whest/experiments/2026-09-18_own_fit/eval_09_fit.py",
+        "candidate_sha256": "552c5d600911980845daab1c346c311dcb48de64257a8adf8d2d7b78c0ebd2ab",
+        "host_cold_start_s": 0.24,
+        "lifecycle": "grader",
+        "n_mlps": 12,
+        "objective_is_graded": false,
+        "residual_is_graded": false,
+        "residual_measurement_path": "runner=local (in-process BudgetContext)",
+        "round_deviations": {
+          "predict_timeout_s": [
+            1000000000.0,
+            30.0
+          ],
+          "residual_wall_time_limit_s": [
+            null,
+            0.4
+          ],
+          "setup_timeout_s": [
+            1000000000.0,
+            5.0
+          ],
+          "wall_time_limit_s": [
+            null,
+            120.0
+          ]
+        },
+        "round_tag": "v2-phase2",
+        "rows_hash": "a93cb606a9c405b7382bca06041a0d08a3753bc320493a411dece05efb67d0a6",
+        "setup_called": true,
+        "setup_error": "",
+        "setup_seconds": 0.018827100022463128,
+        "setup_timed_out": false,
+        "setup_timeout_s": 1000000000.0,
+        "spec": {
+          "depth": 16,
+          "floor": 0.1,
+          "flop_budget": 2199023255552,
+          "lam": 0.0,
+          "memory_limit_mb": 8192,
+          "predict_timeout_s": 1000000000.0,
+          "residual_wall_time_limit_s": null,
+          "round_tag": "v2-phase2",
+          "seed": 0,
+          "setup_timeout_s": 1000000000.0,
+          "wall_time_limit_s": null,
+          "width": 1024
+        },
+        "truth_sha256": "0eee0bae5208b9d41826a3c074362ab44b3ebe13fb5b3a9db1ddeb1687723d1c",
+        "weights_mode": "f64_readonly",
+        "weights_mode_is_grader_default": true
+      },
+      "rows": "eval_09_fit.jsonl",
+      "rows_file_sha256": "7fc9794e4977b7003ea8a75d5ad41311aa15fd99e5a750e07480699d631fc2a5",
+      "rows_hash": "a93cb606a9c405b7382bca06041a0d08a3753bc320493a411dece05efb67d0a6",
+      "sha256": "552c5d600911980845daab1c346c311dcb48de64257a8adf8d2d7b78c0ebd2ab",
+      "split": "fit"
+    },
+    {
+      "candidate": "eval_10_fit.py",
+      "gt_noise_mean": 2.26902802503473e-09,
+      "index": 10,
+      "mean_flops": 669988045853.0,
+      "n": 12,
+      "n_failed": 0,
+      "observed_score": 8.109494678843237e-09,
+      "official_precision_score": 7.441374651141719e-09,
+      "parameters": {
+        "s_feed": 1.0,
+        "s_lam": 1.15,
+        "t_lam": 0.0,
+        "theta_fam": 0.875
+      },
+      "penalized_fit_objective": 0.9189459017652474,
+      "provenance": {
+        "backend": {
+          "flopscope": "0.12.1+np2.2.6",
+          "flopscope_path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1748\\job-1748\\.venv\\lib\\site-packages\\flopscope",
+          "numpy": "2.2.6",
+          "python": "3.10.19"
+        },
+        "candidate": "../../../../../../Documents/arc-whest/experiments/2026-09-18_own_fit/eval_10_fit.py",
+        "candidate_sha256": "41eae8849fdfce0cac82a37f48c1a4408601d1a67930ab4468c2575d88a5f8da",
+        "host_cold_start_s": 0.24,
+        "lifecycle": "grader",
+        "n_mlps": 12,
+        "objective_is_graded": false,
+        "residual_is_graded": false,
+        "residual_measurement_path": "runner=local (in-process BudgetContext)",
+        "round_deviations": {
+          "predict_timeout_s": [
+            1000000000.0,
+            30.0
+          ],
+          "residual_wall_time_limit_s": [
+            null,
+            0.4
+          ],
+          "setup_timeout_s": [
+            1000000000.0,
+            5.0
+          ],
+          "wall_time_limit_s": [
+            null,
+            120.0
+          ]
+        },
+        "round_tag": "v2-phase2",
+        "rows_hash": "c339679c7839e67d782ddd0ace4f64dae09c07d43b76feb464f93a3bc1ce4a6a",
+        "setup_called": true,
+        "setup_error": "",
+        "setup_seconds": 0.01826810001512058,
+        "setup_timed_out": false,
+        "setup_timeout_s": 1000000000.0,
+        "spec": {
+          "depth": 16,
+          "floor": 0.1,
+          "flop_budget": 2199023255552,
+          "lam": 0.0,
+          "memory_limit_mb": 8192,
+          "predict_timeout_s": 1000000000.0,
+          "residual_wall_time_limit_s": null,
+          "round_tag": "v2-phase2",
+          "seed": 0,
+          "setup_timeout_s": 1000000000.0,
+          "wall_time_limit_s": null,
+          "width": 1024
+        },
+        "truth_sha256": "0eee0bae5208b9d41826a3c074362ab44b3ebe13fb5b3a9db1ddeb1687723d1c",
+        "weights_mode": "f64_readonly",
+        "weights_mode_is_grader_default": true
+      },
+      "rows": "eval_10_fit.jsonl",
+      "rows_file_sha256": "5c66116e9629b454ce73010d62dbae41c725a3267dd20b9f2b462a52bf4abe60",
+      "rows_hash": "c339679c7839e67d782ddd0ace4f64dae09c07d43b76feb464f93a3bc1ce4a6a",
+      "sha256": "41eae8849fdfce0cac82a37f48c1a4408601d1a67930ab4468c2575d88a5f8da",
+      "split": "fit"
+    },
+    {
+      "candidate": "eval_11_fit.py",
+      "gt_noise_mean": 2.26902802503473e-09,
+      "index": 11,
+      "mean_flops": 669988045853.0,
+      "n": 12,
+      "n_failed": 0,
+      "observed_score": 8.030541494789004e-09,
+      "official_precision_score": 7.362421467087487e-09,
+      "parameters": {
+        "s_feed": 1.0,
+        "s_lam": 1.075,
+        "t_lam": 0.0,
+        "theta_fam": 0.625
+      },
+      "penalized_fit_objective": 0.9093043906793019,
+      "provenance": {
+        "backend": {
+          "flopscope": "0.12.1+np2.2.6",
+          "flopscope_path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1748\\job-1748\\.venv\\lib\\site-packages\\flopscope",
+          "numpy": "2.2.6",
+          "python": "3.10.19"
+        },
+        "candidate": "../../../../../../Documents/arc-whest/experiments/2026-09-18_own_fit/eval_11_fit.py",
+        "candidate_sha256": "c252e0e05f524e5ee624e1592af010f926c479c985c2eb363aa2f0440d0c672c",
+        "host_cold_start_s": 0.24,
+        "lifecycle": "grader",
+        "n_mlps": 12,
+        "objective_is_graded": false,
+        "residual_is_graded": false,
+        "residual_measurement_path": "runner=local (in-process BudgetContext)",
+        "round_deviations": {
+          "predict_timeout_s": [
+            1000000000.0,
+            30.0
+          ],
+          "residual_wall_time_limit_s": [
+            null,
+            0.4
+          ],
+          "setup_timeout_s": [
+            1000000000.0,
+            5.0
+          ],
+          "wall_time_limit_s": [
+            null,
+            120.0
+          ]
+        },
+        "round_tag": "v2-phase2",
+        "rows_hash": "68dcd06b4e375565d93ade9644be426cb8758f0036048b5f271de329ebb655da",
+        "setup_called": true,
+        "setup_error": "",
+        "setup_seconds": 0.012329199991654605,
+        "setup_timed_out": false,
+        "setup_timeout_s": 1000000000.0,
+        "spec": {
+          "depth": 16,
+          "floor": 0.1,
+          "flop_budget": 2199023255552,
+          "lam": 0.0,
+          "memory_limit_mb": 8192,
+          "predict_timeout_s": 1000000000.0,
+          "residual_wall_time_limit_s": null,
+          "round_tag": "v2-phase2",
+          "seed": 0,
+          "setup_timeout_s": 1000000000.0,
+          "wall_time_limit_s": null,
+          "width": 1024
+        },
+        "truth_sha256": "0eee0bae5208b9d41826a3c074362ab44b3ebe13fb5b3a9db1ddeb1687723d1c",
+        "weights_mode": "f64_readonly",
+        "weights_mode_is_grader_default": true
+      },
+      "rows": "eval_11_fit.jsonl",
+      "rows_file_sha256": "15cdc8fb5b043f6cede91a3c571bacc92ced8075e41cd4ed913d21c252298603",
+      "rows_hash": "68dcd06b4e375565d93ade9644be426cb8758f0036048b5f271de329ebb655da",
+      "sha256": "c252e0e05f524e5ee624e1592af010f926c479c985c2eb363aa2f0440d0c672c",
+      "split": "fit"
+    },
+    {
+      "candidate": "eval_12_fit.py",
+      "gt_noise_mean": 2.26902802503473e-09,
+      "index": 12,
+      "mean_flops": 669988045853.0,
+      "n": 12,
+      "n_failed": 0,
+      "observed_score": 7.920228004966107e-09,
+      "official_precision_score": 7.252107977264587e-09,
+      "parameters": {
+        "s_feed": 1.0,
+        "s_lam": 1.2249999999999999,
+        "t_lam": 0.0,
+        "theta_fam": 0.625
+      },
+      "penalized_fit_objective": 0.8957271866602065,
+      "provenance": {
+        "backend": {
+          "flopscope": "0.12.1+np2.2.6",
+          "flopscope_path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1748\\job-1748\\.venv\\lib\\site-packages\\flopscope",
+          "numpy": "2.2.6",
+          "python": "3.10.19"
+        },
+        "candidate": "../../../../../../Documents/arc-whest/experiments/2026-09-18_own_fit/eval_12_fit.py",
+        "candidate_sha256": "f4c68e6ad791adde513ce3a395354e703155fafe0a6bddc9198d76e14edea203",
+        "host_cold_start_s": 0.24,
+        "lifecycle": "grader",
+        "n_mlps": 12,
+        "objective_is_graded": false,
+        "residual_is_graded": false,
+        "residual_measurement_path": "runner=local (in-process BudgetContext)",
+        "round_deviations": {
+          "predict_timeout_s": [
+            1000000000.0,
+            30.0
+          ],
+          "residual_wall_time_limit_s": [
+            null,
+            0.4
+          ],
+          "setup_timeout_s": [
+            1000000000.0,
+            5.0
+          ],
+          "wall_time_limit_s": [
+            null,
+            120.0
+          ]
+        },
+        "round_tag": "v2-phase2",
+        "rows_hash": "38b3f38d4c5790ef35ed25060022e660799f00f8a245b0d0c438d3f7be8c3f52",
+        "setup_called": true,
+        "setup_error": "",
+        "setup_seconds": 0.014791199995670468,
+        "setup_timed_out": false,
+        "setup_timeout_s": 1000000000.0,
+        "spec": {
+          "depth": 16,
+          "floor": 0.1,
+          "flop_budget": 2199023255552,
+          "lam": 0.0,
+          "memory_limit_mb": 8192,
+          "predict_timeout_s": 1000000000.0,
+          "residual_wall_time_limit_s": null,
+          "round_tag": "v2-phase2",
+          "seed": 0,
+          "setup_timeout_s": 1000000000.0,
+          "wall_time_limit_s": null,
+          "width": 1024
+        },
+        "truth_sha256": "0eee0bae5208b9d41826a3c074362ab44b3ebe13fb5b3a9db1ddeb1687723d1c",
+        "weights_mode": "f64_readonly",
+        "weights_mode_is_grader_default": true
+      },
+      "rows": "eval_12_fit.jsonl",
+      "rows_file_sha256": "f7ee9eeb86e24314de960b0171d561838ef77e32f95f4e02adde366c13cd9995",
+      "rows_hash": "38b3f38d4c5790ef35ed25060022e660799f00f8a245b0d0c438d3f7be8c3f52",
+      "sha256": "f4c68e6ad791adde513ce3a395354e703155fafe0a6bddc9198d76e14edea203",
+      "split": "fit"
+    },
+    {
+      "candidate": "eval_13_fit.py",
+      "gt_noise_mean": 2.26902802503473e-09,
+      "index": 13,
+      "mean_flops": 669988045853.0,
+      "n": 12,
+      "n_failed": 0,
+      "observed_score": 7.900810940844857e-09,
+      "official_precision_score": 7.232690913143336e-09,
+      "parameters": {
+        "s_feed": 1.0,
+        "s_lam": 1.2249999999999999,
+        "t_lam": -0.1,
+        "theta_fam": 0.625
+      },
+      "penalized_fit_objective": 0.8933394453745652,
+      "provenance": {
+        "backend": {
+          "flopscope": "0.12.1+np2.2.6",
+          "flopscope_path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1748\\job-1748\\.venv\\lib\\site-packages\\flopscope",
+          "numpy": "2.2.6",
+          "python": "3.10.19"
+        },
+        "candidate": "../../../../../../Documents/arc-whest/experiments/2026-09-18_own_fit/eval_13_fit.py",
+        "candidate_sha256": "f59b9d52605fb9dcb4cf6718f6eb90c055df589e3e7c935b5b27e799055d879a",
+        "host_cold_start_s": 0.24,
+        "lifecycle": "grader",
+        "n_mlps": 12,
+        "objective_is_graded": false,
+        "residual_is_graded": false,
+        "residual_measurement_path": "runner=local (in-process BudgetContext)",
+        "round_deviations": {
+          "predict_timeout_s": [
+            1000000000.0,
+            30.0
+          ],
+          "residual_wall_time_limit_s": [
+            null,
+            0.4
+          ],
+          "setup_timeout_s": [
+            1000000000.0,
+            5.0
+          ],
+          "wall_time_limit_s": [
+            null,
+            120.0
+          ]
+        },
+        "round_tag": "v2-phase2",
+        "rows_hash": "b54b8ae3d5340ad5bcd63693ab1012e3afa9f9fb965c17686f73aa9684723397",
+        "setup_called": true,
+        "setup_error": "",
+        "setup_seconds": 0.015446900011738762,
+        "setup_timed_out": false,
+        "setup_timeout_s": 1000000000.0,
+        "spec": {
+          "depth": 16,
+          "floor": 0.1,
+          "flop_budget": 2199023255552,
+          "lam": 0.0,
+          "memory_limit_mb": 8192,
+          "predict_timeout_s": 1000000000.0,
+          "residual_wall_time_limit_s": null,
+          "round_tag": "v2-phase2",
+          "seed": 0,
+          "setup_timeout_s": 1000000000.0,
+          "wall_time_limit_s": null,
+          "width": 1024
+        },
+        "truth_sha256": "0eee0bae5208b9d41826a3c074362ab44b3ebe13fb5b3a9db1ddeb1687723d1c",
+        "weights_mode": "f64_readonly",
+        "weights_mode_is_grader_default": true
+      },
+      "rows": "eval_13_fit.jsonl",
+      "rows_file_sha256": "44b3a23f366025d32be092c53c36bfd517e39c4c9b469d43e5ea2e9727d43c84",
+      "rows_hash": "b54b8ae3d5340ad5bcd63693ab1012e3afa9f9fb965c17686f73aa9684723397",
+      "sha256": "f59b9d52605fb9dcb4cf6718f6eb90c055df589e3e7c935b5b27e799055d879a",
+      "split": "fit"
+    },
+    {
+      "candidate": "eval_14_fit.py",
+      "gt_noise_mean": 2.26902802503473e-09,
+      "index": 14,
+      "mean_flops": 669988045853.0,
+      "n": 12,
+      "n_failed": 0,
+      "observed_score": 7.945392921285768e-09,
+      "official_precision_score": 7.277272893584248e-09,
+      "parameters": {
+        "s_feed": 1.0,
+        "s_lam": 1.2249999999999999,
+        "t_lam": 0.1,
+        "theta_fam": 0.625
+      },
+      "penalized_fit_objective": 0.8988447089113857,
+      "provenance": {
+        "backend": {
+          "flopscope": "0.12.1+np2.2.6",
+          "flopscope_path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1748\\job-1748\\.venv\\lib\\site-packages\\flopscope",
+          "numpy": "2.2.6",
+          "python": "3.10.19"
+        },
+        "candidate": "../../../../../../Documents/arc-whest/experiments/2026-09-18_own_fit/eval_14_fit.py",
+        "candidate_sha256": "5404e1d46ea00539bf689a849ea549a2926e95eab8d40db190f332f55b110c88",
+        "host_cold_start_s": 0.24,
+        "lifecycle": "grader",
+        "n_mlps": 12,
+        "objective_is_graded": false,
+        "residual_is_graded": false,
+        "residual_measurement_path": "runner=local (in-process BudgetContext)",
+        "round_deviations": {
+          "predict_timeout_s": [
+            1000000000.0,
+            30.0
+          ],
+          "residual_wall_time_limit_s": [
+            null,
+            0.4
+          ],
+          "setup_timeout_s": [
+            1000000000.0,
+            5.0
+          ],
+          "wall_time_limit_s": [
+            null,
+            120.0
+          ]
+        },
+        "round_tag": "v2-phase2",
+        "rows_hash": "ca965603f5aa5a701188030aa214ab257352236e02b0f2a225740d231958cfbc",
+        "setup_called": true,
+        "setup_error": "",
+        "setup_seconds": 0.012961400003405288,
+        "setup_timed_out": false,
+        "setup_timeout_s": 1000000000.0,
+        "spec": {
+          "depth": 16,
+          "floor": 0.1,
+          "flop_budget": 2199023255552,
+          "lam": 0.0,
+          "memory_limit_mb": 8192,
+          "predict_timeout_s": 1000000000.0,
+          "residual_wall_time_limit_s": null,
+          "round_tag": "v2-phase2",
+          "seed": 0,
+          "setup_timeout_s": 1000000000.0,
+          "wall_time_limit_s": null,
+          "width": 1024
+        },
+        "truth_sha256": "0eee0bae5208b9d41826a3c074362ab44b3ebe13fb5b3a9db1ddeb1687723d1c",
+        "weights_mode": "f64_readonly",
+        "weights_mode_is_grader_default": true
+      },
+      "rows": "eval_14_fit.jsonl",
+      "rows_file_sha256": "17d793dd94f287a97d7afafc97354970190f696c696394e74b21dccf29a6d0c3",
+      "rows_hash": "ca965603f5aa5a701188030aa214ab257352236e02b0f2a225740d231958cfbc",
+      "sha256": "5404e1d46ea00539bf689a849ea549a2926e95eab8d40db190f332f55b110c88",
+      "split": "fit"
+    },
+    {
+      "candidate": "eval_15_fit.py",
+      "gt_noise_mean": 2.26902802503473e-09,
+      "index": 15,
+      "mean_flops": 669988076573.0,
+      "n": 12,
+      "n_failed": 0,
+      "observed_score": 7.904274654372745e-09,
+      "official_precision_score": 7.236154596036878e-09,
+      "parameters": {
+        "s_feed": 0.925,
+        "s_lam": 1.2249999999999999,
+        "t_lam": -0.1,
+        "theta_fam": 0.625
+      },
+      "penalized_fit_objective": 0.8937727877381355,
+      "provenance": {
+        "backend": {
+          "flopscope": "0.12.1+np2.2.6",
+          "flopscope_path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1748\\job-1748\\.venv\\lib\\site-packages\\flopscope",
+          "numpy": "2.2.6",
+          "python": "3.10.19"
+        },
+        "candidate": "../../../../../../Documents/arc-whest/experiments/2026-09-18_own_fit/eval_15_fit.py",
+        "candidate_sha256": "fbf15af1bc9d1b2f4538111c8485bb3bc8fcd6c8bacaa2e90df89667448b85c6",
+        "host_cold_start_s": 0.24,
+        "lifecycle": "grader",
+        "n_mlps": 12,
+        "objective_is_graded": false,
+        "residual_is_graded": false,
+        "residual_measurement_path": "runner=local (in-process BudgetContext)",
+        "round_deviations": {
+          "predict_timeout_s": [
+            1000000000.0,
+            30.0
+          ],
+          "residual_wall_time_limit_s": [
+            null,
+            0.4
+          ],
+          "setup_timeout_s": [
+            1000000000.0,
+            5.0
+          ],
+          "wall_time_limit_s": [
+            null,
+            120.0
+          ]
+        },
+        "round_tag": "v2-phase2",
+        "rows_hash": "888247917bf9e9b7349a78de4f1d33868d29f2c6bc325b7a4b7a97a7e0980820",
+        "setup_called": true,
+        "setup_error": "",
+        "setup_seconds": 0.011468500015325844,
+        "setup_timed_out": false,
+        "setup_timeout_s": 1000000000.0,
+        "spec": {
+          "depth": 16,
+          "floor": 0.1,
+          "flop_budget": 2199023255552,
+          "lam": 0.0,
+          "memory_limit_mb": 8192,
+          "predict_timeout_s": 1000000000.0,
+          "residual_wall_time_limit_s": null,
+          "round_tag": "v2-phase2",
+          "seed": 0,
+          "setup_timeout_s": 1000000000.0,
+          "wall_time_limit_s": null,
+          "width": 1024
+        },
+        "truth_sha256": "0eee0bae5208b9d41826a3c074362ab44b3ebe13fb5b3a9db1ddeb1687723d1c",
+        "weights_mode": "f64_readonly",
+        "weights_mode_is_grader_default": true
+      },
+      "rows": "eval_15_fit.jsonl",
+      "rows_file_sha256": "dbb0f22e5427f33e8e2883d47406424c4010055bddefa5141279fc5cec614e9a",
+      "rows_hash": "888247917bf9e9b7349a78de4f1d33868d29f2c6bc325b7a4b7a97a7e0980820",
+      "sha256": "fbf15af1bc9d1b2f4538111c8485bb3bc8fcd6c8bacaa2e90df89667448b85c6",
+      "split": "fit"
+    },
+    {
+      "candidate": "eval_16_fit.py",
+      "gt_noise_mean": 2.26902802503473e-09,
+      "index": 16,
+      "mean_flops": 669988076573.0,
+      "n": 12,
+      "n_failed": 0,
+      "observed_score": 7.902979669220522e-09,
+      "official_precision_score": 7.234859610884652e-09,
+      "parameters": {
+        "s_feed": 1.075,
+        "s_lam": 1.2249999999999999,
+        "t_lam": -0.1,
+        "theta_fam": 0.625
+      },
+      "penalized_fit_objective": 0.8936128748211056,
+      "provenance": {
+        "backend": {
+          "flopscope": "0.12.1+np2.2.6",
+          "flopscope_path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1748\\job-1748\\.venv\\lib\\site-packages\\flopscope",
+          "numpy": "2.2.6",
+          "python": "3.10.19"
+        },
+        "candidate": "../../../../../../Documents/arc-whest/experiments/2026-09-18_own_fit/eval_16_fit.py",
+        "candidate_sha256": "2a9dc0dc165cf8dbe7332e40acc1773bcd48580a2befa1dc696bceb05062aa98",
+        "host_cold_start_s": 0.24,
+        "lifecycle": "grader",
+        "n_mlps": 12,
+        "objective_is_graded": false,
+        "residual_is_graded": false,
+        "residual_measurement_path": "runner=local (in-process BudgetContext)",
+        "round_deviations": {
+          "predict_timeout_s": [
+            1000000000.0,
+            30.0
+          ],
+          "residual_wall_time_limit_s": [
+            null,
+            0.4
+          ],
+          "setup_timeout_s": [
+            1000000000.0,
+            5.0
+          ],
+          "wall_time_limit_s": [
+            null,
+            120.0
+          ]
+        },
+        "round_tag": "v2-phase2",
+        "rows_hash": "125c76818fa5188d64f06872c8f80c5e6276ff6a5008fbfbc0f5ef00d798631d",
+        "setup_called": true,
+        "setup_error": "",
+        "setup_seconds": 0.011818099999800324,
+        "setup_timed_out": false,
+        "setup_timeout_s": 1000000000.0,
+        "spec": {
+          "depth": 16,
+          "floor": 0.1,
+          "flop_budget": 2199023255552,
+          "lam": 0.0,
+          "memory_limit_mb": 8192,
+          "predict_timeout_s": 1000000000.0,
+          "residual_wall_time_limit_s": null,
+          "round_tag": "v2-phase2",
+          "seed": 0,
+          "setup_timeout_s": 1000000000.0,
+          "wall_time_limit_s": null,
+          "width": 1024
+        },
+        "truth_sha256": "0eee0bae5208b9d41826a3c074362ab44b3ebe13fb5b3a9db1ddeb1687723d1c",
+        "weights_mode": "f64_readonly",
+        "weights_mode_is_grader_default": true
+      },
+      "rows": "eval_16_fit.jsonl",
+      "rows_file_sha256": "76c7412b45901e759f5f0816a7470406410c4df2444276376211e65eb7f18ed5",
+      "rows_hash": "125c76818fa5188d64f06872c8f80c5e6276ff6a5008fbfbc0f5ef00d798631d",
+      "sha256": "2a9dc0dc165cf8dbe7332e40acc1773bcd48580a2befa1dc696bceb05062aa98",
+      "split": "fit"
+    },
+    {
+      "candidate": "eval_17_validation.py",
+      "gt_noise_mean": 2.2271138918449564e-09,
+      "index": 17,
+      "mean_flops": 669940797469.0,
+      "n": 12,
+      "n_failed": 0,
+      "observed_score": 8.97006646888871e-09,
+      "official_precision_score": 8.31433439129682e-09,
+      "parameters": {
+        "s_feed": 1.0,
+        "s_lam": 1.0,
+        "t_lam": 0.0,
+        "theta_fam": 1.0
+      },
+      "provenance": {
+        "backend": {
+          "flopscope": "0.12.1+np2.2.6",
+          "flopscope_path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1748\\job-1748\\.venv\\lib\\site-packages\\flopscope",
+          "numpy": "2.2.6",
+          "python": "3.10.19"
+        },
+        "candidate": "../../../../../../Documents/arc-whest/experiments/2026-09-18_own_fit/eval_17_validation.py",
+        "candidate_sha256": "95dac27482c3b5f257859a959c4107d0f1c2bbc991afb5527901abc63b288822",
+        "host_cold_start_s": 0.24,
+        "lifecycle": "grader",
+        "n_mlps": 12,
+        "objective_is_graded": false,
+        "residual_is_graded": false,
+        "residual_measurement_path": "runner=local (in-process BudgetContext)",
+        "round_deviations": {
+          "predict_timeout_s": [
+            1000000000.0,
+            30.0
+          ],
+          "residual_wall_time_limit_s": [
+            null,
+            0.4
+          ],
+          "setup_timeout_s": [
+            1000000000.0,
+            5.0
+          ],
+          "wall_time_limit_s": [
+            null,
+            120.0
+          ]
+        },
+        "round_tag": "v2-phase2",
+        "rows_hash": "55a2598a4aa84a24cd3cb19c7926599ffb6653f73dc9d72d0e20210592a9cdc6",
+        "setup_called": true,
+        "setup_error": "",
+        "setup_seconds": 0.008393999974941835,
+        "setup_timed_out": false,
+        "setup_timeout_s": 1000000000.0,
+        "spec": {
+          "depth": 16,
+          "floor": 0.1,
+          "flop_budget": 2199023255552,
+          "lam": 0.0,
+          "memory_limit_mb": 8192,
+          "predict_timeout_s": 1000000000.0,
+          "residual_wall_time_limit_s": null,
+          "round_tag": "v2-phase2",
+          "seed": 0,
+          "setup_timeout_s": 1000000000.0,
+          "wall_time_limit_s": null,
+          "width": 1024
+        },
+        "truth_sha256": "372d269e09f4645be248aa11b91a8c2ee03638ffa408dbdd8451bd924246ad16",
+        "weights_mode": "f64_readonly",
+        "weights_mode_is_grader_default": true
+      },
+      "rows": "eval_17_validation.jsonl",
+      "rows_file_sha256": "84751fec28ef7718f99a03ba9106a45edc274e7d6dc1ac9978d0279ed66560e3",
+      "rows_hash": "55a2598a4aa84a24cd3cb19c7926599ffb6653f73dc9d72d0e20210592a9cdc6",
+      "sha256": "95dac27482c3b5f257859a959c4107d0f1c2bbc991afb5527901abc63b288822",
+      "split": "validation"
+    },
+    {
+      "candidate": "eval_18_validation.py",
+      "gt_noise_mean": 2.2271138918449564e-09,
+      "index": 18,
+      "mean_flops": 669988045853.0,
+      "n": 12,
+      "n_failed": 0,
+      "observed_score": 7.918122554853284e-09,
+      "official_precision_score": 7.2623442309645265e-09,
+      "parameters": {
+        "s_feed": 1.0,
+        "s_lam": 1.2249999999999999,
+        "t_lam": -0.1,
+        "theta_fam": 0.625
+      },
+      "provenance": {
+        "backend": {
+          "flopscope": "0.12.1+np2.2.6",
+          "flopscope_path": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1748\\job-1748\\.venv\\lib\\site-packages\\flopscope",
+          "numpy": "2.2.6",
+          "python": "3.10.19"
+        },
+        "candidate": "../../../../../../Documents/arc-whest/experiments/2026-09-18_own_fit/eval_18_validation.py",
+        "candidate_sha256": "f59b9d52605fb9dcb4cf6718f6eb90c055df589e3e7c935b5b27e799055d879a",
+        "host_cold_start_s": 0.24,
+        "lifecycle": "grader",
+        "n_mlps": 12,
+        "objective_is_graded": false,
+        "residual_is_graded": false,
+        "residual_measurement_path": "runner=local (in-process BudgetContext)",
+        "round_deviations": {
+          "predict_timeout_s": [
+            1000000000.0,
+            30.0
+          ],
+          "residual_wall_time_limit_s": [
+            null,
+            0.4
+          ],
+          "setup_timeout_s": [
+            1000000000.0,
+            5.0
+          ],
+          "wall_time_limit_s": [
+            null,
+            120.0
+          ]
+        },
+        "round_tag": "v2-phase2",
+        "rows_hash": "11df7d304cff1f5f27ccdc3637f4658ecbf363267ee217024b2c64c687a2d61c",
+        "setup_called": true,
+        "setup_error": "",
+        "setup_seconds": 0.008004000002983958,
+        "setup_timed_out": false,
+        "setup_timeout_s": 1000000000.0,
+        "spec": {
+          "depth": 16,
+          "floor": 0.1,
+          "flop_budget": 2199023255552,
+          "lam": 0.0,
+          "memory_limit_mb": 8192,
+          "predict_timeout_s": 1000000000.0,
+          "residual_wall_time_limit_s": null,
+          "round_tag": "v2-phase2",
+          "seed": 0,
+          "setup_timeout_s": 1000000000.0,
+          "wall_time_limit_s": null,
+          "width": 1024
+        },
+        "truth_sha256": "372d269e09f4645be248aa11b91a8c2ee03638ffa408dbdd8451bd924246ad16",
+        "weights_mode": "f64_readonly",
+        "weights_mode_is_grader_default": true
+      },
+      "rows": "eval_18_validation.jsonl",
+      "rows_file_sha256": "a2e493166162e10263b57814161cb7ceb0b81e638e1e398903b2257e8f147c1f",
+      "rows_hash": "11df7d304cff1f5f27ccdc3637f4658ecbf363267ee217024b2c64c687a2d61c",
+      "sha256": "f59b9d52605fb9dcb4cf6718f6eb90c055df589e3e7c935b5b27e799055d879a",
+      "split": "validation"
+    }
+  ],
+  "evaluations_used": 19,
+  "fit_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "frozen_default_fit_score": 8.098064723466543e-09,
+  "full_network_runs": 228,
+  "generator_sha256": "30a4d71969c2d329e632230106e33f0c151956352815e0fa897784b1023c7b4e",
+  "heldout_default_official_score": 8.31433439129682e-09,
+  "heldout_selected_official_score": 7.2623442309645265e-09,
+  "local_seconds_caps": "disabled for P12 DESIGN; not release evidence",
+  "max_evaluations": 40,
+  "numerical_environment": {
+    "executable": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1748\\job-1748\\.venv\\Scripts\\python.exe",
+    "numpy": "2.2.6",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python": "3.10.19 (main, Jan 27 2026, 23:41:53) [MSC v.1944 64 bit (AMD64)]",
+    "threads": {
+      "MKL_NUM_THREADS": null,
+      "NUMEXPR_NUM_THREADS": null,
+      "OMP_NUM_THREADS": null,
+      "OPENBLAS_NUM_THREADS": null
+    }
+  },
+  "objective": "fit mean official adjusted / frozen default fit mean + 0.001 squared distance",
+  "optimization_review": "Reuse one truth load and the existing grader lifecycle; stream each row and atomic evaluation checkpoint. Do not cache 12 large MLP weight sets or bypass metered estimator work. Each candidate is priced on all 12 fit networks; matched default and selected validation are priced on all 12 held-out networks. 19 evaluations are below the 40 cap. Source stays per-candidate frozen; no automatic DECIDE reuse.",
+  "ordered_seeds": [
+    40917012000,
+    40917012001,
+    40917012002,
+    40917012003,
+    40917012004,
+    40917012005,
+    40917012006,
+    40917012007,
+    40917012008,
+    40917012009,
+    40917012010,
+    40917012011,
+    40917012012,
+    40917012013,
+    40917012014,
+    40917012015,
+    40917012016,
+    40917012017,
+    40917012018,
+    40917012019,
+    40917012020,
+    40917012021,
+    40917012022,
+    40917012023
+  ],
+  "parameters": [
+    "theta_fam",
+    "s_lam",
+    "t_lam",
+    "s_feed"
+  ],
+  "passes": [
+    {
+      "direction_order": [
+        -1,
+        1
+      ],
+      "step": {
+        "s_feed": 0.15,
+        "s_lam": 0.15,
+        "t_lam": 0.2,
+        "theta_fam": 0.25
+      }
+    },
+    {
+      "direction_order": [
+        -1,
+        1
+      ],
+      "step": {
+        "s_feed": 0.075,
+        "s_lam": 0.075,
+        "t_lam": 0.1,
+        "theta_fam": 0.125
+      }
+    }
+  ],
+  "ridge": 0.001,
+  "scheduled_evaluations": 19,
+  "selected_parameters": {
+    "s_feed": 1.0,
+    "s_lam": 1.2249999999999999,
+    "t_lam": -0.1,
+    "theta_fam": 0.625
+  },
+  "status": "complete",
+  "tie_rule": "retain incumbent",
+  "tier": "DESIGN",
+  "truth_sha256": "92a3228edee16080795c4a1ea0124b8c7bd1f7f7ecf7c84ad078edc4eca756b2",
+  "validation_indices": [
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23
+  ],
+  "validation_rule": "matched default and selected points, last 12 only after fit freeze; never refit",
+  "workerq_line": "workerq submit --project arc-whest --gpus 0 --ram 12 --cpus 4 -- uv run python local_sim/s15_own_fit_driver.py --execute --out-dir <absolute-path> --ts <registered-utc>",
+  "workerq_request": {
+    "cpus": 4,
+    "gpu_count": 0,
+    "ram_gib": 12
+  }
+}

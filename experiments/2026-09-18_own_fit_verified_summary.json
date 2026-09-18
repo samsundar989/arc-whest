@@ -1,0 +1,65 @@
+﻿{
+  "artifact": "own_fit_verified_summary",
+  "tier": "DESIGN",
+  "promotion_decision": null,
+  "evaluations": 19,
+  "numerical_environment": {
+    "executable": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\1748\\job-1748\\.venv\\Scripts\\python.exe",
+    "numpy": "2.2.6",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python": "3.10.19 (main, Jan 27 2026, 23:41:53) [MSC v.1944 64 bit (AMD64)]",
+    "threads": {
+      "MKL_NUM_THREADS": null,
+      "NUMEXPR_NUM_THREADS": null,
+      "OMP_NUM_THREADS": null,
+      "OPENBLAS_NUM_THREADS": null
+    }
+  },
+  "local_seconds_caps": "disabled for P12 DESIGN; not release evidence",
+  "selected_parameters": {
+    "theta_fam": 0.625,
+    "s_lam": 1.2249999999999999,
+    "t_lam": -0.1,
+    "s_feed": 1.0
+  },
+  "heldout": {
+    "observed": {
+      "control": 8.97006646888871e-09,
+      "candidate": 7.918122554853284e-09,
+      "difference": 1.0519439140354259e-09,
+      "t95": [
+        8.034139839763924e-10,
+        1.3004738440944594e-09
+      ]
+    },
+    "official_precision": {
+      "control": 8.31433439129682e-09,
+      "candidate": 7.2623442309645265e-09,
+      "difference": 1.0519901603322932e-09,
+      "t95": [
+        8.0345951455762e-10,
+        1.3005208061069663e-09
+      ],
+      "arithmetic_gain": 1.1448554525750672
+    },
+    "truth_noise_floor_mean": 2.2271138918449564e-09,
+    "control_counted_flops_mean": 669940797469.0,
+    "candidate_counted_flops_mean": 669988045853.0,
+    "control_failed": 0,
+    "candidate_failed": 0,
+    "ordered_seeds": [
+      40917012012,
+      40917012013,
+      40917012014,
+      40917012015,
+      40917012016,
+      40917012017,
+      40917012018,
+      40917012019,
+      40917012020,
+      40917012021,
+      40917012022,
+      40917012023
+    ]
+  }
+}
