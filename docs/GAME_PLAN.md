@@ -8,10 +8,13 @@ instrument/preflight gate is GREEN, and P14 two-replica truth has been minted
 and finalized. Fixed v45 birth-diagonal compensation is being scored against
 C10 on P14 by workerq #1920; independently review its complete paired result.
 In parallel, certify exact C10 for one individually approved server diagnostic;
-workerq #1891 passed WSL Linux memory enforcement and full certificate #1904
-is running. The same-closure reference
+workerq #1891 passed WSL Linux memory enforcement, while full certificate #1904
+refused only its conservative 22,000-call server forecast (C10: 23,421 calls).
+The diagnostic is prospectively narrowed to actual server residual measurement;
+full official mini #1938 is queued, and exact-file approval remains required.
+The same-closure reference
 feasibility note specifies separate no-share and full-P2 operators, plus their
-combined diagnostic reference. Full-shape label-free meter #1921 is queued;
+combined diagnostic reference. Full-shape label-free meter #1921 is running;
 build and price those before a new
 prospective truth contract; continue both arms endogenously and keep closure,
 controls and P4 fixed. Implement only a recurrent mechanism supported by that

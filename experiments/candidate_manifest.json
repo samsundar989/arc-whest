@@ -25,7 +25,7 @@
       "path": "estimator_k3_v43_complete_c10.py",
       "sha256": "fd8d497db6dfbc3affcf579119c7115c3aee4d190a3e92fec4d85c366152d1bf",
       "official_precision_adjusted_p12": 6.486609e-9,
-      "status": "24-network DESIGN forecast; Linux 8 GiB gate passed; full candidate certificate workerq 1904 running; no upload approval"
+      "status": "24-network DESIGN forecast; Linux 8 GiB and MATH/LOCAL checks passed; full certificate REFUSED at 23421 vs 22000 predicted-call screen; full mini workerq 1938 queued; no upload approval"
     },
     "fixed_p14_design_trial": {
       "path": "estimator_k3_v45_p2_diag.py",
@@ -42,7 +42,7 @@
   "contract": "experiments/LOG.md:2026-09-18 P14 birth and C10 diagnostic",
   "stage": {
     "completed": ["stage1", "batch_b_p12_synthesis", "p14_two_replica_truth"],
-    "active_or_recovery": "P14 fixed birth-diagonal pair workerq 1920 queued; same-closure label-free reference meter workerq 1921 queued; C10 full diagnostic certificate workerq 1904 running",
+    "active_or_recovery": "P14 fixed birth-diagonal pair workerq 1920 running; same-closure label-free reference meter workerq 1921 running; C10 narrowed diagnostic full mini workerq 1938 queued after certificate predicted-margin refusal",
     "decide": "P13 truth-read spent=0; preserve for one frozen finalist",
     "release": "No 2x finalist is frozen or approved for submission; C10 diagnostic also needs exact-file approval"
   }

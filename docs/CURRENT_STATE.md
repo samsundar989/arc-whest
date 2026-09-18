@@ -19,8 +19,13 @@ it does not claim a 2x release. Samuel likewise answered “i dont know” to it
 three predictions. Candidate-specific `whest validate` passes. Linux memory
 gate workerq #1891 **passed** on WSL Linux under an applied 8,192 MiB
 `RLIMIT_AS`, with VmPeak 5,754.75 MiB, both enforcement controls and three
-candidate predicts passing. Full candidate certificate workerq #1904 is
-running; clean official mini and independent certificate Skeptic remain pending.
+candidate predicts passing. Full candidate certificate #1904 is **REFUSED only
+by the conservative server-predicted 22,000-call screen**: exact C10 uses
+23,421 calls with modeled residual 0.314 s and 1.27x cliff headroom. Its 41
+MATH and 22 LOCAL checks passed, including zero scalar conversions and a clean
+two-row official subprocess smoke. This is not server residual proof. The
+prospectively narrowed diagnostic asks the server to measure that uncertainty;
+full 100-row official mini #1938 is queued and independent review is active.
 No upload approval has been requested. Exact-file approval remains required.
 
 Bounded iteration-tool changes and same-closure reference construction are complete.
