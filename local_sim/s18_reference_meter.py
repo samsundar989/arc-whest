@@ -27,6 +27,7 @@ from whestbench import MLP  # noqa: E402
 sys.path.append(str(HERE))
 import lifecycle_eval as le  # noqa: E402
 from mint_provenance import canonical_mint  # noqa: E402
+from p2_weff import MaterializationCounter  # noqa: E402
 from s18_same_closure_reference import CONTROL, SWITCHES, build, load, offline_predict  # noqa: E402
 
 OFFICIAL_BUDGET = 2**41
@@ -71,6 +72,21 @@ def _peak_rss_bytes():
     return int(peak * (1 if sys.platform == "darwin" else 1024))
 
 
+def _assert_ledger_conserved(total, operations):
+    """Every billed FLOP must occur in the saved operation ledger, exactly."""
+    if not isinstance(total, int) or total <= 0 or not operations:
+        raise ValueError("empty or invalid counted FLOP ledger")
+    if any(not isinstance(rec["flops"], int) or rec["flops"] < 0 or
+           not isinstance(rec["calls"], int) or rec["calls"] < 0
+           for rec in operations.values()):
+        raise ValueError("negative or noninteger operation totals")
+    billed = sum(rec["flops"] for rec in operations.values())
+    calls = sum(rec["calls"] for rec in operations.values())
+    if billed != total or calls <= 0:
+        raise ValueError(f"operation ledger incomplete: {billed} vs {total} FLOPs, {calls} calls")
+    return calls
+
+
 def _one(name, *, width=1024, depth=16):
     if name not in SWITCHES:
         raise ValueError(f"unknown reference {name}")
@@ -87,10 +103,11 @@ def _one(name, *, width=1024, depth=16):
     context = type("Context", (), {"width": width, "depth": depth,
                                    "flop_budget": DIAGNOSTIC_BUDGET, "seed": 0})()
     est.setup(context)  # grader setup is outside the per-MLP counted window
-    with flops.BudgetContext(flop_budget=DIAGNOSTIC_BUDGET, quiet=True) as ctx:
-        pred = offline_predict(mod, mlp, diagnostic_budget=DIAGNOSTIC_BUDGET,
-                               estimator=est)
-        scored = le.materialise_predictions(pred, depth=depth, width=width)
+    with MaterializationCounter() as materializations:
+        with flops.BudgetContext(flop_budget=DIAGNOSTIC_BUDGET, quiet=True) as ctx:
+            pred = offline_predict(mod, mlp, diagnostic_budget=DIAGNOSTIC_BUDGET,
+                                   estimator=est)
+            scored = le.materialise_predictions(pred, depth=depth, width=width)
     if est.last_run["mode"] != "full" or est.last_run["generations"] is not None:
         raise RuntimeError(f"capped reference: {est.last_run}")
     scored = np.asarray(scored, dtype=np.float32)
@@ -103,9 +120,7 @@ def _one(name, *, width=1024, depth=16):
             entry = operations.setdefault(op, {"flops": 0, "calls": 0})
             entry["flops"] += int(rec.get("flop_cost", 0))
             entry["calls"] += int(rec.get("calls", 0))
-    total_calls = sum(rec["calls"] for rec in operations.values())
-    if not total_calls or int(ctx.flops_used) <= 0:
-        raise RuntimeError("empty operation ledger")
+    total_calls = _assert_ledger_conserved(int(ctx.flops_used), operations)
     return {
         "artifact": "s18_same_closure_reference_meter", "status": "complete",
         "arm": name, "width": width, "depth": depth, "input_seed": PROBE_SEED,
@@ -118,6 +133,8 @@ def _one(name, *, width=1024, depth=16):
                               "local_sim/mint_provenance.py": _sha(HERE / "mint_provenance.py")},
         "last_run": est.last_run, "flops_used": int(ctx.flops_used),
         "operation_calls": total_calls, "operations": operations,
+        "scalar_materializations": dict(materializations.counts),
+        "scalar_materializations_total": materializations.total,
         "peak_process_rss_bytes": _peak_rss_bytes(),
         "final_prediction_sha256": hashlib.sha256(scored[-1].tobytes()).hexdigest(),
     }
