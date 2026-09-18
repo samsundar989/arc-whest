@@ -166,6 +166,33 @@ class CorrectedStorageDecision(unittest.TestCase):
             require_present_sources=True, require_full_row_binding=True,
             root=m.ROOT)
 
+    def test_snapshot_source_root_verifies_and_refuses_wrong_or_missing_source(self):
+        score, _, _ = fixtures()
+        with tempfile.TemporaryDirectory() as tmp:
+            snapshot = pathlib.Path(tmp) / "snapshot" / "job"
+            snapshot.mkdir(parents=True)
+            for arm in score["arms"].values():
+                (snapshot / arm["path"]).write_bytes((ROOT / arm["path"]).read_bytes())
+            truth = snapshot / "synthetic_truth.bin"
+            truth.write_bytes(b"synthetic truth source")
+            score["truth_sha256"] = m._sha(truth)
+            man = verified_sidecar(score)["manifest"]
+            man.update(truth=truth.name, packages={}, mint={})
+            sidecar = pathlib.Path(tmp) / "sidecar"
+            for name, info in man["arms"].items():
+                writer = m.ds.ArmWriter(str(sidecar), name, width=1024,
+                                        candidate=info["path"],
+                                        candidate_sha256=info["candidate_sha256"])
+                for full in info["evidence_rows"]:
+                    writer.append(m.le.EvidenceRow(**full), m.ds.np.zeros(1024, dtype="<f4"))
+            m.ds.write_manifest(str(sidecar), man)
+            m._bind_sidecar(score, str(sidecar), str(snapshot))
+            with self.assertRaises(FileNotFoundError):
+                m._bind_sidecar(score, str(sidecar), str(pathlib.Path(tmp) / "wrong"))
+            (snapshot / next(iter(score["arms"].values()))["path"]).unlink()
+            with self.assertRaises(FileNotFoundError):
+                m._bind_sidecar(score, str(sidecar), str(snapshot))
+
     def test_missing_E_refuses(self):
         score, old, new = fixtures()
         del new["arms"]["qE"]["per_layer"][1]["E"]

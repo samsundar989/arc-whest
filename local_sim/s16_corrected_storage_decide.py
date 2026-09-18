@@ -102,10 +102,11 @@ def _score_arms(data):
     return found
 
 
-def _bind_sidecar(data, directory):
+def _bind_sidecar(data, directory, source_root=None):
+    source_root = ROOT if source_root is None else os.path.realpath(source_root)
     verified = ds.verify(directory, check_sources=True,
                          require_present_sources=True, require_full_row_binding=True,
-                         root=ROOT)
+                         root=source_root)
     man = verified["manifest"]
     if man.get("run_complete") is not True:
         raise ValueError("prediction sidecar is incomplete")
@@ -175,11 +176,12 @@ def _query_compare(old, new):
     return bool(passed), detail
 
 
-def decide(score_path, query_old_path, query_corrected_path, sidecar_dir):
+def decide(score_path, query_old_path, query_corrected_path, sidecar_dir,
+           source_root=None):
     data = _read(score_path)
     if not sidecar_dir:
         raise ValueError("production decision requires verified prediction sidecar")
-    _bind_sidecar(data, sidecar_dir)
+    _bind_sidecar(data, sidecar_dir, source_root)
     by = _score_arms(data)
     old_raw, old = _query(query_old_path, ("old_qE", "old_qEd"))
     new_raw, new = _query(query_corrected_path, ("qEc", "qEdc"))
@@ -250,9 +252,13 @@ def main():
     p.add_argument("--query-corrected", required=True)
     p.add_argument("--sidecar", required=True,
                    help="complete prediction sidecar directory for all scored arms")
+    p.add_argument("--source-root", default=None,
+                   help="original workerq snapshot root for sidecar source verification; "
+                        "defaults to the live repository")
     p.add_argument("--out", required=True)
     a = p.parse_args()
-    result = decide(a.score, a.query_old, a.query_corrected, a.sidecar)
+    result = decide(a.score, a.query_old, a.query_corrected, a.sidecar,
+                    a.source_root)
     with open(a.out, "w", encoding="utf-8") as fh:
         json.dump(result, fh, indent=2)
         fh.write("\n")
