@@ -31,9 +31,9 @@ def _sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def _source(path, digest):
+def _source(path, digest, root):
     p = Path(path).resolve(strict=True)
-    if p.parent != ROOT or p.suffix != ".py" or len(digest) != 64:
+    if p.parent != root or p.suffix != ".py" or len(digest) != 64:
         raise ValueError("source must be a frozen root-level Python file and SHA-256")
     if _sha(p) != digest:
         raise ValueError(f"source bytes differ: {p.name}")
@@ -78,9 +78,10 @@ def _paired(control, candidate, gate):
 
 
 def synthesize(score_path, prediction_dir, exact_path, exact_sha,
-               approx_path, approx_sha, *, source_root=ROOT):
-    exact = _source(exact_path, exact_sha)
-    approx = _source(approx_path, approx_sha)
+               approx_path, approx_sha, *, run_root=None):
+    root = Path(run_root).resolve(strict=True) if run_root is not None else ROOT
+    exact = _source(exact_path, exact_sha, root)
+    approx = _source(approx_path, approx_sha, root)
     if exact == approx or exact_sha == approx_sha:
         raise ValueError("exact and approximate roles must be distinct")
     d = json.loads(Path(score_path).read_text(encoding="utf-8"))
@@ -90,7 +91,6 @@ def synthesize(score_path, prediction_dir, exact_path, exact_sha,
             d.get("accuracy_only") is not True or d.get("local_seconds_caps") != "off" or
             set(d.get("arms", {})) != set(LABELS)):
         raise ValueError("wrong P12 DESIGN score identity or protocol")
-    root = Path(source_root).resolve()
     side = ds.verify(str(prediction_dir), root=str(root), check_sources=True,
                      require_present_sources=True, require_full_row_binding=True)
     man = side["manifest"]
@@ -112,10 +112,12 @@ def synthesize(score_path, prediction_dir, exact_path, exact_sha,
             set(man.get("arms", {})) != set(LABELS) or
             set(side.get("arms", {})) != set(LABELS)):
         raise ValueError("score/sidecar provenance or registered configuration differs")
-    if Path(ROOT / str(d.get("prediction_sidecars", ""))).resolve() != Path(prediction_dir).resolve():
+    recorded_sidecars = d.get("prediction_sidecars")
+    if (not isinstance(recorded_sidecars, str) or
+            (root / recorded_sidecars).resolve() != Path(prediction_dir).resolve()):
         raise ValueError("score points to another prediction directory")
     sources = {"control": (exact, exact_sha), "candidate": (approx, approx_sha)}
-    if Path(d["control"]).resolve() != exact or Path(d["candidate"]).resolve() != approx:
+    if (root / d["control"]).resolve() != exact or (root / d["candidate"]).resolve() != approx:
         raise ValueError("score source roles differ")
     rows = {}
     failed = {}
@@ -123,8 +125,8 @@ def synthesize(score_path, prediction_dir, exact_path, exact_sha,
         arm = d["arms"][label]
         info = man["arms"][label]
         source, digest = sources[label]
-        if (Path(arm["path"]).resolve() != source or
-                Path(info["path"]).resolve() != source or
+        if ((root / arm["path"]).resolve() != source or
+                (root / info["path"]).resolve() != source or
                 arm.get("candidate_sha256") != digest or
                 info.get("candidate_sha256") != digest or
                 arm.get("rows_hash") != info.get("rows_hash") or
@@ -177,8 +179,10 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     for key in ("score", "pred-out", "exact", "exact-sha", "approx", "approx-sha", "out"):
         ap.add_argument("--"+key, required=True)
+    ap.add_argument("--run-root", help="immutable root used by the scoring run; defaults to this checkout")
     a = ap.parse_args()
-    out = synthesize(a.score, a.pred_out, a.exact, a.exact_sha, a.approx, a.approx_sha)
+    out = synthesize(a.score, a.pred_out, a.exact, a.exact_sha, a.approx, a.approx_sha,
+                     run_root=a.run_root)
     dest = Path(a.out)
     with dest.open("x", encoding="utf-8") as fh:
         json.dump(out, fh, indent=2, sort_keys=True)

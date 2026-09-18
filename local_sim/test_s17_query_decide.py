@@ -2,7 +2,9 @@
 import copy
 import dataclasses
 import json
+import os
 from pathlib import Path
+import shutil
 import tempfile
 from unittest.mock import patch
 
@@ -11,12 +13,13 @@ import lifecycle_eval as le
 import s17_query_decide as m
 
 
-def fixture(tmp):
-    exact = m.ROOT / "estimator_k3_v43_complete_c00.py"
-    approx = m.ROOT / "estimator_k3_v43_complete_c10.py"
+def fixture(tmp, root=None):
+    root = Path(root) if root is not None else m.ROOT
+    exact = root / "estimator_k3_v43_complete_c00.py"
+    approx = root / "estimator_k3_v43_complete_c10.py"
     paths = (exact, approx)
     seeds = list(m.p12.SEEDS)
-    relpred = Path(tmp).relative_to(m.ROOT).as_posix()
+    relpred = os.path.relpath(tmp, root).replace("\\", "/")
     spec = dataclasses.asdict(le.LifecycleSpec(
         width=1024, depth=16, flop_budget=m.B, lam=0.,
         residual_wall_time_limit_s=None, wall_time_limit_s=None,
@@ -121,7 +124,63 @@ def main():
                 pass
             else:
                 raise AssertionError(f"accepted {name}")
-        print(f"query reader synthetic observed/official split and {len(cases)} refusals passed")
+        snapshot = directory / "snapshot"
+        snapshot.mkdir()
+        output = directory / "external-output" / "predictions"
+        output.mkdir(parents=True)
+        (output / m.ds.MANIFEST).write_text("{}", encoding="utf-8")
+        for path in paths:
+            shutil.copyfile(path, snapshot / path.name)
+        snap_score, snap_side, snap_paths = fixture(output, snapshot)
+        snap_path = output.parent / "score.json"
+        snap_hashes = tuple(m._sha(path) for path in snap_paths)
+
+        def snap_run(data, verified=snap_side, sources=snap_paths):
+            snap_path.write_text(json.dumps(data), encoding="utf-8")
+            with patch.object(m.ds, "verify", return_value=verified) as verify:
+                result = m.synthesize(snap_path, output, str(sources[0]), snap_hashes[0],
+                                      str(sources[1]), snap_hashes[1], run_root=snapshot)
+                assert verify.call_args.kwargs == {
+                    "root": str(snapshot.resolve()), "check_sources": True,
+                    "require_present_sources": True, "require_full_row_binding": True}
+                return result
+
+        assert snap_run(snap_score)["QUERY_SCORE_PASSED"] is False
+        wrong = copy.deepcopy(snap_score)
+        wrong["prediction_sidecars"] = "predictions"
+        try:
+            snap_run(wrong)
+        except ValueError as exc:
+            assert "prediction directory" in str(exc)
+        else:
+            raise AssertionError("accepted wrong snapshot-relative sidecar path")
+        wrong = copy.deepcopy(snap_score)
+        wrong["arms"]["candidate"]["path"] = str(paths[1])
+        try:
+            snap_run(wrong)
+        except ValueError as exc:
+            assert "source or sidecar hash" in str(exc)
+        else:
+            raise AssertionError("accepted checkout source instead of snapshot source")
+        wrong = copy.deepcopy(snap_score)
+        wrong["control"], wrong["candidate"] = wrong["candidate"], wrong["control"]
+        wrong_side = copy.deepcopy(snap_side)
+        wrong_side["manifest"]["control"] = wrong["control"]
+        wrong_side["manifest"]["candidate"] = wrong["candidate"]
+        try:
+            snap_run(wrong, wrong_side)
+        except ValueError as exc:
+            assert "source roles differ" in str(exc)
+        else:
+            raise AssertionError("accepted snapshot role swap")
+        (snapshot / paths[0].name).write_bytes(b"tampered source")
+        try:
+            snap_run(snap_score)
+        except ValueError as exc:
+            assert "source bytes differ" in str(exc)
+        else:
+            raise AssertionError("accepted changed snapshot source")
+        print(f"query reader synthetic observed/official split and {len(cases)+4} refusals passed")
 
 
 if __name__ == "__main__":
