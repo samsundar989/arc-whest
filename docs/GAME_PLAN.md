@@ -1,6 +1,25 @@
 # GAME_PLAN — measure and optimize the complete candidate
 
-**Execution checkpoint, September 18:** Four gram/P4 compressed arms and the
+**Measured outcome, September 18.** The complete-candidate slice ran through
+its registered stopping rules. The same-panel P12 factorial selected exact
+`estimator_k3_v43_complete_c10.py` at 6.48661e-9 official adjusted score,
+1.36599x better than graded v31, with 480.851 billion complete counted
+FLOPs. P3's compressed arms did not displace it. The one rank32 old-query
+approximation saved 5.514% whole-file FLOPs but worsened official adjusted
+score to 1.14227e-8 and failed the paired 1.05 gate. Fresh result Skeptics
+accepted both DESIGN decisions; the query source is retained as a measured
+failure. C10 needs another 31.700% official and 31.664% observed mean score
+reduction to reach the same-panel half-v31 targets. The registered 25%
+complete-fit trigger therefore failed; P13 and release checks were not run.
+The dual paired 2x release rule remains binding. Candidate-specific server
+residual and Linux 8 GiB safety remain untested, with C10 above the 22,000
+operation-call working margin. The [current state](CURRENT_STATE.md) and
+[self-contained blocker packet](STRATEGIST_PACKET_2026-09-18_COMPLETE_SLICE.md)
+carry the exact evidence and next bounded planning question. This fallback
+is not completion of the next-submission objective. Do not repeat this
+factorial, rank32 experiment or fit on the exposed panel under this contract.
+
+**Historical execution checkpoint, September 18:** Four gram/P4 compressed arms and the
 fitted dense P4 sentinel are emitted as new versioned files. Tiny independent
 tensor and complete full-rank recurrent parity, disabled-feature identity,
 fallback, and source-bound reader tests pass; fresh Skeptics accepted narrow
@@ -12,7 +31,7 @@ not run. C11 costs 539.872 billion counted FLOPs and 26,393 calls, so its
 conservative residual margin needs candidate-specific release evidence.
 The ordered conditional stages and dual2x release gate below remain binding.
 
-**Active September 18, after the worker decision-point review.** The strategist response is delivered and independently accepted as a research plan. Execute [Claude handoff](CLAUDE_CODE_HANDOFF_2026-09-18.md), with mechanisms, prospective gates and limits in [strategist response](STRATEGIST_RESPONSE_2026-09-18.md). The previous plan is preserved in [archive](archive/GAME_PLAN_before_2026-09-18_complete_candidate.md).
+**Historical September 18 execution contract.** The strategist response was delivered and independently accepted as a research plan. The [dated handoff](CLAUDE_CODE_HANDOFF_2026-09-18.md) was executed through its stopping rules, with mechanisms and gates in the [strategist response](STRATEGIST_RESPONSE_2026-09-18.md). The previous plan is preserved in [archive](archive/GAME_PLAN_before_2026-09-18_complete_candidate.md).
 
 ## Objective and architecture
 
@@ -30,7 +49,7 @@ Retain full means/covariance, persistent factored K3 history, regenerated approx
 - No same-panel P12 v31 control is saved. Neither public nor P11 half-v31 scores are P12 thresholds.
 - P13 remained untouched at this review. No release, submission or designation is authorized.
 
-## Ordered next slice
+## Ordered completed slice (historical contract)
 
 | Stage | Deliverable | Exit/decision |
 |---|---|---|

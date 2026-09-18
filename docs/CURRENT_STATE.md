@@ -1,6 +1,53 @@
 # CURRENT_STATE.md — read this first
 
-## September 18 — complete-candidate package metered; P12 factorial next
+## September 18 — complete-candidate slice measured; no 2x finalist
+
+The dated handoff's finite experiment is complete through its stopping
+rules. Its pre-data contract and Samuel's three “I don't know” predictions
+preceded measurement. Four matched compressed gram/P4 arms, a fitted dense
+sentinel, and graded v31 were priced and scored on the same exposed 24-network
+P12 DESIGN panel. The independently reviewed
+[factorial result](../experiments/2026-09-18_s17_factorial/decision.json)
+selects exact `estimator_k3_v43_complete_c10.py` (SHA-256
+`fd8d497db6dfbc3affcf579119c7115c3aee4d190a3e92fec4d85c366152d1bf`).
+Its official adjusted score is **6.48661e-9**, 1.36599x better than same-panel
+v31 at 8.86067e-9; the observed gain is 1.36672x. Zero MLPs failed.
+Its raw MSE is 3.18371e-8 against a 2.24807e-9 truth-noise floor, and
+the f64-readonly whole-file cost is 480.851 billion counted FLOPs.
+
+The compressed P3 arms did not displace C10 once their full FLOP costs were
+included. The one fixed rank32 old-query experiment saved **5.514%** complete
+counted FLOPs, but its independently reviewed
+[paired P12 result](../experiments/2026-09-18_s17_query_accuracy/decision.json)
+failed: official adjusted score worsened to **1.14227e-8** (gain 0.56787x
+versus exact C10), with every one of 24 pairs worse and no new failed MLPs.
+Retain exact C10. It still needs **31.664% observed and 31.700% official**
+further mean score reduction just to meet the two same-panel half-v31 targets.
+That exceeds the registered 25% complete-fit trigger, so the fit was not run.
+No whole frozen file supports the unchanged paired dual 2x release case;
+**P13 remains untouched**, and there is no upload approval request.
+
+The concrete obstacles are the remaining exact-package score gap and the
+rank32 query's recurrence accuracy loss. C10 has 23,421 operation calls;
+the carried 13.4 microseconds/call law models 0.31384 s residual, 1.2745x
+headroom to the 0.4 s hard cliff. This is above the conservative 22,000-call
+working margin; candidate-specific server residual and Linux 8 GiB safety
+were not certified. The complete raw rows, scored final predictions,
+grader-twin meter, continuation audit, negative rank32 result, and fresh
+Skeptic verdicts are under `experiments/2026-09-18_s17_*`. All raw producer
+hashes are preserved across fresh Git checkouts. The
+[self-contained next-plan packet](STRATEGIST_PACKET_2026-09-18_COMPLETE_SLICE.md)
+names the measured obstacle and asks for one bounded mechanism/cost plan.
+
+**Next:** obtain a new bounded mechanism and cost plan addressing this
+specific accuracy/cost gap before any new STRATEGIC measurements. Preserve
+the historical failures, frozen archives, dual 2x rule and untouched P13.
+This measured research fallback does **not** complete the original objective
+of a substantially better next submission.
+
+---
+
+## September 18 — historical execution checkpoint: package metered; P12 factorial next
 
 The pre-data Rule-1 contract for the dated complete-candidate slice is recorded
 at the end of `experiments/LOG.md` in commit `0c3cb95`; Samuel answered “I don't
