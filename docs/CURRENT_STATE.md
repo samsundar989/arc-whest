@@ -38,8 +38,8 @@ The LOG tail records the dimensionless ridge objective, exact coordinate
 schedule, 40-evaluation cap, and workerq optimization review before data.
 Final standard preflight passed 12/16 on the scientific source bytes. The
 registered fit is workerq **#1748**, submitted from commit `6c4c02a` with
-0 GPUs, 12 GiB RAM and 4 CPUs. It was QUEUED for CPU capacity at the last
-status check; do not bypass the queue. A first mistaken queue request (#1747)
+0 GPUs, 12 GiB RAM and 4 CPUs. It started at **2026-09-18T03:05:45Z** after a
+CPU-capacity wait; do not inspect or select from its partial output. A first mistaken queue request (#1747)
 was cancelled before execution because workerq treated `--vram 0` as one GPU.
 On #1748 completion, reconcile its P12 truth-read receipt from the immutable
 snapshot, verify all 19 complete evaluations and paired held-out comparison,

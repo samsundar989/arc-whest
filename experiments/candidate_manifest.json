@@ -25,7 +25,7 @@
   "contract": "experiments/LOG.md:2026-09-17b",
   "stage": {
     "completed": ["stage1", "batch_b_p12_synthesis"],
-    "active_or_recovery": "Own PAIR+Q bounded P12 fit is workerq #1748 (queued at last check, CPU-only); corrected qE/qEd truth comparison awaits Samuel predictions",
+    "active_or_recovery": "Own PAIR+Q bounded P12 fit is workerq #1748 (running since 2026-09-18T03:05:45Z, CPU-only); corrected qE/qEd truth comparison awaits Samuel predictions",
     "decide": "P13 truth-read spent=0; preserve for one frozen finalist",
     "release": "No finalist is frozen or approved for submission"
   }
