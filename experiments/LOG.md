@@ -54104,3 +54104,15 @@ reproduce `competition_score`'s paired arithmetic held-out difference and
 official-precision adjustment without a new truth read. It will make no
 promotion boolean and no release claim. This prediction precedes the adapter
 implementation and any job result read.
+
+### IMPORTANT prediction before the corrected-objective decision reader is written
+
+The corrected-storage DESIGN comparison has a fixed primary old-qE/qEc pair
+and a secondary old-qEd/qEdc diagnostic. A read-only adapter using the
+repaired `s12_decide` primitives should reject swapped, duplicate or missing
+network identities, source bytes that differ from the frozen manifest, any
+new failed identity, and absent E/D3/D21/next-state/output evidence. Synthetic
+cases should reproduce the official-precision paired score decision through
+`competition_score.decide(gate=1.0)` while keeping observed score separate.
+The secondary diagnostic must never turn a failed primary screen into a pass.
+No new labels or query runs exist when this prediction is recorded.
