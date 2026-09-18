@@ -54801,3 +54801,30 @@ that mocked synthetic sidecars do not themselves execute truth/dependency
 hash checks, which are verified by inspecting `design_sidecar.verify`.
 Standard preflight is GREEN 12/16 (four Full-tier checks skipped), exit 0;
 transcript `experiments/2026-09-18_s17_snapshot_reader_preflight.log`.
+
+**Query source frozen before label-free jobs.** The one rank32 emitter
+produced `estimator_k3_v44_c10_query_rank32.py` SHA-256
+`96e87025e55367cdf9951bf9666cc8da98b439c0c6359f1c5dc2fce622cded2b`.
+Its raw bytes match the staged Git blob. The seven existing tiny query tests
+pass, and official `whest validate` passes shape/finite/contract with
+`PYTHONIOENCODING=utf-8`. An initial `python -m unittest` invocation failed
+only because the test module's path import was not on `PYTHONPATH`; running
+the test as its intended file passes. An initial `whest validate` invocation
+hit the documented cp1252 CLI printer error; the UTF-8 rerun passes. Neither
+failure is a candidate numerical result. The exact labels, sources and
+output paths for the two workerq jobs are now fixed:
+
+- `s17-query-meter`: `uv run python local_sim/s17_meter_exports.py
+  --source estimator_k3_v43_complete_c10.py --source
+  estimator_k3_v44_c10_query_rank32.py --out
+  C:/Users/samsu/Documents/arc-whest/experiments/2026-09-18_s17_query_meter.json`.
+- `s17-query-continuation`: `uv run python
+  local_sim/s17_query_continuation.py --exact
+  estimator_k3_v43_complete_c10.py --approx
+  estimator_k3_v44_c10_query_rank32.py --out
+  C:/Users/samsu/Documents/arc-whest/experiments/2026-09-18_s17_query_continuation.json`.
+
+The meter and recurrence audit can run independently after this commit.
+Both are source- and branch-bound and contain no P12 labels. Their raw
+artifacts and independent Skeptic verdict will determine eligibility for
+the one registered P12 accuracy comparison.
