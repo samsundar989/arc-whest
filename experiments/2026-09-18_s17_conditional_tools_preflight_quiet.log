@@ -1,0 +1,39 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260918040113
+Username: SAM_MEGA_PC\samsu
+RunAs User: SAM_MEGA_PC\samsu
+Configuration Name: 
+Machine: SAM_MEGA_PC (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/preflight.ps1 -Log experiments/2026-09-18_s17_conditional_tools_preflight_quiet.log
+Process ID: 65204
+PSVersion: 5.1.26100.9444
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9444
+BuildVersion: 10.0.26100.9444
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+preflight -- arc-whest
+repo:    C:\Users\samsu\Documents\arc-whest
+shipped: estimator.py   archive: estimator_v2_6_1.py
+HEAD:    5b01bc702bc46130b0fdf473a20ce50306cf3b09
+worktree: DIRTY at start --
+    ?? _snapshot_for_review.tgz
+    ?? experiments/2026-09-18_s17_conditional_tools_preflight_quiet.log
+    ?? experiments/2026-09-18_s17_factorial/
+  (steps 15/16 regenerate tracked evidence, so the tree is
+   EXPECTED to be dirty at the END of a -Full run)
+
+=== 1. official stack + round configuration ===
+› Ask Codex to do anything
+  PASS  1. official stack + round configuration
+
+=== 2. mint provenance + dataset pin ===
+› Ask Codex to do anything
+› Ask Codex to do anything
+  PASS  2. mint provenance + dataset pin
+
+=== 3. invariant suite ===

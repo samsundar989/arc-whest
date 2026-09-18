@@ -54634,3 +54634,17 @@ P12 verdict or promotion is inferred here; independent Skeptic remains required.
 
 Standard preflight transcript experiments/2026-09-18_s17_complete_fit_preflight.log is RED at step 7: enforcement coverage's nested lifecycle suite returned rc=1 while another preflight was running. The other run reports the shared _lifecycle_slowsetup_tmp.py missing, consistent with a temp-file collision. This is not a green gate; the root driver will run one quiet-tree preflight after both instruments are committed. No broad rerun was launched here.
 
+### IMPORTANT prediction: complete-fit cap disclosure repair
+
+The fresh fit-instrument Skeptic's provisional verdict is preserved in
+`experiments/2026-09-18_s17_fit_instrument_skeptic.md`. The registered
+schedule and execution guard permit exactly 19 evaluations, but the dry-run
+plan inherits `MAX_EVALS=40` from the historical producer. Before editing,
+predict: setting only this new producer's displayed/asserted cap to 19 will
+leave source generation, schedule, paired evidence, and all four label-free
+tests unchanged; its dry run will report both scheduled and maximum
+evaluations as 19. A changed source hash for an emitted trial or failed tiny
+test falsifies the narrow repair. The first single preflight was interrupted
+at step 3 because this finding already required a source edit; no verdict is
+claimed from that incomplete transcript. No P12 truth or factorial output was
+read for this repair.
