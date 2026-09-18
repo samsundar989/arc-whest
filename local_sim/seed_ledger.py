@@ -123,6 +123,7 @@ TIERS: Dict[str, str] = {
     # the one frozen release challenger is decided on.
     "P12": "DESIGN",
     "P13": "SINGLE_USE",
+    "P14": "DESIGN",
 }
 
 #: Strictness ordering, so a tier CHANGE can be judged as a tightening or a

@@ -237,6 +237,11 @@ DECISION_BLOCKS = [
                                  "read once, after the candidate and its contract "
                                  "are frozen. No tuning, no selection, no "
                                  "re-reading to find a better spelling."),
+    ("P14", 40_918_014_000, 96, "PHASE-2 DESIGN block allocated 2026-09-18 "
+                                 "for the fixed C10 newborn P2 diagonal compensation "
+                                 "and subsequent bounded same-closure attribution. "
+                                 "DESIGN evidence may select a mechanism but grants "
+                                 "no release authority; P13 remains untouched."),
 ]
 
 # --- single-use blocks -------------------------------------------------------
