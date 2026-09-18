@@ -44,37 +44,81 @@ def _control():
     return mod
 
 
-def _arrays(state):
-    for value in state:
-        if value is None or isinstance(value, (float, int)):
-            continue
-        if hasattr(value, "__slots__"):
-            for name in value.__slots__:
-                item = getattr(value, name)
-                if item is not None and hasattr(item, "shape"):
-                    yield name, item
-        elif hasattr(value, "shape"):
-            yield "state", value
-
-
 def state_hash(state):
+    """Hash every reachable state value; never silently skip an unknown cache.
+
+    flopscope arrays inherit ndarray. Python containers and slot-based tower
+    records are traversed recursively, with explicit type/length boundaries.
+    """
     h = hashlib.sha256()
-    for index, value in enumerate(state):
-        if value is None or isinstance(value, (float, int)):
-            h.update(repr((index, value)).encode())
-        elif hasattr(value, "__slots__"):
-            for name in value.__slots__:
-                item = getattr(value, name)
-                if item is None or isinstance(item, (float, int)):
-                    h.update(repr((index, name, item)).encode())
-    for name, arr in _arrays(state):
-        a = np.asarray(arr)
-        if not np.isfinite(a).all():
-            raise RuntimeError(f"nonfinite incoming state {name}")
-        h.update(name.encode())
-        h.update(str((a.shape, a.dtype)).encode())
-        h.update(a.tobytes())
+    active = set()
+
+    def token(tag, payload=b""):
+        h.update(tag.encode("ascii") + b":" + str(len(payload)).encode("ascii") + b":" + payload)
+
+    def walk(value, path):
+        if value is None:
+            token("none")
+            return
+        if isinstance(value, np.ndarray):
+            a = np.asarray(value)
+            if a.dtype.hasobject or not np.issubdtype(a.dtype, np.number):
+                raise TypeError(f"unsupported state array at {path}: {a.dtype}")
+            if not np.isfinite(a).all():
+                raise RuntimeError(f"nonfinite state at {path}")
+            token("array_dtype", a.dtype.str.encode("ascii"))
+            token("array_shape", repr(a.shape).encode("ascii"))
+            token("array_data", a.tobytes(order="C"))
+            return
+        if isinstance(value, np.generic):
+            walk(np.asarray(value), path)
+            return
+        if type(value) in (bool, int, float, str):
+            if type(value) is float and not np.isfinite(value):
+                raise RuntimeError(f"nonfinite state at {path}")
+            token(type(value).__name__, repr(value).encode("utf-8"))
+            return
+        obj_id = id(value)
+        if obj_id in active:
+            raise TypeError(f"cyclic state at {path}")
+        active.add(obj_id)
+        try:
+            if type(value) in (tuple, list):
+                token(type(value).__name__, str(len(value)).encode("ascii"))
+                for i, item in enumerate(value):
+                    walk(item, f"{path}[{i}]")
+            elif type(value) is dict:
+                keys = list(value)
+                if any(type(k) not in (str, int, float, bool) for k in keys):
+                    raise TypeError(f"unsupported state dict key at {path}")
+                keys.sort(key=lambda k: (type(k).__name__, repr(k)))
+                token("dict", str(len(keys)).encode("ascii"))
+                for key in keys:
+                    walk(key, f"{path}.key")
+                    walk(value[key], f"{path}[{key!r}]")
+            elif hasattr(type(value), "__slots__"):
+                slots = type(value).__slots__
+                if isinstance(slots, str):
+                    slots = (slots,)
+                token("object", (type(value).__module__ + "." + type(value).__qualname__).encode("utf-8"))
+                token("slots", str(len(slots)).encode("ascii"))
+                for name in slots:
+                    if not hasattr(value, name):
+                        raise TypeError(f"missing state slot {path}.{name}")
+                    token("slot", name.encode("utf-8"))
+                    walk(getattr(value, name), f"{path}.{name}")
+            else:
+                raise TypeError(f"unsupported state type at {path}: {type(value)!r}")
+        finally:
+            active.remove(obj_id)
+
+    walk(state, "state")
     return h.hexdigest()
+
+
+def _assert_same_state(state, expected):
+    if state_hash(state) != expected:
+        raise RuntimeError("incoming state changed before branch")
 
 
 def _ledger(ctx):
@@ -128,8 +172,7 @@ def run(*, width=33, depth=8, branch_layer=4, shared_rank=4):
         "control", "full_p2", "unshared_full_p2")
     for name in names:
         mod = mods[name]
-        if state_hash(state) != incoming:
-            raise RuntimeError("incoming state changed before branch")
+        _assert_same_state(state, incoming)
         joins, ranks = [], []
         original_join, original_p2 = mod._shared_join_lean, mod._p2_compress
 

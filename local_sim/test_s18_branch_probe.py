@@ -42,6 +42,29 @@ class BranchProbeTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "nonfinite"):
             probe.state_hash((np.array([float("nan")]),))
 
+    def test_nested_cache_mutation_and_unsupported_type_refused(self):
+        import numpy as np
+
+        class TinyTower:
+            __slots__ = ("_p2", "_hub")
+
+            def __init__(self):
+                self._p2 = (np.array([1.0], dtype=np.float32),
+                            [None, {"cache": np.array([[2.0]], dtype=np.float64)}])
+                self._hub = {"z": (3, True)}
+
+        tower = TinyTower()
+        state = (np.array([0.0], dtype=np.float32), tower)
+        expected = probe.state_hash(state)
+        self.assertEqual(probe.state_hash(state), expected)
+        probe._assert_same_state(state, expected)
+        tower._p2[1][1]["cache"][0, 0] = 4.0
+        with self.assertRaisesRegex(RuntimeError, "incoming state changed"):
+            probe._assert_same_state(state, expected)
+        tower._hub = object()
+        with self.assertRaisesRegex(TypeError, "unsupported state type"):
+            probe.state_hash(state)
+
 
 if __name__ == "__main__":
     unittest.main()
