@@ -7,7 +7,8 @@ under the committed contracts at the end of `experiments/LOG.md`. First close
 the bounded instrument/preflight gate, mint and score fixed v45 birth-diagonal
 compensation on new P14 DESIGN, and independently review that paired result.
 In parallel, certify exact C10 for one individually approved server diagnostic;
-workerq #1891 is the queued Linux memory gate. The same-closure reference
+workerq #1891 passed WSL Linux memory enforcement and full certificate #1904
+is queued. The same-closure reference
 feasibility note specifies separate no-share and full-P2 operators, plus their
 combined diagnostic reference. Build and price those label-free before a new
 prospective truth contract; continue both arms endogenously and keep closure,

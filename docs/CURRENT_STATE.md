@@ -9,21 +9,25 @@ birth-diagonal candidate `estimator_k3_v45_p2_diag.py`, SHA-256
 24 new networks, paired official-precision arithmetic gate 1.05, and two
 `2^24`-sample truth replicas. Samuel answered “i dont know” to all three
 pre-result predictions. Independent and source-bound tiny algebra checks pass;
-no P14 truth has been minted or scored yet. P13 remains untouched.
+P14 truth is minting under workerq #1901 and has not been scored. P13 remains
+untouched.
 
 A separate committed C10 diagnostic-upload contract asks whether exact
 `estimator_k3_v43_complete_c10.py` survives server residual/memory limits;
 it does not claim a 2x release. Samuel likewise answered “i dont know” to its
 three predictions. Candidate-specific `whest validate` passes. Linux memory
-gate workerq job #1891 is queued for RAM; no upload approval has been requested.
-The full candidate certificate, clean mini and independent certificate Skeptic
-are pending. Exact-file approval remains required.
+gate workerq #1891 **passed** on WSL Linux under an applied 8,192 MiB
+`RLIMIT_AS`, with VmPeak 5,754.75 MiB, both enforcement controls and three
+candidate predicts passing. Full candidate certificate workerq #1904 is
+queued; clean official mini and independent certificate Skeptic remain pending.
+No upload approval has been requested. Exact-file approval remains required.
 
 Iteration-tool changes and same-closure reference construction are in progress.
-The source/seed instrument preflight must be green before P14 truth dispatch;
-the reference feasibility note is committed, while its generator is provisional
-and has produced no evidence. The major 2x objective remains unproven and
-unsubmitted.
+The source/seed instrument preflight passed GREEN 12/16 and fresh P14 seeds
+were claimed in the live ledger before immutable workerq #1901 began truth
+minting. The reference feasibility note and generator are committed; the
+generator and P14 reader have only narrow truth-free provisional reviews.
+The major 2x objective remains unproven and unsubmitted.
 
 ---
 
