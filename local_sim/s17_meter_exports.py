@@ -27,7 +27,8 @@ def main() -> None:
     if len(set(args.source)) != len(args.source):
         raise ValueError("duplicate source")
     result = {
-        "meter": "local_sim/p2_flop_anchor.py::_run_arm(grader)",
+        "meter": "local_sim/p2_flop_anchor.py::_run_arm(grader,f64_readonly)",
+        "input_weight_dtype": "f64_readonly",
         "meter_sha256": hashlib.sha256(Path(anchor.__file__).read_bytes()).hexdigest(),
         "wrapper_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "shape": {"width": anchor.WIDTH, "depth": anchor.DEPTH},
@@ -41,7 +42,7 @@ def main() -> None:
         result["sources"].append({
             "name": name,
             "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
-            "grader": anchor._run_arm(name, "grader"),
+            "grader": anchor._run_arm(name, "grader", input_weight_dtype="f64_readonly"),
         })
     result["status"] = "complete"
     args.out.parent.mkdir(parents=True, exist_ok=True)
