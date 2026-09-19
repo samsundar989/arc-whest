@@ -1,0 +1,49 @@
+{
+  "artifact_sha256": "6b600edec23d12c7dc8d2bddd8759aaca92073c7419d623a9b641550e19037c7",
+  "math_provenance": {
+    "backend": {
+      "autocast_cpu": false,
+      "autocast_cuda": false,
+      "bf16_reduced_precision_reduction": true,
+      "cublas_workspace_config": null,
+      "cuda_matmul_allow_tf32": false,
+      "cudnn_allow_tf32": false,
+      "cudnn_benchmark": false,
+      "cudnn_deterministic": false,
+      "deterministic_algorithms": false,
+      "float32_matmul_precision": "highest",
+      "fp16_reduced_precision_reduction": true,
+      "nvidia_tf32_override": null,
+      "torch_threads": 8
+    },
+    "chunk_size": 65536,
+    "cuda_runtime": "13.0",
+    "cudnn_version": 92000,
+    "depth": 16,
+    "device": "cuda",
+    "device_capability": [
+      8,
+      6
+    ],
+    "device_index": 0,
+    "device_name": "NVIDIA GeForce RTX 3080 Ti",
+    "historical_precision_equivalence": "not established; no retroactive provenance",
+    "mint_sha256": "48aef520b7cef454a629a937420c440f67eafc0cb872a6b2ac875b5f576936e2",
+    "numpy": "2.2.6",
+    "precision": {
+      "forward": "float32 IEEE (TF32 and autocast disabled)",
+      "npz_means_export": "float32",
+      "returned_means": "float64",
+      "samples": "float32",
+      "sums_and_squared_sums": "float64",
+      "variance": "float64, centered on pre-export float64 means; clipped at zero",
+      "weights": "float32"
+    },
+    "producer_sha256": "9526194757d6520f3c4c11bb677102c6ce59fb023fd0a39fc6ca64ee53ebccb2",
+    "python": "3.10.0",
+    "schema": "p2_truth_math_e14_v1",
+    "torch": "2.13.0+cu130",
+    "torch_git": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+    "width": 1024
+  }
+}
