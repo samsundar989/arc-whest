@@ -44,11 +44,13 @@ real snapshot behavior before access. A separate tiny same-state branch probe
 passed fresh independent structural review: join first changes at layer 4;
 full-P2 must branch before the first birth because stored lineage ranks are
 uniform. It is not a width-1024 accuracy result. Fresh P15 DESIGN seeds are
-registered but unclaimed. The four-arm attribution contract is committed;
+registered and the first 24 are claimed. Samuel answered “i dont know” for all
+three pre-result predictions; truth workerq #1944 is queued from immutable
+snapshot `9793d4e09`. The four-arm attribution contract is committed;
 the repaired scorer and paired reader pass 7 focused tests, source scan 75/75,
 standard preflight GREEN 12/16, and fresh independent Skeptic review for the
-narrow truth-dispatch instrument. Samuel's three P15 pre-result predictions
-and a claimed fresh block must precede truth. P13 remains untouched. The major
+narrow truth-dispatch instrument. No P15 truth or accuracy result exists yet.
+P13 remains untouched. The major
 2x objective remains unproven and unsubmitted.
 
 ---
