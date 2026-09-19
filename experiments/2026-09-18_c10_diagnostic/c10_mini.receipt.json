@@ -1,0 +1,42 @@
+{
+    "schema":  "arc-whest.run_receipt/1",
+    "report_path":  "C:\\Users\\samsu\\Documents\\arc-whest\\experiments\\2026-09-18_c10_diagnostic\\c10_mini.json",
+    "report_sha256":  "97ae4ef56d90e0809590931dd5648c4f2621c7f5025de30460772b9a981910c3",
+    "source_path":  "estimator_k3_v43_complete_c10.py",
+    "source_sha256":  "fd8d497db6dfbc3affcf579119c7115c3aee4d190a3e92fec4d85c366152d1bf",
+    "source_changed_during_run":  false,
+    "meter_path":  "whest_run_subprocess",
+    "dataset":  {
+                    "path":  "hf://aicrowd/arc-whestbench-public-2026@v2-phase2",
+                    "sha256":  "264fa1f416d16a40821fb5e8e94f5d2da4698a201d40da999616225b38b464f1",
+                    "n_mlps":  100
+                },
+    "host_load":  {
+                      "class":  "unknown",
+                      "evidence":  "runner-written receipt; queue overlap is not queried here"
+                  },
+    "provenance":  {
+                       "kind":  "written_by_run_mini_json",
+                       "started_utc":  "2026-09-18T23:12:08.8445233Z",
+                       "ended_utc":  "2026-09-19T00:59:23.2846306Z",
+                       "arguments":  [
+                                         "run",
+                                         "whest",
+                                         "run",
+                                         "--estimator",
+                                         "estimator_k3_v43_complete_c10.py",
+                                         "--dataset",
+                                         "hf://aicrowd/arc-whestbench-public-2026@v2-phase2",
+                                         "--split",
+                                         "mini",
+                                         "--runner",
+                                         "subprocess",
+                                         "--detail",
+                                         "full",
+                                         "--format",
+                                         "json",
+                                         "--no-residual-wall-time-limit"
+                                     ],
+                       "exit_code":  0
+                   }
+}

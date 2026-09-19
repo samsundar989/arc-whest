@@ -1,0 +1,40 @@
+﻿worker-q: job #160 starting at 2026-09-19T00:07:36.504162+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest\.gpuq-work\job-001944
+worker-q: snapshot=live -
+worker-q: CUDA_VISIBLE_DEVICES=0
+worker-q: command=['.venv-gpu\\Scripts\\python.exe', 'local_sim/p2_truth.py', '--already-claimed', '--seed-start', '40919015000', '--n-mlps', '24', '--log2-samples', '24', '--chunk', '65536', '--block', 'P15', '--ts', '2026-09-19T00:06:00Z', '--out', 'C:/Users/samsu/Documents/arc-whest/experiments/2026-09-18_p15_reference/truth_P15.npz']
+worker-q: ------------------------------------------------------------
+==============================================================================
+PHASE-2 TRUTH  --  1024 x 16, two independent replicas
+==============================================================================
+  block           P15
+  networks        24
+  samples/replica 2^24 = 16,777,216   (2 replicas each)
+  expected truth noise per replica  ~ avg_variance / N
+                  ~ 0.087 / 16,777,216 = 5.186e-09
+  total work      2.702e+16 FLOPs
+  out             C:/Users/samsu/Documents/arc-whest/experiments/2026-09-18_p15_reference/truth_P15.npz
+  device          cuda  NVIDIA GeForce RTX 3080 Ti
+
+  verified        P15[40,919,015,000 .. 40,919,015,023] already claimed by local_sim/p2_truth.py
+  ledger          NOT written (--already-claimed); finalize on the host
+       4/24     340.8s   eta  1703.9s
+       8/24     695.4s   eta  1390.9s
+      12/24    1057.0s   eta  1057.0s
+      16/24    1421.9s   eta   710.9s
+      20/24    1789.3s   eta   357.9s
+      24/24    2158.8s   eta     0.0s
+  ledger finalize SKIPPED (--already-claimed); bind on the host with
+    seed_ledger.finalize(<the claiming consumer>, '../../experiments/2026-09-18_p15_reference/truth_P15.npz', ts=...)
+
+  replica disagreement  observed 9.3319e-09   predicted 2*V/N 9.0573e-09   ratio 1.0303
+     (a ratio far from 1.0 means the replicas are NOT independent, or
+      the variance model is wrong. It is a check, not a formality.)
+  mean truth noise      4.5287e-09
+  wrote                 ../../experiments/2026-09-18_p15_reference/truth_P15.npz
+  sha256                6b600edec23d12c7dc8d2bddd8759aaca92073c7419d623a9b641550e19037c7
+  ledger finalized      no (--already-claimed)
+  elapsed               2159.2s
+==============================================================================
+worker-q: ------------------------------------------------------------
+worker-q: job #160 SUCCEEDED (exit code 0) at 2026-09-19T00:43:40.541227+00:00
