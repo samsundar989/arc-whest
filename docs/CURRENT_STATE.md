@@ -97,12 +97,9 @@ was throughput — 15 entries in 25 days against ~250 available, while the leade
 
 ## Known deviations from PLAN §8
 
-- `docs/HUMAN_MODEL.md` was **not** archived. It is Samuel-owned and mechanically
-  write-protected by `scripts/guard_paths.py`; an agent relocating it is the exact thing
-  that guard exists to prevent. One file of clutter, left for Samuel to move if he wants.
-- `docs/SKEPTIC.md` was **not** archived. PLAN §4 keeps the Skeptic for the two
-  designated finals and for write-up numbers, so archiving the brief while keeping the
-  role would break a capability the plan retains.
-- `.claude/settings.json` still allowlists `scripts/preflight.ps1`. That file is the
-  agent's own permission configuration; the entry is inert now that no contract names
-  preflight as a gate.
+Three files PLAN listed for archiving were left in place: `docs/HUMAN_MODEL.md`
+(Samuel-owned and mechanically write-protected — an agent relocating it is what that
+guard exists to prevent), `docs/SKEPTIC.md` (PLAN §4 keeps the Skeptic for the
+designated finals and write-up numbers, so archiving the brief would break a capability
+the plan retains), and the `preflight.ps1` entry in `.claude/settings.json` (the agent's
+own permission file; the entry is inert now that no contract names preflight as a gate).
