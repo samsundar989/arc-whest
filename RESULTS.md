@@ -155,6 +155,35 @@ Evidence: `experiments/2026-09-21_d1/c10_dev100_cupy.json`.
 - `HF_HUB_OFFLINE=1` in the worker env: otherwise every worker resolves the
   dataset revision against an unauthenticated, rate-limited endpoint.
 
+## D2 prep — the six profiles already exist as constants (read 2026-09-21)
+
+PLAN §6 D2(a) asks for six per-layer profiles parametrised as 4-knot splines,
+"defaults = current constants exactly". They do not need to be invented: five of
+the six are already module-level constants in `estimator_k3_v43_complete_c10.py`,
+so the refactor is *read these from an embedded `coeffs.json`*, not a rewrite,
+and bit-parity at defaults is close to free.
+
+| PLAN's profile | where it lives in C10 | current form |
+|---|---|---|
+| λ (κ4 regen) | `_K4_LAM` (line 130) via `_own_lambda()` (1487) | **already per-layer**: a 16-entry table, times `_OWN_S_LAM = 1.225`, times a linear depth tilt `(1 + _OWN_T_LAM·phase)`, `_OWN_T_LAM = -0.1` |
+| closure scale θ | `_OWN_THETA_FAM = 0.625` (122), applied at 432 | global scalar |
+| κ4→κ3 feed gain | `_OWN_S_FEED = 1.0` (125), applied at 1771–1773 | global scalar |
+| D21-feedback gain | `_P3_ON = False`, `_P3_RANK = 32` (117–118) | **off**; D2's base turns it on at rank 16 |
+| (2,1)-consumer gain | `_P2_SEPARABLE = True` (79) | boolean, no gain exposed yet |
+| old-tier readout gain | `_SHARED_*` (89–95), age 4 / rank 256 | no gain exposed yet |
+
+So four of the six are a scalar or a table to generalise, one is a switch to
+turn on, and two ((2,1)-consumer, old-tier readout) need a gain introduced
+before they can be fitted. `_own_lambda`'s existing "table × scale × linear
+tilt" is already a crude 3-parameter profile — the spline generalises it rather
+than replacing a constant, which is a useful sanity check that the
+parametrisation is in the right place.
+
+Note `_K4_LAM[15] = 0.0`: the last layer's κ4 channel is already off, and
+`_K4_LAM` is documented as "an INITIALISER measured on our own fresh design
+networks, not a fitted value". Fitting it on FIT's 100 noise-free organizer nets
+is exactly what D2 is for.
+
 ## Open items
 
 ### C10 canary — PACKAGED AND GATED, NOT YET SUBMITTED (2026-09-21)
