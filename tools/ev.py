@@ -119,25 +119,18 @@ WALL_FACTOR = max(WALL_ANCHORS.values())
 US_PER_OP = (0.140244e6 / 13053, 0.156232e6 / 14091)
 RESIDUAL_CLIFF_S = 0.4
 
-#: Prediction workers. **Two, and raising it does not help.**
+#: Prediction workers. Bounded by free RAM: one worker holds ~3.8 GiB of chain
+#: at width 1024, and this box has 16 logical / 8 physical cores but only ~30
+#: GiB genuinely free. Four fits with room to spare.
 #:
-#: One worker holds ~3.8 GiB of chain at width 1024. On 2026-09-21, four and six
-#: workers both degenerated the same way: one worker ran normally and the rest
-#: crawled through a single net for many minutes. Measured while it was
-#: happening -- ~1e6 page faults/second, private working sets pinned at ~600 MiB
-#: against the 3.8 GiB the chain needs, and the DISK COMPLETELY IDLE. Soft
-#: faults, i.e. Windows trimming the working sets of processes that are all
-#: allocating multiple GiB at once, even with 32 GiB free.
-#:
-#: Two wrong diagnoses were made first and are recorded so they are not made
-#: again: it is NOT BLAS thread oversubscription (the same thing happens at two
-#: threads each, which is exactly the eight physical cores), and it is NOT the
-#: dataset or the HF hub (the disk is idle and a second process can open the
-#: dataset in 1.3 s while this is going on).
-#:
-#: If a full numpy panel is needed faster than ~45 min, the answer is the cupy
-#: backend (2.03 s/net, one process), not more workers.
-DEFAULT_JOBS = 2
+#: For most of 2026-09-21 the pool appeared not to scale past one worker, and
+#: three separate causes were proposed and are recorded here because each was
+#: WRONG: the HF hub's rate limiter, BLAS thread oversubscription, and the
+#: Windows memory manager trimming working sets. The actual cause was a pipe
+#: deadlock in this file -- see the comment on the Popen calls below. None of
+#: the three hypotheses was tested against the one measurement that settled it
+#: (per-process CPU seconds: a blocked worker had accumulated 3 of them).
+DEFAULT_JOBS = 4
 
 
 def sha256_file(path: Path) -> str:
@@ -201,24 +194,41 @@ def predictions(candidate: Path, panel: str, n: int, jobs: int,
                 "NUMEXPR_NUM_THREADS"):
         env[var] = str(per)
 
+    # EACH WORKER GETS ITS OWN LOG FILES, NOT A PIPE.
+    #
+    # `stdout=PIPE, stderr=PIPE` with a single `communicate()` at the end is a
+    # deadlock, and it is the bug that ate the evening of 2026-09-21. The
+    # candidate emits Python warnings with source context on stderr; once a
+    # worker writes ~64 KiB the OS pipe buffer fills, and nothing drains it
+    # until communicate(), which does not run until the process exits. The
+    # worker blocks forever at ~0% CPU, a few hundred MiB resident, having just
+    # entered predict -- which reads as "mysteriously slow" and was
+    # mis-diagnosed three times (HF locks, BLAS oversubscription, the Windows
+    # memory manager) before the process priorities and CPU times made it
+    # obvious. Files have no buffer limit and keep the diagnostics.
     procs = []
     t0 = time.perf_counter()
     for lo, hi in spans:
         out = tmp / f"{lo}_{hi}.npz"
-        procs.append(((lo, hi), out, subprocess.Popen(
+        fo = open(tmp / f"{lo}_{hi}.out", "w", encoding="utf-8")
+        fe = open(tmp / f"{lo}_{hi}.err", "w", encoding="utf-8")
+        procs.append(((lo, hi), out, (fo, fe), subprocess.Popen(
             [sys.executable, str(TOOLS / "_predict_worker.py"), str(candidate),
              panel, str(lo), str(hi), str(out)],
-            cwd=str(ROOT), env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            text=True, encoding="utf-8", errors="replace")))
+            cwd=str(ROOT), env=env, stdout=fo, stderr=fe)))
     if not quiet:
         print(f"  {len(spans)} workers x {per} BLAS threads over {total} nets ...",
               flush=True)
 
     parts, errors, peak = {}, [], 0.0
-    for (lo, hi), out, pr in procs:
-        so, se = pr.communicate()
-        if pr.returncode != 0:
-            raise SystemExit(f"worker [{lo}:{hi}] failed rc={pr.returncode}\n{se[-3000:]}")
+    for (lo, hi), out, (fo, fe), pr in procs:
+        rc = pr.wait()
+        fo.close()
+        fe.close()
+        so = (tmp / f"{lo}_{hi}.out").read_text(encoding="utf-8", errors="replace")
+        if rc != 0:
+            se = (tmp / f"{lo}_{hi}.err").read_text(encoding="utf-8", errors="replace")
+            raise SystemExit(f"worker [{lo}:{hi}] failed rc={rc}\n{se[-3000:]}")
         line = [l for l in so.strip().splitlines() if l.startswith("{")]
         info = json.loads(line[-1]) if line else {}
         errors += info.get("errors", [])
@@ -236,8 +246,11 @@ def predictions(candidate: Path, panel: str, n: int, jobs: int,
             "worker_peak_rss_mib": peak, "failed_nets": errors,
             "built_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
     meta_p.write_text(json.dumps(meta, indent=1) + "\n", encoding="utf-8")
-    for _, out, _ in procs:
+    # Keep the .err files: they are where a candidate's warnings live, and a
+    # candidate that starts emitting new ones is telling you something.
+    for (lo, hi), out, _fhs, _pr in procs:
         out.unlink(missing_ok=True)
+        (tmp / f"{lo}_{hi}.progress").unlink(missing_ok=True)
     meta["cached"] = False
     return preds, truth, meta
 
