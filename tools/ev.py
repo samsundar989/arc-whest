@@ -76,6 +76,18 @@ for p in (str(ROOT), str(TOOLS), str(LOCAL_SIM)):
 
 os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
 
+# A Windows console is cp1252, and this file prints Delta, multiplication and
+# section signs, and writes RESULTS.md rows containing them. Without this the
+# run dies in its own report AFTER the compute -- the same class of failure as
+# `whest`'s box-drawing output killing a cp1252 console inside its error
+# printer (`docs/GOTCHAS.md`). errors="replace" so a console that still cannot
+# encode something degrades a character instead of losing the whole result.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 import numpy as np  # noqa: E402
 
 import panels  # noqa: E402
