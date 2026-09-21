@@ -233,8 +233,12 @@ def predictions(candidate: Path, panel: str, n: int, jobs: int,
         info = json.loads(line[-1]) if line else {}
         errors += info.get("errors", [])
         peak = max(peak, float(info.get("peak_rss_mib", 0.0)))
-        d = np.load(out)
-        parts[lo] = (d["preds"], d["truth"])
+        # CLOSE IT. `np.load` on an .npz returns a lazy NpzFile that holds the
+        # file handle open until closed, and on Windows an open handle makes the
+        # later unlink fail with WinError 32 -- after the whole panel has been
+        # computed. Copy the two arrays out and let the handle go.
+        with np.load(out) as d:
+            parts[lo] = (np.array(d["preds"]), np.array(d["truth"]))
     wall = time.perf_counter() - t0
 
     preds = np.concatenate([parts[lo][0] for lo in sorted(parts)], axis=0)

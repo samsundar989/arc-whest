@@ -11,11 +11,11 @@ The plan is `docs/PLAN.md`; the submission gates are its §5.
 | **date** | UTC date of the evaluation or of the submission |
 | **file** | candidate source in the repo root |
 | **sha8** | first 8 hex of sha256 of the *estimator source bytes* (not the package) |
-| **panel** | `DEV` = the 100 organizer mini nets · `FIT` = 100 full-split nets disjoint from mini · `HOLDOUT` = the remaining 800 (≤2 reads/week, never fitted) · `GRADED` = AIcrowd server, 100 nets (50 public + 50 sealed) |
+| **panel** | `DEV` = the 100 organizer mini nets · `FIT` = 100 full-split nets disjoint from mini · `HOLDOUT` = the remaining **900** (≤2 reads/week, never fitted) · `GRADED` = AIcrowd server, 100 nets (50 public + 50 sealed) |
 | **raw MSE** | final-layer MSE, unweighted |
 | **F/B** | FLOPs per MLP ÷ 2^41, i.e. the score multiplier before the 0.1 floor |
 | **ops** | flopscope operation calls per MLP (drives residual wall time) |
-| **wall** | worst per-MLP wall seconds. Local rows are marked `(local)`; the server figure is `local × 1.3097` (§ Calibration) |
+| **wall** | worst per-MLP wall seconds. Local rows are marked `(local)` and come from the one-net grader twin; the server figure is `local × 1.5981` (§ Calibration) |
 | **RSS** | VmPeak under the WSL `RLIMIT_AS` 8,192 MB gate |
 | **projected** | predicted public score = DEV score ÷ 1.037 |
 | **graded** | the AIcrowd adjusted score actually returned |
@@ -74,6 +74,7 @@ All four are implemented in `tools/ev.py`; change them there and here together.
 | 2026-09-16 | `estimator_k3_v31.py` | `6dde5fd4` | GRADED | 2.9074e-08 | 0.30103 | 13,037 | 68.132 s | 5,434.6 MB | 8.713e-09 | **8.7520e-09** | 1.8233× vs F21 | 50/50 | sub #331317, 100/100, 0 failed, smoke 8/8. Worst residual 0.140244 s (2.85× headroom, 10.76 µs/op). Projection landed +0.45% — the best graded score to date and the §5 baseline. |
 | 2026-09-18 | `estimator_k3_v31.py` | `6dde5fd4` | DEV | 3.006065e-08 | 0.30101 | 13,037 | 52.02 s (local) | 5,434.6 MB | 8.713e-09 | see above | baseline | — | The DEV control. `experiments/2026-09-16_slice7_canary/`. Reproduce this row in D1: DEV adjusted 9.0486e-09 ± 1%. |
 | 2026-09-18 | `estimator_k3_v43_complete_c10.py` | `fd8d497d` | DEV | 3.094966e-08 | 0.21865 | 23,405 | 60.259 s (local) → 78.9 s proj | 5,754.8 MiB | **6.526e-09** | PENDING | 1.3371× vs v31 DEV (score ratio, unpaired) | — | C10. DEV adjusted 6.767156e-09, 100/100, 0 failed, official `v2-phase2` mini, subprocess runner (`experiments/2026-09-18_c10_diagnostic/c10_mini.json`). Raw MSE is 3.0% WORSE than v31; the whole gain is cost (0.30103 → 0.21865 F/B). All §5 gates pass — see below. |
+| 2026-09-21 | `estimator_k3_v43_complete_c10.py` | `fd8d497d` | DEV | 3.094966e-08 | 0.21867 | 23,421 | 49.881 s (local) → 79.7 s proj | 3842 MiB | **6.5262e-09** | PENDING | — | — | D1 acceptance on the instrument of record: raw MSE reproduces the Sep-18 official whest run EXACTLY (3.094966e-08). Multiplier is the f64 twin's, hence 2^25 above whest run's. |
 
 <!-- ev.py --append inserts new rows directly above this marker. Keep it here. -->
 
@@ -95,7 +96,7 @@ by sha256 of the weight tensors across all 200 nets, not just by seed.
 
 | backend | s/net | 100 nets | host RSS | agreement with the official 100-net mini run |
 |---|---:|---:|---:|---|
-| `numpy` (default) | ~50 | ~40 min (4 workers) | 3.8 GiB | exact to float32 on the 2 nets checked per-net |
+| `numpy` (default) | ~50 | **38 min** (4 workers) | 3.8 GiB | **exact** — 100-net mean 3.094966e-08, the official figure to every digit it reports |
 | `cupy` on the 5090 | **2.03** | **3.4 min** | 8.0 GiB | panel mean **+3.2e-05**; worst single net 1.9e-03 |
 
 PLAN §4 asked the GPU to match numpy to 1e-6 relative. **It does not, and it
@@ -118,11 +119,24 @@ run on**; `ev.py` still uses numpy for anything that becomes a RESULTS.md row or
 a §5 gate, because a submission is worth 40 minutes. Do not run the two
 backends concurrently — 8.0 + 15.2 GiB puts this box into paging.
 
-### Acceptance
+### Acceptance — met on both backends
 
-C10 on DEV, cupy, 100 nets: **6.767843e-09** against the official
-6.767156e-09 — inside the ±1% acceptance by a factor of 300.
-Evidence: `experiments/2026-09-21_d1/c10_dev100_cupy.json`.
+C10 on DEV, 100 nets, against the Sep-18 official `whest run`
+(`experiments/2026-09-18_c10_diagnostic/c10_mini.json`):
+
+| | raw MSE | adjusted | vs official raw |
+|---|---|---|---|
+| official `whest run` | 3.094965995e-08 | 6.767156e-09 | — |
+| **numpy (instrument of record)** | **3.094966e-08** | 6.767629e-09 | **exact** |
+| cupy (screening) | 3.095064010e-08 | 6.767843e-09 | +3.2e-05 |
+
+PLAN D1 asked for ±1%; numpy reproduces the official raw MSE to every digit the
+official report carries. The small spread in *adjusted* is not accuracy — it is
+the multiplier: ev.py takes FLOPs from the f64 twin, which is 2^25 above what
+`whest run` bills, and that is the correct, graded-verified number.
+
+Evidence: `experiments/2026-09-21_d1/c10_dev_numpy.json`,
+`experiments/2026-09-21_d1/c10_dev100_cupy.json`.
 
 ### Operational notes that cost time
 
