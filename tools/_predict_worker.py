@@ -13,6 +13,13 @@ computes predictions and nothing else, and `tools/ev.py` takes every cost figure
 from a different process running the real meter. The isolation is the safety
 property, not the sys.path order.
 
+Two backends, selected by `WHEST_BACKEND`:
+
+    numpy   (default)  local_sim/flopscope  -- CPU, ~50 s/net
+    cupy               tools/gpu_shim       -- RTX 5090
+
+They must agree; `tools/check_backends.py` is the equality test.
+
 Writes one .npz to the cache directory and prints one JSON line.
 
     python tools/_predict_worker.py <candidate.py> <panel> <lo> <hi> <out.npz>
@@ -27,9 +34,18 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 LOCAL_SIM = ROOT / "local_sim"
+GPU_SHIM = ROOT / "tools" / "gpu_shim"
+
+BACKEND = os.environ.get("WHEST_BACKEND", "numpy").lower()
+if BACKEND not in ("numpy", "cupy"):
+    raise SystemExit(f"WHEST_BACKEND must be 'numpy' or 'cupy', got {BACKEND!r}")
 
 # DELIBERATE INSERT -- see the module docstring. Only ever in this file.
+# The cupy shim ships only `flopscope`, so `local_sim` stays behind it for
+# `whestbench` and for `real_data`.
 sys.path.insert(0, str(LOCAL_SIM))
+if BACKEND == "cupy":
+    sys.path.insert(0, str(GPU_SHIM))
 sys.path.insert(0, str(ROOT))
 os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
 
@@ -70,12 +86,22 @@ class _Ctx:
 
 BUDGET = 2 ** 41
 
+_xp = None
+_GPU = False
+
 
 def main(argv) -> int:
     cand, panel, lo, hi, out = argv[1], argv[2], int(argv[3]), int(argv[4]), argv[5]
 
     import numpy as np
     import importlib.util
+
+    global _xp, _GPU
+    _GPU = BACKEND == "cupy"
+    if _GPU:
+        import cupy as _xp  # noqa: PLC0415
+    else:
+        _xp = np
 
     sys.path.append(str(ROOT / "tools"))
     import panels  # noqa: PLC0415
@@ -94,6 +120,12 @@ def main(argv) -> int:
         print(json.dumps({"n": 0}))
         return 0
 
+    _p0 = Path(out).with_suffix(".progress")
+    try:
+        _p0.write_text(f"{time.strftime('%H:%M:%S')} opening dataset\n", encoding="utf-8")
+    except Exception:
+        pass
+
     est = mod.Estimator()
     # The grader calls setup() once per submission, not per MLP.
     first_split, first_idx = rows[0][0], rows[0][1]
@@ -104,25 +136,44 @@ def main(argv) -> int:
     except Exception as exc:  # the grader tolerates a failed setup; so do we
         print(json.dumps({"setup_error": type(exc).__name__}), file=sys.stderr)
 
+    # Progress goes to a sidecar file, not stdout: the driver reads stdout only
+    # at the end, so a per-net print is invisible for the whole run and a stalled
+    # worker is indistinguishable from a slow one. It cost an hour to find that
+    # out the hard way.
+    progress = Path(out).with_suffix(".progress")
+
+    def note(msg: str) -> None:
+        try:
+            progress.write_text(f"{time.strftime('%H:%M:%S')} {msg}\n", encoding="utf-8")
+        except Exception:
+            pass
+
     preds = np.empty((len(rows), width), dtype=np.float32)
     truth = np.empty((len(rows), width), dtype=np.float64)
     errors = []
     t0 = time.perf_counter()
     for k, (split, idx, seed, _name) in enumerate(rows):
+        note(f"net {k + 1}/{len(rows)} (panel index {idx}) loading")
         if k == 0:
             w, tr = w0, truth0
         else:
             w, tr, _ = rd.get(idx, split, dtype=np.float32)
+        note(f"net {k + 1}/{len(rows)} (panel index {idx}) predicting")
         # The grader's weights are float64 and immutable. Reproduce both, so the
         # opening cast in the candidate takes the branch it takes on the server.
+        # cupy arrays have no `setflags`, so the cupy backend can reproduce the
+        # dtype but not the immutability; that costs nothing here, because a
+        # candidate that writes into its weights is caught by the cost path and
+        # by `whest validate`, both of which run on the real arrays.
         wf = []
         for x in w:
             a = np.asarray(x, dtype=np.float64)
             a.setflags(write=False)
-            wf.append(a)
+            wf.append(_xp.asarray(a) if _GPU else a)
         mlp = _MLP(wf, width, depth, int(seed))
         try:
-            raw = np.asarray(est.predict(mlp, BUDGET), dtype=np.float32)
+            raw = est.predict(mlp, BUDGET)
+            raw = np.asarray(_xp.asnumpy(raw) if _GPU else raw, dtype=np.float32)
             if raw.shape != (depth, width) or not np.all(np.isfinite(raw)):
                 raise ValueError(f"bad prediction shape/finiteness {raw.shape}")
             preds[k] = raw[-1]
@@ -138,6 +189,7 @@ def main(argv) -> int:
                         indices=np.array([r[1] for r in rows], dtype=np.int64))
     print(json.dumps({"n": len(rows), "seconds": round(dt, 2),
                       "per_net": round(dt / len(rows), 3),
+                      "backend": BACKEND,
                       "peak_rss_mib": round(peak_rss_mib(), 1),
                       "errors": errors}))
     return 0

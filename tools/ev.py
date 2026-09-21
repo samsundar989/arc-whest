@@ -32,6 +32,13 @@ The **cost path** runs `local_sim/lifecycle_eval.evaluate` on ONE net with the
 genuine flopscope package. FLOPs are net-independent (spread 0 across all 100
 nets of every graded run we hold), so one net is the whole cost answer.
 
+There is also a **cupy backend** (`tools/gpu_shim`, `WHEST_BACKEND=cupy`) at
+~5.2 s/net against ~50 s/net on the CPU. It is a SCREENING instrument only:
+both backends run the chain in float32, the GPU reduces in a different order,
+and sixteen layers amplify that into ~1e-3 relative on a per-net MSE. `ev.py`
+therefore always uses numpy; `tools/check_backends.py` quantifies the gap, and
+the D2 fit is where the GPU earns its keep.
+
 The server FLOP offset
 ----------------------
 `docs/GOTCHAS.md` (2026-09-07) settles this: the offset depends on the opening
@@ -100,6 +107,16 @@ WALL_FACTOR = max(WALL_ANCHORS.values())
 US_PER_OP = (0.140244e6 / 13053, 0.156232e6 / 14091)
 RESIDUAL_CLIFF_S = 0.4
 
+#: Prediction workers. **Bounded by free RAM, not by cores.** One worker holds
+#: ~3.8 GiB of chain at width 1024, and this box has 16 cores but only ~30 GiB
+#: genuinely free (editors, browsers, other agents hold the rest). Six workers
+#: (23 GiB) tipped the machine into paging on 2026-09-21: Windows trimmed their
+#: working sets to ~0.5 GiB and they crawled on page faults while *looking* idle
+#: in Get-Process -- low RSS and low CPU, which reads exactly like a deadlock and
+#: is not one. Four is the number that fits. Raise it only after checking
+#: Win32_OperatingSystem.FreePhysicalMemory, and never past free_GiB / 4.
+DEFAULT_JOBS = 4
+
 
 def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
@@ -142,9 +159,18 @@ def predictions(candidate: Path, panel: str, n: int, jobs: int,
     tmp = cdir / "_parts"
     tmp.mkdir(exist_ok=True)
     env = dict(os.environ)
+    # OFFLINE, and this is not an optimisation. Six workers opening the dataset
+    # at once each resolve the revision against the HF hub; unauthenticated,
+    # concurrent and rate-limited, five of the six sat at 4 CPU-seconds for
+    # minutes while one proceeded. The panel data is already in the local cache,
+    # so offline mode removes the hub from the path entirely. If this ever needs
+    # to fetch, run `python tools/panels.py --build` first, online, once.
+    env["HF_HUB_OFFLINE"] = "1"
+    env["HF_DATASETS_OFFLINE"] = "1"
     # Each worker gets its own slice of the cores. Six processes each spawning
-    # sixteen BLAS threads is slower than six processes with two, and it is the
-    # difference between a busy machine and an unusable one.
+    # sixteen BLAS threads is slower than six processes with two (73 s/net
+    # against 50 s/net measured), and it is the difference between a busy
+    # machine and an unusable one.
     per = max(1, (os.cpu_count() or 8) // len(spans))
     for var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
                 "NUMEXPR_NUM_THREADS"):
@@ -428,8 +454,10 @@ def main(argv=None) -> int:
     ap.add_argument("--n", type=int, default=100)
     ap.add_argument("--baseline", default=None,
                     help="control candidate file; paired on common random numbers")
-    ap.add_argument("--jobs", type=int, default=6,
-                    help="prediction worker processes (each holds a full chain in RAM)")
+    ap.add_argument("--jobs", type=int, default=DEFAULT_JOBS,
+                    help=f"prediction worker processes (default {DEFAULT_JOBS}; each "
+                         f"holds ~3.8 GiB of chain, so this is bounded by FREE RAM, "
+                         f"not by cores)")
     ap.add_argument("--force", action="store_true", help="ignore the prediction cache")
     ap.add_argument("--no-cost", action="store_true",
                     help="skip the real-meter run (accuracy only; no score, no gates)")
