@@ -86,14 +86,13 @@ readout (v44) · qEc/qEdc bases · CP/Tucker leg compression · f64 · E14 · fu
 
 ## Process reset of 2026-09-21
 
-Pre-registered contracts, Samuel-prediction capture, seed blocks, the
-DECIDE/CONFIRM/VAULT tiers, per-experiment Skeptic, dispatch-plan commits, producer
-sidecars, `preflight.ps1` as the change gate, `workerq` for evaluations and the 2×
-release gate are all **retired** (`AGENTS.md` rule 6). Measurement itself was never the
-problem and is unchanged: mints are bit-identical to the organizers', FLOPs match the
-grader, and the DEV→graded factor has held to ±0.3% over three submissions. The problem
-was throughput — 15 entries in 25 days against ~250 available, while the leaders ran
-150–300 each.
+Pre-registered contracts, prediction capture, seed blocks, the DECIDE/CONFIRM/VAULT
+tiers, per-experiment Skeptic, dispatch-plan commits, producer sidecars, `preflight.ps1`
+as the change gate, `workerq` for evaluations and the 2× release gate are all **retired**
+(`AGENTS.md` rule 6). Measurement was never the problem: mints are bit-identical to the
+organizers', FLOPs match the grader exactly, and the DEV→graded factor has held to ±0.3%
+over three submissions. The problem was throughput — 15 entries in 25 days against ~250
+available, while the leaders ran 150–300 each.
 
 ## Known deviations from PLAN §8
 
