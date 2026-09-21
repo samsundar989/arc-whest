@@ -24,18 +24,47 @@ The plan is `docs/PLAN.md`; the submission gates are its §5.
 
 ## Calibration constants (recheck after every graded row)
 
-- **DEV → graded**: divide the 100-net mini adjusted score by **1.037**. Observed
+All four are implemented in `tools/ev.py`; change them there and here together.
+
+- **DEV → graded**: divide the 100-net DEV adjusted score by **1.037**. Observed
   1.0386 / 1.0385 / 1.0339 on three submissions (±0.3%); v31's own row landed
   +0.45% off `predict_public.py`. If a graded row deviates >2% from its
   projection, stop submitting and recalibrate before the next slot (PLAN §5).
-- **local wall → server wall**: multiply by **1.3097** (v31: worst local 52.02 s
-  on the 100-net subprocess mini → worst graded 68.1319 s).
-- **ops → server residual**: **10.8–11.2 µs/op** (F21 13,936 ops → 0.156232 s;
-  v31 13,037 ops → 0.140244 s). The cliff is 0.4 s/MLP and it FAILS the MLP.
-  The in-process local `residual_wall_time_s` is an instrument artefact
+
+- **FLOPs: there is no offset to add.** Take the number from the **f64 read-only
+  grader twin** (`tools/_cost_worker.py`, one net) and use it as-is. Verified
+  2026-09-21 against both graded rows we hold:
+
+  | candidate | twin FLOPs/MLP | twin multiplier | graded multiplier | delta |
+  |---|---:|---:|---:|---|
+  | F21 #330950 | 928,457,637,478 | 0.42221365105 | 0.4222136511 | **0** |
+  | v31 #331317 | 661,961,618,994 | 0.30102529263 | 0.3010252926 | **0** |
+
+  (A third confirmation is on record: the twin predicted #330212's `flops_used`
+  to delta 0 out of sample, `docs/GOTCHAS.md` 2026-09-07.) What *does* read low
+  is `whest run --split mini`, by exactly **2^25 = 33,554,432** — its local
+  dataset hands out float32 weights so the candidate's opening cast never runs.
+  That is the "+2^25" PLAN §4 mentions; taking the number from the twin makes
+  the correction unnecessary rather than approximate. C10 measured: twin
+  480,850,933,121 vs `whest run` 480,817,378,689, difference 2^25 exactly.
+
+- **one-net twin wall → server WORST-of-100 wall**: multiply by **1.5981**.
+  Two anchors, both measured with `tools/_cost_worker.py`:
+
+  | candidate | twin wall (1 net) | graded worst wall | factor |
+  |---|---:|---:|---:|
+  | F21 #330950 | 58.295 s | 93.1597 s | 1.5981 |
+  | v31 #331317 | 43.547 s | 68.1319 s | 1.5646 |
+
+  The factor deliberately bundles *server slowness* with *worst-of-100 vs our
+  one net*, because the gate asks whether the worst net finishes. The larger
+  anchor is used: over-projecting wall costs nothing, under-projecting costs the
+  submission.
+
+- **ops → server residual**: **10.74–11.09 µs/op** (v31 13,053 twin ops →
+  0.140244 s; F21 14,091 → 0.156232 s). The cliff is 0.4 s/MLP and it FAILS the
+  MLP. The in-process local `residual_wall_time_s` is an instrument artefact
   (C10 reads 5.9–9.1 s locally) and must never be quoted — project from ops.
-- **server FLOP offset**: the grading server bills an unexplained **+2^24**
-  (+0.0122%) over the local meter. Include it only near a score boundary.
 
 ## Rows
 

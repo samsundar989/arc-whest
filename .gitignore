@@ -57,3 +57,8 @@ local_sim/*.fault_inject_backup
 # Pinned by COMMIT in docs/PROVENANCE_504aldo.md, never vendored into our
 # history. Their bytes are never submitted and never edited here.
 external/
+
+# tools/ev.py prediction cache: regenerable from (candidate sha256, panel), and
+# ~400 KB per candidate-panel pair. The panel index files under data/panels/ ARE
+# tracked -- those pin which nets a number was measured on, which is evidence.
+cache/preds/
