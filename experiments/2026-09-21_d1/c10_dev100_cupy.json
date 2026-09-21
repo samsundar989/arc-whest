@@ -1,0 +1,16 @@
+{
+ "backend": "cupy",
+ "panel": "dev",
+ "n": 100,
+ "seconds": 203.04,
+ "per_net": 2.03,
+ "peak_rss_mib": 8033.1,
+ "raw_mse_mean": 3.095064009528414e-08,
+ "official_raw_mse_mean": 3.0949659954870865e-08,
+ "relative_vs_official": 3.166885887290104e-05,
+ "per_net_abs_rel_max": 0.001898398482724063,
+ "twin_multiplier": 0.21866568800805908,
+ "adjusted": 6.767843010725126e-09,
+ "projected_public": 6.52636741632124e-09,
+ "official_adjusted": 6.767156433314504e-09
+}

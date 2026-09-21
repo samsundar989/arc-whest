@@ -75,6 +75,65 @@ All four are implemented in `tools/ev.py`; change them there and here together.
 | 2026-09-18 | `estimator_k3_v31.py` | `6dde5fd4` | DEV | 3.006065e-08 | 0.30101 | 13,037 | 52.02 s (local) | 5,434.6 MB | 8.713e-09 | see above | baseline | — | The DEV control. `experiments/2026-09-16_slice7_canary/`. Reproduce this row in D1: DEV adjusted 9.0486e-09 ± 1%. |
 | 2026-09-18 | `estimator_k3_v43_complete_c10.py` | `fd8d497d` | DEV | 3.094966e-08 | 0.21865 | 23,405 | 60.259 s (local) → 78.9 s proj | 5,754.8 MiB | **6.526e-09** | PENDING | 1.3371× vs v31 DEV (score ratio, unpaired) | — | C10. DEV adjusted 6.767156e-09, 100/100, 0 failed, official `v2-phase2` mini, subprocess runner (`experiments/2026-09-18_c10_diagnostic/c10_mini.json`). Raw MSE is 3.0% WORSE than v31; the whole gain is cost (0.30103 → 0.21865 F/B). All §5 gates pass — see below. |
 
+## The evaluator (D1, 2026-09-21)
+
+`python tools/ev.py <candidate.py> [--panel dev|fit|holdout] [--n 100]
+[--baseline <file>] [--mem] [--append]` produces every column above in one
+command. `tools/panels.py` pins the panels; `tools/check_backends.py` reports
+what the GPU backend costs in accuracy.
+
+### Panels — HOLDOUT is 900 nets, not 800
+
+PLAN §4 assumed the 100 `mini` nets were a subset of the 1000-net `full` split.
+They are not: **the overlap is zero**. So DEV = 100 mini, FIT = the first 100
+full nets, HOLDOUT = the remaining **900**. DEV and FIT were verified disjoint
+by sha256 of the weight tensors across all 200 nets, not just by seed.
+
+### Two accuracy backends
+
+| backend | s/net | 100 nets | host RSS | agreement with the official 100-net mini run |
+|---|---:|---:|---:|---|
+| `numpy` (default) | ~50 | ~40 min (4 workers) | 3.8 GiB | exact to float32 on the 2 nets checked per-net |
+| `cupy` on the 5090 | **2.03** | **3.4 min** | 8.0 GiB | panel mean **+3.2e-05**; worst single net 1.9e-03 |
+
+PLAN §4 asked the GPU to match numpy to 1e-6 relative. **It does not, and it
+cannot.** Both run the chain in float32, the GPU reduces in a different order,
+and sixteen layers amplify that to ~1e-3 on a *per-net* MSE. It is not TF32 —
+on a 1024³ f32 product against a float64 reference cupy is *more* accurate than
+the CPU BLAS (3.5e-7 vs 7.2e-7) — it is float32 associativity, and nothing
+turns it off without changing the candidate.
+
+But the per-net errors are signed and roughly independent, so **the panel mean
+is 30× tighter than the tolerance that would matter and 1000× inside the 3%
+decision gate**. Measured on C10 over all 100 DEV nets:
+
+    cupy  100-net mean raw MSE   3.095064010e-08     adjusted 6.767843e-09
+    official whest run           3.094965995e-08     adjusted 6.767156e-09
+    relative                     +3.2e-05
+
+So: **the GPU is sound for panel-level decisions and is what the D2 fit will
+run on**; `ev.py` still uses numpy for anything that becomes a RESULTS.md row or
+a §5 gate, because a submission is worth 40 minutes. Do not run the two
+backends concurrently — 8.0 + 15.2 GiB puts this box into paging.
+
+### Acceptance
+
+C10 on DEV, cupy, 100 nets: **6.767843e-09** against the official
+6.767156e-09 — inside the ±1% acceptance by a factor of 300.
+Evidence: `experiments/2026-09-21_d1/c10_dev100_cupy.json`.
+
+### Operational notes that cost time
+
+- **The pool is bounded by free RAM, not cores.** One worker holds ~3.8 GiB;
+  this box has 16 cores but only ~30 GiB genuinely free. Six workers tipped it
+  into paging, at which point Windows trimmed their working sets to ~0.5 GiB and
+  they crawled at ~1e6 page faults/s *while showing low RSS and low CPU* — which
+  reads exactly like a deadlock and is not one. Default is now 4.
+- Workers write a per-net progress sidecar, because the driver reads stdout only
+  at the end and a slow worker is otherwise indistinguishable from a hung one.
+- `HF_HUB_OFFLINE=1` in the worker env: otherwise every worker resolves the
+  dataset revision against an unauthenticated, rate-limited endpoint.
+
 ## Open items
 
 ### C10 canary — PACKAGED AND GATED, NOT YET SUBMITTED (2026-09-21)

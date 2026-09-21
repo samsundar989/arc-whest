@@ -179,11 +179,14 @@ def predictions(candidate: Path, panel: str, n: int, jobs: int,
     # to fetch, run `python tools/panels.py --build` first, online, once.
     env["HF_HUB_OFFLINE"] = "1"
     env["HF_DATASETS_OFFLINE"] = "1"
-    # Each worker gets its own slice of the cores. Six processes each spawning
-    # sixteen BLAS threads is slower than six processes with two (73 s/net
-    # against 50 s/net measured), and it is the difference between a busy
-    # machine and an unusable one.
-    per = max(1, (os.cpu_count() or 8) // len(spans))
+    # TWO BLAS threads per worker, not `cpu_count // workers`. This chain barely
+    # scales with threads -- one net took 50.02 s at 2 threads and 50.05 s at 4,
+    # against 73 s with all sixteen -- so extra threads buy nothing and cost
+    # contention. `cpu_count // workers` gave 4 each (16 total on 8 physical
+    # cores) and three of four workers crawled through a single net for five
+    # minutes while the first raced ahead; a flat 2 each ran all four uniformly
+    # at 87.8 s/net. Measured 2026-09-21, both ways.
+    per = int(os.environ.get("WHEST_BLAS_THREADS", "2"))
     for var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
                 "NUMEXPR_NUM_THREADS"):
         env[var] = str(per)
