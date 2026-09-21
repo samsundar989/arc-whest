@@ -126,21 +126,30 @@ Evidence: `experiments/2026-09-21_d1/c10_dev100_cupy.json`.
 
 ### Operational notes that cost time
 
-- **The numpy pool does not parallelise past 2 workers on this box, and the
-  reason is the Windows memory manager.** One worker holds ~3.8 GiB. At four and
-  at six workers the run degenerates identically: one worker proceeds normally
-  and the rest crawl through a single net for many minutes. Measured while it
-  was happening — **~1e6 page faults/second, private working sets pinned at
-  ~600 MiB against the 3.8 GiB the chain needs, and the disk completely idle**.
-  Those are soft faults: Windows trimming the working sets of several processes
-  that are each allocating multiple GiB, even with 32 GiB free. Default is 2.
+- **A pipe deadlock made the pool look unparallelisable, and it was our bug.**
+  `ev.py` gave each worker `stderr=subprocess.PIPE` and drained it only at
+  `communicate()`, which does not run until the process exits. The candidate
+  emits Python warnings with source context, so a worker that wrote ~64 KiB
+  filled the OS pipe buffer and blocked **forever**, at ~0% CPU, a few hundred
+  MiB resident, having just entered `predict`. Workers now write to per-worker
+  `.out`/`.err` files. The `.err` files are kept: a candidate that starts
+  emitting new warnings is telling you something.
 
-  Two earlier diagnoses were wrong and are recorded so nobody repeats them:
-  it is **not** BLAS thread oversubscription (identical behaviour at 2 threads
-  each, which is exactly the 8 physical cores) and it is **not** the dataset or
-  the HF hub (disk idle; a second process opens the dataset in 1.3 s throughout).
-  If a full numpy panel is needed faster than ~45 min, the answer is the cupy
-  backend, not more workers.
+  The measurement that settled it — and that no earlier hypothesis was checked
+  against — was per-process CPU time: a "slow" worker had accumulated **3 CPU
+  seconds in three minutes**. Three CPU-seconds is not slow, it is stopped. A
+  control confirmed it: the panel index a pooled worker had sat on for 144 s ran
+  standalone in 62 s *while that worker was still stuck*.
+
+  **Three wrong diagnoses preceded this**, each plausible, each acted on, each
+  costing a cancelled run: the HF hub's rate limiter, BLAS thread
+  oversubscription, and the Windows memory manager trimming working sets. They
+  are recorded so the next session does not requeue them.
+
+- **The pool is still bounded by free RAM, not cores** — ~3.8 GiB per worker
+  against ~30 GiB genuinely free on a 16-logical / 8-physical-core box. Four is
+  the default. That ceiling is real on its own and does not depend on the
+  deadlock it was briefly confused with.
 - Workers write a per-net progress sidecar, because the driver reads stdout only
   at the end and a slow worker is otherwise indistinguishable from a hung one.
 - `HF_HUB_OFFLINE=1` in the worker env: otherwise every worker resolves the
