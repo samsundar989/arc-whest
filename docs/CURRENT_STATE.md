@@ -40,11 +40,24 @@ Two facts that size the job: even at the 0.1 cost floor C10's predictions would 
 | item | state |
 |---|---|
 | **C10 canary submission** | **PACKAGED AND GATED, NOT SENT.** `experiments/2026-09-21_c10_canary/c10-canary.tar.gz`. All seven PLAN §5 gates pass (table in `RESULTS.md`). The `whest submit` call was refused by the agent session's permission classifier, not by a project gate. **Needs Samuel to run it or to grant the permission.** |
-| D0b archive | done — this commit |
-| D1 `tools/ev.py` | next, due Sep 23 |
-| D4 diagram pricing | due Sep 22 |
+| D0b archive | **done** |
+| D1 `tools/ev.py` | **done, acceptance met.** C10 on DEV reads 6.767843e-09 against the official 6.767156e-09 (+3.2e-05). Panels built and hash-verified; cupy backend at 2.03 s/net; numpy panel confirmation running. |
+| D4 diagram pricing | driver written and smoke-tested (`tools/d4_price_diagrams.py`); real runs due Sep 22 |
+| D2 fitted coefficients | the next big item, Sep 23–26. The cupy backend is what makes its ~400 evaluations affordable at all. |
 
 Submission slots: 0/10 used on 2026-09-21 UTC; PLAN §5 caps agent canaries at 5/day.
+
+### Evaluating a candidate
+
+```powershell
+uv run python tools/ev.py <candidate.py> --panel dev --baseline estimator_k3_v31.py --append
+```
+
+numpy, 4 workers, ~40 min for 100 nets — the instrument of record. For screening
+use the cupy backend (`WHEST_BACKEND=cupy`, one process, 3.4 min/panel): it
+agrees with numpy to +3.2e-05 on a *panel mean* but only ~1e-3 *per net*, so it
+ranks candidates and must never produce a submission number. Do not run both
+backends at once. Calibration constants and the full account: `RESULTS.md`.
 
 ## Architecture, in one paragraph
 
