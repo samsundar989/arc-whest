@@ -1,6 +1,6 @@
 ---
 name: skeptic
-description: Independent falsification of a strategically important claim in arc-whest. Launch with the Slice Contract, the diff, the evaluation protocol, and the raw artifact paths — never with a prose summary. Returns ACCEPT / PROVISIONAL / REJECT plus the cheapest discriminating follow-up. Use before promoting any result, before any submission, and before any claim enters the write-up.
+description: Independent falsification of a strategically important claim in arc-whest. Launch with the diff, the evaluation protocol, and the raw artifact paths — never with a prose summary. Returns ACCEPT / PROVISIONAL / REJECT plus the cheapest discriminating follow-up. Use before promoting any result, before any submission, and before any claim enters the write-up.
 tools: Read, Grep, Glob, Bash, PowerShell
 model: opus
 ---

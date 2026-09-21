@@ -1,269 +1,170 @@
 # AGENTS.md — arc-whest
 
 **The cross-agent repository operating contract.** Every coding agent that drives this
-repository obeys this file, whatever product it is. Agent-specific files
-(`CLAUDE.md`, `.claude/`, `.agents/`, `.codex/`) are thin adapters around it and must
-never carry project behaviour of their own.
+repository obeys this file. Agent-specific files (`CLAUDE.md`, `.claude/`, `.codex/`)
+are thin adapters around it and carry no project behaviour of their own.
 
-*A map and a contract, not an encyclopedia. Deeper knowledge lives in `docs/`.
-Harness audit: 2026-08-07. Portability audit: 2026-08-07. Re-audit triggers at the bottom.*
+*Rev 2026-09-21. This replaces the rules layer that stood until Sep 21 — pre-registered
+contracts, seed blocks, DECIDE/CONFIRM/VAULT tiers, per-experiment Skeptic, the 2× gate,
+`preflight.ps1` as the change gate, and the 55k-line experiment log. All of that now lives in
+`archive/2026-09-21/`. It is history and must not be used for decisions.*
 
 ## Objective
 
-Samuel's entry for the **ARC White-Box Estimation Challenge 2026** (AIcrowd).
-Given a random He-init ReLU MLP (live Phase 2: 1024 wide × 16 deep, no biases),
+Samuel's entry for the **ARC White-Box Estimation Challenge 2026** (AIcrowd account
+`neopok919`). Given a random He-init ReLU MLP (Phase 2: 1024 wide × 16 deep, no biases),
 predict every neuron's expected post-ReLU activation under x ~ N(0, I) as a
 `(depth, width)` array. Score = mean over MLPs of
-`final_layer_MSE × max(0.1, FLOPs/2**41)`, lower is better. The official Phase-2
-stack is WhestBench 0.16 / flopscope 0.12; lambda is zero; installed caps are
-residual 0.4 s/MLP, wall default 120 s/MLP, and memory 8 GiB. Graded ledgers only
-prove that at least 104.766 s/MLP passes.
+`final_layer_MSE × max(0.1, FLOPs/2**41)`, lower is better. Phase 2 closes
+**Oct 17 23:59 UTC**; team freeze Oct 2; write-up Oct 24. Stack: WhestBench 0.16.1 /
+flopscope 0.12.1, λ = 0, residual 0.4 s/MLP, wall 120 s/MLP, memory 8 GiB.
 
-**The prize is decided by a private re-run of UP TO TWO designated submissions per
-team on fresh MLPs.** Rules v14 now states this directly; if a team selects none,
-its §6 selects the two best-scoring valid submissions from that Phase's public
-board. **Public board rank is not the target.** There is a second, now co-equal
-objective: the **$20k contribution prize**, whose deliverable is the write-up
-(`docs/writeup-draft.md`, currently marked stale/do-not-submit pending a STRATEGIC
-claim review).
+The prize is decided by a **private re-run of up to two designated submissions per team
+on fresh MLPs**. Public board rank is not the target. A second, co-equal objective is the
+**$20k contribution prize**, whose deliverable is the write-up.
 
-Where we stand, what is open, and what to do next: **`docs/CURRENT_STATE.md`**.
+## The rules
 
-## Layout
+1. **Read `docs/PLAN.md` first. It is the only plan.** Every strategy, handoff, packet or
+   review document older than 2026-09-21 is archived history. Where anything differs
+   from PLAN, PLAN wins. `docs/HANDOFF_2026-09-21.md` turns PLAN into an ordered queue.
+2. **Evaluate with `tools/ev.py`. Record one row per candidate in `RESULTS.md`.**
+   Never write to the old experiment log (`archive/2026-09-21/experiments/LOG.md`);
+   `RESULTS.md` carries the column schema and the live calibration constants.
+3. **Submit under PLAN §5.** Samuel has given standing approval for **non-designated
+   canary submissions, at most 5 per day**, for any candidate passing every §5 gate.
+   An agent may run `whest submit` for those. An agent may **never** designate or
+   nominate a final entry, contact the organizers, post on the forum, or reply to a
+   forum request addressed to AI agents.
+4. **Own code only.** `external/504aldo/` is a local oracle for parity and diagnostics.
+   Never ship, copy or `import` its bytes. Record any mechanism re-implemented from it
+   in `docs/PROVENANCE_504aldo.md` (file, line, what).
+5. **Data.** The organizer public split `hf://aicrowd/arc-whestbench-public-2026@v2-phase2`
+   is unlocked. **DEV** = the 100 mini nets · **FIT** = 100 full-split nets disjoint from
+   mini (verified by weight hash) · **HOLDOUT** = the remaining 800, read at most twice a
+   week and never fitted. Fresh mints and seed blocks are retired.
+6. **Process is minimal.** No pre-registered contracts, no prediction requests, no seed
+   blocks, no SINGLE_USE/DECIDE tiers, no dispatch-plan commits, no producer sidecars, no
+   instrument preflight, no per-experiment Skeptic, no `workerq`/`gpuq` for evaluations,
+   no 2× gate. One evaluator, one results table, one decision rule (PLAN §4). Skeptic
+   review is kept **only** for the two designated finals and for write-up numbers, and
+   only when Samuel asks.
+7. **Commits** are small, frequent and descriptive. One commit per candidate or result.
+8. **Report to Samuel** (short message) after: each submission is graded; each deliverable
+   completes; any gate fails twice; anything needs his decision. Otherwise keep going. If
+   blocked on his input for more than 2 hours, take the conservative option, note it in
+   `RESULTS.md`, and continue.
 
-| path | what |
-|---|---|
-| `estimator.py` | **THE shipped file.** Currently **v2.6.1** and identical to its archive (`preflight` step 5). Phase-2 submissions: v2.6.1 (#328662) and calibrated v2.7 (#328664). Width 1024 still takes basic K2p1. |
-| `estimator_v*.py` | frozen version archive — never edited, only read |
-| `local_sim/` | the offline lab: numpy shims for `flopscope`/`whestbench`, grader-identical mint (`mint_provenance.py`), invariants (`edge_cases.py`), seed registry (`seed_blocks.py`), sealed holdout (`vault.py`), probes |
-| `experiments/` | `LOG.md` (append every experiment), run reports, vault seal, JSON artifacts |
-| `docs/` | durable knowledge — see pointers below. `SKEPTIC.md` is the independent-falsifier brief both agents load |
-| `scripts/` | shared executable enforcement: `preflight.ps1` (the change gate), `guard_paths.py`, `human_model_state.py`, `git-hooks/`, `verify_portability.py` |
+## Grader contract — these are still hard
 
-## Hard rules — grader contract and research integrity
-
-1. `estimator.py` may import ONLY `flopscope`, `flopscope.numpy as fnp`, `whestbench`,
-   and Python stdlib. No numpy/scipy/torch — the grader sandbox lacks them. Grader
-   arrays are **immutable** (no `a[i]=`, no `+=` on arrays); pass `str` not `Path`;
-   single array ≤ 4 GiB.
-2. Determinism: randomness derives from `mlp.seed` (predict) / `context.seed` (setup)
-   via `fnp.random.default_rng(...)`. Never `fnp.random.seed(...)`, never time-based.
+1. A shipped estimator may import ONLY `flopscope`, `flopscope.numpy as fnp`,
+   `whestbench`, and Python stdlib. No numpy/scipy/torch — the grader sandbox lacks them.
+   Grader arrays are **immutable** (no `a[i]=`, no `+=` on arrays); pass `str` not `Path`;
+   a single array must stay ≤ 4 GiB.
+2. Determinism: randomness derives from `mlp.seed` (predict) / `context.seed` (setup) via
+   `fnp.random.default_rng(...)`. Never `fnp.random.seed(...)`, never time-based.
 3. **Never exploit the flopscope wall-time loophole** (routing math through raw
-   uninstrumented arrays). Organizers call it out; we compete clean.
-4. Never `flops.budget_summary_dict()` / `budget_summary()` inside `predict` — O(op
-   history), 157× residual blowup.
+   uninstrumented arrays). The organizers call it out; we compete clean.
+4. Never call `flops.budget_summary_dict()` / `budget_summary()` inside `predict` —
+   it is O(op history) and costs a 157× residual blowup.
 5. Secrets: the AIcrowd key lives only in `whest login`'s credential store. Never in
-   tracked files, logs, or LOG.md.
-6. **Never submit without Samuel's approval** — per submission, never durable. A
-   failed MLP scores as zeros. Order: `whest validate` → clean mini run
-   (`n_failed_mlps: 0`; residual advisory, cost gates on ops) → ask → an agent
-   **may** then run `whest submit` (rule
-   changed 2026-09-05), logging its sha256. **No agent ever designates.**
-7. Keep `estimator.py` shape-generic (`mlp.width`, `len(mlp.weights)`).
-   `ARC_WHEST_DISABLE_CAL=1` disables calibration (used by fitting).
+   tracked files or logs.
+6. Keep the estimator shape-generic (`mlp.width`, `len(mlp.weights)`).
+7. No bare `except` that returns a constant. A crash must reach the grader as a FAILED
+   MLP, not as an invisible wrong answer; a per-net fallback must be a real predictor.
 
-## Measurement law — `docs/VALIDATION.md` is binding
+## Measurement
 
-- **Three tiers.** DECIDE on freshly minted networks with a **new seed block per
-  experiment, never reused** (`local_sim/seed_blocks.py`) → CONFIRM on the public
-  split (**read-only; no constant may ever be fitted there**) → VAULT for milestones
-  (touch-counted; three permitted touches, ever).
-- **Pre-register before you measure.** A decision block is single-use. Its design,
-  gate threshold, and cost model go into `experiments/LOG.md` *before* the block
-  is touched. A model chosen after seeing the answer is not evidence.
-- **Counted compares to counted; effective compares to effective.** Always pair on
-  common random numbers; never quote a bare ratio of means.
-- **The binding promotion statistic is the paired ARITHMETIC score difference**
-  with the studentised-t or basic-bootstrap interval — the competition's own
-  identity (adopted 2026-08-20, `docs/VALIDATION.md` §2b-i). The geometric mean of
-  per-MLP ratios is a **stability diagnostic** with no authority over an outcome.
-  The percentile bootstrap and BCa are **refused**: measured false-promotion rates
-  6.8–8.2% and 9.1–11.5% against a nominal 5%. The gate is executable —
-  `local_sim/competition_score.py::decide()` is the only function here that returns
-  a promotion boolean.
-- **Every MSE is quoted with its ground-truth noise floor.**
-- **Phase 2 sets λ = 0, so `C = F` and residual is not a cost** — it is a 0.4 s
-  per-MLP cliff that FAILS the MLP. Freeze a counted-FLOP model; report *headroom*,
-  `0.4 / observed`. `VALIDATION.md` §2b is Phase-1 law, §2b-ii governs Phase 2.
-- **Never quote a local absolute wall time.** Authority is `--runner subprocess`.
-  The two Phase-2 reports ran submitted K2 files about 7× faster than this host,
-  but that observation is not a general safety factor for a different candidate.
-  The shim reads ~18% low for rotation-using estimators.
-- **The local meter matches the stored official-package subprocess report op for
-  op** (`preflight` step 12 refuses if absent). The grading server adds an
-  unexplained `+2**24` FLOPs (`+0.0122%`) and exposes no operation ledger; include
-  that offset near a score boundary and do not claim server op-by-op parity.
-  **The 8,192 MB limit is unenforceable here** — Windows has no
-  `RLIMIT_AS` — so it is accounting, never a test passed. `docs/GOTCHAS.md`.
+`docs/VALIDATION.md` remains the reference for *how a number is computed*; its
+three-tier protocol, seed blocks and promotion t-gates are retired by rule 6 above.
+What binds now:
+
+- **Counted compares to counted; effective compares to effective**, always paired on
+  common random numbers. Never quote a bare ratio of means.
+- **Every MSE is quoted with its ground-truth noise floor** (organizer labels: ≈9e-11).
+- **Phase 2 sets λ = 0, so `C = F`.** Residual is not a cost — it is a 0.4 s per-MLP
+  cliff that FAILS the MLP. Project it from **op calls** at 10.8–11.2 µs/op; the local
+  in-process `residual_wall_time_s` is an instrument artefact and must never be quoted.
+- **Never quote a local absolute wall time as a server figure.** Multiply local worst
+  wall by **1.3097** (v31: 52.02 s local → 68.1319 s graded).
+- **Predicted public score = DEV 100-net mini score ÷ 1.037** (observed 1.0386 / 1.0385 /
+  1.0339 across three submissions). Recalibrate if a graded row deviates by >2%.
+- Never take FLOPs from the counting shim (it reads ~18% low). Use the real
+  flopscope 0.12.1 f64 read-only grader twin, and add the server's `+2**24` offset only
+  near a score boundary.
+- The 8,192 MB limit is unenforceable on Windows; the WSL `RLIMIT_AS` gate
+  (`local_sim/linux_memory_gate.py`) is the only real test.
+
+`RESULTS.md` holds the current values of all three calibration constants. They are
+updated there, not here, after every graded row.
 
 ## Commands
 
 ```powershell
-uv sync                                                   # environment
-.\scripts\preflight.ps1                                   # THE gate, 12 of 16 steps: official stack + provenance + 30 invariants + contract + ship-file identity + vault seal + FLOP anchor
-.\scripts\preflight.ps1 -Full -Log <path>                  # all 16 + a COMPLETE transcript (2>&1 drops the verdicts; see GOTCHAS)
-uv run whest validate --estimator estimator.py            # contract only (~46 ms)
-uv run python local_sim/official_config.py                # the LIVE round, asserted against the installed package
-uv run python local_sim/p2_flop_anchor.py --gate          # does the local meter bill what the grader bills? op by op
-uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v2-phase2 --split mini --runner subprocess
-uv run python local_sim/phase2_checklist.py               # rounds / dataset tags / boards
-uv run python local_sim/seed_blocks.py                    # allocate a block BEFORE any experiment
-.venv-gpu\Scripts\python.exe local_sim/vault.py verify    # seal integrity + touch log
-uv run python scripts/human_model_state.py                # BLANK/PARTIAL/STALE/FILLED — is the human model current?
-uv run python scripts/verify_portability.py               # the harness is still swappable between agents
-python scripts/install_git_hooks.py                       # install the agent-independent pre-commit backstop
+uv sync                                                    # environment
+uv run python tools/ev.py <candidate.py> [--panel dev|fit|holdout]   # THE evaluator
+uv run whest validate --estimator <candidate.py>           # contract only (~100 ms)
+uv run whest package --estimator <release-dir> --output <pkg>.tar.gz --yes
+uv run whest validate-package <pkg>.tar.gz
+uv run whest submit <pkg>.tar.gz --description "..." --watch    # PLAN §5 gates only
+uv run python local_sim/official_config.py                 # the LIVE round
+uv run python local_sim/linux_memory_gate.py               # WSL 8 GiB gate
+uv run python scripts/verify_portability.py                # after any harness edit
 ```
 
-Full reference, plus **every heavy workload's `gpuq` submit line and declared
-RAM/VRAM/CPU footprint**: `docs/SETUP_WINDOWS.md` §7. Heavy work here is
-**submitted to `gpuq`, never launched** — host RAM binds first, and the queue
-bypasses `guard_paths.py`, so `whest submit` and `vault.py evaluate` stay off it.
+`scripts/preflight.ps1` is **retired from the default path** (rule 6). It still runs and
+its checks are still correct; it is simply not a gate any more.
 **Run `whest` from PowerShell**, or set `PYTHONIOENCODING=utf-8` in a POSIX shell — the
 CLI's box-drawing output kills a cp1252 console inside its own error printer.
 
-## How work is done
-
-*The six slash-command workflows and the `slice-contract` primitive were removed
-on 2026-08-21. What they wrapped was never the ceremony — it was the two rules
-below, stated here directly and still binding.*
-
-**Start a session by reading `docs/CURRENT_STATE.md`.** It is the snapshot: where
-we stand, what is open, which lanes are closed, and what to do next. Then
-`experiments/LOG.md` from the bottom for the narrative. That is the whole
-orientation procedure; there is no command for it.
-
-### Rule 1 — pre-register before you measure
-
-**Binding for every STRATEGIC slice** (see the classification table below), and it
-is the rule this repository has lost the most to when skipped.
-
-Before any data exists, append to `experiments/LOG.md` a dated entry containing:
-
-| field | what |
-|---|---|
-| **Question** | what we are trying to learn |
-| **Evidence** | what is already known, each item marked CONFIRMED / INFERRED / SPECULATIVE |
-| **Hypothesis + mechanism** | what we believe and *why it should be true*. No mechanism means it is a search, not an experiment |
-| **Intervention** | the smallest change that discriminates; one hypothesis |
-| **Predictions** | numbered, with directions and rough magnitudes |
-| **Gate** | the threshold, chosen NOW, passed to `competition_score.decide(gate=...)`, which has no default. **Write the gate on the DIFFERENCE the slice isolates, not on a total that contains it** — two gates in one session measured slightly the wrong quantity |
-| **Falsifier** | what result rejects the hypothesis |
-| **Baseline** | the exact control and its tier |
-| **Cost model** | REQUIRED, and **round-dependent**. Phase 2 sets λ = 0, so `C = F`: freeze a **counted-FLOP** model and report residual as **headroom against the 0.4 s cliff**, quoted against the worst observed run (`VALIDATION.md` §2b-ii). §2b's three-residual-model rule is Phase-1 replay only |
-| **Statistic** | paired, common random numbers, arithmetic score difference, studentised-t or basic bootstrap. Never percentile or BCa |
-| **Seed block** | claimed through `local_sim/seed_ledger.py`, never a literal |
-| **Confounders / scope / what must not change** | |
-
-Then **take Samuel's prediction and record it before the result exists.** Three
-short questions, two minutes. It is the only record of whether the project's model
-of itself is any good, and "I don't know" is a valid answer.
-
-Commit the contract **before** running anything that touches the block, so git
-timestamps prove it preceded the data.
-
-### Rule 2 — an independent Skeptic before anything is believed
-
-**Binding after every IMPORTANT or STRATEGIC slice, before any promotion,
-submission, or write-up claim.**
-
-Launch the `skeptic` subagent in a context that has **never seen the builder's
-reasoning**, with the contract, the diff, the evaluation protocol and the **raw
-artifact paths** — never a prose summary. The canonical brief is `docs/SKEPTIC.md`;
-`.claude/agents/skeptic.md` and `.codex/agents/skeptic.md` are thin adapters.
-
-It has earned its place: on 2026-08-21 it retracted a lane closure that had been
-made on a measurement of a different method, and found an omitted cost column that
-changed the next checkpoint's design.
-
-### Everything else is judgement
-
-Classify the work (below), do it, verify it, record it. Escalate the moment a task
-turns out to touch `estimator.py`, a seed block, the vault, a gate, a residual
-model, a closed lane, or a submission.
-
-When repository evidence is exhausted, write a **Strategist Packet** — a
-self-contained brief for a stronger reasoning capability, assuming no repo access
-and no shared chat history — and bring the returned plan back as a contract.
-
-**`docs/HUMAN_MODEL.md` is human-owned and must not be edited by agents.** Enforced
-mechanically (see § *Enforcement*), not by this sentence.
-
-## Work classification
-
-| class | what | required |
-|---|---|---|
-| **ROUTINE** | doc edits, figures, board snapshots, report fetching, new tests, lab scripts that touch no seed block and no shipped file | just run it; verification only |
-| **IMPORTANT** | anything changing *the instrument* — `harness.py`, `mint_provenance.py`, `edge_cases.py`, `seed_blocks.py`, `seed_ledger.py`, `competition_score.py`, `lifecycle_eval.py`, `vault.py`, a probe's math, grader-report parsing, **or the enforcement layer under `scripts/`** | written prediction first, `scripts/preflight.ps1` green, LOG entry with a knowledge delta |
-| **STRATEGIC** | `estimator.py`; spending a decision block; a vault touch; a submission; changing a gate, a residual model, or the three-tier protocol; a write-up claim; reopening a closed lane | pre-registered contract in LOG before data exists (**Rule 1** above) → Samuel's prediction → build → evidence packet → independent Skeptic (**Rule 2**) |
-
-**Never let one strategic result flow into the next implementation without
-synthesis.** Closed lanes stay closed unless new *external* evidence reopens them —
-the reopening condition goes in the contract.
+Heavy *training / fitting* workloads still go through `workerq` per the machine policy;
+**candidate evaluations do not** (rule 6) — they run directly, because the queue bypasses
+`scripts/guard_paths.py` and because the loop has to be fast.
 
 ## Continuity — no agent may depend on another agent's chat history
 
-The driving agent changes. Chat history does not transfer, and must never need to.
-Everything required to resume lives in the repository:
-
 | what | where |
 |---|---|
-| where we stand, closed lanes, next actions | `docs/CURRENT_STATE.md` |
-| every experiment, contract, result, Skeptic verdict | `experiments/LOG.md` |
-| the binding measurement protocol | `docs/VALIDATION.md` |
+| the plan and the ordered queue | `docs/PLAN.md`, `docs/HANDOFF_2026-09-21.md` |
+| every candidate, result and graded row | `RESULTS.md` |
+| where we stand right now | `docs/CURRENT_STATE.md` |
 | traps not to rediscover | `docs/GOTCHAS.md` |
-| active implementation plan and target architecture | `docs/GAME_PLAN.md` |
-| copy-ready Claude Builder handoff | `docs/CLAUDE_CODE_HANDOFF.md` |
-| the human's own beliefs | `docs/HUMAN_MODEL.md` |
-| raw evidence | JSON under `experiments/` |
-| evaluation state | vault seal, seed-block registry, run reports |
+| how a number is computed | `docs/VALIDATION.md` |
+| what we re-implemented and from where | `docs/PROVENANCE_504aldo.md` |
+| plain-English task explainer | `docs/COMPETITION_BRIEF.md` |
+| environment and heavy-job footprints | `docs/SETUP_WINDOWS.md` |
+| the human's own beliefs | `docs/HUMAN_MODEL.md` (read-only to agents) |
+| the independent-falsifier brief | `docs/SKEPTIC.md` |
+| everything before 2026-09-21 | `archive/2026-09-21/` |
 
-**Switching drivers is exactly:** start the new agent in the repository root and
-have it read `docs/CURRENT_STATE.md`, then `experiments/LOG.md` from the bottom. If
-that is not sufficient, the previous session failed to record something it should
-have — that is a documentation defect, not a reason to consult a transcript.
+**Switching drivers is exactly:** start the new agent in the repository root and have it
+read `docs/PLAN.md`, then `RESULTS.md`. If that is not enough, the previous session
+failed to record something — a documentation defect, not a reason to read a transcript.
 
 ## Enforcement — mechanical, not prose
-
-Rules this repository considers load-bearing are executable, and the implementation is
-shared so both agents enforce the same thing:
 
 | invariant | implementation | wired into |
 |---|---|---|
 | `docs/HUMAN_MODEL.md` is never written by an agent | `scripts/guard_paths.py` | `.claude/hooks/`, `.codex/hooks/`, `scripts/git-hooks/pre-commit` |
 | the vault seal is moved only by `vault.py` | `scripts/guard_paths.py` | same three |
 | `whest submit` requires explicit confirmation | `scripts/guard_paths.py` | both agent hooks |
-| `vault.py evaluate` requires explicit confirmation | `scripts/guard_paths.py` | both agent hooks |
-| vault counter == touch-log line count | `scripts/preflight.ps1` #6, `scripts/git_precommit_guard.py` | preflight, pre-commit |
-| the shipped file matches its version archive | `scripts/preflight.ps1` #5 | preflight |
 | the harness stays agent-swappable | `scripts/verify_portability.py` | run after any harness edit |
 
-The git pre-commit hook is the **agent-independent backstop**: it holds even for an
-agent whose hook system nobody has wired yet. Install it once with
-`python scripts/install_git_hooks.py`. It refuses to commit a protected path *quietly*;
-`ARC_WHEST_PROTECTED_OK=1` is the conscious human override, and Samuel needs it when
-committing his own `HUMAN_MODEL.md`.
+New invariants go into `scripts/guard_paths.py`, where both agents get them at once —
+never into `settings.json` or a hook shim. The git pre-commit hook is the
+agent-independent backstop; install it with `python scripts/install_git_hooks.py`.
+`ARC_WHEST_PROTECTED_OK=1` is the conscious human override.
 
-## Capabilities this project actually needs
+## Working style
 
-Stated as capabilities, not product names, so any agent can satisfy them. An agent
-missing one of the first four cannot drive a strategic slice.
+Samuel has a CS degree but is new to ML/probability — explain what you are doing in plain
+English in the final summary, not in jargon. Concentrate his understanding on the
+decision-critical path (the score identity, the data panels, the residual model); do not
+make him learn commodity code.
 
-| capability | how it is satisfied here | required for |
-|---|---|---|
-| repository read + content search | any agent's native file/grep tools | everything |
-| shell execution (PowerShell **and** a POSIX shell) | native | `whest`, `preflight.ps1`, `uv`, hooks |
-| **the evaluator** | this repo's own scripts — `preflight.ps1`, `edge_cases.py`, `mint_provenance.py`, `vault.py`, `whest run` | every gate |
-| an **independent subagent context** for the Skeptic | `.claude/agents/skeptic.md`, `.codex/agents/skeptic.md` | Rule 2 — after every IMPORTANT/STRATEGIC slice |
-| version control | `git`, `gh` | provenance for every LOG entry |
-| escalation to a stronger reasoning capability | the Strategist Packet, delivered by hand | STRATEGIC_RESEARCH / DECISION |
-
-**Deliberately NOT required, and not to be added without a named bottleneck**:
-autonomous optimization loops (**forbidden — the cost half of the evaluator is E1**),
-experiment trackers (MLflow / Phoenix / Langfuse), docs-retrieval MCPs, semantic-code
-MCPs, repo-packing tools, prompt-eval harnesses, browser automation, web-research
-MCPs, GitHub MCP, multi-agent orchestration. Each was considered and rejected for a
-stated reason: `docs/CURRENT_STATE.md` § *Harness*. An agent that lacks these is not
-disadvantaged here; an agent that uses them is deviating from the contract.
+**Working-directory assumption: every agent is started from the repository root**
+(`C:\Users\samsu\Documents\arc-whest`). All paths here are repo-relative.
+There are no nested `AGENTS.md` files.
 
 ## Agent adapters
 
@@ -271,52 +172,4 @@ disadvantaged here; an agent that uses them is deviating from the contract.
 |---|---|---|---|
 | any | `AGENTS.md` (this file) | `docs/SKEPTIC.md` | `scripts/guard_paths.py` + `scripts/git-hooks/` |
 | Claude Code | `CLAUDE.md` (imports this file) | `.claude/agents/skeptic.md` | `.claude/settings.json` → `.claude/hooks/` |
-| Codex | `AGENTS.md` directly | `.codex/agents/skeptic.md` | `.codex/hooks/` (see `.codex/hooks/README.md`) |
-
-*No skills layer; Rules 1 and 2 are what the removed workflows enforced.*
-
-**Working-directory assumption: every agent is started from the repository root**
-(`c:\Users\samsu\Documents\arc-whest`). All paths in this file and in
-every adapter are repo-relative and assume it. There are no nested `AGENTS.md`
-files; if one is ever added, the more deeply nested wins inside its directory and
-must be recorded here.
-
-Adapters are thin by rule. If an adapter contains project behaviour that is not in
-`docs/`, that is a portability bug — `scripts/verify_portability.py`
-checks for it.
-
-## Working style
-
-Samuel has a CS degree but is new to ML/probability — explain what you're doing in
-plain English in the final summary, not in jargon. Concentrate his understanding on
-the *decision-critical* path (the score identity, the data protocol, the residual
-model); do not make him learn commodity code.
-
-Two roles exist regardless of which products fill them: a **repo-local Builder** (the
-driving agent, doing the work in this tree) and an **independent Skeptic** (a separate
-context that never saw the Builder's reasoning). A third, the **strategist**, is
-consulted by packet when repository evidence is exhausted. Handoffs between all of
-them go through **Slice Contracts and Evidence Packets in `experiments/LOG.md`**,
-never chat history.
-
-## Pointers
-
-| doc | when to read it |
-|---|---|
-| `docs/CURRENT_STATE.md` | **first, always.** Baseline, open questions, closed lanes, next action |
-| `docs/VALIDATION.md` | before measuring anything. The protocol and its proofs |
-| `docs/GOTCHAS.md` | before quoting a number, comparing a cost, or trusting an offline path |
-| `docs/GAME_PLAN.md` | **sole active Phase-2 implementation plan and target architecture** |
-| `docs/BENCHMARK.md` | our numbers vs the field. **PRIVATE — never the forum** |
-| `docs/COMPETITION_BRIEF.md` | plain-English explainer of the task and the math |
-| `docs/RESEARCH_NOTES.md` | rules, forum intel, pricing table, links. §2g is **PRIVATE** |
-| `docs/CLAUDE_CODE_HANDOFF.md` | copy-ready prompt for Claude to execute the plan |
-| `docs/MOONSHOT.md` | archived Phase-1 cumulant-flow plan; historical references only |
-| `docs/HUMAN_MODEL.md` | **Samuel's file.** Agents read and critique it; agents never write it |
-| `experiments/LOG.md` | the full narrative record, newest at the bottom |
-
-## Re-audit this harness when
-
-The competition phase changes · the evaluator's cost half becomes trustworthy · a
-lane reopens · the write-up ships · agent/tool overhead becomes noticeable · a third
-agent is added as a driver.
+| Codex | `AGENTS.md` directly | `.codex/agents/skeptic.md` | `.codex/hooks/` |

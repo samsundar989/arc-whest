@@ -95,36 +95,31 @@ def check_sources_of_truth() -> None:
     if not check(agents.exists(), "AGENTS.md exists"):
         return
     text = read(agents)
-    for heading in ["## Objective", "## Hard rules", "## Measurement law",
-                    "## How work is done", "## Work classification", "## Continuity",
-                    "## Enforcement", "## Capabilities", "## Agent adapters"]:
+    for heading in ["## Objective", "## The rules", "## Grader contract",
+                    "## Measurement", "## Commands", "## Continuity",
+                    "## Enforcement", "## Working style", "## Agent adapters"]:
         check(heading in text, "AGENTS.md has '%s'" % heading)
     # Instruction discovery degrades with size; CLAUDE.md was 9.5 KB and worked.
     kb = len(text.encode("utf-8")) / 1024
     check(kb < 20, "AGENTS.md is concise enough for discovery", "%.1f KB (budget 20)" % kb)
 
-    for doc in ["docs/CURRENT_STATE.md", "docs/HUMAN_MODEL.md", "docs/VALIDATION.md",
-                "docs/GOTCHAS.md", "docs/GAME_PLAN.md", "experiments/LOG.md",
-                "scripts/preflight.ps1"]:
+    # The durable sources a new driver must be able to find. Rewritten 2026-09-21:
+    # GAME_PLAN.md, experiments/LOG.md and preflight.ps1-as-the-gate were retired by
+    # AGENTS.md rule 6 and live in archive/2026-09-21/. Checking for a file the
+    # contract no longer names is exactly the "reports a state rather than testing a
+    # property" failure this checker has lost checks to before.
+    for doc in ["docs/PLAN.md", "RESULTS.md", "docs/CURRENT_STATE.md",
+                "docs/HUMAN_MODEL.md", "docs/VALIDATION.md", "docs/GOTCHAS.md",
+                "docs/PROVENANCE_504aldo.md"]:
         check((REPO / doc).exists(), "durable source present: %s" % doc)
 
-    # THE GATE MUST ACTUALLY INVOKE ITS ENFORCEMENT SUITES.
-    #
-    # Presence is not wiring. WP0A shipped a 70-object coverage claim enforced
-    # only by a test literal that no gate ran, and WP0B then shipped a
-    # label checker with the same defect -- both found by an independent
-    # Skeptic, the second one after the first had been written up as a lesson.
-    # These two assert the property that was missing: the file exists AND
-    # preflight names it.
-    pre = read(REPO / "scripts/preflight.ps1") if (REPO / "scripts/preflight.ps1").exists() else ""
-    for suite, why in [
-        ("local_sim/test_p2_tag_drift.py",
-         "the Phase-2 dataset pin: source bytes, loader route, and their tampers"),
-        ("local_sim/test_enforcement_labels.py",
-         "every coverage count the gate states is checked against its suite"),
-    ]:
-        if check((REPO / suite).exists(), "enforcement suite present: %s" % suite):
-            check(suite in pre, "...and preflight.ps1 RUNS it", why)
+    # The archive must actually hold what the contract says it holds, or "read
+    # archive/2026-09-21/ for history" is a dangling promise.
+    for gone in ["docs/GAME_PLAN.md", "experiments/LOG.md"]:
+        check(not (REPO / gone).exists(), "retired source stays retired: %s" % gone)
+    for kept in ["archive/2026-09-21/docs/GAME_PLAN.md",
+                 "archive/2026-09-21/experiments/LOG.md"]:
+        check((REPO / kept).exists(), "archived, not deleted: %s" % kept)
 
     claude_md = REPO / "CLAUDE.md"
     if check(claude_md.exists(), "CLAUDE.md exists"):
@@ -292,11 +287,11 @@ def check_human_model_detection() -> None:
           "the staleness branch is machine-readable",
           "verdict=%s -> first_orientation_mode=%s"
           % (data["verdict"], data["first_orientation_mode"]))
-    # There is no longer a session-start workflow to consume this. The check that
-    # survives is the one that matters: the verdict comes from a SCRIPT reading
-    # git history, not from an agent's impression of how stale the file looks.
-    check("scripts/human_model_state.py" in read(REPO / "AGENTS.md"),
-          "AGENTS.md points at the mechanical human-model check")
+    # There is no longer a session-start workflow to consume this, and since
+    # 2026-09-21 AGENTS.md no longer names the script either -- the human model is
+    # read, not driven. What survives is the property that still matters: the
+    # verdict comes from a SCRIPT reading git history, not from an agent's
+    # impression of how stale the file looks.
 
 
 # --- 9. no dangling file references -------------------------------------------
