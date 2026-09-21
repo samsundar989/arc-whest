@@ -75,6 +75,8 @@ All four are implemented in `tools/ev.py`; change them there and here together.
 | 2026-09-18 | `estimator_k3_v31.py` | `6dde5fd4` | DEV | 3.006065e-08 | 0.30101 | 13,037 | 52.02 s (local) | 5,434.6 MB | 8.713e-09 | see above | baseline | — | The DEV control. `experiments/2026-09-16_slice7_canary/`. Reproduce this row in D1: DEV adjusted 9.0486e-09 ± 1%. |
 | 2026-09-18 | `estimator_k3_v43_complete_c10.py` | `fd8d497d` | DEV | 3.094966e-08 | 0.21865 | 23,405 | 60.259 s (local) → 78.9 s proj | 5,754.8 MiB | **6.526e-09** | PENDING | 1.3371× vs v31 DEV (score ratio, unpaired) | — | C10. DEV adjusted 6.767156e-09, 100/100, 0 failed, official `v2-phase2` mini, subprocess runner (`experiments/2026-09-18_c10_diagnostic/c10_mini.json`). Raw MSE is 3.0% WORSE than v31; the whole gain is cost (0.30103 → 0.21865 F/B). All §5 gates pass — see below. |
 
+<!-- ev.py --append inserts new rows directly above this marker. Keep it here. -->
+
 ## The evaluator (D1, 2026-09-21)
 
 `python tools/ev.py <candidate.py> [--panel dev|fit|holdout] [--n 100]
@@ -124,11 +126,21 @@ Evidence: `experiments/2026-09-21_d1/c10_dev100_cupy.json`.
 
 ### Operational notes that cost time
 
-- **The pool is bounded by free RAM, not cores.** One worker holds ~3.8 GiB;
-  this box has 16 cores but only ~30 GiB genuinely free. Six workers tipped it
-  into paging, at which point Windows trimmed their working sets to ~0.5 GiB and
-  they crawled at ~1e6 page faults/s *while showing low RSS and low CPU* — which
-  reads exactly like a deadlock and is not one. Default is now 4.
+- **The numpy pool does not parallelise past 2 workers on this box, and the
+  reason is the Windows memory manager.** One worker holds ~3.8 GiB. At four and
+  at six workers the run degenerates identically: one worker proceeds normally
+  and the rest crawl through a single net for many minutes. Measured while it
+  was happening — **~1e6 page faults/second, private working sets pinned at
+  ~600 MiB against the 3.8 GiB the chain needs, and the disk completely idle**.
+  Those are soft faults: Windows trimming the working sets of several processes
+  that are each allocating multiple GiB, even with 32 GiB free. Default is 2.
+
+  Two earlier diagnoses were wrong and are recorded so nobody repeats them:
+  it is **not** BLAS thread oversubscription (identical behaviour at 2 threads
+  each, which is exactly the 8 physical cores) and it is **not** the dataset or
+  the HF hub (disk idle; a second process opens the dataset in 1.3 s throughout).
+  If a full numpy panel is needed faster than ~45 min, the answer is the cupy
+  backend, not more workers.
 - Workers write a per-net progress sidecar, because the driver reads stdout only
   at the end and a slow worker is otherwise indistinguishable from a hung one.
 - `HF_HUB_OFFLINE=1` in the worker env: otherwise every worker resolves the

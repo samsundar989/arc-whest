@@ -119,15 +119,25 @@ WALL_FACTOR = max(WALL_ANCHORS.values())
 US_PER_OP = (0.140244e6 / 13053, 0.156232e6 / 14091)
 RESIDUAL_CLIFF_S = 0.4
 
-#: Prediction workers. **Bounded by free RAM, not by cores.** One worker holds
-#: ~3.8 GiB of chain at width 1024, and this box has 16 cores but only ~30 GiB
-#: genuinely free (editors, browsers, other agents hold the rest). Six workers
-#: (23 GiB) tipped the machine into paging on 2026-09-21: Windows trimmed their
-#: working sets to ~0.5 GiB and they crawled on page faults while *looking* idle
-#: in Get-Process -- low RSS and low CPU, which reads exactly like a deadlock and
-#: is not one. Four is the number that fits. Raise it only after checking
-#: Win32_OperatingSystem.FreePhysicalMemory, and never past free_GiB / 4.
-DEFAULT_JOBS = 4
+#: Prediction workers. **Two, and raising it does not help.**
+#:
+#: One worker holds ~3.8 GiB of chain at width 1024. On 2026-09-21, four and six
+#: workers both degenerated the same way: one worker ran normally and the rest
+#: crawled through a single net for many minutes. Measured while it was
+#: happening -- ~1e6 page faults/second, private working sets pinned at ~600 MiB
+#: against the 3.8 GiB the chain needs, and the DISK COMPLETELY IDLE. Soft
+#: faults, i.e. Windows trimming the working sets of processes that are all
+#: allocating multiple GiB at once, even with 32 GiB free.
+#:
+#: Two wrong diagnoses were made first and are recorded so they are not made
+#: again: it is NOT BLAS thread oversubscription (the same thing happens at two
+#: threads each, which is exactly the eight physical cores), and it is NOT the
+#: dataset or the HF hub (the disk is idle and a second process can open the
+#: dataset in 1.3 s while this is going on).
+#:
+#: If a full numpy panel is needed faster than ~45 min, the answer is the cupy
+#: backend (2.03 s/net, one process), not more workers.
+DEFAULT_JOBS = 2
 
 
 def sha256_file(path: Path) -> str:
@@ -511,12 +521,16 @@ def main(argv=None) -> int:
     if a.append:
         rm = ROOT / "RESULTS.md"
         text = rm.read_text(encoding="utf-8")
-        marker = "\n## Open items"
+        # An explicit marker, not "the next heading": the file grows sections and
+        # a row appended into the wrong one is a row nobody reads.
+        marker = "\n<!-- ev.py --append inserts new rows directly above this marker."
         row = results_row(r) + "\n"
         if marker in text:
             text = text.replace(marker, row + marker, 1)
         else:
-            text += row
+            raise SystemExit(
+                "RESULTS.md has lost its --append marker; restore the "
+                "'<!-- ev.py --append ... -->' comment under the Rows table.")
         rm.write_text(text, encoding="utf-8")
         print(f"  appended to {rm}")
     return 0
