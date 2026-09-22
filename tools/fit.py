@@ -178,16 +178,34 @@ def main(argv=None) -> int:
                   f"best {state['best']:.6e}  {'*' if better else ''}", flush=True)
         return mse
 
-    # The baseline: the frozen constants, i.e. every profile exactly 1.0. This
-    # is the candidate AS SHIPPED, so the reported gain is the gain over what is
-    # already graded, not over some weaker starting point.
-    mod._COEFFS = {k: None for k in mod._COEFFS}
-    base = evaluate(np.zeros(len(PROFILES) * KNOTS))
-    print(f"[fit] baseline (frozen constants) mse = {base:.9e}", flush=True)
+    # THE SEARCH STARTS FROM WHAT THE CANDIDATE ALREADY HAS, not from identity.
+    #
+    # Starting at identity throws away every coefficient already fitted, and on
+    # 2026-09-22 that silently wasted a whole run: fitting v54 (which ships D2's
+    # coefficients) restarted from 1.0, and in 301 evaluations CMA-ES never even
+    # got back to the point D2 had already found -- identity scored 2.548e-08,
+    # the shipped coefficients score 2.455e-08, and the run reported "0.00%
+    # improvement" against the wrong reference. Adding the `old` profile made it
+    # worse by widening the space to 16 dimensions, and `old` perturbs so badly
+    # (evaluations 4.6x the baseline) that the search never optimised the rest.
+    shipped = dict(mod._COEFFS)
+    x0 = []
+    for name in PROFILES:
+        k = shipped.get(name)
+        x0 += [0.0] * KNOTS if k is None else [
+            float(np.clip(np.log(v), -LOG_BOUND, LOG_BOUND)) for v in k]
+    x0 = np.array(x0, dtype=float)
+
+    ident = evaluate(np.zeros(len(PROFILES) * KNOTS))
+    base = evaluate(x0) if np.any(x0) else ident
+    print(f"[fit] identity mse           = {ident:.9e}", flush=True)
+    print(f"[fit] shipped coefficients   = {base:.9e}"
+          f"   ({(base - ident) / ident:+.3%} vs identity)", flush=True)
+    print(f"[fit] searching from the shipped point, sigma {a.sigma}", flush=True)
 
     import cma
     es = cma.CMAEvolutionStrategy(
-        [0.0] * (len(PROFILES) * KNOTS), a.sigma,
+        list(x0), a.sigma,
         {"seed": a.seed, "maxfevals": a.budget, "verbose": -9,
          "bounds": [-LOG_BOUND, LOG_BOUND]})
     while not es.stop() and state["n"] < a.budget:
