@@ -57,18 +57,32 @@ All four are implemented in `tools/ev.py`; change them there and here together.
   the correction unnecessary rather than approximate. C10 measured: twin
   480,850,933,121 vs `whest run` 480,817,378,689, difference 2^25 exactly.
 
-- **one-net twin wall → server WORST-of-100 wall**: multiply by **1.5981**.
-  Two anchors, both measured with `tools/_cost_worker.py`:
+- **server worst-of-100 wall**: fitted on **FLOPs and op calls**, not on our
+  local wall:
 
-  | candidate | twin wall (1 net) | graded worst wall | factor |
+      wall = 62.082 s per 1e12 FLOPs + 2.363 s per 1000 op calls
+
+  **The previous model was wrong and had been wrong for two submissions.** It
+  was `one-net twin wall × 1.5981`, calibrated on F21 and v31 and never updated
+  when C10 and v50 graded — the FLOP and residual constants were refreshed from
+  those rows and this one was not. It projected v50 at 72.0 s; v50 actually took
+  **88.747 s**. The implied "factor" is not constant at all:
+
+  | candidate | twin wall | graded WORST | implied factor |
   |---|---:|---:|---:|
-  | F21 #330950 | 58.295 s | 93.1597 s | 1.5981 |
-  | v31 #331317 | 43.547 s | 68.1319 s | 1.5646 |
+  | F21 #330950 | 58.295 s | 93.160 s | 1.5981 |
+  | v31 #331317 | 43.547 s | 68.132 s | 1.5646 |
+  | C10 #331816 | 50.515 s | 87.556 s | **1.7333** |
+  | v50 #331863 | 45.065 s | 88.747 s | **1.9693** |
 
-  The factor deliberately bundles *server slowness* with *worst-of-100 vs our
-  one net*, because the gate asks whether the worst net finishes. The larger
-  anchor is used: over-projecting wall costs nothing, under-projecting costs the
-  submission.
+  The twin *wall* is the bad input: a local measurement on a box that is usually
+  running something else, so it carries load noise the server does not. What the
+  server's wall tracks is the work — and note **C10 has 48% fewer FLOPs than F21
+  yet nearly the same wall**, because it issues about twice the op calls. Least
+  squares on all four graded rows, using only quantities the f64 twin measures
+  exactly, fits every anchor within 4% (residuals −2.22 / +3.81 / −2.36 / +1.44 s).
+
+  Refit the moment a fifth row grades.
 
 - **ops → server residual**: use **11.09 µs/op**, the worst of three graded
   anchors, because the cliff FAILS the MLP outright and over-projecting is free:

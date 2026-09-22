@@ -97,21 +97,36 @@ BUDGET = 2 ** 41
 #: 1.0385 / 1.0339 on three submissions. Recalibrate in RESULTS.md, not here,
 #: if a graded row ever lands more than 2% from its projection.
 PUBLIC_FACTOR = 1.037
-#: One-net grader-twin wall x this = server WORST-of-100 wall. Calibrated on the
-#: two graded rows we hold, measured by THIS instrument (`_cost_worker.py`) so
-#: the factor and the reading come from the same place:
+#: SERVER WORST-OF-100 WALL, fitted on FLOPs and op calls -- NOT on our local
+#: wall.
 #:
-#:     F21  #330950   twin 58.295 s -> graded worst 93.1597 s   1.5981
-#:     v31  #331317   twin 43.547 s -> graded worst 68.1319 s   1.5646
+#: The old model was `one-net twin wall x 1.5981`, calibrated on F21 and v31 and
+#: never updated when C10 and v50 graded. It projected v50 at 72.0 s; v50
+#: actually took 88.747 s. Worse, the implied "factor" is not a constant at all:
 #:
-#: The factor bundles two things -- the server being slower, and worst-of-100
-#: against our one net -- and that is deliberate: the gate asks whether the
-#: WORST net finishes, so the projection must answer that question. The larger
-#: of the two anchors is used, because over-projecting wall costs nothing and
-#: under-projecting costs the whole submission.
-WALL_ANCHORS = {"f21": 93.1597 / 58.295410299964715,
-                "v31": 68.1319 / 43.5474146999768}
-WALL_FACTOR = max(WALL_ANCHORS.values())
+#:     F21 #330950  twin 58.295 -> 93.160   1.5981
+#:     v31 #331317  twin 43.547 -> 68.132   1.5646
+#:     C10 #331816  twin 50.515 -> 87.556   1.7333
+#:     v50 #331863  twin 45.065 -> 88.747   1.9693
+#:
+#: The twin WALL is the bad input: it is a local measurement on a box that is
+#: often running something else, so it carries load noise the server does not.
+#: What the server's wall actually tracks is the work itself -- and note C10 has
+#: 48% FEWER FLOPs than F21 yet nearly the same wall, because it issues ~2x the
+#: op calls. Least squares on the four graded rows, using only quantities the
+#: f64 twin measures exactly:
+#:
+#:     wall = 62.082 s per 1e12 FLOPs + 2.363 s per 1000 op calls
+#:
+#: residuals -2.22 / +3.81 / -2.36 / +1.44 s, i.e. within 4% on every anchor.
+#: Refit this the moment a fifth row grades.
+WALL_PER_TFLOP = 62.082
+WALL_PER_KOP = 2.363
+
+
+def projected_server_wall_s(flops: float, ops: float) -> float:
+    """Server worst-of-100 wall, from the two things that drive it."""
+    return flops / 1e12 * WALL_PER_TFLOP + ops / 1e3 * WALL_PER_KOP
 #: Server residual seconds per op call. Three graded anchors:
 #:     F21  14,091 ops -> 0.156232 s   11.087 us/op   2.56x headroom
 #:     v31  13,053 ops -> 0.140244 s   10.744 us/op   2.85x headroom
@@ -564,7 +579,7 @@ def evaluate(candidate: Path, panel: str, n: int, jobs: int, baseline: Optional[
         "materializations": float(c.get("materializations", float("nan"))),
         "setup_s": float(c.get("setup_s", float("nan"))),
         "worst_wall_local_s": float(c.get("wall_s", worst_wall)),
-        "projected_server_wall_s": float(c.get("wall_s", worst_wall)) * WALL_FACTOR,
+        "projected_server_wall_s": projected_server_wall_s(flops, float(c.get("ops", float("nan")))),
         "peak_rss_mib": c.get("peak_rss_mib") or pmeta.get("worker_peak_rss_mib"),
         "adjusted_score_dev": float(scores.mean()),
         "projected_public": projected,
