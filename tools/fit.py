@@ -51,7 +51,10 @@ os.environ.setdefault("HF_DATASETS_OFFLINE", "1")
 import numpy as np  # noqa: E402
 
 #: Which profiles are fitted, in order. Each contributes 4 knots.
-PROFILES = ("lam", "theta", "feed")
+#: `old` joins for D6: D5 showed the old tier is where the chain's accuracy
+#: lives (truncating it costs 44% of raw MSE for 6.8% of cost), and it has never
+#: been fitted. Overridable with FIT_PROFILES for ablations.
+PROFILES = tuple(os.environ.get("FIT_PROFILES", "lam,theta,feed,old").split(","))
 KNOTS = 4
 
 #: Knots are searched in log space around 1.0 so the optimiser cannot propose a
@@ -175,7 +178,9 @@ def main(argv=None) -> int:
                   f"best {state['best']:.6e}  {'*' if better else ''}", flush=True)
         return mse
 
-    # The baseline: the frozen constants, i.e. every profile exactly 1.0.
+    # The baseline: the frozen constants, i.e. every profile exactly 1.0. This
+    # is the candidate AS SHIPPED, so the reported gain is the gain over what is
+    # already graded, not over some weaker starting point.
     mod._COEFFS = {k: None for k in mod._COEFFS}
     base = evaluate(np.zeros(len(PROFILES) * KNOTS))
     print(f"[fit] baseline (frozen constants) mse = {base:.9e}", flush=True)
