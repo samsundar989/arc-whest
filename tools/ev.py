@@ -93,10 +93,14 @@ import numpy as np  # noqa: E402
 import panels  # noqa: E402
 
 BUDGET = 2 ** 41
-#: DEV 100-net mini score / this = predicted public score. Observed 1.0386 /
-#: 1.0385 / 1.0339 on three submissions. Recalibrate in RESULTS.md, not here,
-#: if a graded row ever lands more than 2% from its projection.
-PUBLIC_FACTOR = 1.037
+#: DEV 100-net mini score / this = predicted public score. Six observations:
+#: 1.0386 / 1.0385 / 1.0339 / 1.0426 / 1.0471 / 1.0458, mean 1.0411, and the
+#: last three (C10, v50, v53) average 1.0452. RAISED 1.037 -> 1.042 on
+#: 2026-09-22: at 1.037 the last three graded rows all came in BETTER than
+#: projected, by 0.53% / 0.97% / 0.84%, which is a consistent bias rather than
+#: noise. 1.042 stays under the recent mean, so projections remain slightly
+#: pessimistic and §5's gate slightly strict, which is the safe direction.
+PUBLIC_FACTOR = 1.042
 #: SERVER WORST-OF-100 WALL, fitted on FLOPs and op calls -- NOT on our local
 #: wall.
 #:
@@ -116,17 +120,28 @@ PUBLIC_FACTOR = 1.037
 #: op calls. Least squares on the four graded rows, using only quantities the
 #: f64 twin measures exactly:
 #:
-#:     wall = 62.082 s per 1e12 FLOPs + 2.363 s per 1000 op calls
+#:     wall = 60.251 s per 1e12 FLOPs + 2.478 s per 1000 op calls
 #:
-#: residuals -2.22 / +3.81 / -2.36 / +1.44 s, i.e. within 4% on every anchor.
-#: Refit this the moment a fifth row grades.
-WALL_PER_TFLOP = 62.082
-WALL_PER_KOP = 2.363
+#: REFIT on five graded rows 2026-09-22 after v53 #331880 came in at 96.488 s
+#: against a 90.6 s projection. Residuals -2.31 / +4.09 / -0.55 / +3.52 / -3.93 s.
+#: Refit again the moment a sixth row grades.
+WALL_PER_TFLOP = 60.251
+WALL_PER_KOP = 2.478
+
+#: The fit's own error, +/-4.1 s on five anchors. ADDED to every projection,
+#: because the wall cap is a cliff: a net over 120 s is TIME_EXHAUSTED and
+#: scores as zeros. Projecting the fit alone put v53 at 90.6 s when it graded
+#: 96.488 s, which is inside the residual band but on the wrong side of PLAN
+#: D7's 95 s finals bound -- a candidate can therefore look final-ready and not
+#: be. Carrying the band makes the gate answer the question actually being
+#: asked: could the WORST net still fit if the model is as wrong as it has been.
+WALL_MODEL_ERR_S = 4.1
 
 
 def projected_server_wall_s(flops: float, ops: float) -> float:
     """Server worst-of-100 wall, from the two things that drive it."""
-    return flops / 1e12 * WALL_PER_TFLOP + ops / 1e3 * WALL_PER_KOP
+    return (flops / 1e12 * WALL_PER_TFLOP + ops / 1e3 * WALL_PER_KOP
+            + WALL_MODEL_ERR_S)
 #: Server residual seconds per op call. Three graded anchors:
 #:     F21  14,091 ops -> 0.156232 s   11.087 us/op   2.56x headroom
 #:     v31  13,053 ops -> 0.140244 s   10.744 us/op   2.85x headroom

@@ -26,9 +26,13 @@ The plan is `docs/PLAN.md`; the submission gates are its §5.
 
 All four are implemented in `tools/ev.py`; change them there and here together.
 
-- **DEV → graded**: divide the 100-net DEV adjusted score by **1.037**. Observed
-  **1.0386 / 1.0385 / 1.0339 / 1.0426** over four submissions — mean 1.0384,
-  spread ±0.45%. The constant is deliberately left at the *low* end of that
+- **DEV → graded**: divide the 100-net DEV adjusted score by **1.042**
+  (raised from 1.037 on 2026-09-22). Six observations: **1.0386 / 1.0385 /
+  1.0339 / 1.0426 / 1.0471 / 1.0458**, mean 1.0411, last three averaging 1.0452.
+  At 1.037 the last three graded rows all came in *better* than projected — by
+  0.53%, 0.97% and 0.84% — which is a consistent bias, not noise. 1.042 sits
+  under the recent mean, so projections stay slightly pessimistic and the gate
+  slightly strict. The constant is deliberately left at the *low* end of that
   range: projected = DEV/1.037 comes out slightly pessimistic, which makes §5's
   "≥3% better than the best graded" gate harder rather than easier. C10 #331816
   landed 0.53% *better* than projected. If a graded row ever deviates by >2%,
@@ -57,32 +61,29 @@ All four are implemented in `tools/ev.py`; change them there and here together.
   the correction unnecessary rather than approximate. C10 measured: twin
   480,850,933,121 vs `whest run` 480,817,378,689, difference 2^25 exactly.
 
-- **server worst-of-100 wall**: fitted on **FLOPs and op calls**, not on our
-  local wall:
+- **server worst-of-100 wall**: fitted on **FLOPs and op calls**, plus the
+  model's own error band:
 
-      wall = 62.082 s per 1e12 FLOPs + 2.363 s per 1000 op calls
+      wall = 60.251 s per 1e12 FLOPs + 2.478 s per 1000 op calls + 4.1 s
 
-  **The previous model was wrong and had been wrong for two submissions.** It
-  was `one-net twin wall × 1.5981`, calibrated on F21 and v31 and never updated
-  when C10 and v50 graded — the FLOP and residual constants were refreshed from
-  those rows and this one was not. It projected v50 at 72.0 s; v50 actually took
-  **88.747 s**. The implied "factor" is not constant at all:
+  Refit on five graded rows. The 4.1 s is the fit's own worst residual and it is
+  **added** rather than ignored, because the wall cap is a cliff: a net over
+  120 s is TIME_EXHAUSTED and scores as zeros.
 
-  | candidate | twin wall | graded WORST | implied factor |
-  |---|---:|---:|---:|
-  | F21 #330950 | 58.295 s | 93.160 s | 1.5981 |
-  | v31 #331317 | 43.547 s | 68.132 s | 1.5646 |
-  | C10 #331816 | 50.515 s | 87.556 s | **1.7333** |
-  | v50 #331863 | 45.065 s | 88.747 s | **1.9693** |
+  | candidate | FLOPs | ops | graded WORST | projected |
+  |---|---:|---:|---:|---:|
+  | F21 #330950 | 928.5 G | 14,091 | 93.160 s | 95.0 s |
+  | v31 #331317 | 662.0 G | 13,053 | 68.132 s | 76.3 s |
+  | C10 #331816 | 480.9 G | 23,421 | 87.556 s | 91.1 s |
+  | v50 #331863 | 473.4 G | 25,728 | 88.747 s | 96.4 s |
+  | v53 #331880 | 502.4 G | 25,140 | **96.488 s** | 96.7 s |
 
-  The twin *wall* is the bad input: a local measurement on a box that is usually
-  running something else, so it carries load noise the server does not. What the
-  server's wall tracks is the work — and note **C10 has 48% fewer FLOPs than F21
-  yet nearly the same wall**, because it issues about twice the op calls. Least
-  squares on all four graded rows, using only quantities the f64 twin measures
-  exactly, fits every anchor within 4% (residuals −2.22 / +3.81 / −2.36 / +1.44 s).
-
-  Refit the moment a fifth row grades.
+  Conservative on every anchor now. **Two successive corrections were needed
+  here.** The original model (`twin wall × 1.5981`) was 23% low on v50. Its
+  replacement, fitted on four rows without an error band, said 90.6 s for v53
+  which graded 96.488 s — inside the residual band, but on the wrong side of
+  PLAN D7's 95 s finals bound, so a candidate could look final-ready and not be.
+  Refit again when a sixth row grades.
 
 - **ops → server residual**: use **11.09 µs/op**, the worst of three graded
   anchors, because the cliff FAILS the MLP outright and over-projecting is free:
@@ -115,6 +116,7 @@ All four are implemented in `tools/ev.py`; change them there and here together.
 | 2026-09-21 | `estimator_k3_v43_complete_c10.py` | `fd8d497d` | DEV | 3.094966e-08 | 0.21867 | 23,421 | 49.881 s (local) → 79.7 s proj | 3842 MiB | **6.5262e-09** | PENDING | — | — | D1 acceptance on the instrument of record: raw MSE reproduces the Sep-18 official whest run EXACTLY (3.094966e-08). Multiplier is the f64 twin's, hence 2^25 above whest run's. |
 | 2026-09-22 | `estimator_k3_v43_complete_c10.py` | `fd8d497d` | GRADED | 2.968645e-08 | 0.21867 | 23,421 | — | — | 6.526e-09 | **6.4914e-09** | 1.3482× vs v31 (graded/graded) | — | **sub #331816, THE NEW BEST. 100/100, 0 failed.** Server residual **0.236255 s** of the 0.4 s cliff (1.69× headroom, 10.09 µs/op) — the first reading at 23k ops, and the reason D0 existed. Graded landed 0.53% BETTER than the 6.5262e-09 projection. Server multiplier matched the f64 twin to 2e-10. best net 5.029e-09, worst 8.43e-09. Report: `experiments/run_reports/c10_canary_331816_graded_report.json`. |
 | 2026-09-22 | `estimator_k3_v50_safe.py` | `f9cb9439` | DEV | 3.011684e-08 | 0.21529 | 25,728 | 45.065 s (local) → 72.0 s proj | 5,784.9 MiB | **6.2524e-09** | READY, NOT SENT | raw −2.691% / cost −1.544% vs C10 | — | **D2 fitted coefficients + D3 item-1 Strassen routing.** All seven §5 gates pass, 0 failed nets, 3.7% better than the 6.4914e-09 graded. HOLDOUT (100 of 900) agrees: +2.871% raw against DEV's +2.687%, 0.18 pp apart. Package `experiments/2026-09-22_v50_canary/v50-canary.tar.gz`. |
+| 2026-09-22 | `estimator_k3_v53_age5.py` | `8257c055` | GRADED | 2.434000e-08 | 0.22848 | 25,140 | **96.488 s** | 6,457.1 MiB | 5.607e-09 | **5.5603e-09** | 1.1136× vs v50 (graded/graded) | — | **sub #331880, THE NEW BEST. 100/100, 0 failed.** D5's result: old-tier compression age 4→5. Graded 0.84% better than projected — the third row running to beat its projection. Residual 0.268490 s (1.49× headroom, 10.68 µs/op). Multiplier matched the twin exactly; FLOPs delta −491. **WALL 96.488 s EXCEEDS PLAN D7's 95 s finals bound** — a good canary, not a designable entry. |
 
 <!-- ev.py --append inserts new rows directly above this marker. Keep it here. -->
 
