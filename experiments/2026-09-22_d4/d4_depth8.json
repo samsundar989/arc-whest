@@ -1,0 +1,425 @@
+{
+ "shapes": [
+  {
+   "n": 128,
+   "L": 8,
+   "L_over_n": 0.0625,
+   "trials": 8,
+   "mc_samples": 20000000,
+   "rows": [
+    {
+     "trial": 0,
+     "noise_floor": 6.5142581810282595e-09,
+     "truth_rms": 0.588838339955391,
+     "factored SIMPLE K3": {
+      "mse": 7.286407501756717e-06,
+      "seconds": 0.25
+     },
+     "factored AUGMENT K3": {
+      "mse": 2.793763232092393e-06,
+      "seconds": 0.31
+     },
+     "unfactored AUGMENT K3": {
+      "mse": 2.513310463868092e-06,
+      "seconds": 0.49
+     },
+     "factored K4": {
+      "mse": 6.490005874559116e-07,
+      "seconds": 0.65
+     }
+    },
+    {
+     "trial": 1,
+     "noise_floor": 1.0341701762932416e-08,
+     "truth_rms": 0.9680056115104108,
+     "factored SIMPLE K3": {
+      "mse": 3.845663484874646e-06,
+      "seconds": 0.19
+     },
+     "factored AUGMENT K3": {
+      "mse": 1.925201423329997e-06,
+      "seconds": 0.35
+     },
+     "unfactored AUGMENT K3": {
+      "mse": 1.4241731082845234e-06,
+      "seconds": 0.34
+     },
+     "factored K4": {
+      "mse": 3.3487022239645297e-07,
+      "seconds": 0.35
+     }
+    },
+    {
+     "trial": 2,
+     "noise_floor": 7.357681172214019e-09,
+     "truth_rms": 0.7575728900523213,
+     "factored SIMPLE K3": {
+      "mse": 7.309817308289663e-06,
+      "seconds": 0.17
+     },
+     "factored AUGMENT K3": {
+      "mse": 1.908322227929547e-06,
+      "seconds": 0.37
+     },
+     "unfactored AUGMENT K3": {
+      "mse": 1.7967582318758093e-06,
+      "seconds": 0.34
+     },
+     "factored K4": {
+      "mse": 5.643232772119618e-07,
+      "seconds": 0.52
+     }
+    },
+    {
+     "trial": 3,
+     "noise_floor": 1.0616679899695952e-08,
+     "truth_rms": 0.9163397009879387,
+     "factored SIMPLE K3": {
+      "mse": 4.846349347232255e-06,
+      "seconds": 0.16
+     },
+     "factored AUGMENT K3": {
+      "mse": 2.35088068318433e-06,
+      "seconds": 0.34
+     },
+     "unfactored AUGMENT K3": {
+      "mse": 1.7987890014878281e-06,
+      "seconds": 0.48
+     },
+     "factored K4": {
+      "mse": 8.263756410481966e-07,
+      "seconds": 0.42
+     }
+    },
+    {
+     "trial": 4,
+     "noise_floor": 1.259697886142589e-08,
+     "truth_rms": 0.957201343348617,
+     "factored SIMPLE K3": {
+      "mse": 3.4369451827139538e-06,
+      "seconds": 0.17
+     },
+     "factored AUGMENT K3": {
+      "mse": 1.0703461646836275e-06,
+      "seconds": 0.35
+     },
+     "unfactored AUGMENT K3": {
+      "mse": 1.3824518297908016e-06,
+      "seconds": 0.35
+     },
+     "factored K4": {
+      "mse": 5.126956840835979e-07,
+      "seconds": 0.37
+     }
+    },
+    {
+     "trial": 5,
+     "noise_floor": 9.26315324085375e-09,
+     "truth_rms": 0.7484672323331009,
+     "factored SIMPLE K3": {
+      "mse": 7.477088956161388e-06,
+      "seconds": 0.17
+     },
+     "factored AUGMENT K3": {
+      "mse": 2.550706832717058e-06,
+      "seconds": 0.34
+     },
+     "unfactored AUGMENT K3": {
+      "mse": 2.0904412601428e-06,
+      "seconds": 0.34
+     },
+     "factored K4": {
+      "mse": 1.0622490419010504e-06,
+      "seconds": 0.38
+     }
+    },
+    {
+     "trial": 6,
+     "noise_floor": 9.713907749977345e-09,
+     "truth_rms": 0.8433999140924298,
+     "factored SIMPLE K3": {
+      "mse": 7.289114687639518e-06,
+      "seconds": 0.15
+     },
+     "factored AUGMENT K3": {
+      "mse": 2.876829650233233e-06,
+      "seconds": 0.3
+     },
+     "unfactored AUGMENT K3": {
+      "mse": 2.128159513190149e-06,
+      "seconds": 0.29
+     },
+     "factored K4": {
+      "mse": 5.728624067906932e-07,
+      "seconds": 0.27
+     }
+    },
+    {
+     "trial": 7,
+     "noise_floor": 8.620171844183458e-09,
+     "truth_rms": 0.8274985530956818,
+     "factored SIMPLE K3": {
+      "mse": 6.252346422861714e-06,
+      "seconds": 0.12
+     },
+     "factored AUGMENT K3": {
+      "mse": 1.9209525160722003e-06,
+      "seconds": 0.26
+     },
+     "unfactored AUGMENT K3": {
+      "mse": 1.5325370458908199e-06,
+      "seconds": 0.25
+     },
+     "factored K4": {
+      "mse": 5.851624646788062e-07,
+      "seconds": 0.27
+     }
+    }
+   ]
+  },
+  {
+   "n": 256,
+   "L": 8,
+   "L_over_n": 0.03125,
+   "trials": 8,
+   "mc_samples": 20000000,
+   "rows": [
+    {
+     "trial": 0,
+     "noise_floor": 1.2405683797152712e-08,
+     "truth_rms": 1.134038514685803,
+     "factored SIMPLE K3": {
+      "mse": 6.580793197432776e-07,
+      "seconds": 0.14
+     },
+     "factored AUGMENT K3": {
+      "mse": 2.7962901262849383e-07,
+      "seconds": 0.33
+     },
+     "unfactored AUGMENT K3": {
+      "mse": 2.6061358358300254e-07,
+      "seconds": 0.4
+     },
+     "factored K4": {
+      "mse": 4.458997997373557e-08,
+      "seconds": 1.11
+     }
+    },
+    {
+     "trial": 1,
+     "noise_floor": 7.870819798806825e-09,
+     "truth_rms": 0.7937050469162024,
+     "factored SIMPLE K3": {
+      "mse": 4.988195399080562e-07,
+      "seconds": 0.15
+     },
+     "factored AUGMENT K3": {
+      "mse": 2.767890386175947e-07,
+      "seconds": 0.49
+     },
+     "unfactored AUGMENT K3": {
+      "mse": 2.577911287877902e-07,
+      "seconds": 0.74
+     },
+     "factored K4": {
+      "mse": 3.876075287270094e-08,
+      "seconds": 1.54
+     }
+    },
+    {
+     "trial": 2,
+     "noise_floor": 8.88708922540723e-09,
+     "truth_rms": 0.8373404034020819,
+     "factored SIMPLE K3": {
+      "mse": 7.114281132994768e-07,
+      "seconds": 0.15
+     },
+     "factored AUGMENT K3": {
+      "mse": 2.426877672832492e-07,
+      "seconds": 0.48
+     },
+     "unfactored AUGMENT K3": {
+      "mse": 2.3510972889605886e-07,
+      "seconds": 0.69
+     },
+     "factored K4": {
+      "mse": 2.533107910186321e-08,
+      "seconds": 1.69
+     }
+    },
+    {
+     "trial": 3,
+     "noise_floor": 9.728689483493144e-09,
+     "truth_rms": 0.926680828784335,
+     "factored SIMPLE K3": {
+      "mse": 5.855691298995702e-07,
+      "seconds": 0.14
+     },
+     "factored AUGMENT K3": {
+      "mse": 2.5751513779826665e-07,
+      "seconds": 0.48
+     },
+     "unfactored AUGMENT K3": {
+      "mse": 2.1886491949976918e-07,
+      "seconds": 0.7
+     },
+     "factored K4": {
+      "mse": 4.028081284811796e-08,
+      "seconds": 1.56
+     }
+    },
+    {
+     "trial": 4,
+     "noise_floor": 1.1024993745773066e-08,
+     "truth_rms": 1.0012519825072097,
+     "factored SIMPLE K3": {
+      "mse": 6.104438691001916e-07,
+      "seconds": 0.15
+     },
+     "factored AUGMENT K3": {
+      "mse": 2.4076619493610547e-07,
+      "seconds": 0.47
+     },
+     "unfactored AUGMENT K3": {
+      "mse": 2.379741183546539e-07,
+      "seconds": 0.69
+     },
+     "factored K4": {
+      "mse": 4.271388533046915e-08,
+      "seconds": 1.55
+     }
+    },
+    {
+     "trial": 5,
+     "noise_floor": 1.2071099074200503e-08,
+     "truth_rms": 1.0137670136242456,
+     "factored SIMPLE K3": {
+      "mse": 9.421462141983399e-07,
+      "seconds": 0.15
+     },
+     "factored AUGMENT K3": {
+      "mse": 2.6106459045163035e-07,
+      "seconds": 0.45
+     },
+     "unfactored AUGMENT K3": {
+      "mse": 2.458046768392012e-07,
+      "seconds": 0.65
+     },
+     "factored K4": {
+      "mse": 5.82574016928859e-08,
+      "seconds": 1.6
+     }
+    },
+    {
+     "trial": 6,
+     "noise_floor": 1.0253168679997709e-08,
+     "truth_rms": 0.8847495611065666,
+     "factored SIMPLE K3": {
+      "mse": 7.528900181279239e-07,
+      "seconds": 0.15
+     },
+     "factored AUGMENT K3": {
+      "mse": 3.197492217195006e-07,
+      "seconds": 0.48
+     },
+     "unfactored AUGMENT K3": {
+      "mse": 2.730183259820098e-07,
+      "seconds": 0.72
+     },
+     "factored K4": {
+      "mse": 4.189445971646701e-08,
+      "seconds": 1.6
+     }
+    },
+    {
+     "trial": 7,
+     "noise_floor": 1.1195291393657044e-08,
+     "truth_rms": 0.8701066210433626,
+     "factored SIMPLE K3": {
+      "mse": 7.952815769506584e-07,
+      "seconds": 0.15
+     },
+     "factored AUGMENT K3": {
+      "mse": 3.359265675898071e-07,
+      "seconds": 0.52
+     },
+     "unfactored AUGMENT K3": {
+      "mse": 3.1661165618956904e-07,
+      "seconds": 0.76
+     },
+     "factored K4": {
+      "mse": 4.872325202509481e-08,
+      "seconds": 1.58
+     }
+    }
+   ]
+  }
+ ],
+ "summaries": [
+  {
+   "n": 128,
+   "L": 8,
+   "arms": {
+    "factored SIMPLE K3": {
+     "mean_mse": 5.967966611441232e-06,
+     "n_ok": 8,
+     "above_noise_floor": true
+    },
+    "factored AUGMENT K3": {
+     "mean_mse": 2.1746253412802983e-06,
+     "n_ok": 8,
+     "above_noise_floor": true
+    },
+    "unfactored AUGMENT K3": {
+     "mean_mse": 1.8333275568163529e-06,
+     "n_ok": 8,
+     "above_noise_floor": true
+    },
+    "factored K4": {
+     "mean_mse": 6.384424156958339e-07,
+     "n_ok": 8,
+     "above_noise_floor": true
+    }
+   },
+   "noise_floor": 9.378066589038885e-09,
+   "mse_gain_from_unfactoring": 1.1861630144569597,
+   "unfactored_over_factored_raw_mse": 0.8430544434550697,
+   "mse_gain_simple_to_augment": 2.744365430749384,
+   "mse_gain_k3_to_k4": 3.4061417096014672
+  },
+  {
+   "n": 256,
+   "L": 8,
+   "arms": {
+    "factored SIMPLE K3": {
+     "mean_mse": 6.943322226534369e-07,
+     "n_ok": 8,
+     "above_noise_floor": true
+    },
+    "factored AUGMENT K3": {
+     "mean_mse": 2.76765941378081e-07,
+     "n_ok": 8,
+     "above_noise_floor": true
+    },
+    "unfactored AUGMENT K3": {
+     "mean_mse": 2.5572351726650686e-07,
+     "n_ok": 8,
+     "above_noise_floor": true
+    },
+    "factored K4": {
+     "mean_mse": 4.2568952945166816e-08,
+     "n_ok": 8,
+     "above_noise_floor": false
+    }
+   },
+   "noise_floor": 1.042960439981103e-08,
+   "mse_gain_from_unfactoring": 1.0822858387703325,
+   "unfactored_over_factored_raw_mse": 0.9239703266709802,
+   "mse_gain_simple_to_augment": 2.508734344971053,
+   "mse_gain_k3_to_k4": 6.501591470539196
+  }
+ ],
+ "verdict": "INCONCLUSIVE against PLAN's 1.15x/1.3x thresholds \u2014 best resolved gain 1.186x. Report to Samuel.",
+ "device": "cuda",
+ "dtype": "torch.float32"
+}

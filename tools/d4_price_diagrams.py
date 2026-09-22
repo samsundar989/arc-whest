@@ -129,10 +129,20 @@ def summarise(shape: dict) -> dict:
         }
     fa = out["arms"]["factored AUGMENT K3"]["mean_mse"]
     ua = out["arms"]["unfactored AUGMENT K3"]["mean_mse"]
-    out["unfactored_over_factored"] = (ua / fa) if (fa and ua) else None
-    # The ratio the lane turns on is factored/unfactored > 1 when the dropped
-    # diagrams HELP, so state it the way the decision rule reads.
-    out["factored_over_unfactored"] = (fa / ua) if (fa and ua) else None
+    # THE DECISION QUANTITY, and its direction is the whole point: LOWER MSE IS
+    # BETTER, so what PLAN's "unfactored/factored AUGMENT >= 1.3x" has to mean is
+    # "restoring the dropped diagrams divides the MSE by >= 1.3", i.e.
+    # factored_mse / unfactored_mse. Stating it as unfactored/factored gives a
+    # number below 1 whenever the dropped terms help, which compared against a
+    # 1.3 threshold closes the lane exactly when it should be opened. That is
+    # what the first version of this file did.
+    out["mse_gain_from_unfactoring"] = (fa / ua) if (fa and ua) else None
+    out["unfactored_over_factored_raw_mse"] = (ua / fa) if (fa and ua) else None
+    # The other two contrasts the same run measures for free, same direction.
+    fs = out["arms"]["factored SIMPLE K3"]["mean_mse"]
+    k4 = out["arms"]["factored K4"]["mean_mse"]
+    out["mse_gain_simple_to_augment"] = (fs / fa) if (fs and fa) else None
+    out["mse_gain_k3_to_k4"] = (fa / k4) if (fa and k4) else None
     return out
 
 
@@ -171,9 +181,14 @@ def main(argv=None) -> int:
             flag = "" if v["above_noise_floor"] else "   <-- AT OR BELOW NOISE FLOOR"
             mm = v["mean_mse"]
             print(f"      {name:<24} {('%.4e' % mm) if mm else 'FAILED':>12}{flag}")
-        r = s["unfactored_over_factored"]
-        print(f"      unfactored/factored AUGMENT = "
-              f"{('%.3f' % r) if r else 'n/a'}x")
+        for label, key in (("restore dropped diagrams (unfactor)",
+                            "mse_gain_from_unfactoring"),
+                           ("SIMPLE -> AUGMENT (factored)",
+                            "mse_gain_simple_to_augment"),
+                           ("K3 -> K4 (factored)", "mse_gain_k3_to_k4")):
+            r = s[key]
+            print(f"      MSE gain, {label:<34} "
+                  f"{('%.3fx' % r) if r else 'n/a':>8}")
 
     # A ratio between two arms that both sit at the Monte-Carlo noise floor is
     # a ratio of two measurements of the noise, and it will read ~1.000x -- which
@@ -192,8 +207,8 @@ def main(argv=None) -> int:
               + ", ".join(f"n={s['n']} L={s['L']}" for s in unresolved))
         print("  -> raise --samples, or use --float64, before trusting these shapes.")
 
-    ratios = [s["unfactored_over_factored"] for s in resolved
-              if s["unfactored_over_factored"]]
+    ratios = [s["mse_gain_from_unfactoring"] for s in resolved
+              if s["mse_gain_from_unfactoring"]]
     print()
     if not ratios:
         verdict = ("NO VERDICT: no shape resolved both AUGMENT arms above the "
@@ -209,14 +224,14 @@ def main(argv=None) -> int:
         print(f"  wrote {out}")
         return 1
     if len(ratios) >= 2 and sum(1 for r in ratios if r >= 1.3) >= 2:
-        verdict = ("SCHEDULE D4b: unfactored AUGMENT beats factored by >=1.3x at "
-                   "two shapes. The dropped diagrams are worth deriving.")
+        verdict = ("SCHEDULE D4b: restoring the dropped diagrams divides the MSE "
+                   "by >=1.3x at two resolved shapes. They are worth deriving.")
     elif ratios and max(ratios) < 1.15:
-        verdict = ("CLOSE THE LANE: unfactored AUGMENT is within 1.15x of factored "
-                   "at every shape measured. The dropped diagrams are not the gap.")
+        verdict = ("CLOSE THE LANE: restoring the dropped diagrams divides the MSE "
+                   "by <1.15x at every resolved shape. They are not the gap.")
     else:
-        verdict = ("INCONCLUSIVE against PLAN's thresholds — report to Samuel with "
-                   "the per-shape ratios and let him decide.")
+        verdict = (f"INCONCLUSIVE against PLAN's 1.15x/1.3x thresholds — best "
+                   f"resolved gain {max(ratios):.3f}x. Report to Samuel.")
     print(f"  VERDICT: {verdict}")
 
     out = Path(a.json)
