@@ -97,6 +97,14 @@ by CMA-ES on 100 held-out nets disjoint from the scoring panel by weight hash.
 (DEV +2.687%, HOLDOUT +2.871%, 0.18 pp apart), so it is real — just small. The
 likely reason: the λ table being refitted was *already* fitted.
 
+**And it does not go further.** Refitting on the current structure, with a
+fourth profile added (a gain on the old-tier readout — the component §4d shows
+carries the accuracy), returns **0.00%** over 302 evaluations. The search was
+exploring properly: 9 evaluations within +1% of the incumbent, closest
+non-baseline +0.196%, none better. The coefficients are at a local optimum and
+16 parameters do no better than 12. **On this chain, fitting is a 2.7% lever and
+that is all it is.**
+
 ### 4b. Billing polish is a small lever, and two of its five items are impossible
 
 **Result: −2.26%**, not the −6–10% projected.
@@ -155,7 +163,9 @@ to cheapen it. Measured, on 100 scoring nets:
 | age 7 | +16.40% | −21.07% | −8.13% |
 | age 8 | +20.54% | −21.42% | −5.28% |
 
-**The old tier is under-funded, not overpriced.** Even the mildest truncation —
+**The old tier is under-funded, not overpriced.** Note the contrast with §4a:
+one integer here was worth −10.32%, while the whole fitted-coefficient apparatus
+is worth −2.7% and is exhausted. On this chain, structure dominates fitting. Even the mildest truncation —
 6.8% of cost — destroys 44% of raw MSE. Conversely, compressing two layers
 *later* costs 6.1% and returns 15.5%, a −10.3% score improvement **from changing
 one integer**. That single constant outperformed the fitted-coefficient work
@@ -194,11 +204,12 @@ it, and it would leave us around 5.0–5.2e-9 — still outside the top 40.
    already). Is there a reason to expect it continues, or is this the end of that
    direction?
 
-3. **Should we move to a cheaper term set with heavier fitting?** Our own
-   measurement says factored SIMPLE beats factored AUGMENT on *score* by ~3× at
-   two widths. That contradicts our chain's design. Is that result transferable
-   to (1024, 16) and to an optimised implementation, and if so what would the
-   migration cost?
+3. **Should we move to a cheaper term set?** Our own measurement says factored
+   SIMPLE beats factored AUGMENT on *score* by ~3× at two widths, which
+   contradicts our chain's design. Is that transferable to (1024, 16) and to an
+   optimised implementation, and what would migration cost? Note we cannot
+   assume "cheaper term set plus heavier fitting" rescues the accuracy: §4a
+   shows fitting is exhausted at 2.7% on the chain we have.
 
 4. **Only the final layer is scored.** We prune hard at the last layer but carry
    the full apparatus everywhere else. Is there a principled way to propagate

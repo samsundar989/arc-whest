@@ -457,6 +457,36 @@ comparable accuracy (≈−20% raw) age 6 costs 11.6% where rank 384 costs 19.4%
 This is the largest single lever found so far. For context, D2's fitted
 coefficients were worth −2.7% and D3's billing polish −1.5%, and each took a day.
 
+## D6 — more fitting adds NOTHING on this chain (2026-09-22)
+
+PLAN D6 asks for "a second fitting round on the final structure with more
+parameters (per-term-class × layer, ~130) and per-net adaptation". The first
+step of that — refitting the existing profiles on v53's structure, plus a newly
+wired **old-tier readout gain** (the one profile never fitted, and the one D5
+showed carries the chain's accuracy) — returns **0.00%**.
+
+    identity (all profiles 1.0)      2.628931e-08
+    D2's shipped coefficients        2.509809e-08    -4.531%
+    best of 302 further evaluations  2.509809e-08     0.000%
+
+The search was genuinely exploring, not mis-scaled: of 302 evaluations, 9 landed
+within +1% of the incumbent and the closest non-baseline point was +0.196%. None
+was better. D2's coefficients sit at a local optimum for this structure, and 16
+parameters do no better than 12.
+
+**A first run of this reported the same 0.00% for the wrong reason** and nearly
+went on the record as a result about the old-tier gain. `tools/fit.py` seeded
+CMA-ES at identity, discarding whatever coefficients the candidate already
+carried, so it restarted 4.5% behind and never recovered the point D2 had
+already found. Fixed: the search now seeds from the shipped coefficients and
+prints both references. The second run above is the honest one.
+
+**What this means, taken with D5.** On this chain, *structure* beats *fitting* by
+a wide margin: one integer (compression age 4 → 5) was worth −10.32% on score,
+while the entire fitted-coefficient apparatus is worth −2.7% and will not go
+further. PLAN's ordering — fitting as "the main accuracy bet", structure as a
+cost afterthought — is exactly inverted.
+
 ## D2 prep — the six profiles already exist as constants (read 2026-09-21)
 
 PLAN §6 D2(a) asks for six per-layer profiles parametrised as 4-knot splines,
