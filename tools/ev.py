@@ -120,7 +120,25 @@ WALL_FACTOR = max(WALL_ANCHORS.values())
 #: is a mix-dependent cost and three points do not define a line. Quote the WORST
 #: rate: the cliff FAILS the MLP outright, so over-projecting is free.
 US_PER_OP = (0.236255e6 / 23421, 0.156232e6 / 14091)
+
+#: The per-MLP residual cliff. Exceeding it FAILS the MLP, which scores it as
+#: zeros -- about 0.9 against a good score of 6e-9. There is no partial credit.
 RESIDUAL_CLIFF_S = 0.4
+
+#: What a candidate is actually gated on: PLAN D7's finals bound, not the cliff.
+#: Gating canaries at the finals bound means no candidate is ever built on margin
+#: a designated entry could not keep, which is the failure D7 exists to prevent.
+RESIDUAL_GATE_S = 0.33
+
+#: Op ceiling. RAISED 24,500 -> 26,000 on 2026-09-22, which PLAN §5 explicitly
+#: provides for ("raise/lower after the first graded residual reading from
+#: C10"). That reading: 23,421 ops billed 0.236255 s, i.e. 10.087 us/op and
+#: 1.69x headroom -- comfortably better than the 0.252-0.260 s we had projected.
+#: At the WORST of the three graded rates, 11.09 us/op, 26,000 ops is 0.288 s:
+#: 1.39x headroom against the cliff and inside D7's 0.33 s bound. At C10's own
+#: measured rate it is 0.262 s. The residual gate above is the binding
+#: constraint; this ceiling is the cheap proxy that catches a regression early.
+OP_CEILING = 26_000
 
 #: Prediction workers. Bounded by free RAM: one worker holds ~3.8 GiB of chain
 #: at width 1024, and this box has 16 logical / 8 physical cores but only ~30
@@ -383,16 +401,22 @@ def gate_table(r: Dict, best_graded: float) -> List[tuple]:
     return [
         ("DEV projected vs best graded", f"≥3% better than {best_graded:.4e}",
          f"{proj:.4e} = {better * 100:.1f}% better", better >= 0.03),
-        ("op calls", "≤ 24,500", f"{int(r['ops']):,}", r["ops"] <= 24_500),
+        ("op calls", f"≤ {OP_CEILING:,}", f"{int(r['ops']):,}", r["ops"] <= OP_CEILING),
         ("projected server wall", "< 100 s",
          f"{r['projected_server_wall_s']:.1f} s", r["projected_server_wall_s"] < 100),
         ("setup", "< 2 s", f"{r['setup_s']:.2f} s", r["setup_s"] < 2.0),
         ("scalar materializations", "0", f"{int(r['materializations'])}",
          r["materializations"] == 0),
         ("failed nets on panel", "0", f"{len(r['failed_nets'])}", not r["failed_nets"]),
-        ("projected server residual", f"< {RESIDUAL_CLIFF_S} s cliff (advisory)",
-         f"{res_hi:.3f} s ({RESIDUAL_CLIFF_S / res_hi:.2f}× headroom)",
-         res_hi < RESIDUAL_CLIFF_S),
+        # A REAL GATE, not advisory. The cliff FAILS the MLP outright and a
+        # failed net scores ~0.9 against ~6e-9, so this is the one number where
+        # being wrong is unrecoverable. Gated at PLAN D7's finals bound rather
+        # than at the cliff, so a canary is never built on margin a final could
+        # not keep.
+        ("projected server residual", f"≤ {RESIDUAL_GATE_S} s (D7 finals bound)",
+         f"{res_hi:.3f} s ({RESIDUAL_CLIFF_S / res_hi:.2f}× headroom vs the "
+         f"{RESIDUAL_CLIFF_S} s cliff)",
+         res_hi <= RESIDUAL_GATE_S),
     ] + ([] if not r.get("memory") else [
         ("WSL RLIMIT_AS 8 GiB gate", "PASS",
          "{} VmPeak {:.0f} MiB".format(

@@ -95,6 +95,13 @@ correctors · exact augmented κ4 · the standalone (3,1)/q31 consumer · rank-3
 readout (v44) · qEc/qEdc bases · CP/Tucker leg compression · f64 · E14 · further
 "why does v29's chain differ from ours" archaeology · fresh-mint blocks · the 2× gate.
 
+**Closed 2026-09-22 on measured cost** (`RESULTS.md` § D4b and K4): **K4 cumulant
+order** — 21–42× the FLOPs for 3.4–6.5× the accuracy, a 6.2–6.5× worse score, and the
+cost ratio doubles from n=128 to n=256. **D4b / the dropped non-hypertree diagrams** —
+score-negative at both shapes and worsening with width. Also measured dead in D3:
+**pooled `out=` buffers** (flopscope arrays are immutable and `out=` bills identically)
+and **`as_symmetric`** (no matmul discount at all).
+
 ## Process reset of 2026-09-21
 
 Pre-registered contracts, prediction capture, seed blocks, the DECIDE/CONFIRM/VAULT

@@ -1,0 +1,64 @@
+[
+ {
+  "n": 128,
+  "L": 8,
+  "base": "factored AUGMENT K3",
+  "arms": {
+   "factored SIMPLE K3": {
+    "flops": 1433430477,
+    "cost_ratio": 0.1249548549381603,
+    "mse_ratio": 2.7444127655660813,
+    "score_ratio": 0.342927699011745
+   },
+   "factored AUGMENT K3": {
+    "flops": 11471586900,
+    "cost_ratio": 1.0,
+    "mse_ratio": 1.0,
+    "score_ratio": 1.0
+   },
+   "unfactored AUGMENT K3": {
+    "flops": 15609951956,
+    "cost_ratio": 1.3607491354138632,
+    "mse_ratio": 0.8430515956957603,
+    "score_ratio": 1.1471817299522835
+   },
+   "factored K4": {
+    "flops": 243133881088,
+    "cost_ratio": 21.194441815892098,
+    "mse_ratio": 0.29358962567828567,
+    "score_ratio": 6.222468239187966
+   }
+  }
+ },
+ {
+  "n": 256,
+  "L": 8,
+  "base": "factored AUGMENT K3",
+  "arms": {
+   "factored SIMPLE K3": {
+    "flops": 11336667981,
+    "cost_ratio": 0.12446446092124856,
+    "mse_ratio": 2.508689525598873,
+    "score_ratio": 0.3122426894224465
+   },
+   "factored AUGMENT K3": {
+    "flops": 91083574356,
+    "cost_ratio": 1.0,
+    "mse_ratio": 1.0,
+    "score_ratio": 1.0
+   },
+   "unfactored AUGMENT K3": {
+    "flops": 214860000596,
+    "cost_ratio": 2.3589324652128827,
+    "mse_ratio": 0.9239440690826318,
+    "score_ratio": 2.1795216605999146
+   },
+   "factored K4": {
+    "flops": 3838947177984,
+    "cost_ratio": 42.14752445901477,
+    "mse_ratio": 0.15380640965422554,
+    "score_ratio": 6.482559412854716
+   }
+  }
+ }
+]

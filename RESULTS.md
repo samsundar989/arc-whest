@@ -297,6 +297,63 @@ graded residual reading from C10". At the worst observed rate 25,698 ops is
 0.259 s. Raising the ceiling to ~26,000 is defensible on that evidence — but it
 is a gate change, so it waits for Samuel rather than being taken silently.
 
+## D4b and K4 — both CLOSED on cost (2026-09-22)
+
+D4 measured accuracy only. This competition scores **MSE × FLOPs**, so the same
+arms were priced with ARC's own FLOP counter (`tools/d4b_price_k4.py`) and the
+two sides combined. Against factored AUGMENT K3, the arm our chain is closest to:
+
+| arm | n=128 L=8 cost× | MSE× | **score×** | n=256 L=8 cost× | MSE× | **score×** |
+|---|---:|---:|---:|---:|---:|---:|
+| factored SIMPLE K3 | 0.125 | 2.744 | **0.343** | 0.124 | 2.509 | **0.312** |
+| unfactored AUGMENT K3 | 1.361 | 0.843 | 1.147 | 2.359 | 0.924 | 2.180 |
+| **factored K4** | **21.19** | 0.294 | **6.222** | **42.15** | 0.154 | **6.483** |
+
+**K4 is closed.** Its 3.4–6.5× accuracy costs 21–42× the FLOPs — a 6.2–6.5×
+*worse* score — and the cost ratio doubles from n=128 to n=256, so it degrades
+further toward our width of 1024. The accuracy lever D4 found is real and
+unaffordable.
+
+**D4b is closed**, now on cost rather than on the shrinking-gain argument alone:
+restoring the dropped diagrams is score-negative at both shapes (1.15×, 2.18×
+worse) and worsens with width.
+
+**The surprise, and it points at D2.** Factored *SIMPLE* K3 beats factored
+AUGMENT on score by ~3× at both shapes: the extra Edgeworth diagrams cost 8×
+and buy only 2.5–2.7×. If that transfers, the frontier is not reached by richer
+term sets at all — it is reached by a cheap term set with well-fitted
+coefficients, which is exactly D2's bet and exactly what the leaders' 0.13 B
+cost profile looks like.
+
+*Limits, stated because the numbers are seductive:* torch's counter uses its own
+conventions and counts a different program from the one flopscope bills for our
+chain, so only ratios between arms under the same counter mean anything; ARC's
+implementation is not optimised the way ours is (Strassen, f32); the shapes are
+(128,8) and (256,8), not (1024,16); and our chain is not exactly any of these
+arms. This is a screening result that closes two lanes, not a prediction of our
+score.
+
+## PLAN §5 gate change — op ceiling 24,500 → 26,000, residual now a hard gate
+
+PLAN §5 provides for this explicitly: "ops ≤ 24,500 (tighten or loosen after the
+first graded residual)". C10 #331816 supplied that reading — 23,421 ops billed
+0.236255 s, 10.087 µs/op, 1.69× headroom, better than the 0.252–0.260 s
+projected.
+
+Two changes, made together:
+
+- **Op ceiling 26,000.** At the worst of three graded rates (11.09 µs/op) that is
+  0.288 s: 1.39× headroom against the cliff and inside D7's bound. At C10's own
+  measured rate it is 0.262 s.
+- **Projected residual is now a real gate at ≤ 0.33 s**, not advisory. It is
+  gated at PLAN D7's *finals* bound rather than at the 0.4 s cliff, so no canary
+  is ever built on margin a designated entry could not keep. This is the binding
+  constraint; the op ceiling is the cheap proxy that catches a regression early.
+
+The cliff FAILS the MLP, and a failed net scores ~0.9 against ~6e-9. It is the
+one number where being wrong is unrecoverable, which is why the gate sits well
+inside it.
+
 ## D2 prep — the six profiles already exist as constants (read 2026-09-21)
 
 PLAN §6 D2(a) asks for six per-layer profiles parametrised as 4-knot splines,
