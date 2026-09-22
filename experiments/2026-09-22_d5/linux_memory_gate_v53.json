@@ -1,0 +1,174 @@
+{
+  "artifact": "linux_memory_gate",
+  "artifact_version": 5,
+  "candidate": "estimator_k3_v53_age5.py",
+  "candidate_sha256": "8257c055ff74ed8e573d934ca7f7d3cb4633ada4b85f2f5d1d31e482d67b5015",
+  "instrument": "local_sim/linux_memory_gate.py",
+  "instrument_sha256": "463b8560aa5be78bd18270a3507b80edb552ee8b1b7929d4089f7624a7261e8f",
+  "instrument_policy": "current-source-sha256",
+  "limit_mb": 8192,
+  "width": 1024,
+  "depth": 16,
+  "budget": 2199023255552,
+  "seed": 90000000101,
+  "suite_n_mlps": 100,
+  "weights_mode": "f64_readonly",
+  "repeats": 3,
+  "host_platform": "win32",
+  "generated_utc": "2026-09-22T17:39:09Z",
+  "linux_kind": "wsl",
+  "linux_note": "WSL2 Ubuntu, official stack in $HOME/.arcwhest-linux",
+  "negative_control": {
+    "limit_mb": 8192,
+    "request_gib": 9.0,
+    "cap_applied": true,
+    "allocated": false,
+    "survived": false,
+    "error": "MemoryError: "
+  },
+  "positive_control": {
+    "limit_mb": 0,
+    "request_gib": 9.0,
+    "cap_applied": false,
+    "allocated": true,
+    "survived": true
+  },
+  "lifecycle_controls": {
+    "growth_threshold_bytes": 67108864,
+    "stateless": {
+      "completed": true,
+      "retain": false,
+      "allocation_mib": 96,
+      "repeats": 3,
+      "rows": [
+        {
+          "i": 0,
+          "vm_size_settled_bytes": 16072704
+        },
+        {
+          "i": 1,
+          "vm_size_settled_bytes": 16072704
+        },
+        {
+          "i": 2,
+          "vm_size_settled_bytes": 16072704
+        }
+      ],
+      "growth_bytes": 0,
+      "error": "",
+      "cap_applied": true
+    },
+    "retaining": {
+      "completed": true,
+      "retain": true,
+      "allocation_mib": 96,
+      "repeats": 3,
+      "rows": [
+        {
+          "i": 0,
+          "vm_size_settled_bytes": 116740096
+        },
+        {
+          "i": 1,
+          "vm_size_settled_bytes": 217407488
+        },
+        {
+          "i": 2,
+          "vm_size_settled_bytes": 318074880
+        }
+      ],
+      "growth_bytes": 201334784,
+      "error": "",
+      "cap_applied": true
+    }
+  },
+  "candidate_run": {
+    "stage": "done",
+    "limit_mb": 8192,
+    "setrlimit_raised": null,
+    "soft_limit_bytes": 8589934592,
+    "hard_limit_bytes": 8589934592,
+    "cap_requested_bytes": 8589934592,
+    "cap_applied": true,
+    "whestbench_file": "/home/samsu/.arcwhest-linux/lib/python3.12/site-packages/whestbench/__init__.py",
+    "flopscope_file": "/home/samsu/.arcwhest-linux/lib/python3.12/site-packages/flopscope/__init__.py",
+    "numpy_version": "2.4.6",
+    "whestbench_version": "0.16.1",
+    "flopscope_version": "0.12.1",
+    "stack_version_source": "importlib.metadata.version",
+    "python_version": "3.12.3",
+    "weights_mode": "f64_readonly",
+    "repeats": 3,
+    "suite_n_mlps": 100,
+    "weight_dtype": "float64",
+    "weight_writeable": false,
+    "setup_raised": null,
+    "setup_s": 0.10447342399999116,
+    "predict_s": 110.88619226399999,
+    "predict_error": "",
+    "shape": [
+      16,
+      1024
+    ],
+    "finite": true,
+    "dtype": "float32",
+    "largest_array_bytes": 65536,
+    "repeat_runs": [
+      {
+        "i": 0,
+        "vm_peak_bytes": 6719717376,
+        "vm_size_settled_bytes": 2156720128,
+        "flops_used": 502430823125.0,
+        "error": ""
+      },
+      {
+        "i": 1,
+        "vm_peak_bytes": 6770728960,
+        "vm_size_settled_bytes": 2170351616,
+        "flops_used": 502430823125.0,
+        "error": ""
+      },
+      {
+        "i": 2,
+        "vm_peak_bytes": 6770728960,
+        "vm_size_settled_bytes": 2185031680,
+        "flops_used": 502430823125.0,
+        "error": ""
+      }
+    ],
+    "repeat_error": "",
+    "repeat_vm_size_growth_bytes": 28311552,
+    "repeat_flops_identical": true,
+    "repeat_flops_observed": [
+      502430823125.0,
+      502430823125.0,
+      502430823125.0
+    ],
+    "flops_used": 502430823125.0,
+    "residual_wall_time_s": 1.2160213019859611,
+    "wall_time_s": 110.88618924599996,
+    "multiplier": 0.22847908581979937,
+    "peak_rss_bytes": 4814778368,
+    "vm_peak_bytes": 6770728960,
+    "vm_hwm_bytes": 4814778368,
+    "ok": true
+  },
+  "child_stderr": {
+    "negative": "",
+    "positive": "",
+    "lifecycle_stateless": "",
+    "lifecycle_retaining": "",
+    "candidate": ""
+  },
+  "child_stderr_tail": "",
+  "stack": {
+    "whestbench": "0.16.1",
+    "flopscope": "0.12.1",
+    "numpy": "2.4.6",
+    "python": "3.12.3",
+    "source": "importlib.metadata.version"
+  },
+  "status": "PASS",
+  "checks_total": 23,
+  "checks_failed": []
+}
