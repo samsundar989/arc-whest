@@ -1,0 +1,211 @@
+[
+ {
+  "product": "J.T @ Om",
+  "shape_a": [
+   2048,
+   1024
+  ],
+  "shape_b": [
+   1024,
+   256
+  ],
+  "depth": 3,
+  "plain_flops": 1073217536.0,
+  "plain_ops": 1.0,
+  "mm_flops": 769843200.0,
+  "mm_ops": 70.0,
+  "d_flops": -303374336.0,
+  "d_ops": 69.0,
+  "flops_saved_per_extra_op": 4396729.507246377
+ },
+ {
+  "product": "Qn.T @ J",
+  "shape_a": [
+   256,
+   1024
+  ],
+  "shape_b": [
+   1024,
+   2048
+  ],
+  "depth": 3,
+  "plain_flops": 1073217536.0,
+  "plain_ops": 1.0,
+  "mm_flops": 769843200.0,
+  "mm_ops": 70.0,
+  "d_flops": -303374336.0,
+  "d_ops": 69.0,
+  "flops_saved_per_extra_op": 4396729.507246377
+ },
+ {
+  "product": "(FJ*dJ) @ FJ.T",
+  "shape_a": [
+   256,
+   2048
+  ],
+  "shape_b": [
+   2048,
+   256
+  ],
+  "depth": 3,
+  "plain_flops": 268369920.0,
+  "plain_ops": 1.0,
+  "mm_flops": 199287808.0,
+  "mm_ops": 70.0,
+  "d_flops": -69082112.0,
+  "d_ops": 69.0,
+  "flops_saved_per_extra_op": 1001190.0289855072
+ },
+ {
+  "product": "Q.T @ Om",
+  "shape_a": [
+   256,
+   1024
+  ],
+  "shape_b": [
+   1024,
+   256
+  ],
+  "depth": 3,
+  "plain_flops": 134152192.0,
+  "plain_ops": 1.0,
+  "mm_flops": 100230144.0,
+  "mm_ops": 70.0,
+  "d_flops": -33922048.0,
+  "d_ops": 69.0,
+  "flops_saved_per_extra_op": 491623.884057971
+ },
+ {
+  "product": "Q @ (Sg@(Q.T@Om))",
+  "shape_a": [
+   1024,
+   256
+  ],
+  "shape_b": [
+   256,
+   256
+  ],
+  "depth": 3,
+  "plain_flops": 133955584.0,
+  "plain_ops": 1.0,
+  "mm_flops": 100319232.0,
+  "mm_ops": 70.0,
+  "d_flops": -33636352.0,
+  "d_ops": 69.0,
+  "flops_saved_per_extra_op": 487483.3623188406
+ },
+ {
+  "product": "Sg @ (Q.T@Om)",
+  "shape_a": [
+   256,
+   256
+  ],
+  "shape_b": [
+   256,
+   256
+  ],
+  "depth": 3,
+  "plain_flops": 33488896.0,
+  "plain_ops": 1.0,
+  "mm_flops": 25936896.0,
+  "mm_ops": 70.0,
+  "d_flops": -7552000.0,
+  "d_ops": 69.0,
+  "flops_saved_per_extra_op": 109449.27536231885
+ },
+ {
+  "product": "T @ tw.Sg",
+  "shape_a": [
+   256,
+   256
+  ],
+  "shape_b": [
+   256,
+   256
+  ],
+  "depth": 3,
+  "plain_flops": 33488896.0,
+  "plain_ops": 1.0,
+  "mm_flops": 25936896.0,
+  "mm_ops": 70.0,
+  "d_flops": -7552000.0,
+  "d_ops": 69.0,
+  "flops_saved_per_extra_op": 109449.27536231885
+ },
+ {
+  "product": "(T@Sg) @ T.T",
+  "shape_a": [
+   256,
+   256
+  ],
+  "shape_b": [
+   256,
+   256
+  ],
+  "depth": 3,
+  "plain_flops": 33488896.0,
+  "plain_ops": 1.0,
+  "mm_flops": 25936896.0,
+  "mm_ops": 70.0,
+  "d_flops": -7552000.0,
+  "d_ops": 69.0,
+  "flops_saved_per_extra_op": 109449.27536231885
+ },
+ {
+  "product": "R @ Om  (p2, r=1024)",
+  "shape_a": [
+   1024,
+   1024
+  ],
+  "shape_b": [
+   1024,
+   1024
+  ],
+  "depth": 5,
+  "plain_flops": 2146435072.0,
+  "plain_ops": 1.0,
+  "mm_flops": 1299743744.0,
+  "mm_ops": 116.0,
+  "d_flops": -846691328.0,
+  "d_ops": 115.0,
+  "flops_saved_per_extra_op": 7362533.286956522
+ },
+ {
+  "product": "D @ Om  (p3, r=32)",
+  "shape_a": [
+   1024,
+   1024
+  ],
+  "shape_b": [
+   1024,
+   32
+  ],
+  "depth": 0,
+  "plain_flops": 67076096.0,
+  "plain_ops": 1.0,
+  "mm_flops": 67076096.0,
+  "mm_ops": 1.0,
+  "d_flops": 0.0,
+  "d_ops": 0.0,
+  "flops_saved_per_extra_op": Infinity
+ },
+ {
+  "product": "Q.T @ R (p2)",
+  "shape_a": [
+   1024,
+   1024
+  ],
+  "shape_b": [
+   1024,
+   1024
+  ],
+  "depth": 5,
+  "plain_flops": 2146435072.0,
+  "plain_ops": 1.0,
+  "mm_flops": 1299743744.0,
+  "mm_ops": 116.0,
+  "d_flops": -846691328.0,
+  "d_ops": 115.0,
+  "flops_saved_per_extra_op": 7362533.286956522
+ }
+]

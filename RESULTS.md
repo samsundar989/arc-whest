@@ -194,6 +194,109 @@ Evidence: `experiments/2026-09-21_d1/c10_dev_numpy.json`,
 - `HF_HUB_OFFLINE=1` in the worker env: otherwise every worker resolves the
   dataset revision against an unauthenticated, rate-limited endpoint.
 
+## D3 — billing polish: measured at −2.26%, not PLAN's −6–10% (2026-09-22)
+
+**PLAN's D3 target is not reachable from the five items it names.** Every item was
+measured under the real meter. Two are infeasible, one is worth ~0.05%, and the
+two that work only work *together*. The deliverable is
+`estimator_k3_v46_d3.py`: **−2.26% score at flat op count**, which is real but
+**below §5's 3% gate**, so it cannot ship alone.
+
+| item | measured | verdict |
+|---|---|---|
+| 1. Strassen for plain-`@` products | blanket: −2.60% FLOPs, **+30.3% ops**; high-value subset: −1.55% FLOPs, +9.7% ops | only viable once item 2 funds the ops |
+| 2. 15-add Winograd instead of 18-add Strassen | −0.69% FLOPs, **−8.2% ops**, +29% RSS | small alone; its op saving is what pays for item 1 |
+| 3. pooled preallocated `out=` buffers | **INFEASIBLE** | see below |
+| 4. remove recomputed `A_L*M` / `C_L` | ~0.2–0.3% by inspection | marginal, not pursued |
+| 5. aliasing / `as_symmetric` | ~0.05% | **closed**, see below |
+| **1 + 2 combined** | **−2.26% FLOPs, ops 23,421 → 23,484** | the deliverable |
+
+### Why the op budget, not the FLOP budget, governs this work
+
+Measured by forcing `_STRASSEN_DEPTH`:
+
+| depth | FLOPs | multiplier | ops |
+|---|---:|---:|---:|
+| 0 (off) | 723,666,642,305 | 0.329085 | **8,724** |
+| 3 | 529,917,341,057 | 0.240979 | 20,017 |
+| 5 (C10) | 480,850,933,121 | 0.218666 | **23,421** |
+
+**63% of C10's op budget is Strassen glue.** Strassen buys a 33.6% FLOP
+reduction with 14,697 op calls. So routing *more* products through it spends the
+residual budget fast: the blanket version of item 1 reached 30,528 ops = 0.339 s
+projected, which busts both §5's 24,500 ceiling and PLAN D7's 0.33 s finals
+bound. `tools/d3_strassen_table.py` prices the trade per shape — break-even is
+~61,000 FLOPs saved per extra op call, and every site clears it, so the
+constraint is the residual cliff, not efficiency.
+
+### Item 3 is infeasible, and the reason is a hard flopscope property
+
+- `fnp.add(a, b, out=buf)` bills **exactly** what `a + b` bills: 1 op call, same
+  FLOPs. `out=` saves nothing.
+- Slice assignment raises: *"flopscope arrays are immutable, so item assignment
+  (arr[i] = ...) and indexed in-place updates are not supported."*
+- `fnp.empty(...)` itself costs an op call.
+
+So there is no way to write into a pooled buffer, and nothing to gain if there
+were. PLAN's note that "504aldo ships `out=` and is graded" may be true, but it
+buys no FLOPs and no ops here.
+
+### Item 5 is closed: symmetry discounts elementwise ops, not matmuls
+
+| operation | untagged | symmetric-tagged |
+|---|---:|---:|
+| `X @ Y` (n=256) | 33,488,896 | **33,488,896** |
+| `einsum('ij,jk->ik')` | 33,488,896 | **33,488,896** |
+| `X + Y` | 65,536 | **32,896** |
+| `X * 2` | 65,536 | **32,896** |
+| `as_symmetric(X)` itself | — | **458,751** (≈7n², it verifies) |
+
+Matmuls — which are essentially the whole bill — get **no discount at all**.
+Elementwise ops get a genuine 2×, but `as_symmetric` costs ~14 elementwise ops
+to pay for itself, and n×n elementwise work is a negligible share of 481 G.
+
+### The deliverable, on DEV (100 nets)
+
+    C10   raw 3.095064010e-08   multiplier 0.218666   adjusted 6.767843e-09
+    v46   raw 3.094959965e-08   multiplier 0.213724   adjusted 6.614663e-09
+          raw change  -0.0034%      score change  -2.2634%
+
+**Accuracy is unharmed.** Winograd perturbs individual activations by up to
+4.3e-3 relative — it is algebraically exact (verified to 2.7e-15 in float64) but
+numerically noisier than classical Strassen in float32 — yet the panel raw MSE
+moves −0.0034% and 51/100 nets improve. That is a coin flip, i.e. pure
+rounding-order noise with no systematic direction. It is **not** the ≤1e-6
+bit-parity PLAN assumed the item would have, so it is validated by panel
+measurement rather than by parity.
+
+Projected public **6.378653e-09** = only **+1.74%** better than the 6.4914e-09
+best graded. Below the 3% gate. `estimator_k3_v46_d3.py` is a **base to stack
+D2's accuracy gain on**, not a candidate.
+
+**The memory margin is the real price.** WSL 8 GiB gate PASSES, but VmPeak rises
+**5,754.8 → 6,801.6 MiB** — 83% of the 8,192 MiB cap against C10's 70%, leaving
+1,390 MiB. PLAN D7's finals bound is 7 GiB, so this clears it by 200 MiB.
+Winograd is the cause: it holds eight S/T temporaries simultaneously where the
+classical form folds its sums into the `concatenate` call.
+
+### Two bases, and the choice is deferred to D2
+
+Neither ships alone, and which one D2 should stack on depends on D2's own
+memory footprint (it re-enables P3 feedback), which does not exist yet:
+
+| base | FLOPs | score vs C10 | ops | VmPeak |
+|---|---:|---:|---:|---:|
+| C10 (unchanged) | 480,850,933,121 | — | 23,421 | 5,754.8 MiB |
+| item 1 subset only | 473,416,794,497 | −1.55% | 25,698 | ~5,800 MiB |
+| **v46 = items 1 + 2** | 469,983,381,889 | **−2.26%** | 23,484 | 6,801.6 MiB |
+
+The middle row exceeds §5's 24,500-op ceiling, but that ceiling was set *before*
+any graded residual existed and PLAN §5 says to revisit it "after the first
+graded residual reading from C10". At the worst observed rate 25,698 ops is
+0.285 s (1.40× headroom, inside D7's 0.33 s); at C10's own measured rate it is
+0.259 s. Raising the ceiling to ~26,000 is defensible on that evidence — but it
+is a gate change, so it waits for Samuel rather than being taken silently.
+
 ## D2 prep — the six profiles already exist as constants (read 2026-09-21)
 
 PLAN §6 D2(a) asks for six per-layer profiles parametrised as 4-knot splines,
