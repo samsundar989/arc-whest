@@ -355,6 +355,38 @@ The cliff FAILS the MLP, and a failed net scores ~0.9 against ~6e-9. It is the
 one number where being wrong is unrecoverable, which is why the gate sits well
 inside it.
 
+## D5-H3 first cut — the old-tier RANK TAPER is worth nothing (2026-09-22)
+
+PLAN D5-H3 proposes a final-layer-aware schedule: "taper old-tier rank and
+switch off D21/old readouts over the last 2–4 layers", expecting −5–10% FLOPs.
+The taper half is measured and **dead**.
+
+`estimator_k3_v51_h3.py` adds `_SHARED_RANK_TAIL = (h, rank)`: the last `h`
+layers compress the old tier at `rank` instead of `_SHARED_RANK`. With it set to
+`None` the file is bit-identical to v50 in both FLOPs and ops. Swept on DEV:
+
+| taper | multiplier | ops | raw MSE | score |
+|---|---:|---:|---:|---:|
+| off (v50) | 0.215285 | 25,728 | 3.011892e-08 | — |
+| last 2 layers @ 128 | 0.215285 | 25,728 | 3.011560e-08 | −0.01% |
+| last 3 layers @ 128 | 0.215285 | 25,728 | 3.011560e-08 | −0.01% |
+| last 4 layers @ 128 | 0.215285 | 25,728 | 3.011560e-08 | −0.01% |
+
+Not a rounding artefact — a structural fact about the implementation. **The
+old-tier basis `Q` is built once, early, when enough lineages have accumulated
+(`tw.k - tw.ko >= _SHARED_AGE`). The tail layers only transport it.** Asking for
+a smaller rank at layer 14 cannot shrink a basis that was constructed at layer
+6, so the multiplier does not move at all, and h=2/3/4 are identical because
+none of them triggers a compression event.
+
+To cut tail cost the basis itself would have to be *re-compressed* smaller, or
+the readouts switched off. That is the other half of H3 ("births at layers
+≥ L−2 keep only the (3)-diagonal readout"), and it is real surgery on the birth
+logic rather than a constant: the last layer already prunes to
+`{(1,), (3,), (4,)}` and skips every term with `ip != (1,)`, but layer L−2 still
+has to produce the full state that L−1 consumes, so pruning backwards trades
+accuracy for cost rather than removing waste outright. Not attempted yet.
+
 ## D2 prep — the six profiles already exist as constants (read 2026-09-21)
 
 PLAN §6 D2(a) asks for six per-layer profiles parametrised as 4-knot splines,
