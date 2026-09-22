@@ -27,9 +27,17 @@ The plan is `docs/PLAN.md`; the submission gates are its §5.
 All four are implemented in `tools/ev.py`; change them there and here together.
 
 - **DEV → graded**: divide the 100-net DEV adjusted score by **1.037**. Observed
-  1.0386 / 1.0385 / 1.0339 on three submissions (±0.3%); v31's own row landed
-  +0.45% off `predict_public.py`. If a graded row deviates >2% from its
-  projection, stop submitting and recalibrate before the next slot (PLAN §5).
+  **1.0386 / 1.0385 / 1.0339 / 1.0426** over four submissions — mean 1.0384,
+  spread ±0.45%. The constant is deliberately left at the *low* end of that
+  range: projected = DEV/1.037 comes out slightly pessimistic, which makes §5's
+  "≥3% better than the best graded" gate harder rather than easier. C10 #331816
+  landed 0.53% *better* than projected. If a graded row ever deviates by >2%,
+  stop submitting and recalibrate before the next slot (PLAN §5).
+
+  The factor is entirely a raw-MSE effect: C10's graded multiplier matched its
+  DEV multiplier to 2e-10, while raw MSE moved 3.094966e-08 → 2.968645e-08. The
+  graded 100 nets are simply a little easier than the mini 100; nothing about
+  cost changes between the two.
 
 - **FLOPs: there is no offset to add.** Take the number from the **f64 read-only
   grader twin** (`tools/_cost_worker.py`, one net) and use it as-is. Verified
@@ -39,6 +47,7 @@ All four are implemented in `tools/ev.py`; change them there and here together.
   |---|---:|---:|---:|---|
   | F21 #330950 | 928,457,637,478 | 0.42221365105 | 0.4222136511 | **0** |
   | v31 #331317 | 661,961,618,994 | 0.30102529263 | 0.3010252926 | **0** |
+  | C10 #331816 | 480,850,933,121 | 0.21866568801 | 0.21866568778 | **491 FLOPs of 4.8e11**, i.e. 1e-9 relative |
 
   (A third confirmation is on record: the twin predicted #330212's `flops_used`
   to delta 0 out of sample, `docs/GOTCHAS.md` 2026-09-07.) What *does* read low
@@ -61,10 +70,25 @@ All four are implemented in `tools/ev.py`; change them there and here together.
   anchor is used: over-projecting wall costs nothing, under-projecting costs the
   submission.
 
-- **ops → server residual**: **10.74–11.09 µs/op** (v31 13,053 twin ops →
-  0.140244 s; F21 14,091 → 0.156232 s). The cliff is 0.4 s/MLP and it FAILS the
-  MLP. The in-process local `residual_wall_time_s` is an instrument artefact
-  (C10 reads 5.9–9.1 s locally) and must never be quoted — project from ops.
+- **ops → server residual**: use **11.09 µs/op**, the worst of three graded
+  anchors, because the cliff FAILS the MLP outright and over-projecting is free:
+
+  | candidate | twin ops | graded residual | µs/op | headroom vs 0.4 s |
+  |---|---:|---:|---:|---:|
+  | F21 #330950 | 14,091 | 0.156232 s | 11.087 | 2.56× |
+  | v31 #331317 | 13,053 | 0.140244 s | 10.744 | 2.85× |
+  | **C10 #331816** | **23,421** | **0.236255 s** | **10.087** | **1.69×** |
+
+  The rate is **not** constant — it falls as ops rise (11.09 → 10.09), so a flat
+  µs/op is a crude model of a mix-dependent cost. It is not even monotone in
+  ops between F21 and v31, so do not fit a line to three points; take the worst
+  rate and keep margin. Implied ceilings at 11.09 µs/op: the 0.4 s cliff is
+  36,069 ops, **1.5× headroom is 24,046 ops**, and PLAN D7's 0.33 s finals bound
+  is 29,757 ops.
+
+  The in-process local `residual_wall_time_s` is an instrument artefact (C10
+  reads 5.9–9.1 s locally against 0.236 s on the server) and must never be
+  quoted — project from ops.
 
 ## Rows
 
@@ -75,6 +99,7 @@ All four are implemented in `tools/ev.py`; change them there and here together.
 | 2026-09-18 | `estimator_k3_v31.py` | `6dde5fd4` | DEV | 3.006065e-08 | 0.30101 | 13,037 | 52.02 s (local) | 5,434.6 MB | 8.713e-09 | see above | baseline | — | The DEV control. `experiments/2026-09-16_slice7_canary/`. Reproduce this row in D1: DEV adjusted 9.0486e-09 ± 1%. |
 | 2026-09-18 | `estimator_k3_v43_complete_c10.py` | `fd8d497d` | DEV | 3.094966e-08 | 0.21865 | 23,405 | 60.259 s (local) → 78.9 s proj | 5,754.8 MiB | **6.526e-09** | PENDING | 1.3371× vs v31 DEV (score ratio, unpaired) | — | C10. DEV adjusted 6.767156e-09, 100/100, 0 failed, official `v2-phase2` mini, subprocess runner (`experiments/2026-09-18_c10_diagnostic/c10_mini.json`). Raw MSE is 3.0% WORSE than v31; the whole gain is cost (0.30103 → 0.21865 F/B). All §5 gates pass — see below. |
 | 2026-09-21 | `estimator_k3_v43_complete_c10.py` | `fd8d497d` | DEV | 3.094966e-08 | 0.21867 | 23,421 | 49.881 s (local) → 79.7 s proj | 3842 MiB | **6.5262e-09** | PENDING | — | — | D1 acceptance on the instrument of record: raw MSE reproduces the Sep-18 official whest run EXACTLY (3.094966e-08). Multiplier is the f64 twin's, hence 2^25 above whest run's. |
+| 2026-09-22 | `estimator_k3_v43_complete_c10.py` | `fd8d497d` | GRADED | 2.968645e-08 | 0.21867 | 23,421 | — | — | 6.526e-09 | **6.4914e-09** | 1.3482× vs v31 (graded/graded) | — | **sub #331816, THE NEW BEST. 100/100, 0 failed.** Server residual **0.236255 s** of the 0.4 s cliff (1.69× headroom, 10.09 µs/op) — the first reading at 23k ops, and the reason D0 existed. Graded landed 0.53% BETTER than the 6.5262e-09 projection. Server multiplier matched the f64 twin to 2e-10. best net 5.029e-09, worst 8.43e-09. Report: `experiments/run_reports/c10_canary_331816_graded_report.json`. |
 
 <!-- ev.py --append inserts new rows directly above this marker. Keep it here. -->
 

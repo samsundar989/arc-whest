@@ -112,11 +112,14 @@ PUBLIC_FACTOR = 1.037
 WALL_ANCHORS = {"f21": 93.1597 / 58.295410299964715,
                 "v31": 68.1319 / 43.5474146999768}
 WALL_FACTOR = max(WALL_ANCHORS.values())
-#: Server residual seconds per op call, from the same two rows:
-#:     F21  14,091 ops -> 0.156232 s   11.09 us/op
-#:     v31  13,053 ops -> 0.140244 s   10.74 us/op
-#: The high end is the one to quote, because the cliff FAILS the MLP outright.
-US_PER_OP = (0.140244e6 / 13053, 0.156232e6 / 14091)
+#: Server residual seconds per op call. Three graded anchors:
+#:     F21  14,091 ops -> 0.156232 s   11.087 us/op   2.56x headroom
+#:     v31  13,053 ops -> 0.140244 s   10.744 us/op   2.85x headroom
+#:     C10  23,421 ops -> 0.236255 s   10.087 us/op   1.69x headroom
+#: The rate FALLS as ops rise and is not even monotone between F21 and v31, so it
+#: is a mix-dependent cost and three points do not define a line. Quote the WORST
+#: rate: the cliff FAILS the MLP outright, so over-projecting is free.
+US_PER_OP = (0.236255e6 / 23421, 0.156232e6 / 14091)
 RESIDUAL_CLIFF_S = 0.4
 
 #: Prediction workers. Bounded by free RAM: one worker holds ~3.8 GiB of chain
@@ -505,8 +508,12 @@ def main(argv=None) -> int:
                     help="skip the real-meter run (accuracy only; no score, no gates)")
     ap.add_argument("--mem", action="store_true",
                     help="also run the WSL RLIMIT_AS 8 GiB gate (2 predictions, ~3 min)")
-    ap.add_argument("--best-graded", type=float, default=8.75203025190677e-09,
-                    help="the score the §5 3%% gate is measured against")
+    #: THE §5 BASELINE. C10 #331816, graded 2026-09-22. Update this the moment a
+    #: better score grades, or every later candidate is gated against a stale bar
+    #: and "3% better" stops meaning anything.
+    ap.add_argument("--best-graded", type=float, default=6.491408844300788e-09,
+                    help="the score the §5 3%% gate is measured against "
+                         "(default: C10 #331816)")
     ap.add_argument("--json", default=None, help="also write the full result here")
     ap.add_argument("--append", action="store_true",
                     help="append the row to RESULTS.md")
