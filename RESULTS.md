@@ -403,6 +403,44 @@ logic rather than a constant: the last layer already prunes to
 has to produce the full state that L−1 consumes, so pruning backwards trades
 accuracy for cost rather than removing waste outright. Not attempted yet.
 
+## D5 — PLAN's premise is BACKWARDS: the old tier is under-funded (2026-09-22)
+
+PLAN D5 calls the old tier "the cost bet" and proposes cheapening it — H1
+replaces it with a carried aggregate, H2 refits under "aggressive truncation",
+H3 tapers its rank in the tail. **Every one of those directions is measured
+wrong.** The chain is not over-spending on the old tier; it is compressing too
+early and too hard.
+
+Cost and accuracy on 100 DEV nets, against v50 (rank 256, age 4):
+
+| setting | cost | raw MSE | **score** | projected public |
+|---|---:|---:|---:|---:|
+| rank 64 | −23.21% | +545.6% | +395.8% | 3.1000e-08 |
+| rank 128 | −15.64% | +170.4% | +128.1% | 1.4262e-08 |
+| rank 192 | −6.81% | +43.9% | +34.1% | 8.3849e-09 |
+| **v50: rank 256, age 4** | — | — | — | 6.2528e-09 |
+| rank 320 | +9.34% | −14.89% | **−6.95%** | 5.8185e-09 |
+| rank 384 | +19.37% | −19.94% | −4.42% | 5.9762e-09 |
+| **age 5** | +6.13% | −15.50% | **−10.32%** | 5.6075e-09 |
+| **age 6** | +11.59% | −20.17% | **−10.91%** | **5.5704e-09** |
+
+Two things follow, and both are larger than anything D2 or D3 produced.
+
+**Truncation is dead, and not recoverable by fitting.** Even the mildest cut —
+rank 192, saving 6.8% of cost — costs 43.9% of raw MSE and is 34% worse on
+score. PLAN H2 proposes rerunning D2's fit on exactly this configuration; D2's
+entire lever was 2.7%, against a 44% loss. H1's "carried aggregate" would have
+to reproduce content worth 44%+ of raw MSE at 2 units/layer instead of 7, which
+the rank curve says is not a small ask but a very large one.
+
+**Spending more wins.** Raising the compression age from 4 to 6 — keeping
+sources exact two layers longer — costs 11.6% more FLOPs and returns 20.2% of
+raw MSE, a net **−10.91% on score**. Age is a better axis than rank: at
+comparable accuracy (≈−20% raw) age 6 costs 11.6% where rank 384 costs 19.4%.
+
+This is the largest single lever found so far. For context, D2's fitted
+coefficients were worth −2.7% and D3's billing polish −1.5%, and each took a day.
+
 ## D2 prep — the six profiles already exist as constants (read 2026-09-21)
 
 PLAN §6 D2(a) asks for six per-layer profiles parametrised as 4-knot splines,
