@@ -372,12 +372,28 @@ layers compress the old tier at `rank` instead of `_SHARED_RANK`. With it set to
 | last 3 layers @ 128 | 0.215285 | 25,728 | 3.011560e-08 | −0.01% |
 | last 4 layers @ 128 | 0.215285 | 25,728 | 3.011560e-08 | −0.01% |
 
-Not a rounding artefact — a structural fact about the implementation. **The
-old-tier basis `Q` is built once, early, when enough lineages have accumulated
-(`tw.k - tw.ko >= _SHARED_AGE`). The tail layers only transport it.** Asking for
-a smaller rank at layer 14 cannot shrink a basis that was constructed at layer
-6, so the multiplier does not move at all, and h=2/3/4 are identical because
-none of them triggers a compression event.
+Not a rounding artefact — a structural fact about the implementation, and the
+mechanism was **verified by probe rather than inferred**, because the first
+explanation written here was imprecise.
+
+The taper *does* fire: instrumenting `_shared_rank` over one net shows 28 calls,
+two per layer at layers 1–14, of which **6 take the taper branch and return 64
+instead of 256** (layers 12, 13, 14 at h=4). So the constant is reaching the
+code.
+
+It is inert for a narrower reason. `_shared_rank` is consulted only at *guard*
+sites, each of the form `if _SHARED_ON and _shared_rank(n) and (tw.k - tw.ko) >=
+_SHARED_AGE`, and in the tail the second condition is false: **no compression
+event occurs in those layers at all.** The old-tier basis `Q` is built once,
+earlier, when enough lineages have accumulated; the tail layers only transport
+it. A smaller rank requested where nothing is being compressed is never used to
+build anything, which is why the multiplier does not move and why h = 2/3/4 and
+rank 64 vs 128 are all byte-identical.
+
+**That points at the real lever.** To cut tail cost the existing basis has to be
+*re-compressed* smaller on entry to the tail — an explicit rank reduction of `Q`
+at layer `L-h`, which then makes every remaining transport cheaper — rather than
+a request that silently finds no compression to attach to.
 
 To cut tail cost the basis itself would have to be *re-compressed* smaller, or
 the readouts switched off. That is the other half of H3 ("births at layers
