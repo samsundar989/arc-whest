@@ -1,0 +1,581 @@
+{
+ "date": "2026-09-22",
+ "file": "estimator_k3_v49_stack.py",
+ "sha8": "e942a985",
+ "panel": "dev",
+ "n": 100,
+ "raw_mse": 0.4597285645680635,
+ "flops": 469983412609.0,
+ "multiplier": 0.21372371184452277,
+ "ops": 23514.0,
+ "materializations": 0.0,
+ "setup_s": 0.001,
+ "worst_wall_local_s": 45.421699600003194,
+ "projected_server_wall_s": 72.58670770911408,
+ "peak_rss_mib": 4992.1,
+ "adjusted_score_dev": 0.09825489526044086,
+ "projected_public": 0.09474917575741645,
+ "failed_nets": [
+  {
+   "i": 5,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 98.0 MiB for an array with shape (49, 256, 2048) and data type float32"
+  },
+  {
+   "i": 6,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 75.0 MiB for an array with shape (2401, 256, 32) and data type float32"
+  },
+  {
+   "i": 7,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 394. MiB for an array with shape (16807, 32, 192) and data type float32"
+  },
+  {
+   "i": 8,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 525. MiB for an array with shape (16807, 256, 32) and data type float32"
+  },
+  {
+   "i": 9,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 5.36 MiB for an array with shape (343, 64, 64) and data type float32"
+  },
+  {
+   "i": 10,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 172. MiB for an array with shape (343, 128, 1024) and data type float32"
+  },
+  {
+   "i": 11,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 394. MiB for an array with shape (16807, 192, 32) and data type float32"
+  },
+  {
+   "i": 12,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 225. MiB for an array with shape (2401, 384, 64) and data type float32"
+  },
+  {
+   "i": 13,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 37.5 MiB for an array with shape (2401, 32, 128) and data type float32"
+  },
+  {
+   "i": 14,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 37.5 MiB for an array with shape (2401, 64, 64) and data type float32"
+  },
+  {
+   "i": 20,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 525. MiB for an array with shape (16807, 32, 256) and data type float32"
+  },
+  {
+   "i": 21,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 197. MiB for an array with shape (16807, 32, 96) and data type float32"
+  },
+  {
+   "i": 22,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 37.5 MiB for an array with shape (2401, 32, 128) and data type float32"
+  },
+  {
+   "i": 30,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 525. MiB for an array with shape (16807, 256, 32) and data type float32"
+  },
+  {
+   "i": 31,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 394. MiB for an array with shape (16807, 32, 192) and data type float32"
+  },
+  {
+   "i": 32,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 394. MiB for an array with shape (16807, 32, 192) and data type float32"
+  },
+  {
+   "i": 33,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 525. MiB for an array with shape (16807, 32, 256) and data type float32"
+  },
+  {
+   "i": 34,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 42.0 MiB for an array with shape (7, 512, 3072) and data type float32"
+  },
+  {
+   "i": 35,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 394. MiB for an array with shape (16807, 192, 32) and data type float32"
+  },
+  {
+   "i": 36,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 21.4 MiB for an array with shape (343, 64, 256) and data type float32"
+  },
+  {
+   "i": 37,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 525. MiB for an array with shape (16807, 32, 256) and data type float32"
+  },
+  {
+   "i": 38,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 394. MiB for an array with shape (16807, 192, 32) and data type float32"
+  },
+  {
+   "i": 39,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 131. MiB for an array with shape (16807, 32, 64) and data type float32"
+  },
+  {
+   "i": 40,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 525. MiB for an array with shape (16807, 32, 256) and data type float32"
+  },
+  {
+   "i": 41,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 21.4 MiB for an array with shape (343, 64, 256) and data type float32"
+  },
+  {
+   "i": 47,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 245. MiB for an array with shape (49, 256, 5120) and data type float32"
+  },
+  {
+   "i": 48,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 75.0 MiB for an array with shape (2401, 32, 256) and data type float32"
+  },
+  {
+   "i": 49,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 394. MiB for an array with shape (16807, 32, 192) and data type float32"
+  },
+  {
+   "i": 55,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 300. MiB for an array with shape (2401, 512, 64) and data type float32"
+  },
+  {
+   "i": 56,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 394. MiB for an array with shape (16807, 32, 192) and data type float32"
+  },
+  {
+   "i": 57,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 42.9 MiB for an array with shape (343, 64, 512) and data type float32"
+  },
+  {
+   "i": 58,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 525. MiB for an array with shape (16807, 32, 256) and data type float32"
+  },
+  {
+   "i": 59,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 525. MiB for an array with shape (16807, 256, 32) and data type float32"
+  },
+  {
+   "i": 60,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 394. MiB for an array with shape (16807, 192, 32) and data type float32"
+  },
+  {
+   "i": 61,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 263. MiB for an array with shape (16807, 32, 128) and data type float32"
+  },
+  {
+   "i": 62,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 9.38 MiB for an array with shape (2401, 32, 32) and data type float32"
+  },
+  {
+   "i": 68,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 300. MiB for an array with shape (2401, 512, 64) and data type float32"
+  },
+  {
+   "i": 69,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 5.36 MiB for an array with shape (343, 64, 64) and data type float32"
+  },
+  {
+   "i": 70,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 225. MiB for an array with shape (2401, 384, 64) and data type float32"
+  },
+  {
+   "i": 71,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 4.00 MiB for an array with shape (1024, 1024) and data type float32"
+  },
+  {
+   "i": 81,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 300. MiB for an array with shape (2401, 64, 512) and data type float32"
+  },
+  {
+   "i": 82,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 9.38 MiB for an array with shape (2401, 32, 32) and data type float32"
+  },
+  {
+   "i": 83,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 225. MiB for an array with shape (2401, 64, 384) and data type float32"
+  },
+  {
+   "i": 84,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 525. MiB for an array with shape (16807, 256, 32) and data type float32"
+  },
+  {
+   "i": 85,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 225. MiB for an array with shape (2401, 384, 64) and data type float32"
+  },
+  {
+   "i": 86,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 21.4 MiB for an array with shape (343, 128, 128) and data type float32"
+  },
+  {
+   "i": 87,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 3.50 MiB for an array with shape (7, 256, 512) and data type float32"
+  },
+  {
+   "i": 88,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 37.5 MiB for an array with shape (2401, 64, 64) and data type float32"
+  },
+  {
+   "i": 94,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 9.38 MiB for an array with shape (2401, 32, 32) and data type float32"
+  },
+  {
+   "i": 95,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 225. MiB for an array with shape (2401, 384, 64) and data type float32"
+  },
+  {
+   "i": 96,
+   "error": "MemoryError",
+   "detail": "Unable to allocate 525. MiB for an array with shape (16807, 32, 256) and data type float32"
+  }
+ ],
+ "baseline_name": "estimator_k3_v43_complete_c10",
+ "paired": {
+  "n": 100,
+  "mean_difference": -0.09825488849281219,
+  "relative_improvement": -14518362.786680806,
+  "arithmetic_gain": 6.887828509417869e-08,
+  "t95_lo": -0.11841102060908171,
+  "t95_hi": -0.07809875637654268,
+  "wins": 48,
+  "geometric_gain_diagnostic": 0.00016257867997211084
+ },
+ "memory": null,
+ "accuracy_meta": {
+  "sha256": "e942a9851d265b7bdf07b1b83622e5bba507ac29750b94d68fc9cde2554766c0",
+  "panel": "dev",
+  "n": 100,
+  "workers": 4,
+  "blas_threads_each": 2,
+  "wall_s": 1403.6,
+  "per_net_s": 14.04,
+  "worker_peak_rss_mib": 6238.2,
+  "failed_nets": [
+   {
+    "i": 5,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 98.0 MiB for an array with shape (49, 256, 2048) and data type float32"
+   },
+   {
+    "i": 6,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 75.0 MiB for an array with shape (2401, 256, 32) and data type float32"
+   },
+   {
+    "i": 7,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 394. MiB for an array with shape (16807, 32, 192) and data type float32"
+   },
+   {
+    "i": 8,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 525. MiB for an array with shape (16807, 256, 32) and data type float32"
+   },
+   {
+    "i": 9,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 5.36 MiB for an array with shape (343, 64, 64) and data type float32"
+   },
+   {
+    "i": 10,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 172. MiB for an array with shape (343, 128, 1024) and data type float32"
+   },
+   {
+    "i": 11,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 394. MiB for an array with shape (16807, 192, 32) and data type float32"
+   },
+   {
+    "i": 12,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 225. MiB for an array with shape (2401, 384, 64) and data type float32"
+   },
+   {
+    "i": 13,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 37.5 MiB for an array with shape (2401, 32, 128) and data type float32"
+   },
+   {
+    "i": 14,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 37.5 MiB for an array with shape (2401, 64, 64) and data type float32"
+   },
+   {
+    "i": 20,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 525. MiB for an array with shape (16807, 32, 256) and data type float32"
+   },
+   {
+    "i": 21,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 197. MiB for an array with shape (16807, 32, 96) and data type float32"
+   },
+   {
+    "i": 22,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 37.5 MiB for an array with shape (2401, 32, 128) and data type float32"
+   },
+   {
+    "i": 30,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 525. MiB for an array with shape (16807, 256, 32) and data type float32"
+   },
+   {
+    "i": 31,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 394. MiB for an array with shape (16807, 32, 192) and data type float32"
+   },
+   {
+    "i": 32,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 394. MiB for an array with shape (16807, 32, 192) and data type float32"
+   },
+   {
+    "i": 33,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 525. MiB for an array with shape (16807, 32, 256) and data type float32"
+   },
+   {
+    "i": 34,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 42.0 MiB for an array with shape (7, 512, 3072) and data type float32"
+   },
+   {
+    "i": 35,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 394. MiB for an array with shape (16807, 192, 32) and data type float32"
+   },
+   {
+    "i": 36,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 21.4 MiB for an array with shape (343, 64, 256) and data type float32"
+   },
+   {
+    "i": 37,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 525. MiB for an array with shape (16807, 32, 256) and data type float32"
+   },
+   {
+    "i": 38,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 394. MiB for an array with shape (16807, 192, 32) and data type float32"
+   },
+   {
+    "i": 39,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 131. MiB for an array with shape (16807, 32, 64) and data type float32"
+   },
+   {
+    "i": 40,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 525. MiB for an array with shape (16807, 32, 256) and data type float32"
+   },
+   {
+    "i": 41,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 21.4 MiB for an array with shape (343, 64, 256) and data type float32"
+   },
+   {
+    "i": 47,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 245. MiB for an array with shape (49, 256, 5120) and data type float32"
+   },
+   {
+    "i": 48,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 75.0 MiB for an array with shape (2401, 32, 256) and data type float32"
+   },
+   {
+    "i": 49,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 394. MiB for an array with shape (16807, 32, 192) and data type float32"
+   },
+   {
+    "i": 55,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 300. MiB for an array with shape (2401, 512, 64) and data type float32"
+   },
+   {
+    "i": 56,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 394. MiB for an array with shape (16807, 32, 192) and data type float32"
+   },
+   {
+    "i": 57,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 42.9 MiB for an array with shape (343, 64, 512) and data type float32"
+   },
+   {
+    "i": 58,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 525. MiB for an array with shape (16807, 32, 256) and data type float32"
+   },
+   {
+    "i": 59,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 525. MiB for an array with shape (16807, 256, 32) and data type float32"
+   },
+   {
+    "i": 60,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 394. MiB for an array with shape (16807, 192, 32) and data type float32"
+   },
+   {
+    "i": 61,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 263. MiB for an array with shape (16807, 32, 128) and data type float32"
+   },
+   {
+    "i": 62,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 9.38 MiB for an array with shape (2401, 32, 32) and data type float32"
+   },
+   {
+    "i": 68,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 300. MiB for an array with shape (2401, 512, 64) and data type float32"
+   },
+   {
+    "i": 69,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 5.36 MiB for an array with shape (343, 64, 64) and data type float32"
+   },
+   {
+    "i": 70,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 225. MiB for an array with shape (2401, 384, 64) and data type float32"
+   },
+   {
+    "i": 71,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 4.00 MiB for an array with shape (1024, 1024) and data type float32"
+   },
+   {
+    "i": 81,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 300. MiB for an array with shape (2401, 64, 512) and data type float32"
+   },
+   {
+    "i": 82,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 9.38 MiB for an array with shape (2401, 32, 32) and data type float32"
+   },
+   {
+    "i": 83,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 225. MiB for an array with shape (2401, 64, 384) and data type float32"
+   },
+   {
+    "i": 84,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 525. MiB for an array with shape (16807, 256, 32) and data type float32"
+   },
+   {
+    "i": 85,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 225. MiB for an array with shape (2401, 384, 64) and data type float32"
+   },
+   {
+    "i": 86,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 21.4 MiB for an array with shape (343, 128, 128) and data type float32"
+   },
+   {
+    "i": 87,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 3.50 MiB for an array with shape (7, 256, 512) and data type float32"
+   },
+   {
+    "i": 88,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 37.5 MiB for an array with shape (2401, 64, 64) and data type float32"
+   },
+   {
+    "i": 94,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 9.38 MiB for an array with shape (2401, 32, 32) and data type float32"
+   },
+   {
+    "i": 95,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 225. MiB for an array with shape (2401, 384, 64) and data type float32"
+   },
+   {
+    "i": 96,
+    "error": "MemoryError",
+    "detail": "Unable to allocate 525. MiB for an array with shape (16807, 32, 256) and data type float32"
+   }
+  ],
+  "built_utc": "2026-09-22T07:26:46Z",
+  "cached": false
+ },
+ "cost_meta": {
+  "net": "logan-fitzgerald",
+  "panel": "dev",
+  "split": "mini",
+  "index": 0,
+  "flops": 469983412609.0,
+  "multiplier": 0.21372371184452277,
+  "ops": 23514.0,
+  "materializations": 0,
+  "materialization_detail": {
+   "__bool__": 0,
+   "__float__": 0,
+   "__int__": 0,
+   "__index__": 0
+  },
+  "wall_s": 45.421699600003194,
+  "residual_local_s": 6.302042094001081,
+  "setup_s": 0.001,
+  "setup_error": "",
+  "peak_rss_mib": 4992.1,
+  "weights_mode": "f64_readonly",
+  "error": ""
+ },
+ "ev_wall_s": 1503.5,
+ "note": "D2 fitted coefficients + D3 billing polish, stacked"
+}
