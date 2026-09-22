@@ -166,12 +166,86 @@ def sha256_file(path: Path) -> str:
 # accuracy path
 # --------------------------------------------------------------------------- #
 
+#: What one worker holds at width 1024, used ONLY when the candidate's own
+#: footprint has not been measured yet. Prefer the measured value.
+WORKER_GIB = 5.2
+
+#: Multiplier on a candidate's measured peak RSS to get what a worker really
+#: needs. Peak RSS is a *settled* figure and badly understates the transient
+#: allocations a Strassen chain makes: on 2026-09-22 two candidates with peak
+#: RSS of 3.8 and 5.0 GiB both produced MemoryError on 4 workers, and the
+#: failing allocations were 525 MiB Strassen batch tensors (7^5 x 256 x 32).
+#: 2.5x is what makes the observed failures fit; it is empirical, not derived.
+TRANSIENT_FACTOR = 2.5
+
+#: Headroom left for the OS and everything else on the box.
+RESERVE_GIB = 6.0
+
+
+def _free_gib() -> float:
+    """Physical memory actually free right now, or nan if it cannot be read."""
+    if os.name == "nt":
+        try:
+            import ctypes
+            from ctypes import wintypes
+
+            class _MS(ctypes.Structure):
+                _fields_ = [("dwLength", wintypes.DWORD),
+                            ("dwMemoryLoad", wintypes.DWORD),
+                            ("ullTotalPhys", ctypes.c_ulonglong),
+                            ("ullAvailPhys", ctypes.c_ulonglong),
+                            ("ullTotalPageFile", ctypes.c_ulonglong),
+                            ("ullAvailPageFile", ctypes.c_ulonglong),
+                            ("ullTotalVirtual", ctypes.c_ulonglong),
+                            ("ullAvailVirtual", ctypes.c_ulonglong),
+                            ("ullAvailExtendedVirtual", ctypes.c_ulonglong)]
+
+            st = _MS()
+            st.dwLength = ctypes.sizeof(st)
+            if not ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(st)):
+                return float("nan")
+            return st.ullAvailPhys / 2 ** 30
+        except Exception:
+            return float("nan")
+    try:
+        with open("/proc/meminfo") as fh:
+            for line in fh:
+                if line.startswith("MemAvailable:"):
+                    return int(line.split()[1]) / 2 ** 20
+    except Exception:
+        pass
+    return float("nan")
+
+
+def _fit_pool_to_memory(jobs: int, quiet: bool, worker_gib: float = WORKER_GIB) -> int:
+    """Shrink the pool to what free RAM can actually hold.
+
+    On 2026-09-22 a 4-worker run of a candidate needing ~5 GiB each produced 51
+    MemoryError nets out of 100 -- scored as zeros, which is exactly how a real
+    failure looks. The gate caught it, but a run that merely came CLOSE to the
+    limit would have produced quietly degraded numbers instead. So the pool is
+    sized from measured free memory, not from a constant, and never silently:
+    when it shrinks it says so.
+    """
+    free = _free_gib()
+    if free != free:  # nan
+        return jobs
+    allowed = max(1, int((free - RESERVE_GIB) // worker_gib))
+    if allowed >= jobs:
+        return jobs
+    if not quiet:
+        print(f"  [mem] {free:.1f} GiB free, {worker_gib:.1f} GiB per worker -> "
+              f"{allowed} workers, not {jobs}", flush=True)
+    return allowed
+
+
 def _cache_dir(sha: str, panel: str) -> Path:
     return CACHE / sha / panel
 
 
 def predictions(candidate: Path, panel: str, n: int, jobs: int,
-                force: bool = False, quiet: bool = False):
+                force: bool = False, quiet: bool = False,
+                worker_gib: float = WORKER_GIB):
     """(preds, truth, meta) for `panel`, from cache or a fresh pooled run."""
     sha = sha256_file(candidate)
     cdir = _cache_dir(sha, panel)
@@ -188,6 +262,7 @@ def predictions(candidate: Path, panel: str, n: int, jobs: int,
     if total == 0:
         raise SystemExit(f"panel {panel!r} is empty")
     jobs = max(1, min(jobs, total))
+    jobs = _fit_pool_to_memory(jobs, quiet, worker_gib)
     # Contiguous chunks: each worker pays the dataset open once.
     edges = [round(k * total / jobs) for k in range(jobs + 1)]
     spans = [(edges[k], edges[k + 1]) for k in range(jobs) if edges[k] < edges[k + 1]]
@@ -264,7 +339,12 @@ def predictions(candidate: Path, panel: str, n: int, jobs: int,
 
     preds = np.concatenate([parts[lo][0] for lo in sorted(parts)], axis=0)
     truth = np.concatenate([parts[lo][1] for lo in sorted(parts)], axis=0)
-    np.savez_compressed(blob, preds=preds, truth=truth)
+    # NEVER CACHE A RUN THAT HAD FAILURES. A failed net is stored as the zeros
+    # the grader would score, which is correct for reporting but poison to reuse:
+    # the next run would hit the cache, skip the compute, and re-report a number
+    # produced by a transient local OOM as though it were the candidate's.
+    if not errors:
+        np.savez_compressed(blob, preds=preds, truth=truth)
     meta = {"sha256": sha, "panel": panel, "n": int(preds.shape[0]),
             "workers": len(spans), "blas_threads_each": per,
             "wall_s": round(wall, 1), "per_net_s": round(wall / total, 2),
@@ -431,12 +511,24 @@ def evaluate(candidate: Path, panel: str, n: int, jobs: int, baseline: Optional[
     t_all = time.perf_counter()
     print(f"[ev] {candidate.name} on {panel.upper()} n={n}", flush=True)
 
-    preds, truth, pmeta = predictions(candidate, panel, n, jobs, force, quiet)
+    # COST FIRST, deliberately. It is one net and about a minute, and it yields
+    # this candidate's measured peak RSS -- which is what the prediction pool
+    # must be sized from. Sizing from a constant put the box into MemoryError
+    # twice on 2026-09-22 and scored 51 and 60 nets as zeros.
+    c = cost(candidate, panel) if do_cost else {}
+    rss_gib = float(c.get("peak_rss_mib") or 0.0) / 1024.0
+    worker_gib = max(2.0, rss_gib * TRANSIENT_FACTOR) if rss_gib else WORKER_GIB
+    if not quiet and rss_gib:
+        print(f"[ev] cost: {c.get('flops', float('nan')):,.0f} FLOPs, "
+              f"{c.get('ops', float('nan')):,.0f} ops, peak RSS {rss_gib:.2f} GiB "
+              f"-> budget {worker_gib:.1f} GiB/worker", flush=True)
+
+    preds, truth, pmeta = predictions(candidate, panel, n, jobs, force, quiet,
+                                      worker_gib)
     mse = per_net_mse(preds, truth)
     print(f"[ev] accuracy: {'cache' if pmeta.get('cached') else pmeta['wall_s']} "
           f"{'hit' if pmeta.get('cached') else 's'}, raw MSE {mse.mean():.6e}", flush=True)
 
-    c = cost(candidate, panel) if do_cost else {}
     flops = float(c.get("flops", float("nan")))
     mult = multiplier(flops)
     scores = mse * mult
@@ -445,12 +537,14 @@ def evaluate(candidate: Path, panel: str, n: int, jobs: int, baseline: Optional[
     pair = None
     base_name = ""
     if baseline is not None:
-        bpreds, btruth, _ = predictions(baseline, panel, n, jobs, False, quiet)
+        bc = cost(baseline, panel) if do_cost else {}
+        b_rss = float(bc.get("peak_rss_mib") or 0.0) / 1024.0
+        b_gib = max(2.0, b_rss * TRANSIENT_FACTOR) if b_rss else WORKER_GIB
+        bpreds, btruth, _ = predictions(baseline, panel, n, jobs, False, quiet, b_gib)
         if bpreds.shape != preds.shape:
             raise SystemExit("baseline was evaluated on a different panel size")
         if not np.array_equal(btruth, truth):
             raise SystemExit("baseline truth differs — not common random numbers")
-        bc = cost(baseline, panel) if do_cost else {}
         bscores = per_net_mse(bpreds, btruth) * multiplier(
             float(bc.get("flops", float("nan"))))
         pair = paired(scores, bscores)
