@@ -644,6 +644,73 @@ survive on a chain that already carries age-5 exact content. r16 would also
 have sat 50 ops under the 26,000 ceiling. Not re-fitted with a D21 gain: at
 best that closes part of a 1.8% gap on a lever that is at best break-even.
 
+## Step 3 (HANDOFF 09-23) — P-N1 sensitivity-weighted old-tier basis
+
+**Predictions, recorded before any N1 run (2026-09-23).** Strategist:
+sensitivity-256 within 3% raw of energy-384 (≥15% raw better than energy-256);
+Spearman(energy, sensitivity) < 0.7. **Mine:** Spearman between 0.6 and 0.85 on
+the first-join layer — the top ~30 energy directions will also be the most
+sensitive, the tail will be weakly ordered — so the Spearman kill does not fire.
+But the old tier is **re-based at every join** (one lineage per layer from the
+age gate on; `_shared_join_lean` rebuilds `Q` from `span{Q, J}` by energy every
+time), so a sensitivity choice made at one layer is re-truncated by energy at
+the next. I therefore expect a first-join-only sensitivity-256 arm to gain
+**< 5% raw** over energy-256 (kill), and an every-join version to gain 5–12%,
+short of energy-384's gain on v55 (which I expect at −12 to −18% raw).
+Harness: `tools/n1_probe.py` (eigen-rotates the rank-512 basis at the first
+join by its carried Gram `Sg`, checks rotation parity, then zeroes one
+direction at a time and continues the real chain).
+
+### Result — N1 KILLED on its own criterion (2026-09-23)
+
+Two DEV nets, v55 at `_SHARED_RANK = 512`, first join at layer 5, all 512
+eigen-directions zeroed one at a time and the real chain continued (cupy,
+0.78 s per tail, rotation parity 5.2e-07). `experiments/2026-09-25_n1/net{0,1}_r512.json`,
+summarised by `tools/n1_spectra.py`.
+
+| rank | energy, net 0 | sensitivity ‖Δμ_L‖², net 0 | energy, net 1 | sensitivity, net 1 |
+|---:|---:|---:|---:|---:|
+| 1 | 4.39e-03 | 1.82e-06 | 5.04e-03 | 2.00e-06 |
+| 16 | 2.28e-03 | 2.68e-07 | 2.63e-03 | 3.41e-07 |
+| 64 | 8.31e-04 | 9.89e-08 | 9.19e-04 | 9.90e-08 |
+| 128 | 2.64e-04 | 2.82e-08 | 2.91e-04 | 3.56e-08 |
+| 256 | 3.14e-05 | 3.51e-09 | 3.35e-05 | 5.35e-09 |
+| 384 | 3.03e-06 | 6.18e-10 | 3.05e-06 | 8.46e-10 |
+| 512 | 3.03e-08 | 2.61e-10 | 3.12e-08 | 3.31e-10 |
+
+| | net 0 | net 1 |
+|---|---:|---:|
+| **Spearman(energy, sensitivity)** | **0.994** | **0.958** |
+| top-256 overlap, energy vs sensitivity order | 249/256 | 239/256 |
+| sensitivity captured by energy-256 / sensitivity-256 | 98.83% / 98.87% | 98.32% / 98.48% |
+
+The ceiling for any 256-of-512 selection, measured on DEV 100 (cupy, paired
+vs energy-256 = v55, `rank_dev100.json`):
+
+| arm | Δraw | ±95% | wins |
+|---|---:|---:|---:|
+| energy-384 | −6.56% | 0.71 | 98/100 |
+| energy-512 | −6.93% | 0.73 | 99/100 |
+
+**Decision: N1 is dead; the compression lane is closed.** Kill criterion
+"Spearman > 0.9" fires on both nets. The energy basis already *is* the
+sensitivity basis to within 0.04–0.16 pp of captured sensitivity, and even a
+perfect selection is bounded by energy-512's −6.9% — against the ≥15% predicted.
+Arms (c)/(d) were not run: they cannot reach the 5% pass bar when the whole
+512-dimensional candidate space is worth 6.9% and the reordering captures
+~nothing of it. Every prediction was wrong: the strategist's (Spearman < 0.7,
+sensitivity-256 ≥15% better) and mine (Spearman 0.6–0.85). Mine that
+energy-384 would be −12 to −18% was also wrong: at age 5 the rank above 256 is
+worth only 6.6% (v50/age 4: 19.9%), because the extra exact layer already holds
+what the higher ranks used to carry. At rank 384's ~+19% FLOPs (D5 table) that
+is score-negative, so no rank change ships either.
+
+Reading for the write-up: the old tier's spectrum decays ~10⁵ from rank 1 to
+512 in energy and ~10⁴ in sensitivity, *in the same order*. The remaining
+transport is not selectively contracting old-tier directions, so observability
+and controllability are aligned here and balanced truncation has nothing to add.
+The third negative on "old content at zero cost" becomes a fourth.
+
 ## Step 2 (HANDOFF 09-23) — wall-safe twin (started 2026-09-23)
 
 `estimator_k3_v56b_wallsafe.py` = v55 + `_STRASSEN_WIDE_MIN_BLOCK = 64`: the two
@@ -658,6 +725,27 @@ both within ±0.5% raw of v55 (Strassen depth is a rounding-order change). On th
 refit wall model, only all64 is cleanly classable (leaf 64, age 5: 101 ps/FLOP
 inferred) and should project a noisy worst ≤ 80 s; wide64's real rate has to be
 read from a canary.
+
+**Result.** Cost: f64 twin (`experiments/2026-09-24_wallsafe/arms/cost.json`);
+accuracy: DEV 100 cupy, paired vs v55 (`.../twin_dev100.json`).
+
+| arm | F/B | ΔFLOPs | ops | Δraw | ±95% | wins | proj. median | proj. worst quiet / noisy |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| v55 (= `parity_v55`, exact) | 0.216185 | — | 23,645 | — | — | — | 92.9 | 98.0 / 115.2 |
+| wide64 | 0.222947 | +3.13% | 23,116 | +0.00% | 0.01 | 47 | ? (mixed leaves) | — |
+| **all64** | **0.231932** | **+7.28%** | **19,804** | **−0.00%** | 0.01 | 49 | **58.9** | **62.1 / 73.0** |
+
+Both predictions on FLOPs were wrong in the good direction for all64 (+7.3%,
+not +12–15%) and wrong in the bad direction for wide64 (ops −529, not −1,000 to
+−2,000). wide64 buys too little to be worth a server reading. Accuracy is
+untouched, as predicted. all64's projection rests on an **inferred** leaf-64 /
+age-5 kernel rate (101 ps/FLOP = the measured 92 ps + the age-5 10%); even at
+130 ps it projects a 91 s noisy worst, inside B's 95 s bound.
+
+**all64 is shipped as `estimator_k3_v56b_wallsafe.py`** (`_STRASSEN_MIN_BLOCK =
+64`; the `_STRASSEN_WIDE_MIN_BLOCK` knob is then inert). Its score is v55 ×
+1.0728, so it **fails §5's 3% score gate by design** — it is the designate-B
+candidate, and HANDOFF 09-23 Step 2 asks for one canary to read its real wall.
 
 ## D5 — PLAN's premise is BACKWARDS: the old tier is under-funded (2026-09-22)
 

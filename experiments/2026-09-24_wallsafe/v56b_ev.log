@@ -1,0 +1,4 @@
+[ev] estimator_k3_v56b_wallsafe.py on DEV n=100
+[ev] cost: 510,024,394,985 FLOPs, 19,804 ops, peak RSS 2.95 GiB -> budget 7.4 GiB/worker
+  [mem] 23.0 GiB free, 7.4 GiB per worker -> 2 workers, not 4
+  2 workers x 2 BLAS threads over 100 nets ...

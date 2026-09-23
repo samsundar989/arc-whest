@@ -1,0 +1,29 @@
+{
+ "parity_v55": {
+  "flops": 475395428585.0,
+  "multiplier": 0.216184811772564,
+  "ops": 23645.0,
+  "materializations": 0,
+  "wall_s": 72.35624069999903,
+  "peak_rss_mib": 4532.9,
+  "error": ""
+ },
+ "wide64": {
+  "flops": 490266290409.0,
+  "multiplier": 0.22294729679242664,
+  "ops": 23116.0,
+  "materializations": 0,
+  "wall_s": 83.63463330001105,
+  "peak_rss_mib": 3018.4,
+  "error": ""
+ },
+ "all64": {
+  "flops": 510024394985.0,
+  "multiplier": 0.23193224250690037,
+  "ops": 19804.0,
+  "materializations": 0,
+  "wall_s": 52.53074880002532,
+  "peak_rss_mib": 3018.6,
+  "error": ""
+ }
+}

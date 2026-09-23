@@ -1,0 +1,6 @@
+[variants] parity_v55: estimator_k3_v56b_wallsafe__parity_v55.py
+   F/B 0.216184811772564  ops 23645.0  wall 72.35624069999903  err ''
+[variants] wide64: estimator_k3_v56b_wallsafe.py
+   F/B 0.22294729679242664  ops 23116.0  wall 83.63463330001105  err ''
+[variants] all64: estimator_k3_v56b_wallsafe__all64.py
+   F/B 0.23193224250690037  ops 19804.0  wall 52.53074880002532  err ''

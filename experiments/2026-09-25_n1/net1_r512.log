@@ -1,0 +1,36 @@
+whestbench: downloading 'mini' split from hf://aicrowd/arc-whestbench-public-2026@v2-phase2
+[n1] net 1 (william-graves): first join at layer 5, rank 512, FA (512, 1024), FM (512, 1024)
+[n1] tail 0.77 s; rotation parity 5.47e-07; ref MSE 2.4527e-08
+[n1] 1/512 (1s) sens 1.039e-06 dmse +8.103e-10
+[n1] 17/512 (15s) sens 2.814e-07 dmse +6.206e-11
+[n1] 33/512 (26s) sens 1.583e-07 dmse -3.742e-11
+[n1] 49/512 (39s) sens 1.253e-07 dmse +3.432e-10
+[n1] 65/512 (51s) sens 9.658e-08 dmse +1.092e-10
+[n1] 81/512 (63s) sens 7.808e-08 dmse -1.368e-10
+[n1] 97/512 (76s) sens 5.052e-08 dmse +1.006e-10
+[n1] 113/512 (88s) sens 4.753e-08 dmse +1.249e-10
+[n1] 129/512 (101s) sens 2.847e-08 dmse -1.385e-10
+[n1] 145/512 (116s) sens 2.074e-08 dmse -1.261e-10
+[n1] 161/512 (130s) sens 1.880e-08 dmse +4.781e-11
+[n1] 177/512 (145s) sens 9.260e-09 dmse -9.183e-11
+[n1] 193/512 (159s) sens 6.600e-09 dmse -6.938e-11
+[n1] 209/512 (172s) sens 6.745e-09 dmse -7.438e-11
+[n1] 225/512 (186s) sens 8.317e-09 dmse -7.052e-11
+[n1] 241/512 (199s) sens 4.187e-09 dmse +4.632e-11
+[n1] 257/512 (212s) sens 8.406e-09 dmse +1.497e-11
+[n1] 273/512 (225s) sens 3.028e-09 dmse -2.381e-11
+[n1] 289/512 (238s) sens 3.009e-09 dmse +1.354e-11
+[n1] 305/512 (250s) sens 1.960e-09 dmse -9.059e-14
+[n1] 321/512 (263s) sens 1.347e-09 dmse +5.604e-12
+[n1] 337/512 (275s) sens 1.326e-09 dmse -1.127e-11
+[n1] 353/512 (287s) sens 1.379e-09 dmse -9.267e-12
+[n1] 369/512 (299s) sens 6.349e-10 dmse +1.881e-11
+[n1] 385/512 (312s) sens 8.217e-10 dmse +2.626e-11
+[n1] 401/512 (329s) sens 6.717e-10 dmse -5.921e-12
+[n1] 417/512 (343s) sens 5.643e-10 dmse -9.566e-12
+[n1] 433/512 (361s) sens 5.330e-10 dmse +1.777e-11
+[n1] 449/512 (376s) sens 5.427e-10 dmse +1.067e-11
+[n1] 465/512 (394s) sens 4.049e-10 dmse +9.765e-12
+[n1] 481/512 (412s) sens 4.855e-10 dmse +2.156e-11
+[n1] 497/512 (430s) sens 4.255e-10 dmse -5.265e-12
+[n1] done in 447s -> C:\Users\samsu\Documents\arc-whest\experiments\2026-09-25_n1\net1_r512.json
