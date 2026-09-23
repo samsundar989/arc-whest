@@ -1,0 +1,8 @@
+[variants] v55: estimator_k3_v58_tier.py
+   F/B 0.216184811772564  ops 23645.0  wall 150.36711900000228  err ''
+[variants] t9_192: estimator_k3_v58_tier__t9_192.py
+   F/B 0.20703134335099094  ops 22661.0  wall 137.59428060002392  err ''
+[variants] t11_192_13_128: estimator_k3_v58_tier__t11_192_13_128.py
+   F/B 0.20562951652618722  ops 23080.0  wall 86.65478480001912  err ''
+[variants] t13_192: estimator_k3_v58_tier__t13_192.py
+   F/B 0.21307550377287043  ops 23397.0  wall 118.55999569996493  err ''

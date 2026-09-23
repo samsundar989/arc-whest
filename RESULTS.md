@@ -740,6 +740,29 @@ matter. FLOP cost is two n-reductions/layer (lagged) — ~0 — so β = 1 lagged
 kept in `estimator_k3_v57_adlam.py` as a free component for a later bundle,
 not a canary.
 
+## Step 4d (HANDOFF 09-23) — tiered old-tier ranks: CLOSED, score-negative
+
+`estimator_k3_v58_tier.py` = v55 + `_SHARED_RANK_SCHED`. **First, a correction
+to the H3 note (D5-H3, 2026-09-22):** instrumenting v55 shows a join at *every*
+layer 5–14, so compression events do happen in the tail. The taper was
+byte-inert for a different reason: the range finder's sketch is the old `Q`,
+and its width (256), not `_SHARED_RANK`, sets the new basis's rank. v58 narrows
+the sketch to the top-r columns of `Q·Sg` by norm when the scheduled rank drops.
+
+Prediction (strategist): −3–5% cost at ≤2% loss. Measured, DEV 20 (cupy,
+paired vs v55; the 2-net smoke of five arms had already shown +13 to +54%) and
+f64-twin cost (`experiments/2026-09-26_tier/`):
+
+| schedule | Δraw | ±95% | wins | ΔFLOPs | ops | **Δscore** |
+|---|---:|---:|---:|---:|---:|---:|
+| 192 from layer 9 | +12.33% | 1.97 | 0/20 | −4.23% | 22,661 | **+7.6%** |
+| 192 from 11, 128 from 13 | +17.90% | 1.79 | 0/20 | −4.88% | 23,080 | **+12.1%** |
+| 192 from layer 13 | +2.46% | 0.63 | 0/20 | −1.44% | 23,397 | **+1.0%** |
+
+The cost side landed as predicted; the loss is 6–9× the predicted ceiling.
+Consistent with N1 and D5: the old tier's rank is not over-provisioned at any
+age — cutting it is always worse than its bill. The compression lane stays closed.
+
 ## Step 2 (HANDOFF 09-23) — wall-safe twin (started 2026-09-23)
 
 `estimator_k3_v56b_wallsafe.py` = v55 + `_STRASSEN_WIDE_MIN_BLOCK = 64`: the two
