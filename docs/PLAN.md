@@ -1,4 +1,6 @@
-# PLAN — ARC White-Box Estimation Challenge, Phase 2 (rev 12.2, 2026-09-23)
+# PLAN — ARC White-Box Estimation Challenge, Phase 2 (rev 12.3, 2026-09-24)
+
+> **Rev 12.3 amendment (Sep 24):** N1, tiered ranks, P3, adaptive λ and the closure tail are measured and closed (`docs/STRATEGIST_PACKET_2026-09-23.md`). The Sep 24 – Oct 2 slice — all-layer residual anatomy, the in-loop learned mean corrector, per-lineage adaptive age, the A/B designation and the stop rule — is `docs/STRATEGIST_RESPONSE_2026-09-24.md` §3–§7.
 
 > **Rev 12.2 amendment (Sep 23):** the single-leg program (rev 12.1) is falsified (RESULTS.md, T0–T3). The Sep 24–Oct 16 schedule, the (A, B) wall-safe designation policy and the write-up allocation are now in `docs/STRATEGIST_RESPONSE_2026-09-23.md` §3–§7. §1–§4, §5 gates (as amended in RESULTS.md), D8 and §9 stand.
 
