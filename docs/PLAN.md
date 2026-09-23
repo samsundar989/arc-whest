@@ -1,4 +1,8 @@
-# PLAN — ARC White-Box Estimation Challenge, Phase 2 (rev 12, 2026-09-21)
+# PLAN — ARC White-Box Estimation Challenge, Phase 2 (rev 12.2, 2026-09-23)
+
+> **Rev 12.2 amendment (Sep 23):** the single-leg program (rev 12.1) is falsified (RESULTS.md, T0–T3). The Sep 24–Oct 16 schedule, the (A, B) wall-safe designation policy and the write-up allocation are now in `docs/STRATEGIST_RESPONSE_2026-09-23.md` §3–§7. §1–§4, §5 gates (as amended in RESULTS.md), D8 and §9 stand.
+
+> **Rev 12.1 amendment (Sep 22):** D5 and D6 are superseded by `docs/STRATEGIST_RESPONSE_2026-09-22.md` §4–§5 (the single-leg tower kill tests T0–T5). §1–§4, §5 gates (as amended in RESULTS.md), D7, D8 and §9 stand. Fitting (D2) and billing (D3) are measured at 2.7% / 2.3% and are closed as levers.
 
 **This is the only plan.** It supersedes `game-plan.md` rev ≤11, every `STRATEGIST_*`, `*_HANDOFF_*`, `STRATEGY_REVIEW_*`, the Sep 18 packet and its "2× release gate". It answers `docs/STRATEGIST_PACKET_2026-09-18_COMPLETE_SLICE.md`. Labels: **[M]** measured / read from a primary source today, **[I]** inference.
 

@@ -61,7 +61,55 @@ All four are implemented in `tools/ev.py`; change them there and here together.
   the correction unnecessary rather than approximate. C10 measured: twin
   480,850,933,121 vs `whest run` 480,817,378,689, difference 2^25 exactly.
 
-- **server worst-of-100 wall**: fitted on **FLOPs and op calls**, plus the
+- **server wall — REFIT 2026-09-23 (supersedes the two entries below).** Nine
+  graded runs, six candidates, using the per-net telemetry split the server
+  reports (`flopscope_server_overhead_wall_s` vs `..._kernel_wall_s`):
+
+      median wall = 0.371 ms × ops  +  FLOPs × kernel rate
+      worst-of-100 = median × 1.055 (quiet day)   or   × 1.24 (noisy day)
+
+  | run | FLOPs | ops | median | worst | kernel ps/FLOP | overhead µs/op |
+  |---|---:|---:|---:|---:|---:|---:|
+  | F21 #330950 (depth 4, leaf 64) | 928.5 G | 14,091 | 89.5 | 93.2 | **90.0** | 408 |
+  | v31 #331317 (depth 4, leaf 64) | 662.0 G | 13,053 | 66.0 | 68.1 | **91.8** | 391 |
+  | C10 #331816 | 480.9 G | 23,421 | 83.1 | 87.6 | 154.8 | 361 |
+  | v50 #331863 / #331939 | 473.4 G | 25,728 | 84.4 / 85.0 | 88.7 / 87.7 | 158.6 / 160.1 | 351 / 350 |
+  | v53 #331880 (age 5) | 502.4 G | 25,140 | 92.8 | 96.5 | 166.2 | 360 |
+  | v55 #331967 / #331980 (age 5), noisy | 475.4 G | 23,645 | 92.8 / 92.5 | 114.5 / 113.8 | 176.3 / 175.8 | 371 / 366 |
+  | v50 #331989, noisy | 473.4 G | 25,728 | 87.0 | 104.1 | 163.6 | 360 |
+
+  Three findings. (1) **Overhead is flat** at ~0.36 ms per op call. (2) **Kernel
+  time per FLOP is not a constant — it depends on Strassen leaf size**: ~91 ps
+  with 64-wide leaves (depth 4) vs 155–177 ps with 32-wide leaves (every depth-5
+  chain). The server's BLAS runs 32×32 leaves at ~55% of the efficiency of 64×64
+  ones, so depth 5's 12% FLOP saving *costs* wall. Age-5 chains are a further
+  ~10% slower per FLOP. The old FLOPs+ops fit could see neither effect. (3) **The
+  tail is the day, not the candidate**: worst/median is 1.03–1.055 on a quiet
+  server and 1.20–1.235 on a noisy one; medians barely move (v50 85.0 → 87.0).
+
+  Rates used (`tools/ev.py` `KERNEL_PS_PER_FLOP`, worst observed per class):
+  leaf 64 / age ≤4 **92**, leaf 64 / age ≥5 **101** (inferred, +10%), leaf 32 /
+  age ≤4 **164**, leaf 32 / age ≥5 **177** ps/FLOP. Every anchor projects at or
+  above its graded worst:
+
+  | candidate | projected quiet | graded quiet | projected noisy | graded noisy |
+  |---|---:|---:|---:|---:|
+  | F21 | 95.6 | 93.2 | 112.4 | — |
+  | v31 | 69.4 | 68.1 | 81.5 | — |
+  | C10 | 92.4 | 87.6 | 108.6 | — |
+  | v50 | 92.0 | 88.7 / 87.7 | 108.1 | 104.1 |
+  | v53 | 103.7 | 96.5 | 121.8 | — |
+  | **v55** | **98.0** | — | **115.2** | **114.5 / 113.8** |
+
+  Against the Sep 23 designation policy (A ≤ 105 s noisy, B ≤ 95 s noisy):
+  **v55 is neither** (noisy 114.5 s measured); **v50 is marginal A** (104.1 s
+  measured, 108.1 s projected); **nothing we hold is B**. B needs a projected
+  noisy median ≤ 76.6 s, which on this model means 64-wide leaves.
+  §5's "projected server wall < 100 s" gate is read as the **quiet-day**
+  projection (a canary's job is to measure wall); the noisy projection is the
+  designation number, reported alongside.
+
+- **server worst-of-100 wall** *(superseded above, kept as history)*: fitted on **FLOPs and op calls**, plus the
   model's own error band:
 
       wall = 60.251 s per 1e12 FLOPs + 2.478 s per 1000 op calls + 4.1 s
@@ -645,7 +693,7 @@ and bit-parity at defaults is close to free.
 | λ (κ4 regen) | `_K4_LAM` (line 130) via `_own_lambda()` (1487) | **already per-layer**: a 16-entry table, times `_OWN_S_LAM = 1.225`, times a linear depth tilt `(1 + _OWN_T_LAM·phase)`, `_OWN_T_LAM = -0.1` |
 | closure scale θ | `_OWN_THETA_FAM = 0.625` (122), applied at 432 | global scalar |
 | κ4→κ3 feed gain | `_OWN_S_FEED = 1.0` (125), applied at 1771–1773 | global scalar |
-| D21-feedback gain | `_P3_ON = False`, `_P3_RANK = 32` (117–118) | **off**; D2's base turns it on at rank 16 |
+| D21-feedback gain | `_P3_ON = False`, `_P3_RANK = 32` (117–118) | **off**; D2's base turns it on at rank 16 — **CORRECTION 2026-09-23: it never did.** Every file from C10 through v47–v55 ships `_P3_ON = False`, `_P3_RANK = 32` (grep). HANDOFF 09-21 *planned* P3 r16 on the D2 base; it was not turned on. v50, v53, v55 all have **P3 off**. |
 | (2,1)-consumer gain | `_P2_SEPARABLE = True` (79) | boolean, no gain exposed yet |
 | old-tier readout gain | `_SHARED_*` (89–95), age 4 / rank 256 | no gain exposed yet |
 

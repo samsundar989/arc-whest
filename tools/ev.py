@@ -101,47 +101,65 @@ BUDGET = 2 ** 41
 #: noise. 1.042 stays under the recent mean, so projections remain slightly
 #: pessimistic and §5's gate slightly strict, which is the safe direction.
 PUBLIC_FACTOR = 1.042
-#: SERVER WORST-OF-100 WALL, fitted on FLOPs and op calls -- NOT on our local
-#: wall.
+#: SERVER WALL -- REFIT 2026-09-23 on nine graded runs (six candidates), using
+#: the per-net telemetry split the server reports: `flopscope_server_overhead_wall_s`
+#: (per op call) and `flopscope_server_kernel_wall_s` (the arithmetic itself).
 #:
-#: The old model was `one-net twin wall x 1.5981`, calibrated on F21 and v31 and
-#: never updated when C10 and v50 graded. It projected v50 at 72.0 s; v50
-#: actually took 88.747 s. Worse, the implied "factor" is not a constant at all:
+#:     run          FLOPs    ops    median  worst | kernel ps/FLOP | overhead us/op
+#:     F21 #330950  928.5G 14,091   89.5   93.2  |      90.0      |     408
+#:     v31 #331317  662.0G 13,053   66.0   68.1  |      91.8      |     391
+#:     C10 #331816  480.9G 23,421   83.1   87.6  |     154.8      |     361
+#:     v50 #331863  473.4G 25,728   84.4   88.7  |     158.6      |     351
+#:     v53 #331880  502.4G 25,140   92.8   96.5  |     166.2      |     360
+#:     v50 #331939  (rerun)         85.0   87.7  |     160.1      |     350
+#:     v55 #331967  475.4G 23,645   92.8  114.5  |     176.3      |     371   noisy
+#:     v55 #331980  (rerun)         92.5  113.8  |     175.8      |     366   noisy
+#:     v50 #331989  (rerun)         87.0  104.1  |     163.6      |     360   noisy
 #:
-#:     F21 #330950  twin 58.295 -> 93.160   1.5981
-#:     v31 #331317  twin 43.547 -> 68.132   1.5646
-#:     C10 #331816  twin 50.515 -> 87.556   1.7333
-#:     v50 #331863  twin 45.065 -> 88.747   1.9693
+#: Overhead is a flat ~0.36 ms per op call. KERNEL TIME PER FLOP IS NOT A
+#: CONSTANT: it is ~91 ps with Strassen leaves of 64 (F21, v31: depth 4,
+#: `_STRASSEN_MIN_BLOCK = 64`) and 155-176 ps with leaves of 32 (every depth-5
+#: chain) -- small leaves run the server's BLAS at ~55% efficiency. The age-5
+#: chains are a further ~10% slower per FLOP (memory traffic of the bigger
+#: exact tier). That is why the old FLOPs+ops fit could not see either effect.
 #:
-#: The twin WALL is the bad input: it is a local measurement on a box that is
-#: often running something else, so it carries load noise the server does not.
-#: What the server's wall actually tracks is the work itself -- and note C10 has
-#: 48% FEWER FLOPs than F21 yet nearly the same wall, because it issues ~2x the
-#: op calls. Least squares on the four graded rows, using only quantities the
-#: f64 twin measures exactly:
-#:
-#:     wall = 60.251 s per 1e12 FLOPs + 2.478 s per 1000 op calls
-#:
-#: REFIT on five graded rows 2026-09-22 after v53 #331880 came in at 96.488 s
-#: against a 90.6 s projection. Residuals -2.31 / +4.09 / -0.55 / +3.52 / -3.93 s.
-#: Refit again the moment a sixth row grades.
-WALL_PER_TFLOP = 60.251
-WALL_PER_KOP = 2.478
-
-#: The fit's own error, +/-4.1 s on five anchors. ADDED to every projection,
-#: because the wall cap is a cliff: a net over 120 s is TIME_EXHAUSTED and
-#: scores as zeros. Projecting the fit alone put v53 at 90.6 s when it graded
-#: 96.488 s, which is inside the residual band but on the wrong side of PLAN
-#: D7's 95 s finals bound -- a candidate can therefore look final-ready and not
-#: be. Carrying the band makes the gate answer the question actually being
-#: asked: could the WORST net still fit if the model is as wrong as it has been.
-WALL_MODEL_ERR_S = 4.1
+#: The worst-of-100 is then the median times a TAIL FACTOR that depends on the
+#: day, not the candidate: 1.03-1.055 on a quiet server, 1.20-1.235 on a noisy
+#: one (v50 identical bytes: 87.7 s at 03:00 UTC, 104.1 s at 10:00 UTC Sep 23).
+WALL_OVH_MS_PER_OP = 0.371          # worst observed median rate
+KERNEL_PS_PER_FLOP = {              # keyed on (min leaf, age-5-or-more)
+    (64, False): 92.0, (64, True): 101.0,
+    (32, False): 164.0, (32, True): 177.0,
+}
+WALL_TAIL_QUIET = 1.055
+WALL_TAIL_NOISY = 1.24
 
 
-def projected_server_wall_s(flops: float, ops: float) -> float:
-    """Server worst-of-100 wall, from the two things that drive it."""
-    return (flops / 1e12 * WALL_PER_TFLOP + ops / 1e3 * WALL_PER_KOP
-            + WALL_MODEL_ERR_S)
+def wall_class(candidate: Path) -> tuple:
+    """(min Strassen leaf, age>=5) read from the candidate's module constants.
+
+    A file that routes some products at a different depth still reports its
+    global constants, so a mixed file is classed by its SMALLEST leaf -- the
+    conservative side. Its real wall must be read from one canary."""
+    import re
+    src = candidate.read_text(encoding="utf-8", errors="replace")
+    m = re.search(r"^_STRASSEN_MIN_BLOCK\s*=\s*(\d+)", src, re.M)
+    a = re.search(r"^_SHARED_AGE\s*=\s*(\d+)", src, re.M)
+    leaf = int(m.group(1)) if m else 32
+    return (64 if leaf >= 64 else 32, bool(a and int(a.group(1)) >= 5))
+
+
+def projected_server_median_s(flops: float, ops: float, cls: tuple = (32, True)) -> float:
+    return ops * WALL_OVH_MS_PER_OP * 1e-3 + flops * KERNEL_PS_PER_FLOP[cls] * 1e-12
+
+
+def projected_server_wall_s(flops: float, ops: float, cls: tuple = (32, True),
+                            noisy: bool = False) -> float:
+    """Server worst-of-100 wall: median x the day's tail factor."""
+    return projected_server_median_s(flops, ops, cls) * (
+        WALL_TAIL_NOISY if noisy else WALL_TAIL_QUIET)
+
+
 #: Server residual seconds per op call. Three graded anchors:
 #:     F21  14,091 ops -> 0.156232 s   11.087 us/op   2.56x headroom
 #:     v31  13,053 ops -> 0.140244 s   10.744 us/op   2.85x headroom
@@ -515,8 +533,10 @@ def gate_table(r: Dict, best_graded: float) -> List[tuple]:
         ("DEV projected vs best graded", f"≥3% better than {best_graded:.4e}",
          f"{proj:.4e} = {better * 100:.1f}% better", better >= 0.03),
         ("op calls", f"≤ {OP_CEILING:,}", f"{int(r['ops']):,}", r["ops"] <= OP_CEILING),
-        ("projected server wall", "< 100 s",
-         f"{r['projected_server_wall_s']:.1f} s", r["projected_server_wall_s"] < 100),
+        ("projected server wall (quiet day)", "< 100 s",
+         f"{r['projected_server_wall_s']:.1f} s (noisy day "
+         f"{r.get('projected_server_wall_noisy_s', float('nan')):.1f} s)",
+         r["projected_server_wall_s"] < 100),
         ("setup", "< 2 s", f"{r['setup_s']:.2f} s", r["setup_s"] < 2.0),
         ("scalar materializations", "0", f"{int(r['materializations'])}",
          r["materializations"] == 0),
@@ -597,7 +617,10 @@ def evaluate(candidate: Path, panel: str, n: int, jobs: int, baseline: Optional[
         "materializations": float(c.get("materializations", float("nan"))),
         "setup_s": float(c.get("setup_s", float("nan"))),
         "worst_wall_local_s": float(c.get("wall_s", worst_wall)),
-        "projected_server_wall_s": projected_server_wall_s(flops, float(c.get("ops", float("nan")))),
+        "projected_server_wall_s": projected_server_wall_s(
+            flops, float(c.get("ops", float("nan"))), wall_class(candidate)),
+        "projected_server_wall_noisy_s": projected_server_wall_s(
+            flops, float(c.get("ops", float("nan"))), wall_class(candidate), noisy=True),
         "peak_rss_mib": c.get("peak_rss_mib") or pmeta.get("worker_peak_rss_mib"),
         "adjusted_score_dev": float(scores.mean()),
         "projected_public": projected,
