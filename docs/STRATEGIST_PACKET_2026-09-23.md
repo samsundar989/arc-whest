@@ -23,7 +23,7 @@ expected post-ReLU activation of a random He-init ReLU MLP (1024 wide, 16 deep,
 no biases) under x ~ N(0, I). Score = mean over MLPs of
 `final_layer_MSE × max(0.1, FLOPs/2^41)`, lower better; λ = 0, so cost is the
 FLOP multiplier only. Hard per-MLP limits: wall 120 s, "residual" (un-metered
-Python dispatch ≈ 0.36 ms per flopscope op call on the server… see §3) 0.4 s,
+Python dispatch, ≈ 10–11 µs per flopscope op call on the server) 0.4 s,
 memory 8 GiB; a breach FAILS the MLP (scores ≈0.9 against ≈5e-9). The prize is
 a private re-run of up to two designated entries on fresh MLPs. Close Oct 17,
 team freeze Oct 2, write-up Oct 24 (co-equal $20k contribution prize).
