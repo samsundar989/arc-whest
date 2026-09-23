@@ -128,7 +128,7 @@ PUBLIC_FACTOR = 1.042
 #: one (v50 identical bytes: 87.7 s at 03:00 UTC, 104.1 s at 10:00 UTC Sep 23).
 WALL_OVH_MS_PER_OP = 0.371          # worst observed median rate
 KERNEL_PS_PER_FLOP = {              # keyed on (min leaf, age-5-or-more)
-    (64, False): 92.0, (64, True): 101.0,
+    (64, False): 92.0, (64, True): 94.0,   # (64, True): v56b #332063 measured 92.8
     (32, False): 164.0, (32, True): 177.0,
 }
 WALL_TAIL_QUIET = 1.055
