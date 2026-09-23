@@ -763,6 +763,26 @@ The cost side landed as predicted; the loss is 6–9× the predicted ceiling.
 Consistent with N1 and D5: the old tier's rank is not over-provisioned at any
 age — cutting it is always worse than its bill. The compression lane stays closed.
 
+## Step 4e (HANDOFF 09-23) — exact Gaussian bivariate tail in the covariance
+
+`estimator_k3_v59_biv.py` = v55 + `_biv_tail`: the table's Gaussian post-ReLU
+covariance is the Hermite series Σ C^k/k! w(k,1)_i w(k,1)_j **truncated at k=2**;
+by Price's theorem the k≥3 tail is exactly
+`C²/(σᵢσⱼ) ∫₀¹ (1−u)(φ₂(αᵢ,αⱼ;ρu) − φᵢφⱼ) du`, done with 4 Gauss–Legendre nodes.
+Checked offline: kept + tail = the exact Price integral to 1e-7 at ρ = 0.3 and
+0.5; Monte Carlo agrees within its noise. Motivation (one DEV net, v55):
+off-diagonal |ρ| rms rises 0.031 → 0.123 from layer 0 to 14 (max 0.60), and the
+dropped tail is 0.06% → 1.0% of the kept Gaussian covariance.
+
+**Prediction, recorded before the DEV run.** −0.5% to −2% raw at ~+0.1% FLOPs;
+the correction is Gaussian-only (the κ3/κ4 terms keep their own truncation) and
+at most ~1% of the late-layer covariance. Strategist: 0–5% [?].
+
+**Result (DEV 100, cupy, paired vs v55).** 4 nodes −0.23% raw (±0.11, 65/100);
+8 nodes −0.22% (±0.11, 65/100) — the quadrature is converged at 4. **Real, and
+below my predicted floor. Closed as a lever**; kept as a free bundle component
+(~0.1% FLOPs). The Gaussian closure's truncation was not where the error is.
+
 ## Step 2 (HANDOFF 09-23) — wall-safe twin (started 2026-09-23)
 
 `estimator_k3_v56b_wallsafe.py` = v55 + `_STRASSEN_WIDE_MIN_BLOCK = 64`: the two
