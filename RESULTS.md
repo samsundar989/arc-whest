@@ -711,6 +711,35 @@ transport is not selectively contracting old-tier directions, so observability
 and controllability are aligned here and balanced truncation has nothing to add.
 The third negative on "old content at zero cost" becomes a fourth.
 
+## Step 4a (HANDOFF 09-23) — per-network adaptive λ
+
+`estimator_k3_v57_adlam.py` = v55 + `λ_{l} ← λ_{l}·clip(r_l/REF_l, 0.5, 2)^β`,
+`r_l = mean(dG_l)/mean(var_l)` read at layer l and applied to the λ layer l+1
+consumes; own code, mechanism from v29 (provenance entry added). REF from FIT
+100 at β=0 (`experiments/2026-09-26_adlam/ref_fit100.json`): r_l falls from
+0.0085 (layer 3) to 0.0047 (layer 14); **its coefficient of variation across
+the 100 FIT nets is only 1.8–9.0%**, so the clip never binds.
+
+**Prediction, recorded before the DEV run.** With per-net r within ±9% of REF,
+the factor is ≈ 1 ± 0.09β, i.e. a per-net λ perturbation far smaller than D2's
+fitted profile moved λ (0.5–1.35×) for a 2.7% total. I expect |Δraw| < 1% at
+β ∈ {0.5, 1} — no canary. Strategist: 0–8% [?].
+
+**Result (DEV 100, cupy, paired vs v55 = β 0).** `experiments/2026-09-26_adlam/adlam{,_same}_dev100.json`.
+
+| β | lagged: Δraw | ±95% | wins | same-layer (504aldo's form): Δraw | ±95% | wins |
+|---:|---:|---:|---:|---:|---:|---:|
+| 0.5 | −0.28% | 0.10 | 71 | −0.25% | 0.10 | 71 |
+| **1** | **−0.39%** | 0.18 | 62 | −0.35% | 0.19 | 65 |
+| 2 | −0.11% | 0.35 | 53 | −0.06% | 0.37 | 55 |
+| −1 (sign check) | +1.01% | 0.30 | 17 | +0.95% | 0.29 | 20 |
+
+**Closed as a lever: −0.4% raw, as predicted.** The effect is real and signed
+(β = −1 loses 1%) but per-net r varies too little on this panel for per-net λ to
+matter. FLOP cost is two n-reductions/layer (lagged) — ~0 — so β = 1 lagged is
+kept in `estimator_k3_v57_adlam.py` as a free component for a later bundle,
+not a canary.
+
 ## Step 2 (HANDOFF 09-23) — wall-safe twin (started 2026-09-23)
 
 `estimator_k3_v56b_wallsafe.py` = v55 + `_STRASSEN_WIDE_MIN_BLOCK = 64`: the two

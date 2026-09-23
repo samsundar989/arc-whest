@@ -273,3 +273,16 @@ work**, credited to their 2026-09-09 publication. What would be ours is the
 independent λ fit, the width-stability result, whatever mechanism we add beyond
 their catalogue, and our negative results. Replication is not contribution, and
 this repository does not get to blur that.
+
+## 2026-09-23 — per-network adaptive λ (HANDOFF 09-23 Step 4a)
+
+- **Mechanism re-implemented:** `λ ← λ · clip(r / REF, 0.5, 2)^β` with
+  `r = mean(dG)/mean(var)`, and (mode `"same"`) the affine split
+  `dG = t_g + λ t_v` that lets the same layer's λ be adapted.
+- **Where it is from:** `external/504aldo/docs/derivation_code_map.md` lines
+  222–228 (description of V25 adaptive lambda); the same line appears in
+  `external/504aldo/estimators/estimator_v25.py:690` and v26–v28. Read, not copied.
+- **Ours:** `estimator_k3_v57_adlam.py` (`_ADAPT_*` constants, the `_layer` dG
+  block), a lagged variant (`"lag"`) of our own, and REF calibrated on our FIT
+  panel by `tools/adlam_calib.py` (`experiments/2026-09-26_adlam/ref_fit100.json`).
+  No 504aldo REF or β values are used.
