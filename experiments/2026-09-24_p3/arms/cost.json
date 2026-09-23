@@ -1,0 +1,29 @@
+{
+ "v55": {
+  "flops": 475395428585.0,
+  "multiplier": 0.216184811772564,
+  "ops": 23645.0,
+  "materializations": 0,
+  "wall_s": 65.32353779999539,
+  "peak_rss_mib": 4532.2,
+  "error": ""
+ },
+ "p3r16": {
+  "flops": 506901187513.0,
+  "multiplier": 0.23051197218273956,
+  "ops": 25950.0,
+  "materializations": 0,
+  "wall_s": 78.07685429998673,
+  "peak_rss_mib": 4598.3,
+  "error": ""
+ },
+ "p3r8": {
+  "flops": 492718108241.0,
+  "multiplier": 0.22406225445638484,
+  "ops": 25329.0,
+  "materializations": 0,
+  "wall_s": 91.13234790001297,
+  "peak_rss_mib": 4594.0,
+  "error": ""
+ }
+}

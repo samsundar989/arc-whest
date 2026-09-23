@@ -612,6 +612,53 @@ v53 + `_P2_RANK = 4`** is the fallback canary: −4.49% score, projected wall
 91.3 s (v53: 96.7 s), i.e. it also moves under D7's 95 s bound. The T0–T3
 single-leg work is closed; H1/H4-type ideas are "measured, superseded by T1–T3".
 
+## Step 1 (HANDOFF 09-23) — P3 D21-feedback on v55 (started 2026-09-23)
+
+P3 is **off** in v50, v53 and v55 (see the D2-prep correction below), so the
+arms are `_P3_ON=True` at `_P3_RANK` 16 and 8 on v55, paired against v55 on
+DEV 100 (cupy probe), then one f64-twin cost run per arm and the WSL memory gate
+on the shipping arm.
+
+**Predictions, recorded before any arm ran.** Strategist: r16 −4–8% score at
++3–6% FLOPs. Mine: prior evidence is C10 + P3 r32 = −6% raw for +12% FLOPs (a
+net *loss* on score), and 504aldo's "r16 lossless vs r32". The P3 thin cost
+scales with the number of exact lineages `k`, which age 5 raises, so I expect
+r16 at **−4 to −7% raw, +5 to +8% FLOPs, Δscore −2% to +2%**, and r8 at −3 to
+−6% raw, +3 to +5% FLOPs, Δscore −3% to +1%. I expect **neither arm to clear
+the 3% gate**, r8 being the better of the two.
+
+**Result (DEV 100, cupy, paired vs v55; cost from the f64 twin).**
+`experiments/2026-09-24_p3/p3_dev100.json`, `.../arms/cost.json`.
+
+| arm | Δraw | ±95% | wins | FLOPs (F/B) | ΔFLOPs | ops | **Δscore** |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| v55 (P3 off) | — | — | — | 0.216185 | — | 23,645 | — |
+| P3 r16 | −4.57% | 1.48 | 72/100 | 0.230512 | +6.63% | 25,950 | **+1.76%** |
+| P3 r8 | −3.28% | 1.48 | 66/100 | 0.224062 | +3.64% | 25,329 | **+0.24%** |
+
+**P3 is CLOSED on this chain.** The accuracy gain is real (72/100 wins at r16)
+but smaller than its FLOP bill at both ranks, so both arms are score-*negative*.
+No canary. My prediction held (Δscore −2..+2%, neither clears 3%); the
+strategist's (−4–8% score) did not — the uncompressed −17% and C10's −6% do not
+survive on a chain that already carries age-5 exact content. r16 would also
+have sat 50 ops under the 26,000 ceiling. Not re-fitted with a D21 gain: at
+best that closes part of a 1.8% gap on a lever that is at best break-even.
+
+## Step 2 (HANDOFF 09-23) — wall-safe twin (started 2026-09-23)
+
+`estimator_k3_v56b_wallsafe.py` = v55 + `_STRASSEN_WIDE_MIN_BLOCK = 64`: the two
+wide D21 contractions (`rec = [LA|LP][A_L|M]ᵀ`, inner dim `2kn`, and the old-tier
+`X_old`) use 64-wide Strassen leaves; everything else keeps depth 5 / leaf 32.
+Arms: `parity_v55` (knob `None`, must equal v55's FLOPs and ops exactly),
+`wide64` (the twin), `all64` (`_STRASSEN_MIN_BLOCK = 64`, depth 4 everywhere).
+
+**Predictions, recorded before the cost runs.** wide64: FLOPs +3 to +5%, ops
+−1,000 to −2,000. all64: FLOPs +12 to +15%, ops −3,000 to −4,000. Accuracy of
+both within ±0.5% raw of v55 (Strassen depth is a rounding-order change). On the
+refit wall model, only all64 is cleanly classable (leaf 64, age 5: 101 ps/FLOP
+inferred) and should project a noisy worst ≤ 80 s; wide64's real rate has to be
+read from a canary.
+
 ## D5 — PLAN's premise is BACKWARDS: the old tier is under-funded (2026-09-22)
 
 PLAN D5 calls the old tier "the cost bet" and proposes cheapening it — H1

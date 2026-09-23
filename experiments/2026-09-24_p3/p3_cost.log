@@ -1,0 +1,6 @@
+[variants] v55: estimator_k3_v55_p2r4.py
+   F/B 0.216184811772564  ops 23645.0  wall 65.32353779999539  err ''
+[variants] p3r16: estimator_k3_v55_p2r4__p3r16.py
+   F/B 0.23051197218273956  ops 25950.0  wall 78.07685429998673  err ''
+[variants] p3r8: estimator_k3_v55_p2r4__p3r8.py
+   F/B 0.22406225445638484  ops 25329.0  wall 91.13234790001297  err ''
