@@ -85,6 +85,31 @@ All four are implemented in `tools/ev.py`; change them there and here together.
   PLAN D7's 95 s finals bound, so a candidate could look final-ready and not be.
   Refit again when a sixth row grades.
 
+- **WALL MODEL WARNING (2026-09-23, five v50/v55 graded runs).** Two effects
+  the FLOPs+ops model does not capture, both measured today:
+
+  | run | median | p90 | worst | nets >100 s |
+  |---|---:|---:|---:|---:|
+  | v50 #331863 (Sep 22) | 84.4 | 87.0 | 88.7 | 0 |
+  | v50 #331939 (Sep 23 03:00 UTC) | 85.0 | 86.7 | 87.7 | 0 |
+  | v50 #331989 (Sep 23 ~08:00 UTC) | 87.0 | 100.8 | **104.1** | 15 |
+  | v55 #331967 | 92.8 | 104.4 | **114.5** | 27 |
+  | v55 #331980 | 92.5 | 105.6 | **113.8** | 15 |
+
+  1. **Server state drifts.** Identical v50 bytes grew a ~16 s tail within one
+     day. A "worst of 100" from one run is a sample, not a property.
+  2. **Age-5 chains are ~5–8 s slower at the median than the model says.** v55
+     does about the same work as v50 (FLOPs +0.4%, ops −2,083) yet its median is
+     ~5.5 s above v50's under the same server state, and equals v53's (92.7 s).
+     The age-5 old tier costs wall that neither FLOPs nor op calls meter —
+     probably memory traffic (VmPeak 6.5 vs 5.8 GB). The model projected v55 at
+     91.3 s worst; its median alone is 92.5 s.
+
+  Until refit with a memory/age term: **treat an age-5 chain's projected wall as
+  ≥ v53's graded worst (96.5 s) on a quiet server, and ≥ 114 s on a noisy one.**
+  For the private re-run, v50 (worst 104 s even on today's noisy server) keeps
+  more margin to the 120 s cliff than v55 (114 s).
+
 - **ops → server residual**: use **11.09 µs/op**, the worst of three graded
   anchors, because the cliff FAILS the MLP outright and over-projecting is free:
 
@@ -120,6 +145,8 @@ All four are implemented in `tools/ev.py`; change them there and here together.
 | 2026-09-23 | `estimator_k3_v50_safe.py` | `f9cb9439` | GRADED | 2.876e-08 | 0.21529 | 25,728 | **87.663 s** | — | — | **6.192e-09** | identical to #331863 | — | **sub #331939, identical bytes rerun (HANDOFF 09-22 Bank). 100/100, 0 failed.** Same score to every digit (the chain is deterministic). Worst wall 87.663 s vs 88.747 s first run (−1.2%); worst residual 0.26291 s vs 0.26550 s. Run-to-run wall spread on identical bytes ≈1.1 s — inside the wall model's ±4.1 s band. v50 stays the safe designate-B candidate. |
 | 2026-09-23 | `estimator_k3_v55_p2r4.py` | `aac641b4` | DEV | 2.569027e-08 | 0.21618 | 23,645 | 54.385 s (local) → 91.3 s proj | VmPeak 6,470.5 MB (WSL gate PASS, 23/23) | **5.3300e-09** | PENDING | 1.0470× vs v53 (Δ +2.610e-10, t95 [+2.432e-10, +2.788e-10]) | 100/100 | **v55 = v53 + `_P2_RANK` 32→4** (elasticity table). Raw +0.94% vs v53, cost −5.38%, ops −1,495. All seven §5 gates pass; projected wall 91.3 s is under D7's 95 s bound (v53: 96.7 s). An earlier run of this row was INVALID — 5 MemoryError nets while the box was loaded (`v55_ev_INVALID_memoryerror.log`); rerun clean, 0 failed. Package `experiments/2026-09-23_v55_canary/v55-canary.tar.gz`. |
 | 2026-09-23 | `estimator_k3_v55_p2r4.py` | `aac641b4` | GRADED | 2.461e-08 | 0.21618 | 23,645 | **114.487 s** (median 92.8) | — | 5.330e-09 | **5.3200e-09** | 1.0452× vs v53 (graded/graded) | — | **sub #331967, THE NEW BEST. 100/100, 0 failed.** Graded 0.19% better than projected (DEV/graded factor 1.0439). Residual worst 0.28054 s (1.43× headroom). Multiplier matched the twin (FLOPs Δ −491). **WALL ANOMALY: worst 114.487 s, 27 nets > 100 s**, against a 91.3 s projection. v55 does ~5% less work than v53 yet its median (92.8 s) equals v53's (92.7 s), and the slow nets cluster late in the run (index-decile medians 92–95 s for the first 80, 100.8 / 99.6 s for the last 20). v50 — slightly MORE work — graded 85 s median twice. Reads as server-side slowdown, not the candidate; **not designable until an identical-bytes rerun shows a normal wall.** |
+| 2026-09-23 | `estimator_k3_v55_p2r4.py` | `aac641b4` | GRADED | 2.461e-08 | 0.21618 | 23,645 | **113.807 s** (median 92.5) | — | 5.330e-09 | **5.3200e-09** | identical to #331967 | — | **sub #331980, identical-bytes rerun of v55. 100/100, 0 failed.** Same score to every digit. Worst wall 113.807 s again, 15 nets > 100 s; per-net wall correlation with #331967 is 0.03 — the slow nets are random, not net-specific. Worst residual 0.27087 s. |
+| 2026-09-23 | `estimator_k3_v50_safe.py` | `f9cb9439` | GRADED | 2.876e-08 | 0.21529 | 25,728 | **104.1 s** (median 87.0) | — | — | 6.192e-09 | identical to #331863/#331939 | — | **sub #331989, v50 identical bytes as a SERVER-STATE CONTROL for v55's wall.** 0 failed. The same bytes that graded worst 87.7 s at 03:00 UTC now grade worst 104.1 s with 15 nets > 100 s: **the server got noisier today (+~16 s tail).** See the wall note under Calibration. |
 
 <!-- ev.py --append inserts new rows directly above this marker. Keep it here. -->
 
