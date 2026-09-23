@@ -419,6 +419,76 @@ logic rather than a constant: the last layer already prunes to
 has to produce the full state that L−1 consumes, so pruning backwards trades
 accuracy for cost rather than removing waste outright. Not attempted yet.
 
+## Single-leg kill tests T0–T3 (HANDOFF 2026-09-22, started 2026-09-23 UTC)
+
+Probe file `estimator_k3_p60_probe.py` = v53 verbatim plus knobs `_D21_AGE`
+(T1), `_LBLOCK_AGE` (T2), `_RHO` (T3), and two diagnostics (`_KEEP_AGE`: drop
+old lineages from both readouts; `_LB_PART`: which part of the L-block T2
+drops). Runner `tools/probe.py`: every arm on every net in one persistent cupy
+process, so arms are paired by construction. **Probe arms are accuracy-only and
+run on cupy** (panel-mean agreement with numpy 3.2e-05); nothing here is a §5
+row. Age = `l-1-b` for lineage `b` at layer `l`; the newborn is age 0.
+
+Parity, 2 DEV nets: the probe at v53's settings reproduces v53 to every digit
+(2.521407e-08 both); `_LBLOCK_AGE=99`, `_D21_AGE=99` and `_RHO=0` reproduce
+their bases exactly.
+
+**Predictions, recorded before the 100-net run.** Strategist: T1 ≤8% raw loss
+at a=3; T2 10–40% at a=1 ("I don't know"). Mine, and **made after** a 2-net
+smoke test that already showed T2 a=1 at +5,700% and T1 a=3 at +1,500%: T2 a=1
+loses >40× raw on DEV 100; T1 a=3 >10×; no a ∈ {0..3} of either gate comes
+within 40% of T0; the loss falls roughly geometrically with a (a=10 ≈ +30%).
+Diagnostic prediction: the pure two-leg block (`w2b`) carries most of T2's loss,
+the rank-32 `Z` residual little.
+
+### T0–T2 on DEV 100 — the single-leg hypothesis is falsified (2026-09-23)
+
+`experiments/2026-09-23_single_leg/t0t2_dev100.json` (per-net MSE, every arm),
+cupy, 100/100 nets, all arms paired against T0 on the same nets.
+
+| arm | what is removed for lineages older than `a` | raw MSE | × T0 | ±95% | wins/100 |
+|---|---|---:|---:|---:|---:|
+| **T0** | nothing: unshared exact chain (`_SHARED_ON=False`) | **2.3642e-08** | 1 | — | — |
+| v53 settings | old tier compressed at age 5, rank 256 | 2.5451e-08 | 1.077 | ±0.008 | 1 |
+| T1 a=2 | old lineages' (2,1) slice | 6.356e-07 | 26.9 | ±0.8 | 0 |
+| T1 a=3 | ″ | 3.675e-07 | 15.5 | ±0.4 | 0 |
+| T1 a=4 | ″ | 2.092e-07 | 8.85 | ±0.24 | 0 |
+| T2 a=0 | L-block (`A_L`, `eb`, `Z`) → `A_D = M d(sb)` | 1.737e-06 | 73.5 | ±2.5 | 0 |
+| **T2 a=1** | ″ (the decisive arm) | **1.138e-06** | **48.1** | ±1.6 | 0 |
+| T2 a=2 | ″ | 7.561e-07 | 32.0 | ±0.9 | 0 |
+| T2 a=3 | ″ | 5.002e-07 | 21.2 | ±0.6 | 0 |
+| T2 a=6 | ″ | 1.363e-07 | 5.77 | ±0.15 | 0 |
+| T2 a=10 | ″ | 3.017e-08 | 1.276 | ±0.015 | 0 |
+| T1 a=3 ∩ T2 a=1 | both | 1.259e-06 | 53.3 | ±1.7 | 0 |
+| diag: K a=1 | the whole lineage, from both readouts | 1.623e-06 | 68.6 | ±2.3 | 0 |
+| diag: K a=5 | ″ | 3.122e-07 | 13.2 | ±0.3 | 0 |
+| diag: T2 a=1, two-leg only | `w2b` (the `A_L ⊗ 3M ⊗ C_L` block) | 3.304e-07 | 14.0 | ±0.4 | 0 |
+| diag: T2 a=1, `Z` only | the rank-32 born-(2,1) residual | 1.516e-07 | 6.41 | ±0.21 | 0 |
+
+**Reading.** Every prediction the strategist wrote is wrong by one to two orders
+of magnitude (T1 a=3: predicted ≤8%, measured +1,454%; T2 a=1: predicted 10–40%,
+measured +4,714%). My post-smoke prediction (>40× at a=1, geometric decay, a=10
+≈ +30%) held. Four facts:
+
+1. **The old D-block alone is nearly worthless.** Keeping `M d(sb)` for old
+   sources (T2 a=1, 48×) is barely better than dropping them outright (K a=1,
+   69×). The single-leg object the design rests on does not carry the accuracy.
+2. **Every part of the L-block matters on its own**: the pure correlation-born
+   two-leg block 14×, even the rank-32 `Z` residual 6.4×. None is cheap to drop.
+3. **Old (2,1) content matters as much as old (3,) content** (T1 a=3 15.5×).
+   Leaving D21 at age ≤3 is not the 60%-of-cost free saving §1 of the response
+   assumed.
+4. **It is consistent with a number we already had.** v53's own docstring and
+   `experiments/submissions.jsonl` record the fully memoryless (regenerating) κ3
+   flow, #329896: graded 8.50e-08 at the 0.1 floor, i.e. **raw ≈ 8.5e-07 ≈ 36×
+   the exact tower**. "Regenerate the correlation-born κ3 memoryless" was in
+   effect measured in September. v53's shared basis, by contrast, costs only
+   +7.7%: the old content can be *compressed* cheaply but cannot be *dropped or
+   reduced to its diagonal*.
+
+T3 (fitted regeneration ρ on top of T2 a=1) is running; it has to recover
+~98% of a 48× loss to pass its gate.
+
 ## D5 — PLAN's premise is BACKWARDS: the old tier is under-funded (2026-09-22)
 
 PLAN D5 calls the old tier "the cost bet" and proposes cheapening it — H1

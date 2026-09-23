@@ -1,0 +1,10 @@
+{"base": {},
+ "nohub": {"_HUB_ROUTES": []},
+ "clos_last": {"_CLOSURE_SCOPE": "last"},
+ "clos_none": {"_CLOSURE_SCOPE": null},
+ "p2r16": {"_P2_RANK": 16},
+ "p2r8": {"_P2_RANK": 8},
+ "age4": {"_SHARED_AGE": 4},
+ "age6": {"_SHARED_AGE": 6},
+ "rank224": {"_SHARED_RANK": 224},
+ "s6": {"_STRASSEN_DEPTH": 6}}

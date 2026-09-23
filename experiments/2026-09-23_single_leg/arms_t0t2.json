@@ -1,0 +1,9 @@
+{"T0": {},
+ "v53s": {"_SHARED_ON": true, "_SHARED_AGE": 5},
+ "T1a2": {"_D21_AGE": 2}, "T1a3": {"_D21_AGE": 3}, "T1a4": {"_D21_AGE": 4},
+ "T2a0": {"_LBLOCK_AGE": 0}, "T2a1": {"_LBLOCK_AGE": 1}, "T2a2": {"_LBLOCK_AGE": 2}, "T2a3": {"_LBLOCK_AGE": 3},
+ "T2a6": {"_LBLOCK_AGE": 6}, "T2a10": {"_LBLOCK_AGE": 10},
+ "T1a3_T2a1": {"_D21_AGE": 3, "_LBLOCK_AGE": 1},
+ "K1": {"_KEEP_AGE": 1}, "K5": {"_KEEP_AGE": 5},
+ "T2a1_twoleg": {"_LBLOCK_AGE": 1, "_LB_PART": "twoleg"},
+ "T2a1_z": {"_LBLOCK_AGE": 1, "_LB_PART": "z"}}
