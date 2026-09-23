@@ -1,0 +1,20 @@
+{
+ "d6_leaf16": {
+  "flops": 484094134505.0,
+  "multiplier": 0.2201405252458244,
+  "ops": 26773.0,
+  "materializations": 0,
+  "wall_s": 401.43946260004304,
+  "peak_rss_mib": 3664.9,
+  "error": ""
+ },
+ "d6_wide_only": {
+  "flops": 488300005865.0,
+  "multiplier": 0.22205313410495364,
+  "ops": 23783.0,
+  "materializations": 0,
+  "wall_s": 69.9298364999704,
+  "peak_rss_mib": 3664.0,
+  "error": ""
+ }
+}

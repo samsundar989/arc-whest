@@ -785,6 +785,14 @@ at most ~1% of the late-layer covariance. Strategist: 0–5% [?].
 below my predicted floor. Closed as a lever**; kept as a free bundle component
 (~0.1% FLOPs). The Gaussian closure's truncation was not where the error is.
 
+## Strassen depth 6 (leaf 16) — dearer, closed (2026-09-23)
+
+v56c with `_STRASSEN_DEPTH = 6, _STRASSEN_MIN_BLOCK = 16`: F/B **0.22014**,
+26,773 ops (v55: 0.21618, 23,645). Transports only at leaf 16: 0.22205. At
+16-wide leaves the Winograd glue outruns the multiply saving, so leaf 32 is the
+FLOP minimum in our spelling — and leaf 16 would also be the slowest kernel.
+`experiments/2026-09-24_depth6/cost.json`.
+
 ## Step 2 (HANDOFF 09-23) — wall-safe twin (started 2026-09-23)
 
 `estimator_k3_v56b_wallsafe.py` = v55 + `_STRASSEN_WIDE_MIN_BLOCK = 64`: the two
