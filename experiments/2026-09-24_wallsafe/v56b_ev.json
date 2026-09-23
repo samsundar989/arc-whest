@@ -1,0 +1,243 @@
+{
+ "date": "2026-09-23",
+ "file": "estimator_k3_v56b_wallsafe.py",
+ "sha8": "b401ad75",
+ "panel": "dev",
+ "n": 100,
+ "raw_mse": 2.5692186724768363e-08,
+ "flops": 510024394985.0,
+ "multiplier": 0.23193224250690037,
+ "ops": 19804.0,
+ "materializations": 0.0,
+ "setup_s": 0.001,
+ "worst_wall_local_s": 90.54860750003718,
+ "projected_server_wall_s": 62.09703402762667,
+ "projected_server_wall_noisy_s": 72.9860873879214,
+ "peak_rss_mib": 3018.3,
+ "adjusted_score_dev": 5.958846481981543e-09,
+ "projected_public": 5.718662650654072e-09,
+ "failed_nets": [],
+ "baseline_name": "estimator_k3_v55_p2r4",
+ "paired": {
+  "n": 100,
+  "mean_difference": -4.050004665688711e-10,
+  "relative_improvement": -0.07292252349902036,
+  "arithmetic_gain": 0.9320337471701077,
+  "t95_lo": -4.1589735963763793e-10,
+  "t95_hi": -3.941035735001042e-10,
+  "wins": 0,
+  "geometric_gain_diagnostic": 0.9320319482758518
+ },
+ "memory": {
+  "artifact": "linux_memory_gate",
+  "artifact_version": 5,
+  "candidate": "estimator_k3_v56b_wallsafe.py",
+  "candidate_sha256": "b401ad7539c4da488f7ea860af4a829ce0756126e4923fe95a8c55b9892ff4bf",
+  "instrument": "local_sim/linux_memory_gate.py",
+  "instrument_sha256": "463b8560aa5be78bd18270a3507b80edb552ee8b1b7929d4089f7624a7261e8f",
+  "instrument_policy": "current-source-sha256",
+  "limit_mb": 8192,
+  "width": 1024,
+  "depth": 16,
+  "budget": 2199023255552,
+  "seed": 90000000101,
+  "suite_n_mlps": 100,
+  "weights_mode": "f64_readonly",
+  "repeats": 3,
+  "host_platform": "win32",
+  "generated_utc": "2026-09-23T19:40:41Z",
+  "linux_kind": "wsl",
+  "linux_note": "WSL2 Ubuntu, official stack in $HOME/.arcwhest-linux",
+  "negative_control": {
+   "limit_mb": 8192,
+   "request_gib": 9.0,
+   "cap_applied": true,
+   "allocated": false,
+   "survived": false,
+   "error": "MemoryError: "
+  },
+  "positive_control": {
+   "limit_mb": 0,
+   "request_gib": 9.0,
+   "cap_applied": false,
+   "allocated": true,
+   "survived": true
+  },
+  "lifecycle_controls": {
+   "growth_threshold_bytes": 67108864,
+   "stateless": {
+    "completed": true,
+    "retain": false,
+    "allocation_mib": 96,
+    "repeats": 3,
+    "rows": [
+     {
+      "i": 0,
+      "vm_size_settled_bytes": 16072704
+     },
+     {
+      "i": 1,
+      "vm_size_settled_bytes": 16072704
+     },
+     {
+      "i": 2,
+      "vm_size_settled_bytes": 16072704
+     }
+    ],
+    "growth_bytes": 0,
+    "error": "",
+    "cap_applied": true
+   },
+   "retaining": {
+    "completed": true,
+    "retain": true,
+    "allocation_mib": 96,
+    "repeats": 3,
+    "rows": [
+     {
+      "i": 0,
+      "vm_size_settled_bytes": 116740096
+     },
+     {
+      "i": 1,
+      "vm_size_settled_bytes": 217407488
+     },
+     {
+      "i": 2,
+      "vm_size_settled_bytes": 318074880
+     }
+    ],
+    "growth_bytes": 201334784,
+    "error": "",
+    "cap_applied": true
+   }
+  },
+  "candidate_run": {
+   "stage": "done",
+   "limit_mb": 8192,
+   "setrlimit_raised": null,
+   "soft_limit_bytes": 8589934592,
+   "hard_limit_bytes": 8589934592,
+   "cap_requested_bytes": 8589934592,
+   "cap_applied": true,
+   "whestbench_file": "/home/samsu/.arcwhest-linux/lib/python3.12/site-packages/whestbench/__init__.py",
+   "flopscope_file": "/home/samsu/.arcwhest-linux/lib/python3.12/site-packages/flopscope/__init__.py",
+   "numpy_version": "2.4.6",
+   "whestbench_version": "0.16.1",
+   "flopscope_version": "0.12.1",
+   "stack_version_source": "importlib.metadata.version",
+   "python_version": "3.12.3",
+   "weights_mode": "f64_readonly",
+   "repeats": 3,
+   "suite_n_mlps": 100,
+   "weight_dtype": "float64",
+   "weight_writeable": false,
+   "setup_raised": null,
+   "setup_s": 0.12398148700000178,
+   "predict_s": 256.68584986400003,
+   "predict_error": "",
+   "shape": [
+    16,
+    1024
+   ],
+   "finite": true,
+   "dtype": "float32",
+   "largest_array_bytes": 65536,
+   "repeat_runs": [
+    {
+     "i": 0,
+     "vm_peak_bytes": 5143527424,
+     "vm_size_settled_bytes": 2153603072,
+     "flops_used": 510024394985.0,
+     "error": ""
+    },
+    {
+     "i": 1,
+     "vm_peak_bytes": 5143527424,
+     "vm_size_settled_bytes": 2164088832,
+     "flops_used": 510024394985.0,
+     "error": ""
+    },
+    {
+     "i": 2,
+     "vm_peak_bytes": 5145972736,
+     "vm_size_settled_bytes": 2175623168,
+     "flops_used": 510024394985.0,
+     "error": ""
+    }
+   ],
+   "repeat_error": "",
+   "repeat_vm_size_growth_bytes": 22020096,
+   "repeat_flops_identical": true,
+   "repeat_flops_observed": [
+    510024394985.0,
+    510024394985.0,
+    510024394985.0
+   ],
+   "flops_used": 510024394985.0,
+   "residual_wall_time_s": 1.5515835810005854,
+   "wall_time_s": 256.685797154,
+   "multiplier": 0.23193224250690037,
+   "peak_rss_bytes": 3189813248,
+   "vm_peak_bytes": 5145972736,
+   "vm_hwm_bytes": 3189813248,
+   "ok": true
+  },
+  "child_stderr": {
+   "negative": "",
+   "positive": "",
+   "lifecycle_stateless": "",
+   "lifecycle_retaining": "",
+   "candidate": ""
+  },
+  "child_stderr_tail": "",
+  "stack": {
+   "whestbench": "0.16.1",
+   "flopscope": "0.12.1",
+   "numpy": "2.4.6",
+   "python": "3.12.3",
+   "source": "importlib.metadata.version"
+  },
+  "status": "PASS",
+  "checks_total": 23,
+  "checks_failed": []
+ },
+ "accuracy_meta": {
+  "sha256": "b401ad7539c4da488f7ea860af4a829ce0756126e4923fe95a8c55b9892ff4bf",
+  "panel": "dev",
+  "n": 100,
+  "workers": 2,
+  "blas_threads_each": 2,
+  "wall_s": 4595.2,
+  "per_net_s": 45.95,
+  "worker_peak_rss_mib": 6544.0,
+  "failed_nets": [],
+  "built_utc": "2026-09-23T19:35:55Z",
+  "cached": false
+ },
+ "cost_meta": {
+  "net": "logan-fitzgerald",
+  "panel": "dev",
+  "split": "mini",
+  "index": 0,
+  "flops": 510024394985.0,
+  "multiplier": 0.23193224250690037,
+  "ops": 19804.0,
+  "materializations": 0,
+  "materialization_detail": {
+   "__bool__": 0,
+   "__float__": 0,
+   "__int__": 0,
+   "__index__": 0
+  },
+  "wall_s": 90.54860750003718,
+  "residual_local_s": 6.4640473068575375,
+  "setup_s": 0.001,
+  "setup_error": "",
+  "peak_rss_mib": 3018.3,
+  "weights_mode": "f64_readonly",
+  "error": ""
+ },
+ "ev_wall_s": 5643.1,
+ "note": "v56b wall-safe twin = v55 at Strassen depth 4 (min leaf 64). Designate-B candidate; fails the 3% score gate by design."
+}

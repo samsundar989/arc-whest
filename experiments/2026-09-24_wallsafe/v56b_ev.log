@@ -2,3 +2,29 @@
 [ev] cost: 510,024,394,985 FLOPs, 19,804 ops, peak RSS 2.95 GiB -> budget 7.4 GiB/worker
   [mem] 23.0 GiB free, 7.4 GiB per worker -> 2 workers, not 4
   2 workers x 2 BLAS threads over 100 nets ...
+[ev] accuracy: 4595.2 s, raw MSE 2.569219e-08
+
+  raw MSE            2.569219e-08   (label noise floor ~9e-11)
+  FLOPs / MLP        510,024,394,985   = 0.23193 x 2^41
+  op calls           19,804
+  materializations   0
+  adjusted (panel)   5.958846e-09
+  PROJECTED PUBLIC   5.718663e-09   (÷ 1.042)
+  paired vs estimator_k3_v55_p2r4:  gain 0.9320×, Δ -4.0500e-10, t95 [-4.1590e-10, -3.9410e-10], wins 0/100
+    (geometric 0.9320× — diagnostic only, no authority over an outcome)
+
+  PLAN §5 gates
+    FAIL  DEV projected vs best graded     ≥3% better than 5.3200e-09         5.7187e-09 = -7.5% better
+    PASS  op calls                         ≤ 26,000                           19,804
+    PASS  projected server wall (quiet day) < 100 s                            62.1 s (noisy day 73.0 s)
+    PASS  setup                            < 2 s                              0.00 s
+    PASS  scalar materializations          0                                  0
+    PASS  failed nets on panel             0                                  0
+    PASS  projected server residual        ≤ 0.33 s (D7 finals bound)         0.220 s (1.82× headroom vs the 0.4 s cliff)
+    PASS  WSL RLIMIT_AS 8 GiB gate         PASS                               PASS VmPeak 4908 MiB
+
+  GATED — not submittable as it stands
+
+  RESULTS.md row:
+  | 2026-09-23 | `estimator_k3_v56b_wallsafe.py` | `b401ad75` | DEV | 2.569219e-08 | 0.23193 | 19,804 | 90.549 s (local) → 62.1 s proj | 3018 MiB | **5.7187e-09** | PENDING | 0.9320× vs estimator_k3_v55_p2r4 (Δ -4.050e-10, t95 [-4.159e-10, -3.941e-10]) | 0/100 | v56b wall-safe twin = v55 at Strassen depth 4 (min leaf 64). Designate-B candidate; fails the 3% score gate by design. |
+  appended to C:\Users\samsu\Documents\arc-whest\RESULTS.md
