@@ -426,7 +426,10 @@ def cost(candidate: Path, panel: str = "dev", index: int = 0) -> Dict[str, float
 # memory -- the only real 8 GiB test we have
 # --------------------------------------------------------------------------- #
 
-def memory_gate(candidate: Path, repeats: int = 2, out: Optional[Path] = None) -> Dict:
+def memory_gate(candidate: Path, repeats: int = 3, out: Optional[Path] = None) -> Dict:
+    # 3, not 2: `linux_memory_gate.py` refuses `--repeats < 3` ("must be >= 3 for
+    # lifecycle evidence"), and with 2 this silently reported UNAVAILABLE
+    # (v55, 2026-09-23). Every passing gate on record used 3.
     """WSL, `RLIMIT_AS` 8,192 MB, f64 read-only, `repeats` predictions in ONE worker.
 
     Windows has no `RLIMIT_AS`, so a local peak RSS is accounting and never a

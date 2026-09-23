@@ -1,0 +1,30 @@
+[ev] estimator_k3_v55_p2r4.py on DEV n=100
+[ev] cost: 475,395,428,585 FLOPs, 23,645 ops, peak RSS 4.43 GiB -> budget 11.1 GiB/worker
+  [mem] 26.3 GiB free, 11.1 GiB per worker -> 1 workers, not 4
+  1 workers x 2 BLAS threads over 100 nets ...
+[ev] accuracy: 7266.6 s, raw MSE 5.225815e-02
+
+  raw MSE            5.225815e-02   (label noise floor ~9e-11)
+  FLOPs / MLP        475,395,428,585   = 0.21618 x 2^41
+  op calls           23,645
+  materializations   0
+  adjusted (panel)   1.129742e-02
+  PROJECTED PUBLIC   1.084205e-02   (÷ 1.042)
+  paired vs estimator_k3_v53_age5:  gain 0.0000×, Δ -1.1297e-02, t95 [-2.1322e-02, -1.2724e-03], wins 95/100
+    (geometric 0.4376× — diagnostic only, no authority over an outcome)
+  !! 5 FAILED NETS: [{'i': 1, 'error': 'MemoryError', 'detail': 'Unable to allocate 32.0 MiB for an array with shape (1024, 8192) and data type float32'}, {'i': 2, 'error': 'MemoryError', 'detail': 'Unable to allocate 10.0 MiB for an array with shape (1, 5120, 512) and data type float32'}, {'i': 11, 'error': 'MemoryError', 'detail': 'Unable to allocate 657. MiB for an array with shape (16807, 320, 32) and data type float32'}]
+
+  PLAN §5 gates
+    FAIL  DEV projected vs best graded     ≥3% better than 5.5603e-09         1.0842e-02 = -194990468.4% better
+    PASS  op calls                         ≤ 26,000                           23,645
+    PASS  projected server wall            < 100 s                            91.3 s
+    PASS  setup                            < 2 s                              0.00 s
+    PASS  scalar materializations          0                                  0
+    FAIL  failed nets on panel             0                                  5
+    PASS  projected server residual        ≤ 0.33 s (D7 finals bound)         0.262 s (1.53× headroom vs the 0.4 s cliff)
+    FAIL  WSL RLIMIT_AS 8 GiB gate         PASS                               UNAVAILABLE VmPeak 0 MiB
+
+  GATED — not submittable as it stands
+
+  RESULTS.md row:
+  | 2026-09-23 | `estimator_k3_v55_p2r4.py` | `aac641b4` | DEV | 5.225815e-02 | 0.21618 | 23,645 | 475.125 s (local) → 91.3 s proj | 4533 MiB | **1.0842e-02** | PENDING | 0.0000× vs estimator_k3_v53_age5 (Δ -1.130e-02, t95 [-2.132e-02, -1.272e-03]) | 95/100 |  |
