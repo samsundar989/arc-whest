@@ -1,0 +1,8 @@
+{"base": {},
+ "p2r8": {"_P2_RANK": 8},
+ "p2r4": {"_P2_RANK": 4},
+ "p2r2": {"_P2_RANK": 2},
+ "p2r1": {"_P2_RANK": 1},
+ "age6_p2r8": {"_SHARED_AGE": 6, "_P2_RANK": 8},
+ "age6_p2r4": {"_SHARED_AGE": 6, "_P2_RANK": 4},
+ "age6_p2r2": {"_SHARED_AGE": 6, "_P2_RANK": 2}}

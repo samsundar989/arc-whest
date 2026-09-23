@@ -487,8 +487,53 @@ measured +4,714%). My post-smoke prediction (>40× at a=1, geometric decay, a=10
    +7.7%: the old content can be *compressed* cheaply but cannot be *dropped or
    reduced to its diagonal*.
 
-T3 (fitted regeneration ρ on top of T2 a=1) is running; it has to recover
-~98% of a 48× loss to pass its gate.
+**T3 — fitted regeneration, CLOSED.** `tools/probe_fit.py`, CMA-ES on FIT, base
+T2 a=1. The 2-parameter age-exponential form (50 evaluations, 25-net batch)
+recovered 0.59% in-sample; the free 13-entry ρ vector (155 evaluations, 10-net
+batch) recovered 2.99% in-sample and **0.09% on DEV 100** (T3 1.1370e-06 vs T2
+1.1380e-06, still 48.1× T0). Gate was "within 15% of T0". No HOLDOUT read was
+spent on a 48× arm. Fitted ρ: `experiments/2026-09-23_single_leg/t3_fit_vec16_best.json`.
+
+**Step 6 decision: the third branch.** T2 loses >40% and T3 does not bring it
+under 40%, so the single-leg chain (T5/v60) is not built. T4 (carried κ4 on M)
+was specified *on the T3 arm*; on an arm 48× worse than T0 it cannot change this
+decision and was not run. The κ4-on-M idea itself is not refuted by anything
+here and could be tested on the v53 chain's exact tier later.
+
+### Fallback (response §6): the elasticity table on v53 (2026-09-23)
+
+Accuracy: `tools/probe.py` on v53, DEV 100, cupy, paired vs v53
+(`experiments/2026-09-23_single_leg/elastic_dev100.json`, `p2_dev100.json`).
+Cost: `tools/variants.py --cost`, the real flopscope f64 read-only twin, one net
+(`.../elastic/cost.json`, `.../p2/cost.json`). Projected wall uses the 5-anchor
+model + 4.1 s band. Negative Δscore is better.
+
+| arm | Δraw | ±95% | wins | ΔFLOPs | ops | Δscore | proj. wall |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| v53 | — | — | — | — | 25,140 | — | 96.7 s |
+| no hubs (`_HUB_ROUTES=()`) | +5.41% | 0.59 | 4 | −0.57% | 24,312 | +4.81% | |
+| closure last layer only | +18.03% | 1.22 | 0 | −1.03% | 21,690 | +16.81% | |
+| closure off | +18.14% | 1.23 | 0 | −1.03% | 21,634 | +16.92% | |
+| shared rank 224 | +6.09% | 0.66 | 3 | −1.71% | 23,346 | +4.27% | |
+| age 4 | +18.33% | 1.26 | 0 | −5.77% | 25,728 | +11.49% | |
+| age 6 | −5.53% | 0.67 | 94 | +5.15% | 24,552 | −0.66% | |
+| P2 rank 16 | +0.40% | 0.18 | 29 | −3.00% | 24,519 | −2.61% | |
+| P2 rank 8 | +0.82% | 0.25 | 25 | −4.56% | 23,990 | −3.78% | 92.4 s |
+| **P2 rank 4** | **+0.94%** | 0.26 | 24 | **−5.38%** | **23,645** | **−4.49%** | **91.3 s** |
+| P2 rank 2 | +11.17% | 4.60 | 10 | −5.82% | 23,645 | +4.70% | |
+| P2 rank 1 | +1,175% | 39.6 | 0 | −6.04% | 23,645 | +1,098% | |
+| age 6 + P2 rank 8 | −4.69% | 0.74 | 92 | +0.59% | 23,402 | −4.13% | 92.5 s |
+| age 6 + P2 rank 4 | −4.51% | 0.75 | 91 | −0.23% | 23,057 | −4.73% | 91.4 s |
+| Strassen depth 6 | 0 | — | — | 0 | 25,140 | 0 | (no-op: `_STRASSEN_MIN_BLOCK=32` caps 1024 at depth 5) |
+
+**Reading.** Of the exact tier's components only one has score elasticity < 1:
+the **P2 residual rank**. Everything else (hubs, closure, shared rank, age) pays
+for itself. Rank 4 keeps rank 8's per-net tail (worst net +4.2% vs +3.8%);
+rank 2 is a cliff (worst net 2.3×). Re-spending the saving on age 6 buys only
+0.25% more for ~700 MiB of memory, which D7's 7 GiB bound forbids. **v55 =
+v53 + `_P2_RANK = 4`** is the fallback canary: −4.49% score, projected wall
+91.3 s (v53: 96.7 s), i.e. it also moves under D7's 95 s bound. The T0–T3
+single-leg work is closed; H1/H4-type ideas are "measured, superseded by T1–T3".
 
 ## D5 — PLAN's premise is BACKWARDS: the old tier is under-funded (2026-09-22)
 

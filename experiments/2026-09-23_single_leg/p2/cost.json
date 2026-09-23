@@ -1,0 +1,74 @@
+{
+ "base": {
+  "flops": 502430823125.0,
+  "multiplier": 0.22847908581979937,
+  "ops": 25140.0,
+  "materializations": 0,
+  "wall_s": 60.731809599965345,
+  "peak_rss_mib": 4540.3,
+  "error": ""
+ },
+ "p2r8": {
+  "flops": 479509891797.0,
+  "multiplier": 0.2180558530185408,
+  "ops": 23990.0,
+  "materializations": 0,
+  "wall_s": 61.30809639999643,
+  "peak_rss_mib": 4534.2,
+  "error": ""
+ },
+ "p2r4": {
+  "flops": 475395428585.0,
+  "multiplier": 0.216184811772564,
+  "ops": 23645.0,
+  "materializations": 0,
+  "wall_s": 134.1492534999852,
+  "peak_rss_mib": 4533.7,
+  "error": ""
+ },
+ "p2r2": {
+  "flops": 473191213461.0,
+  "multiplier": 0.2151824507841411,
+  "ops": 23645.0,
+  "materializations": 0,
+  "wall_s": 63.78488099999959,
+  "peak_rss_mib": 4534.3,
+  "error": ""
+ },
+ "p2r1": {
+  "flops": 472089473729.0,
+  "multiplier": 0.21468143755964775,
+  "ops": 23645.0,
+  "materializations": 0,
+  "wall_s": 60.00926850002725,
+  "peak_rss_mib": 4532.6,
+  "error": ""
+ },
+ "age6_p2r8": {
+  "flops": 505384819753.0,
+  "multiplier": 0.2298224079609099,
+  "ops": 23402.0,
+  "materializations": 0,
+  "wall_s": 64.25852199998917,
+  "peak_rss_mib": 5233.0,
+  "error": ""
+ },
+ "age6_p2r4": {
+  "flops": 501270356541.0,
+  "multiplier": 0.2279513667149331,
+  "ops": 23057.0,
+  "materializations": 0,
+  "wall_s": 64.90956749999896,
+  "peak_rss_mib": 5233.0,
+  "error": ""
+ },
+ "age6_p2r2": {
+  "flops": 499066141417.0,
+  "multiplier": 0.22694900572651022,
+  "ops": 23057.0,
+  "materializations": 0,
+  "wall_s": 70.6104675999959,
+  "peak_rss_mib": 5232.7,
+  "error": ""
+ }
+}
