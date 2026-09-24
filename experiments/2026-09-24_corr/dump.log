@@ -9,3 +9,120 @@ whestbench: downloading 'full' split from hf://aicrowd/arc-whestbench-public-202
 [anatomy] net 30/100 (88s) final-layer MSE 2.5144e-08
 [anatomy] net 35/100 (101s) final-layer MSE 2.7023e-08
 [anatomy] net 40/100 (110s) final-layer MSE 2.5011e-08
+[anatomy] net 45/100 (122s) final-layer MSE 2.6920e-08
+[anatomy] net 50/100 (133s) final-layer MSE 2.4201e-08
+[anatomy] net 55/100 (143s) final-layer MSE 2.5415e-08
+[anatomy] net 60/100 (152s) final-layer MSE 2.7397e-08
+[anatomy] net 65/100 (167s) final-layer MSE 2.3269e-08
+[anatomy] net 70/100 (183s) final-layer MSE 2.5182e-08
+[anatomy] net 75/100 (197s) final-layer MSE 2.6815e-08
+[anatomy] net 80/100 (211s) final-layer MSE 3.2664e-08
+[anatomy] net 85/100 (227s) final-layer MSE 2.2635e-08
+[anatomy] net 90/100 (243s) final-layer MSE 2.3308e-08
+[anatomy] net 95/100 (260s) final-layer MSE 2.5645e-08
+[anatomy] net 100/100 (276s) final-layer MSE 2.1909e-08
+[anatomy] dump -> experiments\2026-09-24_corr\train_fit100.npz  X(16, 102400, 9)
+
+[anatomy] -> experiments\2026-09-24_corr\fit100.json
+
+  layer      MSE     ratio    one-step   one/acc
+      1  6.7982e-10       -           -        -
+      2  6.6295e-10   0.975           -        -
+      3  1.0094e-09   1.523           -        -
+      4  1.7025e-09   1.687           -        -
+      5  2.6835e-09   1.576           -        -
+      6  3.9333e-09   1.466           -        -
+      7  5.4497e-09   1.386           -        -
+      8  7.1776e-09   1.317           -        -
+      9  9.0283e-09   1.258           -        -
+     10  1.1049e-08   1.224           -        -
+     11  1.3267e-08   1.201           -        -
+     12  1.5676e-08   1.182           -        -
+     13  1.8029e-08   1.150           -        -
+     14  2.0582e-08   1.142           -        -
+     15  2.2998e-08   1.117           -        -
+     16  2.5325e-08   1.101           -        -
+[anatomy] patched copy -> experiments\2026-09-24_corr\_patched_estimator_k3_v55_p2r4.py
+whestbench: downloading 'full' split from hf://aicrowd/arc-whestbench-public-2026@v2-phase2
+[anatomy] net 1/300 (15s) final-layer MSE 2.4647e-08
+[anatomy] net 5/300 (27s) final-layer MSE 2.4349e-08
+[anatomy] net 10/300 (39s) final-layer MSE 2.3932e-08
+[anatomy] net 15/300 (48s) final-layer MSE 2.4297e-08
+[anatomy] net 20/300 (58s) final-layer MSE 2.4022e-08
+[anatomy] net 25/300 (69s) final-layer MSE 2.1696e-08
+[anatomy] net 30/300 (79s) final-layer MSE 2.3126e-08
+[anatomy] net 35/300 (100s) final-layer MSE 2.2714e-08
+[anatomy] net 40/300 (117s) final-layer MSE 2.7666e-08
+[anatomy] net 45/300 (136s) final-layer MSE 3.2073e-08
+[anatomy] net 50/300 (152s) final-layer MSE 2.3816e-08
+[anatomy] net 55/300 (177s) final-layer MSE 2.5026e-08
+[anatomy] net 60/300 (204s) final-layer MSE 2.5706e-08
+[anatomy] net 65/300 (277s) final-layer MSE 2.0830e-08
+[anatomy] net 70/300 (346s) final-layer MSE 2.5805e-08
+[anatomy] net 75/300 (412s) final-layer MSE 2.6160e-08
+[anatomy] net 80/300 (495s) final-layer MSE 2.4423e-08
+[anatomy] net 85/300 (513s) final-layer MSE 1.8333e-08
+[anatomy] net 90/300 (534s) final-layer MSE 2.5930e-08
+[anatomy] net 95/300 (548s) final-layer MSE 2.2405e-08
+[anatomy] net 100/300 (559s) final-layer MSE 2.7235e-08
+[anatomy] net 105/300 (567s) final-layer MSE 1.9123e-08
+[anatomy] net 110/300 (577s) final-layer MSE 3.5284e-08
+[anatomy] net 115/300 (586s) final-layer MSE 2.6198e-08
+[anatomy] net 120/300 (595s) final-layer MSE 2.3157e-08
+[anatomy] net 125/300 (605s) final-layer MSE 2.9707e-08
+[anatomy] net 130/300 (614s) final-layer MSE 2.3929e-08
+[anatomy] net 135/300 (631s) final-layer MSE 2.1137e-08
+[anatomy] net 140/300 (650s) final-layer MSE 2.4972e-08
+[anatomy] net 145/300 (670s) final-layer MSE 2.8514e-08
+[anatomy] net 150/300 (688s) final-layer MSE 2.8391e-08
+[anatomy] net 155/300 (708s) final-layer MSE 2.6630e-08
+[anatomy] net 160/300 (725s) final-layer MSE 1.7742e-08
+[anatomy] net 165/300 (740s) final-layer MSE 2.4652e-08
+[anatomy] net 170/300 (753s) final-layer MSE 2.6528e-08
+[anatomy] net 175/300 (764s) final-layer MSE 2.4070e-08
+[anatomy] net 180/300 (775s) final-layer MSE 2.3438e-08
+[anatomy] net 185/300 (785s) final-layer MSE 2.6827e-08
+[anatomy] net 190/300 (794s) final-layer MSE 2.4341e-08
+[anatomy] net 195/300 (804s) final-layer MSE 2.7635e-08
+[anatomy] net 200/300 (813s) final-layer MSE 2.4000e-08
+[anatomy] net 205/300 (823s) final-layer MSE 2.4064e-08
+[anatomy] net 210/300 (833s) final-layer MSE 3.1995e-08
+[anatomy] net 215/300 (844s) final-layer MSE 2.4987e-08
+[anatomy] net 220/300 (854s) final-layer MSE 2.2819e-08
+[anatomy] net 225/300 (865s) final-layer MSE 2.4753e-08
+[anatomy] net 230/300 (875s) final-layer MSE 2.2137e-08
+[anatomy] net 235/300 (885s) final-layer MSE 2.6309e-08
+[anatomy] net 240/300 (896s) final-layer MSE 2.6314e-08
+[anatomy] net 245/300 (908s) final-layer MSE 2.1547e-08
+[anatomy] net 250/300 (918s) final-layer MSE 2.3426e-08
+[anatomy] net 255/300 (928s) final-layer MSE 2.6585e-08
+[anatomy] net 260/300 (939s) final-layer MSE 3.0776e-08
+[anatomy] net 265/300 (949s) final-layer MSE 2.5278e-08
+[anatomy] net 270/300 (959s) final-layer MSE 2.4760e-08
+[anatomy] net 275/300 (970s) final-layer MSE 2.4890e-08
+[anatomy] net 280/300 (979s) final-layer MSE 2.9604e-08
+[anatomy] net 285/300 (987s) final-layer MSE 2.8510e-08
+[anatomy] net 290/300 (997s) final-layer MSE 2.2551e-08
+[anatomy] net 295/300 (1008s) final-layer MSE 2.1216e-08
+[anatomy] net 300/300 (1016s) final-layer MSE 3.0424e-08
+[anatomy] dump -> experiments\2026-09-24_corr\train_hold300.npz  X(16, 307200, 9)
+
+[anatomy] -> experiments\2026-09-24_corr\hold300.json
+
+  layer      MSE     ratio    one-step   one/acc
+      1  6.8107e-10       -           -        -
+      2  6.6436e-10   0.975           -        -
+      3  1.0093e-09   1.519           -        -
+      4  1.7066e-09   1.691           -        -
+      5  2.6920e-09   1.577           -        -
+      6  3.9071e-09   1.451           -        -
+      7  5.4011e-09   1.382           -        -
+      8  7.0939e-09   1.313           -        -
+      9  8.9874e-09   1.267           -        -
+     10  1.1009e-08   1.225           -        -
+     11  1.3164e-08   1.196           -        -
+     12  1.5394e-08   1.169           -        -
+     13  1.7748e-08   1.153           -        -
+     14  2.0200e-08   1.138           -        -
+     15  2.2781e-08   1.128           -        -
+     16  2.5451e-08   1.117           -        -

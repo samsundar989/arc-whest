@@ -73,6 +73,13 @@ passthrough = [
   "experiments/sprint3_robustness/robust_1200fresh.npz",
   "experiments/sprint3_robustness/robust_stress_600.npz",
   "experiments/sprint3_robustness/figure_data.npz",
+  # --- the v57 corrector's training corpus (HANDOFF 09-24 Step 2) ---------
+  # Written by `tools/anatomy.py --dump`; gitignored by `*.npz`, so a queued
+  # fit cannot see them without these two lines. 61 MB + 185 MB, read-only to
+  # the fit. Both exceed the 50 MiB auto-send limit, so a job declaring them
+  # can only be placed where they already exist (this machine) until staged.
+  "experiments/2026-09-24_corr/train_fit100.npz",     # FIT 100 nets
+  "experiments/2026-09-24_corr/train_hold300.npz",    # pinned HOLDOUT-300
   "experiments/vault/vault_v1.npz",
   "experiments/vault/mirror_preds.npz",
   "experiments/vault/sacrificial_preds.npz",
