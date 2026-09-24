@@ -142,11 +142,34 @@ def r2(y, pred):
     return float(1.0 - ((y - pred) ** 2).sum() / ss) if ss > 0 else float("nan")
 
 
+class _Enough(Exception):
+    """Raised by the hook once layer `l` has been recorded, to stop the chain.
+
+    Fitting corrector `l` needs layers 0..l-1 to have RUN (with their frozen
+    correctors active) and layer l's features; layers l+1..15 are pure waste.
+    Aborting there turns the total from 16 full passes into sum(l) = 136
+    layer-passes, i.e. 53% of the work -- which on 400 nets is the difference
+    between ~13 h and ~7 h.
+
+    This is not a swallowed error: it is a private sentinel raised and caught by
+    this fitting harness, in a process that ships nothing. The estimator's own
+    rule against broad handlers concerns `predict` on the grader, where a crash
+    must surface as a FAILED MLP; nothing here runs there.
+    """
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--candidate", default="estimator_k3_v57_corr.py")
-    ap.add_argument("--panel", default="fit")
-    ap.add_argument("--n", type=int, default=100)
+    ap.add_argument("--panel", default="fit",
+                    help="one panel, or a comma list of panel:count specs, e.g. "
+                         "'fit:100,holdout:300'. The MLP is measurably "
+                         "data-limited (hidden 64 is worse than 32 at 100 nets), "
+                         "so the training corpus is worth widening; HOLDOUT-300 "
+                         "is the slice data/panels/holdout_train_split.json pins "
+                         "for exactly this, leaving HOLDOUT-600 untouched.")
+    ap.add_argument("--n", type=int, default=100,
+                    help="ignored when --panel carries explicit counts")
     ap.add_argument("--hidden", type=int, default=32)
     ap.add_argument("--steps", type=int, default=2500)
     ap.add_argument("--lr", type=float, default=3e-3)
@@ -173,7 +196,23 @@ def main(argv=None) -> int:
     spec.loader.exec_module(mod)
     fnp = sys.modules["flopscope.numpy"] if "flopscope.numpy" in sys.modules else None
 
-    rows = panels.nets(a.panel)[: a.n]
+    if ":" in a.panel:
+        rows, spec = [], []
+        for part in a.panel.split(","):
+            name, cnt = part.split(":")
+            take = panels.nets(name.strip())[: int(cnt)]
+            if name.strip() == "holdout":
+                # HOLDOUT-600 is never fitted. The pinned training slice is the
+                # FIRST 300 of the holdout order; anything past that is the
+                # untouched panel and must not be trained on.
+                if int(cnt) > 300:
+                    raise SystemExit("refusing to train on more than the pinned "
+                                     "HOLDOUT-300 (see holdout_train_split.json)")
+            rows.extend(take)
+            spec.append(f"{name.strip()}:{len(take)}")
+        print(f"[seq] training corpus = {' + '.join(spec)} = {len(rows)} nets")
+    else:
+        rows = panels.nets(a.panel)[: a.n]
 
     # DO NOT pre-load the panel onto the device. One net's weights are
     # 16 x 1024 x 1024 float64 = 134 MB, so caching 100 of them is 13.4 GB of
@@ -240,13 +279,18 @@ def main(argv=None) -> int:
                                  dtype=np.float64))
             ys.append(np.asarray(xp.asnumpy(mu_out) if xp is not None else mu_out,
                                  dtype=np.float64))
+            # Everything past this layer is waste for THIS fit -- see _Enough.
+            raise _Enough
 
         mod._CORR_HOOK = hook
         for i in range(len(rows)):
             wf, wdt, dp, seed, truth = load(i)
             est.setup(_Ctx(wdt, dp, BUDGET, 0))
             before = len(Xs)
-            est.predict(_MLP(wf, wdt, dp, seed), BUDGET)
+            try:
+                est.predict(_MLP(wf, wdt, dp, seed), BUDGET)
+            except _Enough:
+                pass
             if len(Xs) == before:
                 raise SystemExit(f"layer {l}: hook never fired on net {i}")
             # target = label - the CHAIN's uncorrected mu_out at this layer
