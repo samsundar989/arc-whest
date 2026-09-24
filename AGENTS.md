@@ -81,7 +81,14 @@ What binds now:
 
 - **Counted compares to counted; effective compares to effective**, always paired on
   common random numbers. Never quote a bare ratio of means.
-- **Every MSE is quoted with its ground-truth noise floor** (organizer labels: ≈9e-11).
+- **Every MSE is quoted with its ground-truth noise floor** (organizer labels:
+  **≈6.8e-10**, measured 2026-09-24 — *not* the ≈9e-11 this line carried until
+  then, which was too low by 7.6×). Layer 1 is the one row our chain does not
+  compute: it is the exact closed form `‖W[:,j]‖/√(2π)` in float64, so its MSE
+  **is** the labels' own Monte-Carlo noise, and it reads 6.8815e-10 against an
+  analytic `Var(ReLU)/1e9 = 6.817e-10`. Evidence and the full derivation:
+  `RESULTS.md` § "Step 1 (HANDOFF 09-24)" 1a. At raw 2.46e-8 the floor is 2.8%
+  of our MSE and 4.2% of the leader's, so it binds nobody — but quote it right.
 - **Phase 2 sets λ = 0, so `C = F`.** Residual is not a cost — it is a 0.4 s per-MLP
   cliff that FAILS the MLP. Project it from **op calls** at 10.8–11.2 µs/op; the local
   in-process `residual_wall_time_s` is an instrument artefact and must never be quoted.

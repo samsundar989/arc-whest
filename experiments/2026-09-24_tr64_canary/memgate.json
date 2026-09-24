@@ -1,0 +1,117 @@
+{
+  "artifact": "linux_memory_gate",
+  "artifact_version": 5,
+  "candidate": "experiments/2026-09-24_tr64_canary/release/estimator.py",
+  "candidate_sha256": "52d83de71ee85e6c3b7381ead48067b0797f33bfe51b1b250a078f79d5f6181c",
+  "instrument": "local_sim/linux_memory_gate.py",
+  "instrument_sha256": "463b8560aa5be78bd18270a3507b80edb552ee8b1b7929d4089f7624a7261e8f",
+  "instrument_policy": "current-source-sha256",
+  "limit_mb": 8192,
+  "width": 1024,
+  "depth": 16,
+  "budget": 2199023255552,
+  "seed": 90000000101,
+  "suite_n_mlps": 100,
+  "weights_mode": "f64_readonly",
+  "repeats": 3,
+  "host_platform": "linux",
+  "generated_utc": "2026-09-23T23:22:10Z",
+  "linux_kind": "native",
+  "linux_note": "native Linux; RLIMIT_AS present in this interpreter",
+  "negative_control": {
+    "limit_mb": 8192,
+    "request_gib": 9.0,
+    "cap_applied": true,
+    "allocated": false,
+    "survived": false,
+    "error": "MemoryError: "
+  },
+  "positive_control": {
+    "limit_mb": 0,
+    "request_gib": 9.0,
+    "cap_applied": false,
+    "allocated": true,
+    "survived": true
+  },
+  "lifecycle_controls": {
+    "growth_threshold_bytes": 67108864,
+    "stateless": {
+      "completed": true,
+      "retain": false,
+      "allocation_mib": 96,
+      "repeats": 3,
+      "rows": [
+        {
+          "i": 0,
+          "vm_size_settled_bytes": 17268736
+        },
+        {
+          "i": 1,
+          "vm_size_settled_bytes": 17268736
+        },
+        {
+          "i": 2,
+          "vm_size_settled_bytes": 17268736
+        }
+      ],
+      "growth_bytes": 0,
+      "error": "",
+      "cap_applied": true
+    },
+    "retaining": {
+      "completed": true,
+      "retain": true,
+      "allocation_mib": 96,
+      "repeats": 3,
+      "rows": [
+        {
+          "i": 0,
+          "vm_size_settled_bytes": 117936128
+        },
+        {
+          "i": 1,
+          "vm_size_settled_bytes": 218603520
+        },
+        {
+          "i": 2,
+          "vm_size_settled_bytes": 319270912
+        }
+      ],
+      "growth_bytes": 201334784,
+      "error": "",
+      "cap_applied": true
+    }
+  },
+  "candidate_run": {},
+  "child_stderr": {
+    "negative": "",
+    "positive": "",
+    "lifecycle_stateless": "",
+    "lifecycle_retaining": "",
+    "candidate": "Traceback (most recent call last):\n  File \"<string>\", line 58, in <module>\nAttributeError: module 'flopscope' has no attribute 'SymmetryLossWarning'\n"
+  },
+  "child_stderr_tail": "Traceback (most recent call last):\n  File \"<string>\", line 58, in <module>\nAttributeError: module 'flopscope' has no attribute 'SymmetryLossWarning'\n",
+  "stack": {
+    "whestbench": "",
+    "flopscope": "",
+    "numpy": "",
+    "python": "",
+    "source": ""
+  },
+  "status": "FAIL",
+  "checks_total": 23,
+  "checks_failed": [
+    "C: the child reported",
+    "C: the candidate child wrote no stderr",
+    "C: the cap was applied to the candidate's process too",
+    "C: installed distribution metadata names both package versions",
+    "C: predict() completed under the cap",
+    "C: the output has the right shape",
+    "C: every value is finite",
+    "C: peak address space is under the cap",
+    "C: the weights were the DEPLOYMENT representation",
+    "C: repeated predictions in the SAME worker all completed",
+    "C: ...and SETTLED address space did not GROW across them",
+    "C: the single largest returned array is under 4 GiB"
+  ]
+}

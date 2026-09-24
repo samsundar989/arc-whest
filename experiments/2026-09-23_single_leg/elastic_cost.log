@@ -1,0 +1,27 @@
+[variants] base: estimator_k3_v53_age5.py
+   F/B 0.22847908581979937  ops 25140.0  wall 62.822315700002946  err ''
+[variants] nohub: estimator_k3_v53_age5__nohub.py
+   F/B 0.22718346896954245  ops 24312.0  wall 62.14081479999004  err ''
+[variants] clos_last: estimator_k3_v53_age5__clos_last.py
+   F/B 0.2261250771266532  ops 21690.0  wall 60.99761770002078  err ''
+[variants] clos_none: estimator_k3_v53_age5__clos_none.py
+   F/B 0.22612469234900345  ops 21634.0  wall 58.56363160000183  err ''
+_P2_RANK: expected exactly one single-line definition in estimator_k3_v53_age5.py
+[variants] base: estimator_k3_v53_age5.py
+_HUB_ROUTES: expected exactly one single-line definition in estimator_k3_v53_age5.py
+[variants] base: estimator_k3_v53_age5.py
+[variants] nohub: estimator_k3_v53_age5__nohub.py
+[variants] clos_last: estimator_k3_v53_age5__clos_last.py
+[variants] clos_none: estimator_k3_v53_age5__clos_none.py
+[variants] p2r16: estimator_k3_v53_age5__p2r16.py
+   F/B 0.22161646314316386  ops 24519.0  wall 79.22164559998782  err ''
+[variants] p2r8: estimator_k3_v53_age5__p2r8.py
+   F/B 0.2180558530185408  ops 23990.0  wall 60.555647899978794  err ''
+[variants] age4: estimator_k3_v53_age5__age4.py
+   F/B 0.21528504713251095  ops 25728.0  wall 56.768861199961975  err ''
+[variants] age6: estimator_k3_v53_age5__age6.py
+   F/B 0.24024564076216848  ops 24552.0  wall 64.654254699999  err ''
+[variants] rank224: estimator_k3_v53_age5__rank224.py
+   F/B 0.22456286882197674  ops 23346.0  wall 57.43208090000553  err ''
+[variants] s6: estimator_k3_v53_age5__s6.py
+   F/B 0.22847908581979937  ops 25140.0  wall 64.37538559996756  err ''

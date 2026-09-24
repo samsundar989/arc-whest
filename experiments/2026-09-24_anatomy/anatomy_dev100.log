@@ -1,0 +1,43 @@
+[anatomy] patched copy -> experiments\2026-09-24_anatomy\_patched_estimator_k3_v55_p2r4.py
+whestbench: downloading 'mini' split from hf://aicrowd/arc-whestbench-public-2026@v2-phase2
+[anatomy] net 1/100 (4s) final-layer MSE 2.4125e-08
+[anatomy] net 5/100 (15s) final-layer MSE 2.6778e-08
+[anatomy] net 10/100 (29s) final-layer MSE 3.0320e-08
+[anatomy] net 15/100 (42s) final-layer MSE 2.5164e-08
+[anatomy] net 20/100 (56s) final-layer MSE 2.0558e-08
+[anatomy] net 25/100 (69s) final-layer MSE 2.4044e-08
+[anatomy] net 30/100 (84s) final-layer MSE 2.3429e-08
+[anatomy] net 35/100 (99s) final-layer MSE 3.2844e-08
+[anatomy] net 40/100 (113s) final-layer MSE 3.0495e-08
+[anatomy] net 45/100 (135s) final-layer MSE 2.6301e-08
+[anatomy] net 50/100 (177s) final-layer MSE 2.0184e-08
+[anatomy] net 55/100 (207s) final-layer MSE 2.9244e-08
+[anatomy] net 60/100 (228s) final-layer MSE 2.7667e-08
+[anatomy] net 65/100 (248s) final-layer MSE 2.8600e-08
+[anatomy] net 70/100 (265s) final-layer MSE 2.6873e-08
+[anatomy] net 75/100 (284s) final-layer MSE 2.4606e-08
+[anatomy] net 80/100 (304s) final-layer MSE 2.1284e-08
+[anatomy] net 85/100 (324s) final-layer MSE 2.9096e-08
+[anatomy] net 90/100 (357s) final-layer MSE 2.5636e-08
+[anatomy] net 95/100 (383s) final-layer MSE 2.2132e-08
+[anatomy] net 100/100 (402s) final-layer MSE 2.6425e-08
+
+[anatomy] -> experiments\2026-09-24_anatomy\anatomy_dev100.json
+
+  layer      MSE     ratio    one-step   one/acc
+      1  6.8815e-10       -           -        -
+      2  6.6882e-10   0.972  2.5453e-10    0.381
+      3  1.0107e-09   1.511  5.6486e-10    0.559
+      4  1.7219e-09   1.704  9.8144e-10    0.570
+      5  2.7002e-09   1.568  1.3928e-09    0.516
+      6  3.8990e-09   1.444  1.8073e-09    0.464
+      7  5.4538e-09   1.399  2.3002e-09    0.422
+      8  7.0950e-09   1.301  2.7205e-09    0.383
+      9  8.9375e-09   1.260  3.1377e-09    0.351
+     10  1.0973e-08   1.228  3.4865e-09    0.318
+     11  1.3266e-08   1.209  3.8480e-09    0.290
+     12  1.5351e-08   1.157  4.0925e-09    0.267
+     13  1.7628e-08   1.148  4.3515e-09    0.247
+     14  2.0113e-08   1.141  4.7224e-09    0.235
+     15  2.2797e-08   1.133  4.9517e-09    0.217
+     16  2.5691e-08   1.127  5.2837e-09    0.206

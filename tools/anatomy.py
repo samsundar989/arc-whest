@@ -327,6 +327,9 @@ def main(argv=None) -> int:
     ap.add_argument("--no-onestep", dest="onestep", action="store_false")
     ap.add_argument("--verify", action="store_true",
                     help="prove the patch is inert, then exit")
+    ap.add_argument("--dump", default="",
+                    help="also write per-neuron features and residuals to this "
+                         ".npz, for fitting the corrector's ceiling offline")
     a = ap.parse_args(argv)
 
     import panels
@@ -427,8 +430,9 @@ def main(argv=None) -> int:
             acc_se = np.zeros(depth)
             one_se = np.zeros(depth)
             lbl_sq = np.zeros(depth)
+            dump_feats = FEATURES + (("mu_out", "dmu") if a.dump else ())
             for l in range(depth):
-                pool_feat[l] = {f: [] for f in FEATURES}
+                pool_feat[l] = {f: [] for f in dump_feats}
                 pool_acc[l] = []
                 pool_one[l] = []
 
@@ -453,6 +457,14 @@ def main(argv=None) -> int:
             pool_acc[l].append(r_acc[l].astype(np.float32))
             if a.onestep and l > 0:
                 pool_one[l].append((alt[l - 1] - truth[l]).astype(np.float32))
+        if a.dump:
+            # The two chain-state features that are not locals of `_layer`: the
+            # layer's own output mean, and its shift from the previous layer's
+            # mean level. Both come straight off the prediction array.
+            for l in range(depth):
+                pool_feat[l]["mu_out"].append(pred[l].astype(np.float32))
+                prev = pred[l - 1].mean() if l else 0.0
+                pool_feat[l]["dmu"].append((pred[l] - prev).astype(np.float32))
 
         if xp is not None:
             xp.get_default_memory_pool().free_all_blocks()
@@ -463,6 +475,28 @@ def main(argv=None) -> int:
 
     nnet, n = len(rows), width
     tot = nnet * n
+
+    if a.dump:
+        # (layer, net*neuron, feature) plus both residuals, so the corrector's
+        # ceiling can be fitted offline without re-running the chain. A net id
+        # column goes with it: a fit that splits by NET rather than by neuron is
+        # the only honest held-out split -- neurons of one net share its weights.
+        dpath = Path(a.dump)
+        if not dpath.is_absolute():
+            dpath = ROOT / dpath
+        names = list(dump_feats)
+        X = np.stack([np.stack([np.concatenate(pool_feat[l][f]) for f in names],
+                               axis=1) for l in range(depth)])
+        netid = np.repeat(np.arange(nnet, dtype=np.int32), n)
+        one = np.stack([(np.concatenate(pool_one[l]) if (a.onestep and l)
+                         else np.zeros(nnet * n, dtype=np.float32))
+                        for l in range(depth)])
+        acc = np.stack([np.concatenate(pool_acc[l]) for l in range(depth)])
+        np.savez_compressed(dpath, X=X.astype(np.float32), features=np.array(names),
+                            onestep=one.astype(np.float32),
+                            accumulated=acc.astype(np.float32), netid=netid,
+                            panel=a.panel, candidate=cand.name)
+        print(f"[anatomy] dump -> {dpath.relative_to(ROOT)}  X{X.shape}", flush=True)
 
     # ---- 1. MSE by layer and the growth ratio
     mse = acc_se / tot

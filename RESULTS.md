@@ -198,6 +198,8 @@ All four are implemented in `tools/ev.py`; change them there and here together.
 | 2026-09-23 | `estimator_k3_v56b_wallsafe.py` | `b401ad75` | DEV | 2.569219e-08 | 0.23193 | 19,804 | 90.549 s (local) → 62.1 s proj | 3018 MiB | **5.7187e-09** | PENDING | 0.9320× vs estimator_k3_v55_p2r4 (Δ -4.050e-10, t95 [-4.159e-10, -3.941e-10]) | 0/100 | v56b wall-safe twin = v55 at Strassen depth 4 (min leaf 64). Designate-B candidate; fails the 3% score gate by design. |
 
 | 2026-09-23 | `estimator_k3_v56b_wallsafe.py` | `b401ad75` | GRADED | 2.460897e-08 | 0.23193 | 19,804 | **60.7 s** (median 54.5) | 4,908 MiB | 5.7187e-09 | **5.7076e-09** | 1.0729× vs v55 (graded/graded; raw identical) | — | **sub #332063, the WALL-SAFE TWIN. 100/100, 0 failed, 0 nets > 100 s.** Graded 0.19% better than projected. Raw MSE identical to v55's graded 2.461e-08; the whole difference is the +7.28% FLOP multiplier. **Worst wall 60.7 s vs v55's 114 s**: kernel 92.8 ps/FLOP (v55: 176), confirming the leaf-size mechanism of the wall refit; the inferred age-5 penalty for 64-wide leaves does not exist (rate set to 94 in ev.py). Worst/median 1.114. Worst residual 0.2188 s (1.83× headroom). Submitted under HANDOFF 09-23 Step 2's explicit instruction, not the §5 standing approval (fails the 3% score gate by design). **Meets both A (≤105 s) and B (≤95 s) wall policies, and dominates v50 (6.192e-09, 104.1 s).** |
+| 2026-09-24 | `experiments/2026-09-24_wallsafe/mix/estimator_k3_v56c_mix__tr64.py` | `52d83de7` | GRADED | 2.569182e-08 (DEV) | 0.22081 | 22,978 | **PENDING** | VmPeak 6,468.4 MB (WSL gate PASS 23/23) | 5.4444e-09 | **PENDING** | +0.0041% raw vs v55 (rounding order) | 45/100 | **sub #332088, the A/B DESIGNATION WALL READING.** tr64 = v55 + `_STRASSEN_TRANSPORT_MIN_BLOCK = 64`: the tower transports (139.6 G, 29.4% of the chain) move to 64-wide Strassen leaves, everything else stays at leaf 32. Accuracy is v55's; the whole difference is +2.14% FLOPs bought for a projected 11 s of median wall. Submitted under HANDOFF 09-24's NEW standing A/B allowance, NOT §5 standing approval — it is 2.34% WORSE than the 5.3200e-09 best graded and fails the 3% score gate by design. Every other gate passes: validate 177 ms, validate-package OK, WSL 8 GiB 23/23 (and its FLOP count matches the f64 twin to the digit at 485,566,756,073), 22,978 ops of 26,000, residual 0.2548 s of 0.4 (1.57×), setup 0.00 s. **Wall projection, derived independently and agreeing with DESIGNATION.md:** measured leaf-32→64 FLOP inflation 7.284% ⇒ 139.6 G moved; at 176.4 / 92.5 ps/FLOP and 0.371 ms/op ⇒ median 81.6 s, quiet worst 86.1 s, **noisy worst 101.2 s**. Mixed leaves are exactly what the wall model cannot classify, which is why this reading exists. First slot of UTC day 2026-09-24. |
+| 2026-09-24 | κ4-on-M (HANDOFF 09-23 item 4c) | — | — | — | — | — | — | — | — | **NOT RUN** | — | — | **Recorded as not-run, not as a result.** The Sep 23 packet §3.4 listed 4c as "the worker's next task unless you redirect"; the Sep 24 response §5 then redirected to §3/§4 and listed κ4-on-M under "not doing … beyond the one run already in flight". **There was no run in flight** — no experiment directory, no arm file, no log exists for it. HANDOFF 09-24 Step 0 asked for it as a RESULTS row if finished, capped at 2 further hours if not; it is recorded here as never started rather than given 2 hours, because the response prices it at 0–3% and closes it, and the slice's time went to Step 1/Step 2 instead. Reopening it needs a decision, not a rerun. |
 <!-- ev.py --append inserts new rows directly above this marker. Keep it here. -->
 
 ## The evaluator (D1, 2026-09-21)
@@ -828,6 +830,313 @@ age-5 kernel rate (101 ps/FLOP = the measured 92 ps + the age-5 10%); even at
 64`; the `_STRASSEN_WIDE_MIN_BLOCK` knob is then inert). Its score is v55 ×
 1.0728, so it **fails §5's 3% score gate by design** — it is the designate-B
 candidate, and HANDOFF 09-23 Step 2 asks for one canary to read its real wall.
+
+## Step 1 (HANDOFF 09-24) — all-layer residual anatomy: the error is PROPAGATED, and it is not locally predictable (2026-09-24)
+
+`tools/anatomy.py` on v55, DEV 100, cupy, against the organizer's
+`all_layer_means` (every layer, N = 1e9). Predictions were written first
+(`experiments/2026-09-24_anatomy/PREDICTIONS.md`). The instrument patches a COPY
+of v55 at two anchored points and proves itself inert: with the hook off AND
+with hook + one-step on, the patched prediction is **bit-identical** to the
+unpatched one on 2 nets (max|diff| = 0.000e+00), so the extra mid-chain `_layer`
+call perturbs nothing. Per-net final MSEs reproduce the v55 arm of
+`experiments/2026-09-24_wallsafe/mix_dev100.json` exactly.
+
+### 1a. The label noise floor is 6.8e-10, NOT 9e-11 — AGENTS.md is wrong by 7.6x
+
+Layer 1 is the one row v55 does not compute with the chain: it is the exact
+closed form `||W[:, j]|| / sqrt(2 pi)`, evaluated in float64. Its MSE is
+therefore a **direct measurement of the organizer labels' own Monte-Carlo
+noise**, and it reads **6.8815e-10**. The analytic value for N = 1e9 samples is
+`Var(ReLU(z))/N = s^2 (1/2 - 1/(2 pi)) / 1e9 = 6.817e-10` at He init
+(`||W[:, j]||^2 -> 2`) — agreement to **1%**.
+
+AGENTS.md "Measurement" says "(organizer labels: ~9e-11)". That is too low by
+**7.6x** and should be corrected there. It changes no decision we have taken —
+at raw 2.46e-8 the floor is 2.8% of our MSE and 4.2% of J2W's 1.64e-8, so nobody
+on the board is near it — but every "MSE quoted with its noise floor" from here
+on should quote 6.8e-10.
+
+### 1b. MSE by layer, and the one-step residual
+
+`one-step` = one chain step taken from the **labelled** mu_{l-1}, with this
+layer's covariance, kappa3 tower and kappa4 core left exactly as the chain has
+them. It substitutes the mean channel only, so the cumulants entering that step
+have still drifted for l-1 layers: the one-step number is an **upper bound** on
+local closure error, which is the conservative direction for the question asked.
+
+| layer | MSE | MSE_l/MSE_{l-1} | one-step MSE | one-step / accumulated |
+|---:|---:|---:|---:|---:|
+| 1 | 6.8815e-10 | — | — | — (closed form = the noise floor, 1a) |
+| 2 | 6.6882e-10 | 0.972 | 2.5453e-10 | 0.381 |
+| 3 | 1.0107e-09 | 1.511 | 5.6486e-10 | 0.559 |
+| 4 | 1.7219e-09 | 1.704 | 9.8144e-10 | 0.570 |
+| 5 | 2.7002e-09 | 1.568 | 1.3928e-09 | 0.516 |
+| 6 | 3.8990e-09 | 1.444 | 1.8073e-09 | 0.464 |
+| 7 | 5.4538e-09 | 1.399 | 2.3002e-09 | 0.422 |
+| 8 | 7.0950e-09 | 1.301 | 2.7205e-09 | 0.383 |
+| 9 | 8.9375e-09 | 1.260 | 3.1377e-09 | 0.351 |
+| 10 | 1.0973e-08 | 1.228 | 3.4865e-09 | 0.318 |
+| 11 | 1.3266e-08 | 1.209 | 3.8480e-09 | 0.290 |
+| 12 | 1.5351e-08 | 1.157 | 4.0925e-09 | 0.267 |
+| 13 | 1.7628e-08 | 1.148 | 4.3515e-09 | 0.247 |
+| 14 | 2.0113e-08 | 1.141 | 4.7224e-09 | 0.235 |
+| 15 | 2.2797e-08 | 1.133 | 4.9517e-09 | 0.217 |
+| **16** | **2.5691e-08** | **1.127** | **5.2837e-09** | **0.206** |
+
+Three readings.
+
+1. **Layers 1-2 are at the noise floor** (6.88e-10, 6.69e-10) — the chain's own
+   error there is below this instrument's resolution, and the ratio < 1 at
+   layer 2 is the floor varying slightly by layer, not an improvement. Real
+   error starts at layer 3.
+2. **The error is propagated, and increasingly so with depth.** one-step /
+   accumulated falls monotonically from 0.570 at layer 4 to **0.206** at
+   layer 16. Even taking the one-step figure at face value (it is an upper
+   bound), **79% of the final-layer error is drift carried in from earlier
+   layers, not error made at the last step.**
+3. Growth is superlinear early (1.70x at layer 4) and settles to a geometric
+   **1.13-1.23x** over layers 10-16.
+
+**Predictions scored.** Strategist: "one-step < 20% of accumulated at layer 16"
+— **0.206, just outside, i.e. right in substance.** Worker: "10-30%, at or below
+his 20% bound, near its top end" — **right, and the tighter call.** Worker on
+the growth ratio ("declining, geometric 1.15-1.35x by layers 10-16") — right in
+shape, slightly high in level (measured 1.13-1.23).
+
+### 1c. The residual does not correlate with ANY local feature — both predictions wrong
+
+Pearson correlation of the residual with each per-neuron feature, pooled over
+100 nets x 1024 neurons. Largest |corr| over layers >= 8:
+
+| feature | accumulated | one-step |
+|---|---:|---:|
+| mu_pre | 0.031 | 0.002 |
+| sigma | 0.062 | **0.097** |
+| alpha = mu_pre/sigma | 0.031 | 0.002 |
+| D3/sigma^3 | 0.034 | 0.002 |
+| D4/sigma^4 | 0.051 | 0.082 |
+| norm of W[:, i] | 0.023 | 0.022 |
+| D21 row energy/sigma^4 | 0.045 | 0.073 |
+
+**Nothing reaches 0.10.** Strategist predicted "> 0.5 with (alpha, D3/sigma^3)
+at layers >= 8": measured **0.002 and 0.002** — wrong by two orders of
+magnitude. Worker predicted 0.3-0.7 and 0.2-0.6: **also wrong, in the same
+direction, just less so.** Both were far too optimistic.
+
+The #330001 result quoted in the response §3 ("0.975 correlation with Edgeworth
+features at one step") does **not** reproduce as a per-feature correlation on
+this chain at this depth. Whatever it measured, it was not this.
+
+### 1d. The bin concentration is real but has NO consistent sign — no formula fix
+
+Share of squared error in the top-2 of 10 quantile bins (random = 0.20):
+
+| layer | kind | alpha | D3/s^3 | D4/s^4 | norm W |
+|---:|---|---:|---:|---:|---:|
+| 8 | accumulated | 0.320 | 0.318 | 0.214 | 0.214 |
+| 12 | accumulated | 0.357 | 0.355 | 0.217 | 0.217 |
+| 15 | accumulated | 0.360 | 0.362 | 0.214 | 0.216 |
+| 16 | accumulated | 0.363 | 0.364 | 0.216 | 0.212 |
+| 8 | one-step | 0.476 | 0.365 | 0.208 | 0.217 |
+| 12 | one-step | **0.576** | 0.428 | 0.217 | 0.210 |
+| 15 | one-step | **0.631** | 0.461 | 0.251 | 0.210 |
+| 16 | one-step | **0.664** | 0.478 | 0.239 | 0.216 |
+
+The handoff's trigger is ">50% of the squared error **with a consistent sign**
+at >= 3 layers". The one-step residual clears the 50% half at layers 12, 15 and
+16 on alpha — **and fails the sign half outright.** The concentration sits in
+bins 4-5, i.e. **alpha ~ 0, the ReLU kink**, where the residual is simply
+largest; the per-bin bias there is 0.1-2.4% of the per-bin RMS:
+
+    layer 16, one-step, binned by alpha
+    bin  alpha range        bias        rms     bias/rms   se_share
+      3  [-1.80, -0.88]   1.023e-05  8.547e-05     0.120      0.138
+      4  [-0.88, -0.01]  -1.288e-07  1.322e-04    -0.001      0.331
+      5  [-0.01,  0.87]   3.208e-06  1.327e-04     0.024      0.333
+      6  [ 0.87,  1.81]   1.065e-05  8.632e-05     0.123      0.141
+
+The error is **symmetric spread, not offset**. The largest signed effect
+anywhere is bias/rms = 0.12 at moderate |alpha|, and it has the SAME (positive)
+sign on both sides of zero — an even-in-alpha bias, not the odd-in-alpha
+signature a mis-scaled closure term would leave.
+
+**Decision: no formula fix is implicated; Step 1 hands over to Step 2.** Worker
+prediction 4 ("top-2 bins 25-45%, below the trigger, hands to Step 2") — right
+on the accumulated residual (32-36%) and right on the decision, though it did
+not anticipate the one-step residual crossing 50% on concentration alone.
+
+### 1e. The ceiling this puts on a per-neuron corrector
+
+Subtracting the per-bin mean is the best any function of a single feature can
+do. That ceiling, as a fraction of squared error removed:
+
+| layer | kind | alpha | D3/s^3 | D4/s^4 | norm W |
+|---:|---|---:|---:|---:|---:|
+| 8 | accumulated | 0.00211 | 0.00418 | 0.00153 | 0.00043 |
+| 16 | accumulated | 0.00129 | 0.00221 | 0.00135 | 0.00056 |
+| 15 | one-step | 0.00522 | 0.00596 | 0.00664 | 0.00107 |
+| 16 | one-step | 0.00459 | 0.00711 | 0.00513 | 0.00132 |
+
+**0.04% to 0.7%.** A perfect nonparametric corrector on the single best feature
+removes at most 0.7% of the one-step residual. Even adding the four axes as if
+they were independent reaches ~1.8%, below Step 2's 3% gate and at the edge of
+its 1% ridge kill.
+
+This bounds single features, not the ~50-feature ridge Step 2 specifies, and the
+in-loop correction compounds (a fraction rho removed from each layer's increment
+removes ~rho of the accumulated total, not rho x 0.206). So it does **not** close
+the lane by itself. It does mean the lane is priced before it is built: the
+ridge's real held-out R^2 on the full Step-2 feature set is measured directly on
+FIT 100 first (`tools/anatomy.py --dump`, then `tools/corr_ceiling.py`).
+
+
+## Step 2 priced BEFORE it is built — the corrector lane is OPEN, and it is the MLP that opens it (2026-09-24)
+
+HANDOFF 09-24 Step 2 is a two-day build (teacher-forced in-loop corrector, ridge
+and MLP, trained on FIT + 300 HOLDOUT). Its kill criteria — "ridge < 1% on DEV",
+"MLP < 3%" — are, to first order, one number: **the fraction of each layer's
+one-step residual variance a function of the per-neuron features can explain.**
+That number was measured directly first, in an hour, from
+`tools/anatomy.py --dump` on FIT 100. Nothing was fitted on DEV or on HOLDOUT.
+
+Panels: features and targets from **FIT 100 only**; 5-fold cross-validation with
+folds **split by NET, not by neuron** (1024 neurons of one MLP share its weights,
+so a neuron-level split leaks and inflates R^2). HOLDOUT is untouched.
+
+### 2a. Why R^2 on the one-step residual is the gain, and the propagation model
+
+The corrector runs in the loop, so it shrinks each layer's *increment* to the
+accumulated error rather than the accumulated error itself. Writing
+`M_l = A_l M_{l-1} + S_l` — accumulated MSE at l = amplified incoming error plus
+newly created error — Step 1's one-step MSE **is** `S_l`, so `A_l` is measurable:
+
+| l | M_l (accumulated) | S_l (new) | A_l | weight of S_l at layer 16 |
+|---:|---:|---:|---:|---:|
+| 5 | 2.6835e-09 | 1.3774e-09 | 0.767 | 0.155 |
+| 8 | 7.1776e-09 | 2.7410e-09 | 0.814 | 0.298 |
+| 12 | 1.5676e-08 | 4.1370e-09 | 0.870 | 0.584 |
+| 16 | 2.5325e-08 | 5.1905e-09 | 0.876 | 1.000 |
+
+**A_l is 0.60-0.88, i.e. < 1 at every layer: a ReLU layer CONTRACTS incoming mean
+error.** All of the growth in M_l is newly created error, not amplification. That
+is a genuinely useful structural fact and it is new here.
+
+`M_16 = M_1 w_1 + sum_l S_l w_l` with `w_l = prod_{k>l} A_k` reconstructs the
+measured 2.5325e-08 **to -0.00%**, so the decomposition is not a fit — it is an
+identity, and it converts a per-layer R^2 into a predicted final-layer gain.
+
+### 2b. Ridge: 2.13% — would have FAILED the 3% gate
+
+Per-layer ridge, the handoff's feature expansion (9 raw chain channels — mu_pre,
+sigma, alpha, D3/s^3, D4/s^4, ||W[:,i]||, D21 row energy/s^4, the chain's mu_l,
+dmu — plus squares and pairwise products of the top 6 = 33 columns), lambda by
+inner CV:
+
+| layer | one-step MSE | R^2 held-out | R^2 in-sample | gap |
+|---:|---:|---:|---:|---:|
+| 2 | 2.5383e-10 | 0.30900 | 0.30932 | 0.0003 |
+| 5 | 1.3774e-09 | 0.02675 | 0.02695 | 0.0002 |
+| 8 | 2.7410e-09 | 0.01887 | 0.01968 | 0.0008 |
+| 12 | 4.1370e-09 | 0.01918 | 0.01968 | 0.0005 |
+| 16 | 5.1905e-09 | 0.02229 | 0.02275 | 0.0005 |
+
+Through the propagation model: **predicted raw gain 2.13%.** Below §5's 3% ship
+gate, above Step 2's own 1% ridge kill.
+
+**The in-sample/held-out gap is ~0.0005 everywhere.** The ridge is not
+data-limited and not overfitting — 102,400 rows for 33 columns. So the ceiling it
+reports is a statement about the FEATURES and the model CLASS, not about sample
+size, and more training nets (the 300 HOLDOUT nets Step 2 proposes to draw) would
+buy the ridge **nothing**. That is worth knowing before spending a HOLDOUT read.
+
+### 2c. MLP: 7.32% — the lane is open
+
+Same rows, same net-wise folds, same 33 features; 2 hidden layers x 32, tanh,
+Adam, 2,000 steps, targets standardized per layer (`tools/corr_mlp_ceiling.py`):
+
+| layer | one-step MSE | R^2 held-out ridge | R^2 held-out MLP | ratio |
+|---:|---:|---:|---:|---:|
+| 2 | 2.5383e-10 | 0.309 | **0.423** | 1.4x |
+| 3 | 5.6345e-10 | 0.143 | **0.290** | 2.0x |
+| 5 | 1.3774e-09 | 0.027 | **0.119** | 4.4x |
+| 8 | 2.7410e-09 | 0.019 | **0.078** | 4.1x |
+| 11 | 3.9118e-09 | 0.017 | **0.090** | 5.3x |
+| 14 | 4.7635e-09 | 0.024 | **0.076** | 3.2x |
+| 16 | 5.1905e-09 | 0.022 | **0.057** | 2.6x |
+
+**Predicted raw gain 7.32%**, and the layers that carry it are the LATE ones
+(layer 14 contributes 1.10 pp, 15 contributes 1.24 pp, 16 contributes 1.18 pp;
+layers 2-5 together contribute 0.26 pp), because `w_l` discounts early error.
+
+Robustness of the 7.32%:
+
+| variant | predicted raw gain |
+|---|---:|
+| MLP at the measured R^2 | **7.32%** |
+| MLP, only layers >= 5 corrected | 7.17% |
+| MLP at HALF the measured R^2 (a compounding haircut) | **3.66%** |
+| ridge at the measured R^2 | 2.13% |
+
+**Even halving every R^2 clears the 3% gate.** That is the margin that makes this
+worth building.
+
+### 2d. What this number is NOT
+
+It is an **optimistic** reading of the real thing, on four counts, and all four
+push the same way:
+
+1. **Teacher-forced, one layer at a time.** Each layer's corrector is scored on
+   the residual it sees given the chain's own state. The real in-loop corrector
+   compounds its own errors across 16 layers.
+2. **The corrector feeds the covariance and kappa3 channels.** Step 2 applies the
+   correction to the state, not just the output row, and this measurement says
+   nothing about whether that helps or hurts those channels.
+3. **Cost is not in it.** It is small but not zero — see 2e.
+4. **Two features in the handoff's list are absent** and cannot be measured this
+   way: the *transported previous correction* `(W_l c_{l-1})_i` is recursive (it
+   does not exist until a corrector does), and the young/old tier shares of D3
+   need further chain surgery. Both could only raise the number.
+
+### 2e. Cost estimate for the shipped corrector (not yet metered)
+
+Per layer, per neuron: 33 features -> 32 -> 32 -> 1. FLOPs ~ `1024 x (33x32 +
+32x32 + 32) x 2` = 4.3 MFLOP/layer, **69 MFLOP over 16 layers = 0.015% of v55's
+475 G** — irrelevant. The feature construction is elementwise or already computed
+by the chain, except `D21` row energy at `n^2` = 1.0 MFLOP/layer, also
+irrelevant.
+
+**Op calls are the constraint, as always.** ~15-25 flopscope calls per layer for
+the matmuls, activations and feature assembly = **240-400 ops** on top of 23,645
+(+1.0 to +1.7%), i.e. +0.003 to +0.004 s of residual against 0.146 s of headroom.
+Comfortable.
+
+**Weight storage.** Per-layer models are 16 x ~2,144 = ~34k float literals
+(~400 KB of source on top of the current 101 KB). The handoff's shared model with
+an 8-dim layer embedding is ~2k weights instead — and since 2b shows the models
+are not data-limited, sharing costs nothing statistically and is the form to
+ship. **Not yet verified: the shared+embedding variant's R^2 has not been
+measured** (`--shared` exists in the tool and has not been run).
+
+### 2f. Predictions scored
+
+| | ridge | MLP |
+|---|---|---|
+| strategist | 3-6% | 8-15% |
+| worker (PREDICTIONS.md, Step 1) | lane likely dead; single-axis ceilings 0.04-0.7% | same |
+| **measured ceiling** | **2.13%** | **7.32%** |
+
+The strategist was optimistic on both but **close on the MLP**, and his §3 bet —
+that the all-layer labels are exact supervision for a channel where the error is
+locally observable — is **vindicated for a nonlinear model**, having looked dead
+after Step 1's correlations. The worker's Step 1 inference ("the lane is very
+likely dead because nothing correlates") was **wrong, and wrong for an
+instructive reason**: every *linear* correlation is < 0.10 and every *single-axis*
+nonparametric ceiling is < 0.7%, yet a 33-feature MLP reaches R^2 = 0.057-0.119.
+The signal is entirely in **interactions between features**, invisible to both
+diagnostics Step 1 ran. Single-feature correlations were the wrong instrument for
+this question and should not be used to close a learned-model lane again.
+
 
 ## D5 — PLAN's premise is BACKWARDS: the old tier is under-funded (2026-09-22)
 

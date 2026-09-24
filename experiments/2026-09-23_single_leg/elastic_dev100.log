@@ -1,0 +1,113 @@
+whestbench: downloading 'mini' split from hf://aicrowd/arc-whestbench-public-2026@v2-phase2
+[probe] net 1/100 (21s) base=2.4044e-08 nohub=2.3774e-08 clos_last=2.8265e-08 clos_none=2.8334e-08 p2r16=2.4015e-08 p2r8=2.4128e-08 age4=2.7339e-08 age6=2.3258e-08 rank224=2.4767e-08 s6=2.4044e-08
+[probe] net 2/100 (41s) base=2.6384e-08 nohub=2.8004e-08 clos_last=3.4630e-08 clos_none=3.4736e-08 p2r16=2.6649e-08 p2r8=2.6792e-08 age4=3.0639e-08 age6=2.4543e-08 rank224=2.9405e-08 s6=2.6384e-08
+[probe] net 3/100 (61s) base=3.0030e-08 nohub=3.1865e-08 clos_last=3.3467e-08 clos_none=3.3384e-08 p2r16=3.0630e-08 p2r8=3.0718e-08 age4=3.6744e-08 age6=2.5307e-08 rank224=3.2304e-08 s6=3.0030e-08
+[probe] net 4/100 (81s) base=2.8628e-08 nohub=3.0901e-08 clos_last=3.4136e-08 clos_none=3.4176e-08 p2r16=2.8646e-08 p2r8=2.9211e-08 age4=3.5552e-08 age6=2.7838e-08 rank224=3.1836e-08 s6=2.8628e-08
+[probe] net 5/100 (101s) base=2.6290e-08 nohub=2.7312e-08 clos_last=3.0723e-08 clos_none=3.0809e-08 p2r16=2.6703e-08 p2r8=2.6740e-08 age4=2.9808e-08 age6=2.6531e-08 rank224=2.8357e-08 s6=2.6290e-08
+[probe] net 6/100 (121s) base=2.3636e-08 nohub=2.5234e-08 clos_last=2.9142e-08 clos_none=2.9095e-08 p2r16=2.3907e-08 p2r8=2.3868e-08 age4=2.9683e-08 age6=2.2326e-08 rank224=2.5018e-08 s6=2.3636e-08
+[probe] net 7/100 (141s) base=2.2925e-08 nohub=2.3493e-08 clos_last=2.8192e-08 clos_none=2.8232e-08 p2r16=2.3117e-08 p2r8=2.3254e-08 age4=2.6310e-08 age6=2.1363e-08 rank224=2.3654e-08 s6=2.2925e-08
+[probe] net 8/100 (164s) base=2.7694e-08 nohub=2.7036e-08 clos_last=3.0273e-08 clos_none=3.0285e-08 p2r16=2.7708e-08 p2r8=2.7662e-08 age4=3.1632e-08 age6=2.5221e-08 rank224=2.8657e-08 s6=2.7694e-08
+[probe] net 9/100 (185s) base=2.7949e-08 nohub=2.9041e-08 clos_last=2.9946e-08 clos_none=2.9909e-08 p2r16=2.7882e-08 p2r8=2.7779e-08 age4=3.1380e-08 age6=2.6006e-08 rank224=2.8944e-08 s6=2.7949e-08
+[probe] net 10/100 (204s) base=3.0061e-08 nohub=3.1369e-08 clos_last=3.2465e-08 clos_none=3.2435e-08 p2r16=3.0208e-08 p2r8=3.0539e-08 age4=3.4818e-08 age6=2.6969e-08 rank224=3.1830e-08 s6=3.0061e-08
+[probe] net 11/100 (226s) base=2.5503e-08 nohub=2.5550e-08 clos_last=2.9063e-08 clos_none=2.9015e-08 p2r16=2.5538e-08 p2r8=2.5807e-08 age4=3.0742e-08 age6=2.4222e-08 rank224=2.7391e-08 s6=2.5503e-08
+[probe] net 12/100 (246s) base=2.6206e-08 nohub=2.6565e-08 clos_last=3.0605e-08 clos_none=3.0807e-08 p2r16=2.6718e-08 p2r8=2.7025e-08 age4=2.8495e-08 age6=2.5299e-08 rank224=2.8152e-08 s6=2.6206e-08
+[probe] net 13/100 (268s) base=2.3749e-08 nohub=2.4421e-08 clos_last=2.9881e-08 clos_none=2.9835e-08 p2r16=2.3575e-08 p2r8=2.3432e-08 age4=3.1511e-08 age6=2.1612e-08 rank224=2.5205e-08 s6=2.3749e-08
+[probe] net 14/100 (292s) base=2.8645e-08 nohub=3.0277e-08 clos_last=3.4350e-08 clos_none=3.4504e-08 p2r16=2.8148e-08 p2r8=2.8357e-08 age4=3.0474e-08 age6=2.6013e-08 rank224=3.0081e-08 s6=2.8645e-08
+[probe] net 15/100 (317s) base=2.4664e-08 nohub=2.5782e-08 clos_last=2.9667e-08 clos_none=2.9604e-08 p2r16=2.5137e-08 p2r8=2.5012e-08 age4=3.3107e-08 age6=2.3753e-08 rank224=2.7410e-08 s6=2.4664e-08
+[probe] net 16/100 (341s) base=2.6835e-08 nohub=2.8573e-08 clos_last=3.0330e-08 clos_none=3.0350e-08 p2r16=2.6935e-08 p2r8=2.7060e-08 age4=3.0592e-08 age6=2.5543e-08 rank224=2.8643e-08 s6=2.6835e-08
+[probe] net 17/100 (366s) base=2.0514e-08 nohub=2.0163e-08 clos_last=2.4891e-08 clos_none=2.4952e-08 p2r16=2.0756e-08 p2r8=2.0869e-08 age4=2.5997e-08 age6=1.9132e-08 rank224=2.1825e-08 s6=2.0514e-08
+[probe] net 18/100 (391s) base=2.3932e-08 nohub=2.4888e-08 clos_last=2.9254e-08 clos_none=2.9376e-08 p2r16=2.3987e-08 p2r8=2.4003e-08 age4=2.6839e-08 age6=2.2367e-08 rank224=2.6523e-08 s6=2.3932e-08
+[probe] net 19/100 (418s) base=2.4607e-08 nohub=2.6807e-08 clos_last=2.8036e-08 clos_none=2.8162e-08 p2r16=2.4525e-08 p2r8=2.4899e-08 age4=3.0853e-08 age6=2.4405e-08 rank224=2.5089e-08 s6=2.4607e-08
+[probe] net 20/100 (445s) base=2.0322e-08 nohub=2.1946e-08 clos_last=2.5177e-08 clos_none=2.5177e-08 p2r16=2.0334e-08 p2r8=2.0409e-08 age4=2.3387e-08 age6=1.9765e-08 rank224=2.1524e-08 s6=2.0322e-08
+[probe] net 21/100 (469s) base=2.6143e-08 nohub=2.8691e-08 clos_last=2.7556e-08 clos_none=2.7550e-08 p2r16=2.6219e-08 p2r8=2.6407e-08 age4=3.2157e-08 age6=2.5140e-08 rank224=2.8725e-08 s6=2.6143e-08
+[probe] net 22/100 (495s) base=2.9738e-08 nohub=3.2287e-08 clos_last=3.4122e-08 clos_none=3.3990e-08 p2r16=2.9055e-08 p2r8=2.9190e-08 age4=3.5672e-08 age6=2.8780e-08 rank224=3.0118e-08 s6=2.9738e-08
+[probe] net 23/100 (519s) base=2.6289e-08 nohub=2.7526e-08 clos_last=2.6341e-08 clos_none=2.6333e-08 p2r16=2.6146e-08 p2r8=2.5907e-08 age4=3.2167e-08 age6=2.4388e-08 rank224=2.7444e-08 s6=2.6289e-08
+[probe] net 24/100 (544s) base=2.1003e-08 nohub=2.2090e-08 clos_last=2.5492e-08 clos_none=2.5561e-08 p2r16=2.1207e-08 p2r8=2.1201e-08 age4=2.4067e-08 age6=2.0282e-08 rank224=2.1366e-08 s6=2.1003e-08
+[probe] net 25/100 (572s) base=2.3534e-08 nohub=2.5309e-08 clos_last=2.6161e-08 clos_none=2.6259e-08 p2r16=2.3810e-08 p2r8=2.4054e-08 age4=2.9221e-08 age6=2.2452e-08 rank224=2.5321e-08 s6=2.3534e-08
+[probe] net 26/100 (596s) base=2.5393e-08 nohub=2.6631e-08 clos_last=3.0995e-08 clos_none=3.1017e-08 p2r16=2.5628e-08 p2r8=2.5593e-08 age4=3.1872e-08 age6=2.4596e-08 rank224=2.7246e-08 s6=2.5393e-08
+[probe] net 27/100 (621s) base=2.9016e-08 nohub=2.9402e-08 clos_last=3.4233e-08 clos_none=3.4317e-08 p2r16=2.9036e-08 p2r8=2.9043e-08 age4=3.5674e-08 age6=2.9197e-08 rank224=3.0334e-08 s6=2.9016e-08
+[probe] net 28/100 (645s) base=1.9421e-08 nohub=2.1782e-08 clos_last=2.3208e-08 clos_none=2.3232e-08 p2r16=1.9477e-08 p2r8=1.9893e-08 age4=2.4249e-08 age6=1.9441e-08 rank224=2.0361e-08 s6=1.9421e-08
+[probe] net 29/100 (670s) base=2.5962e-08 nohub=2.9040e-08 clos_last=3.0001e-08 clos_none=3.0076e-08 p2r16=2.6287e-08 p2r8=2.6467e-08 age4=3.1454e-08 age6=2.5013e-08 rank224=2.6989e-08 s6=2.5962e-08
+[probe] net 30/100 (700s) base=2.3028e-08 nohub=2.3976e-08 clos_last=2.6466e-08 clos_none=2.6588e-08 p2r16=2.3188e-08 p2r8=2.3255e-08 age4=2.6412e-08 age6=2.1648e-08 rank224=2.3879e-08 s6=2.3028e-08
+[probe] net 31/100 (730s) base=2.6502e-08 nohub=2.7188e-08 clos_last=3.0751e-08 clos_none=3.0763e-08 p2r16=2.6322e-08 p2r8=2.6455e-08 age4=3.0525e-08 age6=2.4787e-08 rank224=2.7440e-08 s6=2.6502e-08
+[probe] net 32/100 (750s) base=2.0201e-08 nohub=2.0765e-08 clos_last=2.6156e-08 clos_none=2.6167e-08 p2r16=2.0295e-08 p2r8=2.0627e-08 age4=2.3204e-08 age6=1.8877e-08 rank224=2.1104e-08 s6=2.0201e-08
+[probe] net 33/100 (775s) base=2.5596e-08 nohub=2.7083e-08 clos_last=2.7278e-08 clos_none=2.7341e-08 p2r16=2.5822e-08 p2r8=2.5834e-08 age4=2.9501e-08 age6=2.3482e-08 rank224=2.6072e-08 s6=2.5596e-08
+[probe] net 34/100 (799s) base=2.6278e-08 nohub=2.9442e-08 clos_last=3.0716e-08 clos_none=3.0754e-08 p2r16=2.6624e-08 p2r8=2.6890e-08 age4=3.2415e-08 age6=2.5247e-08 rank224=2.6071e-08 s6=2.6278e-08
+[probe] net 35/100 (827s) base=3.2556e-08 nohub=3.3535e-08 clos_last=3.9383e-08 clos_none=3.9387e-08 p2r16=3.2716e-08 p2r8=3.3095e-08 age4=4.1057e-08 age6=2.9757e-08 rank224=3.4440e-08 s6=3.2556e-08
+[probe] net 36/100 (854s) base=1.9803e-08 nohub=2.0458e-08 clos_last=2.2363e-08 clos_none=2.2318e-08 p2r16=2.0148e-08 p2r8=2.0561e-08 age4=2.3801e-08 age6=1.8919e-08 rank224=2.1799e-08 s6=1.9803e-08
+[probe] net 37/100 (882s) base=2.4050e-08 nohub=2.5364e-08 clos_last=3.1895e-08 clos_none=3.1977e-08 p2r16=2.4194e-08 p2r8=2.4080e-08 age4=2.7620e-08 age6=2.3236e-08 rank224=2.4301e-08 s6=2.4050e-08
+[probe] net 38/100 (908s) base=3.3053e-08 nohub=3.5172e-08 clos_last=3.5184e-08 clos_none=3.5208e-08 p2r16=3.3070e-08 p2r8=3.3277e-08 age4=3.7866e-08 age6=2.9676e-08 rank224=3.4180e-08 s6=3.3053e-08
+[probe] net 39/100 (933s) base=2.4255e-08 nohub=2.5308e-08 clos_last=3.2409e-08 clos_none=3.2482e-08 p2r16=2.4327e-08 p2r8=2.4308e-08 age4=3.0223e-08 age6=2.3148e-08 rank224=2.6029e-08 s6=2.4255e-08
+[probe] net 40/100 (958s) base=3.0526e-08 nohub=3.2873e-08 clos_last=3.2933e-08 clos_none=3.2945e-08 p2r16=3.0932e-08 p2r8=3.0667e-08 age4=3.1175e-08 age6=2.7851e-08 rank224=3.2398e-08 s6=3.0526e-08
+[probe] net 41/100 (982s) base=2.9133e-08 nohub=2.8953e-08 clos_last=3.7059e-08 clos_none=3.7105e-08 p2r16=2.9658e-08 p2r8=2.9217e-08 age4=3.5410e-08 age6=2.6622e-08 rank224=3.0296e-08 s6=2.9133e-08
+[probe] net 42/100 (1007s) base=2.1917e-08 nohub=2.3888e-08 clos_last=2.7620e-08 clos_none=2.7629e-08 p2r16=2.1911e-08 p2r8=2.1989e-08 age4=2.5095e-08 age6=2.1885e-08 rank224=2.1600e-08 s6=2.1917e-08
+[probe] net 43/100 (1032s) base=2.5994e-08 nohub=2.7698e-08 clos_last=2.8637e-08 clos_none=2.8594e-08 p2r16=2.6267e-08 p2r8=2.6400e-08 age4=3.2110e-08 age6=2.4906e-08 rank224=2.9800e-08 s6=2.5994e-08
+[probe] net 44/100 (1060s) base=2.7460e-08 nohub=2.9768e-08 clos_last=3.1147e-08 clos_none=3.1126e-08 p2r16=2.7242e-08 p2r8=2.7167e-08 age4=3.2778e-08 age6=2.5157e-08 rank224=2.9474e-08 s6=2.7460e-08
+[probe] net 45/100 (1090s) base=2.6422e-08 nohub=2.7225e-08 clos_last=3.1291e-08 clos_none=3.1346e-08 p2r16=2.6242e-08 p2r8=2.6232e-08 age4=3.2750e-08 age6=2.4792e-08 rank224=2.7293e-08 s6=2.6422e-08
+[probe] net 46/100 (1113s) base=2.0933e-08 nohub=2.2075e-08 clos_last=2.5941e-08 clos_none=2.5918e-08 p2r16=2.1168e-08 p2r8=2.1407e-08 age4=2.5265e-08 age6=1.9746e-08 rank224=2.2080e-08 s6=2.0933e-08
+[probe] net 47/100 (1138s) base=2.6269e-08 nohub=2.8351e-08 clos_last=3.1543e-08 clos_none=3.1447e-08 p2r16=2.6665e-08 p2r8=2.6791e-08 age4=3.0207e-08 age6=2.5778e-08 rank224=2.6813e-08 s6=2.6269e-08
+[probe] net 48/100 (1162s) base=2.8347e-08 nohub=3.0030e-08 clos_last=3.2788e-08 clos_none=3.2829e-08 p2r16=2.8477e-08 p2r8=2.8813e-08 age4=3.3438e-08 age6=2.7334e-08 rank224=3.0206e-08 s6=2.8347e-08
+[probe] net 49/100 (1194s) base=2.6837e-08 nohub=2.7718e-08 clos_last=3.1499e-08 clos_none=3.1603e-08 p2r16=2.6969e-08 p2r8=2.7038e-08 age4=3.3948e-08 age6=2.6270e-08 rank224=2.7397e-08 s6=2.6837e-08
+[probe] net 50/100 (1222s) base=2.0079e-08 nohub=2.0872e-08 clos_last=2.5298e-08 clos_none=2.5373e-08 p2r16=2.0211e-08 p2r8=2.0317e-08 age4=2.4820e-08 age6=1.9431e-08 rank224=2.0919e-08 s6=2.0079e-08
+[probe] net 51/100 (1246s) base=2.0784e-08 nohub=2.1184e-08 clos_last=2.6275e-08 clos_none=2.6394e-08 p2r16=2.0777e-08 p2r8=2.0771e-08 age4=2.4536e-08 age6=2.0626e-08 rank224=2.1458e-08 s6=2.0784e-08
+[probe] net 52/100 (1270s) base=2.3704e-08 nohub=2.5410e-08 clos_last=2.7431e-08 clos_none=2.7457e-08 p2r16=2.3939e-08 p2r8=2.4072e-08 age4=3.0160e-08 age6=2.2570e-08 rank224=2.4537e-08 s6=2.3704e-08
+[probe] net 53/100 (1294s) base=2.6306e-08 nohub=2.6355e-08 clos_last=3.4135e-08 clos_none=3.4118e-08 p2r16=2.6530e-08 p2r8=2.6785e-08 age4=3.0361e-08 age6=2.4927e-08 rank224=2.7832e-08 s6=2.6306e-08
+[probe] net 54/100 (1318s) base=2.0624e-08 nohub=2.1967e-08 clos_last=2.5120e-08 clos_none=2.5156e-08 p2r16=2.0876e-08 p2r8=2.1297e-08 age4=2.5800e-08 age6=1.9021e-08 rank224=2.1569e-08 s6=2.0624e-08
+[probe] net 55/100 (1343s) base=2.9539e-08 nohub=3.1512e-08 clos_last=3.1059e-08 clos_none=3.1031e-08 p2r16=2.9483e-08 p2r8=2.9667e-08 age4=3.4861e-08 age6=2.6424e-08 rank224=3.1137e-08 s6=2.9539e-08
+[probe] net 56/100 (1369s) base=2.5827e-08 nohub=2.7440e-08 clos_last=3.0446e-08 clos_none=3.0418e-08 p2r16=2.5964e-08 p2r8=2.5933e-08 age4=2.9873e-08 age6=2.4465e-08 rank224=2.6158e-08 s6=2.5827e-08
+[probe] net 57/100 (1395s) base=1.7529e-08 nohub=1.7557e-08 clos_last=2.0811e-08 clos_none=2.0822e-08 p2r16=1.7328e-08 p2r8=1.7243e-08 age4=1.9458e-08 age6=1.5793e-08 rank224=1.8694e-08 s6=1.7529e-08
+[probe] net 58/100 (1422s) base=2.2230e-08 nohub=2.3972e-08 clos_last=2.6683e-08 clos_none=2.6689e-08 p2r16=2.2313e-08 p2r8=2.2678e-08 age4=2.6858e-08 age6=2.2317e-08 rank224=2.3996e-08 s6=2.2230e-08
+[probe] net 59/100 (1442s) base=2.0185e-08 nohub=2.1179e-08 clos_last=2.5750e-08 clos_none=2.5746e-08 p2r16=2.0321e-08 p2r8=2.0597e-08 age4=2.4480e-08 age6=1.9129e-08 rank224=2.0847e-08 s6=2.0185e-08
+[probe] net 60/100 (1462s) base=2.8030e-08 nohub=2.9573e-08 clos_last=3.3058e-08 clos_none=3.3066e-08 p2r16=2.7971e-08 p2r8=2.7886e-08 age4=3.2066e-08 age6=2.6665e-08 rank224=3.0788e-08 s6=2.8030e-08
+[probe] net 61/100 (1482s) base=2.3907e-08 nohub=2.5773e-08 clos_last=2.9781e-08 clos_none=2.9791e-08 p2r16=2.3755e-08 p2r8=2.3678e-08 age4=2.8728e-08 age6=2.3491e-08 rank224=2.6408e-08 s6=2.3907e-08
+[probe] net 62/100 (1501s) base=2.5913e-08 nohub=2.7602e-08 clos_last=3.2034e-08 clos_none=3.1971e-08 p2r16=2.6002e-08 p2r8=2.6156e-08 age4=2.9288e-08 age6=2.4528e-08 rank224=2.7287e-08 s6=2.5913e-08
+[probe] net 63/100 (1521s) base=2.6252e-08 nohub=2.7875e-08 clos_last=3.0669e-08 clos_none=3.0739e-08 p2r16=2.6509e-08 p2r8=2.6634e-08 age4=2.8918e-08 age6=2.4720e-08 rank224=2.8496e-08 s6=2.6252e-08
+[probe] net 64/100 (1540s) base=1.8513e-08 nohub=2.0624e-08 clos_last=2.0272e-08 clos_none=2.0281e-08 p2r16=1.8681e-08 p2r8=1.8605e-08 age4=2.2260e-08 age6=1.7373e-08 rank224=2.0113e-08 s6=1.8513e-08
+[probe] net 65/100 (1560s) base=2.8597e-08 nohub=2.9230e-08 clos_last=3.2302e-08 clos_none=3.2295e-08 p2r16=2.8505e-08 p2r8=2.8505e-08 age4=3.6002e-08 age6=2.6423e-08 rank224=2.9618e-08 s6=2.8597e-08
+[probe] net 66/100 (1582s) base=2.6847e-08 nohub=2.9949e-08 clos_last=3.0967e-08 clos_none=3.0969e-08 p2r16=2.6912e-08 p2r8=2.6855e-08 age4=3.2618e-08 age6=2.5160e-08 rank224=2.6980e-08 s6=2.6847e-08
+[probe] net 67/100 (1606s) base=1.9989e-08 nohub=2.0374e-08 clos_last=2.5580e-08 clos_none=2.5640e-08 p2r16=1.9779e-08 p2r8=2.0308e-08 age4=2.4106e-08 age6=1.9214e-08 rank224=2.1339e-08 s6=1.9989e-08
+[probe] net 68/100 (1628s) base=3.1304e-08 nohub=3.1520e-08 clos_last=3.6560e-08 clos_none=3.6525e-08 p2r16=3.1191e-08 p2r8=3.0861e-08 age4=3.6717e-08 age6=2.9998e-08 rank224=3.3823e-08 s6=3.1304e-08
+[probe] net 69/100 (1650s) base=2.5051e-08 nohub=2.7266e-08 clos_last=3.1109e-08 clos_none=3.1183e-08 p2r16=2.5623e-08 p2r8=2.5641e-08 age4=2.9845e-08 age6=2.2389e-08 rank224=2.7761e-08 s6=2.5051e-08
+[probe] net 70/100 (1672s) base=2.6370e-08 nohub=2.7022e-08 clos_last=3.0337e-08 clos_none=3.0428e-08 p2r16=2.6467e-08 p2r8=2.6678e-08 age4=3.3374e-08 age6=2.4493e-08 rank224=2.8370e-08 s6=2.6370e-08
+[probe] net 71/100 (1698s) base=2.4406e-08 nohub=2.4872e-08 clos_last=2.6975e-08 clos_none=2.7001e-08 p2r16=2.4470e-08 p2r8=2.4473e-08 age4=2.4889e-08 age6=2.2700e-08 rank224=2.5660e-08 s6=2.4406e-08
+[probe] net 72/100 (1719s) base=2.4358e-08 nohub=2.5647e-08 clos_last=3.0025e-08 clos_none=3.0118e-08 p2r16=2.4383e-08 p2r8=2.4392e-08 age4=3.0035e-08 age6=2.2824e-08 rank224=2.6659e-08 s6=2.4358e-08
+[probe] net 73/100 (1742s) base=2.3694e-08 nohub=2.6061e-08 clos_last=3.0571e-08 clos_none=3.0686e-08 p2r16=2.3478e-08 p2r8=2.3512e-08 age4=2.4792e-08 age6=2.1547e-08 rank224=2.3160e-08 s6=2.3694e-08
+whestbench: downloading 'mini' split from hf://aicrowd/arc-whestbench-public-2026@v2-phase2
+[probe] net 74/100 (10s) base=3.3417e-08 nohub=3.5052e-08 clos_last=4.0652e-08 clos_none=4.0617e-08 p2r16=3.3887e-08 p2r8=3.4472e-08 age4=3.8559e-08 age6=3.1384e-08 rank224=3.7248e-08 s6=3.3417e-08
+[probe] net 75/100 (19s) base=2.4595e-08 nohub=2.6749e-08 clos_last=2.9836e-08 clos_none=2.9841e-08 p2r16=2.4667e-08 p2r8=2.4583e-08 age4=2.9200e-08 age6=2.3198e-08 rank224=2.6336e-08 s6=2.4595e-08
+[probe] net 76/100 (28s) base=2.5071e-08 nohub=2.7721e-08 clos_last=3.0727e-08 clos_none=3.0717e-08 p2r16=2.5030e-08 p2r8=2.4662e-08 age4=3.1339e-08 age6=2.2216e-08 rank224=2.7226e-08 s6=2.5071e-08
+[probe] net 77/100 (37s) base=2.7843e-08 nohub=2.9673e-08 clos_last=3.4870e-08 clos_none=3.4857e-08 p2r16=2.8310e-08 p2r8=2.8486e-08 age4=3.4525e-08 age6=2.5170e-08 rank224=3.1268e-08 s6=2.7843e-08
+[probe] net 78/100 (49s) base=2.8005e-08 nohub=2.8630e-08 clos_last=3.4093e-08 clos_none=3.4246e-08 p2r16=2.8066e-08 p2r8=2.8070e-08 age4=3.4383e-08 age6=2.6360e-08 rank224=2.9876e-08 s6=2.8005e-08
+[probe] net 79/100 (58s) base=3.1882e-08 nohub=3.4347e-08 clos_last=3.6168e-08 clos_none=3.6152e-08 p2r16=3.1269e-08 p2r8=3.1342e-08 age4=3.7102e-08 age6=2.9524e-08 rank224=3.4481e-08 s6=3.1882e-08
+[probe] net 80/100 (68s) base=2.0423e-08 nohub=2.1539e-08 clos_last=2.4134e-08 clos_none=2.4231e-08 p2r16=2.0622e-08 p2r8=2.1165e-08 age4=2.6180e-08 age6=2.1266e-08 rank224=2.1579e-08 s6=2.0423e-08
+[probe] net 81/100 (82s) base=2.3750e-08 nohub=2.5042e-08 clos_last=3.0198e-08 clos_none=3.0245e-08 p2r16=2.3712e-08 p2r8=2.3380e-08 age4=2.7972e-08 age6=2.2813e-08 rank224=2.5695e-08 s6=2.3750e-08
+[probe] net 82/100 (95s) base=2.2008e-08 nohub=2.3602e-08 clos_last=2.6187e-08 clos_none=2.6160e-08 p2r16=2.1766e-08 p2r8=2.1900e-08 age4=2.7434e-08 age6=2.0582e-08 rank224=2.3831e-08 s6=2.2008e-08
+[probe] net 83/100 (107s) base=2.0691e-08 nohub=2.1835e-08 clos_last=2.5873e-08 clos_none=2.5822e-08 p2r16=2.0752e-08 p2r8=2.0913e-08 age4=2.4854e-08 age6=1.9984e-08 rank224=2.2443e-08 s6=2.0691e-08
+[probe] net 84/100 (120s) base=2.6990e-08 nohub=2.9560e-08 clos_last=2.9881e-08 clos_none=2.9961e-08 p2r16=2.7047e-08 p2r8=2.7276e-08 age4=3.2702e-08 age6=2.5906e-08 rank224=2.9346e-08 s6=2.6990e-08
+[probe] net 85/100 (132s) base=2.8746e-08 nohub=3.0608e-08 clos_last=3.1596e-08 clos_none=3.1635e-08 p2r16=2.9204e-08 p2r8=2.9190e-08 age4=3.1601e-08 age6=2.7582e-08 rank224=2.8985e-08 s6=2.8746e-08
+[probe] net 86/100 (141s) base=2.1887e-08 nohub=2.3417e-08 clos_last=2.6659e-08 clos_none=2.6743e-08 p2r16=2.2133e-08 p2r8=2.2361e-08 age4=2.5906e-08 age6=2.0043e-08 rank224=2.3688e-08 s6=2.1887e-08
+[probe] net 87/100 (150s) base=2.4454e-08 nohub=2.5752e-08 clos_last=3.0605e-08 clos_none=3.0591e-08 p2r16=2.4855e-08 p2r8=2.4882e-08 age4=2.6919e-08 age6=2.2732e-08 rank224=2.5387e-08 s6=2.4454e-08
+[probe] net 88/100 (159s) base=2.7403e-08 nohub=2.8832e-08 clos_last=3.4381e-08 clos_none=3.4438e-08 p2r16=2.7532e-08 p2r8=2.7741e-08 age4=3.2083e-08 age6=2.6552e-08 rank224=2.9264e-08 s6=2.7403e-08
+[probe] net 89/100 (168s) base=2.5578e-08 nohub=2.6430e-08 clos_last=3.0471e-08 clos_none=3.0479e-08 p2r16=2.5823e-08 p2r8=2.5791e-08 age4=2.8128e-08 age6=2.5083e-08 rank224=2.7678e-08 s6=2.5578e-08
+[probe] net 90/100 (176s) base=2.4987e-08 nohub=2.5994e-08 clos_last=2.8741e-08 clos_none=2.8771e-08 p2r16=2.5007e-08 p2r8=2.5480e-08 age4=2.8742e-08 age6=2.2744e-08 rank224=2.7145e-08 s6=2.4987e-08
+[probe] net 91/100 (185s) base=3.3155e-08 nohub=3.4762e-08 clos_last=3.6327e-08 clos_none=3.6333e-08 p2r16=3.3023e-08 p2r8=3.3022e-08 age4=4.0875e-08 age6=3.1771e-08 rank224=3.4919e-08 s6=3.3155e-08
+[probe] net 92/100 (194s) base=2.6600e-08 nohub=2.7926e-08 clos_last=3.0281e-08 clos_none=3.0310e-08 p2r16=2.6894e-08 p2r8=2.7223e-08 age4=2.8046e-08 age6=2.4767e-08 rank224=2.9044e-08 s6=2.6600e-08
+[probe] net 93/100 (203s) base=2.7134e-08 nohub=2.8559e-08 clos_last=3.1368e-08 clos_none=3.1418e-08 p2r16=2.7132e-08 p2r8=2.7357e-08 age4=3.0820e-08 age6=2.5633e-08 rank224=2.9461e-08 s6=2.7134e-08
+[probe] net 94/100 (211s) base=3.1140e-08 nohub=3.2515e-08 clos_last=3.5230e-08 clos_none=3.5292e-08 p2r16=3.1656e-08 p2r8=3.1909e-08 age4=3.5128e-08 age6=2.9405e-08 rank224=3.3390e-08 s6=3.1140e-08
+[probe] net 95/100 (220s) base=2.2180e-08 nohub=2.3825e-08 clos_last=2.5195e-08 clos_none=2.5237e-08 p2r16=2.2082e-08 p2r8=2.2060e-08 age4=2.5131e-08 age6=2.1140e-08 rank224=2.3647e-08 s6=2.2180e-08
+[probe] net 96/100 (229s) base=3.0285e-08 nohub=3.1794e-08 clos_last=3.3834e-08 clos_none=3.3888e-08 p2r16=3.0175e-08 p2r8=3.0177e-08 age4=3.3538e-08 age6=2.8134e-08 rank224=3.2027e-08 s6=3.0285e-08
+[probe] net 97/100 (237s) base=2.7600e-08 nohub=2.9327e-08 clos_last=3.3179e-08 clos_none=3.3263e-08 p2r16=2.7906e-08 p2r8=2.8200e-08 age4=3.2222e-08 age6=2.5523e-08 rank224=2.8238e-08 s6=2.7600e-08
+[probe] net 98/100 (246s) base=2.0289e-08 nohub=2.1615e-08 clos_last=2.6743e-08 clos_none=2.6773e-08 p2r16=2.0302e-08 p2r8=2.0419e-08 age4=2.3881e-08 age6=2.0797e-08 rank224=2.1223e-08 s6=2.0289e-08
+[probe] net 99/100 (254s) base=2.4449e-08 nohub=2.6292e-08 clos_last=2.9132e-08 clos_none=2.9147e-08 p2r16=2.4390e-08 p2r8=2.4436e-08 age4=2.9604e-08 age6=2.2909e-08 rank224=2.6500e-08 s6=2.4449e-08
+[probe] net 100/100 (263s) base=2.6225e-08 nohub=2.7972e-08 clos_last=3.0691e-08 clos_none=3.0637e-08 p2r16=2.6453e-08 p2r8=2.6498e-08 age4=3.2604e-08 age6=2.5087e-08 rank224=2.9298e-08 s6=2.6225e-08
+
+  base           raw 2.545098e-08  n=100
+  nohub          raw 2.682837e-08  n=100  vs base: +5.41% raw (+/-0.59)  wins 4/100
+  clos_last      raw 3.003959e-08  n=100  vs base: +18.03% raw (+/-1.22)  wins 0/100
+  clos_none      raw 3.006746e-08  n=100  vs base: +18.14% raw (+/-1.23)  wins 0/100
+  p2r16          raw 2.555384e-08  n=100  vs base: +0.40% raw (+/-0.18)  wins 29/100
+  p2r8           raw 2.565959e-08  n=100  vs base: +0.82% raw (+/-0.25)  wins 25/100
+  age4           raw 3.011560e-08  n=100  vs base: +18.33% raw (+/-1.26)  wins 0/100
+  age6           raw 2.404418e-08  n=100  vs base: -5.53% raw (+/-0.67)  wins 94/100
+  rank224        raw 2.700026e-08  n=100  vs base: +6.09% raw (+/-0.66)  wins 3/100
+  s6             raw 2.545098e-08  n=100  vs base: +0.00% raw (+/-0.00)  wins 0/100

@@ -1,0 +1,199 @@
+whestbench: downloading 'full' split from hf://aicrowd/arc-whestbench-public-2026@v2-phase2
+[pfit] estimator_k3_p60_probe.py base {'_LBLOCK_AGE': 1} form vec16 on FIT batch 10 (seed 20260923)
+[pfit]    1  mse 1.178976e-06  best 1.178976e-06
+[pfit]    2  mse 1.317415e-06  best 1.178976e-06
+[pfit]    3  mse 1.250745e-06  best 1.178976e-06
+[pfit]    4  mse 1.309480e-06  best 1.178976e-06
+[pfit]    5  mse 1.244118e-06  best 1.178976e-06
+[pfit]    6  mse 1.376984e-06  best 1.178976e-06
+[pfit]    7  mse 1.405213e-06  best 1.178976e-06
+[pfit]    8  mse 1.401569e-06  best 1.178976e-06
+[pfit]    9  mse 1.259988e-06  best 1.178976e-06
+[pfit]   10  mse 1.267190e-06  best 1.178976e-06
+[pfit]   11  mse 1.287930e-06  best 1.178976e-06
+[pfit]   12  mse 1.287352e-06  best 1.178976e-06
+[pfit]   13  mse 1.240529e-06  best 1.178976e-06
+[pfit]   14  mse 1.316120e-06  best 1.178976e-06
+[pfit]   15  mse 1.468572e-06  best 1.178976e-06
+[pfit]   16  mse 1.262173e-06  best 1.178976e-06
+[pfit]   17  mse 1.272660e-06  best 1.178976e-06
+[pfit]   18  mse 1.336469e-06  best 1.178976e-06
+[pfit]   19  mse 1.466350e-06  best 1.178976e-06
+[pfit]   20  mse 1.386008e-06  best 1.178976e-06
+[pfit]   21  mse 1.347117e-06  best 1.178976e-06
+[pfit]   22  mse 1.413692e-06  best 1.178976e-06
+[pfit]   23  mse 1.282798e-06  best 1.178976e-06
+[pfit]   24  mse 1.310806e-06  best 1.178976e-06
+[pfit]   25  mse 1.181077e-06  best 1.178976e-06
+[pfit]   26  mse 1.306846e-06  best 1.178976e-06
+[pfit]   27  mse 1.347828e-06  best 1.178976e-06
+[pfit]   28  mse 1.272685e-06  best 1.178976e-06
+[pfit]   29  mse 1.259474e-06  best 1.178976e-06
+[pfit]   30  mse 1.250913e-06  best 1.178976e-06
+[pfit]   31  mse 1.349940e-06  best 1.178976e-06
+[pfit]   32  mse 1.244437e-06  best 1.178976e-06
+[pfit]   33  mse 1.252560e-06  best 1.178976e-06
+[pfit]   34  mse 1.287900e-06  best 1.178976e-06
+[pfit]   35  mse 1.198655e-06  best 1.178976e-06
+[pfit]   36  mse 1.343068e-06  best 1.178976e-06
+[pfit]   37  mse 1.304966e-06  best 1.178976e-06
+[pfit]   38  mse 1.169356e-06  best 1.169356e-06
+[pfit]   39  mse 1.231725e-06  best 1.169356e-06
+[pfit]   40  mse 1.258143e-06  best 1.169356e-06
+[pfit]   41  mse 1.415385e-06  best 1.169356e-06
+[pfit]   42  mse 1.322405e-06  best 1.169356e-06
+[pfit]   43  mse 1.284868e-06  best 1.169356e-06
+[pfit]   44  mse 1.235336e-06  best 1.169356e-06
+[pfit]   45  mse 1.199127e-06  best 1.169356e-06
+[pfit]   46  mse 1.209589e-06  best 1.169356e-06
+[pfit]   47  mse 1.219648e-06  best 1.169356e-06
+[pfit]   48  mse 1.313307e-06  best 1.169356e-06
+[pfit]   49  mse 1.267726e-06  best 1.169356e-06
+[pfit]   50  mse 1.343339e-06  best 1.169356e-06
+[pfit]   51  mse 1.199871e-06  best 1.169356e-06
+[pfit]   52  mse 1.198394e-06  best 1.169356e-06
+[pfit]   53  mse 1.201118e-06  best 1.169356e-06
+[pfit]   54  mse 1.239249e-06  best 1.169356e-06
+[pfit]   55  mse 1.184347e-06  best 1.169356e-06
+[pfit]   56  mse 1.226615e-06  best 1.169356e-06
+[pfit]   57  mse 1.179857e-06  best 1.169356e-06
+[pfit]   58  mse 1.226607e-06  best 1.169356e-06
+[pfit]   59  mse 1.268215e-06  best 1.169356e-06
+[pfit]   60  mse 1.241429e-06  best 1.169356e-06
+[pfit]   61  mse 1.245028e-06  best 1.169356e-06
+[pfit]   62  mse 1.241549e-06  best 1.169356e-06
+[pfit]   63  mse 1.199509e-06  best 1.169356e-06
+[pfit]   64  mse 1.176990e-06  best 1.169356e-06
+[pfit]   65  mse 1.219127e-06  best 1.169356e-06
+[pfit]   66  mse 1.220786e-06  best 1.169356e-06
+[pfit]   67  mse 1.207950e-06  best 1.169356e-06
+[pfit]   68  mse 1.210571e-06  best 1.169356e-06
+[pfit]   69  mse 1.198259e-06  best 1.169356e-06
+[pfit]   70  mse 1.188485e-06  best 1.169356e-06
+[pfit]   71  mse 1.206571e-06  best 1.169356e-06
+[pfit]   72  mse 1.193327e-06  best 1.169356e-06
+[pfit]   73  mse 1.194270e-06  best 1.169356e-06
+[pfit]   74  mse 1.204417e-06  best 1.169356e-06
+[pfit]   75  mse 1.226915e-06  best 1.169356e-06
+[pfit]   76  mse 1.178994e-06  best 1.169356e-06
+[pfit]   77  mse 1.227330e-06  best 1.169356e-06
+[pfit]   78  mse 1.190917e-06  best 1.169356e-06
+[pfit]   79  mse 1.212437e-06  best 1.169356e-06
+[pfit]   80  mse 1.201744e-06  best 1.169356e-06
+[pfit]   81  mse 1.216473e-06  best 1.169356e-06
+[pfit]   82  mse 1.196932e-06  best 1.169356e-06
+[pfit]   83  mse 1.198958e-06  best 1.169356e-06
+[pfit]   84  mse 1.208985e-06  best 1.169356e-06
+[pfit]   85  mse 1.270753e-06  best 1.169356e-06
+[pfit]   86  mse 1.186187e-06  best 1.169356e-06
+[pfit]   87  mse 1.176835e-06  best 1.169356e-06
+[pfit]   88  mse 1.211142e-06  best 1.169356e-06
+[pfit]   89  mse 1.194128e-06  best 1.169356e-06
+[pfit]   90  mse 1.206837e-06  best 1.169356e-06
+[pfit]   91  mse 1.243955e-06  best 1.169356e-06
+[pfit]   92  mse 1.209584e-06  best 1.169356e-06
+[pfit]   93  mse 1.243907e-06  best 1.169356e-06
+[pfit]   94  mse 1.226485e-06  best 1.169356e-06
+[pfit]   95  mse 1.162383e-06  best 1.162383e-06
+[pfit]   96  mse 1.180254e-06  best 1.162383e-06
+[pfit]   97  mse 1.205419e-06  best 1.162383e-06
+[pfit]   98  mse 1.203998e-06  best 1.162383e-06
+[pfit]   99  mse 1.198551e-06  best 1.162383e-06
+[pfit]  100  mse 1.229877e-06  best 1.162383e-06
+[pfit]  101  mse 1.174250e-06  best 1.162383e-06
+[pfit]  102  mse 1.247980e-06  best 1.162383e-06
+[pfit]  103  mse 1.232373e-06  best 1.162383e-06
+[pfit]  104  mse 1.212316e-06  best 1.162383e-06
+[pfit]  105  mse 1.182734e-06  best 1.162383e-06
+[pfit]  106  mse 1.245976e-06  best 1.162383e-06
+[pfit]  107  mse 1.176098e-06  best 1.162383e-06
+[pfit]  108  mse 1.200356e-06  best 1.162383e-06
+[pfit]  109  mse 1.167812e-06  best 1.162383e-06
+[pfit]  110  mse 1.218320e-06  best 1.162383e-06
+[pfit]  111  mse 1.217827e-06  best 1.162383e-06
+[pfit]  112  mse 1.190082e-06  best 1.162383e-06
+[pfit]  113  mse 1.207597e-06  best 1.162383e-06
+[pfit]  114  mse 1.248644e-06  best 1.162383e-06
+[pfit]  115  mse 1.151725e-06  best 1.151725e-06
+[pfit]  116  mse 1.210526e-06  best 1.151725e-06
+[pfit]  117  mse 1.206868e-06  best 1.151725e-06
+[pfit]  118  mse 1.212580e-06  best 1.151725e-06
+[pfit]  119  mse 1.200360e-06  best 1.151725e-06
+[pfit]  120  mse 1.187394e-06  best 1.151725e-06
+[pfit]  121  mse 1.173218e-06  best 1.151725e-06
+[pfit]  122  mse 1.203667e-06  best 1.151725e-06
+[pfit]  123  mse 1.159212e-06  best 1.151725e-06
+[pfit]  124  mse 1.189387e-06  best 1.151725e-06
+[pfit]  125  mse 1.179979e-06  best 1.151725e-06
+[pfit]  126  mse 1.164467e-06  best 1.151725e-06
+[pfit]  127  mse 1.215134e-06  best 1.151725e-06
+[pfit]  128  mse 1.176462e-06  best 1.151725e-06
+[pfit]  129  mse 1.184227e-06  best 1.151725e-06
+[pfit]  130  mse 1.229570e-06  best 1.151725e-06
+[pfit]  131  mse 1.166395e-06  best 1.151725e-06
+[pfit]  132  mse 1.164753e-06  best 1.151725e-06
+[pfit]  133  mse 1.152237e-06  best 1.151725e-06
+[pfit]  134  mse 1.145057e-06  best 1.145057e-06
+[pfit]  135  mse 1.181863e-06  best 1.145057e-06
+[pfit]  136  mse 1.164357e-06  best 1.145057e-06
+[pfit]  137  mse 1.168096e-06  best 1.145057e-06
+[pfit]  138  mse 1.177809e-06  best 1.145057e-06
+[pfit]  139  mse 1.176515e-06  best 1.145057e-06
+[pfit]  140  mse 1.165068e-06  best 1.145057e-06
+[pfit]  141  mse 1.157716e-06  best 1.145057e-06
+[pfit]  142  mse 1.182818e-06  best 1.145057e-06
+[pfit]  143  mse 1.188306e-06  best 1.145057e-06
+[pfit]  144  mse 1.200736e-06  best 1.145057e-06
+[pfit]  145  mse 1.160588e-06  best 1.145057e-06
+[pfit]  146  mse 1.148403e-06  best 1.145057e-06
+[pfit]  147  mse 1.147309e-06  best 1.145057e-06
+[pfit]  148  mse 1.182376e-06  best 1.145057e-06
+[pfit]  149  mse 1.143755e-06  best 1.143755e-06
+[pfit]  150  mse 1.159682e-06  best 1.143755e-06
+[pfit]  151  mse 1.147588e-06  best 1.143755e-06
+[pfit]  152  mse 1.149776e-06  best 1.143755e-06
+[pfit]  153  mse 1.178826e-06  best 1.143755e-06
+[pfit]  154  mse 1.151103e-06  best 1.143755e-06
+[pfit]  155  mse 1.172191e-06  best 1.143755e-06
+{
+ "candidate": "estimator_k3_p60_probe.py",
+ "base": {
+  "_LBLOCK_AGE": 1
+ },
+ "form": "vec16",
+ "panel": "fit",
+ "batch_indices": [
+  5,
+  21,
+  30,
+  48,
+  55,
+  79,
+  81,
+  85,
+  91,
+  93
+ ],
+ "evaluations": 155,
+ "base_mse": 1.178975884386091e-06,
+ "best_mse": 1.1437548891990446e-06,
+ "gain": 0.029874228687371662,
+ "rho": [
+  0.0,
+  0.0,
+  0.0,
+  1.1829712353889952,
+  0.28958759423379177,
+  -0.09002201339151485,
+  -0.11339984905575783,
+  -0.13711562875512534,
+  -0.32129743963262847,
+  0.08963134132345585,
+  0.11679917671441944,
+  -0.18391742694702354,
+  -0.1341058391070169,
+  0.052212617653549884,
+  -0.04814752767248354,
+  0.02126868638891556
+ ]
+}

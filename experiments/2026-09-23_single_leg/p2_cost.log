@@ -1,0 +1,16 @@
+[variants] base: estimator_k3_v53_age5.py
+   F/B 0.22847908581979937  ops 25140.0  wall 60.731809599965345  err ''
+[variants] p2r8: estimator_k3_v53_age5__p2r8.py
+   F/B 0.2180558530185408  ops 23990.0  wall 61.30809639999643  err ''
+[variants] p2r4: estimator_k3_v53_age5__p2r4.py
+   F/B 0.216184811772564  ops 23645.0  wall 134.1492534999852  err ''
+[variants] p2r2: estimator_k3_v53_age5__p2r2.py
+   F/B 0.2151824507841411  ops 23645.0  wall 63.78488099999959  err ''
+[variants] p2r1: estimator_k3_v53_age5__p2r1.py
+   F/B 0.21468143755964775  ops 23645.0  wall 60.00926850002725  err ''
+[variants] age6_p2r8: estimator_k3_v53_age5__age6_p2r8.py
+   F/B 0.2298224079609099  ops 23402.0  wall 64.25852199998917  err ''
+[variants] age6_p2r4: estimator_k3_v53_age5__age6_p2r4.py
+   F/B 0.2279513667149331  ops 23057.0  wall 64.90956749999896  err ''
+[variants] age6_p2r2: estimator_k3_v53_age5__age6_p2r2.py
+   F/B 0.22694900572651022  ops 23057.0  wall 70.6104675999959  err ''
