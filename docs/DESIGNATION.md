@@ -10,20 +10,34 @@ evidence current.
 "Noisy day" means a run whose worst/median ratio is ≥ 1.15 (Sep 23 after ~08:00
 UTC: 1.197–1.235). Quiet runs sit at 1.03–1.055. See RESULTS.md, wall refit.
 
-## Standing — 2026-09-24 02:30 UTC
+## Standing — 2026-09-24 16:30 UTC
 
-**A is now `tr64`, measured.** Submission #332088 read a QUIET-day wall of 80.30 s
-worst / 76.90 s median (worst/median 1.044), 0 nets > 100 s, 0 failed. Implied
-noisy-day worst = 76.90 x 1.24 = **95.4 s**, which clears A's 105 s bound by ~10 s
-and misses B's 95 s bound by 0.4 s. Its raw MSE is v55's to six digits, so the
-only cost of choosing it over the (undesignable) v55 is the +2.14% multiplier.
+**The best score moved, and it is NOT designable.** v57 (#332129) grades
+**5.0443e-09** with an implied noisy-day worst of 90.43 x 1.24 = **112.1 s**,
+over A's 105 s bound and 8 s from the cliff. A therefore stays `tr64` until the
+wall-safe twin of v57 exists.
+
+**The designable follow-up is already proven in principle:** v57 at Strassen
+depth 4 is the same transform v56b applied to v55 (+7.28% multiplier, raw
+IDENTICAL, kernel 176 -> 93 ps/FLOP). Applied to v57 it projects
+**~5.41e-09 at ~68 s**, which would be a better A than tr64 on BOTH axes --
+score (5.41 vs 5.4341e-09) and wall (~68 vs 80.3 s). Building and canarying it
+is the highest-value remaining designation action.
 
 | role | file | sha8 | graded rows | score | worst wall per run (median) | residual worst | VmPeak | meets policy? |
 |---|---|---|---|---:|---|---:|---:|---|
-| **A (recommended)** | `experiments/2026-09-24_wallsafe/mix/estimator_k3_v56c_mix__tr64.py` | `52d83de7` | #332088 | **5.4341e-09** | **80.30 (76.90)** quiet, ratio 1.044 | 0.24128 s | 6,468 MiB | **yes, A** by ~10 s on the implied noisy day; needs one genuine noisy-day re-run |
-| **B (recommended)** | `estimator_k3_v56b_wallsafe.py` | `b401ad75` | #332063 | 5.7076e-09 | 60.7 (54.5), ratio 1.114 | 0.2188 s | 4,908 MiB | **yes, both** by 44 s / 34 s; needs a quiet and a noisy re-run |
-| dominated | `estimator_k3_v50_safe.py` | `f9cb9439` | #331863, #331939, #331989 | 6.192e-09 | 88.7 (84.4) q, 87.7 (85.0) q, 104.1 (87.0) noisy | 0.2655 s | 5,785 MiB | yes, but **dominated by tr64 and v56b** |
-| best score, NOT designable | `estimator_k3_v55_p2r4.py` | `aac641b4` | #331967, #331980 | **5.320e-09** | 114.5 (92.8) noisy, 113.8 (92.5) noisy | 0.2805 s | 6,471 MiB | **no** (6 s from the 120 s cliff) |
+| **best score, NOT designable** | `estimator_k3_v57_corr.py` | `253c7b19` | #332129 | **5.0443e-09** | 92.81 (90.43) quiet, ratio 1.026 | 0.2507 s | 6,434 MiB | **no** — implied noisy 112.1 s > 105 |
+| **A (current)** | `...v56c_mix__tr64.py` | `52d83de7` | #332088 | 5.4341e-09 | 80.30 (76.90) quiet, ratio 1.044 | 0.2413 s | 6,468 MiB | **yes, A** (implied noisy ~95.4 s) |
+| **B (current)** | `estimator_k3_v56b_wallsafe.py` | `b401ad75` | #332063 | 5.7076e-09 | 60.7 (54.5), ratio 1.114 | 0.2188 s | 4,908 MiB | **yes, both** |
+| dominated | `estimator_k3_v50_safe.py` | `f9cb9439` | #331863/939/989 | 6.192e-09 | 88.7 q / 87.7 q / 104.1 noisy | 0.2655 s | 5,785 MiB | dominated |
+| superseded | `estimator_k3_v55_p2r4.py` | `aac641b4` | #331967/980 | 5.320e-09 | 114.5 / 113.8 noisy | 0.2805 s | 6,471 MiB | no |
+
+**Still outstanding for BOTH designates: a genuine noisy-day reading.** Every row
+above was measured on a quiet or moderate server (ratios 1.026-1.114); the noisy
+figures are the x1.24 projection, not readings. Sep 23's noise appeared after
+~08:00 UTC, and today's 08:30 UTC v57 run came back quiet (1.026), so the tail is
+not a fixed time of day. Spend a slot on an A/B re-run whenever a same-day row
+shows a ratio >= 1.15.
 
 **The designation gap is now 2.1% of score**, not 7.3%: v55 5.3200e-09 (undesignable)
 vs tr64 5.4341e-09 (A). Choosing A costs 2.1% and buys ~19 s of margin to the cliff.
@@ -59,3 +73,4 @@ mixed-leaf anchor, not just its two endpoints:
 | 2026-09-23 10:13 | v50 | #331989 | noisy | 104.1 | 87.0 |
 | 2026-09-23 19:56 | v56b | #332063 | moderate (1.114) | 60.7 | 54.5 |
 | 2026-09-24 00:11 | tr64 | #332088 | quiet (1.044) | 80.30 | 76.90 |
+| 2026-09-24 08:30 | v57 | #332129 | quiet (1.026) | 92.81 | 90.43 |
