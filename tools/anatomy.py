@@ -37,8 +37,9 @@ dG transport formula and let the instrument drift from the chain -- this writes 
 PATCHED COPY of the candidate next to the output with exactly two insertions,
 both anchored on a string that occurs once in the file:
 
-  * `_layer`: a call to `_ANATOMY_HOOK(...)` immediately before `pK = {}`, i.e.
-    after every feature exists and before anything consumes them.
+  * `_layer`: a call to `_ANATOMY_HOOK(...)` immediately after `mu_out` is
+    formed -- the same point at which the v57 corrector is applied, so the
+    features recorded here are exactly the values it will see at inference.
   * `_Tower`'s driving loop in `Estimator._tower`: when `_ANATOMY_ONESTEP` holds
     the labelled means, one extra `_layer` call per layer on the substituted
     state, whose output mu is recorded and then thrown away.
@@ -88,17 +89,27 @@ BUDGET = 2 ** 41
 
 # ---------------------------------------------------------------- the patch
 
-#: Anchor in `_layer`, immediately after mu_pre / sigma / D3 / D4 / D21 exist
-#: and before the first consumer. Asserted to occur exactly once.
-_ANCHOR_LAYER = "\n    pK = {}\n"
+#: Anchor in `_layer`, immediately after `mu_out` is formed. This is the SAME
+#: point at which the v57 corrector is applied, and that is deliberate: the
+#: features the corrector is fitted on must be the exact values it will see at
+#: inference. An earlier anchor (before `pK`) had every feature except `mu_out`
+#: and `dmu`, and taking those two from the returned prediction array instead
+#: made the layer-1 and layer-2 features inconsistent with the chain, because
+#: `predict` replaces row 0 with its exact closed form. Asserted unique.
+_ANCHOR_LAYER = """
+    mu_out = K[(1,)]
+    if last_layer:
+        return (mu_out, None, None, 0.0, dG)
+"""
 
 _INJECT_LAYER = '''
+    mu_out = K[(1,)]
     # --- tools/anatomy.py instrumentation (inert unless _ANATOMY_HOOK is set)
     if _ANATOMY_HOOK is not None:
         _ANATOMY_HOOK(layer_index, mu_pre, sigma, D3, D4, W,
-                      None if last_layer else D21)
-
-    pK = {}
+                      None if last_layer else D21, mu, mu_out)
+    if last_layer:
+        return (mu_out, None, None, 0.0, dG)
 '''
 
 #: Anchor in `Estimator._tower`: the one loop that drives the chain.
@@ -208,15 +219,18 @@ def _host(a, xp):
     return np.asarray(a, dtype=np.float64)
 
 
-#: The feature names the hook records, in order. `alpha` is the chain's own
-#: clipped mu_pre/sigma only in the closure; here it is the raw ratio, which is
-#: what a binning axis wants.
-FEATURES = ("mu_pre", "sigma", "alpha", "d3n", "d4n", "wnorm", "d21e")
+#: The feature names the hook records, IN ORDER. The fitted corrector weights
+#: depend on this order, so it is part of the contract between this file,
+#: `tools/corr_ceiling.py` and the shipped estimator -- do not reorder.
+#: `alpha` is the chain's own clipped mu_pre/sigma only inside the closure; here
+#: it is the raw ratio, which is what a binning axis and a feature want.
+FEATURES = ("mu_pre", "sigma", "alpha", "d3n", "d4n", "wnorm", "d21e",
+            "mu_out", "dmu")
 
 
 def make_hook(store: list, xp):
     """Record one row of per-neuron features per layer, on the host."""
-    def hook(layer_index, mu_pre, sigma, D3, D4, W, D21):
+    def hook(layer_index, mu_pre, sigma, D3, D4, W, D21, mu_prev, mu_out):
         mp = _host(mu_pre, xp)
         sg = _host(sigma, xp)
         d3 = _host(D3, xp)
@@ -231,6 +245,7 @@ def make_hook(store: list, xp):
             # copy -- D21 is (n, n) and copying 100 x 16 of them is pointless.
             d21 = D21 if xp is None else D21
             d21e = _host((d21 * d21).sum(axis=1), xp)
+        mo = _host(mu_out, xp)
         with np.errstate(divide="ignore", invalid="ignore"):
             store.append({
                 "layer": int(layer_index),
@@ -240,6 +255,10 @@ def make_hook(store: list, xp):
                 "d4n": d4 / sg ** 4,
                 "wnorm": wn,
                 "d21e": d21e / sg ** 4,
+                "mu_out": mo,
+                # The chain's own previous mean, NOT the prediction array's row
+                # (which `predict` overwrites at layer 1 with a closed form).
+                "dmu": mo - _host(mu_prev, xp).mean(),
             })
     return hook
 
@@ -419,6 +438,7 @@ def main(argv=None) -> int:
     pool_feat: dict = {}
     pool_acc: dict = {}
     pool_one: dict = {}
+    pool_tgt: dict = {}
     setup_done = False
     t0 = time.time()
 
@@ -430,11 +450,12 @@ def main(argv=None) -> int:
             acc_se = np.zeros(depth)
             one_se = np.zeros(depth)
             lbl_sq = np.zeros(depth)
-            dump_feats = FEATURES + (("mu_out", "dmu") if a.dump else ())
+            dump_feats = FEATURES
             for l in range(depth):
                 pool_feat[l] = {f: [] for f in dump_feats}
                 pool_acc[l] = []
                 pool_one[l] = []
+                pool_tgt[l] = []
 
         pred, store, alt = run_net(mod, est, wf, width, depth, seed, xp,
                                    truth, onestep=a.onestep)
@@ -455,16 +476,11 @@ def main(argv=None) -> int:
             for f in FEATURES:
                 pool_feat[l][f].append(rec[f].astype(np.float32))
             pool_acc[l].append(r_acc[l].astype(np.float32))
+            # label - the CHAIN's own mu_out (rec["mu_out"]), which is what the
+            # corrector adds to. Not label - pred[l]: see the dump comment.
+            pool_tgt[l].append((truth[l] - rec["mu_out"]).astype(np.float32))
             if a.onestep and l > 0:
                 pool_one[l].append((alt[l - 1] - truth[l]).astype(np.float32))
-        if a.dump:
-            # The two chain-state features that are not locals of `_layer`: the
-            # layer's own output mean, and its shift from the previous layer's
-            # mean level. Both come straight off the prediction array.
-            for l in range(depth):
-                pool_feat[l]["mu_out"].append(pred[l].astype(np.float32))
-                prev = pred[l - 1].mean() if l else 0.0
-                pool_feat[l]["dmu"].append((pred[l] - prev).astype(np.float32))
 
         if xp is not None:
             xp.get_default_memory_pool().free_all_blocks()
@@ -492,9 +508,18 @@ def main(argv=None) -> int:
                          else np.zeros(nnet * n, dtype=np.float32))
                         for l in range(depth)])
         acc = np.stack([np.concatenate(pool_acc[l]) for l in range(depth)])
+        # THE CORRECTOR'S TRAINING TARGET, recorded explicitly rather than
+        # derived from `accumulated`. They differ in two places and both would
+        # be silent: `accumulated` is chain-MINUS-label (opposite sign), and it
+        # is built from the PREDICTION array, whose row 0 `predict` overwrites
+        # with an exact closed form and whose every row is clamped at zero. The
+        # corrector corrects the chain's own `mu_out`, so that is what this
+        # subtracts from the label.
+        tgt = np.stack([np.concatenate(pool_tgt[l]) for l in range(depth)])
         np.savez_compressed(dpath, X=X.astype(np.float32), features=np.array(names),
                             onestep=one.astype(np.float32),
-                            accumulated=acc.astype(np.float32), netid=netid,
+                            accumulated=acc.astype(np.float32),
+                            target=tgt.astype(np.float32), netid=netid,
                             panel=a.panel, candidate=cand.name)
         print(f"[anatomy] dump -> {dpath.relative_to(ROOT)}  X{X.shape}", flush=True)
 

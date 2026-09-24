@@ -1721,11 +1721,6 @@ def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,
         S = {(1,): mu_pre, (2,): var, (1, 1): C11, (2, 1): D21, (1, 2): D21.T,
              (3,): D3, (4,): D4, (2, 2): D22}
 
-    # --- tools/anatomy.py instrumentation (inert unless _ANATOMY_HOOK is set)
-    if _ANATOMY_HOOK is not None:
-        _ANATOMY_HOOK(layer_index, mu_pre, sigma, D3, D4, W,
-                      None if last_layer else D21)
-
     pK = {}
     prog = const["wick"]
     if prog["fast_1d"]:
@@ -1830,6 +1825,10 @@ def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,
         K[ip] = acc
 
     mu_out = K[(1,)]
+    # --- tools/anatomy.py instrumentation (inert unless _ANATOMY_HOOK is set)
+    if _ANATOMY_HOOK is not None:
+        _ANATOMY_HOOK(layer_index, mu_pre, sigma, D3, D4, W,
+                      None if last_layer else D21, mu, mu_out)
     if last_layer:
         return (mu_out, None, None, 0.0, dG)
 
