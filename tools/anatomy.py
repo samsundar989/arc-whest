@@ -67,6 +67,22 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+
+def _rel(p) -> str:
+    """`p` relative to the repo root for LOGGING, never raising.
+
+    `Path.relative_to` raises when the path is not under `ROOT`, and under
+    worker-q `ROOT` is the job's snapshot directory while an output path is
+    deliberately absolute and outside it (`.gpuq.toml`: "Always give heavy jobs
+    an ABSOLUTE output path"). That combination failed jobs 2090 and 2091 on a
+    print statement AFTER all their work was written -- a cosmetic line that
+    cost two exit-code-1 job reports.
+    """
+    try:
+        return str(Path(p).relative_to(ROOT))
+    except ValueError:
+        return str(p)
+
 LOCAL_SIM = ROOT / "local_sim"
 GPU_SHIM = ROOT / "tools" / "gpu_shim"
 
@@ -372,7 +388,7 @@ def main(argv=None) -> int:
     patched_path = out.parent / f"_patched_{cand.stem}.py"
     patched_path.write_text(patch_source(cand.read_text(encoding="utf-8")),
                             encoding="utf-8", newline="\n")
-    print(f"[anatomy] patched copy -> {patched_path.relative_to(ROOT)}", flush=True)
+    print(f"[anatomy] patched copy -> {_rel(patched_path)}", flush=True)
 
     mod = load_module(patched_path, "_anatomy_candidate")
     est = mod.Estimator()
@@ -521,7 +537,7 @@ def main(argv=None) -> int:
                             accumulated=acc.astype(np.float32),
                             target=tgt.astype(np.float32), netid=netid,
                             panel=a.panel, candidate=cand.name)
-        print(f"[anatomy] dump -> {dpath.relative_to(ROOT)}  X{X.shape}", flush=True)
+        print(f"[anatomy] dump -> {_rel(dpath)}  X{X.shape}", flush=True)
 
     # ---- 1. MSE by layer and the growth ratio
     mse = acc_se / tot
@@ -565,7 +581,7 @@ def main(argv=None) -> int:
     res["corr"] = corr
 
     out.write_text(json.dumps(res, indent=1, default=float) + "\n", encoding="utf-8")
-    print(f"\n[anatomy] -> {out.relative_to(ROOT)}")
+    print(f"\n[anatomy] -> {_rel(out)}")
 
     print(f"\n  layer      MSE     ratio    one-step   one/acc")
     for r in by_layer:

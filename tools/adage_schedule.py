@@ -27,6 +27,22 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+
+def _rel(p) -> str:
+    """`p` relative to the repo root for LOGGING, never raising.
+
+    `Path.relative_to` raises when the path is not under `ROOT`, and under
+    worker-q `ROOT` is the job's snapshot directory while an output path is
+    deliberately absolute and outside it (`.gpuq.toml`: "Always give heavy jobs
+    an ABSOLUTE output path"). That combination failed jobs 2090 and 2091 on a
+    print statement AFTER all their work was written -- a cosmetic line that
+    cost two exit-code-1 job reports.
+    """
+    try:
+        return str(Path(p).relative_to(ROOT))
+    except ValueError:
+        return str(p)
+
 sys.path.insert(0, str(ROOT / "local_sim"))
 BACKEND = os.environ.get("WHEST_BACKEND", "cupy").lower()
 if BACKEND == "cupy":
@@ -132,7 +148,7 @@ def main() -> int:
         if not p.is_absolute():
             p = ROOT / p
         p.write_text(json.dumps(summary, indent=1) + "\n", encoding="utf-8")
-        print(f"\n[sched] -> {p.relative_to(ROOT)}")
+        print(f"\n[sched] -> {_rel(p)}")
     return 0
 
 

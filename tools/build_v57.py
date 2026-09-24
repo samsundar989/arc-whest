@@ -52,6 +52,22 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent
+
+def _rel(p) -> str:
+    """`p` relative to the repo root for LOGGING, never raising.
+
+    `Path.relative_to` raises when the path is not under `ROOT`, and under
+    worker-q `ROOT` is the job's snapshot directory while an output path is
+    deliberately absolute and outside it (`.gpuq.toml`: "Always give heavy jobs
+    an ABSOLUTE output path"). That combination failed jobs 2090 and 2091 on a
+    print statement AFTER all their work was written -- a cosmetic line that
+    cost two exit-code-1 job reports.
+    """
+    try:
+        return str(Path(p).relative_to(ROOT))
+    except ValueError:
+        return str(p)
+
 BASE = ROOT / "estimator_k3_v55_p2r4.py"
 OUT = ROOT / "estimator_k3_v57_corr.py"
 
@@ -167,6 +183,15 @@ def _corr_delta(li, corr, mu_pre, sigma, D3, D4, W, D21, mu_prev, mu_out, n,
     The target's mean and standard deviation are folded into `W3`/`b3` at export
     time, so there is no de-standardisation step to pay for here.
     """
+    # SHAPE-GENERIC OR NOTHING (grader contract rule 6). The weight stack has one
+    # page per layer of the depth it was FITTED at, and `li` is the real depth, so
+    # a deeper MLP than the table would index off the end -- exactly the bug
+    # `_K4_LAM` documents above, where an independent Skeptic found every case at
+    # 256x32 raising IndexError. Past the table the corrector is DISABLED, not
+    # extrapolated: inventing a correction for a depth we never fitted is the
+    # same error one layer further out.
+    if li >= corr["W1"].shape[0]:
+        return dtype(0.0)
     inv = dtype(1.0) / sigma
     inv2 = inv * inv
     if D21 is None:
@@ -245,7 +270,7 @@ def main(argv=None) -> int:
         out = ROOT / out
     out.write_text(src, encoding="utf-8", newline="\n")
     on = "_CORR_ON = True" in src
-    print(f"[build_v57] -> {out.relative_to(ROOT)}  ({len(src):,} bytes, "
+    print(f"[build_v57] -> {_rel(out)}  ({len(src):,} bytes, "
           f"_CORR_ON={on})")
 
     if a.verify:
