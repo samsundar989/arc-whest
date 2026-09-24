@@ -1325,23 +1325,53 @@ age 5 = 0.7983/0.845 − 1). The same lever, reached a different way. And the
 ordering is monotone in folds, not in adaptivity: **every arm that improves raw
 does so by folding LESS often**, which is what age 6 already does.
 
-### 3e. Verdict
+### 3e. Verdict — KILLED at −0.72%, against a 2% kill
 
-Cost is being metered per net on the f64 twin (`tools/cost_sweep.py`, worker-q
-job 2090) rather than inferred, because HANDOFF Step 3 asks for min/mean/max and
-because the spread is the interesting quantity. But the score arithmetic is
-already visible: tau 0.28 needs its FLOPs to come in under +3.4% to clear the 2%
-kill, and its schedule is fixed age 6's, which D5 measured at **+5.14%** FLOPs
-against age 5 — implying roughly **−0.6% of score**, not −2%.
+Per-net cost on the f64 grader twin, 5 DEV nets per arm (`tools/cost_sweep.py`,
+worker-q 2090). v55 reads **475,395,428,585 FLOPs with 0.00% spread** — exactly
+its known value, which is the control passing:
 
-**Read against the strategist's hypothesis.** Response §4 proposed adaptive age
-as "the only candidate that survives the evidence" for the leaders' ±6% per-net
-cost variation. This says it is not that mechanism *in this chain*: the lineage
-energies are too tightly distributed across nets for a tolerance to produce
-meaningful per-net variation, and the one arm that does vary meaningfully
-(tau 0.48, 13 distinct schedules) is 8.6% worse on raw. Whatever makes the
-leaders' cost vary by ±6%, it is not an energy tolerance on a factorized K3
-tower's fold schedule.
+| arm | FLOPs mean | spread | multiplier | Δraw | Δcost | **Δscore** | projected public |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| v55 (age 5) | 475,395,428,585 | **0.00%** | 0.21618 | — | — | — | 5.3301e-09 |
+| tau 0.28 | 501,295,522,365 | **0.00%** | 0.22796 | −5.40% | +5.45% | **−0.25%** | 5.3169e-09 |
+| tau 0.34 | 495,499,113,431 | 3.34% | 0.22533 | −4.16% | +4.23% | **−0.11%** | 5.3243e-09 |
+| tau 0.40 | 480,349,166,551 | 2.13% | 0.21844 | −1.75% | +1.04% | **−0.72%** | 5.2916e-09 |
+
+**Best arm −0.72%. The kill is < 2%. Step 3 is CLOSED.**
+
+Two independent confirmations inside the table. `tau 0.28`'s FLOP spread is
+**0.00%** — it is a fixed schedule, i.e. fixed age 6, as §3c said — and its
++5.45% cost against −5.40% raw reproduces D5's age-6 measurement (+5.14% for
+−5.53%) from a completely different mechanism. And the arms that DO vary per net
+reach only **2.13–3.34%** of spread, against the ±6% (a 12% range) the leaders'
+telemetry shows.
+
+**Predictions scored.** Strategist: −2 to −5% score. Worker: **−0% to −2%, "I
+expect this to FAIL its 2% kill"**, with the specific sub-predictions that per-net
+FLOP spread would be **< 4%** (measured 0.00–3.34%) and that any gain would come
+from the low-age end rather than smarter allocation (it did: every arm that
+improved raw folded less often). The worker's reasoning — that D5's age curve is
+nearly flat past 5, so the curvature available to an adaptive schedule is small —
+is what the numbers show. That is now three slices running where the strategist's
+predictions were optimistic and the worker's were right; the priors should be set
+accordingly.
+
+**And the materialisation question never arose.** It was to be bought with a
+canary only if an arm cleared 2%. None did, so the standing zero-materialisations
+invariant is untouched and no slot was spent on it.
+
+**What this closes, and what it leaves open.** Response §4 named adaptive age as
+"the only candidate that survives the evidence" for the leaders' per-net cost
+variation. It is not that mechanism in this chain — the lineage energies are too
+tightly distributed for a tolerance to allocate age per net. The leaders' ±6%
+remains **unexplained**, and this is the second hypothesis for it to fail (after
+per-net λ, whose driving ratio varies only 1.8–9.0% CV). Both failures have the
+same shape: *this chain's per-net statistics are too uniform to key an adaptive
+decision on.* If a third hypothesis is wanted, it should look for variation that
+is NOT built from the weight energies — e.g. an iterative solve with a
+convergence test, whose iteration count varies for reasons of conditioning rather
+than scale.
 
 
 ## D5 — PLAN's premise is BACKWARDS: the old tier is under-funded (2026-09-22)
