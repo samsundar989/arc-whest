@@ -99,9 +99,12 @@ _I_APPLY = """
     # channels are deliberately left alone. Inert when `_CORR_ON` is False or a
     # layer's weights are zero.
     if _CORR_ON and const.get("corr") is not None:
-        mu_out = mu_out + _corr_delta(
+        global _CORR_CPREV
+        _c = _corr_delta(
             layer_index, const["corr"], mu_pre, sigma, D3, D4, W,
             None if last_layer else D21, mu, mu_out, n, dtype)
+        mu_out = mu_out + _c
+        _CORR_CPREV = _c
     if last_layer:
         return (mu_out, None, None, 0.0, dG)
 """
@@ -143,7 +146,20 @@ _CORR_ON = False
 #: mu_pre, sigma, alpha, D3/s^3, D4/s^4, ||W[:,i]||, D21energy/s^4, mu_out, dmu.
 #: This order is a CONTRACT shared with `tools/anatomy.py` FEATURES and
 #: `tools/corr_ceiling.py` expand(). Reordering it silently invalidates the fit.
-_CORR_NF = 9
+#: The TENTH channel is the recursive one: the previous layer's applied
+#: correction, transported into this layer's coordinates, `(W_l^T c_{l-1})_i`.
+#: HANDOFF 09-24 Step 2 lists it, and it is the one feature that could not be
+#: measured before a corrector existed -- every ceiling number on record excludes
+#: it. It is NOT redundant with `mu_pre`: `mu_pre` already contains the
+#: correction, mixed with everything else, while this isolates it.
+_CORR_NF = 10
+
+#: The previous layer's applied correction, in that layer's own coordinates.
+#: A module global rather than a sixth element of the state tuple, following the
+#: precedent `_CUR_LAYER`/`_CUR_DEPTH` already set in this file: `_layer` is
+#: called strictly in order within one `predict`, and `_corr_arrays` clears this
+#: once per MLP, so no value ever crosses from one MLP to the next.
+_CORR_CPREV = None
 
 #: Pairwise products of the first six raw channels, i < j -- the expansion the
 #: ridge and MLP ceilings were measured with.
@@ -180,13 +196,17 @@ def _corr_arrays(dtype):
     a candidate near a multiplier boundary on the wrong side. Two operations per
     array, sixteen per MLP.
     """
+    # Clear the recursive channel's carry. `_constants` calls this exactly once
+    # per `predict`, before any `_layer`, so no correction leaks between MLPs.
+    global _CORR_CPREV
+    _CORR_CPREV = None
     if not _CORR_ON or not _CORR_B64:
         return None
     return {k: fnp.reshape(fnp.asarray(v, dtype=dtype), shape)
             for k, (v, shape) in _corr_decode().items()}
 
 
-def _corr_raw(mu_pre, sigma, D3, D4, W, D21, mu_prev, mu_out, dtype):
+def _corr_raw(mu_pre, sigma, D3, D4, W, D21, mu_prev, mu_out, cprev_t, dtype):
     """The NINE raw per-neuron channels, `(n, 9)`, in the fitted order.
 
     THE SINGLE IMPLEMENTATION. `tools/fit_corr_seq.py` calls this exact function
@@ -218,7 +238,7 @@ def _corr_raw(mu_pre, sigma, D3, D4, W, D21, mu_prev, mu_out, dtype):
     return fnp.stack([mu_pre, sigma, mu_pre * inv,
                       D3 * (inv2 * inv), D4 * (inv2 * inv2),
                       fnp.sqrt((W * W).sum(axis=0)), d21e,
-                      mu_out, mu_out - mu_prev.mean()], axis=1)
+                      mu_out, mu_out - mu_prev.mean(), cprev_t], axis=1)
 
 
 def _corr_delta(li, corr, mu_pre, sigma, D3, D4, W, D21, mu_prev, mu_out, n,
@@ -237,7 +257,13 @@ def _corr_delta(li, corr, mu_pre, sigma, D3, D4, W, D21, mu_prev, mu_out, n,
     # same error one layer further out.
     if li >= corr["W1"].shape[0]:
         return dtype(0.0)
-    X = _corr_raw(mu_pre, sigma, D3, D4, W, D21, mu_prev, mu_out, dtype)
+    # The recursive channel. At layer 0 there is no previous correction, so it is
+    # an exact zero -- which is how it was FITTED, not a stand-in.
+    if _CORR_CPREV is None:
+        cprev_t = mu_out * dtype(0.0)
+    else:
+        cprev_t = W.T @ _CORR_CPREV
+    X = _corr_raw(mu_pre, sigma, D3, D4, W, D21, mu_prev, mu_out, cprev_t, dtype)
     X = fnp.concatenate([X, X * X, X[:, _CORR_PI] * X[:, _CORR_PJ]], axis=1)
     X = (X - corr["fmu"][li]) * corr["fisd"][li]
     h = fnp.tanh(X @ corr["W1"][li] + corr["b1"][li])

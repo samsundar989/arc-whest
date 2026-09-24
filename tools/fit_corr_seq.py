@@ -239,9 +239,15 @@ def main(argv=None) -> int:
           flush=True)
 
     H = a.hidden
-    P = {"fmu": np.zeros((depth, 33), np.float32),
-         "fisd": np.ones((depth, 33), np.float32),
-         "W1": np.zeros((depth, 33, H), np.float32),
+    # NF raw channels -> NF + NF + 15 expanded columns. Derived from the
+    # estimator, never hardcoded: the recursive channel took it from 33 to 35 and
+    # a hardcoded 33 would have silently truncated every fit.
+    NF = int(getattr(mod, "_CORR_NF", 9))
+    NC = NF + NF + len(PI)
+    print(f"[seq] {NF} raw channels -> {NC} expanded columns")
+    P = {"fmu": np.zeros((depth, NC), np.float32),
+         "fisd": np.ones((depth, NC), np.float32),
+         "W1": np.zeros((depth, NC, H), np.float32),
          "b1": np.zeros((depth, H), np.float32),
          "W2": np.zeros((depth, H, H), np.float32),
          "b2": np.zeros((depth, H), np.float32),
@@ -273,8 +279,12 @@ def main(argv=None) -> int:
                  _l=l):
             if li != _l:
                 return
+            # Same recursive channel the estimator builds, from the estimator's
+            # own carry -- so the fitted rows are the served rows.
+            cp = mod._CORR_CPREV
+            cprev_t = (mu_out * dtype(0.0)) if cp is None else (W.T @ cp)
             raw = mod._corr_raw(mu_pre, sigma, D3, D4, W, D21, mu_prev, mu_out,
-                                dtype)
+                                cprev_t, dtype)
             Xs.append(np.asarray(xp.asnumpy(raw) if xp is not None else raw,
                                  dtype=np.float64))
             ys.append(np.asarray(xp.asnumpy(mu_out) if xp is not None else mu_out,
@@ -317,7 +327,7 @@ def main(argv=None) -> int:
         Zva = xp.asarray(((Z[va] - fmu) / fsd).astype(np.float32))
         ytr = xp.asarray(((y[tr_m] - ym) / ysd).astype(np.float32))
 
-        net = MLPFit(xp, 33, H, seed=20260924 + l)
+        net = MLPFit(xp, NC, H, seed=20260924 + l)
         best, best_snap, best_step = -np.inf, net.snapshot(), 0
         for s in range(a.steps):
             lr = a.lr * (0.5 ** (s / max(1, a.steps // 3)))
