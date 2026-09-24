@@ -196,7 +196,16 @@ def _corr_raw(mu_pre, sigma, D3, D4, W, D21, mu_prev, mu_out, dtype):
     meaningless, and the feature ORDER is a contract shared with
     `tools/anatomy.py` FEATURES and `tools/fit_corr.py`.
     """
-    inv = dtype(1.0) / sigma
+    # `fnp.divide`, NOT `dtype(1.0) / sigma`. With the scalar on the left numpy's
+    # own `__truediv__` wins the dispatch and flopscope auto-routes with
+    # "np.divide(FlopscopeArray) auto-routed to fnp.divide" -- i.e. the operation
+    # was nearly billed by the wrong meter. This file's `dG` block records the
+    # same rule for products ("the array goes on the LEFT of every scalar
+    # product"). The WSL gate caught it as a new stderr line, which is the check
+    # RESULTS.md keeps for exactly this ("a candidate that starts emitting new
+    # warnings is telling you something"). `fnp.divide` is the operation the
+    # auto-route performed, called directly, so the values are bit-identical.
+    inv = fnp.divide(dtype(1.0), sigma)
     inv2 = inv * inv
     if D21 is None:
         # The LAST layer never forms D21 -- skipping it is worth 5 matmuls per
