@@ -1208,12 +1208,42 @@ is also exactly inert (`tanh(0) = 0` through both hidden layers, then `+ b3 = 0`
 so a partial fit degrades to the base chain layer by layer rather than
 misbehaving.
 
-Metered cost of the corrector under the REAL flopscope (not yet a full candidate
-run): the `33→32→32→1` forward is 5.34 MFLOP and 5 op calls per layer with tanh
-billed at 17 FLOP/element; features add ~15 ops and ~4 MFLOP (`||W[:,i]||` and
-the D21 row energy are the only `n^2` pieces). Projected: **~128 MFLOP (0.027% of
-v55's 475 G) and ~500 ops (+2.1%, i.e. +0.0055 s of a 0.146 s residual
-headroom).** FLOPs are a non-issue; ops are the thing to watch, as always.
+**Cost, MEASURED on the f64 grader twin** (not projected). Built with ZERO
+weights so the corrector's whole arithmetic path runs and returns exactly 0 --
+which is also a strong test of the injection: v57 with `_CORR_ON = True` and zero
+weights is **bit-identical to v55** (`tools/_parity.py`, max|diff| = 0.000e+00),
+so base64 decode, the stacked `_constants` arrays, the feature assembly and the
+MLP forward are all live and provably inert.
+
+| | v55 | v57 (corrector live) | delta |
+|---|---:|---:|---:|
+| FLOPs / MLP | 475,395,428,585 | 475,550,316,409 | **+0.0326%** |
+| multiplier | 0.21618481 | 0.21625525 | +0.0326% |
+| op calls | 23,645 | **24,186** | +541 (+2.29%) |
+| scalar materializations | 0 | **0** | — |
+| projected residual @ 11.09 us/op | 0.2622 s | **0.2682 s** | 1.49x headroom |
+
+The projection in the paragraph above (+0.027% FLOPs, ~500 ops) was accurate.
+Ops clear the 26,000 gate; the residual headroom equals shipped v53's 1.49x.
+**Cost is a non-issue: essentially the entire raw gain flows to the score.**
+
+**So the gate is a single number.** Against the 5.3200e-09 best graded, at
+multiplier 0.21625525 and the 1.042 DEV->graded factor, the corrector must deliver
+
+    raw gain >= 3.22% on DEV 100
+
+to clear PLAN §5's "3% better than the best graded". The measured teacher-forced
+ceiling is 6.16-7.32%, so there is ~2x of margin for the compounding losses §2d
+lists. What it buys if it lands:
+
+| DEV raw gain | projected public | vs best graded |
+|---:|---:|---:|
+| 3.00% | 5.1719e-09 | −2.78% (fails the gate) |
+| **3.22%** | **5.1604e-09** | **−3.00% (the gate)** |
+| 5.00% | 5.0652e-09 | −4.79% |
+| 6.16% | 5.0034e-09 | −5.95% |
+| 7.32% | 4.9415e-09 | −7.11% |
+
 
 
 ## Step 3 (HANDOFF 09-24) — per-lineage adaptive age: a FUZZY FIXED AGE, not an allocation (2026-09-24)
