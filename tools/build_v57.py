@@ -86,6 +86,12 @@ _A_APPLY = """
 
 _I_APPLY = """
     mu_out = K[(1,)]
+    # ---- tools/fit_corr_seq.py hook. None in the shipped file. It fires on the
+    # UNCORRECTED `mu_out`, which is exactly what the corrector is fitted to
+    # predict against, and it is placed before the correction for that reason.
+    if _CORR_HOOK is not None:
+        _CORR_HOOK(layer_index, mu_pre, sigma, D3, D4, W,
+                   None if last_layer else D21, mu, mu_out, n, dtype)
     # ---- THE IN-LOOP MEAN CORRECTION (v57) --------------------------------
     # Applied HERE, to the state, not to the output array: `mu_out` is what the
     # next layer transports as `mu_pre = W^T mu`, so a correction added here
@@ -150,6 +156,10 @@ _CORR_B64 = {}
 
 _CORR_DECODED = None
 
+#: Set by `tools/fit_corr_seq.py` only; None in the shipped file, where the
+#: `if` below is one Python identity test per layer and bills nothing.
+_CORR_HOOK = None
+
 
 def _corr_decode():
     """Base64 -> Python lists. PURE PYTHON, so it bills nothing and cannot make
@@ -176,6 +186,32 @@ def _corr_arrays(dtype):
             for k, (v, shape) in _corr_decode().items()}
 
 
+def _corr_raw(mu_pre, sigma, D3, D4, W, D21, mu_prev, mu_out, dtype):
+    """The NINE raw per-neuron channels, `(n, 9)`, in the fitted order.
+
+    THE SINGLE IMPLEMENTATION. `tools/fit_corr_seq.py` calls this exact function
+    through a hook to build its training rows, so the features the corrector is
+    fitted on cannot drift from the features it is served. Writing them twice --
+    once here and once in the trainer -- is how a fit silently becomes
+    meaningless, and the feature ORDER is a contract shared with
+    `tools/anatomy.py` FEATURES and `tools/fit_corr.py`.
+    """
+    inv = dtype(1.0) / sigma
+    inv2 = inv * inv
+    if D21 is None:
+        # The LAST layer never forms D21 -- skipping it is worth 5 matmuls per
+        # lineage and is why `last_layer` pruning exists. Its energy channel is
+        # therefore a constant zero, which is exactly how the corrector was
+        # FITTED for that layer, not an approximation made at inference.
+        d21e = mu_out * dtype(0.0)
+    else:
+        d21e = (D21 * D21).sum(axis=1) * (inv2 * inv2)
+    return fnp.stack([mu_pre, sigma, mu_pre * inv,
+                      D3 * (inv2 * inv), D4 * (inv2 * inv2),
+                      fnp.sqrt((W * W).sum(axis=0)), d21e,
+                      mu_out, mu_out - mu_prev.mean()], axis=1)
+
+
 def _corr_delta(li, corr, mu_pre, sigma, D3, D4, W, D21, mu_prev, mu_out, n,
                 dtype):
     """The fitted mean correction for layer `li`, as an `(n,)` array.
@@ -192,20 +228,7 @@ def _corr_delta(li, corr, mu_pre, sigma, D3, D4, W, D21, mu_prev, mu_out, n,
     # same error one layer further out.
     if li >= corr["W1"].shape[0]:
         return dtype(0.0)
-    inv = dtype(1.0) / sigma
-    inv2 = inv * inv
-    if D21 is None:
-        # The LAST layer never forms D21 -- skipping it is worth 5 matmuls per
-        # lineage and is why `last_layer` pruning exists. Its energy channel is
-        # therefore a constant zero, which is exactly how the corrector was
-        # FITTED for that layer, not an approximation made at inference.
-        d21e = mu_out * dtype(0.0)
-    else:
-        d21e = (D21 * D21).sum(axis=1) * (inv2 * inv2)
-    X = fnp.stack([mu_pre, sigma, mu_pre * inv,
-                   D3 * (inv2 * inv), D4 * (inv2 * inv2),
-                   fnp.sqrt((W * W).sum(axis=0)), d21e,
-                   mu_out, mu_out - mu_prev.mean()], axis=1)
+    X = _corr_raw(mu_pre, sigma, D3, D4, W, D21, mu_prev, mu_out, dtype)
     X = fnp.concatenate([X, X * X, X[:, _CORR_PI] * X[:, _CORR_PJ]], axis=1)
     X = (X - corr["fmu"][li]) * corr["fisd"][li]
     h = fnp.tanh(X @ corr["W1"][li] + corr["b1"][li])
