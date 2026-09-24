@@ -174,19 +174,30 @@ def main(argv=None) -> int:
     fnp = sys.modules["flopscope.numpy"] if "flopscope.numpy" in sys.modules else None
 
     rows = panels.nets(a.panel)[: a.n]
-    # Load every net once; the panel is swept many times.
-    print(f"[seq] loading {len(rows)} nets from {a.panel}", flush=True)
-    nets = []
-    for split, idx, seed, _nm in rows:
+
+    # DO NOT pre-load the panel onto the device. One net's weights are
+    # 16 x 1024 x 1024 float64 = 134 MB, so caching 100 of them is 13.4 GB of
+    # VRAM (and the same again in host RAM as float64) -- it blew a 10 GiB pool
+    # on the first attempt. `real_data.get` reads from the on-disk HF cache and
+    # is cheap next to a chain sweep, which is why `tools/anatomy.py` and
+    # `tools/probe.py` both load per net. Same here.
+    def load(i):
+        split, idx, seed, _nm = rows[i]
         w, tr, _ = rd.get(idx, split, dtype=np.float32)
-        depth, width = w.shape[0], w.shape[1]
+        dp, wd = w.shape[0], w.shape[1]
         wf = []
         for x in w:
             arr = np.asarray(x, dtype=np.float64)
             arr.setflags(write=False)
             wf.append(xp.asarray(arr) if xp is not None else arr)
-        nets.append((wf, width, depth, int(seed), np.asarray(tr, dtype=np.float64)))
-    depth, width = nets[0][2], nets[0][1]
+        return wf, wd, dp, int(seed), np.asarray(tr, dtype=np.float64)
+
+    _w0, width, depth, _s0, _t0 = load(0)
+    del _w0, _t0
+    if xp is not None:
+        xp.get_default_memory_pool().free_all_blocks()
+    print(f"[seq] {len(rows)} nets from {a.panel}, depth {depth}, width {width}",
+          flush=True)
 
     H = a.hidden
     P = {"fmu": np.zeros((depth, 33), np.float32),
@@ -207,13 +218,13 @@ def main(argv=None) -> int:
     mod._CORR_ON = True
 
     rng = np.random.default_rng(0)
-    nval = int(round(a.val_frac * len(nets)))
-    val_ids = set(rng.permutation(len(nets))[:nval].tolist())
-    print(f"[seq] {len(nets) - nval} train / {nval} val nets (whole nets held out)")
+    nval = int(round(a.val_frac * len(rows)))
+    val_ids = set(rng.permutation(len(rows))[:nval].tolist())
+    print(f"[seq] {len(rows) - nval} train / {nval} val nets (whole nets held out)")
     print(f"{'layer':>5} {'rows':>8} {'MSE':>12} {'R2 val':>9} {'R2 train':>9} {'step':>6}")
 
     est = mod.Estimator()
-    rep = {"panel": a.panel, "n": len(nets), "hidden": H, "steps": a.steps,
+    rep = {"panel": a.panel, "n": len(rows), "hidden": H, "steps": a.steps,
            "val_nets": nval, "layers": {}}
 
     for l in range(depth):
@@ -231,7 +242,8 @@ def main(argv=None) -> int:
                                  dtype=np.float64))
 
         mod._CORR_HOOK = hook
-        for i, (wf, wdt, dp, seed, truth) in enumerate(nets):
+        for i in range(len(rows)):
+            wf, wdt, dp, seed, truth = load(i)
             est.setup(_Ctx(wdt, dp, BUDGET, 0))
             before = len(Xs)
             est.predict(_MLP(wf, wdt, dp, seed), BUDGET)
@@ -240,6 +252,7 @@ def main(argv=None) -> int:
             # target = label - the CHAIN's uncorrected mu_out at this layer
             ys[-1] = truth[l] - ys[-1]
             ids.append(np.full(len(ys[-1]), i, dtype=np.int64))
+            del wf
             if xp is not None:
                 xp.get_default_memory_pool().free_all_blocks()
         mod._CORR_HOOK = None
