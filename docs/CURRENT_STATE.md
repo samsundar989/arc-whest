@@ -5,18 +5,18 @@
 
 ## Best graded
 
-**4.9347e-09** — `estimator_k3_v62_s1.py`, #332313 (v59 + the twin's end-to-end S1 corrector
-pages), 100/100, 0 failed, worst wall 102.6 s (median 90.3, moderately noisy). Prev 4.9756e-09 (v59).
+**4.9124e-09** — `estimator_k3_v64_s2.py`, #332350 (v59 + the twin's end-to-end S1 corrector pages
++ S2 λ/θ/feed gains), 100/100, 0 failed, worst wall 94.5 s (quiet). Prev 4.9347e-09 (v62_s1 #332313).
 
 ## The designation pair (Samuel designates; agents never do)
 
 | role | file | graded | score | implied noisy worst |
 |---|---|---|---|---:|
-| **A** | `estimator_k3_v62_s1.py` | #332313 | **4.9347e-09** | 111.9 s (policy ≤ ~115 s) |
+| **A** | `estimator_k3_v64_s2.py` | #332350 | **4.9124e-09** | 113.0 s (policy ≤ ~115 s) |
 | **B** | `estimator_k3_v60_ws400.py` | #332223 | 5.3387e-09 | 69.1 s (policy ≤ 95 s) |
 
-`estimator_k3_v62_ws.py` (v62_s1 at leaf 64) is built and validated: the better B, for the Sep 26
-A/B slot. Rules v14 §7 ranks only the better of the two.
+`estimator_k3_v64_ws.py` (v64_s2 at leaf 64) is the better B, for the Sep 26 A/B slot
+(it supersedes `estimator_k3_v62_ws.py`). Rules v14 §7 ranks only the better of the two.
 
 ## In flight (HANDOFF 09-25)
 

@@ -65,6 +65,8 @@ TRAINABLE = {
     "S1": tuple(f"corr/{k}" for k in ("W1", "b1", "W2", "b2", "W3", "b3")),
     "S2": tuple(f"corr/{k}" for k in ("W1", "b1", "W2", "b2", "W3", "b3"))
     + ("gain/lam", "gain/theta", "gain/feed"),
+    "S2t": tuple(f"corr/{k}" for k in ("W1", "b1", "W2", "b2", "W3", "b3"))
+    + ("gain/lam", "gain/theta", "gain/feed", "gain/tt", "gain/t1", "gain/cu", "gain/cb"),
     "S4": tuple(f"sig/{k}" for k in ("S1", "c1", "S2", "c2")),
     "S14": tuple(f"corr/{k}" for k in ("W1", "b1", "W2", "b2", "W3", "b3"))
     + tuple(f"sig/{k}" for k in ("S1", "c1", "S2", "c2")),
@@ -135,6 +137,31 @@ TWIN_PATCHES = [
     ('def _own_extra(x):\n    th = _OWN_THETA_FAM * _prof("theta")\n',
      '_TWG = None\n\n\ndef _own_extra(x):\n    th = _OWN_THETA_FAM * _prof("theta")\n'
      '    if _TWG is not None:\n        return x * (th * _TWG["theta"][_CUR_LAYER])\n'),
+    # --- S2t: per-TERM gains (HANDOFF 09-25 Step 2 (iii)). Each is live only
+    # when its key is installed, so S1/S2 runs are unaffected.
+    # (a) the bivariate closure-table terms, by row index in table["terms"]
+    ('    for row in table["terms"]:\n',
+     '    for _ridx, row in enumerate(table["terms"]):\n'),
+    ("        pK[ip] = term if ip not in pK else pK[ip] + term\n",
+     '        if _TWG is not None and "tt" in _TWG:\n'
+     '            term = term * _TWG["tt"][layer_index, _ridx]\n'
+     "        pK[ip] = term if ip not in pK else pK[ip] + term\n"),
+    # (b) the 1-D fast path: kappa3 / kappa4 contributions per output order p
+    ('        W4 = fnp.stack([w[kp] for kp in prog["w4_keys"]])\n',
+     '        W4 = fnp.stack([w[kp] for kp in prog["w4_keys"]])\n'
+     '        if _TWG is not None and "t1" in _TWG:\n'
+     '            W3 = W3 * _TWG["t1"][layer_index, 0][:, None]\n'
+     '            W4 = W4 * _TWG["t1"][layer_index, 1][:, None]\n'),
+    # (c) closure univariate extras, per (term, p)
+    ("        cvec = fnp.array([c for fs, k, c in sel], dtype=dtype)\n",
+     "        cvec = fnp.array([c for fs, k, c in sel], dtype=dtype)\n"
+     '        if _TWG is not None and "cu" in _TWG:\n'
+     '            cvec = cvec * _TWG["cu"][_CUR_LAYER, [_u for _u, (_f, _k, _c) in enumerate(prog["uni"]) if str(p) in _c], p - 1]\n'),
+    # (d) closure bivariate extras, per term
+    ("        Rj = fnp.stack([H[row[(kj, out[1])]] * c for i, ki, kj, c in sel])\n",
+     "        Rj = fnp.stack([H[row[(kj, out[1])]] * c for i, ki, kj, c in sel])\n"
+     '        if _TWG is not None and "cb" in _TWG:\n'
+     '            Rj = Rj * _TWG["cb"][_CUR_LAYER, [i for i, *_ in sel]][:, None]\n'),
 ]
 
 
@@ -198,6 +225,14 @@ class Twin:
                      for g in ("corr", "sig") if self.const.get(g) is not None}
         one = torch.ones(depth, dtype=torch.float32, device=DEV)
         self.base["gain"] = {"lam": one.clone(), "theta": one.clone(), "feed": one.clone()}
+        # S2t per-term gains: table terms, 1-D kappa3/kappa4 per p, closure extras
+        nterm = len(self.table["terms"])
+        cprog = self.const["closure"]["prog"] if self.const.get("closure") else {"uni": [], "biv": []}
+        nps = len(self.const["wick"]["ps"])
+        mk = lambda *shape: torch.ones(shape, dtype=torch.float32, device=DEV)
+        self.base["gain"].update({"tt": mk(depth, nterm), "t1": mk(depth, 2, nps),
+                                  "cu": mk(depth, len(cprog["uni"]), 4),
+                                  "cb": mk(depth, len(cprog["biv"]))})
 
     def leaf(self, key):
         g, k = key.split("/")
