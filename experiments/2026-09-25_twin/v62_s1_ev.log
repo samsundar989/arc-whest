@@ -1,0 +1,31 @@
+[ev] estimator_k3_v62_s1.py on DEV n=100
+[ev] cost: 475,550,316,409 FLOPs, 24,186 ops, peak RSS 4.43 GiB -> budget 11.1 GiB/worker
+  [mem] 36.2 GiB free, 11.1 GiB per worker -> 2 workers, not 4
+  2 workers x 2 BLAS threads over 100 nets ...
+[ev] accuracy: 3633.8 s, raw MSE 2.370347e-08
+  [mem] 31.0 GiB free, 11.1 GiB per worker -> 2 workers, not 4
+  2 workers x 2 BLAS threads over 100 nets ...
+
+  raw MSE            2.370347e-08   (label noise floor at layer 16 ~7.7e-11)
+  FLOPs / MLP        475,550,316,409   = 0.21626 x 2^41
+  op calls           24,186
+  materializations   0
+  adjusted (panel)   5.126000e-09
+  PROJECTED PUBLIC   4.938343e-09   (÷ 1.038)
+  paired vs estimator_k3_v59_corr400:  gain 1.0061×, Δ +3.1474e-11, t95 [+1.6981e-11, +4.5967e-11], wins 63/100
+    (geometric 1.0062× — diagnostic only, no authority over an outcome)
+
+  PLAN §5 gates
+    PASS  DEV projected vs best graded     better than 4.9756e-09             4.9383e-09 = 0.75% better
+    PASS  op calls                         ≤ 26,000                           24,186
+    FAIL  projected server wall (noisy day, A policy) ≤ 115 s                            115.5 s (quiet day 98.3 s)
+    PASS  setup                            < 2 s                              0.00 s
+    PASS  scalar materializations          0                                  0
+    PASS  failed nets on panel             0                                  0
+    PASS  projected server residual        ≤ 0.33 s (D7 finals bound)         0.268 s (1.49× headroom vs the 0.4 s cliff)
+    PASS  WSL RLIMIT_AS 8 GiB gate         PASS                               PASS VmPeak 6445 MiB
+
+  GATED — not submittable as it stands
+
+  RESULTS.md row:
+  | 2026-09-25 | `estimator_k3_v62_s1.py` | `d1d722db` | DEV | 2.370347e-08 | 0.21626 | 24,186 | 62.291 s (local) → 98.3 s proj | 4535 MiB | **4.9383e-09** | PENDING | 1.0061× vs estimator_k3_v59_corr400 (Δ +3.147e-11, t95 [+1.698e-11, +4.597e-11]) | 63/100 |  |

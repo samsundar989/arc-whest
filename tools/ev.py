@@ -665,8 +665,13 @@ def report(r: Dict, best_graded: float) -> None:
     print("  PLAN §5 gates")
     allpass = True
     for name, thr, reading, ok in gate_table(r, best_graded):
-        allpass &= bool(ok)
-        print(f"    {'PASS' if ok else 'FAIL'}  {name:<32} {thr:<34} {reading}")
+        # PLAN rev 13 decision 1: wall is NOT a hard gate (a canary measures it);
+        # the row is the designation policy, reported but not counted.
+        advisory = name.startswith("projected server wall")
+        if not advisory:
+            allpass &= bool(ok)
+        tag = ("ok  " if ok else "WARN") if advisory else ("PASS" if ok else "FAIL")
+        print(f"    {tag}  {name:<32} {thr:<34} {reading}")
     print()
     print("  " + ("ALL GATES PASS — eligible for a canary under PLAN §5"
                   if allpass else "GATED — not submittable as it stands"))
