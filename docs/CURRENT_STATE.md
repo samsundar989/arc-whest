@@ -1,82 +1,51 @@
-# CURRENT_STATE — 2026-09-23
+# CURRENT_STATE — 2026-09-25 01:30 UTC
 
-*The snapshot. Where we stand, what is running, what is next. Rewritten, not appended.*
-*The plan is `docs/PLAN.md` (rev 12.1); the slice spec is `docs/HANDOFF_2026-09-22.md` +
-`docs/STRATEGIST_RESPONSE_2026-09-22.md`; every number is in `RESULTS.md`. Everything
-before 2026-09-21 is in `archive/2026-09-21/`.*
-
-Phase 2 closes **Oct 17 23:59 UTC**. Team freeze Oct 2. Write-up due Oct 24.
+*Where we stand right now. The plan is `docs/PLAN.md`; every candidate and result
+is `RESULTS.md`; the open decisions are `docs/STRATEGIST_PACKET_2026-09-25.md`.*
 
 ## Best graded
 
-**v55** — `estimator_k3_v55_p2r4.py` (`aac641b4`) = v53 + `_P2_RANK` 32→4.
-**5.3200e-9**, graded twice identically (#331967, #331980), 100/100, 0 failures.
-Raw 2.461e-08, multiplier 0.21618, 23,645 ops, residual ≤0.281 s.
-**Wall: worst 114.5 s / 113.8 s** (median ~92.5 s) — see "Wall" below. **Not designated.**
+**5.0443e-09** — `estimator_k3_v57_corr.py`, submission #332129, 100/100, 0 failed.
+Was 5.3200e-09 at the start of the Sep 24 slice, so the slice was worth 1.0546x.
 
-The §5 baseline is now 5.3200e-9: a canary must project ≤ 5.1604e-9.
+## The designation pair (Samuel designates; agents never do)
 
-| candidate | graded | worst wall | note |
-|---|---:|---:|---|
-| v55 #331967/#331980 | **5.320e-9** | 114.5 / 113.8 s | best score, thinnest wall margin |
-| v53 #331880 | 5.560e-9 | 96.5 s | age 5, P2 rank 32 |
-| v50 #331863/#331939/#331989 | 6.192e-9 | 88.7 / 87.7 / 104.1 s | safest wall; the designate-B candidate |
+| role | file | graded | score | implied noisy worst |
+|---|---|---|---:|---:|
+| **A** | `estimator_k3_v60_ws400.py` | #332223 | 5.3387e-09 | **69.1 s** |
+| B | `estimator_k3_v56b_wallsafe.py` | #332063 | 5.7076e-09 | ~68 s |
 
-**Designation is Samuel's alone. No agent ever designates.**
+A dominates B, so the second slot currently buys nothing. See the packet §3-Q2.
 
-## What the Sep 22 handoff found (single-leg tower, T0–T3)
+## What the chain is
 
-**Falsified.** On DEV 100 every "cheap old-source" arm loses one to two orders of
-magnitude against the unshared exact chain T0 (raw 2.364e-08): T2 a=1 (old sources
-reduced to their diagonal-born `M d(sb)` block) 48×; T1 a=3 (old sources out of D21)
-15.5×; the pure two-leg block alone 14×; even the rank-32 `Z` residual alone 6.4×.
-T3's fitted regeneration recovers 0.09% on DEV. The old diagonal block alone is worth
-almost nothing; old content can be *compressed* (v53's shared basis: +7.7%) but not
-*dropped or diagonalised*. Consistent with #329896 (memoryless κ3, raw ≈8.5e-7, 36×).
-T4/T5 were not built (Step 6, third branch). Details: `RESULTS.md` "Single-leg kill tests".
+Deterministic cumulant propagation: exact mean and covariance; kappa3 as per-layer
+factored lineages, those older than 5 layers compressed into a shared rank-256
+basis; kappa4 regenerated with fitted per-layer lambda; Strassen products; float32;
+stdlib + flopscope only. **Plus, since Sep 24, an in-loop learned mean corrector** —
+a per-layer 33->32->32->1 tanh MLP, weights fitted by sequential teacher forcing,
+embedded as base64 float32, costing +0.03% FLOPs and +541 ops.
 
-## The fallback that shipped
+## Blocked, and needing Samuel rather than measurement
 
-Response §6's elasticity table on v53: of hubs, closure, shared rank, age and P2 rank,
-only the **P2 residual rank** had score elasticity < 1. Rank 4: −4.49% score on DEV
-(+0.94% raw, −5.38% FLOPs), FIT agrees (+0.98% raw). **Rank 2 is a cliff** (per-net up to
-3.2×), rank 1 is +1,175% — do not go below 4. Age 6 on top buys only 0.25% for
-~700 MiB. Closure and hubs pay for themselves by a wide margin (+17%, +5% if removed).
+1. **PLAN section 5's 3% gate is binding against our own best.**
+   `estimator_k3_v59_corr400.py` would grade 4.9763e-09 (the best this project has
+   produced, 1.35% better than #332129) and cannot be submitted.
+2. **How do the two designated entries combine?** The Rules v14 text we hold says
+   only "up to two designated submissions are rerun on fresh MLPs". The answer
+   decides whether v59's extra 7% of score is worth its thinner wall margin.
 
-## Wall — the open risk
+## Closed by measurement — do not reopen
 
-- The server got noisier on Sep 23: identical v50 bytes went from worst 87.7 s (03:00 UTC)
-  to 104.1 s (~08:00 UTC), 15 nets > 100 s.
-- Age-5 chains run ~5–8 s slower at the median than the FLOPs+ops model says (v55 median
-  92.5 s ≈ v53's 92.7 s, ~5.5 s above v50 under the same server state). The model
-  projected v55 at 91.3 s worst. It needs a memory/age term before it is trusted again.
-- One net over 120 s is TIME_EXHAUSTED. v55 on a noisy day has ~6 s of margin; v50 ~16 s.
+Single-leg, N1, tiered ranks, P3 at any rank, per-net lambda, the exact Gaussian
+closure tail, joint refit, deeper Strassen (wall), K4 and unfactored AUGMENT
+(priced out ~6x on score), adaptive age (-0.72% against a 2% gate), the recursive
+corrector feature (no gain), hidden 64 (uniformly worse than 32), and the
+formula-fix reading of the residual anatomy (concentration has no consistent sign).
 
-## Tools added Sep 23
+## Two calibration facts corrected this slice
 
-- `tools/probe.py` — many knob-arms on one imported module, cupy, paired by construction,
-  resumable. Screening only. `PROBE_GPU_LIMIT_GIB` caps the pool (default 20; the unshared
-  chain needs >12).
-- `tools/probe_fit.py` — CMA-ES on a linear knob vector on FIT (T3's ρ).
-- `tools/variants.py` — emit single-constant variants of a candidate and meter each on the
-  real f64 twin.
-- `estimator_k3_p60_probe.py` — v53 + `_D21_AGE/_LBLOCK_AGE/_RHO/_KEEP_AGE/_LB_PART`.
-- `tools/ev.py --mem` fixed (the WSL gate needs `--repeats ≥ 3`; 2 read UNAVAILABLE).
-
-## Operational notes
-
-- ev.py sizes its pool from free RAM (11 GiB/worker for these chains). Under a loaded box
-  it drops to 1 worker (~2 h) and can still hit MemoryError; a run with failed nets is not
-  cached and is not a row — rerun it.
-- cupy's pool is uncapped by default and grew to the whole 32 GiB card over 19 nets once.
-
-## Next
-
-1. Samuel: designation (v55 score vs v50 wall margin), given the wall data above.
-2. Refit the wall model with a memory/age term on the five v50/v53/v55 rows.
-3. If wall margin matters more than 4%: v50 + P2 rank 4 (age 4) is the obvious candidate
-   (cheaper than v50, same wall profile); measure it.
-4. κ4-on-M (response §2) is untested on the exact tier of the v53/v55 chain; it is the one
-   idea from the Sep 22 response that T2 did not refute.
-
-Slots: 4 of 5 used on UTC day 2026-09-23.
+- The organizer label noise floor is **6.8e-10**, not 9e-11 (AGENTS.md was wrong by
+  7.6x). Layer 1 is our exact closed form, so its MSE measures it directly.
+- DEV->graded is **1.038**, lowered from 1.042 after two rows graded worse than
+  projected. Change it in `RESULTS.md` and `tools/ev.py` together.
