@@ -10,57 +10,45 @@ evidence current.
 "Noisy day" means a run whose worst/median ratio is ≥ 1.15 (Sep 23 after ~08:00
 UTC: 1.197–1.235). Quiet runs sit at 1.03–1.055. See RESULTS.md, wall refit.
 
-## Standing — 2026-09-24 16:30 UTC
+## Standing — 2026-09-25 01:30 UTC
 
-**The best score moved, and it is NOT designable.** v57 (#332129) grades
-**5.0443e-09** with an implied noisy-day worst of 90.43 x 1.24 = **112.1 s**,
-over A's 105 s bound and 8 s from the cliff. A therefore stays `tr64` until the
-wall-safe twin of v57 exists.
+**A is now MEASURED, not projected.** `v60_ws400` (#332223) graded **5.3387e-09**
+with worst wall **57.59 s** (median 55.73, ratio 1.033), 0 nets over 100 s and 0
+failed. Implied noisy worst **69.1 s** against a 68.8 s projection — it meets the
+A bound (105 s) by 36 s and the B bound (95 s) by 26 s, with **~51 s of margin to
+the 120 s cliff**. It retires `tr64` outright, beating it on BOTH axes
+(5.3387 vs 5.4341e-09, and 69.1 vs ~95.4 s).
 
-**The designable follow-up is already proven in principle:** v57 at Strassen
-depth 4 is the same transform v56b applied to v55 (+7.28% multiplier, raw
-IDENTICAL, kernel 176 -> 93 ps/FLOP). Applied to v57 it projects
-**~5.41e-09 at ~68 s**, which would be a better A than tr64 on BOTH axes --
-score (5.41 vs 5.4341e-09) and wall (~68 vs 80.3 s). Building and canarying it
-is the highest-value remaining designation action.
-
-| role | file | sha8 | graded rows | score | worst wall per run (median) | residual worst | VmPeak | meets policy? |
+| role | file | sha8 | graded | score | worst wall (median) | residual | VmPeak | policy |
 |---|---|---|---|---:|---|---:|---:|---|
-| **best score, NOT designable** | `estimator_k3_v57_corr.py` | `253c7b19` | #332129 | **5.0443e-09** | 92.81 (90.43) quiet, ratio 1.026 | 0.2507 s | 6,434 MiB | **no** — implied noisy 112.1 s > 105 |
-| **A (current)** | `...v56c_mix__tr64.py` | `52d83de7` | #332088 | 5.4341e-09 | 80.30 (76.90) quiet, ratio 1.044 | 0.2413 s | 6,468 MiB | **yes, A** (implied noisy ~95.4 s) |
-| **B (current)** | `estimator_k3_v56b_wallsafe.py` | `b401ad75` | #332063 | 5.7076e-09 | 60.7 (54.5), ratio 1.114 | 0.2188 s | 4,908 MiB | **yes, both** |
-| dominated | `estimator_k3_v50_safe.py` | `f9cb9439` | #331863/939/989 | 6.192e-09 | 88.7 q / 87.7 q / 104.1 noisy | 0.2655 s | 5,785 MiB | dominated |
-| superseded | `estimator_k3_v55_p2r4.py` | `aac641b4` | #331967/980 | 5.320e-09 | 114.5 / 113.8 noisy | 0.2805 s | 6,471 MiB | no |
+| **A (recommended)** | `estimator_k3_v60_ws400.py` | `e9344107` | #332223 | **5.3387e-09** | **57.59 (55.73)**, 1.033 | 0.2121 s (1.89x) | 4,941 MiB | **yes, A and B**, by 36 / 26 s |
+| best score, NOT designable | `estimator_k3_v57_corr.py` | `253c7b19` | #332129 | **5.0443e-09** | 92.81 (90.43), 1.026 | 0.2507 s | 6,434 MiB | **no** — implied noisy 112.1 s |
+| **B (fallback)** | `estimator_k3_v56b_wallsafe.py` | `b401ad75` | #332063 | 5.7076e-09 | 60.7 (54.5), 1.114 | 0.2188 s | 4,908 MiB | yes — but **dominated by A** |
+| retired | `...v56c_mix__tr64.py` | `52d83de7` | #332088 | 5.4341e-09 | 80.30 (76.90) | 0.2413 s | 6,468 MiB | superseded by A |
+| retired | `estimator_k3_v58_ws.py` | — | never sent | 5.3998e-09 proj | ~68.8 s proj | 0.2256 s | 4,920 MiB | superseded by A |
 
-**Still outstanding for BOTH designates: a genuine noisy-day reading.** Every row
-above was measured on a quiet or moderate server (ratios 1.026-1.114); the noisy
-figures are the x1.24 projection, not readings. Sep 23's noise appeared after
-~08:00 UTC, and today's 08:30 UTC v57 run came back quiet (1.026), so the tail is
-not a fixed time of day. Spend a slot on an A/B re-run whenever a same-day row
-shows a ratio >= 1.15.
+### The one open decision, and it is Samuel's
 
-**The designation gap is now 2.1% of score**, not 7.3%: v55 5.3200e-09 (undesignable)
-vs tr64 5.4341e-09 (A). Choosing A costs 2.1% and buys ~19 s of margin to the cliff.
+`estimator_k3_v59_corr400.py` — the SAME corrector as A, at Strassen depth 4's
+leaf 32 — would grade **4.9763e-09**, derived from A's own graded raw MSE
+(2.301125e-08 x 0.21625525). That is **1.35% better than the best graded** and the
+**best score this project has ever produced**. It is blocked twice over:
 
-The mixed-leaf projections below are now superseded for `tr64` by its own reading;
-`tr64_wide64` is still a projection and there is no reason to spend a slot on it,
-since tr64 already clears A.
+1. **PLAN §5 needs 3%.** At 1.35% it cannot be canaried under standing approval,
+   so it can never acquire the graded row designation requires.
+2. **Its wall is v57's.** Implied noisy worst ~112 s, over the A bound.
 
-| arm | dFLOPs vs v55 | score | median | worst noisy |
-|---|---:|---:|---:|---:|
-| v55 | — | 5.320e-09 graded | 92.6 graded | 114.5 graded |
-| **`tr64`** | +2.14% | **5.4341e-09 graded** | **76.90 graded** | **~95.4 implied** |
-| `tr64_wide64` (projection only) | +5.27% | ~5.600e-09 | ~66 | ~82 |
-| v56b | +7.28% | 5.7076e-09 graded | 54.5 graded | ~68 |
+So the pair on the table today is **A = v60_ws400 (measured, safe, 5.3387e-09)**
+and **B = v56b (measured, safest, 5.7076e-09)** — with A dominating B, which means
+the second slot is currently buying nothing.
 
-**Kernel rate, measured on three leaf configurations** — the wall law now has a
-mixed-leaf anchor, not just its two endpoints:
-
-| config | leaves | kernel ps/FLOP |
-|---|---|---:|
-| v55 | all 32 | 176.3 |
-| **tr64** | **transports 64, rest 32** | **141.0** |
-| v56b | all 64 | 92.8 |
+The alternative pair, **A = v59 (4.9763e-09, ~112 s) + B = v60_ws400 (5.3387e-09,
+69 s)**, is a genuine hedge: the best score we have, floored by a safe twin. It
+needs two things that are not an agent's to give — a graded row for v59 (i.e. a
+§5 exception or a lowered gate), and an answer to whether the better of two
+designated entries counts or a failure in either taints the result. The Rules v14
+text this repository holds says only that "up to two designated submissions are
+rerun on fresh MLPs".
 
 ## Re-run log
 
@@ -74,3 +62,4 @@ mixed-leaf anchor, not just its two endpoints:
 | 2026-09-23 19:56 | v56b | #332063 | moderate (1.114) | 60.7 | 54.5 |
 | 2026-09-24 00:11 | tr64 | #332088 | quiet (1.044) | 80.30 | 76.90 |
 | 2026-09-24 08:30 | v57 | #332129 | quiet (1.026) | 92.81 | 90.43 |
+| 2026-09-25 01:05 | v60_ws400 | #332223 | quiet (1.033) | 57.59 | 55.73 |

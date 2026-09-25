@@ -14,7 +14,7 @@ What it reports
   difference with a studentised-t 95% interval and wins/N, on common random
   numbers. The arithmetic difference is the competition's own identity; the
   geometric mean of per-net ratios is a stability diagnostic with no authority.
-* **projected public score** — mean(MSE · max(0.1, F/2^41)) ÷ 1.037.
+* **projected public score** — mean(MSE · max(0.1, F/2^41)) ÷ `PUBLIC_FACTOR` (1.038).
 * **FLOPs, op calls, scalar materializations** — from the REAL flopscope 0.12.1
   meter on one net under the f64 read-only grader twin. Never from the shim,
   which reads ~18% low.
@@ -93,14 +93,18 @@ import numpy as np  # noqa: E402
 import panels  # noqa: E402
 
 BUDGET = 2 ** 41
-#: DEV 100-net mini score / this = predicted public score. Six observations:
-#: 1.0386 / 1.0385 / 1.0339 / 1.0426 / 1.0471 / 1.0458, mean 1.0411, and the
-#: last three (C10, v50, v53) average 1.0452. RAISED 1.037 -> 1.042 on
-#: 2026-09-22: at 1.037 the last three graded rows all came in BETTER than
-#: projected, by 0.53% / 0.97% / 0.84%, which is a consistent bias rather than
-#: noise. 1.042 stays under the recent mean, so projections remain slightly
-#: pessimistic and §5's gate slightly strict, which is the safe direction.
-PUBLIC_FACTOR = 1.042
+#: DEV 100-net mini score / this = predicted public score. EIGHT observations:
+#: 1.0386 / 1.0385 / 1.0339 / 1.0426 / 1.0471 / 1.0458 / 1.0397 / 1.0361,
+#: mean 1.0403. History: 1.037 -> 1.042 on 2026-09-22 because three rows in a
+#: row graded BETTER than projected; LOWERED 1.042 -> 1.038 on 2026-09-25
+#: because the next two graded WORSE than projected (v57 #332129 by 0.22%,
+#: v60_ws400 #332223 by 0.54%), putting the implied factor at 1.0397 / 1.0361.
+#: Neither breached PLAN §5's 2% recalibration trigger, but 1.042 made the 3%
+#: submission gate ~0.4% LOOSER than intended, and a gate that is silently loose
+#: is worse than one that is tight. At 1.038 projections come out slightly
+#: pessimistic again, which is the side this constant exists to err on.
+#: Change this and the matching block in RESULTS.md § Calibration TOGETHER.
+PUBLIC_FACTOR = 1.038
 #: SERVER WALL -- REFIT 2026-09-23 on nine graded runs (six candidates), using
 #: the per-net telemetry split the server reports: `flopscope_server_overhead_wall_s`
 #: (per op call) and `flopscope_server_kernel_wall_s` (the arithmetic itself).
