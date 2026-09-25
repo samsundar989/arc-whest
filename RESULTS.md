@@ -208,6 +208,252 @@ All four are implemented in `tools/ev.py`; change them there and here together.
 | 2026-09-25 | `estimator_k3_v59_corr400.py` | `f419f765` | GRADED | 2.300780e-08 | 0.21626 | 24,186 | **94.42 s** (median 89.84) | (v57's code path, 6,434 MB) | 4.9763e-09 derived | **4.9756e-09** | **1.0138x vs v57 #332129** (graded/graded) | 99/100 DEV | **sub #332232, THE NEW BEST (prev 5.0443e-09). 100/100 completed, 0 failed, 0 nets > 100 s.** First canary under PLAN rev 13 decision 1 (any projected gain over the best graded; the 3% gate is retired). The 400-net corrector at leaf 32. **Raw 2.300780e-08 vs v60_ws400's 2.301125e-08: the same accuracy to 0.015%**, as designed -- the two files differ only in `_STRASSEN_MIN_BLOCK`. The score was DERIVED before submission from #332223's graded raw x this multiplier (4.9763e-09) and graded 0.01% better. Against the DEV projection at the current 1.038 (5.1577e-09 / 1.038 = 4.9689e-09) it graded +0.13% worse: implied factor **1.0366**, the NINTH observation (range now 1.0339-1.0471, mean 1.0399), no change to the constant. **Wall: median 89.84, p90 92.66, worst 94.42, worst/median 1.051 -- a quiet day.** Kernel 170.3 ps/FLOP (v57: 171.3), overhead 8.65 s. Residual worst 0.25114 s (1.59x). Multiplier = twin's 0.21625525 exactly. **Implied noisy worst 89.84 x 1.24 = 111.4 s: meets the rev-13 A policy (<= ~115 s)** by ~3.6 s and the 120 s cliff by ~8.6 s. `docs/DESIGNATION.md`: A = v59, B = v60_ws400. First slot of UTC day 2026-09-25. |
 <!-- ev.py --append inserts new rows directly above this marker. Keep it here. -->
 
+## Anatomy 2 — channel drift against EXACT pre-activation labels (HANDOFF 09-25 Step 1, 2026-09-25)
+
+**Instrument.** `tools/anatomy2.py` on `estimator_k3_v59_corr400.py`, cupy, 20 **FIT** nets (full rows
+0–19), worker-q 2132. Labels: keenanpepper `arc-whestbench-p2-full1000-N1e9` (raw moments to 4th order,
+dense pairwise, N = 1e9) converted to cumulants by `tools/labels/cumulants.py`; `gate_p` from
+`whest-p2-bakev2-bench-supp`. **FIT, not DEV**: the dense labels exist only for the `full` split, which is
+disjoint from `mini` (DEV). Checks: layer 0 (exactly Gaussian) reads every normalised κ3/κ4 slice at
+4–8e-5 = the 1/√N floor; all 20 names match `data/panels/fit.json`; the patched chain driven by the
+tool's own loop is **bit-identical** to `predict`, recording is inert, and substituting every object
+with the chain's own values changes nothing (max abs 0.0). Every MSE below is the **cross estimate**
+mean((p−gt)(p−kp)) over two independent N = 1e9 label sets — the noise-free MSE.
+
+**Label noise is layer-dependent (correction of AGENTS.md).** MSE(gt, kp)/2, mean over the 20 nets:
+6.83e-10 at layer 1, falling monotonically to **7.71e-11 at the scored layer 16** (4.9e-11 – 1.1e-10). The
+Sep 24 note applied layer 1's 6.8e-10 to the final layer; at layer 16 the floor is ~0.3% of our raw MSE.
+
+**How to read §3.** *One-step*: from the chain's own state after layer l−1, step layer l with μ_pre
+labelled (base) and additionally one object labelled; the layer-l mean reads only the marginals (μ,
+var, D3, D4), so the off-diagonal objects are tested by *two-step* (label X and μ at l−1, μ at l, read
+the mean at l). *Rolled*: X labelled at every layer 2..P+1, chain free after — "how much of the final
+error does X own". The chain's corrector stays on throughout (it is part of v59).
+
+## 1. Object errors (relative Frobenius, mean over nets)
+
+| layer (1-based) | mu | var | C11 | D3 | D21 | dG | D22 | Q31 | cov_out | cov err: diag / trace / traceless share |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 2 | 4.65e-05 | 4.49e-05 | 0.000817 | 0.00923 | 0.0118 | 0.0942 | 0.103 | 0.733 | 0.00099 | 0.00 / 0.000 / 1.00 |
+| 3 | 3.38e-05 | 6.85e-05 | 0.000991 | 0.0227 | 0.0322 | 0.108 | 0.112 | 0.744 | 0.00172 | 0.00 / 0.000 / 1.00 |
+| 4 | 3.55e-05 | 0.000139 | 0.00172 | 0.0265 | 0.039 | 0.115 | 0.118 | 0.715 | 0.00239 | 0.00 / 0.000 / 1.00 |
+| 5 | 4.49e-05 | 0.000217 | 0.00239 | 0.0293 | 0.0439 | 0.126 | 0.129 | 0.709 | 0.00304 | 0.00 / 0.000 / 1.00 |
+| 6 | 5.58e-05 | 0.000307 | 0.00304 | 0.0316 | 0.0487 | 0.139 | 0.143 | 0.709 | 0.00369 | 0.00 / 0.000 / 1.00 |
+| 7 | 6.6e-05 | 0.000407 | 0.00369 | 0.0365 | 0.0556 | 0.154 | 0.158 | 0.714 | 0.00436 | 0.00 / 0.000 / 1.00 |
+| 8 | 7.73e-05 | 0.000512 | 0.00436 | 0.04 | 0.062 | 0.175 | 0.176 | 0.721 | 0.00504 | 0.00 / 0.000 / 1.00 |
+| 9 | 8.87e-05 | 0.000629 | 0.00504 | 0.0442 | 0.0686 | 0.192 | 0.194 | 0.73 | 0.00574 | 0.00 / 0.000 / 1.00 |
+| 10 | 9.84e-05 | 0.00077 | 0.00575 | 0.0479 | 0.0753 | 0.216 | 0.216 | 0.748 | 0.00647 | 0.00 / 0.000 / 1.00 |
+| 11 | 0.000109 | 0.000918 | 0.00645 | 0.0527 | 0.082 | 0.237 | 0.237 | 0.766 | 0.00719 | 0.00 / 0.000 / 1.00 |
+| 12 | 0.000118 | 0.00108 | 0.00717 | 0.0565 | 0.0879 | 0.255 | 0.253 | 0.736 | 0.00785 | 0.00 / 0.000 / 1.00 |
+| 13 | 0.000126 | 0.00125 | 0.00781 | 0.0601 | 0.0943 | 0.274 | 0.273 | 0.733 | 0.0085 | 0.00 / 0.000 / 1.00 |
+| 14 | 0.000134 | 0.00143 | 0.00849 | 0.0637 | 0.101 | 0.302 | 0.294 | 0.74 | 0.00917 | 0.00 / 0.000 / 1.00 |
+| 15 | 0.000142 | 0.00164 | 0.00914 | 0.0669 | 0.106 | 0.333 | 0.321 | 0.755 | 0.00975 | 0.00 / 0.000 / 1.00 |
+| 16 | 0.000147 | 0.00186 | — | 0.0703 | — | 0.354 | — | — | — | — |
+
+### T0
+
+| layer (1-based) | mu | var | C11 | D3 | D21 | dG | D22 | Q31 | cov_out | cov err: diag / trace / traceless share |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 2 | 4.65e-05 | 4.49e-05 | 0.000817 | 0.00923 | 0.0118 | 0.0942 | 0.103 | 0.733 | 0.00099 | 0.00 / 0.000 / 1.00 |
+| 3 | 3.38e-05 | 6.85e-05 | 0.000991 | 0.0227 | 0.0322 | 0.108 | 0.112 | 0.744 | 0.00172 | 0.00 / 0.000 / 1.00 |
+| 4 | 3.55e-05 | 0.000139 | 0.00172 | 0.0265 | 0.039 | 0.115 | 0.118 | 0.715 | 0.00239 | 0.00 / 0.000 / 1.00 |
+| 5 | 4.49e-05 | 0.000217 | 0.00239 | 0.0293 | 0.0439 | 0.126 | 0.129 | 0.709 | 0.00304 | 0.00 / 0.000 / 1.00 |
+| 6 | 5.58e-05 | 0.000307 | 0.00304 | 0.0316 | 0.0487 | 0.139 | 0.143 | 0.709 | 0.00369 | 0.00 / 0.000 / 1.00 |
+| 7 | 6.6e-05 | 0.000407 | 0.00369 | 0.0351 | 0.0539 | 0.154 | 0.158 | 0.714 | 0.00431 | 0.00 / 0.000 / 1.00 |
+| 8 | 7.68e-05 | 0.000505 | 0.00431 | 0.0385 | 0.0601 | 0.175 | 0.176 | 0.721 | 0.00494 | 0.00 / 0.000 / 1.00 |
+| 9 | 8.74e-05 | 0.000619 | 0.00494 | 0.0427 | 0.0668 | 0.192 | 0.194 | 0.73 | 0.00562 | 0.00 / 0.000 / 1.00 |
+| 10 | 9.62e-05 | 0.000755 | 0.00562 | 0.0463 | 0.0734 | 0.216 | 0.216 | 0.748 | 0.00632 | 0.00 / 0.000 / 1.00 |
+| 11 | 0.000106 | 0.000899 | 0.00631 | 0.0511 | 0.0802 | 0.237 | 0.236 | 0.766 | 0.00702 | 0.00 / 0.000 / 1.00 |
+| 12 | 0.000115 | 0.00106 | 0.00701 | 0.055 | 0.0861 | 0.254 | 0.253 | 0.736 | 0.00767 | 0.00 / 0.000 / 1.00 |
+| 13 | 0.000122 | 0.00122 | 0.00763 | 0.0584 | 0.0926 | 0.274 | 0.272 | 0.733 | 0.00831 | 0.00 / 0.000 / 1.00 |
+| 14 | 0.00013 | 0.00141 | 0.00831 | 0.0624 | 0.099 | 0.301 | 0.294 | 0.74 | 0.00898 | 0.00 / 0.000 / 1.00 |
+| 15 | 0.000137 | 0.00161 | 0.00896 | 0.0657 | 0.105 | 0.332 | 0.321 | 0.755 | 0.00956 | 0.00 / 0.000 / 1.00 |
+| 16 | 0.000143 | 0.00182 | — | 0.0689 | — | 0.353 | — | — | — | — |
+
+T0 final MSE (x-est): 2.1479e-08
+
+### T0x
+
+| layer (1-based) | mu | var | C11 | D3 | D21 | dG | D22 | Q31 | cov_out | cov err: diag / trace / traceless share |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 2 | 4.65e-05 | 4.49e-05 | 0.000817 | 0.00855 | 0.011 | 0.0942 | 0.103 | 0.733 | 0.00098 | 0.00 / 0.000 / 1.00 |
+| 3 | 3.38e-05 | 6.79e-05 | 0.000982 | 0.0199 | 0.0281 | 0.108 | 0.112 | 0.744 | 0.00162 | 0.00 / 0.000 / 1.00 |
+| 4 | 3.48e-05 | 0.000131 | 0.00162 | 0.0245 | 0.0359 | 0.115 | 0.118 | 0.715 | 0.00227 | 0.00 / 0.000 / 1.00 |
+| 5 | 4.33e-05 | 0.000206 | 0.00227 | 0.0278 | 0.0415 | 0.126 | 0.129 | 0.709 | 0.00291 | 0.00 / 0.000 / 1.00 |
+| 6 | 5.37e-05 | 0.000293 | 0.00292 | 0.0304 | 0.0468 | 0.139 | 0.143 | 0.709 | 0.00356 | 0.00 / 0.000 / 1.00 |
+| 7 | 6.38e-05 | 0.000392 | 0.00356 | 0.0341 | 0.0523 | 0.154 | 0.158 | 0.714 | 0.00418 | 0.00 / 0.000 / 1.00 |
+| 8 | 7.45e-05 | 0.00049 | 0.00418 | 0.0378 | 0.0587 | 0.175 | 0.176 | 0.721 | 0.00482 | 0.00 / 0.000 / 1.00 |
+| 9 | 8.48e-05 | 0.000604 | 0.00482 | 0.042 | 0.0656 | 0.192 | 0.194 | 0.73 | 0.0055 | 0.00 / 0.000 / 1.00 |
+| 10 | 9.38e-05 | 0.000739 | 0.00551 | 0.0456 | 0.0724 | 0.216 | 0.215 | 0.748 | 0.00621 | 0.00 / 0.000 / 1.00 |
+| 11 | 0.000104 | 0.000883 | 0.00619 | 0.0505 | 0.0792 | 0.237 | 0.236 | 0.766 | 0.00691 | 0.00 / 0.000 / 1.00 |
+| 12 | 0.000112 | 0.00104 | 0.0069 | 0.0544 | 0.0852 | 0.254 | 0.253 | 0.736 | 0.00756 | 0.00 / 0.000 / 1.00 |
+| 13 | 0.000119 | 0.0012 | 0.00751 | 0.0578 | 0.0918 | 0.274 | 0.272 | 0.733 | 0.0082 | 0.00 / 0.000 / 1.00 |
+| 14 | 0.000128 | 0.00139 | 0.0082 | 0.062 | 0.0982 | 0.301 | 0.293 | 0.74 | 0.00887 | 0.00 / 0.000 / 1.00 |
+| 15 | 0.000135 | 0.00159 | 0.00886 | 0.0652 | 0.104 | 0.332 | 0.32 | 0.755 | 0.00946 | 0.00 / 0.000 / 1.00 |
+| 16 | 0.00014 | 0.0018 | — | 0.0685 | — | 0.353 | — | — | — | — |
+
+T0x final MSE (x-est): 2.0654e-08
+
+## 2. κ4 model check
+
+Fitted on nets 0..9, R² on nets 10..19 (normalised slices, off-diagonal entries; R² is about the eval-set mean, and every fitted model has an intercept unless marked).
+
+κ4_iijj / (σ_i²σ_j²). B = (κ4_iiii + κ4_jjjj)/6 from TRUE marginals = the chain's form (m/6)(dG_i+dG_j) with exact dG:
+
+| layer | mean target | B, coef 1 | λ*·ρ (no intercept): λ*, R² | const + λ*ρ | const + B + λ*ρ | const + 4-mode {ρ, ρ², ḡρ, α_iα_j} | const + B + 4-mode | T (transported diagonal), coef 1 | const + T | const + B + 4-mode + T |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2 | 3.22e-03 | -0.183 | 0.0001, -95.537 | -0.002 | 0.031 | 0.000 | 0.033 | -6.779 | 0.105 | 0.145 |
+| 3 | 5.38e-03 | -0.052 | -0.0001, -78.213 | -0.010 | 0.093 | -0.008 | 0.095 | -49.852 | 0.061 | 0.131 |
+| 4 | 7.21e-03 | -0.008 | -0.0000, -69.038 | -0.003 | 0.117 | -0.002 | 0.119 | -57.214 | 0.065 | 0.147 |
+| 5 | 8.85e-03 | 0.003 | -0.0001, -58.579 | -0.000 | 0.129 | 0.001 | 0.131 | -52.646 | 0.053 | 0.150 |
+| 6 | 1.03e-02 | 0.008 | 0.0000, -48.621 | -0.000 | 0.134 | 0.001 | 0.136 | -45.455 | 0.039 | 0.150 |
+| 7 | 1.16e-02 | 0.024 | 0.0001, -40.217 | -0.002 | 0.142 | 0.000 | 0.145 | -38.421 | 0.037 | 0.156 |
+| 8 | 1.28e-02 | 0.019 | -0.0001, -33.643 | -0.008 | 0.140 | -0.005 | 0.143 | -32.560 | 0.012 | 0.148 |
+| 9 | 1.38e-02 | 0.021 | 0.0000, -28.326 | -0.012 | 0.139 | -0.009 | 0.143 | -27.592 | 0.005 | 0.148 |
+| 10 | 1.49e-02 | 0.008 | 0.0000, -24.578 | -0.012 | 0.128 | -0.006 | 0.135 | -24.002 | -0.009 | 0.136 |
+| 11 | 1.60e-02 | 0.017 | -0.0001, -21.256 | -0.007 | 0.136 | 0.001 | 0.143 | -20.759 | 0.006 | 0.146 |
+| 12 | 1.70e-02 | 0.029 | 0.0000, -18.468 | -0.011 | 0.147 | 0.002 | 0.157 | -18.119 | 0.002 | 0.160 |
+| 13 | 1.81e-02 | 0.022 | 0.0001, -16.634 | -0.006 | 0.142 | 0.012 | 0.156 | -16.348 | -0.002 | 0.157 |
+| 14 | 1.89e-02 | 0.049 | 0.0002, -14.268 | -0.009 | 0.163 | 0.014 | 0.180 | -14.037 | -0.002 | 0.181 |
+| 15 | 2.00e-02 | 0.056 | 0.0001, -12.971 | -0.004 | 0.170 | 0.030 | 0.193 | -12.775 | 0.002 | 0.194 |
+
+κ4_iiij / (σ_i³σ_j). The chain's form is (m/2)·λ·C_ij (no intercept); "fitted coef" is the best (m/2)λ:
+
+| layer | chain form: fitted (m/2)λ, R² | chain (m/2)λ used | λ*·ρ (no intercept) R² | const + 4-mode {ρ, ρ², g_iρ, α_iα_j} | const + C-form + 4-mode | T, coef 1 | const + T | const + C-form + 4-mode + T |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2 | 0.0137, 0.471 | 0.0117 | 0.473 | 0.473 | 0.473 | 0.364 | 0.376 | 0.528 |
+| 3 | 0.0147, 0.467 | 0.0116 | 0.468 | 0.470 | 0.470 | 0.086 | 0.112 | 0.498 |
+| 4 | 0.0146, 0.495 | 0.0131 | 0.496 | 0.500 | 0.501 | 0.024 | 0.029 | 0.517 |
+| 5 | 0.0139, 0.504 | 0.0129 | 0.505 | 0.514 | 0.515 | 0.008 | 0.008 | 0.524 |
+| 6 | 0.0132, 0.498 | 0.0135 | 0.501 | 0.515 | 0.516 | 0.003 | 0.003 | 0.522 |
+| 7 | 0.0126, 0.492 | 0.0135 | 0.494 | 0.518 | 0.520 | 0.001 | 0.001 | 0.523 |
+| 8 | 0.0122, 0.479 | 0.0116 | 0.482 | 0.516 | 0.518 | -0.000 | 0.000 | 0.520 |
+| 9 | 0.0116, 0.465 | 0.0109 | 0.470 | 0.514 | 0.516 | -0.000 | 0.000 | 0.518 |
+| 10 | 0.0111, 0.462 | 0.0088 | 0.471 | 0.524 | 0.525 | 0.000 | 0.000 | 0.527 |
+| 11 | 0.0106, 0.458 | 0.0074 | 0.471 | 0.530 | 0.532 | 0.001 | 0.001 | 0.533 |
+| 12 | 0.0102, 0.456 | 0.0092 | 0.472 | 0.538 | 0.541 | 0.000 | 0.001 | 0.541 |
+| 13 | 0.0100, 0.458 | 0.0087 | 0.480 | 0.545 | 0.547 | 0.000 | 0.001 | 0.547 |
+| 14 | 0.0097, 0.456 | 0.0080 | 0.481 | 0.555 | 0.557 | 0.000 | 0.001 | 0.558 |
+| 15 | 0.0093, 0.466 | 0.0067 | 0.501 | 0.576 | 0.578 | 0.000 | 0.001 | 0.578 |
+
+## 3a. One-step (substituted at l, mean read at l)
+
+| layer | chain MSE | base MSE | var rec. | D3 rec. | D4 rec. | marg rec. |
+|---|---|---|---|---|---|---|
+| 2 | 4.583e-11 | 5.038e-11 | -6% | +3% | +18% | +18% |
+| 3 | 3.698e-10 | 3.362e-10 | +17% | +31% | +24% | +71% |
+| 4 | 1.021e-09 | 7.589e-10 | +33% | +28% | +22% | +85% |
+| 5 | 1.935e-09 | 1.165e-09 | +39% | +25% | +18% | +85% |
+| 6 | 3.137e-09 | 1.633e-09 | +43% | +24% | +22% | +91% |
+| 7 | 4.489e-09 | 2.007e-09 | +43% | +25% | +16% | +89% |
+| 8 | 6.187e-09 | 2.470e-09 | +46% | +24% | +17% | +88% |
+| 9 | 7.987e-09 | 2.761e-09 | +46% | +21% | +14% | +83% |
+| 10 | 9.861e-09 | 3.256e-09 | +48% | +23% | +16% | +86% |
+| 11 | 1.193e-08 | 3.472e-09 | +46% | +22% | +15% | +86% |
+| 12 | 1.398e-08 | 3.667e-09 | +46% | +19% | -2% | +75% |
+| 13 | 1.630e-08 | 3.928e-09 | +46% | +20% | +10% | +86% |
+| 14 | 1.863e-08 | 4.319e-09 | +46% | +20% | +14% | +85% |
+| 15 | 2.065e-08 | 4.575e-09 | +48% | +19% | +12% | +85% |
+| 16 | 2.294e-08 | 4.823e-09 | +48% | +18% | +10% | +85% |
+
+## 3b. Two-step (substituted at l−1, mean read at l)
+
+| layer | chain MSE | base2 MSE | var rec. | C11 rec. | cov rec. | D3 rec. | D21 rec. | D4 rec. | D22 rec. | Q31 rec. | offdiag rec. | all rec. |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 3 | 3.698e-10 | 3.361e-10 | +0% | -0% | +0% | +0% | +1% | -1% | +8% | +8% | +17% | +18% |
+| 4 | 1.021e-09 | 7.588e-10 | -0% | +4% | +4% | -0% | +15% | -1% | +5% | +9% | +33% | +33% |
+| 5 | 1.935e-09 | 1.164e-09 | +0% | +11% | +11% | +0% | +13% | -0% | +3% | +8% | +37% | +37% |
+| 6 | 3.137e-09 | 1.632e-09 | +0% | +18% | +18% | -0% | +12% | -1% | +2% | +7% | +39% | +39% |
+| 7 | 4.489e-09 | 2.007e-09 | +0% | +21% | +22% | -0% | +10% | -2% | +1% | +5% | +39% | +39% |
+| 8 | 6.187e-09 | 2.470e-09 | +0% | +25% | +25% | -0% | +10% | -2% | -0% | +6% | +41% | +41% |
+| 9 | 7.987e-09 | 2.760e-09 | +0% | +27% | +27% | -0% | +8% | -2% | -0% | +6% | +42% | +42% |
+| 10 | 9.861e-09 | 3.256e-09 | +0% | +30% | +31% | -0% | +8% | -3% | -1% | +6% | +45% | +44% |
+| 11 | 1.193e-08 | 3.473e-09 | +0% | +30% | +31% | -0% | +7% | -3% | -1% | +5% | +43% | +42% |
+| 12 | 1.398e-08 | 3.667e-09 | -0% | +30% | +31% | -0% | +7% | -7% | -4% | +5% | +39% | +39% |
+| 13 | 1.630e-08 | 3.928e-09 | -0% | +31% | +32% | -0% | +6% | -6% | -4% | +5% | +40% | +39% |
+| 14 | 1.863e-08 | 4.316e-09 | -1% | +34% | +34% | -0% | +5% | -8% | -5% | +5% | +40% | +39% |
+| 15 | 2.065e-08 | 4.575e-09 | -1% | +35% | +36% | +0% | +6% | -8% | -6% | +4% | +41% | +41% |
+| 16 | 2.294e-08 | 4.822e-09 | -0% | +35% | +37% | -0% | +6% | -12% | -11% | +3% | +36% | +35% |
+
+## 3c. Rolled
+
+Chain final-layer MSE (x-est, mean of 20 nets): **2.2943e-08**
+
+| substituted at layers 2..P+1 (1-based) | final MSE | share of chain final MSE removed | MSE at layer 9 | at layer 13 |
+|---|---:|---:|---:|---:|
+| mu @ 2..16 | 4.8176e-09 | +79.0% | 2.760e-09 | 3.924e-09 |
+| var @ 2..16 | 1.3360e-08 | +41.8% | 4.735e-09 | 9.353e-09 |
+| C11 @ 2..16 | 1.5678e-08 | +31.7% | 6.207e-09 | 1.175e-08 |
+| cov @ 2..16 | 1.3209e-08 | +42.4% | 4.709e-09 | 9.275e-09 |
+| D3 @ 2..16 | 1.7977e-08 | +21.6% | 5.880e-09 | 1.248e-08 |
+| D21 @ 2..16 | 2.0076e-08 | +12.5% | 6.484e-09 | 1.361e-08 |
+| k3 @ 2..16 | 1.1366e-08 | +50.5% | 3.860e-09 | 7.843e-09 |
+| D4 @ 2..16 | 2.3233e-08 | -1.3% | 6.888e-09 | 1.567e-08 |
+| D22 @ 2..16 | 2.4452e-08 | -6.6% | 7.687e-09 | 1.622e-08 |
+| Q31 @ 2..16 | 1.9390e-08 | +15.5% | 7.020e-09 | 1.406e-08 |
+| k4 @ 2..16 | 1.9404e-08 | +15.4% | 5.677e-09 | 1.298e-08 |
+| nomu @ 2..16 | 4.5234e-09 | +80.3% | 1.029e-09 | 2.860e-09 |
+| all @ 2..16 | 7.3363e-10 | +96.8% | 4.624e-10 | 5.450e-10 |
+| cov @ 2..5 | 2.2419e-08 | +2.3% | 7.255e-09 | 1.558e-08 |
+| cov @ 2..9 | 1.9743e-08 | +14.0% | 4.709e-09 | 1.247e-08 |
+| cov @ 2..13 | 1.5657e-08 | +31.8% | 4.709e-09 | 9.275e-09 |
+| D21 @ 2..5 | 2.2502e-08 | +1.9% | 7.386e-09 | 1.575e-08 |
+| D21 @ 2..9 | 2.1364e-08 | +6.9% | 6.484e-09 | 1.441e-08 |
+| D21 @ 2..13 | 2.0458e-08 | +10.8% | 6.484e-09 | 1.361e-08 |
+| k3 @ 2..5 | 2.2335e-08 | +2.6% | 7.052e-09 | 1.558e-08 |
+| k3 @ 2..9 | 2.0357e-08 | +11.3% | 3.860e-09 | 1.282e-08 |
+| k3 @ 2..13 | 1.6120e-08 | +29.7% | 3.860e-09 | 7.843e-09 |
+| k4 @ 2..5 | 2.2647e-08 | +1.3% | 7.323e-09 | 1.582e-08 |
+| k4 @ 2..9 | 2.2052e-08 | +3.9% | 5.677e-09 | 1.452e-08 |
+| k4 @ 2..13 | 2.0692e-08 | +9.8% | 5.677e-09 | 1.298e-08 |
+| nomu @ 2..5 | 2.1920e-08 | +4.5% | 6.262e-09 | 1.498e-08 |
+| nomu @ 2..9 | 1.8067e-08 | +21.3% | 1.029e-09 | 9.834e-09 |
+| nomu @ 2..13 | 1.0899e-08 | +52.5% | 1.029e-09 | 2.860e-09 |
+
+
+### Decision (PLAN §3 Step 3 mapping) and what the tables say
+
+1. **Covariance and κ3 are the two channels; κ4 is minor.** Rolled at every layer: cov −42% of final
+   MSE (var alone −42%, C_off −32%), κ3 −51% (D3 −22%, D21 −12.5%), κ4 −15% — and all of κ4's share is
+   Q31; exact D4 (−1%) and exact D22 (−7%) make the chain *worse*, because λ/θ/feed were fitted to
+   compensate for the model κ4. The error is late: substituting cov only over layers 2..9 recovers
+   14% of what 2..16 does 42%; the same shape holds for every channel.
+2. **The variance consumed at a layer is the largest single marginal source**: one-step, exact var
+   recovers **46–48%** of the per-layer error at every layer ≥ 6, D3 ~20%, D4 ~12%, all four ~85%. Its
+   relative error is tiny (0.19% at layer 16) but ∂E[ReLU]/∂σ = φ(α) is the largest sensitivity. The
+   off-diagonal covariance, one layer later, recovers 35% (two-step C11) — the largest off-diagonal.
+3. **D21 error is birth/closure, not compression.** The unshared T0 chain's D21 error is 99% of v59's
+   (0.105 vs 0.106 at layer 15); exact P2 births (T0x) 98%. The old-tier compression owns ~1–2% of the
+   D21 object error. (It owns more of the final MSE — T0 2.148e-08, T0x 2.065e-08 vs v59 2.294e-08,
+   −6.4% / −10% — through channels other than D21's Frobenius error.)
+4. **κ4 models.** κ4_iijj: the chain's form (m/6)(dG_i+dG_j) with *exact* dG has R² ≈ 0.0–0.06; no
+   tested family — λρ, ρ², ḡρ, α_iα_j, or the transported post-κ4 diagonal (W∘W)ᵀdiag(κ4(a))(W∘W) —
+   explains more than **0.19** of its off-diagonal variance (sd 5e-3 around a mean of 2e-2 at layer 15,
+   ≫ the 1e-4 label noise). κ4_iiij: the chain's λ·C form has R² ≈ **0.46–0.50, flat with depth**, and
+   its fitted (m/2)λ is within 5–40% of the chain's (e.g. 0.0093 vs 0.0067 at layer 16); the 4-mode
+   model adds only +0.00–0.11 (0.47 → 0.58).
+
+**Mapping.** Covariance dominant ⇒ **S4 (σ corrector, `estimator_k3_v62_sig.py`) is in, promoted
+ahead of S3**; and the cov_out-from-corrected-pK1 one-line test. κ3 co-dominant, D21 birth-side ⇒
+S2's birth gains; harmonic projection-at-fold is **not** implicated (compression ~1% of D21 error).
+κ4 ⇒ S3's multi-mode core has at most ~15% × (0.58−0.47)/0.5 ≈ 3% headroom; demoted to last.
+
+### Predictions scored
+
+| claim | strategist | mine | measured |
+|---|---|---|---|
+| cov share of one-step error | < 15% | var 25–40% | var **46–48%** (one-step); C_off 35% (two-step) — both wrong, strategist further |
+| D21 share | 30–50% | largest off-diagonal | **6%** two-step, 12.5% rolled — both wrong |
+| κ4 slices share | 20–40% | 10–25% rolled | **15%** rolled (all Q31) — mine right |
+| λ·C_off R² on κ4_iijj by L10 | < 0.5 | < 0.3 | ≤ 0 — both right |
+| 4-mode R² on κ4_iijj | > 0.8 | 0.5–0.8 | **≤ 0.19** — both wrong |
+| λ·C R² on κ4_iiij | — | 0.3–0.7, falling | 0.46–0.50, **flat** — range right, trend wrong |
+| rolled cov / κ3 / all-but-μ | — | 30–50 / 30–50 / 70–85% | 42 / **51** / 80% — κ3 just above |
+| D21 compression share | unknown | 20–40% | **~1–2%** — wrong |
+| object errors at L16: var / C_off / D3 / D21 / D4 / Q31 | — | ≲1 / 3–8 / 10–25 / 25–45 / 30–60 / >50% | 0.19 / **0.9** / **7** / **10.6** / 35 / 75% — the carried objects are 3–4× more accurate than I expected; their *effect* is what is large |
+
+Artifacts: `experiments/2026-09-25_anatomy2/{fit20.json,fit20.md,PREDICTIONS.md,verify.json}`.
+
 ## The evaluator (D1, 2026-09-21)
 
 `python tools/ev.py <candidate.py> [--panel dev|fit|holdout] [--n 100]

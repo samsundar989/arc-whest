@@ -60,7 +60,15 @@ BUDGET = 2 ** 41
 DEV = torch.device("cuda")
 CACHE = ROOT / "cache" / "twin"
 DEFAULT_CAND = ROOT / "estimator_k3_v59_corr400.py"
-TRAINABLE = {"S1": ("W1", "b1", "W2", "b2", "W3", "b3")}
+#: Stage -> trainable leaves, as "group/name" over the chain's constant groups.
+TRAINABLE = {
+    "S1": tuple(f"corr/{k}" for k in ("W1", "b1", "W2", "b2", "W3", "b3")),
+    "S2": tuple(f"corr/{k}" for k in ("W1", "b1", "W2", "b2", "W3", "b3"))
+    + ("gain/lam", "gain/theta", "gain/feed"),
+    "S4": tuple(f"sig/{k}" for k in ("S1", "c1", "S2", "c2")),
+    "S14": tuple(f"corr/{k}" for k in ("W1", "b1", "W2", "b2", "W3", "b3"))
+    + tuple(f"sig/{k}" for k in ("S1", "c1", "S2", "c2")),
+}
 
 
 # --------------------------------------------------------------------- data
@@ -105,12 +113,52 @@ class _Ctx:
         self.api_version, self.scratch_dir, self.submission_dir = "1.0", None, None
 
 
+#: S2 profile hooks. The shipped file turns lambda into a Python float at two
+#: sites, which would cut the gradient; the twin's COPY of the source replaces
+#: them (and routes theta / feed through per-layer gain tensors). The exported
+#: estimator keeps plain constants -- `tools/build_twin.py` bakes the gains in.
+TWIN_PATCHES = [
+    ('"lam": float(_lam_prev), "metric": metric})',
+     '"lam": _lam_prev, "metric": metric})'),
+    ("_lam_h = float(_own_lambda(_li_h, depth))",
+     "_lam_h = _own_lambda(_li_h, depth)"),
+    ('            _sf = _OWN_S_FEED * _prof_at("feed", layer_index, depth)\n'
+     '            if _sf != 1.0:\n',
+     '            _sf = _OWN_S_FEED * _prof_at("feed", layer_index, depth)\n'
+     '            if _TWG is not None:\n'
+     '                _sf = _sf * _TWG["feed"][layer_index]\n'
+     '            if _TWG is not None or _sf != 1.0:\n'),
+    ('def _own_extra(x):\n    th = _OWN_THETA_FAM * _prof("theta")\n',
+     '_TWG = None\n\n\ndef _own_extra(x):\n    th = _OWN_THETA_FAM * _prof("theta")\n'
+     '    if _TWG is not None:\n        return x * (th * _TWG["theta"][_CUR_LAYER])\n'),
+]
+
+
 def load_module(path: Path, name="_twin_candidate"):
+    """Import the candidate from a PATCHED copy (see TWIN_PATCHES), kept for audit."""
     import importlib.util
-    spec = importlib.util.spec_from_file_location(name, path)
+    src = path.read_text(encoding="utf-8")
+    for a, b in TWIN_PATCHES:
+        if src.count(a) != 1:
+            raise SystemExit(f"twin patch anchor occurs {src.count(a)}x:\n{a}")
+        src = src.replace(a, b, 1)
+    pp = ROOT / "cache" / "twin" / f"_twin_{path.stem}.py"
+    pp.parent.mkdir(parents=True, exist_ok=True)
+    pp.write_text(src, encoding="utf-8", newline="\n")
+    spec = importlib.util.spec_from_file_location(name, pp)
     mod = importlib.util.module_from_spec(spec)
     sys.modules[name] = mod
     spec.loader.exec_module(mod)
+    _orig_lam = mod._own_lambda
+
+    def _own_lambda(i, depth):                   # lambda gain, per SOURCE layer i
+        v = _orig_lam(i, depth)
+        g = mod._TWG
+        if g is None or not (0 <= i < g["lam"].shape[0]):
+            return v
+        return g["lam"][i] * v
+
+    mod._own_lambda = _own_lambda
     return mod
 
 
@@ -125,13 +173,29 @@ class Twin:
         self.gens = self.mod._fit_generations(width, depth, BUDGET)
         assert self.gens is None, "generation cap -- not the exact tower"
         self.const = self.est._constants(width, self.dtype)
-        self.corr0 = {k: v.detach().clone() for k, v in self.const["corr"].items()}
+        #: the frozen base values of every learnable group the file carries
+        self.base = {g: {k: v.detach().clone() for k, v in self.const[g].items()}
+                     for g in ("corr", "sig") if self.const.get(g) is not None}
+        one = torch.ones(depth, dtype=torch.float32, device=DEV)
+        self.base["gain"] = {"lam": one.clone(), "theta": one.clone(), "feed": one.clone()}
+
+    def leaf(self, key):
+        g, k = key.split("/")
+        return self.base[g][k]
 
     def install(self, params: dict):
-        """Point the chain's corrector at `params` (leaf tensors) + frozen rest."""
-        corr = dict(self.corr0)
-        corr.update(params)
-        self.const["corr"] = corr
+        """Point each group at `params` ("group/name" -> tensor) + its frozen rest.
+
+        `gain/*` is live only when some gain is actually in `params`: with no
+        gains installed `_TWG` stays None and the twin runs the file's own
+        Python-float profiles, bit for bit."""
+        for g, vals in self.base.items():
+            d = dict(vals)
+            d.update({k.split("/")[1]: v for k, v in params.items() if k.startswith(g + "/")})
+            if g == "gain":
+                self.mod._TWG = d if any(k.startswith("gain/") for k in params) else None
+            else:
+                self.const[g] = d
 
     def _step(self, l, W, state):
         s = self.mod._layer(W, state, self.table, self.dtype, self.const, 2.0,
@@ -158,6 +222,16 @@ def mse_rows(mus, truth):
     """Per-row MSE (float64) for rows 1..depth-1."""
     t = torch.from_numpy(np.asarray(truth)).to(DEV)
     return [((m.double() - t[l]) ** 2).mean() for l, m in enumerate(mus) if l >= 1]
+
+
+def load_params(path):
+    """npz -> {"group/name": tensor}. Bare names (old S1 files) mean group corr."""
+    return {(k if "/" in k else f"corr/{k}").replace("__", "/"): torch.from_numpy(v).to(DEV)
+            for k, v in np.load(path).items()}
+
+
+def save_params(path, params):
+    np.savez(path, **{k.replace("/", "__"): v.detach().cpu().numpy() for k, v in params.items()})
 
 
 # ------------------------------------------------------------------ commands
@@ -187,7 +261,7 @@ def cmd_parity(a):
 def cmd_eval(a, tw=None, params=None, quiet=False):
     tw = tw or Twin(Path(a.cand))
     if params is None and a.params:
-        params = {k: torch.from_numpy(v).to(DEV) for k, v in np.load(a.params).items()}
+        params = load_params(a.params)
     if params is not None:
         tw.install(params)
     data = Data()
@@ -203,18 +277,58 @@ def cmd_eval(a, tw=None, params=None, quiet=False):
     return r
 
 
+def cmd_sigstats(a):
+    """Per-layer mean / (1/std) of the sigma page's 27 expanded features on TRAIN.
+
+    Collected at the point `var` is formed, from the chain as it stands (sigma page
+    inert), over `--n` TRAIN nets. Written as sig__smu / sig__sisd, the frozen
+    standardisers `tools/build_v62.py --params` bakes into the file.
+    """
+    tw = Twin(Path(a.cand))
+    m = tw.mod
+    assert hasattr(m, "_sig_raw"), "candidate has no sigma corrector (build_v62 first)"
+    acc = {}
+    orig = m._sig_factor
+
+    def spy(li, sig, mu_pre, var, D3, W, dtype):
+        X = m._sig_raw(mu_pre, var, D3, W, dtype)
+        X = torch.cat([X, X * X, X[:, m._SIG_PI] * X[:, m._SIG_PJ]], dim=1).double()
+        s1, s2, c = acc.get(li, (0.0, 0.0, 0))
+        acc[li] = (s1 + X.sum(0), s2 + (X * X).sum(0), c + X.shape[0])
+        return orig(li, sig, mu_pre, var, D3, W, dtype)
+
+    m._sig_factor = spy
+    data = Data()
+    with torch.no_grad():
+        for split, i in panel("train")[: a.n or 20]:
+            w, _ = data.net(split, i)
+            tw.forward(w)
+    m._sig_factor = orig
+    L = len(acc)
+    smu = np.zeros((L, acc[0][0].numel()), np.float32)
+    sisd = np.ones_like(smu)
+    for li, (s1, s2, c) in acc.items():
+        mu = (s1 / c).cpu().numpy()
+        sd = np.sqrt(np.maximum((s2 / c).cpu().numpy() - mu * mu, 1e-30))
+        smu[li], sisd[li] = mu, 1.0 / np.maximum(sd, 1e-12)
+    np.savez(a.out, smu=smu, sisd=sisd)
+    print(f"wrote {a.out}: {L} layers x {smu.shape[1]} features")
+
+
 def cmd_train(a):
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     tw = Twin(Path(a.cand))
     names = TRAINABLE[a.stage]
-    params = {k: tw.corr0[k].clone().requires_grad_(True) for k in names}
+    params = {k: tw.leaf(k).clone().requires_grad_(True) for k in names}
     if a.init:
-        for k, v in np.load(a.init).items():
+        for k, v in load_params(a.init).items():
             if k in params:
-                params[k] = torch.from_numpy(v).to(DEV).requires_grad_(True)
+                params[k] = v.clone().requires_grad_(True)
+            else:                                   # frozen, but not the file's value
+                params[k] = v
     tw.install(params)
-    opt = torch.optim.Adam(list(params.values()), lr=a.lr)
+    opt = torch.optim.Adam([v for k, v in params.items() if v.requires_grad], lr=a.lr)
     data = Data()
     train = panel("train")
     rng = np.random.default_rng(20260925)
@@ -234,7 +348,7 @@ def cmd_train(a):
         return r["raw_mse"]
 
     best = evaluate("init")
-    np.savez(out / "params_best.npz", **{k: v.detach().cpu().numpy() for k, v in params.items()})
+    save_params(out / "params_best.npz", params)
     bad = 0
     step = 0
     progress = os.environ.get("WORKERQ_PROGRESS")
@@ -271,8 +385,7 @@ def cmd_train(a):
                 h = evaluate(f"step {step}")
                 if h < best:
                     best, bad = h, 0
-                    np.savez(out / "params_best.npz",
-                             **{k: v.detach().cpu().numpy() for k, v in params.items()})
+                    save_params(out / "params_best.npz", params)
                 else:
                     bad += 1
                     if bad >= a.patience:
@@ -284,7 +397,7 @@ def cmd_train(a):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["parity", "eval", "train"])
+    ap.add_argument("cmd", choices=["parity", "eval", "train", "sigstats"])
     ap.add_argument("--cand", default=str(DEFAULT_CAND))
     ap.add_argument("--nets", default="0,1,2")
     ap.add_argument("--ref", default=str(ROOT / "experiments" / "2026-09-25_anatomy2" / "fit20.json"))
@@ -302,7 +415,8 @@ def main():
     ap.add_argument("--hold-n", type=int, default=100)
     ap.add_argument("--patience", type=int, default=3)
     a = ap.parse_args()
-    {"parity": cmd_parity, "eval": cmd_eval, "train": cmd_train}[a.cmd](a)
+    {"parity": cmd_parity, "eval": cmd_eval, "train": cmd_train,
+     "sigstats": cmd_sigstats}[a.cmd](a)
 
 
 if __name__ == "__main__":

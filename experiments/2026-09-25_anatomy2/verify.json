@@ -1,0 +1,7 @@
+{
+ "net": 0,
+ "loop_bit_identical": true,
+ "recording_bit_identical": true,
+ "self_substitution_max_abs": 0.0,
+ "ref_final_mse_vs_split_truth": 2.0728972477306987e-08
+}
