@@ -9,8 +9,8 @@ file is the first of the three.
 What it reports
 ---------------
 * **raw MSE** — mean final-layer MSE over the panel, against the organizers'
-  1e9-sample labels (noise floor ~6.8e-10, measured 2026-09-24 from layer 1, which
-  our chain computes in exact closed form; ~3% of today's raw MSE).
+  1e9-sample labels (noise floor at the scored layer 16 ~7.7e-11, ~0.3% of today's
+  raw MSE; it is 6.8e-10 at layer 1 and falls with depth -- RESULTS.md Anatomy 2).
 * **paired ratio vs the baseline** — mean of the per-net ADJUSTED score
   difference with a studentised-t 95% interval and wins/N, on common random
   numbers. The arithmetic difference is the competition's own identity; the
@@ -646,7 +646,7 @@ def evaluate(candidate: Path, panel: str, n: int, jobs: int, baseline: Optional[
 
 def report(r: Dict, best_graded: float) -> None:
     print()
-    print(f"  raw MSE            {r['raw_mse']:.6e}   (label noise floor ~6.8e-10)")
+    print(f"  raw MSE            {r['raw_mse']:.6e}   (label noise floor at layer 16 ~7.7e-11)")
     print(f"  FLOPs / MLP        {r['flops']:,.0f}   = {r['multiplier']:.5f} x 2^41")
     print(f"  op calls           {r['ops']:,.0f}")
     print(f"  materializations   {r['materializations']:,.0f}")
@@ -691,11 +691,11 @@ def main(argv=None) -> int:
                     help="skip the real-meter run (accuracy only; no score, no gates)")
     ap.add_argument("--mem", action="store_true",
                     help="also run the WSL RLIMIT_AS 8 GiB gate (2 predictions, ~3 min)")
-    #: THE §5 BASELINE. v57 #332129, graded 2026-09-24. Update this the moment a
+    #: THE §5 BASELINE. v59 #332232, graded 2026-09-25. Update this the moment a
     #: better score grades, or every later candidate is gated against a stale bar.
-    ap.add_argument("--best-graded", type=float, default=5.0443e-09,
+    ap.add_argument("--best-graded", type=float, default=4.975556505550612e-09,
                     help="the best graded score, which the §5 gate must beat "
-                         "(default: v57 #332129)")
+                         "(default: v59 #332232)")
     ap.add_argument("--json", default=None, help="also write the full result here")
     ap.add_argument("--append", action="store_true",
                     help="append the row to RESULTS.md")

@@ -80,6 +80,11 @@ passthrough = [
   # can only be placed where they already exist (this machine) until staged.
   "experiments/2026-09-24_corr/train_fit100.npz",     # FIT 100 nets
   "experiments/2026-09-24_corr/train_hold300.npz",    # pinned HOLDOUT-300
+  # --- keenanpepper's public MC labels (PLAN rev 13 decision 3), fetched by
+  # tools/labels/fetch.py. `cache/hf/` holds no tracked file, so the directory
+  # itself links. ~6.6 GB, read-only to every job; local-only until staged.
+  "cache/hf",
+  "cache/twin",       # tools/twin/export_weights.py memmaps, ~74 GB; written through
   "experiments/vault/vault_v1.npz",
   "experiments/vault/mirror_preds.npz",
   "experiments/vault/sacrificial_preds.npz",

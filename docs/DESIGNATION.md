@@ -27,11 +27,11 @@ but it touches only that entry. The other designate is ranked on its own, and
 only the better of the two counts. So A may carry wall risk that B does not;
 B exists so that a bad private-run day on A costs us A's edge, not the entry.
 
-## Standing — 2026-09-25 04:10 UTC
+## Standing — 2026-09-25 06:40 UTC (v59 graded)
 
 | role | file | sha8 | graded | score | worst wall (median) | implied noisy worst | residual | VmPeak | meets policy |
 |---|---|---|---|---:|---|---:|---:|---:|---|
-| **A (recommended)** | `estimator_k3_v59_corr400.py` | `f419f765` | #332232 **PENDING** | 4.9763e-09 derived | v57's: 92.81 (90.43) | ~112 s | 0.2507 s (v57) | 6,434 MiB (v57) | yes, A (≤ 115 s) — by ~3 s |
+| **A (recommended)** | `estimator_k3_v59_corr400.py` | `f419f765` | #332232 | **4.9756e-09** | **94.42 (89.84)**, 1.051 | 111.4 s | 0.2511 s (1.59x) | 6,434 MiB (v57 path) | **yes, A (≤ 115 s)** — by 3.6 s |
 | A fallback | `estimator_k3_v57_corr.py` | `253c7b19` | #332129 | **5.0443e-09** | 92.81 (90.43), 1.026 | 112.1 s | 0.2507 s | 6,434 MiB | yes, A |
 | **B (recommended)** | `estimator_k3_v60_ws400.py` | `e9344107` | #332223 | **5.3387e-09** | 57.59 (55.73), 1.033 | 69.1 s | 0.2121 s (1.89x) | 4,941 MiB | yes, A and B, by 46 / 26 s |
 | retired | `estimator_k3_v56b_wallsafe.py` | `b401ad75` | #332063 | 5.7076e-09 | 60.7 (54.5), 1.114 | ~68 s | 0.2188 s | 4,908 MiB | dominated by v60_ws400 |
@@ -39,9 +39,9 @@ B exists so that a bad private-run day on A costs us A's edge, not the entry.
 
 v59 is v60_ws400 with `_STRASSEN_MIN_BLOCK = 32` instead of 64 — same corrector
 weights, same accuracy (v60's graded raw 2.301125e-08), v57's cost and code path.
-Its derived score is 2.301125e-08 × 0.21625525 = 4.9763e-09. The v59 A row
-becomes MEASURED when #332232 grades; if it grades worse than v57, A falls back
-to v57 #332129.
+Its derived score was 2.301125e-08 × 0.21625525 = 4.9763e-09; **#332232 graded
+4.9756e-09** (raw 2.300780e-08), so A is now MEASURED. v57 #332129 stays the
+fallback A (same code path, 1.4% worse).
 
 **A's thin margin.** v57/v59's implied noisy worst (~112 s) clears the ~115 s A
 bound by about 3 s and the 120 s cliff by about 8 s. That is the accepted risk
@@ -62,3 +62,4 @@ The anchor is real: v55 (leaf 32, median 92.8 s, 2.5 s above v57's) read
 | 2026-09-24 00:11 | tr64 | #332088 | quiet (1.044) | 80.30 | 76.90 |
 | 2026-09-24 08:30 | v57 | #332129 | quiet (1.026) | 92.81 | 90.43 |
 | 2026-09-25 01:05 | v60_ws400 | #332223 | quiet (1.033) | 57.59 | 55.73 |
+| 2026-09-25 04:05 | v59 | #332232 | quiet (1.051) | 94.42 | 89.84 |

@@ -65,3 +65,6 @@ cache/preds/
 
 # keenanpepper public MC labels (tools/labels/fetch.py); tens of GB, never tracked
 cache/hf/
+
+# tools/twin/export_weights.py memmaps (~74 GB), regenerable
+cache/twin/
