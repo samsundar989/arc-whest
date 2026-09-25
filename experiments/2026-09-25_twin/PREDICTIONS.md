@@ -20,3 +20,9 @@ Order after Anatomy 2 (Samuel acknowledged the S4 promotion, 2026-09-25): S1 -> 
 - S2 (lambda/theta/feed gains + S1): -0.5 to -2% (D6 found the profiles already at their optimum
   under greedy fitting; end to end may unlock a little).
 - S3: not run unless S1+S4+S2 leave time (Anatomy 2 caps it at ~3%).
+
+## Scored so far (2026-09-25 ~17:50 UTC)
+- S1: DEV -0.62% / HOLDOUT-100 -0.76% (strategist -3..-6, mine -1.5..-3.5: both too high).
+- S4 (on S1): HOLDOUT-100 -0.10% (mine -3..-8: wrong). The output page moved ~2 Adam steps' worth in
+  448 -- the gradient has no consistent sign, i.e. the 27 local features do not predict the var error.
+- S2 (on S1, gains lam/theta/feed + corr pages): my -0.5..-2% stands.

@@ -239,6 +239,14 @@ teacher-forced fit. Under the handoff's rule (S1 < 1%) no further S1 work; its p
 the base for S4, and the file `estimator_k3_v62_s1.py` (v59 + S1 pages, data lines only) goes
 through the §5 gates as a canary candidate under decision 1 (projected ≈ 4.945e-09 < 4.9756e-09).
 
+**S4 — sigma page on var_pre** (`estimator_k3_v63_sig.py` = v62_s1 + a 27→32→1 page rescaling the
+variance consumed at each layer; standardisers from 20 TRAIN nets; 900 TRAIN, 2 epochs; worker-q
+2153, 2h29m): HOLDOUT-100 2.368646e-08 → **2.366172e-08 (−0.10%)** — noise. **Closed.** Anatomy 2
+says exact var is worth ~47% of each layer's one-step error, but the learned output page moved only
+~2 Adam steps' worth in 448 (rms 4e-4, i.e. ~1e-4 relative on var against a ~1e-3 error): the
+gradient has no consistent sign, so the variance error is not predictable from the 6 local channels
+(μ_pre, σ, α, D3/σ³, ‖W_i‖, centred μ). Prediction (mine −3 to −8%) wrong. No canary.
+
 **Step 3 "test first" — cov_out from the corrected pK1** (diag(cov_out) −= 2δ·pK1 + δ², the
 variance made consistent with the corrector's mean shift δ; twin arm `pk1cov`, DEV 100 paired):
 **−0.15% ± 0.14% raw, 57/100 wins. KILLED** (Step 3 kill line 2%).
