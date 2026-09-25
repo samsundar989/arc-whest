@@ -27,7 +27,7 @@ but it touches only that entry. The other designate is ranked on its own, and
 only the better of the two counts. So A may carry wall risk that B does not;
 B exists so that a bad private-run day on A costs us A's edge, not the entry.
 
-## Standing — 2026-09-25 06:40 UTC (v59 graded)
+## Standing — 2026-09-25 04:35 UTC (v59 graded)
 
 | role | file | sha8 | graded | score | worst wall (median) | implied noisy worst | residual | VmPeak | meets policy |
 |---|---|---|---|---:|---|---:|---:|---:|---|
