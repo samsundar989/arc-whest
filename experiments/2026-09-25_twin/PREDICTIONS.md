@@ -1,0 +1,22 @@
+# Twin stages — predictions, recorded 2026-09-25 ~05:45 UTC, BEFORE any training step
+
+Acceptance (done first): twin DEV 100 raw 2.385123e-08 vs v59 2.384984e-08 (+0.006%, bar 0.1%).
+Per-net parity on FIT 0-2: +7.5e-4 / +6.3e-5 / -8.4e-5 relative -- inside the cupy-vs-numpy per-net
+envelope (worst 1.9e-3, RESULTS "Two accuracy backends"); the handoff's per-net 1e-4 bar is below
+what any two float32 backends achieve, so the panel criterion is the binding one.
+
+Order after Anatomy 2 (Samuel acknowledged the S4 promotion, 2026-09-25): S1 -> S4 -> S2 -> S3.
+
+## Strategist (PLAN rev 13 §3 Step 2)
+- S1: -3 to -6% raw over v59; S2-S4 together a further -5 to -15%.
+
+## Mine
+- S1 (corrector pages end to end, 900 TRAIN nets): **-1.5 to -3.5% raw** on DEV. The sequential
+  teacher-forced fit already removed exposure bias layer by layer; what end-to-end adds is
+  credit assignment to the final layer, which I expect to be modest. HOLDOUT-100 within 1 pp of DEV.
+- S4 (sigma page on var_pre, on top of S1): **a further -3 to -8%**. Exact var recovers ~47% of
+  one-step error, but a 27-feature page can only learn the predictable part; the mean corrector's
+  analogous ceiling was ~7% of a 21%-local channel.
+- S2 (lambda/theta/feed gains + S1): -0.5 to -2% (D6 found the profiles already at their optimum
+  under greedy fitting; end to end may unlock a little).
+- S3: not run unless S1+S4+S2 leave time (Anatomy 2 caps it at ~3%).

@@ -79,15 +79,19 @@ class Data:
         for split, n in (("full", 1000), ("mini", 100)):
             p = CACHE / f"{split}_w.f32"
             if p.exists():
-                self.w[split] = np.memmap(p, dtype=np.float32, mode="r",
-                                          shape=(n, 16, 1024, 1024))
+                # a path, not a memmap: mapped pages would count against this
+                # process's working set across 900 nets (see export_weights.py)
+                self.w[split] = p
                 self.truth[split] = np.load(CACHE / f"{split}_truth.npy")
                 self.meta[split] = json.loads((CACHE / f"{split}_meta.json").read_text())
 
     def net(self, split, i):
         if not self.meta[split]["done"][i]:
             raise RuntimeError(f"{split} row {i} not exported yet")
-        w = [torch.from_numpy(np.array(self.w[split][i, l])).to(DEV) for l in range(16)]
+        per_net = 16 * 1024 * 1024                  # float32 elements in one net
+        a = np.fromfile(self.w[split], dtype=np.float32, count=per_net,
+                        offset=i * per_net * 4).reshape(16, 1024, 1024)
+        w = [torch.from_numpy(a[l].copy()).to(DEV) for l in range(16)]
         return w, self.truth[split][i]
 
 
@@ -328,9 +332,24 @@ def cmd_train(a):
             else:                                   # frozen, but not the file's value
                 params[k] = v
     tw.install(params)
-    opt = torch.optim.Adam([v for k, v in params.items() if v.requires_grad], lr=a.lr)
+    # PER-TENSOR RELATIVE STEP SIZES. Adam moves every weight by ~lr whatever its
+    # gradient, and the corrector's output page W3/b3 carries the target scale
+    # (~1e-4): an absolute 1e-3 step sent the train MSE 2.4e-8 -> 3.5e-3 in ONE
+    # step (smoke run, 2026-09-25). So lr_k = lr x RMS(tensor_k): every step is a
+    # relative change of ~lr. A zero-initialised tensor (sigma page S2/c2) takes
+    # the RMS of its group's non-zero siblings times --zero-scale.
+    groups = []
+    for k, v in params.items():
+        if not v.requires_grad:
+            continue
+        rms = float(v.detach().pow(2).mean().sqrt())
+        if rms == 0.0:
+            rms = a.zero_scale
+        groups.append({"params": [v], "lr": a.lr * rms, "name": k})
+        print(f"  {k}: rms {rms:.3e} -> lr {a.lr * rms:.3e}", flush=True)
+    opt = torch.optim.Adam(groups)
     data = Data()
-    train = panel("train")
+    train = panel("train")[: a.train_n or None]
     rng = np.random.default_rng(20260925)
     steps_per_epoch = len(train) // a.accum
     total = steps_per_epoch * a.epochs
@@ -339,7 +358,7 @@ def cmd_train(a):
     log = open(out / "train.log", "a", encoding="utf-8")
 
     def evaluate(tag):
-        ev = argparse.Namespace(panel="hold100", n=a.hold_n, cand=a.cand, params=None)
+        ev = argparse.Namespace(panel=a.hold_panel, n=a.hold_n, cand=a.cand, params=None)
         r = cmd_eval(ev, tw=tw, params=params, quiet=True)
         msg = f"[{tag}] HOLDOUT-100 raw {r['raw_mse']:.6e} (n={r['n']})"
         print(msg, flush=True)
@@ -365,7 +384,7 @@ def cmd_train(a):
                 rows = mse_rows(mus, truth)
                 loss = rows[-1] + a.w_all * torch.stack(rows[:-1]).mean()
                 (loss * (1e8 / a.accum)).backward()
-                lsum += float(rows[-1])
+                lsum += float(rows[-1].detach())
                 del mus, rows, loss, w
             opt.step()
             sched.step()
@@ -381,6 +400,11 @@ def cmd_train(a):
                     Path(progress).write_text(str(step / total))
                 except OSError:
                     pass
+            if a.max_steps and step >= a.max_steps:
+                print(f"smoke: {step} steps, peak VRAM "
+                      f"{torch.cuda.max_memory_allocated() / 2**30:.2f} GiB, "
+                      f"{(time.time() - t0) / (step * a.accum):.2f} s/net", flush=True)
+                return
             if step % a.eval_every == 0 or step == total:
                 h = evaluate(f"step {step}")
                 if h < best:
@@ -413,6 +437,11 @@ def main():
     ap.add_argument("--w-all", type=float, default=0.1)
     ap.add_argument("--eval-every", type=int, default=28)
     ap.add_argument("--hold-n", type=int, default=100)
+    ap.add_argument("--hold-panel", default="hold100")
+    ap.add_argument("--train-n", type=int, default=0, help="first N TRAIN rows only")
+    ap.add_argument("--zero-scale", type=float, default=1e-2,
+                    help="RMS assumed for a zero-initialised tensor's step size")
+    ap.add_argument("--max-steps", type=int, default=0, help="stop after N steps (smoke)")
     ap.add_argument("--patience", type=int, default=3)
     a = ap.parse_args()
     {"parity": cmd_parity, "eval": cmd_eval, "train": cmd_train,

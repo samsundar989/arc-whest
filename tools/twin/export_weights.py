@@ -37,7 +37,15 @@ def export(split: str) -> None:
     w0, _, _ = rd.get(0, split, dtype=np.float32)
     shape = (n,) + w0.shape
     path = OUT / f"{split}_w.f32"
-    mm = np.memmap(path, dtype=np.float32, mode="r+" if path.exists() else "w+", shape=shape)
+    # PLAIN FILE WRITES, NOT A WRITABLE MEMMAP. A memmap's dirty pages count
+    # against this process's working set (36 GiB observed on a 4 GiB
+    # declaration, worker-q 2134), which starved the whole queue of host RAM.
+    # Seek-and-write goes through the reclaimable file cache instead.
+    row_bytes = int(np.prod(shape[1:])) * 4
+    if not path.exists() or path.stat().st_size != n * row_bytes:
+        with open(path, "ab") as f:
+            f.truncate(n * row_bytes)
+    fh = open(path, "r+b")
     tpath = OUT / f"{split}_truth.npy"
     truth = np.load(tpath) if tpath.exists() else np.zeros((n,) + w0.shape[:1] + w0.shape[2:])
     mpath = OUT / f"{split}_meta.json"
@@ -48,20 +56,21 @@ def export(split: str) -> None:
         if meta["done"][i]:
             continue
         w, tr, m = rd.get(i, split, dtype=np.float32)
-        mm[i] = w
+        fh.seek(i * row_bytes)
+        fh.write(np.ascontiguousarray(w, dtype=np.float32).tobytes())
         truth[i] = tr
         meta["names"][i], meta["seeds"][i] = m["mlp_name"], int(m["mlp_seed"])
         meta["done"][i] = True
         if i % 50 == 49 or i == n - 1:
-            mm.flush()
+            fh.flush()
+            os.fsync(fh.fileno())
             np.save(tpath, truth)
             mpath.write_text(json.dumps(meta))
             print(f"{split}: {i + 1}/{n}", flush=True)
             p = os.environ.get("WORKERQ_PROGRESS")
             if p:
                 Path(p).write_text(str((i + 1) / n))
-    mm.flush()
-    del mm
+    fh.close()
 
 
 if __name__ == "__main__":
