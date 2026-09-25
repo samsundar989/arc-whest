@@ -209,6 +209,10 @@ class Twin:
         `gain/*` is live only when some gain is actually in `params`: with no
         gains installed `_TWG` stays None and the twin runs the file's own
         Python-float profiles, bit for bit."""
+        unknown = [k for k in params if k.split("/")[0] not in self.base
+                   or k.split("/")[1] not in self.base[k.split("/")[0]]]
+        if unknown:        # a silently ignored key made one DEV read a no-op once
+            raise SystemExit(f"install: unknown parameter keys {unknown}")
         for g, vals in self.base.items():
             d = dict(vals)
             d.update({k.split("/")[1]: v for k, v in params.items() if k.startswith(g + "/")})
@@ -246,8 +250,11 @@ def mse_rows(mus, truth):
 
 def load_params(path):
     """npz -> {"group/name": tensor}. Bare names (old S1 files) mean group corr."""
-    return {(k if "/" in k else f"corr/{k}").replace("__", "/"): torch.from_numpy(v).to(DEV)
-            for k, v in np.load(path).items()}
+    out = {}
+    for k, v in np.load(path).items():
+        k = k.replace("__", "/")
+        out[k if "/" in k else f"corr/{k}"] = torch.from_numpy(v).to(DEV)
+    return out
 
 
 def save_params(path, params):

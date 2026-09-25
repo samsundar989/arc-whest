@@ -208,6 +208,40 @@ All four are implemented in `tools/ev.py`; change them there and here together.
 | 2026-09-25 | `estimator_k3_v59_corr400.py` | `f419f765` | GRADED | 2.300780e-08 | 0.21626 | 24,186 | **94.42 s** (median 89.84) | (v57's code path, 6,434 MB) | 4.9763e-09 derived | **4.9756e-09** | **1.0138x vs v57 #332129** (graded/graded) | 99/100 DEV | **sub #332232, THE NEW BEST (prev 5.0443e-09). 100/100 completed, 0 failed, 0 nets > 100 s.** First canary under PLAN rev 13 decision 1 (any projected gain over the best graded; the 3% gate is retired). The 400-net corrector at leaf 32. **Raw 2.300780e-08 vs v60_ws400's 2.301125e-08: the same accuracy to 0.015%**, as designed -- the two files differ only in `_STRASSEN_MIN_BLOCK`. The score was DERIVED before submission from #332223's graded raw x this multiplier (4.9763e-09) and graded 0.01% better. Against the DEV projection at the current 1.038 (5.1577e-09 / 1.038 = 4.9689e-09) it graded +0.13% worse: implied factor **1.0366**, the NINTH observation (range now 1.0339-1.0471, mean 1.0399), no change to the constant. **Wall: median 89.84, p90 92.66, worst 94.42, worst/median 1.051 -- a quiet day.** Kernel 170.3 ps/FLOP (v57: 171.3), overhead 8.65 s. Residual worst 0.25114 s (1.59x). Multiplier = twin's 0.21625525 exactly. **Implied noisy worst 89.84 x 1.24 = 111.4 s: meets the rev-13 A policy (<= ~115 s)** by ~3.6 s and the 120 s cliff by ~8.6 s. `docs/DESIGNATION.md`: A = v59, B = v60_ws400. First slot of UTC day 2026-09-25. |
 <!-- ev.py --append inserts new rows directly above this marker. Keep it here. -->
 
+## Step 2 (HANDOFF 09-25) — the differentiable twin, and stage S1 (2026-09-25)
+
+**The twin runs the shipped file itself.** `tools/twin/twin.py` imports the estimator with
+`flopscope` replaced by a torch shim (`tools/twin/shim`), so autograd flows through exactly the
+arithmetic that ships (Strassen, tower, closure, κ4 regeneration, corrector). Acceptance: **DEV
+100 raw 2.385123e-08 vs v59 2.384984e-08 (+0.006%, bar 0.1%)**. Per-net parity on FIT 0–2:
++7.5e-4 / +6.3e-5 / −8.4e-5 relative. The handoff's per-net 1e-4 bar is below what any two float32
+backends reach (cupy vs the official numpy chain: worst net 1.9e-3, § "Two accuracy backends"), so
+the panel criterion binds. 0.6 s/net forward; 3.4 s/net/step with per-layer checkpointing, 5.45 GiB
+VRAM — but 18 s/net/step in the S1 run while other projects held all 16 CPU threads.
+
+Two traps, both fixed before any number was trusted: (1) Adam at the handoff's absolute lr 1e-3
+took train MSE 2.4e-8 → 3.5e-3 in one step, because the corrector's output page carries the target
+scale (~1e-4) — steps are now relative, lr_k = lr × RMS(tensor_k); (2) a parameter-file key bug made
+the first S1 DEV read silently evaluate v59 — `install` now refuses unknown keys.
+
+**S1 — corrector pages end to end** (900 TRAIN nets, 2 epochs, relative lr 2e-3, cosine, early
+stop on HOLDOUT-100; worker-q 2144, 9h02m):
+
+| panel | v59 | S1 | paired | wins |
+|---|---:|---:|---:|---:|
+| HOLDOUT-100 (rows 900–999) | 2.386798e-08 | **2.368646e-08** | −0.76% | — |
+| DEV 100 (twin) | 2.385123e-08 | **2.370264e-08** | **−0.62% ± 0.28%** | 65/100 |
+
+HOLDOUT−DEV gap 0.14 pp (alarm at 1.5 pp). Predictions: strategist −3 to −6%, mine −1.5 to −3.5% —
+**both too optimistic**; end-to-end credit assignment adds little on top of the sequential
+teacher-forced fit. Under the handoff's rule (S1 < 1%) no further S1 work; its pages are kept as
+the base for S4, and the file `estimator_k3_v62_s1.py` (v59 + S1 pages, data lines only) goes
+through the §5 gates as a canary candidate under decision 1 (projected ≈ 4.945e-09 < 4.9756e-09).
+
+**Step 3 "test first" — cov_out from the corrected pK1** (diag(cov_out) −= 2δ·pK1 + δ², the
+variance made consistent with the corrector's mean shift δ; twin arm `pk1cov`, DEV 100 paired):
+**−0.15% ± 0.14% raw, 57/100 wins. KILLED** (Step 3 kill line 2%).
+
 ## Anatomy 2 — channel drift against EXACT pre-activation labels (HANDOFF 09-25 Step 1, 2026-09-25)
 
 **Instrument.** `tools/anatomy2.py` on `estimator_k3_v59_corr400.py`, cupy, 20 **FIT** nets (full rows
