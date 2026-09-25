@@ -62,3 +62,6 @@ external/
 # ~400 KB per candidate-panel pair. The panel index files under data/panels/ ARE
 # tracked -- those pin which nets a number was measured on, which is evidence.
 cache/preds/
+
+# keenanpepper public MC labels (tools/labels/fetch.py); tens of GB, never tracked
+cache/hf/

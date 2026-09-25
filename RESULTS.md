@@ -15,9 +15,9 @@ The plan is `docs/PLAN.md`; the submission gates are its §5.
 | **raw MSE** | final-layer MSE, unweighted |
 | **F/B** | FLOPs per MLP ÷ 2^41, i.e. the score multiplier before the 0.1 floor |
 | **ops** | flopscope operation calls per MLP (drives residual wall time) |
-| **wall** | worst per-MLP wall seconds. Local rows are marked `(local)` and come from the one-net grader twin; the server figure is `local × 1.5981` (§ Calibration) |
+| **wall** | worst per-MLP wall seconds. Local rows are marked `(local)` and come from the one-net grader twin; the server figure comes from the wall law (median = 0.36 ms × ops + FLOPs × kernel rate; worst = median × 1.055 quiet / 1.24 noisy; § Calibration) |
 | **RSS** | VmPeak under the WSL `RLIMIT_AS` 8,192 MB gate |
-| **projected** | predicted public score = DEV score ÷ 1.037 |
+| **projected** | predicted public score = DEV score ÷ 1.038 (§ Calibration) |
 | **graded** | the AIcrowd adjusted score actually returned |
 | **paired gain** | paired arithmetic gain vs the stated baseline, common random numbers |
 | **wins/N** | nets on which the candidate beat that baseline |
@@ -26,28 +26,16 @@ The plan is `docs/PLAN.md`; the submission gates are its §5.
 
 All four are implemented in `tools/ev.py`; change them there and here together.
 
-- **DEV → graded**: divide the 100-net DEV adjusted score by **1.038**
-  (LOWERED from 1.042 on 2026-09-25). **EIGHT** observations: **1.0386 / 1.0385 /
-  1.0339 / 1.0426 / 1.0471 / 1.0458 / 1.0397 / 1.0361**, mean **1.0403**; the
-  last two are v57 #332129 and v60_ws400 #332223.
-  **Two consecutive rows have now graded WORSE than projected** (+0.22%, +0.54%),
-  so 1.042 was optimistic by ~0.4% and §5's 3% gate was correspondingly easier
-  than intended. Neither row breached PLAN §5's 2% recalibration trigger, but a
-  gate that is silently 0.4% loose is worse than one that is 0.4% tight: at 1.038
-  projections come out slightly pessimistic again, which is the side this
-  constant is supposed to err on.
-  **v57 is the first row to grade WORSE than projected** — 5.0443e-09 against a
-  5.0332e-09 projection, i.e. +0.22%. That is well inside PLAN §5's 2%
-  recalibration trigger and the constant stays at 1.042, but the six-row run of
-  projections landing pessimistic is over, so do not treat the margin as free.
-  At 1.037 the last three graded rows all came in *better* than projected — by
-  0.53%, 0.97% and 0.84% — which is a consistent bias, not noise. 1.042 sits
-  under the recent mean, so projections stay slightly pessimistic and the gate
-  slightly strict. The constant is deliberately left at the *low* end of that
-  range: projected = DEV/1.037 comes out slightly pessimistic, which makes §5's
-  "≥3% better than the best graded" gate harder rather than easier. C10 #331816
-  landed 0.53% *better* than projected. If a graded row ever deviates by >2%,
-  stop submitting and recalibrate before the next slot (PLAN §5).
+- **DEV → graded**: divide the 100-net DEV adjusted score by **1.038** — the
+  current constant, in `tools/ev.py` `PUBLIC_FACTOR`. **Eight** observations:
+  1.0386 / 1.0385 / 1.0339 / 1.0426 / 1.0471 / 1.0458 / 1.0397 / 1.0361, mean
+  1.0403 (the last two are v57 #332129 and v60_ws400 #332223).
+  History: 1.037 until 2026-09-22 (three rows in a row graded 0.53–0.97% *better*
+  than projected) → 1.042 → **1.038 on 2026-09-25**, because the next two rows
+  graded *worse* than projected (+0.22%, +0.54%), i.e. 1.042 was ~0.4% optimistic.
+  1.038 sits just under the mean, so projections err slightly pessimistic — the
+  side this constant exists to err on. If a graded row ever deviates by >2%,
+  stop submitting and recalibrate before the next slot.
 
   The factor is entirely a raw-MSE effect: C10's graded multiplier matched its
   DEV multiplier to 2e-10, while raw MSE moved 3.094966e-08 → 2.968645e-08. The

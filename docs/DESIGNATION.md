@@ -1,54 +1,53 @@
 # DESIGNATION — current A and B (maintained by the worker; designating is Samuel's)
 
-*Policy (STRATEGIST_RESPONSE_2026-09-23 §5, pending Samuel's acceptance):*
-**A** = the best score whose worst wall is ≤ 105 s on a **noisy-day** run.
-**B** = a wall-safe twin whose worst wall is ≤ 95 s on a noisy-day run.
-Re-run each designate on one quiet and one noisy day before Oct 15. Never spend
-B's wall margin for score. Agents never designate; this file only keeps the
+*Policy — PLAN rev 13, Samuel's decision 2 (2026-09-25):*
+**A** = the best-scoring entry. Strassen leaf 32 is allowed; implied **noisy-day worst ≤ ~115 s**.
+**B** = its wall-safe twin (leaf 64), implied **noisy-day worst ≤ 95 s**.
+Re-run each designate on one quiet and one noisy day before Oct 10. Never spend
+B's wall margin for score. **Agents never designate**; this file only keeps the
 evidence current.
 
-"Noisy day" means a run whose worst/median ratio is ≥ 1.15 (Sep 23 after ~08:00
-UTC: 1.197–1.235). Quiet runs sit at 1.03–1.055. See RESULTS.md, wall refit.
+"Noisy day" = a run whose worst/median ratio is ≥ 1.15 (Sep 23 after ~08:00 UTC:
+1.197–1.235). Quiet runs sit at 1.03–1.055. Implied noisy worst = graded median ×
+1.24 (RESULTS.md § Calibration, wall refit).
 
-## Standing — 2026-09-25 01:30 UTC
+## Why the pair is a free option — the rule, quoted
 
-**A is now MEASURED, not projected.** `v60_ws400` (#332223) graded **5.3387e-09**
-with worst wall **57.59 s** (median 55.73, ratio 1.033), 0 nets over 100 s and 0
-failed. Implied noisy worst **69.1 s** against a 68.8 s projection — it meets the
-A bound (105 s) by 36 s and the B bound (95 s) by 26 s, with **~51 s of margin to
-the 120 s cliff**. It retires `tr64` outright, beating it on BOTH axes
-(5.3387 vs 5.4341e-09, and 69.1 vs ~95.4 s).
+Live Rules v14 §7, read in Chrome 2026-09-25 (PLAN rev 13 decision 2):
 
-| role | file | sha8 | graded | score | worst wall (median) | residual | VmPeak | policy |
-|---|---|---|---|---:|---|---:|---:|---|
-| **A (recommended)** | `estimator_k3_v60_ws400.py` | `e9344107` | #332223 | **5.3387e-09** | **57.59 (55.73)**, 1.033 | 0.2121 s (1.89x) | 4,941 MiB | **yes, A and B**, by 36 / 26 s |
-| best score, NOT designable | `estimator_k3_v57_corr.py` | `253c7b19` | #332129 | **5.0443e-09** | 92.81 (90.43), 1.026 | 0.2507 s | 6,434 MiB | **no** — implied noisy 112.1 s |
-| **B (fallback)** | `estimator_k3_v56b_wallsafe.py` | `b401ad75` | #332063 | 5.7076e-09 | 60.7 (54.5), 1.114 | 0.2188 s | 4,908 MiB | yes — but **dominated by A** |
-| retired | `...v56c_mix__tr64.py` | `52d83de7` | #332088 | 5.4341e-09 | 80.30 (76.90) | 0.2413 s | 6,468 MiB | superseded by A |
-| retired | `estimator_k3_v58_ws.py` | — | never sent | 5.3998e-09 proj | ~68.8 s proj | 0.2256 s | 4,920 MiB | superseded by A |
+> *"Where a Participant has more than one submission eligible for score-based prize
+> consideration in a Phase, only that Participant's best-scoring such submission is
+> ranked, so that each Participant occupies at most one position in that Phase's
+> score-based ranking."*
 
-### The one open decision, and it is Samuel's
+**Fallback reading.** A net that exceeds the 120 s wall (or the 0.4 s residual) is
+not a disqualification: it gets the zero-prediction fallback (§5.5), which scores
+that net at roughly **0.9** instead of ~5e-9 — ruinous for *that entry's* mean,
+but it touches only that entry. The other designate is ranked on its own, and
+only the better of the two counts. So A may carry wall risk that B does not;
+B exists so that a bad private-run day on A costs us A's edge, not the entry.
 
-`estimator_k3_v59_corr400.py` — the SAME corrector as A, at Strassen depth 4's
-leaf 32 — would grade **4.9763e-09**, derived from A's own graded raw MSE
-(2.301125e-08 x 0.21625525). That is **1.35% better than the best graded** and the
-**best score this project has ever produced**. It is blocked twice over:
+## Standing — 2026-09-25 04:10 UTC
 
-1. **PLAN §5 needs 3%.** At 1.35% it cannot be canaried under standing approval,
-   so it can never acquire the graded row designation requires.
-2. **Its wall is v57's.** Implied noisy worst ~112 s, over the A bound.
+| role | file | sha8 | graded | score | worst wall (median) | implied noisy worst | residual | VmPeak | meets policy |
+|---|---|---|---|---:|---|---:|---:|---:|---|
+| **A (recommended)** | `estimator_k3_v59_corr400.py` | `f419f765` | #332232 **PENDING** | 4.9763e-09 derived | v57's: 92.81 (90.43) | ~112 s | 0.2507 s (v57) | 6,434 MiB (v57) | yes, A (≤ 115 s) — by ~3 s |
+| A fallback | `estimator_k3_v57_corr.py` | `253c7b19` | #332129 | **5.0443e-09** | 92.81 (90.43), 1.026 | 112.1 s | 0.2507 s | 6,434 MiB | yes, A |
+| **B (recommended)** | `estimator_k3_v60_ws400.py` | `e9344107` | #332223 | **5.3387e-09** | 57.59 (55.73), 1.033 | 69.1 s | 0.2121 s (1.89x) | 4,941 MiB | yes, A and B, by 46 / 26 s |
+| retired | `estimator_k3_v56b_wallsafe.py` | `b401ad75` | #332063 | 5.7076e-09 | 60.7 (54.5), 1.114 | ~68 s | 0.2188 s | 4,908 MiB | dominated by v60_ws400 |
+| retired | `...v56c_mix__tr64.py` | `52d83de7` | #332088 | 5.4341e-09 | 80.30 (76.90) | 95.4 s | 0.2413 s | 6,468 MiB | superseded |
 
-So the pair on the table today is **A = v60_ws400 (measured, safe, 5.3387e-09)**
-and **B = v56b (measured, safest, 5.7076e-09)** — with A dominating B, which means
-the second slot is currently buying nothing.
+v59 is v60_ws400 with `_STRASSEN_MIN_BLOCK = 32` instead of 64 — same corrector
+weights, same accuracy (v60's graded raw 2.301125e-08), v57's cost and code path.
+Its derived score is 2.301125e-08 × 0.21625525 = 4.9763e-09. The v59 A row
+becomes MEASURED when #332232 grades; if it grades worse than v57, A falls back
+to v57 #332129.
 
-The alternative pair, **A = v59 (4.9763e-09, ~112 s) + B = v60_ws400 (5.3387e-09,
-69 s)**, is a genuine hedge: the best score we have, floored by a safe twin. It
-needs two things that are not an agent's to give — a graded row for v59 (i.e. a
-§5 exception or a lowered gate), and an answer to whether the better of two
-designated entries counts or a failure in either taints the result. The Rules v14
-text this repository holds says only that "up to two designated submissions are
-rerun on fresh MLPs".
+**A's thin margin.** v57/v59's implied noisy worst (~112 s) clears the ~115 s A
+bound by about 3 s and the 120 s cliff by about 8 s. That is the accepted risk
+of decision 2, and it is exactly why B is v60_ws400 (51 s to the cliff).
+The anchor is real: v55 (leaf 32, median 92.8 s, 2.5 s above v57's) read
+114.5 / 113.8 s worst on the Sep 23 noisy day, with 0 failures.
 
 ## Re-run log
 

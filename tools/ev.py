@@ -9,7 +9,8 @@ file is the first of the three.
 What it reports
 ---------------
 * **raw MSE** — mean final-layer MSE over the panel, against the organizers'
-  1e9-sample labels (noise floor ~9e-11, three orders below anything we measure).
+  1e9-sample labels (noise floor ~6.8e-10, measured 2026-09-24 from layer 1, which
+  our chain computes in exact closed form; ~3% of today's raw MSE).
 * **paired ratio vs the baseline** — mean of the per-net ADJUSTED score
   difference with a studentised-t 95% interval and wins/N, on common random
   numbers. The arithmetic difference is the competition's own identity; the
@@ -534,13 +535,17 @@ def gate_table(r: Dict, best_graded: float) -> List[tuple]:
     better = 1.0 - proj / best_graded
     res_hi = r["ops"] * US_PER_OP[1] * 1e-6
     return [
-        ("DEV projected vs best graded", f"≥3% better than {best_graded:.4e}",
-         f"{proj:.4e} = {better * 100:.1f}% better", better >= 0.03),
+        # PLAN rev 13 decision 1 (Samuel, 2026-09-25): any projected improvement
+        # over the best graded score qualifies; the 3% margin is retired.
+        ("DEV projected vs best graded", f"better than {best_graded:.4e}",
+         f"{proj:.4e} = {better * 100:.2f}% better", better > 0.0),
         ("op calls", f"≤ {OP_CEILING:,}", f"{int(r['ops']):,}", r["ops"] <= OP_CEILING),
-        ("projected server wall (quiet day)", "< 100 s",
-         f"{r['projected_server_wall_s']:.1f} s (noisy day "
-         f"{r.get('projected_server_wall_noisy_s', float('nan')):.1f} s)",
-         r["projected_server_wall_s"] < 100),
+        # Not a hard gate since rev 13 (a canary's job is to measure wall); the
+        # threshold is the designation-A policy, noisy-day worst <= ~115 s.
+        ("projected server wall (noisy day, A policy)", "≤ 115 s",
+         f"{r.get('projected_server_wall_noisy_s', float('nan')):.1f} s (quiet day "
+         f"{r['projected_server_wall_s']:.1f} s)",
+         r.get("projected_server_wall_noisy_s", float("nan")) <= 115),
         ("setup", "< 2 s", f"{r['setup_s']:.2f} s", r["setup_s"] < 2.0),
         ("scalar materializations", "0", f"{int(r['materializations'])}",
          r["materializations"] == 0),
@@ -641,7 +646,7 @@ def evaluate(candidate: Path, panel: str, n: int, jobs: int, baseline: Optional[
 
 def report(r: Dict, best_graded: float) -> None:
     print()
-    print(f"  raw MSE            {r['raw_mse']:.6e}   (label noise floor ~9e-11)")
+    print(f"  raw MSE            {r['raw_mse']:.6e}   (label noise floor ~6.8e-10)")
     print(f"  FLOPs / MLP        {r['flops']:,.0f}   = {r['multiplier']:.5f} x 2^41")
     print(f"  op calls           {r['ops']:,.0f}")
     print(f"  materializations   {r['materializations']:,.0f}")
@@ -686,12 +691,11 @@ def main(argv=None) -> int:
                     help="skip the real-meter run (accuracy only; no score, no gates)")
     ap.add_argument("--mem", action="store_true",
                     help="also run the WSL RLIMIT_AS 8 GiB gate (2 predictions, ~3 min)")
-    #: THE §5 BASELINE. C10 #331816, graded 2026-09-22. Update this the moment a
-    #: better score grades, or every later candidate is gated against a stale bar
-    #: and "3% better" stops meaning anything.
-    ap.add_argument("--best-graded", type=float, default=6.491408844300788e-09,
-                    help="the score the §5 3%% gate is measured against "
-                         "(default: C10 #331816)")
+    #: THE §5 BASELINE. v57 #332129, graded 2026-09-24. Update this the moment a
+    #: better score grades, or every later candidate is gated against a stale bar.
+    ap.add_argument("--best-graded", type=float, default=5.0443e-09,
+                    help="the best graded score, which the §5 gate must beat "
+                         "(default: v57 #332129)")
     ap.add_argument("--json", default=None, help="also write the full result here")
     ap.add_argument("--append", action="store_true",
                     help="append the row to RESULTS.md")

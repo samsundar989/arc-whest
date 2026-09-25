@@ -92,13 +92,16 @@ What binds now:
 - **Phase 2 sets λ = 0, so `C = F`.** Residual is not a cost — it is a 0.4 s per-MLP
   cliff that FAILS the MLP. Project it from **op calls** at 10.8–11.2 µs/op; the local
   in-process `residual_wall_time_s` is an instrument artefact and must never be quoted.
-- **Never quote a local absolute wall time as a server figure.** Multiply local worst
-  wall by **1.3097** (v31: 52.02 s local → 68.1319 s graded).
-- **Predicted public score = DEV 100-net mini score ÷ 1.037** (observed 1.0386 / 1.0385 /
-  1.0339 across three submissions). Recalibrate if a graded row deviates by >2%.
+- **Never quote a local absolute wall time as a server figure.** Project server wall
+  from the **wall law** (`tools/ev.py` `projected_server_wall_s`): median =
+  0.36 ms × op calls + FLOPs × kernel rate (≈92–95 ps/FLOP at Strassen leaf 64,
+  164–177 ps at leaf 32); worst-of-100 = median × 1.055 (quiet day) or × 1.24 (noisy
+  day). The old ×1.3097 / ×1.5981 local-to-server factors are retired.
+- **Predicted public score = DEV 100-net mini score ÷ 1.038** (eight graded
+  observations, 1.0339–1.0471, mean 1.0403). Recalibrate if a graded row deviates by >2%.
 - Never take FLOPs from the counting shim (it reads ~18% low). Use the real
-  flopscope 0.12.1 f64 read-only grader twin, and add the server's `+2**24` offset only
-  near a score boundary.
+  flopscope 0.12.1 f64 read-only grader twin, whose count matches the server exactly
+  (no offset; only `whest run --split mini` reads 2^25 low — `RESULTS.md` § Calibration).
 - The 8,192 MB limit is unenforceable on Windows; the WSL `RLIMIT_AS` gate
   (`local_sim/linux_memory_gate.py`) is the only real test.
 
