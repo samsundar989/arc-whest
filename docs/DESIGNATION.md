@@ -27,12 +27,13 @@ but it touches only that entry. The other designate is ranked on its own, and
 only the better of the two counts. So A may carry wall risk that B does not;
 B exists so that a bad private-run day on A costs us A's edge, not the entry.
 
-## Standing — 2026-09-25 04:35 UTC (v59 graded)
+## Standing — 2026-09-25 (v62_s1 graded)
 
 | role | file | sha8 | graded | score | worst wall (median) | implied noisy worst | residual | VmPeak | meets policy |
 |---|---|---|---|---:|---|---:|---:|---:|---|
-| **A (recommended)** | `estimator_k3_v59_corr400.py` | `f419f765` | #332232 | **4.9756e-09** | **94.42 (89.84)**, 1.051 | 111.4 s | 0.2511 s (1.59x) | 6,434 MiB (v57 path) | **yes, A (≤ 115 s)** — by 3.6 s |
-| A fallback | `estimator_k3_v57_corr.py` | `253c7b19` | #332129 | **5.0443e-09** | 92.81 (90.43), 1.026 | 112.1 s | 0.2507 s | 6,434 MiB | yes, A |
+| **A (recommended)** | `estimator_k3_v62_s1.py` | `d1d722db` | #332313 | **4.9347e-09** | **102.61 (90.27)**, 1.137 | 111.9 s | 0.2713 s (1.47x) | v59 path | **yes, A (≤ 115 s)** — by 3.1 s |
+| A fallback | `estimator_k3_v59_corr400.py` | `f419f765` | #332232 | **4.9756e-09** | **94.42 (89.84)**, 1.051 | 111.4 s | 0.2511 s (1.59x) | 6,434 MiB (v57 path) | **yes, A (≤ 115 s)** — by 3.6 s |
+| retired | `estimator_k3_v57_corr.py` | `253c7b19` | #332129 | **5.0443e-09** | 92.81 (90.43), 1.026 | 112.1 s | 0.2507 s | 6,434 MiB | yes, A |
 | **B (recommended)** | `estimator_k3_v60_ws400.py` | `e9344107` | #332223 | **5.3387e-09** | 57.59 (55.73), 1.033 | 69.1 s | 0.2121 s (1.89x) | 4,941 MiB | yes, A and B, by 46 / 26 s |
 | retired | `estimator_k3_v56b_wallsafe.py` | `b401ad75` | #332063 | 5.7076e-09 | 60.7 (54.5), 1.114 | ~68 s | 0.2188 s | 4,908 MiB | dominated by v60_ws400 |
 | retired | `...v56c_mix__tr64.py` | `52d83de7` | #332088 | 5.4341e-09 | 80.30 (76.90) | 95.4 s | 0.2413 s | 6,468 MiB | superseded |
@@ -63,3 +64,4 @@ The anchor is real: v55 (leaf 32, median 92.8 s, 2.5 s above v57's) read
 | 2026-09-24 08:30 | v57 | #332129 | quiet (1.026) | 92.81 | 90.43 |
 | 2026-09-25 01:05 | v60_ws400 | #332223 | quiet (1.033) | 57.59 | 55.73 |
 | 2026-09-25 04:05 | v59 | #332232 | quiet (1.051) | 94.42 | 89.84 |
+| 2026-09-25 | v62_s1 | #332313 | moderate (1.137) | 102.61 | 90.27 |
