@@ -1905,3 +1905,15 @@ sacrificial two-snapshot race and mutation checks live in
 One `edge_cases.py` run died silently at 68 lines. Use the tool's own
 background mode, which does survive, and redirect inside the command if the
 full transcript is wanted — the task output file keeps only the tail.
+
+## 2026-09-25 — streaming the whole `full` split balloons the working set to ~36 GiB
+
+`real_data.get(i, "full")` reads through HF `datasets.load_from_disk`, which MEMORY-MAPS
+the split's arrow files. Touching all 1000 nets leaves ~36 GiB of mapped pages in the
+process working set (private memory stays ~1.5 GiB), and worker-q then sees host RAM at
+1–5% free and holds every other job. A writable `np.memmap` does the same on the write
+side (worker-q 2134: 36 GiB on a 4 GiB declaration). Neither shows up as "private" RAM.
+What to do: stream the split ONCE into `cache/twin/*_w.f32` (`tools/twin/export_weights.py`,
+plain seek-and-write) and read nets with `np.fromfile(..., offset=)` (`tools/twin/twin.py
+Data.net`). Anything that loops over hundreds of full-split nets through `real_data`
+should declare `--ram 40` or use the export.

@@ -138,15 +138,31 @@ TWIN_PATCHES = [
 ]
 
 
-def load_module(path: Path, name="_twin_candidate"):
+#: Optional ARMS: source changes tested through the twin before any estimator
+#: file is built (PLAN rev 13 §3 Step 3: "test first").
+ARMS = {
+    # cov_out from the CORRECTED mean: K2 = pK2 - pK1^2 with pK1 -> pK1 + delta,
+    # i.e. diag(cov_out) -= 2 delta pK1 + delta^2. K11 has no pK1 term.
+    "pk1cov": [
+        ('    if _CORR_ON and const.get("corr") is not None:\n',
+         '    _mu_unc = mu_out\n    if _CORR_ON and const.get("corr") is not None:\n'),
+        ("    cov_out = fnp.diag(K[(2,)]) + K[(1, 1)]\n",
+         "    cov_out = fnp.diag(K[(2,)]) + K[(1, 1)]\n"
+         "    _dl = mu_out - _mu_unc\n"
+         "    cov_out = cov_out - fnp.diag(_dl * _mu_unc * 2.0 + _dl * _dl)\n"),
+    ],
+}
+
+
+def load_module(path: Path, name="_twin_candidate", arm=""):
     """Import the candidate from a PATCHED copy (see TWIN_PATCHES), kept for audit."""
     import importlib.util
     src = path.read_text(encoding="utf-8")
-    for a, b in TWIN_PATCHES:
+    for a, b in TWIN_PATCHES + (ARMS[arm] if arm else []):
         if src.count(a) != 1:
             raise SystemExit(f"twin patch anchor occurs {src.count(a)}x:\n{a}")
         src = src.replace(a, b, 1)
-    pp = ROOT / "cache" / "twin" / f"_twin_{path.stem}.py"
+    pp = ROOT / "cache" / "twin" / f"_twin_{path.stem}{'_' + arm if arm else ''}.py"
     pp.parent.mkdir(parents=True, exist_ok=True)
     pp.write_text(src, encoding="utf-8", newline="\n")
     spec = importlib.util.spec_from_file_location(name, pp)
@@ -167,8 +183,8 @@ def load_module(path: Path, name="_twin_candidate"):
 
 
 class Twin:
-    def __init__(self, cand: Path, width=1024, depth=16):
-        self.mod = load_module(cand)
+    def __init__(self, cand: Path, width=1024, depth=16, arm=""):
+        self.mod = load_module(cand, arm=arm)
         self.est = self.mod.Estimator()
         self.est.setup(_Ctx(width, depth, BUDGET, 0))
         self.width, self.depth = width, depth
@@ -263,7 +279,7 @@ def cmd_parity(a):
 
 
 def cmd_eval(a, tw=None, params=None, quiet=False):
-    tw = tw or Twin(Path(a.cand))
+    tw = tw or Twin(Path(a.cand), arm=getattr(a, "arm", ""))
     if params is None and a.params:
         params = load_params(a.params)
     if params is not None:
@@ -275,7 +291,10 @@ def cmd_eval(a, tw=None, params=None, quiet=False):
         for split, i in rows:
             w, truth = data.net(split, i)
             fin.append(float(mse_rows(tw.forward(w), truth)[-1]))
-    r = {"panel": a.panel, "n": len(fin), "raw_mse": float(np.mean(fin)), "per_net": fin}
+    r = {"panel": a.panel, "arm": getattr(a, "arm", ""), "n": len(fin),
+         "raw_mse": float(np.mean(fin)), "per_net": fin}
+    if getattr(a, "json", ""):
+        Path(a.json).write_text(json.dumps(r))
     if not quiet:
         print(json.dumps({k: v for k, v in r.items() if k != "per_net"}), flush=True)
     return r
@@ -439,6 +458,8 @@ def main():
     ap.add_argument("--hold-n", type=int, default=100)
     ap.add_argument("--hold-panel", default="hold100")
     ap.add_argument("--train-n", type=int, default=0, help="first N TRAIN rows only")
+    ap.add_argument("--arm", default="", help="optional source arm (see ARMS)")
+    ap.add_argument("--json", default="", help="eval: write per-net results here")
     ap.add_argument("--zero-scale", type=float, default=1e-2,
                     help="RMS assumed for a zero-initialised tensor's step size")
     ap.add_argument("--max-steps", type=int, default=0, help="stop after N steps (smoke)")
