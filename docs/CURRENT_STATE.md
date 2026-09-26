@@ -5,15 +5,15 @@
 
 ## Best graded
 
-**4.7404e-09** — `estimator_k3_v67_s3.py`, #332440 (v59 + the twin's end-to-end corrector, λ/θ/feed,
-per-term closure gains and multi-mode κ4_iiij), 100/100, 0 failed, worst wall 94.4 s (quiet).
-Prev 4.7854e-09 (v66_s2t2). Twin total vs v59: −4.7% score in six graded steps.
+**4.7039e-09** — `estimator_k3_v68_wino.py`, #332478 (v67_s3 + Strassen-Winograd products), 100/100,
+0 failed, worst wall 93.9 s, median 84.0 s (6.7 s faster than v67). Total vs v59: −5.5% score in seven
+graded steps. The plan's levers are executed: see `docs/STRATEGIST_PACKET_2026-09-26.md`.
 
 ## The designation pair (Samuel designates; agents never do)
 
 | role | file | graded | score | implied noisy worst |
 |---|---|---|---|---:|
-| **A** | `estimator_k3_v67_s3.py` | #332440 | **4.7404e-09** | 112.5 s (policy ≤ ~115 s) |
+| **A** | `estimator_k3_v68_wino.py` | #332478 | **4.7039e-09** | 104.2 s (policy ≤ ~115 s) |
 | **B** | `estimator_k3_v64_ws.py` | #332364 | 5.2699e-09 | 63.6 s MEASURED on a noisy day (policy ≤ 95 s) |
 
 B is v64_s2 at leaf 64, graded on a noisy-day server (worst/median 1.150). Rules v14 §7 ranks only the better of the two.

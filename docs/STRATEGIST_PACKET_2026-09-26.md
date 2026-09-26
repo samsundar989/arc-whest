@@ -6,9 +6,9 @@ scheduled Sep 28 date because every concrete lever in the plan has now been exec
 Every number is measured unless marked **[I]**. Paths are given so a Skeptic can check them.
 
 **The short version.** Steps 0–3 are done and Step 4's three arms are done. The differentiable
-twin — PLAN's main bet — works and produced **six straight graded improvements in two days,
-4.9756e-09 → 4.7404e-09 (−4.73% score)**; a seventh (v68, Strassen-Winograd) is grading at a
-projected 4.7103e-09 (−5.3%). The slice goal was **≥ 10% (≤ 4.5e-09)**. The twin has plateaued
+twin — PLAN's main bet — works and produced six straight graded improvements in two days,
+4.9756e-09 → 4.7404e-09 (−4.73%); a seventh (v68, Strassen-Winograd) graded **4.7039e-09 (−5.46%)**
+and cut the median wall by 6.7 s (84.0 s). The slice goal was **≥ 10% (≤ 4.5e-09)**. The twin has plateaued
 (last stage −0.28%, inside noise), Step 4(b)/(c) are closed in both directions, and leaf 16
 stays closed. **What remains in the plan is Step 5 (harden, designate, write-up, from Oct 9).**
 The decision needed: how to spend Sep 27 – Oct 8.
@@ -26,12 +26,12 @@ The decision needed: how to spend Sep 27 – Oct 8.
 | 332409 | v66_s2t2 | S2t trained further | 4.7854e-09 | 2.2119e-08 | 0.21634 | 101.10 (89.24) | moderate |
 | **332440** | **v67_s3** | **+ multi-mode κ4_iiij** | **4.7404e-09** | **2.1903e-08** | 0.21643 | 94.44 (90.74) | quiet |
 | 332364 | v64_ws (B) | v64_s2 at leaf 64 | 5.2699e-09 | 2.2715e-08 | 0.23200 | **63.55 (55.27)** | **noisy (1.150)** |
-| 332478 | v68_wino | v67 + Strassen-Winograd | PENDING (proj 4.7103e-09) | ≈ v67 | 0.21473 | — | — |
+| **332478** | **v68_wino** | **v67 + Strassen-Winograd** | **4.7039e-09** | 2.1906e-08 | 0.21473 | 93.86 (**84.00**) | moderate |
 
 All 100/100, 0 failed. Every graded row landed within 0.15% of its projection (DEV/graded
 factor observations now 1.0366–1.0396; constant 1.038 stands). Designation (Samuel's call):
-A = v67_s3 (implied noisy worst 112.5 s), B = v64_ws (measured 63.6 s on a noisy day); v68 and
-its leaf-64 twin v68_ws (gates pass) replace them if v68 grades as projected.
+A = v68_wino (implied noisy worst 104.2 s — Winograd bought ~9 s of A margin), B = v64_ws (measured
+63.6 s on a noisy day), to be replaced by v68_ws (gates pass) on the Sep 27 A/B slot.
 
 ## 2. What was learned (details in `RESULTS.md`)
 
@@ -77,7 +77,7 @@ raw by several times its FLOP change, in the direction that leaves the score fla
 
 ## 3. The gap, restated
 
-Board (Sep 25): #1 2.00e-9, #5 2.60e-9, #10 ≈ 2.8e-9. **Us 4.74e-09** (≈ #30 [I]). Accuracy gap
+Board (Sep 25): #1 2.00e-9, #5 2.60e-9, #10 ≈ 2.8e-9. **Us 4.70e-09** (≈ #30 [I]). Accuracy gap
 ≈ 1.35× (our raw 2.19e-8 vs 1.56–1.67e-8); cost gap ≈ 1.4–1.7× (0.215 vs 0.127–0.155 B). At the
 0.1 floor with today's accuracy: 2.2e-9. With the leaders' accuracy at our cost: 3.4e-9.
 
@@ -112,3 +112,8 @@ Board (Sep 25): #1 2.00e-9, #5 2.60e-9, #10 ≈ 2.8e-9. **Us 4.74e-09** (≈ #30
   two-sided "settled VM did not change" check on allocator shrinkage (−404 MB), then passed on a
   re-run (+20 MB). Both recorded.
 - **Label panels.** The dense exact labels exist only for `full` (FIT/HOLDOUT), not DEV.
+
+- **Wall law under-prices Strassen glue.** Winograd removed 1,947 ops and 0.79% FLOPs (law: ≈ −1.5 s median)
+  but the graded median fell 6.7 s. The glue is memory-bound; fewer block temporaries is worth more
+  wall than the law says. This makes the remaining Step 4(a) layout items (no-concatenate blocks,
+  fewer temporaries) worth more wall than priced — relevant if more A-side FLOPs are ever wanted.
