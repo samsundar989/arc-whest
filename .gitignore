@@ -68,3 +68,10 @@ cache/hf/
 
 # tools/twin/export_weights.py memmaps (~74 GB), regenerable
 cache/twin/
+
+# 2026-09-27: large local caches read by queue jobs through .gpuq.toml passthrough.
+# Must be IGNORED: a snapshot copies untracked-unignored files, which creates the
+# directory in the snapshot, and an existing directory silently skips the passthrough.
+cache/twin_labels/
+cache/d8b/
+cache/_harm_check_arm.py
