@@ -67,6 +67,9 @@ TRAINABLE = {
     + ("gain/lam", "gain/theta", "gain/feed"),
     "S2t": tuple(f"corr/{k}" for k in ("W1", "b1", "W2", "b2", "W3", "b3"))
     + ("gain/lam", "gain/theta", "gain/feed", "gain/tt", "gain/t1", "gain/cu", "gain/cb"),
+    "S3": tuple(f"corr/{k}" for k in ("W1", "b1", "W2", "b2", "W3", "b3"))
+    + ("gain/lam", "gain/theta", "gain/feed", "gain/tt", "gain/t1", "gain/cu", "gain/cb",
+       "gain/q31"),
     "S4": tuple(f"sig/{k}" for k in ("S1", "c1", "S2", "c2")),
     "S14": tuple(f"corr/{k}" for k in ("W1", "b1", "W2", "b2", "W3", "b3"))
     + tuple(f"sig/{k}" for k in ("S1", "c1", "S2", "c2")),
@@ -157,6 +160,17 @@ TWIN_PATCHES = [
      "        cvec = fnp.array([c for fs, k, c in sel], dtype=dtype)\n"
      '        if _TWG is not None and "cu" in _TWG:\n'
      '            cvec = cvec * _TWG["cu"][_CUR_LAYER, [_u for _u, (_f, _k, _c) in enumerate(prog["uni"]) if str(p) in _c], p - 1]\n'),
+    # (e) S3: multi-mode kappa4_iiij. Anatomy 2 §2: the chain's (m/2) lam C form
+    # explains R^2 ~0.48 of the true slice; {rho, rho^2, Phi(alpha_i) rho,
+    # alpha_i alpha_j, 1} lifts it to ~0.58. Added to the NORMALISED Q31
+    # (kappa_iiij / s_i^3 s_j), which is exactly what the closure consumes.
+    ('        nb["Q31"] = Cn * inv2[:, None] * (0.5 * blocks["metric"] * blocks["lam"])\n',
+     '        nb["Q31"] = Cn * inv2[:, None] * (0.5 * blocks["metric"] * blocks["lam"])\n'
+     '        if _TWG is not None and "q31" in _TWG:\n'
+     '            _q = _TWG["q31"][_CUR_LAYER]\n'
+     '            _gi = flops.stats.norm.cdf(alpha)[:, None]\n'
+     '            nb["Q31"] = (nb["Q31"] + Cn * _q[0] + (Cn * Cn) * _q[1] + (_gi * Cn) * _q[2]\n'
+     '                         + (alpha[:, None] * alpha[None, :]) * _q[3] + _q[4])\n'),
     # (d) closure bivariate extras, per term
     ("        Rj = fnp.stack([H[row[(kj, out[1])]] * c for i, ki, kj, c in sel])\n",
      "        Rj = fnp.stack([H[row[(kj, out[1])]] * c for i, ki, kj, c in sel])\n"
@@ -181,11 +195,15 @@ ARMS = {
 }
 
 
-def load_module(path: Path, name="_twin_candidate", arm=""):
-    """Import the candidate from a PATCHED copy (see TWIN_PATCHES), kept for audit."""
+def load_module(path: Path, name="_twin_candidate", arm="", raw=False):
+    """Import the candidate from a PATCHED copy (see TWIN_PATCHES), kept for audit.
+
+    `raw=True` skips TWIN_PATCHES (the gain hooks), for EVALUATING a file whose
+    gains are already baked in by tools/build_s2.py -- its rewritten lines no
+    longer match the hooks' anchors. `install` refuses gain parameters then."""
     import importlib.util
     src = path.read_text(encoding="utf-8")
-    for a, b in TWIN_PATCHES + (ARMS[arm] if arm else []):
+    for a, b in ([] if raw else TWIN_PATCHES) + (ARMS[arm] if arm else []):
         if src.count(a) != 1:
             raise SystemExit(f"twin patch anchor occurs {src.count(a)}x:\n{a}")
         src = src.replace(a, b, 1)
@@ -210,8 +228,9 @@ def load_module(path: Path, name="_twin_candidate", arm=""):
 
 
 class Twin:
-    def __init__(self, cand: Path, width=1024, depth=16, arm=""):
-        self.mod = load_module(cand, arm=arm)
+    def __init__(self, cand: Path, width=1024, depth=16, arm="", raw=False):
+        self.raw = raw
+        self.mod = load_module(cand, arm=arm, raw=raw)
         self.est = self.mod.Estimator()
         self.est.setup(_Ctx(width, depth, BUDGET, 0))
         self.width, self.depth = width, depth
@@ -233,6 +252,9 @@ class Twin:
         self.base["gain"].update({"tt": mk(depth, nterm), "t1": mk(depth, 2, nps),
                                   "cu": mk(depth, len(cprog["uni"]), 4),
                                   "cb": mk(depth, len(cprog["biv"]))})
+        # S3: additive multi-mode correction to the normalised kappa4_iiij slice,
+        # zero-initialised (an exact identity) -- see TWIN_PATCHES "q31"
+        self.base["gain"]["q31"] = torch.zeros((depth, 5), dtype=torch.float32, device=DEV)
 
     def leaf(self, key):
         g, k = key.split("/")
@@ -246,6 +268,8 @@ class Twin:
         Python-float profiles, bit for bit."""
         unknown = [k for k in params if k.split("/")[0] not in self.base
                    or k.split("/")[1] not in self.base[k.split("/")[0]]]
+        if self.raw and any(k.startswith("gain/") for k in params):
+            raise SystemExit("install: gain parameters need the twin's source hooks (not --raw)")
         if unknown:        # a silently ignored key made one DEV read a no-op once
             raise SystemExit(f"install: unknown parameter keys {unknown}")
         for g, vals in self.base.items():
@@ -321,7 +345,7 @@ def cmd_parity(a):
 
 
 def cmd_eval(a, tw=None, params=None, quiet=False):
-    tw = tw or Twin(Path(a.cand), arm=getattr(a, "arm", ""))
+    tw = tw or Twin(Path(a.cand), arm=getattr(a, "arm", ""), raw=getattr(a, "raw", False))
     if params is None and a.params:
         params = load_params(a.params)
     if params is not None:
@@ -501,6 +525,8 @@ def main():
     ap.add_argument("--hold-panel", default="hold100")
     ap.add_argument("--train-n", type=int, default=0, help="first N TRAIN rows only")
     ap.add_argument("--arm", default="", help="optional source arm (see ARMS)")
+    ap.add_argument("--raw", action="store_true",
+                    help="eval a file with baked-in gains: skip the twin's gain hooks")
     ap.add_argument("--json", default="", help="eval: write per-net results here")
     ap.add_argument("--zero-scale", type=float, default=1e-2,
                     help="RMS assumed for a zero-initialised tensor's step size")
