@@ -1,0 +1,234 @@
+{
+ "date": "2026-09-25",
+ "file": "estimator_k3_v64_ws.py",
+ "sha8": "2580ef79",
+ "panel": "dev",
+ "n": 5,
+ "raw_mse": 2.5153535077038214e-08,
+ "flops": 510179282809.0,
+ "multiplier": 0.23200267733454893,
+ "ops": 20345.0,
+ "materializations": 0.0,
+ "setup_s": 0.001,
+ "worst_wall_local_s": 46.830624900059775,
+ "projected_server_wall_s": 58.557614201168526,
+ "projected_server_wall_noisy_s": 68.82601100421704,
+ "peak_rss_mib": 3021.6,
+ "adjusted_score_dev": 5.835687482301355e-09,
+ "projected_public": 5.622049597592827e-09,
+ "failed_nets": [],
+ "baseline_name": "",
+ "paired": null,
+ "memory": {
+  "artifact": "linux_memory_gate",
+  "artifact_version": 5,
+  "candidate": "estimator_k3_v64_ws.py",
+  "candidate_sha256": "2580ef79682182aee8181276c02aa4d27bb72bd72845655f344382a861172aea",
+  "instrument": "local_sim/linux_memory_gate.py",
+  "instrument_sha256": "463b8560aa5be78bd18270a3507b80edb552ee8b1b7929d4089f7624a7261e8f",
+  "instrument_policy": "current-source-sha256",
+  "limit_mb": 8192,
+  "width": 1024,
+  "depth": 16,
+  "budget": 2199023255552,
+  "seed": 90000000101,
+  "suite_n_mlps": 100,
+  "weights_mode": "f64_readonly",
+  "repeats": 3,
+  "host_platform": "win32",
+  "generated_utc": "2026-09-25T23:07:11Z",
+  "linux_kind": "wsl",
+  "linux_note": "WSL2 Ubuntu, official stack in $HOME/.arcwhest-linux",
+  "negative_control": {
+   "limit_mb": 8192,
+   "request_gib": 9.0,
+   "cap_applied": true,
+   "allocated": false,
+   "survived": false,
+   "error": "MemoryError: "
+  },
+  "positive_control": {
+   "limit_mb": 0,
+   "request_gib": 9.0,
+   "cap_applied": false,
+   "allocated": true,
+   "survived": true
+  },
+  "lifecycle_controls": {
+   "growth_threshold_bytes": 67108864,
+   "stateless": {
+    "completed": true,
+    "retain": false,
+    "allocation_mib": 96,
+    "repeats": 3,
+    "rows": [
+     {
+      "i": 0,
+      "vm_size_settled_bytes": 16080896
+     },
+     {
+      "i": 1,
+      "vm_size_settled_bytes": 16080896
+     },
+     {
+      "i": 2,
+      "vm_size_settled_bytes": 16080896
+     }
+    ],
+    "growth_bytes": 0,
+    "error": "",
+    "cap_applied": true
+   },
+   "retaining": {
+    "completed": true,
+    "retain": true,
+    "allocation_mib": 96,
+    "repeats": 3,
+    "rows": [
+     {
+      "i": 0,
+      "vm_size_settled_bytes": 116748288
+     },
+     {
+      "i": 1,
+      "vm_size_settled_bytes": 217415680
+     },
+     {
+      "i": 2,
+      "vm_size_settled_bytes": 318083072
+     }
+    ],
+    "growth_bytes": 201334784,
+    "error": "",
+    "cap_applied": true
+   }
+  },
+  "candidate_run": {
+   "stage": "done",
+   "limit_mb": 8192,
+   "setrlimit_raised": null,
+   "soft_limit_bytes": 8589934592,
+   "hard_limit_bytes": 8589934592,
+   "cap_requested_bytes": 8589934592,
+   "cap_applied": true,
+   "whestbench_file": "/home/samsu/.arcwhest-linux/lib/python3.12/site-packages/whestbench/__init__.py",
+   "flopscope_file": "/home/samsu/.arcwhest-linux/lib/python3.12/site-packages/flopscope/__init__.py",
+   "numpy_version": "2.4.6",
+   "whestbench_version": "0.16.1",
+   "flopscope_version": "0.12.1",
+   "stack_version_source": "importlib.metadata.version",
+   "python_version": "3.12.3",
+   "weights_mode": "f64_readonly",
+   "repeats": 3,
+   "suite_n_mlps": 100,
+   "weight_dtype": "float64",
+   "weight_writeable": false,
+   "setup_raised": null,
+   "setup_s": 0.04542320299999858,
+   "predict_s": 135.929098953,
+   "predict_error": "",
+   "shape": [
+    16,
+    1024
+   ],
+   "finite": true,
+   "dtype": "float32",
+   "largest_array_bytes": 65536,
+   "repeat_runs": [
+    {
+     "i": 0,
+     "vm_peak_bytes": 5161078784,
+     "vm_size_settled_bytes": 2155745280,
+     "flops_used": 510179282809.0,
+     "error": ""
+    },
+    {
+     "i": 1,
+     "vm_peak_bytes": 5161078784,
+     "vm_size_settled_bytes": 2167279616,
+     "flops_used": 510179282809.0,
+     "error": ""
+    },
+    {
+     "i": 2,
+     "vm_peak_bytes": 5202628608,
+     "vm_size_settled_bytes": 2177765376,
+     "flops_used": 510179282809.0,
+     "error": ""
+    }
+   ],
+   "repeat_error": "",
+   "repeat_vm_size_growth_bytes": 22020096,
+   "repeat_flops_identical": true,
+   "repeat_flops_observed": [
+    510179282809.0,
+    510179282809.0,
+    510179282809.0
+   ],
+   "flops_used": 510179282809.0,
+   "residual_wall_time_s": 0.9850677449999665,
+   "wall_time_s": 135.929072255,
+   "multiplier": 0.23200267733454893,
+   "peak_rss_bytes": 3247190016,
+   "vm_peak_bytes": 5202628608,
+   "vm_hwm_bytes": 3247190016,
+   "ok": true
+  },
+  "child_stderr": {
+   "negative": "",
+   "positive": "",
+   "lifecycle_stateless": "",
+   "lifecycle_retaining": "",
+   "candidate": ""
+  },
+  "child_stderr_tail": "",
+  "stack": {
+   "whestbench": "0.16.1",
+   "flopscope": "0.12.1",
+   "numpy": "2.4.6",
+   "python": "3.12.3",
+   "source": "importlib.metadata.version"
+  },
+  "status": "PASS",
+  "checks_total": 23,
+  "checks_failed": []
+ },
+ "accuracy_meta": {
+  "sha256": "2580ef79682182aee8181276c02aa4d27bb72bd72845655f344382a861172aea",
+  "panel": "dev",
+  "n": 5,
+  "workers": 3,
+  "blas_threads_each": 2,
+  "wall_s": 122.9,
+  "per_net_s": 24.58,
+  "worker_peak_rss_mib": 3148.1,
+  "failed_nets": [],
+  "built_utc": "2026-09-25T23:07:03Z",
+  "cached": false
+ },
+ "cost_meta": {
+  "net": "logan-fitzgerald",
+  "panel": "dev",
+  "split": "mini",
+  "index": 0,
+  "flops": 510179282809.0,
+  "multiplier": 0.23200267733454893,
+  "ops": 20345.0,
+  "materializations": 0,
+  "materialization_detail": {
+   "__bool__": 0,
+   "__float__": 0,
+   "__int__": 0,
+   "__index__": 0
+  },
+  "wall_s": 46.830624900059775,
+  "residual_local_s": 6.402548198821023,
+  "setup_s": 0.001,
+  "setup_error": "",
+  "peak_rss_mib": 3021.6,
+  "weights_mode": "f64_readonly",
+  "error": ""
+ },
+ "ev_wall_s": 707.1,
+ "note": ""
+}
