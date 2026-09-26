@@ -52,6 +52,16 @@ PATCHES = [
     ("        sel = [(i, ki, kj, cs[tag]) for i, (fs, ki, kj, cs) in enumerate(prog[\"biv\"]) if tag in cs]\n",
      "        sel = [(i, ki, kj, cs[tag] * _gain1(_CB_GAIN, _CUR_LAYER, i))\n"
      "               for i, (fs, ki, kj, cs) in enumerate(prog[\"biv\"]) if tag in cs]\n"),
+    # --- S3: multi-mode kappa4_iiij, added to the NORMALISED Q31 the closure reads;
+    # the same formula as tools/twin/twin.py TWIN_PATCHES (e). Skipped (no
+    # operation) at a layer whose five coefficients are all zero.
+    ('        nb["Q31"] = Cn * inv2[:, None] * (0.5 * blocks["metric"] * blocks["lam"])\n',
+     '        nb["Q31"] = Cn * inv2[:, None] * (0.5 * blocks["metric"] * blocks["lam"])\n'
+     '        _q = _Q31_COEF[_CUR_LAYER] if _CUR_LAYER < len(_Q31_COEF) else None\n'
+     '        if _q is not None and any(c != 0.0 for c in _q):\n'
+     '            _gi = flops.stats.norm.cdf(alpha).astype(dtype)[:, None]\n'
+     '            nb["Q31"] = (nb["Q31"] + Cn * _q[0] + (Cn * Cn) * _q[1] + (_gi * Cn) * _q[2]\n'
+     '                         + (alpha[:, None] * alpha[None, :]) * _q[3] + _q[4])\n'),
     ('    for row in table["terms"]:\n',
      '    for _ridx, row in enumerate(table["terms"]):\n'),
     ("        pK[ip] = term if ip not in pK else pK[ip] + term\n",
@@ -101,7 +111,7 @@ def main(argv=None) -> int:
     for name, key in (("_LAM_GAIN", "gain__lam"), ("_THETA_GAIN", "gain__theta"),
                       ("_FEED_GAIN", "gain__feed"), ("_TT_GAIN", "gain__tt"),
                       ("_T1_GAIN", "gain__t1"), ("_CU_GAIN", "gain__cu"),
-                      ("_CB_GAIN", "gain__cb")):
+                      ("_CB_GAIN", "gain__cb"), ("_Q31_COEF", "gain__q31")):
         vals = p[key].astype(float).tolist() if key in p else []
         tables += f"{name} = {vals!r}\n"
     tables += _HELPERS
