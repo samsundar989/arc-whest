@@ -287,6 +287,15 @@ Cost: +0.04% FLOPs, +252 op calls.
 **S2t2 — S2t continued 2 epochs at lr 3e-4**: HOLDOUT-100 2.299547e-08 → **2.285008e-08 (−0.63%)**;
 DEV (twin) **−0.70% ± 0.10% vs S2t, 95/100** → `estimator_k3_v66_s2t2.py`.
 
+**S3 — multi-mode κ4_iiij on S2t2** (5 per-layer coefficients on {ρ, ρ², Φ(α_i)ρ, α_iα_j, 1} added to
+the normalised Q31 the closure reads; zero-initialised; `tools/build_s2.py` bakes them; worker-q 2176):
+HOLDOUT-100 2.285008e-08 → **2.264823e-08 (−0.88%)**; DEV (twin) **−0.86% ± 0.15% vs S2t2, 89/100** →
+`estimator_k3_v67_s3.py` (export reproduces the twin to 6.3e-5). The learned correction SHRINKS the
+slice (ρ and Φρ coefficients −0.001 → −0.006 with depth), although Anatomy 2's truth-fit λ was larger
+than the chain's: end to end, the κ4_iiij channel is compensating for errors elsewhere, not being
+made more accurate. Anatomy 2 capped S3 at ~3% of the 15% κ4 share; it delivered 0.9% of score-relevant
+error because the fit is to the output, not to the slice.
+
 **S4 — sigma page on var_pre** (`estimator_k3_v63_sig.py` = v62_s1 + a 27→32→1 page rescaling the
 variance consumed at each layer; standardisers from 20 TRAIN nets; 900 TRAIN, 2 epochs; worker-q
 2153, 2h29m): HOLDOUT-100 2.368646e-08 → **2.366172e-08 (−0.10%)** — noise. **Closed.** Anatomy 2
