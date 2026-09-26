@@ -228,6 +228,9 @@ SUB_PATCHES = [
     ('        nb["Q13"] = nb["Q31"].T\n',
      '        nb["Q31"] = _a2("Q31n", nb["Q31"], inv, inv2)\n'
      '        nb["Q13"] = nb["Q31"].T\n'),
+    # Step 3 closure bench (tools/closure_bench.py): mu, and a read-only tap on K
+    ("    mu_pre = WT @ mu\n", "    mu_pre = WT @ mu\n    mu_pre = _a2('mu', mu_pre)\n"),
+    ("    mu_out = K[(1,)]\n", "    _a2('K', K)\n    mu_out = K[(1,)]\n"),
 ]
 #: Step 2 channels. "all" is every object but mu: substituting mu_pre at every layer
 #: makes the final mean nearly exact by construction, which leaves nothing to refit.
