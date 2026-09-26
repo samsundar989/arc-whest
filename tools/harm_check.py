@@ -94,14 +94,15 @@ def lineage_tensor(tw, n, b):
     return T
 
 
-def cmd_chain(arm=None, n=32, depth=9, seed=11):
+def cmd_chain(metric=None, n=32, depth=9, seed=11):
+    metric = metric or (sys.argv[2] if len(sys.argv) > 2 else "C")
     sys.path.append(str(ROOT / "local_sim"))
     sys.path.insert(0, str(ROOT / "tools"))
     import importlib.util
     import flopscope as flops
     import flopscope.numpy as fnp
     import build_harm
-    src = build_harm.build((ROOT / "estimator_k3_v68_wino.py").read_text(encoding="utf-8"), 3, "C")
+    src = build_harm.build((ROOT / "estimator_k3_v68_wino.py").read_text(encoding="utf-8"), 3, metric)
     p = ROOT / "cache" / "_harm_check_arm.py"
     p.parent.mkdir(exist_ok=True)
     p.write_text(src, encoding="utf-8", newline="\n")
@@ -141,8 +142,24 @@ def cmd_chain(arm=None, n=32, depth=9, seed=11):
             rem = np.einsum("abc,bc->a", T - sym_uC(u, C), K)
             worst["remainder"] = max(worst["remainder"], np.abs(rem).max() / np.abs(u).max())
             seen["folds"] += 1
+            # the FILE's u for its own metric vs the exact dense solve
+            #   u* = 3 (tau I + 2 C K)^-1 (T : K)   (first-order Neumann in the file)
+            Km = {"C": K, "diag": np.diag(Kd), "euc": C,
+                  "ridge": np.linalg.inv(C + np.eye(n_) * np.trace(C) / n_)}[metric]
+            tau = np.trace(C @ Km)
+            bK = np.einsum("abc,bc->a", T, Km)
+            # the file applies the solve to first order; at n = 32 (2CK/tau)^2 is not small,
+            # so the IMPLEMENTATION is checked against the same first-order formula here and
+            # the approximation itself is measured at n = 1024 (tools/harm_check.py neumann)
+            ustar = (3.0 / (n_ + 2) * bK if metric == "C"
+                     else (bK - C @ (Km @ bK) * (2.0 / tau)) * (3.0 / tau))
+            tw2, U2 = orig_fold(tw, U, cov_out, n_, dtype)
+            ufile = np.asarray(U2, dtype=np.float64) - (0.0 if U is None else np.asarray(U, dtype=np.float64))
+            worst["u_vs_exact"] = max(worst.get("u_vs_exact", 0.0),
+                                      np.abs(ufile - ustar).max() / np.abs(ustar).max())
             if U is None:
-                captured["u_first"] = (u, C)
+                captured["u_first"] = (ufile, C)
+            return tw2, U2
         return orig_fold(tw, U, cov_out, n_, dtype)
 
     mod._harm_fold = spy
@@ -179,7 +196,9 @@ def cmd_chain(arm=None, n=32, depth=9, seed=11):
     print(f"folds checked: {seen['folds']}, consumer checks: {seen['consumer_checks']}")
     for k, v in worst.items():
         print(f"  {k:12s} {v:.2e}")
-    ok = seen["folds"] > 0 and seen["consumer_checks"] > 0 and max(worst.values()) < 1e-9
+    tol_u = 1e-8   # euc at n = 32: f64 cancellation in b - (2/tau) C K b
+    ok = (seen["folds"] > 0 and seen["consumer_checks"] > 0 and worst.pop("u_vs_exact") < tol_u
+          and max(worst.values()) < 1e-9)
     print("PASS" if ok else "FAIL")
     return ok
 

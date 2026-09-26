@@ -720,15 +720,37 @@ def _harm_drop(tw, n):
 
 
 def _harm_fold(tw, U, cov_out, n, dtype):
-    """Fold every lineage beyond `_HARM_FOLD_AGE - 1` into U (end of a layer)."""
+    """Fold every lineage beyond `_HARM_FOLD_AGE - 1` into U (end of a layer).
+
+    u is chosen so that T - Sym(u (x) C) is traceless under the weight K:
+        u = 3 (tau I + 2 C K)^-1 (T : K),   tau = tr(C K),
+    applied to first order in 2CK/tau (<= ~3% here). K = C^-1 ("C") is the harmonic
+    projection proper, u = 3/(n+2) T:C^-1, taken exactly. K = C ("euc") is the
+    Euclidean least-squares fit of Sym(u (x) C) to T. "diag" = diag(1/var),
+    "ridge" = (C + mean(var) I)^-1.
+    """
     if tw is None or tw.k < _HARM_FOLD_AGE:
         return tw, U
+    K = Kdiag = None
     if _HARM_METRIC == "C":
-        K, Kdiag = fnp.linalg.inv(cov_out), None
+        K = fnp.linalg.inv(cov_out)
+    elif _HARM_METRIC == "ridge":
+        _eps = fnp.diagonal(cov_out).sum() * (1.0 / n)
+        K = fnp.linalg.inv(cov_out + fnp.eye(n, dtype=dtype) * _eps)
+    elif _HARM_METRIC == "euc":
+        K = cov_out
     else:
-        K, Kdiag = None, 1.0 / fnp.maximum(fnp.diagonal(cov_out), dtype(1e-12))
+        Kdiag = 1.0 / fnp.maximum(fnp.diagonal(cov_out), dtype(1e-12))
+    if _HARM_METRIC != "C":
+        tau = ((cov_out * K).sum() if Kdiag is None
+               else (fnp.diagonal(cov_out) * Kdiag).sum())
     while tw.k >= _HARM_FOLD_AGE:
-        u = _harm_trace(tw, K, Kdiag, n) * (3.0 / (n + 2.0))
+        b = _harm_trace(tw, K, Kdiag, n)
+        if _HARM_METRIC == "C":
+            u = b * (3.0 / (n + 2.0))
+        else:
+            Kb = K @ b if K is not None else b * Kdiag
+            u = (b - (cov_out @ Kb) * (2.0 / tau)) * (3.0 / tau)
         U = u if U is None else U + u
         tw = _harm_drop(tw, n)
     return tw, U

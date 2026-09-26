@@ -221,6 +221,45 @@ All four are implemented in `tools/ev.py`; change them there and here together.
 | 2026-09-26 | `estimator_k3_v68_wino.py` | — | GRADED | 2.190577e-08 | 0.21473 | 22,701 | **93.86 s** (median **84.00**) | VmPeak 6,736 MiB | 4.7103e-09 | **4.7039e-09** | **1.0078× vs v67 #332440** (graded/graded) | 100/100 DEV | **sub #332478, THE NEW BEST (prev 4.7404e-09). 100/100, 0 failed, 0 nets > 100 s.** Step 4(a) Strassen-Winograd. Raw = v67's to 0.015%; the gain is the multiplier. **Wall: median 84.00 (v67: 90.74, −6.7 s), p90 87.08, worst 93.86, worst/median 1.117.** The wall fell ~4× more than ops × 0.36 ms + ΔFLOPs × kernel rate predicts (~1.5 s): the Winograd glue is memory-bound work the law under-prices. Implied noisy worst 84.00 × 1.24 = **104.2 s** — A's margin to the ~115 s policy grows from 2.5 s to ~11 s. Residual worst 0.2521 s. **Total vs v59 graded: −5.46% score.** Fourth canary of UTC day 2026-09-26. |
 <!-- ev.py --append inserts new rows directly above this marker. Keep it here. -->
 
+## Step 1 (HANDOFF 09-27) — the harmonic old tier: CLOSED, the radial part carries ~70% of the tier's error budget and leaves ×6.6 (2026-09-26)
+
+`tools/build_harm.py` on v68_wino: at the end of each layer the lineage that ages out (5 kept
+exact, = v68's exact set) is reduced to its radial part Sym(u ⊗ C) in the post-activation
+metric; u joins one carried n-vector U (U ← W^T U, U ← w11·U), consumed as D3 += U∘var,
+D21[a,i] += (2U_a C_ai + U_i var_a)/3; the lineage and the shared rank-256 basis are dropped.
+`tools/harm_check.py`: ARC's `proj_geq_r` constant reproduced (1.5e-8 = ARC's f32 coefficient),
+factored trace vs dense 1e-15, consumer slices vs dense transported radial tensor 7e-15.
+(The handoff's written D21 consumer is the transpose of the file's `D21[a,i] = T_aai`.)
+
+**Metric C is ill-posed.** v68's own `cov_out` is PD but its condition runs 1e3 (layer 1) → 1e11
+(layer 6) → 1e15 (layer 12), from near-dead neurons; C⁻¹ weights those directions, u is garbage,
+the H3c chain diverged (LinAlgError at layer 14). So u was chosen to make the remainder traceless
+under a well-posed weight K: u = 3(τI + 2CK)⁻¹(T:K), first order (≤ 0.8% error for diag, 2–63%
+for euc at depth): **d** K = diag(1/var), **r** K = (C + mean(var) I)⁻¹, **e** K = C (Euclidean
+least squares), and the control **z** = drop the lineage, carry nothing.
+
+DEV net 0, real f32 chain; FLOPs from the real f64 meter (`experiments/2026-09-27_harm/cost.json`):
+
+| arm | final MSE | × v68 raw | F/B | ΔFLOPs | ops | score × v68 |
+|---|---:|---:|---:|---:|---:|---:|
+| v68_wino | 2.109e-08 | 1 | 0.21473 | — | 22,701 | 1 |
+| H5z (drop, U ≡ 0) | 4.085e-07 | ×19.4 | 0.15450 | −28.0% | 17,673 | ×13.9 |
+| H5e (K = C) | 1.662e-07 | ×7.9 | 0.16995 | −20.9% | 18,964 | ×6.2 |
+| H5d (K = diag) | 1.451e-07 | ×6.9 | 0.15475 | −27.9% | 18,614 | ×5.0 |
+| **H5r (ridge)** | **1.392e-07** | **×6.6** | 0.17972 | −16.3% | 19,034 | ×5.5 |
+
+The old tier is **28% of v68's FLOPs** (H5z) and is worth a factor 19 in raw MSE. The radial
+(r = 1) part recovers (4.09 − 1.39)/(4.09 − 0.21) ≈ **70% of the tier's excess error**; the
+traceless remainder carries the other 30%, which alone is ≈ 6× v68's whole error. Handoff
+decision: > +50% raw ⇒ **closed**; no gain fit (16 gains cannot move ×6.6 to ×1.1) and no
+rank-16 remainder day (that lane opened at +10–50%). Write-up result: *the old third cumulant is
+not isotropic about the covariance — its value to the final mean lies in the traceless part.*
+Predictions: strategist H5c ≤ +10% at −20% FLOPs [35%] — wrong (H5c unrunnable; best well-posed
+arm +560%); strategist H5d ≥ 2× worse than the metric arm — wrong (d ≈ r ≈ e). Mine: +40–150%,
+P(≤ +10%) = 10% — right in direction, 4× too small in magnitude; H5z ≈ ×8–11 — too small (×19).
+A 100-net twin confirmation of the table is queued (worker-q 2191); one net is decisive at this
+margin (per-net spread is ±20%, the close line is +50%).
+
 ## Step 4(a) — Strassen-Winograd (15 block adds per level instead of 18) (2026-09-26)
 
 `tools/build_winograd.py` replaces `_sb`'s classic Strassen block (10 pre + 8 post additions) with

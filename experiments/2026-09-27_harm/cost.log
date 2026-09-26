@@ -1,0 +1,9 @@
+estimator_k3_v68_wino.py net 0 final MSE 2.1086e-08 per-layer 6.98e-10 6.84e-10 9.40e-10 1.59e-09 2.55e-09 3.74e-09 5.35e-09 6.52e-09 8.10e-09 1.04e-08 1.20e-08 1.34e-08 1.56e-08 1.75e-08 1.83e-08 2.11e-08
+variant                                       n        FLOPs min             mean              max  spread  ops mean
+estimator_k3_v68_wino                         1  472,199,315,449  472,199,315,449  472,199,315,449  0.00%     22701
+estimator_k3_v68_wino__harm_H5d               1  340,306,256,163  340,306,256,163  340,306,256,163  0.00%     18614
+estimator_k3_v68_wino__harm_H5e               1  373,728,154,403  373,728,154,403  373,728,154,403  0.00%     18964
+estimator_k3_v68_wino__harm_H5r               1  395,218,745,123  395,218,745,123  395,218,745,123  0.00%     19034
+estimator_k3_v68_wino__harm_H5z               1  339,757,269,313  339,757,269,313  339,757,269,313  0.00%     17673
+
+[cost] -> experiments\2026-09-27_harm\cost.json
