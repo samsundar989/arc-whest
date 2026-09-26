@@ -27,12 +27,13 @@ but it touches only that entry. The other designate is ranked on its own, and
 only the better of the two counts. So A may carry wall risk that B does not;
 B exists so that a bad private-run day on A costs us A's edge, not the entry.
 
-## Standing — 2026-09-26 05:30 UTC (v65_s2t graded)
+## Standing — 2026-09-26 07:50 UTC (v66_s2t2 graded)
 
 | role | file | sha8 | graded | score | worst wall (median) | implied noisy worst | residual | VmPeak | meets policy |
 |---|---|---|---|---:|---|---:|---:|---:|---|
-| **A (recommended)** | `estimator_k3_v65_s2t.py` | `29a65bd2` | #332393 | **4.8134e-09** | **94.34 (89.27)**, 1.057 | 110.7 s | 0.2606 s (1.53x) | v59 path | **yes, A (≤ 115 s)** — by 4.3 s |
-| A fallback | `estimator_k3_v64_s2.py` | `e92f2e7e` | #332350 | **4.9124e-09** | **94.47 (91.11)**, 1.037 | 113.0 s | 0.2531 s (1.58x) | v59 path | **yes, A (≤ 115 s)** — by 2 s |
+| **A (recommended)** | `estimator_k3_v66_s2t2.py` | `5766053c` | #332409 | **4.7854e-09** | **101.10 (89.24)**, 1.133 | 110.7 s | 0.2635 s (1.52x) | v59 path | **yes, A (≤ 115 s)** — by 4.3 s |
+| A fallback | `estimator_k3_v65_s2t.py` | `29a65bd2` | #332393 | **4.8134e-09** | **94.34 (89.27)**, 1.057 | 110.7 s | 0.2606 s (1.53x) | v59 path | **yes, A (≤ 115 s)** — by 4.3 s |
+| retired | `estimator_k3_v64_s2.py` | `e92f2e7e` | #332350 | **4.9124e-09** | **94.47 (91.11)**, 1.037 | 113.0 s | 0.2531 s (1.58x) | v59 path | **yes, A (≤ 115 s)** — by 2 s |
 | retired | `estimator_k3_v62_s1.py` | `d1d722db` | #332313 | **4.9347e-09** | **102.61 (90.27)**, 1.137 | 111.9 s | 0.2713 s (1.47x) | v59 path | **yes, A (≤ 115 s)** — by 3.1 s |
 | retired | `estimator_k3_v59_corr400.py` | `f419f765` | #332232 | **4.9756e-09** | **94.42 (89.84)**, 1.051 | 111.4 s | 0.2511 s (1.59x) | 6,434 MiB (v57 path) | **yes, A (≤ 115 s)** — by 3.6 s |
 | retired | `estimator_k3_v57_corr.py` | `253c7b19` | #332129 | **5.0443e-09** | 92.81 (90.43), 1.026 | 112.1 s | 0.2507 s | 6,434 MiB | yes, A |
@@ -71,3 +72,4 @@ The anchor is real: v55 (leaf 32, median 92.8 s, 2.5 s above v57's) read
 | 2026-09-25 22:30 | v64_s2 | #332350 | quiet (1.037) | 94.47 | 91.11 |
 | 2026-09-26 00:03 | v64_ws | #332364 | noisy (1.150) | 63.55 | 55.27 |
 | 2026-09-26 04:50 | v65_s2t | #332393 | quiet (1.057) | 94.34 | 89.27 |
+| 2026-09-26 07:10 | v66_s2t2 | #332409 | moderate (1.133) | 101.10 | 89.24 |

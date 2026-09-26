@@ -5,15 +5,15 @@
 
 ## Best graded
 
-**4.8134e-09** — `estimator_k3_v65_s2t.py`, #332393 (v59 + the twin's end-to-end corrector, λ/θ/feed
-and per-term closure gains), 100/100, 0 failed, worst wall 94.3 s (quiet). Prev 4.9124e-09 (v64_s2).
-Twin total vs v59: −3.3% score in four graded steps.
+**4.7854e-09** — `estimator_k3_v66_s2t2.py`, #332409 (v59 + the twin's end-to-end corrector, λ/θ/feed
+and per-term closure gains, trained further), 100/100, 0 failed, worst wall 101.1 s (moderately noisy).
+Prev 4.8134e-09 (v65_s2t). Twin total vs v59: −3.8% score in five graded steps.
 
 ## The designation pair (Samuel designates; agents never do)
 
 | role | file | graded | score | implied noisy worst |
 |---|---|---|---|---:|
-| **A** | `estimator_k3_v65_s2t.py` | #332393 | **4.8134e-09** | 110.7 s (policy ≤ ~115 s) |
+| **A** | `estimator_k3_v66_s2t2.py` | #332409 | **4.7854e-09** | 110.7 s (policy ≤ ~115 s) |
 | **B** | `estimator_k3_v64_ws.py` | #332364 | 5.2699e-09 | 63.6 s MEASURED on a noisy day (policy ≤ 95 s) |
 
 B is v64_s2 at leaf 64, graded on a noisy-day server (worst/median 1.150). Rules v14 §7 ranks only the better of the two.

@@ -696,11 +696,11 @@ def main(argv=None) -> int:
                     help="skip the real-meter run (accuracy only; no score, no gates)")
     ap.add_argument("--mem", action="store_true",
                     help="also run the WSL RLIMIT_AS 8 GiB gate (2 predictions, ~3 min)")
-    #: THE §5 BASELINE. v65_s2t #332393, graded 2026-09-26. Update this the moment a
+    #: THE §5 BASELINE. v66_s2t2 #332409, graded 2026-09-26. Update this the moment a
     #: better score grades, or every later candidate is gated against a stale bar.
-    ap.add_argument("--best-graded", type=float, default=4.813406475263119e-09,
+    ap.add_argument("--best-graded", type=float, default=4.785380618755037e-09,
                     help="the best graded score, which the §5 gate must beat "
-                         "(default: v65_s2t #332393)")
+                         "(default: v66_s2t2 #332409)")
     ap.add_argument("--json", default=None, help="also write the full result here")
     ap.add_argument("--append", action="store_true",
                     help="append the row to RESULTS.md")
