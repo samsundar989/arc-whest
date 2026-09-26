@@ -177,3 +177,7 @@ class linalg:
     def qr(a):
         q, r = _t.linalg.qr(a)
         return q, r
+
+    @staticmethod
+    def inv(a):
+        return _t.linalg.inv(a)
