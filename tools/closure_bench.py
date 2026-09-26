@@ -142,7 +142,10 @@ def run(a):
         k5, k6 = pre_k56(gi)
         zpost = load_post(gi)
         rows, uni, biv = {}, {}, {}
-        for l in range(1, tw.depth):
+        # LAYER 0 IS THE NOISE FLOOR: its input is exactly Gaussian and the chain is exact
+        # there, so K(layer 0) vs the labels is pure label noise (N = 1e9 marginals / M11,
+        # N = 1e8 bench K21/K22), in the same relative units as every other row.
+        for l in range(0, tw.depth):
             K = tap.K[l]
             tr = post_truth(zpost, gi, l, dev)
             last = (l == tw.depth - 1)
