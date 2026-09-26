@@ -484,15 +484,42 @@ def cmd_train(a):
         log.flush()
         return r["raw_mse"]
 
-    best = evaluate("init")
-    save_params(out / "params_best.npz", params)
-    bad = 0
+    # RESUME (worker-q preemption): `ckpt.pt` is written at every evaluation; a restarted
+    # job reloads it and skips the steps already taken. The data order is a pure function
+    # of the seed, so the permutations are regenerated, not stored.
+    ck = out / "ckpt.pt"
+    start = 0
+    if ck.exists():
+        st = torch.load(ck, map_location=DEV, weights_only=False)
+        with torch.no_grad():
+            for k, v in st["params"].items():
+                params[k].copy_(v)
+        opt.load_state_dict(st["opt"])
+        sched.load_state_dict(st["sched"])
+        best, bad, start = st["best"], st["bad"], st["step"]
+        msg = f"[resume] step {start}, best {best:.6e}, bad {bad}"
+        print(msg, flush=True)
+        log.write(msg + "\n")
+    else:
+        best = evaluate("init")
+        save_params(out / "params_best.npz", params)
+        bad = 0
+
+    def checkpoint_state(step):
+        torch.save({"params": {k: v.detach() for k, v in params.items()},
+                    "opt": opt.state_dict(), "sched": sched.state_dict(),
+                    "best": best, "bad": bad, "step": step}, str(ck) + ".tmp")
+        os.replace(str(ck) + ".tmp", ck)
+
     step = 0
     progress = os.environ.get("WORKERQ_PROGRESS")
     t0 = time.time()
     for ep in range(a.epochs):
         order = rng.permutation(len(train))
         for s in range(steps_per_epoch):
+            if step < start:
+                step += 1
+                continue
             opt.zero_grad(set_to_none=True)
             lsum = 0.0
             for j in order[s * a.accum:(s + 1) * a.accum]:
@@ -533,7 +560,9 @@ def cmd_train(a):
                     if bad >= a.patience:
                         log.write(f"early stop at step {step}\n")
                         print(f"early stop at step {step}", flush=True)
+                        checkpoint_state(total)
                         return
+                checkpoint_state(step)
     log.close()
 
 
