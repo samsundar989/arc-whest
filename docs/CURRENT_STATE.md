@@ -13,10 +13,9 @@
 | role | file | graded | score | implied noisy worst |
 |---|---|---|---|---:|
 | **A** | `estimator_k3_v64_s2.py` | #332350 | **4.9124e-09** | 113.0 s (policy ≤ ~115 s) |
-| **B** | `estimator_k3_v60_ws400.py` | #332223 | 5.3387e-09 | 69.1 s (policy ≤ 95 s) |
+| **B** | `estimator_k3_v64_ws.py` | #332364 | 5.2699e-09 | 63.6 s MEASURED on a noisy day (policy ≤ 95 s) |
 
-`estimator_k3_v64_ws.py` (v64_s2 at leaf 64) is the better B, for the Sep 26 A/B slot
-(it supersedes `estimator_k3_v62_ws.py`). Rules v14 §7 ranks only the better of the two.
+B is v64_s2 at leaf 64, graded on a noisy-day server (worst/median 1.150). Rules v14 §7 ranks only the better of the two.
 
 ## In flight (HANDOFF 09-25)
 
