@@ -10,7 +10,10 @@ signal that a candidate uses a function this backend has not been checked on.
 """
 import torch as _t
 
-DEVICE = _t.device("cuda" if _t.cuda.is_available() else "cpu")
+import os as _os
+
+#: TWIN_DEVICE=cpu forces CPU (CPU-only queue jobs, e.g. the forward-only closure bench)
+DEVICE = _t.device(_os.environ.get("TWIN_DEVICE") or ("cuda" if _t.cuda.is_available() else "cpu"))
 ndarray = _t.Tensor
 
 

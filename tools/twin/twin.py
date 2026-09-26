@@ -57,7 +57,7 @@ torch.backends.cuda.matmul.allow_tf32 = False     # float32 means float32
 torch.backends.cudnn.allow_tf32 = False
 
 BUDGET = 2 ** 41
-DEV = torch.device("cuda")
+DEV = torch.device(os.environ.get("TWIN_DEVICE") or "cuda")   # TWIN_DEVICE=cpu: CPU-only jobs
 CACHE = ROOT / "cache" / "twin"
 #: keenanpepper/arc-whestbench-p2-d8b-corpus-14k shards 00..15 (nets 0..2047, MC N = 1e8,
 #: noise ~9e-10 at the final layer): per-layer post-ReLU means, (2048, 16, 1024) float32,
