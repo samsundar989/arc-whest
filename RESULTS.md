@@ -215,6 +215,27 @@ All four are implemented in `tools/ev.py`; change them there and here together.
 | 2026-09-26 | `estimator_k3_v65_s2t.py` | `29a65bd2` | GRADED | 2.224876e-08 | 0.21634 | 24,438 | **94.34 s** (median 89.27) | (v59's code path) | 4.8206e-09 | **4.8134e-09** | **1.0206× vs v64_s2 #332350** (graded/graded) | 92/100 DEV | **sub #332393, THE NEW BEST (prev 4.9124e-09). 100/100, 0 failed, 0 nets > 100 s.** Twin S2t. Raw −2.06% graded vs −1.95% DEV / −2.39% HOLDOUT-100. Graded 0.15% better than projected (implied factor 1.0396). **Wall: median 89.27, p90 91.70, worst 94.34, worst/median 1.057 -- quiet.** Implied noisy worst 110.7 s (A policy ≤ ~115 s). Residual worst 0.2606 s. **Cumulative twin gain vs v59 graded (4.9756e-09): −3.26% score.** First canary of UTC day 2026-09-26. |
 <!-- ev.py --append inserts new rows directly above this marker. Keep it here. -->
 
+## Step 4(b) (PLAN rev 13) — birth-layer-aware fold age: KILLED (2026-09-26)
+
+`tools/build_fold.py` on v65_s2t: lineages born at layer ≤ U fold into the shared rank-256 basis at
+age A instead of 5 (a function of layer index only — not PLAN §5's energy-adaptive age). Cost from the
+real f64 meter (`experiments/2026-09-26_fold/cost.json`); accuracy from the twin, DEV 100, paired
+against the `off` arm (which reproduces v65_s2t's FLOPs to the FLOP and its twin DEV read to 1.3e-6).
+
+| arm | F/B | ΔFLOPs | ops | Δraw | wins | **Δscore** |
+|---|---:|---:|---:|---:|---:|---:|
+| off (= v65_s2t) | 0.21634 | — | 24,438 | — | — | — |
+| A4U3 | 0.21051 | −2.69% | 24,725 | +7.65% | 6/100 | **+4.75%** |
+| A3U3 | 0.20468 | −5.39% | 25,012 | +31.6% | 0/100 | **+24.5%** |
+| A3U5 | 0.19848 | −8.26% | 25,012 | +50.9% | 0/100 | **+38.4%** |
+
+**Killed** (kill line: < 2% score gain). PLAN's premise — early lineages are contracted ×0.6–0.88 per
+layer, so their old-tier content matters little by layer 16 — is wrong by a wide margin: compressing
+the layer 0–3 births two layers early costs 8–51% raw. This agrees with D5 (the old tier is
+under-funded, not over-funded). Prediction (mine: neutral, no arm clears) right in sign, 10–20×
+too small in magnitude. Caveat: the corrector and gains were fitted at age 5; a refit cannot plausibly
+recover +31%.
+
 ## Step 2 (HANDOFF 09-25) — the differentiable twin, and stage S1 (2026-09-25)
 
 **The twin runs the shipped file itself.** `tools/twin/twin.py` imports the estimator with
@@ -260,6 +281,9 @@ stop); at **lr 3e-4** HOLDOUT-100 2.355795e-08 → **2.299547e-08 (−2.39%)**, 
 ±2.5%), so a good part of the gain is the corrector and profiles settling at the smaller step — the
 2e-3 schedule was too coarse for this landscape all along. Prediction (mine −0.3 to −1.0%) too low.
 Cost: +0.04% FLOPs, +252 op calls.
+
+**S2t2 — S2t continued 2 epochs at lr 3e-4**: HOLDOUT-100 2.299547e-08 → **2.285008e-08 (−0.63%)**;
+DEV (twin) **−0.70% ± 0.10% vs S2t, 95/100** → `estimator_k3_v66_s2t2.py`.
 
 **S4 — sigma page on var_pre** (`estimator_k3_v63_sig.py` = v62_s1 + a 27→32→1 page rescaling the
 variance consumed at each layer; standardisers from 20 TRAIN nets; 900 TRAIN, 2 epochs; worker-q

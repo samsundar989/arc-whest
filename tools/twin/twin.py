@@ -214,6 +214,9 @@ def load_module(path: Path, name="_twin_candidate", arm="", raw=False):
     mod = importlib.util.module_from_spec(spec)
     sys.modules[name] = mod
     spec.loader.exec_module(mod)
+    if raw:                                      # no gain hooks, no lambda wrapper
+        mod._TWG = None
+        return mod
     _orig_lam = mod._own_lambda
 
     def _own_lambda(i, depth):                   # lambda gain, per SOURCE layer i

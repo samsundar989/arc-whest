@@ -1,0 +1,12 @@
+[cost] estimator_k3_v65_s2t__fold_A3U3 net 0: 450,089,678,841 FLOPs (0.20468)  25012 ops
+[cost] estimator_k3_v65_s2t__fold_A3U5 net 0: 436,465,948,665 FLOPs (0.19848)  25012 ops
+[cost] estimator_k3_v65_s2t__fold_A4U3 net 0: 462,919,677,945 FLOPs (0.21051)  24725 ops
+[cost] estimator_k3_v65_s2t__fold_off net 0: 475,747,579,897 FLOPs (0.21634)  24438 ops
+
+variant                                       n        FLOPs min             mean              max  spread  ops mean
+estimator_k3_v65_s2t__fold_A3U3               1  450,089,678,841  450,089,678,841  450,089,678,841  0.00%     25012
+estimator_k3_v65_s2t__fold_A3U5               1  436,465,948,665  436,465,948,665  436,465,948,665  0.00%     25012
+estimator_k3_v65_s2t__fold_A4U3               1  462,919,677,945  462,919,677,945  462,919,677,945  0.00%     24725
+estimator_k3_v65_s2t__fold_off                1  475,747,579,897  475,747,579,897  475,747,579,897  0.00%     24438
+
+[cost] -> experiments\2026-09-26_fold\cost.json
