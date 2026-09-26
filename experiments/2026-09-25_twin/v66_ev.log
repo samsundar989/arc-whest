@@ -1,0 +1,29 @@
+[ev] estimator_k3_v66_s2t2.py on DEV n=100
+[ev] cost: 475,747,579,897 FLOPs, 24,438 ops, peak RSS 4.43 GiB -> budget 11.1 GiB/worker
+  [mem] 33.3 GiB free, 11.1 GiB per worker -> 2 workers, not 4
+  2 workers x 2 BLAS threads over 100 nets ...
+[ev] accuracy: 3645.8 s, raw MSE 2.296551e-08
+
+  raw MSE            2.296551e-08   (label noise floor at layer 16 ~7.7e-11)
+  FLOPs / MLP        475,747,579,897   = 0.21634 x 2^41
+  op calls           24,438
+  materializations   0
+  adjusted (panel)   4.968472e-09
+  PROJECTED PUBLIC   4.786582e-09   (÷ 1.038)
+  paired vs estimator_k3_v65_s2t:  gain 1.0071×, Δ +3.5350e-11, t95 [+3.0461e-11, +4.0238e-11], wins 95/100
+    (geometric 1.0072× — diagnostic only, no authority over an outcome)
+
+  PLAN §5 gates
+    PASS  DEV projected vs best graded     better than 4.8134e-09             4.7866e-09 = 0.56% better
+    PASS  op calls                         ≤ 26,000                           24,438
+    WARN  projected server wall (noisy day, A policy) ≤ 115 s                            115.7 s (quiet day 98.4 s)
+    PASS  setup                            < 2 s                              0.00 s
+    PASS  scalar materializations          0                                  0
+    PASS  failed nets on panel             0                                  0
+    PASS  projected server residual        ≤ 0.33 s (D7 finals bound)         0.271 s (1.48× headroom vs the 0.4 s cliff)
+    PASS  WSL RLIMIT_AS 8 GiB gate         PASS                               PASS VmPeak 6462 MiB
+
+  ALL GATES PASS — eligible for a canary under PLAN §5
+
+  RESULTS.md row:
+  | 2026-09-26 | `estimator_k3_v66_s2t2.py` | `5766053c` | DEV | 2.296551e-08 | 0.21634 | 24,438 | 62.194 s (local) → 98.4 s proj | 4536 MiB | **4.7866e-09** | PENDING | 1.0071× vs estimator_k3_v65_s2t (Δ +3.535e-11, t95 [+3.046e-11, +4.024e-11]) | 95/100 |  |
