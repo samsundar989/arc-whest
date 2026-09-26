@@ -1086,6 +1086,11 @@ def _sb(A, B, depth):
     t4 = t2 - b21
     SA = fnp.concatenate([a11, a12, s4, a22, s1, s2, s3], axis=0)
     SB = fnp.concatenate([b11, b21, b22, t4, t1, t2, t3], axis=0)
+    # Release the eight block temporaries BEFORE recursing: held across the
+    # recursive call they stack up per level and raised WSL VmPeak 6,461 -> 7,727
+    # MiB (ev.py --mem, 2026-09-26). Classic Strassen built them inline, so they
+    # died at the concatenate; this restores that lifetime.
+    del s1, s2, s3, s4, t1, t2, t3, t4
 
     P = _sb(SA, SB, depth - 1)
     p1 = P[0:b]

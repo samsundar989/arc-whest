@@ -1,0 +1,27 @@
+[ev] estimator_k3_v68_wino.py on DEV n=3
+[ev] cost: 472,199,315,449 FLOPs, 22,701 ops, peak RSS 4.70 GiB -> budget 11.8 GiB/worker
+  [mem] 33.4 GiB free, 11.8 GiB per worker -> 2 workers, not 3
+  2 workers x 2 BLAS threads over 3 nets ...
+[ev] accuracy: 104.2 s, raw MSE 2.390318e-08
+
+  raw MSE            2.390318e-08   (label noise floor at layer 16 ~7.7e-11)
+  FLOPs / MLP        472,199,315,449   = 0.21473 x 2^41
+  op calls           22,701
+  materializations   0
+  adjusted (panel)   5.132764e-09
+  PROJECTED PUBLIC   4.944859e-09   (÷ 1.038)
+
+  PLAN §5 gates
+    FAIL  DEV projected vs best graded     better than 4.7404e-09             4.9449e-09 = -4.31% better
+    PASS  op calls                         ≤ 26,000                           22,701
+    ok    projected server wall (noisy day, A policy) ≤ 115 s                            114.1 s (quiet day 97.1 s)
+    PASS  setup                            < 2 s                              0.00 s
+    PASS  scalar materializations          0                                  0
+    PASS  failed nets on panel             0                                  0
+    PASS  projected server residual        ≤ 0.33 s (D7 finals bound)         0.252 s (1.59× headroom vs the 0.4 s cliff)
+    PASS  WSL RLIMIT_AS 8 GiB gate         PASS                               PASS VmPeak 6736 MiB
+
+  GATED — not submittable as it stands
+
+  RESULTS.md row:
+  | 2026-09-26 | `estimator_k3_v68_wino.py` | `98e40c83` | DEV | 2.390318e-08 | 0.21473 | 22,701 | 46.261 s (local) → 97.1 s proj | 4816 MiB | **4.9449e-09** | PENDING | — | — |  |
