@@ -43,7 +43,39 @@ PATCHES = [
      '            _sf = _OWN_S_FEED * _prof_at("feed", layer_index, depth)\n'
      '            if layer_index < len(_FEED_GAIN):\n'
      '                _sf = _sf * _FEED_GAIN[layer_index]\n'),
+    # --- S2t per-term gains. The two closure-extra families fold into the Python
+    # coefficient `c` (no operation); the table terms and the 1-D kappa3/kappa4
+    # rows cost one multiply where the gain is not exactly 1.0.
+    ("        sel = [(fs, k, cs[str(p)]) for fs, k, cs in prog[\"uni\"] if str(p) in cs]\n",
+     "        sel = [(fs, k, cs[str(p)] * _gain2(_CU_GAIN, _CUR_LAYER, _u, p - 1))\n"
+     "               for _u, (fs, k, cs) in enumerate(prog[\"uni\"]) if str(p) in cs]\n"),
+    ("        sel = [(i, ki, kj, cs[tag]) for i, (fs, ki, kj, cs) in enumerate(prog[\"biv\"]) if tag in cs]\n",
+     "        sel = [(i, ki, kj, cs[tag] * _gain1(_CB_GAIN, _CUR_LAYER, i))\n"
+     "               for i, (fs, ki, kj, cs) in enumerate(prog[\"biv\"]) if tag in cs]\n"),
+    ('    for row in table["terms"]:\n',
+     '    for _ridx, row in enumerate(table["terms"]):\n'),
+    ("        pK[ip] = term if ip not in pK else pK[ip] + term\n",
+     "        _tg = _gain1(_TT_GAIN, layer_index, _ridx)\n"
+     "        if _tg != 1.0:\n"
+     "            term = term * _tg\n"
+     "        pK[ip] = term if ip not in pK else pK[ip] + term\n"),
+    ('        W4 = fnp.stack([w[kp] for kp in prog["w4_keys"]])\n',
+     '        W4 = fnp.stack([w[kp] for kp in prog["w4_keys"]])\n'
+     '        if layer_index < len(_T1_GAIN):\n'
+     '            W3 = W3 * fnp.array([[g] for g in _T1_GAIN[layer_index][0]], dtype=dtype)\n'
+     '            W4 = W4 * fnp.array([[g] for g in _T1_GAIN[layer_index][1]], dtype=dtype)\n'),
 ]
+
+_HELPERS = '''
+
+def _gain1(tab, l, i):
+    """tab[l][i], or exactly 1.0 past the table (shape-generic, hard rule 7)."""
+    return tab[l][i] if l < len(tab) and i < len(tab[l]) else 1.0
+
+
+def _gain2(tab, l, i, j):
+    return tab[l][i][j] if l < len(tab) and i < len(tab[l]) and j < len(tab[l][i]) else 1.0
+'''
 
 
 def main(argv=None) -> int:
@@ -67,9 +99,12 @@ def main(argv=None) -> int:
         src = src.replace(anchor, repl, 1)
     tables = "\n# Twin S2 per-layer gains (tools/build_s2.py). 1.0 is exactly the identity.\n"
     for name, key in (("_LAM_GAIN", "gain__lam"), ("_THETA_GAIN", "gain__theta"),
-                      ("_FEED_GAIN", "gain__feed")):
-        vals = [float(x) for x in p[key]] if key in p else []
+                      ("_FEED_GAIN", "gain__feed"), ("_TT_GAIN", "gain__tt"),
+                      ("_T1_GAIN", "gain__t1"), ("_CU_GAIN", "gain__cu"),
+                      ("_CB_GAIN", "gain__cb")):
+        vals = p[key].astype(float).tolist() if key in p else []
         tables += f"{name} = {vals!r}\n"
+    tables += _HELPERS
     anchor = "\n_CUR_LAYER = 0\n"
     if src.count(anchor) != 1:
         raise SystemExit("no _CUR_LAYER anchor")
