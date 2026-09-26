@@ -124,6 +124,10 @@ def panel(name):
         return [("d8b", i) for i in range(2048)]
     if name == "train+d8b":
         return panel("train") + panel("d8b")
+    if name == "fit80":                              # Step 2 refit TRAIN (labels exist)
+        return [("full", i) for i in range(80)]
+    if name == "fit20h":                             # Step 2 refit HOLDOUT-20
+        return [("full", i) for i in range(80, 100)]
     if name.startswith("fit"):
         return [("full", i) for i in range(int(name[3:] or 100))]
     raise SystemExit(f"unknown panel {name}")
@@ -195,6 +199,61 @@ TWIN_PATCHES = [
 ]
 
 
+#: HANDOFF 09-27 Step 2 (refit ceilings): label-substitution hooks, the SAME anchors and
+#: object names as `tools/anatomy2.py` PATCHES (copied, not imported: importing anatomy2
+#: would put its numpy/cupy shims in front of this process's torch shim). Inert while
+#: `_A2` is None, so every non-substituting run is unchanged.
+SUB_PATCHES = [
+    ("_CORR_HOOK = None\n",
+     "_CORR_HOOK = None\n\n_A2 = None\n\n\ndef _a2(name, value, *aux):\n"
+     "    if _A2 is None:\n        return value\n"
+     "    return _A2(_CUR_LAYER, name, value, *aux)\n"),
+    ("    metric = float(init_scale)\n",
+     "    var = _a2('var', var)\n    metric = float(init_scale)\n"),
+    ("    D3 = _dslice3(adv) if adv is not None else fnp.zeros(n, dtype=dtype)\n",
+     "    D3 = _dslice3(adv) if adv is not None else fnp.zeros(n, dtype=dtype)\n"
+     "    D3 = _a2('D3', D3)\n"),
+    ("    dG = fnp.where(fnp.isfinite(dG), dG, dtype(0.0))\n",
+     "    dG = fnp.where(fnp.isfinite(dG), dG, dtype(0.0))\n    dG = _a2('dG', dG)\n"),
+    ("        C11 = cov_pre * off_mask\n",
+     "        C11 = cov_pre * off_mask\n        C11 = _a2('C11', C11)\n"),
+    ("        D21 = (_dslice21(adv, off_mask) if adv is not None\n"
+     "               else fnp.zeros((n, n), dtype=dtype))\n",
+     "        D21 = (_dslice21(adv, off_mask) if adv is not None\n"
+     "               else fnp.zeros((n, n), dtype=dtype))\n"
+     "        D21 = _a2('D21', D21)\n"),
+    ("        D22 = ((metric / 6.0) * (dG[:, None] + dG[None, :])) * off_mask\n",
+     "        D22 = ((metric / 6.0) * (dG[:, None] + dG[None, :])) * off_mask\n"
+     "        D22 = _a2('D22', D22)\n"),
+    ('        nb["Q13"] = nb["Q31"].T\n',
+     '        nb["Q31"] = _a2("Q31n", nb["Q31"], inv, inv2)\n'
+     '        nb["Q13"] = nb["Q31"].T\n'),
+]
+#: Step 2 channels. "all" is every object but mu: substituting mu_pre at every layer
+#: makes the final mean nearly exact by construction, which leaves nothing to refit.
+SUBST = {"cov": ("var", "C11"), "k3": ("D3", "D21"), "k4": ("dG", "D22", "Q31n"),
+         "all": ("var", "C11", "D3", "D21", "dG", "D22", "Q31n")}
+LABELS = ROOT / "cache" / "twin_labels"
+
+
+class Subst:
+    """`_A2` for one net: returns the exact label of every object in `names`, layers >= 1."""
+
+    def __init__(self, gidx, names):
+        z = np.load(LABELS / f"fit_{gidx:03d}.npz")
+        keys = {("Q31" if k == "Q31n" else k) for k in names}
+        self.t = {k: torch.from_numpy(np.asarray(z[k])).to(DEV) for k in keys}
+        self.names = frozenset(names)
+
+    def __call__(self, l, name, value, *aux):
+        if name not in self.names or l < 1:
+            return value
+        if name == "Q31n":                          # anatomy2 Ctl: raw kappa_iiij, normalised
+            inv, inv2 = aux                         # by the chain's own sigma
+            return self.t["Q31"][l] * ((inv2 * inv)[:, None] * inv[None, :])
+        return self.t[name][l].to(value.dtype)
+
+
 #: Optional ARMS: source changes tested through the twin before any estimator
 #: file is built (PLAN rev 13 §3 Step 3: "test first").
 ARMS = {
@@ -219,7 +278,7 @@ def load_module(path: Path, name="_twin_candidate", arm="", raw=False):
     longer match the hooks' anchors. `install` refuses gain parameters then."""
     import importlib.util
     src = path.read_text(encoding="utf-8")
-    for a, b in ([] if raw else TWIN_PATCHES) + (ARMS[arm] if arm else []):
+    for a, b in ([] if raw else TWIN_PATCHES) + (ARMS[arm] if arm else []) + SUB_PATCHES:
         if src.count(a) != 1:
             raise SystemExit(f"twin patch anchor occurs {src.count(a)}x:\n{a}")
         src = src.replace(a, b, 1)
@@ -326,6 +385,15 @@ def mse_rows(mus, truth):
     return [((m.double() - t[l]) ** 2).mean() for l, m in enumerate(mus) if l >= 1]
 
 
+def set_subst(tw, subst, split, i):
+    """Step 2: point the module's `_A2` at net i's exact labels (or clear it)."""
+    if not subst:
+        tw.mod._A2 = None
+        return
+    assert split == "full" and i < 100, "exact labels exist for FIT rows 0..99 only"
+    tw.mod._A2 = Subst(i, SUBST[subst])
+
+
 def load_params(path):
     """npz -> {"group/name": tensor}. Bare names (old S1 files) mean group corr."""
     out = {}
@@ -375,6 +443,7 @@ def cmd_eval(a, tw=None, params=None, quiet=False):
     with torch.no_grad():
         for split, i in rows:
             w, truth = data.net(split, i)
+            set_subst(tw, getattr(a, "subst", ""), split, i)
             fin.append(float(mse_rows(tw.forward(w), truth)[-1]))
     r = {"panel": a.panel, "arm": getattr(a, "arm", ""), "n": len(fin),
          "raw_mse": float(np.mean(fin)), "per_net": fin}
@@ -476,7 +545,8 @@ def cmd_train(a):
     log = open(out / "train.log", "a", encoding="utf-8")
 
     def evaluate(tag):
-        ev = argparse.Namespace(panel=a.hold_panel, n=a.hold_n, cand=a.cand, params=None)
+        ev = argparse.Namespace(panel=a.hold_panel, n=a.hold_n, cand=a.cand, params=None,
+                                subst=a.subst)
         r = cmd_eval(ev, tw=tw, params=params, quiet=True)
         msg = f"[{tag}] HOLDOUT-100 raw {r['raw_mse']:.6e} (n={r['n']})"
         print(msg, flush=True)
@@ -525,6 +595,8 @@ def cmd_train(a):
             for j in order[s * a.accum:(s + 1) * a.accum]:
                 split, i = train[j]
                 w, truth = data.net(split, i)
+                # set per net and left set: checkpoint recompute in backward re-reads it
+                set_subst(tw, a.subst, split, i)
                 mus = tw.forward(w, ckpt=True)
                 rows = mse_rows(mus, truth)
                 loss = rows[-1] + a.w_all * torch.stack(rows[:-1]).mean()
@@ -586,7 +658,9 @@ def main():
     ap.add_argument("--hold-n", type=int, default=100)
     ap.add_argument("--hold-panel", default="hold100")
     ap.add_argument("--train-n", type=int, default=0, help="first N TRAIN rows only")
-    ap.add_argument("--train-panel", default="train", help="train | train+d8b")
+    ap.add_argument("--train-panel", default="train", help="train | train+d8b | fit80")
+    ap.add_argument("--subst", default="", choices=["", *SUBST],
+                    help="Step 2: substitute this channel exact at layers >= 1 (FIT rows only)")
     ap.add_argument("--arm", default="", help="optional source arm (see ARMS)")
     ap.add_argument("--raw", action="store_true",
                     help="eval a file with baked-in gains: skip the twin's gain hooks")
