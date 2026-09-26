@@ -26,3 +26,9 @@ Order after Anatomy 2 (Samuel acknowledged the S4 promotion, 2026-09-25): S1 -> 
 - S4 (on S1): HOLDOUT-100 -0.10% (mine -3..-8: wrong). The output page moved ~2 Adam steps' worth in
   448 -- the gradient has no consistent sign, i.e. the 27 local features do not predict the var error.
 - S2 (on S1, gains lam/theta/feed + corr pages): my -0.5..-2% stands.
+
+## S2b / S2t (2026-09-26 ~01:10 UTC)
+- S2b (S2 continued 2 epochs): HOLDOUT-100 2.358810 -> 2.355795e-08, -0.13%. Converging.
+- S2t prediction (mine, before running): per-term gains (13 table + 8 one-D + 12 uni + 27 biv
+  per layer, 960 scalars) on top of S2b: **-0.3 to -1.0%** HOLDOUT-100. More capacity than the three
+  profiles, but D6 found the closure constants already near their greedy optimum.
