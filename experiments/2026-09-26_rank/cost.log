@@ -1,0 +1,8 @@
+[cost] estimator_k3_v67_s3__r192 net 0: 448,552,846,145 FLOPs (0.20398)  22854 ops
+[cost] estimator_k3_v67_s3__r224 net 0: 467,325,976,605 FLOPs (0.21252)  22854 ops
+
+variant                                       n        FLOPs min             mean              max  spread  ops mean
+estimator_k3_v67_s3__r192                     1  448,552,846,145  448,552,846,145  448,552,846,145  0.00%     22854
+estimator_k3_v67_s3__r224                     1  467,325,976,605  467,325,976,605  467,325,976,605  0.00%     22854
+
+[cost] -> experiments\2026-09-26_rank\cost.json

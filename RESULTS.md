@@ -218,6 +218,24 @@ All four are implemented in `tools/ev.py`; change them there and here together.
 | 2026-09-26 | `estimator_k3_v67_s3.py` | — | DEV | 2.276868e-08 | 0.21643 | 24,648 | 98.5 s proj | VmPeak 6,461 MiB (WSL PASS) | **4.7475e-09** | PENDING #332440 | 1.0082× vs v66 (Δ +4.061e-11, t95 [+3.306e-11, +4.817e-11]) | 85/100 | **Twin S3** (multi-mode κ4_iiij). Third canary of Sep 26. |
 <!-- ev.py --append inserts new rows directly above this marker. Keep it here. -->
 
+## Step 4(c) / Step 3 rank item — shared old-tier rank, both directions: 256 is the optimum (2026-09-26)
+
+v67_s3 with `_SHARED_RANK` changed (age 5 unchanged); real-meter cost (net 0), twin DEV 100 unrefit,
+paired against v67_s3 raw-twin (2.276898e-08). `experiments/2026-09-26_rank/`.
+
+| rank | F/B | ΔFLOPs | ops | Δraw | wins | **Δscore** |
+|---|---:|---:|---:|---:|---:|---:|
+| 192 | 0.20398 | −5.75% | 22,854 | +21.0% | 0/100 | **+14.0%** |
+| 224 | 0.21252 | −1.81% | 22,854 | +6.77% | 5/100 | **+4.84%** |
+| **256 (v67)** | 0.21643 | — | 24,648 | — | — | — |
+| 288 | 0.22481 | +3.87% | 24,648 | −3.45% ± 0.49 | 91/100 | **+0.29%** |
+| 320 | 0.23351 | +7.89% | 24,648 | −5.47% ± 0.62 | 96/100 | **+1.99%** |
+
+The old tier is valuable (every 32 of rank moves raw 3.5–14%) but rank 256 sits at the SCORE optimum
+in both directions: accuracy per FLOP is almost exactly the multiplier's price. Closed both ways. (The
+op count falls at 192/224 because non-power-of-two thin shapes take fewer Strassen levels.)
+Predictions (mine): downward raw 3× larger than predicted; upward raw right, FLOPs ~2× larger.
+
 ## Step 4(b) (PLAN rev 13) — birth-layer-aware fold age: KILLED (2026-09-26)
 
 `tools/build_fold.py` on v65_s2t: lineages born at layer ≤ U fold into the shared rank-256 basis at
