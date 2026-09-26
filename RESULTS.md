@@ -218,6 +218,20 @@ All four are implemented in `tools/ev.py`; change them there and here together.
 | 2026-09-26 | `estimator_k3_v67_s3.py` | — | DEV | 2.276868e-08 | 0.21643 | 24,648 | 98.5 s proj | VmPeak 6,461 MiB (WSL PASS) | **4.7475e-09** | PENDING #332440 | 1.0082× vs v66 (Δ +4.061e-11, t95 [+3.306e-11, +4.817e-11]) | 85/100 | **Twin S3** (multi-mode κ4_iiij). Third canary of Sep 26. |
 <!-- ev.py --append inserts new rows directly above this marker. Keep it here. -->
 
+## Step 4(a) — Strassen-Winograd (15 block adds per level instead of 18) (2026-09-26)
+
+`tools/build_winograd.py` replaces `_sb`'s classic Strassen block (10 pre + 8 post additions) with
+Winograd's variant (8 + 7) — the same seven products, still one batched matmul per level; identity
+self-tested exact to 2e-15 in float64. On v67_s3 → `estimator_k3_v68_wino.py`:
+
+| | F/B | FLOPs | ops | twin DEV raw vs v67 |
+|---|---:|---:|---:|---:|
+| v67_s3 | 0.21643 | 475,937,828,857 | 24,648 | — |
+| **v68_wino** | **0.21473** | 472,199,315,449 (**−0.79%**) | **22,701 (−1,947)** | −0.014% ± 0.039%, 49/100 (rounding only) |
+
+A free ~0.8% on score and ~1,950 fewer op calls (≈ −0.7 s median wall at 0.36 ms/op, −0.02 s
+residual) — the first wall-engineering step toward PLAN Step 4's "v59-class FLOPs at ≤ 95 s".
+
 ## Step 4(c) / Step 3 rank item — shared old-tier rank, both directions: 256 is the optimum (2026-09-26)
 
 v67_s3 with `_SHARED_RANK` changed (age 5 unchanged); real-meter cost (net 0), twin DEV 100 unrefit,

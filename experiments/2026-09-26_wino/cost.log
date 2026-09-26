@@ -1,0 +1,6 @@
+[cost] estimator_k3_v68_wino net 0: 472,199,315,449 FLOPs (0.21473)  22701 ops
+
+variant                                       n        FLOPs min             mean              max  spread  ops mean
+estimator_k3_v68_wino                         1  472,199,315,449  472,199,315,449  472,199,315,449  0.00%     22701
+
+[cost] -> experiments\2026-09-26_wino\cost.json
