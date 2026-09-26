@@ -231,6 +231,12 @@ self-tested exact to 2e-15 in float64. On v67_s3 → `estimator_k3_v68_wino.py`:
 | v67_s3 | 0.21643 | 475,937,828,857 | 24,648 | — |
 | **v68_wino** | **0.21473** | 472,199,315,449 (**−0.79%**) | **22,701 (−1,947)** | −0.014% ± 0.039%, 49/100 (rounding only) |
 
+**v68_ws (leaf-64 B twin): F/B 0.23127, 19,361 ops, residual 0.215 s, projected noisy worst 68.2 s.**
+Its first WSL gate run FAILED the two-sided check "settled VmSize did not change across repeats"
+at −404 MB (the allocator returning memory after the first predict: 2.58 → 2.17 → 2.18 GB); a
+re-run PASSED at +20 MB (2,309 → 2,329 MiB; peak 5,085 MiB). Allocator noise, not a leak — both
+runs recorded (`experiments/2026-09-26_wino/v68ws_gates*.json`).
+
 A free ~0.8% on score and ~1,950 fewer op calls (≈ −0.7 s median wall at 0.36 ms/op, −0.02 s
 residual) — the first wall-engineering step toward PLAN Step 4's "v59-class FLOPs at ≤ 95 s".
 

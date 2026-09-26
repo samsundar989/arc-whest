@@ -1,0 +1,25 @@
+[ev] estimator_k3_v68_ws.py on DEV n=3
+[ev] cost: 508,578,220,025 FLOPs, 19,361 ops, peak RSS 3.11 GiB -> budget 7.8 GiB/worker
+[ev] accuracy: cache hit, raw MSE 2.388411e-08
+
+  raw MSE            2.388411e-08   (label noise floor at layer 16 ~7.7e-11)
+  FLOPs / MLP        508,578,220,025   = 0.23127 x 2^41
+  op calls           19,361
+  materializations   0
+  adjusted (panel)   5.523789e-09
+  PROJECTED PUBLIC   5.321569e-09   (÷ 1.038)
+
+  PLAN §5 gates
+    FAIL  DEV projected vs best graded     better than 4.7404e-09             5.3216e-09 = -12.26% better
+    PASS  op calls                         ≤ 26,000                           19,361
+    ok    projected server wall (noisy day, A policy) ≤ 115 s                            68.2 s (quiet day 58.0 s)
+    PASS  setup                            < 2 s                              0.00 s
+    PASS  scalar materializations          0                                  0
+    PASS  failed nets on panel             0                                  0
+    PASS  projected server residual        ≤ 0.33 s (D7 finals bound)         0.215 s (1.86× headroom vs the 0.4 s cliff)
+    PASS  WSL RLIMIT_AS 8 GiB gate         PASS                               PASS VmPeak 5086 MiB
+
+  GATED — not submittable as it stands
+
+  RESULTS.md row:
+  | 2026-09-26 | `estimator_k3_v68_ws.py` | `0db9afba` | DEV | 2.388411e-08 | 0.23127 | 19,361 | 30.775 s (local) → 58.0 s proj | 3180 MiB | **5.3216e-09** | PENDING | — | — |  |
