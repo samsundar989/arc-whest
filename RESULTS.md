@@ -211,6 +211,7 @@ All four are implemented in `tools/ev.py`; change them there and here together.
 | 2026-09-25 | `estimator_k3_v64_s2.py` | `e92f2e7e` | DEV | 2.359028e-08 | 0.21626 | 24,186 | 61.439 s (local) → 98.3 s proj (= v59's code) | VmPeak 6,458 MiB (WSL PASS) | **4.9148e-09** | PENDING #332350 | 1.0048× vs v62_s1 (Δ +2.448e-11, t95 [+1.930e-11, +2.966e-11]) | 83/100 | **Twin S2**: per-layer λ/θ/feed gains (moved up to ±19%) trained jointly with the corrector pages through the chain, 900 TRAIN nets; HOLDOUT-100 −0.42%, twin DEV −0.475% (official numpy agrees to 1.4e-5). Gains are pure-Python tables: FLOPs and ops identical to v62_s1. Third canary of Sep 25. |
 | 2026-09-25 | `estimator_k3_v64_s2.py` | `e92f2e7e` | GRADED | 2.271571e-08 | 0.21626 | 24,186 | **94.47 s** (median 91.11) | (v59's code path) | 4.9148e-09 | **4.9124e-09** | **1.0045× vs v62_s1 #332313** (graded/graded) | 83/100 DEV | **sub #332350, THE NEW BEST (prev 4.9347e-09). 100/100, 0 failed, 0 nets > 100 s.** Twin S2 (end-to-end λ/θ/feed gains + corrector). Raw −0.45% graded vs −0.48% DEV / −0.42% HOLDOUT-100. Graded 0.05% better than projected (implied factor 1.0385). **Wall: median 91.11, p90 93.36, worst 94.47, worst/median 1.037 -- quiet.** Implied noisy worst 91.11 × 1.24 = 113.0 s: inside the A policy (≤ ~115 s). Residual worst 0.2531 s. Cumulative twin gain vs v59 graded: −1.27% raw. Third canary of UTC day 2026-09-25. |
 | 2026-09-26 | `estimator_k3_v64_ws.py` | `(v64_s2+leaf64)` | GRADED | 2.271497e-08 | 0.23200 | 20,345 | **63.55 s** (median 55.27) | VmPeak 4,962 MiB (WSL PASS) | 5.2701e-09 derived | **5.2699e-09** | raw = v64_s2's to 3e-5 | — | **sub #332364, THE NEW B (prev v60_ws400 5.3387e-09). 100/100, 0 failed, 0 nets > 100 s.** v64_s2 at Strassen leaf 64, on the Sep 26 A/B slot. **Wall: median 55.27, p90 61.00, worst 63.55, worst/median 1.150 -- a NOISY-day reading (≥ 1.15)**, the first for a wall-safe twin (strategist response 09-25 §4): 63.6 s against B's 95 s policy, 56 s to the cliff. Residual worst 0.2252 s (1.78x). |
+| 2026-09-26 | `estimator_k3_v65_s2t.py` | `29a65bd2` | DEV | 2.312891e-08 | 0.21634 | 24,438 | 53.269 s (local) → 98.4 s proj | VmPeak 6,451 MiB (WSL PASS) | **4.8206e-09** | PENDING #332393 | 1.0195× vs v64_s2 (Δ +9.770e-11, t95 [+8.299e-11, +1.124e-10]) | 92/100 | **Twin S2t**: per-term closure gains (13 table + 8 one-D + 12 uni + 27 biv per layer) with profiles and corrector, re-fitted at lr 3e-4 (2e-3 diverged). HOLDOUT-100 −2.39% vs S2b; twin DEV −1.96% vs S2 (official agrees to 3.5e-5); −3.0% vs v59. First canary of Sep 26. |
 <!-- ev.py --append inserts new rows directly above this marker. Keep it here. -->
 
 ## Step 2 (HANDOFF 09-25) — the differentiable twin, and stage S1 (2026-09-25)
@@ -248,6 +249,16 @@ through the §5 gates as a canary candidate under decision 1 (projected ≈ 4.94
 DEV (twin) **−0.475% ± 0.10%, 83/100** vs S1; official numpy −0.48%. Learned gains: θ +10–16% over
 layers 3–8 and +10% at layer 15, feed +8–19% over layers 4–8 and 14–15, λ within ±8%. Prediction
 (mine −0.5 to −2%) in range. Cumulative twin gain vs v59: −1.1% raw DEV.
+
+**S2b / S2t — convergence, then per-term gains** (all on 900 TRAIN; `tools/build_s2.py` bakes every
+gain into Python tables/constants). S2b (S2 continued, lr 2e-3): HOLDOUT-100 −0.13% more. S2t
+(adds 60 gains per layer: the 13 bivariate table terms, the 1-D κ3/κ4 rows per order, the 3×4
+univariate and 27 bivariate closure extras): at lr 2e-3 it **diverged** (+53% at step 28, early
+stop); at **lr 3e-4** HOLDOUT-100 2.355795e-08 → **2.299547e-08 (−2.39%)**, DEV (twin) **−1.96% ±
+0.29% vs S2, 90/100**; −3.0% vs v59. The learned term gains are small (table ±1%, closure extras
+±2.5%), so a good part of the gain is the corrector and profiles settling at the smaller step — the
+2e-3 schedule was too coarse for this landscape all along. Prediction (mine −0.3 to −1.0%) too low.
+Cost: +0.04% FLOPs, +252 op calls.
 
 **S4 — sigma page on var_pre** (`estimator_k3_v63_sig.py` = v62_s1 + a 27→32→1 page rescaling the
 variance consumed at each layer; standardisers from 20 TRAIN nets; 900 TRAIN, 2 epochs; worker-q
