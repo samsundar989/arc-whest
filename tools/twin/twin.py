@@ -59,6 +59,12 @@ torch.backends.cudnn.allow_tf32 = False
 BUDGET = 2 ** 41
 DEV = torch.device("cuda")
 CACHE = ROOT / "cache" / "twin"
+#: keenanpepper/arc-whestbench-p2-d8b-corpus-14k shards 00..15 (nets 0..2047, MC N = 1e8,
+#: noise ~9e-10 at the final layer): per-layer post-ReLU means, (2048, 16, 1024) float32,
+#: row = net idx. Built by `twin.py d8bprep`; weights regenerate from seed 770000 + idx
+#: (checked 2026-09-26 against the exact layer-0 closed form: MSE 7e-9 = the N = 1e8 floor,
+#: vs 3e-4 for the wrong net, on idx 0, 1, 2, 777, 2047).
+D8B_MEAN = ROOT / "cache" / "d8b" / "d8b_mean.npy"
 DEFAULT_CAND = ROOT / "estimator_k3_v59_corr400.py"
 #: Stage -> trainable leaves, as "group/name" over the chain's constant groups.
 TRAINABLE = {
@@ -89,8 +95,14 @@ class Data:
                 self.w[split] = p
                 self.truth[split] = np.load(CACHE / f"{split}_truth.npy")
                 self.meta[split] = json.loads((CACHE / f"{split}_meta.json").read_text())
+        if D8B_MEAN.exists():
+            self.truth["d8b"] = np.load(D8B_MEAN)
 
     def net(self, split, i):
+        if split == "d8b":                          # weights regenerate from the card's seed rule
+            g = torch.Generator(device="cpu").manual_seed(770000 + i)
+            a = torch.randn(16, 1024, 1024, generator=g, dtype=torch.float32) * (2.0 / 1024) ** 0.5
+            return [a[l].to(DEV) for l in range(16)], self.truth["d8b"][i]
         if not self.meta[split]["done"][i]:
             raise RuntimeError(f"{split} row {i} not exported yet")
         per_net = 16 * 1024 * 1024                  # float32 elements in one net
@@ -108,6 +120,10 @@ def panel(name):
         return [("full", i) for i in s["holdout_100"]["indices"]]
     if name == "dev":
         return [("mini", i) for i in range(100)]
+    if name == "d8b":
+        return [("d8b", i) for i in range(2048)]
+    if name == "train+d8b":
+        return panel("train") + panel("d8b")
     if name.startswith("fit"):
         return [("full", i) for i in range(int(name[3:] or 100))]
     raise SystemExit(f"unknown panel {name}")
@@ -407,6 +423,20 @@ def cmd_sigstats(a):
     print(f"wrote {a.out}: {L} layers x {smu.shape[1]} features")
 
 
+def cmd_d8bprep(a):
+    """Gather the d8b corpus shards' per-layer means (moments[:, 0]) into D8B_MEAN."""
+    out = np.zeros((2048, 16, 1024), np.float32)
+    seen = np.zeros(2048, bool)
+    for s in range(16):
+        z = np.load(D8B_MEAN.parent / f"shard{s:02d}.npz")
+        assert int(z["n_done"]) == len(z["idx"]) and int(z["n_samples"]) == 10 ** 8
+        out[z["idx"]] = z["moments"][:, 0]
+        seen[z["idx"]] = True
+    assert seen.all(), "d8b shards do not cover idx 0..2047"
+    np.save(D8B_MEAN, out)
+    print(f"wrote {D8B_MEAN}: {out.shape}")
+
+
 def cmd_train(a):
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -437,7 +467,7 @@ def cmd_train(a):
         print(f"  {k}: rms {rms:.3e} -> lr {a.lr * rms:.3e}", flush=True)
     opt = torch.optim.Adam(groups)
     data = Data()
-    train = panel("train")[: a.train_n or None]
+    train = panel(a.train_panel)[: a.train_n or None]
     rng = np.random.default_rng(20260925)
     steps_per_epoch = len(train) // a.accum
     total = steps_per_epoch * a.epochs
@@ -509,7 +539,7 @@ def cmd_train(a):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["parity", "eval", "train", "sigstats"])
+    ap.add_argument("cmd", choices=["parity", "eval", "train", "sigstats", "d8bprep"])
     ap.add_argument("--cand", default=str(DEFAULT_CAND))
     ap.add_argument("--nets", default="0,1,2")
     ap.add_argument("--ref", default=str(ROOT / "experiments" / "2026-09-25_anatomy2" / "fit20.json"))
@@ -527,6 +557,7 @@ def main():
     ap.add_argument("--hold-n", type=int, default=100)
     ap.add_argument("--hold-panel", default="hold100")
     ap.add_argument("--train-n", type=int, default=0, help="first N TRAIN rows only")
+    ap.add_argument("--train-panel", default="train", help="train | train+d8b")
     ap.add_argument("--arm", default="", help="optional source arm (see ARMS)")
     ap.add_argument("--raw", action="store_true",
                     help="eval a file with baked-in gains: skip the twin's gain hooks")
@@ -537,7 +568,7 @@ def main():
     ap.add_argument("--patience", type=int, default=3)
     a = ap.parse_args()
     {"parity": cmd_parity, "eval": cmd_eval, "train": cmd_train,
-     "sigstats": cmd_sigstats}[a.cmd](a)
+     "sigstats": cmd_sigstats, "d8bprep": cmd_d8bprep}[a.cmd](a)
 
 
 if __name__ == "__main__":

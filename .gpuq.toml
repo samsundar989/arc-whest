@@ -84,6 +84,7 @@ passthrough = [
   # tools/labels/fetch.py. `cache/hf/` holds no tracked file, so the directory
   # itself links. ~6.6 GB, read-only to every job; local-only until staged.
   "cache/hf",
+  "cache/d8b",        # d8b corpus shards + d8b_mean.npy (twin --train-panel train+d8b), ~0.6 GB
   "cache/twin",       # tools/twin/export_weights.py memmaps, ~74 GB; written through
   "experiments/vault/vault_v1.npz",
   "experiments/vault/mirror_preds.npz",
