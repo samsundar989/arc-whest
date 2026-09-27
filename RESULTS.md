@@ -222,6 +222,74 @@ All four are implemented in `tools/ev.py`; change them there and here together.
 | 2026-09-27 | `estimator_k3_v68_ws.py` | `0db9afba` | GRADED | 2.190628e-08 | 0.23127 | 19,361 | **55.67 s** (median 51.89) | VmPeak 5,085 MiB (WSL PASS) | 5.08e-09 derived | **5.0664e-09** | raw = v68_wino's graded to 2e-5 | — | **sub #332544, THE NEW B (prev v64_ws 5.2699e-09). 100/100 completed, 0 failed.** v68_wino at Strassen leaf 64, on the Sep 27 A/B slot (HANDOFF 09-27 Step 0.1). **Wall: median 51.89, p90 53.00, worst 55.67, worst/median 1.073 -- quiet.** Kernel **88.1 ps/FLOP** (v64_ws: ~92), overhead 6.84 s median. Implied noisy worst 51.89 × 1.24 = **64.3 s**: B policy (≤ 95 s) with ~31 s margin, 64 s to the cliff. Residual worst 0.2063 s (**1.94x**). Report `experiments/run_reports/v68ws_canary_332544_graded_report.json`. First slot of UTC day 2026-09-27. |
 <!-- ev.py --append inserts new rows directly above this marker. Keep it here. -->
 
+## Step 2 (HANDOFF 09-27) — refit ceilings: κ3 53%, cov 41%, κ4 28%, all-but-μ ≈ 91% (2026-09-27)
+
+Twin `--subst X` (v62_s1 + the S3 parameter set = v67/v68 accuracy): X replaced by its exact label
+(full1000, N = 1e9) at every layer ≥ 1 in train AND holdout passes, then the S3 leaves (corrector
+pages, λ/θ/feed, term gains, q31) refit on FIT rows 0–79 (220 steps × 8, lr 3e-4), read on FIT
+rows 80–99 (HOLDOUT-20). `experiments/2026-09-28_ceil/<X>/train.log`. The control's refit never
+beat its init (2.42 → 2.25 → 2.1587e-08, early stop): 80 nets do not move a converged chain.
+
+| X exact | HOLDOUT-20 final MSE (init → best refit) | unrefit share | **ceiling** | Anatomy 2 share (v59, FIT 0–19) |
+|---|---|---:|---:|---:|
+| control | 2.158156e-08 → (no gain) | — | — | — |
+| cov = var + C_off | 1.376388e-08 → 1.283910e-08 | 36.2% | **40.5%** | 42% |
+| κ3 = D3 + D21 | 1.102086e-08 → 1.005448e-08 | 48.9% | **53.4%** | 51% |
+| κ4 = D4 + D22 + Q31 | 1.993065e-08 → 1.557046e-08 | 7.6% | **27.9%** | 15% |
+| all but μ | … → 1.873245e-09 at step 160 (running) | — | **≥ 91.3%** | 80% |
+
+κ3 is the largest ceiling → Step 3's target. κ4 roughly quadruples under refit (the λ/θ/q31
+compensation undone), confirming the strategist's point, but stays **below the 30% bar: Step 4(b)
+stays closed.** Predictions: strategist cov ≥ 45% ✗, κ3 ≥ 45% ✓, κ4 30–45% ✗ (27.9); mine cov
+45–55% ✗, κ3 50–62% ✓, κ4 12–25% ✗ (low), all 82–92% ✓. Two jobs died of host-RAM exhaustion from
+another project's 35 GiB process; `all` resumed from its step-120 checkpoint (twin ckpt.pt).
+
+## Step 3.1–3.2 (HANDOFF 09-27) — closure bench and regression: the lane is OPEN (2026-09-27)
+
+**Bench** (`tools/closure_bench.py`, FIT 0–99, twin on GPU): every pre-activation object the closure
+reads — μ, var, C11, D3, D21, dG, D22, Q31 — replaced by its exact label at every layer, the
+closure's own K tapped and compared with exact post-ReLU moments. Median over 100 nets of the
+relative Frobenius residual; **layer 0** (exact chain, labels only) is the label-noise ceiling —
+an upper bound, since at l ≥ 1 inputs and targets share Monte-Carlo samples. `var_next`/`Coff_next`
+= the covariance residual as the next layer receives it (Wᵀ ΔC W vs exact pre var / C_off at l+1),
+directly comparable with Anatomy 2's per-layer state-error increments (var ~1.3e-4, C_off ~6e-4).
+
+| layer | K1 | K2 | K11 | K3 | K4 | K21 | K22 | var_next | Coff_next |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0 (noise) | 2.4e-5 | 5.5e-5 | 1.4e-3 | 1.2e-4 | 3.0e-4 | 2.0e-2 | 1.5e-2 | 4.6e-5 | 8.5e-4 |
+| 1 | 4.8e-6 | 1.8e-5 | 5.5e-4 | 5.2e-5 | 5.7e-4 | 6.6e-3 | 8.8e-2 | 2.5e-5 | 3.6e-4 |
+| 4 | 5.1e-6 | 2.4e-5 | 6.6e-4 | 1.3e-4 | 1.8e-3 | 7.1e-3 | 6.6e-2 | 5.4e-5 | 5.4e-4 |
+| 8 | 7.9e-6 | 5.1e-5 | 7.4e-4 | 4.2e-4 | 6.6e-3 | 1.2e-2 | 5.5e-2 | 8.9e-5 | 6.6e-4 |
+| 12 | 9.1e-6 | 1.0e-4 | 8.0e-4 | 9.9e-4 | 1.7e-2 | 1.4e-2 | 6.7e-2 | 1.3e-4 | 7.4e-4 |
+| 14 | 9.1e-6 | 1.4e-4 | 9.3e-4 | 1.4e-3 | 2.1e-2 | 1.2e-2 | 8.2e-2 | 1.7e-4 | 8.9e-4 |
+
+(K21 orientation checked: the chain's K[(2,1)] matches bench `post_K21` untransposed — transposed
+reads 0.45–0.85.) **Kill rule does not fire**: the transported variance residual grows with depth
+to 0.9–1.7e-4 at layers 10–14 — the SAME size as the observed per-layer var drift — so the
+covariance drift is closure bias, not only amplification. K3's marginal residual is 1–30% of the D3
+increment and K21's (0.6–1.4%) is under its N = 1e8 label floor: the κ3 drift (53% ceiling) is not
+visible in the marginal / (2,1) closure outputs — it lives in the all-distinct κ3 births the bench
+does not read. K4 grows to 2% at depth (κ4 ceiling 28%).
+
+**Regression** (`tools/closure_regress.py`; features = the closure's own normalised inputs; fit on
+FIT 0–59, R² on held-out nets 60–99; `experiments/2026-09-29_closure/regress.json`):
+
+| residual | ridge (deg-2 poly) | **mlp 16-16** | mlp + exact pre κ5, κ6 (diagnostic) | per-layer bias share |
+|---|---:|---:|---:|---:|
+| K1 (layers 1–14) | 0.03 | **0.63** | 0.92 | 1% |
+| K2 | 0.33 | **0.85** | 0.95 | 2% |
+| K3 | 0.35 | **0.87** | 0.95 | 23% |
+| K4 | 0.61 | **0.85** | 0.90 | 6% |
+| K1 at layer 15 (scored) | 0.01 | **0.52** | — | 1% |
+| K11 (8,192 pairs/layer) | 0.06 | **0.68** | — | 1% |
+| K21 / K12 | 0.41 | **0.75** | — | 5% |
+
+The residual is a smooth NONLINEAR state function (ridge fails; no clean analytic term), not a
+per-layer constant; the unobservable κ5/κ6 truncation adds 5–30 pp. Handoff 3.3 route: elementwise
+nets, initialised from this fit, then fine-tuned through the twin. Predictions: mine (kill rule does
+not fire ✓; univariate R² 0.3–0.6 with ridge ✓, higher with mlp ✓; κ5/κ6 add < 0.1 ✗ — they add
+0.1–0.3 for K1/K4).
+
 ## Step 1 (HANDOFF 09-27) — the harmonic old tier: CLOSED, the radial part carries ~70% of the tier's error budget and leaves ×6.6 (2026-09-26)
 
 `tools/build_harm.py` on v68_wino: at the end of each layer the lineage that ages out (5 kept
