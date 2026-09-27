@@ -236,7 +236,7 @@ beat its init (2.42 → 2.25 → 2.1587e-08, early stop): 80 nets do not move a 
 | cov = var + C_off | 1.376388e-08 → 1.283910e-08 | 36.2% | **40.5%** | 42% |
 | κ3 = D3 + D21 | 1.102086e-08 → 1.005448e-08 | 48.9% | **53.4%** | 51% |
 | κ4 = D4 + D22 + Q31 | 1.993065e-08 → 1.557046e-08 | 7.6% | **27.9%** | 15% |
-| all but μ | … → 1.873245e-09 at step 160 (running) | — | **≥ 91.3%** | 80% |
+| all but μ | → 1.845817e-09 (resumed from step 120 after a host-RAM kill) | — | **91.4%** | 80% |
 
 κ3 is the largest ceiling → Step 3's target. κ4 roughly quadruples under refit (the λ/θ/q31
 compensation undone), confirming the strategist's point, but stays **below the 30% bar: Step 4(b)
