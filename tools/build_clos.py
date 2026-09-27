@@ -36,6 +36,8 @@ _CODE = '''
 # STEP 3.3 (HANDOFF 09-27, tools/build_clos.py): the calibrated closure
 # ==========================================================================
 _CLOS_ON = True
+#: the per-PAIR net (K11/K21 corrections) -- ~1.7% of the FLOP multiplier at 1024 x 16
+_CLOS_BIV = {biv}
 _CLOS_B64 = (
 {b64}
 )
@@ -71,6 +73,8 @@ def _clos_apply(K, c, sigma, var, alpha, D3, D4, S, off_mask, last_layer, layer_
     K[(2,)] = K[(2,)] + o[:, 1] * var
     K[(3,)] = K[(3,)] + o[:, 2] * (var * sigma)
     K[(4,)] = K[(4,)] + o[:, 3] * (var * var)
+    if not _CLOS_BIV:
+        return K
     ii = inv[:, None]
     jj = inv[None, :]
     P = fnp.stack([S[(1, 1)] * (ii * jj), S[(2, 1)] * (inv2[:, None] * jj),
@@ -126,7 +130,7 @@ def encode(W: dict) -> str:
     return "\n".join(f'    "{b[i:i + 96]}"' for i in range(0, len(b), 96))
 
 
-def build(src: str, W: dict) -> str:
+def build(src: str, W: dict, biv: bool = True) -> str:
     for a, b in _PATCHES:
         if src.count(a) != 1:
             raise SystemExit(f"anchor occurs {src.count(a)}x:\n{a}")
@@ -134,7 +138,7 @@ def build(src: str, W: dict) -> str:
     anchor = "\n\ndef _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n"
     if src.count(anchor) != 1:
         raise SystemExit("no _layer anchor")
-    return src.replace(anchor, _CODE.format(b64=encode(W)) + anchor, 1)
+    return src.replace(anchor, _CODE.format(b64=encode(W), biv=biv) + anchor, 1)
 
 
 def main():
@@ -143,6 +147,7 @@ def main():
     ap.add_argument("--weights", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--zero", action="store_true", help="all-zero nets (an exact identity)")
+    ap.add_argument("--no-biv", action="store_true", help="per-neuron net only (skip the pair net)")
     ap.add_argument("--zero-last", action="store_true",
                     help="keep the fitted hidden layers, zero the output layers: an exact identity "
                          "at init whose features are the offline fit's (the twin then learns only "
@@ -154,7 +159,7 @@ def main():
     if a.zero_last:
         for k in ("uW3", "ub3", "bW2", "bb2"):
             W[k] = W[k] * 0
-    src = build((ROOT / a.base).read_text(encoding="utf-8"), W)
+    src = build((ROOT / a.base).read_text(encoding="utf-8"), W, biv=not a.no_biv)
     Path(a.out).write_text(src, encoding="utf-8", newline="\n")
     print(f"wrote {a.out}")
 
