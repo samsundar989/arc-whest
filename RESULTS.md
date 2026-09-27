@@ -326,8 +326,11 @@ not isotropic about the covariance — its value to the final mean lies in the t
 Predictions: strategist H5c ≤ +10% at −20% FLOPs [35%] — wrong (H5c unrunnable; best well-posed
 arm +560%); strategist H5d ≥ 2× worse than the metric arm — wrong (d ≈ r ≈ e). Mine: +40–150%,
 P(≤ +10%) = 10% — right in direction, 4× too small in magnitude; H5z ≈ ×8–11 — too small (×19).
-A 100-net twin confirmation of the table is queued (worker-q 2191); one net is decisive at this
-margin (per-net spread is ±20%, the close line is +50%).
+**DEV-100 confirmation (twin, float32 torch):** v68 2.2766e-08; H5e 1.3507e-07 (**×5.93**, per-net
+×4.3–7.9); H5r 1.4274e-07 (×6.27); H5z 4.0580e-07 (×17.8); H5d 4.0467e-07 (×17.8 — i.e. the twin's
+H5d carries ~nothing, unlike the f32 numpy chain's ×6.9 on net 0; its 1/var weight reaches 1e12 on
+near-dead neurons, a float32 casualty on the torch backend — not chased, it cannot change the
+verdict). Closed stands: the best radial arm is ×5.9 over 100 nets.
 
 ## Step 4(a) — Strassen-Winograd (15 block adds per level instead of 18) (2026-09-26)
 
