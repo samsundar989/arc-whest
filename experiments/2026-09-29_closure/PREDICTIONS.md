@@ -25,3 +25,11 @@ select on HOLDOUT-100; export → bit-parity → f64 cost → canary as (A, B).
   in-loop; the chain's λ/θ/q31/corrector were fitted to compensate the uncorrected closure, so a
   corrected closure is initially double-counted). (c) after S5: **−3% to −8% raw** on HOLDOUT-100
   vs the S3 set (P(≥ 20%) = 5%, P(5–20%) = 45%, P(< 5%) = 50%). Cost +0.2% FLOPs, +~250 ops.
+
+### S5 so far, and S5z added (2026-09-27 ~11:40 UTC, before S5z runs)
+Zero build == S3 on HOLDOUT-100 (2.264823e-08, exact). Offline init untuned: 2.379587e-08 (+5.1%).
+S5 fine-tune: 2.3819 (step 28) → 2.3006 (56) → 2.2765 (84) → 2.2775 (112): converging toward, not
+below, the base. **S5z**: identity start — the offline fit's hidden layers kept, output layers zeroed,
+so the chain starts exactly at S3 and the gradient adds only the correction that survives in-loop.
+Mine: S5z −0.3% to −2% on HOLDOUT-100 vs S3 (the closure residual is real and predictable, but the
+chain's λ/θ/q31/corrector already absorb much of it).

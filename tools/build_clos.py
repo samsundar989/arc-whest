@@ -143,10 +143,17 @@ def main():
     ap.add_argument("--weights", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--zero", action="store_true", help="all-zero nets (an exact identity)")
+    ap.add_argument("--zero-last", action="store_true",
+                    help="keep the fitted hidden layers, zero the output layers: an exact identity "
+                         "at init whose features are the offline fit's (the twin then learns only "
+                         "the correction that survives in-loop)")
     a = ap.parse_args()
     W = fold(np.load(a.weights))
     if a.zero:
         W = {k: v * 0 for k, v in W.items()}
+    if a.zero_last:
+        for k in ("uW3", "ub3", "bW2", "bb2"):
+            W[k] = W[k] * 0
     src = build((ROOT / a.base).read_text(encoding="utf-8"), W)
     Path(a.out).write_text(src, encoding="utf-8", newline="\n")
     print(f"wrote {a.out}")
