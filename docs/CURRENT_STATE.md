@@ -1,36 +1,32 @@
-# CURRENT_STATE — 2026-09-25 04:35 UTC
+# CURRENT_STATE — 2026-09-27 ~17:40 UTC
 
-*Where we stand right now. The plan is `docs/PLAN.md` (rev 13); the ordered queue is
-`docs/HANDOFF_2026-09-25.md`; every candidate and result is `RESULTS.md`.*
+*Where we stand right now. The plan is `docs/PLAN.md` (rev 15); every candidate and result is
+`RESULTS.md`; the designation evidence is `docs/DESIGNATION.md`.*
 
-## Best graded
+## Best graded / recommended pair (Samuel designates; agents never do)
 
-**4.7039e-09** — `estimator_k3_v68_wino.py`, #332478 (v67_s3 + Strassen-Winograd products), 100/100,
-0 failed, worst wall 93.9 s, median 84.0 s (6.7 s faster than v67). Total vs v59: −5.5% score in seven
-graded steps. The plan's levers are executed: see `docs/STRATEGIST_PACKET_2026-09-26.md`.
+| role | file | graded | score | wall median / worst | implied noisy worst |
+|---|---|---|---:|---|---:|
+| **A** | `estimator_k3_v68_wino.py` (`98e40c83`) | #332478 | **4.7039e-09** | 84.0 / 93.9 s | 104.2 s |
+| **B** | `estimator_k3_v68_ws.py` (`0db9afba`) | #332544 | 5.0664e-09 | 51.9 / 55.7 s | 64.3 s |
 
-## The designation pair (Samuel designates; agents never do)
+Board Sep 27: J2W 1.761e-9, Luna 1.907e-9; us #33. Gap ≈ 2.7× (raw 1.36×, cost 1.97×).
 
-| role | file | graded | score | implied noisy worst |
-|---|---|---|---|---:|
-| **A** | `estimator_k3_v68_wino.py` | #332478 | **4.7039e-09** | 104.2 s (policy ≤ ~115 s) |
-| **B** | `estimator_k3_v64_ws.py` | #332364 | 5.2699e-09 | 63.6 s MEASURED on a noisy day (policy ≤ 95 s) |
+## Done under rev 14 (all closed or measured; PLAN §2)
+Harmonic radial old tier closed (×5.93 raw); refit ceilings κ3 53% / cov 41% / κ4 28%; closure
+bench + regression; learned closure S5 −0.75% raw at +1.68% FLOPs, not shipped.
 
-B is v64_s2 at leaf 64, graded on a noisy-day server (worst/median 1.150). Rules v14 §7 ranks only the better of the two.
+## Repaired today
+- Panels: VAL = full 900–999 (checkpoint selection), TRAIN = full 0–899, `--panel holdout`
+  refused (it scored 800 trained nets), `tools/panels.py --check` passes.
+- `tools/ev.py`: DEV-100, paired baseline and the WSL memory gate are hard gates; exit 2 unless
+  accepted. PLAN §5 is now the full acceptance checklist.
+- Ledger: #332544 row reconstructed. UTC Sep 27: 1 of 5 canary slots used before this session.
 
-## In flight (HANDOFF 09-25)
-
-- **Step 1 — channel-drift anatomy** (`tools/anatomy2.py`, worker-q 2132): v59 against
-  keenanpepper's exact N=1e9 pre-activation labels on 20 **FIT** nets (the dense labels
-  exist only for the `full` split, which is disjoint from DEV). Predictions in
-  `experiments/2026-09-25_anatomy2/PREDICTIONS.md`.
-- **Step 2 — differentiable twin** (`tools/twin/`): the shipped estimator source run on a
-  torch `flopscope` shim, so autograd flows through the exact chain. Weights export to
-  `cache/twin/` (worker-q 2133) because `.venv-gpu` has torch but no dataset reader.
-
-## Calibration facts corrected today
-
-- **Label noise is layer-dependent**: 6.8e-10 at layer 1 but **7.7e-11 at the scored
-  layer 16** (two independent N=1e9 label sets, 20 FIT nets). The Sep 24 note that put
-  6.8e-10 on the final layer was wrong by ~9×; AGENTS.md now says so.
-- DEV→graded factor stays **1.038** (ninth observation 1.0366).
+## In flight
+- **Lane A:** `estimator_k3_v70_s2t3.py` (`45f26986`) = S2t3 step-368 parameters (VAL −0.79% vs
+  S3), data-only diff from v68_wino; twin DEV −0.60%; official DEV-100 + gates running.
+- S2t3 (worker-q 2229, 368/736 steps, low priority, repeatedly preempted by biohub) and its
+  equal-step control (worker-q 2236, queued).
+- **Lane B:** all-distinct κ3 projected diagnostic (`tools/k111_diag.py`) and the factor-gate
+  design/prototype (`tools/build_gate.py`, `experiments/2026-09-27_gates/`), both by subagents.
