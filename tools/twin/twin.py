@@ -77,6 +77,14 @@ TRAINABLE = {
     + ("gain/lam", "gain/theta", "gain/feed", "gain/tt", "gain/t1", "gain/cu", "gain/cb",
        "gain/q31"),
     "S4": tuple(f"sig/{k}" for k in ("S1", "c1", "S2", "c2")),
+    # Step 3.3 (HANDOFF 09-27): the S3 leaves + the calibrated-closure nets (tools/build_clos.py)
+    "S5": tuple(f"corr/{k}" for k in ("W1", "b1", "W2", "b2", "W3", "b3"))
+    + ("gain/lam", "gain/theta", "gain/feed", "gain/tt", "gain/t1", "gain/cu", "gain/cb",
+       "gain/q31")
+    + tuple(f"clos/{k}" for k in ("uW1", "ub1", "uW2", "ub2", "uW3", "ub3",
+                                  "bW1", "bb1", "bW2", "bb2")),
+    "S5c": tuple(f"clos/{k}" for k in ("uW1", "ub1", "uW2", "ub2", "uW3", "ub3",
+                                       "bW1", "bb1", "bW2", "bb2")),
     "S14": tuple(f"corr/{k}" for k in ("W1", "b1", "W2", "b2", "W3", "b3"))
     + tuple(f"sig/{k}" for k in ("S1", "c1", "S2", "c2")),
 }
@@ -322,7 +330,7 @@ class Twin:
         self.const = self.est._constants(width, self.dtype)
         #: the frozen base values of every learnable group the file carries
         self.base = {g: {k: v.detach().clone() for k, v in self.const[g].items()}
-                     for g in ("corr", "sig") if self.const.get(g) is not None}
+                     for g in ("corr", "sig", "clos") if self.const.get(g) is not None}
         one = torch.ones(depth, dtype=torch.float32, device=DEV)
         self.base["gain"] = {"lam": one.clone(), "theta": one.clone(), "feed": one.clone()}
         # S2t per-term gains: table terms, 1-D kappa3/kappa4 per p, closure extras

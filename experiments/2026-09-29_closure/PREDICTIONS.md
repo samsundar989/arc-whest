@@ -13,3 +13,15 @@ The like-for-like columns are `var_next` / `Coff_next` (W^T ΔC W vs the exact p
   K[(2,1)] matches bench `post_K21` untransposed. Regression (3.2): R² of the univariate K1/K2
   residual on (α, γ3, γ4, layer) 0.3–0.6 with the ridge, higher with the 16-hidden MLP; the pre
   κ5/κ6 add < 0.1 R² (truncation is not the dominant term). Step 3 end to end: 3–8% raw.
+
+## Step 3.3 — embedded closure nets: predictions before any run (2026-09-27 ~10:10 UTC)
+Build: `tools/build_clos.py` on v62_s1 (twin base) with the offline fit `clos_init.npz`
+(`tools/closure_fit.py`, exact-input pairs FIT 0–79). Checks first: (a) the all-zero build reproduces
+the base in the twin exactly; (b) the offline-initialised nets, UNTUNED, on HOLDOUT-100 with the S3
+parameter set; then (c) twin stage S5 = S3 leaves + closure nets, TRAIN 900, lr 3e-4, S2t length,
+select on HOLDOUT-100; export → bit-parity → f64 cost → canary as (A, B).
+- Strategist: ≥ 20% raw (35%), 5–20% (35%), < 5% (30%).
+- Mine: (b) untuned: anywhere from −4% to +10% (offline-accurate closures are often unstable
+  in-loop; the chain's λ/θ/q31/corrector were fitted to compensate the uncorrected closure, so a
+  corrected closure is initially double-counted). (c) after S5: **−3% to −8% raw** on HOLDOUT-100
+  vs the S3 set (P(≥ 20%) = 5%, P(5–20%) = 45%, P(< 5%) = 50%). Cost +0.2% FLOPs, +~250 ops.
