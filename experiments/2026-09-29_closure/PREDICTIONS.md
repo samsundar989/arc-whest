@@ -40,3 +40,7 @@ chain's λ/θ/q31/corrector already absorb much of it).
   Adam drives every zero-initialised output weight at ~lr·zero_scale per step whatever the gradient,
   so all corrections switch on together and overshoot. Cancelled (worker-q 2224). Prediction
   (−0.3 to −2%) wrong: the identity start is not stable at this step size.
+- v69_clos export parity: 2.247738e-08 vs twin S5 2.247849e-08 (5e-5, Winograd rounding) ✓.
+  v69u (S5 params, pair net removed): 2.387342e-08 (+5.4%) — S5's parameters co-adapted with it.
+- **S5u** (per-neuron net only, trained from the offline init; +0.004% FLOPs): mine −0.2% to −0.6%
+  on HOLDOUT-100 vs S3 (most of S5's −0.75% came with the pair net).
