@@ -33,3 +33,10 @@ below, the base. **S5z**: identity start — the offline fit's hidden layers kep
 so the chain starts exactly at S3 and the gradient adds only the correction that survives in-loop.
 Mine: S5z −0.3% to −2% on HOLDOUT-100 vs S3 (the closure residual is real and predictable, but the
 chain's λ/θ/q31/corrector already absorb much of it).
+- S5 final 2.247849e-08 (−0.75% vs S3, −0.58% vs S3b). Real-meter cost of the embedded nets:
+  **+1.68% FLOPs** (480.12 G vs 472.20 G; +969 ops) — the per-PAIR net; per-neuron only (--no-biv)
+  is +0.004% (472.22 G, +444 ops). As built, S5 is score-NEGATIVE (~+0.9%).
+- S5z (identity start, zero output layers): **diverged** — 2.264823 → 4.614227e-08 at step 28 (×2.04):
+  Adam drives every zero-initialised output weight at ~lr·zero_scale per step whatever the gradient,
+  so all corrections switch on together and overshoot. Cancelled (worker-q 2224). Prediction
+  (−0.3 to −2%) wrong: the identity start is not stable at this step size.
