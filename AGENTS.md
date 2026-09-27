@@ -40,9 +40,12 @@ on fresh MLPs**. Public board rank is not the target. A second, co-equal objecti
    Never ship, copy or `import` its bytes. Record any mechanism re-implemented from it
    in `docs/PROVENANCE_504aldo.md` (file, line, what).
 5. **Data.** The organizer public split `hf://aicrowd/arc-whestbench-public-2026@v2-phase2`
-   is unlocked. **DEV** = the 100 mini nets · **FIT** = 100 full-split nets disjoint from
-   mini (verified by weight hash) · **HOLDOUT** = the remaining 800, read at most twice a
-   week and never fitted. Fresh mints and seed blocks are retired.
+   is unlocked. **DEV** = the 100 mini nets (never fitted) · **TRAIN** = full rows 0–899
+   (FIT 0–99 + the former holdout 100–899, authorised Sep 25) · **VAL** = full rows
+   900–999 (checkpoint selection; a validation set, not a test). The Sep 21 "HOLDOUT"
+   (full 100–999) is historical — `--panel holdout` is refused. Membership:
+   PLAN §3, `data/panels/twin_train_split.json`, `tools/panels.py --check`. Fresh mints
+   and seed blocks are retired.
 6. **Process is minimal.** No pre-registered contracts, no prediction requests, no seed
    blocks, no SINGLE_USE/DECIDE tiers, no dispatch-plan commits, no producer sidecars, no
    instrument preflight, no per-experiment Skeptic, no `workerq`/`gpuq` for evaluations,

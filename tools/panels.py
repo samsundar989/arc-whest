@@ -2,10 +2,19 @@
 
 PLAN §4:
 
-    DEV     the 100 organizer `mini` nets — every candidate is scored here
-    FIT     100 nets from the 1000-net `full` split, DISJOINT from mini —
-            the only panel a coefficient may ever be fitted on
-    HOLDOUT the remaining 800 — read at most twice a week, never fitted
+    DEV     the 100 organizer `mini` nets — every candidate is scored here;
+            never fitted on
+    FIT     full rows 0-99, DISJOINT from mini. Since 2026-09-25 (HANDOFF
+            09-25 Step 2, authorised) it is part of TRAIN.
+    VAL     full rows 900-999 (`twin_train_split.json` `holdout_100`): the
+            twin's checkpoint-selection panel. Repeatedly read, never fitted —
+            a VALIDATION set, not an untouched test.
+
+PANEL SEMANTICS, repaired 2026-09-27 (PLAN rev 15 §3). The Sep 21 `holdout.json`
+(full rows 100-999) is HISTORICAL: rows 100-899 are now TRAIN, so `--panel holdout`
+would silently score trained nets under a holdout label. It is refused; use `val`,
+or `holdout_legacy` to reproduce a historical row (labelled as containing TRAIN).
+`python tools/panels.py --check` asserts membership and disjointness.
 
 Identity is `mlp_seed`. The seed is what the organizers' generator consumes, so
 two rows with the same seed are the same network and two rows with different
@@ -43,7 +52,11 @@ if str(LOCAL_SIM) not in sys.path:
 os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
 
 PANEL_DIR = ROOT / "data" / "panels"
-PANELS = ("dev", "fit", "holdout")
+PANELS = ("dev", "fit", "val", "holdout_legacy", "holdout")
+#: Files `--build` writes. `val` / `holdout_legacy` are views over them plus the
+#: pinned twin split; `holdout` is refused (see the module docstring).
+BUILT = ("dev", "fit", "holdout")
+TWIN_SPLIT = PANEL_DIR / "twin_train_split.json"
 
 #: FIT is the first 100 full-split nets that are not in mini, in split order.
 #: Deterministic, reproducible, and independent of any result — a panel chosen
@@ -110,17 +123,103 @@ def build() -> Dict[str, dict]:
             raise SystemExit(f"{a} and {b} share {len(clash)} nets — panels are not disjoint")
 
     PANEL_DIR.mkdir(parents=True, exist_ok=True)
-    for name, data in out.items():
+    for name, data in out.items():  # holdout.json: the historical Sep 21 definition
         (PANEL_DIR / f"{name}.json").write_text(
             json.dumps(data, indent=1) + "\n", encoding="utf-8")
     return out
 
 
-def load(panel: str) -> dict:
-    p = PANEL_DIR / f"{panel}.json"
+def _load_file(name: str) -> dict:
+    p = PANEL_DIR / f"{name}.json"
     if not p.exists():
-        raise SystemExit(f"panel {panel!r} is not built; run: python tools/panels.py --build")
+        raise SystemExit(f"panel {name!r} is not built; run: python tools/panels.py --build")
     return json.loads(p.read_text(encoding="utf-8"))
+
+
+def twin_split() -> dict:
+    return json.loads(TWIN_SPLIT.read_text(encoding="utf-8"))
+
+
+def train_indices() -> set:
+    """full-split rows the twin trains on (FIT + former holdout 100-899)."""
+    return set(twin_split()["train"]["indices"])
+
+
+def load(panel: str) -> dict:
+    if panel == "holdout":
+        raise SystemExit(
+            "--panel holdout is RETIRED (2026-09-27): data/panels/holdout.json is the "
+            "Sep 21 definition (full rows 100-999) and rows 100-899 are now TRAIN "
+            "(twin_train_split.json). Use --panel val (full 900-999, the checkpoint-"
+            "selection set) or --panel holdout_legacy to reproduce a historical row.")
+    if panel in ("dev", "fit"):
+        return _load_file(panel)
+    legacy = _load_file("holdout")
+    if panel == "holdout_legacy":
+        return dict(legacy, panel="holdout_legacy",
+                    purpose="HISTORICAL Sep 21 holdout (full 100-999); rows 100-899 are TRAIN")
+    if panel == "val":
+        pos = {i: k for k, i in enumerate(legacy["indices"])}
+        idx = list(twin_split()["holdout_100"]["indices"])
+        missing = [i for i in idx if i not in pos]
+        if missing:
+            raise SystemExit(f"val rows {missing[:5]} are not in holdout.json")
+        return dict(legacy, panel="val", indices=idx,
+                    seeds=[legacy["seeds"][pos[i]] for i in idx],
+                    names=[legacy["names"][pos[i]] for i in idx],
+                    purpose="VALIDATION (twin checkpoint selection); never fitted, "
+                            "repeatedly read -- not an untouched test")
+    raise SystemExit(f"unknown panel {panel!r}; choose from {PANELS[:-1]}")
+
+
+def trained_fraction(panel: str, n: int | None = None) -> float:
+    """Share of the first `n` rows of `panel` that are in the twin's TRAIN set."""
+    d = load(panel)
+    if d["split"] != "full":
+        return 0.0
+    idx = d["indices"][:n] if n else d["indices"]
+    tr = train_indices()
+    return sum(i in tr for i in idx) / max(1, len(idx))
+
+
+def label(panel: str, n: int | None = None) -> str:
+    """The RESULTS.md panel tag, which says when trained nets are being scored."""
+    f = trained_fraction(panel, n)
+    tag = panel.upper().replace("_", "-")
+    return f"{tag} (TRAIN {f:.0%})" if f > 0 else tag
+
+
+def check() -> int:
+    """Membership and disjointness of every panel. Returns the number of failures."""
+    bad = 0
+
+    def ok(cond, msg):
+        nonlocal bad
+        print(("  ok    " if cond else "  FAIL  ") + msg)
+        bad += not cond
+
+    dev, fit, legacy = _load_file("dev"), _load_file("fit"), _load_file("holdout")
+    ts = twin_split()
+    train = list(ts["train"]["indices"])
+    val = list(ts["holdout_100"]["indices"])
+    tr, va = set(train), set(val)
+    full_seeds = set(fit["seeds"]) | set(legacy["seeds"])
+    ok(dev["split"] == "mini" and len(dev["indices"]) == 100, "DEV = mini rows 0-99")
+    ok(not set(dev["seeds"]) & full_seeds, "DEV seeds disjoint from every full row")
+    ok(dev.get("weight_sha256_covers", 0) == 100 and fit.get("weight_sha256_covers", 0) == 100
+       and not set(dev["weight_sha256"]) & set(fit["weight_sha256"]),
+       "DEV/FIT weight hashes recorded (100 + 100) and disjoint")
+    ok(len(train) == len(tr) == ts["train"]["n"] == 900, "TRAIN has 900 unique rows")
+    ok(len(val) == len(va) == 100, "VAL has 100 unique rows")
+    ok(not tr & va, "TRAIN and VAL disjoint")
+    ok(tr | va == set(range(1000)), "TRAIN + VAL = full rows 0-999")
+    ok(set(fit["indices"]) <= tr, "FIT (full 0-99) is inside TRAIN")
+    ok(va <= set(legacy["indices"]), "VAL is inside the historical holdout")
+    ok(len(set(legacy["indices"]) & tr) == 800,
+       "HOLDOUT-LEGACY holds 800 TRAIN rows (why --panel holdout is refused)")
+    ok(not set(fit["seeds"]) & set(legacy["seeds"]), "FIT and HOLDOUT-LEGACY seeds disjoint")
+    print("PANELS OK" if not bad else f"{bad} PANEL CHECK FAILURES")
+    return bad
 
 
 def nets(panel: str, n: int | None = None) -> List[tuple]:
@@ -167,7 +266,7 @@ def verify_hashes(limit: int | None = None) -> int:
 
 
 def show() -> None:
-    for name in PANELS:
+    for name in BUILT:
         p = PANEL_DIR / f"{name}.json"
         if not p.exists():
             print(f"{name:8s} not built")
@@ -190,7 +289,11 @@ def main(argv=None) -> int:
     ap.add_argument("--limit", type=int, default=None,
                     help="hash only the first N of each panel (a smoke check)")
     ap.add_argument("--show", action="store_true")
+    ap.add_argument("--check", action="store_true",
+                    help="assert panel membership and disjointness (DEV/TRAIN/VAL)")
     a = ap.parse_args(argv)
+    if a.check:
+        return 1 if check() else 0
     if a.build:
         out = build()
         for k, v in out.items():

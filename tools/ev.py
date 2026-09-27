@@ -1,6 +1,6 @@
 """THE evaluator. One candidate in, one RESULTS.md row out.
 
-    python tools/ev.py <candidate.py> [--panel dev|fit|holdout] [--n 100]
+    python tools/ev.py <candidate.py> [--panel dev|fit|val|holdout_legacy] [--n 100]
                        [--baseline <file.py>] [--jobs K] [--note "..."]
 
 PLAN §4. There is one evaluator, one results table and one decision rule; this
@@ -521,7 +521,8 @@ def results_row(r: Dict) -> str:
     return ("| {date} | `{file}` | `{sha8}` | {panel} | {raw:.6e} | {fb:.5f} | {ops:,} | "
             "{wall:.3f} s (local) → {swall:.1f} s proj | {rss} | **{proj:.4e}** | {graded} | "
             "{gain} | {wins} | {note} |").format(
-        date=r["date"], file=r["file"], sha8=r["sha8"], panel=r["panel"].upper(),
+        date=r["date"], file=r["file"], sha8=r["sha8"],
+        panel=r.get("panel_label") or r["panel"].upper(),
         raw=r["raw_mse"], fb=r["multiplier"], ops=int(r["ops"]),
         wall=r["worst_wall_local_s"], swall=r["projected_server_wall_s"],
         rss=(f"{r['peak_rss_mib']:.0f} MiB" if r.get("peak_rss_mib") else "—"),
@@ -559,13 +560,19 @@ def gate_table(r: Dict, best_graded: float) -> List[tuple]:
          f"{res_hi:.3f} s ({RESIDUAL_CLIFF_S / res_hi:.2f}× headroom vs the "
          f"{RESIDUAL_CLIFF_S} s cliff)",
          res_hi <= RESIDUAL_GATE_S),
-    ] + ([] if not r.get("memory") else [
-        ("WSL RLIMIT_AS 8 GiB gate", "PASS",
-         "{} VmPeak {:.0f} MiB".format(
+        # PLAN rev 15 §5 (2026-09-27): acceptance needs the full DEV-100 read,
+        # paired against the incumbent, and the memory gate on THIS hash. A run
+        # that skipped any of them is INCOMPLETE, never "all gates pass".
+        ("full DEV-100 panel", "dev, n = 100",
+         f"{r['panel']}, n = {r['n']}", r["panel"] == "dev" and r["n"] == 100),
+        ("paired vs incumbent", "--baseline given",
+         r.get("baseline_name") or "no baseline", bool(r.get("paired"))),
+        ("WSL RLIMIT_AS 8 GiB gate", "PASS (--mem)",
+         "NOT RUN" if not r.get("memory") else "{} VmPeak {:.0f} MiB".format(
              r["memory"].get("status", "?"),
              (r["memory"].get("candidate_run", {}).get("vm_peak_bytes", 0) or 0) / 2 ** 20),
-         r["memory"].get("status") == "PASS"),
-    ])
+         bool(r.get("memory")) and r["memory"].get("status") == "PASS"),
+    ]
 
 
 def evaluate(candidate: Path, panel: str, n: int, jobs: int, baseline: Optional[Path],
@@ -618,6 +625,7 @@ def evaluate(candidate: Path, panel: str, n: int, jobs: int, baseline: Optional[
         "file": candidate.name,
         "sha8": sha256_file(candidate)[:8],
         "panel": panel,
+        "panel_label": panels.label(panel, n),
         "n": int(mse.size),
         "raw_mse": float(mse.mean()),
         "flops": flops,
@@ -673,8 +681,10 @@ def report(r: Dict, best_graded: float) -> None:
         tag = ("ok  " if ok else "WARN") if advisory else ("PASS" if ok else "FAIL")
         print(f"    {tag}  {name:<32} {thr:<34} {reading}")
     print()
-    print("  " + ("ALL GATES PASS — eligible for a canary under PLAN §5"
-                  if allpass else "GATED — not submittable as it stands"))
+    print("  " + ("ALL CHECKABLE GATES PASS (PLAN rev 15 §5 items 3-7) — still needs "
+                  "validate, parity, validate-package + source hash, ledger"
+                  if allpass else "NOT ACCEPTED — gated or incomplete; not submittable"))
+    r["accepted"] = bool(allpass)
     print()
     print("  RESULTS.md row:")
     print("  " + results_row(r))
@@ -721,6 +731,9 @@ def main(argv=None) -> int:
         if not base.exists():
             raise SystemExit(f"baseline {a.baseline} does not exist")
 
+    if panels.trained_fraction(a.panel, a.n) > 0:
+        print(f"[ev] WARNING: {panels.label(a.panel, a.n)} -- these nets are in the "
+              f"twin's TRAIN set; this is not held-out evidence", flush=True)
     r = evaluate(cand, a.panel, a.n, a.jobs, base, a.force, not a.no_cost, a.quiet,
                  do_mem=a.mem)
     r["note"] = a.note
@@ -744,7 +757,9 @@ def main(argv=None) -> int:
                 "'<!-- ev.py --append ... -->' comment under the Rows table.")
         rm.write_text(text, encoding="utf-8")
         print(f"  appended to {rm}")
-    return 0
+    # Exit status is the acceptance verdict (0 only when every checkable gate ran
+    # and passed), so no wrapper can mistake a completed run for an accepted one.
+    return 0 if r.get("accepted") else 2
 
 
 if __name__ == "__main__":

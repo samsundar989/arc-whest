@@ -201,7 +201,7 @@ def main(argv=None) -> int:
         for part in a.panel.split(","):
             name, cnt = part.split(":")
             take = panels.nets(name.strip())[: int(cnt)]
-            if name.strip() == "holdout":
+            if name.strip() in ("holdout", "holdout_legacy"):  # "holdout" is refused by panels.py since 09-27
                 # HOLDOUT-600 is never fitted. The pinned training slice is the
                 # FIRST 300 of the holdout order; anything past that is the
                 # untouched panel and must not be trained on.
