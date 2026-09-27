@@ -244,6 +244,34 @@ stays closed.** Predictions: strategist cov ≥ 45% ✗, κ3 ≥ 45% ✓, κ4 30
 45–55% ✗, κ3 50–62% ✓, κ4 12–25% ✗ (low), all 82–92% ✓. Two jobs died of host-RAM exhaustion from
 another project's 35 GiB process; `all` resumed from its step-120 checkpoint (twin ckpt.pt).
 
+## Step 3.3 (HANDOFF 09-27) — the calibrated closure, embedded and fine-tuned: ≤ 0.75% raw, score-negative (2026-09-27)
+
+`tools/closure_fit.py` (offline fit on exact-input pairs, FIT 0–79; held-out R² uni K1/K2/K3/K4
+0.61/0.85/0.87/0.85, pair K11/K21 0.19/0.61) → `tools/build_clos.py` (per-neuron net 4→16→16→4 on
+K1..K4, per-pair net 9→16→2 on K11/K21, applied to K right after the closure) → twin stage S5
+(S3 leaves + closure nets, TRAIN 900, lr 3e-4, 224 steps, select on HOLDOUT-100).
+`experiments/2026-09-29_closure/`. HOLDOUT-100, S3 parameter set = 2.264823e-08:
+
+| arm | HOLDOUT-100 | vs S3 | F/B (real meter) | ops | verdict |
+|---|---:|---:|---:|---:|---|
+| zero-weight build (identity check) | 2.264823e-08 | exact | — | — | ✓ |
+| S3b control (S3 continued, no nets, lr 1.5e-4) | 2.260955e-08 | −0.17% | 0.21473 | 22,701 | — |
+| offline init, untuned | 2.379587e-08 | +5.1% | | | double counting |
+| **S5** (both nets, fine-tuned) | **2.247849e-08** | **−0.75%** | **0.21833 (+1.68%)** | 23,670 | score-negative |
+| S5z (identity start: zero output layers) | 4.61e-08 at step 28 | ×2.04 | | | diverged, cancelled |
+| S5 weights, pair net removed | 2.387342e-08 | +5.4% | | | co-adapted |
+| **S5u** (per-neuron net only, fine-tuned) | **2.260988e-08** | **−0.17%** | 0.21474 (+0.004%) | 23,145 | = the S3b control |
+
+`estimator_k3_v69_clos.py` (S5 baked, Winograd) reproduces the twin (HOLDOUT-100 2.247738e-08 vs
+2.247849e-08; DEV twin 2.259824e-08 = −0.74% vs v68) but its FLOP multiplier is +1.68%: **not
+submitted**. The per-neuron correction is free but worth exactly as much as more training of the
+existing parameters (S5u = S3b to 1e-5 relative). **Conclusion:** the closure bias is real (the
+transported var residual equals the observed per-layer drift) and predictable offline (R² 0.6–0.87),
+but in the loop the chain's existing trainable compensations (λ/θ/q31 profiles, term gains, the μ
+corrector) have already absorbed almost all of it; what remains is worth ≤ 0.75% raw and lives in
+the O(n²) pair correction, whose cost exceeds it. Handoff prediction buckets — strategist: ≥ 20%
+(35%), 5–20% (35%), < 5% (30%) → **< 5%**. Mine: −3% to −8% after S5 ✗ (−0.75%).
+
 ## Step 3.1–3.2 (HANDOFF 09-27) — closure bench and regression: the lane is OPEN (2026-09-27)
 
 **Bench** (`tools/closure_bench.py`, FIT 0–99, twin on GPU): every pre-activation object the closure

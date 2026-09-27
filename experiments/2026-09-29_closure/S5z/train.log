@@ -1,0 +1,30 @@
+[init] HOLDOUT-100 raw 2.264823e-08 (n=100)
+ep 0 step 1/224 train final 2.1385e-08 lr 7.12e-05 27s
+ep 0 step 2/224 train final 1.5046e-06 lr 7.12e-05 54s
+ep 0 step 3/224 train final 2.5803e-07 lr 7.12e-05 80s
+ep 0 step 4/224 train final 4.7536e-07 lr 7.11e-05 105s
+ep 0 step 5/224 train final 9.9605e-07 lr 7.11e-05 133s
+ep 0 step 6/224 train final 5.2939e-07 lr 7.11e-05 160s
+ep 0 step 7/224 train final 1.2552e-07 lr 7.10e-05 185s
+ep 0 step 8/224 train final 1.2390e-07 lr 7.10e-05 210s
+ep 0 step 9/224 train final 4.4480e-07 lr 7.09e-05 235s
+ep 0 step 10/224 train final 4.9870e-07 lr 7.08e-05 261s
+ep 0 step 11/224 train final 2.7700e-07 lr 7.08e-05 286s
+ep 0 step 12/224 train final 9.6560e-08 lr 7.07e-05 311s
+ep 0 step 13/224 train final 6.5991e-08 lr 7.06e-05 336s
+ep 0 step 14/224 train final 1.8864e-07 lr 7.05e-05 361s
+ep 0 step 15/224 train final 2.9393e-07 lr 7.04e-05 386s
+ep 0 step 16/224 train final 2.5403e-07 lr 7.03e-05 412s
+ep 0 step 17/224 train final 1.3422e-07 lr 7.02e-05 437s
+ep 0 step 18/224 train final 4.6053e-08 lr 7.01e-05 462s
+ep 0 step 19/224 train final 2.6065e-08 lr 6.99e-05 487s
+ep 0 step 20/224 train final 8.4246e-08 lr 6.98e-05 512s
+ep 0 step 21/224 train final 1.4533e-07 lr 6.97e-05 537s
+ep 0 step 22/224 train final 1.4012e-07 lr 6.95e-05 562s
+ep 0 step 23/224 train final 8.4051e-08 lr 6.93e-05 587s
+ep 0 step 24/224 train final 4.3567e-08 lr 6.92e-05 612s
+ep 0 step 25/224 train final 3.5591e-08 lr 6.90e-05 638s
+ep 0 step 26/224 train final 7.0349e-08 lr 6.88e-05 663s
+ep 0 step 27/224 train final 8.0412e-08 lr 6.87e-05 688s
+ep 0 step 28/224 train final 6.7398e-08 lr 6.85e-05 714s
+[step 28] HOLDOUT-100 raw 4.614227e-08 (n=100)

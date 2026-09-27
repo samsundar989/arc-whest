@@ -1,0 +1,43 @@
+{
+ "panel": "dev",
+ "indices": [
+  0
+ ],
+ "variants": {
+  "estimator_k3_v69_clos": {
+   "0": {
+    "net": "logan-fitzgerald",
+    "panel": "dev",
+    "split": "mini",
+    "index": 0,
+    "flops": 480117321419.0,
+    "multiplier": 0.21833208002999527,
+    "ops": 23670.0,
+    "materializations": 0,
+    "materialization_detail": {
+     "__bool__": 0,
+     "__float__": 0,
+     "__int__": 0,
+     "__index__": 0
+    },
+    "wall_s": 48.37744510010816,
+    "residual_local_s": 8.092615507543087,
+    "setup_s": 0.001,
+    "setup_error": "",
+    "peak_rss_mib": 4815.9,
+    "weights_mode": "f64_readonly",
+    "error": ""
+   },
+   "_summary": {
+    "n": 1,
+    "flops_min": 480117321419.0,
+    "flops_mean": 480117321419.0,
+    "flops_max": 480117321419.0,
+    "spread": 0.0,
+    "mult_mean": 0.21833208002999527,
+    "ops_mean": 23670.0,
+    "ops_max": 23670.0
+   }
+  }
+ }
+}
