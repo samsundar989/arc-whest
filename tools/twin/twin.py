@@ -88,6 +88,15 @@ TRAINABLE = {
     "S14": tuple(f"corr/{k}" for k in ("W1", "b1", "W2", "b2", "W3", "b3"))
     + tuple(f"sig/{k}" for k in ("S1", "c1", "S2", "c2")),
 }
+# 2026-09-27 gates (tools/build_gate.py, experiments/2026-09-27_gates/DESIGN.md): the
+# state-dependent factor gates live in the candidate's `const["gate"]` group (identity at
+# W2 = b2 = 0). Birth (G1b*) and transport (G1t*) arms share keys; the candidate file
+# decides the arm. G1b/G1t = the S3 leaves + gates (compare with the S3b continued-training
+# control); G1bg/G1tg = gates only (the S3 leaves frozen at --init). Additive: no existing
+# stage reads the "gate" group, and a candidate without it has no `const["gate"]`.
+_GATE_LEAVES = tuple(f"gate/{k}" for k in ("W1", "b1", "W2", "b2"))
+TRAINABLE.update({"G1b": TRAINABLE["S3"] + _GATE_LEAVES, "G1t": TRAINABLE["S3"] + _GATE_LEAVES,
+                  "G1bg": _GATE_LEAVES, "G1tg": _GATE_LEAVES})
 
 
 # --------------------------------------------------------------------- data
@@ -330,7 +339,7 @@ class Twin:
         self.const = self.est._constants(width, self.dtype)
         #: the frozen base values of every learnable group the file carries
         self.base = {g: {k: v.detach().clone() for k, v in self.const[g].items()}
-                     for g in ("corr", "sig", "clos") if self.const.get(g) is not None}
+                     for g in ("corr", "sig", "clos", "gate") if self.const.get(g) is not None}
         one = torch.ones(depth, dtype=torch.float32, device=DEV)
         self.base["gain"] = {"lam": one.clone(), "theta": one.clone(), "feed": one.clone()}
         # S2t per-term gains: table terms, 1-D kappa3/kappa4 per p, closure extras

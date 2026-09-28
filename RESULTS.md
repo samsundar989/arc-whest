@@ -223,6 +223,73 @@ All four are implemented in `tools/ev.py`; change them there and here together.
 | 2026-09-27 | `estimator_k3_v70_s2t3.py` | `45f26986` | DEV | 2.263189e-08 | 0.21473 | 22,701 | 73.4 s (local); code path = v68_wino → inherits its MEASURED median 84.0 s, implied noisy 104.2 s | VmPeak 6,712 MiB (WSL PASS) | **4.6819e-09** | PENDING | 1.0061× vs v68_wino (Δ +2.951e-11, t95 [+1.728e-11, +4.173e-11]) | 74/100 | **S2t3 step-368 parameters** (S3 set continued on TRAIN 900 + d8b 2,048, lr 1.5e-4; worker-q 2229, still running) baked by `build_s2.py` + `build_winograd.py` (pipeline reproduces v67/v68 byte-exact); data-only diff vs v68_wino. VAL-100 (full 900–999, checkpoint-selection set) 2.246946e-08 = −0.79% vs S3; twin DEV 2.263058e-08, official DEV 2.263189e-08 (parity 5.8e-5); raw −0.60% vs v68 DEV at identical FLOPs/ops. Baseline v68 DEV preds reused from its identical-arithmetic build 56b92735 (only a `del` of temporaries differs; bit-identical on 3 overlapping nets). validate OK; package sha 073b58f4, inner estimator.py = 45f26986. Equal-step control (worker-q 2236) queued, attribution only. |
 <!-- ev.py --append inserts new rows directly above this marker. Keep it here. -->
 
+## PLAN rev 15 Lane A — S2t3 and its equal-step control: the gain is steps, not d8b (2026-09-28)
+
+S2t3 = S3 parameter set continued (lr 1.5e-4, accum 8, 736-step cosine) on TRAIN 900 + d8b 2,048
+(worker-q 2229, finished). Control = identical flags on TRAIN 900 only, 784-step cosine (the twin takes
+whole epochs; worker-q 2236, died of the Sep 27–28 full disk (ENOSPC) at step ~530 — not resumed, the
+question is answered). VAL-100 = full rows 900–999 (the twin logs call it HOLDOUT-100; repeatedly read
+for checkpoint selection, so a validation set). S3 = 2.264823e-08.
+
+| step | S2t3 (TRAIN + d8b) | control (TRAIN only) |
+|---:|---:|---:|
+| 230 | 2.255358e-08 | 2.250329e-08 |
+| 368 | 2.246946e-08 (−0.79%) | **2.240008e-08 (−1.10%)** |
+| 506 | 2.236140e-08 | **2.234042e-08** |
+| 736 (end) | **2.232939e-08 (−1.41%)** | — |
+
+**The d8b corpus adds nothing measurable**; the gain over S3b (224 steps, −0.17…−0.28%) is longer
+optimisation at small lr. Predictions: strategist −1 to −2% (✓ −1.41% at the end, but not from d8b);
+mine −0.3 to −0.8% at S2t3's end ✗ (too low), "most of the gain is steps" ✓ (control ≥ S2t3 at equal
+steps). Exports: step 368 → `estimator_k3_v70_s2t3.py` (canary #332737); step 736 →
+`estimator_k3_v71_s2t3f.py` (twin DEV 2.243796e-08 = −1.44% vs v68's twin read; official DEV below).
+
+## PLAN rev 15 B1 — all-distinct κ3 projected diagnostic: the error is real, score-relevant, and outside the gates' span (2026-09-28)
+
+`tools/k111_diag.py`, `experiments/2026-09-27_k111/` (worker-q 2245/2250/2252; FIT 0–19 — nets in
+TRAIN; twin = v62_s1 + S3 set = v67/v68 accuracy; no refit anywhere). With t = post K3, S = post K21
+(T_aab, diagonal 0), W next weights: repeated D3 = Σ W³t + 3 Σ W²(SW), AD = D3_next − repeated; D21
+analogue. **Step 0** (float64 dense symmetric tensors, n = 6–8): both identities exact to 1.7e-15;
+Sᵀ / multiplicity 2 / un-zeroed diagonal fail at 0.1–10; K21 orientation untransposed (≤ 2% vs ≥ 43%).
+In-run: transported D3 = chain tap to 1.1e-7; model AD = inherited + newborn to 2.2e-5.
+
+| source layer l | ‖AD‖/‖D3_next‖ | model AD rel. error D3 / D21 (free) | exact-input mode | noise floor (K21 rep1 + N=1e9 est.) | label/model AD | AD share of D3 error |
+|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 0.22 | 0.043 / 0.042 | same | 0.042 | 1.00 | 0.61 |
+| 4 | 0.30 | 0.100 / 0.100 | 0.100 | 0.008 | 0.99 | 0.57 |
+| 8 | 0.29 | 0.165 / 0.166 | 0.170 | 0.005 | 0.945 | 0.84 |
+| 14 | 0.26 | 0.252 / 0.254 | 0.257 | 0.003 | 0.877 | 0.91 |
+
+Layer 0 (model exact) reads at the floor, which calibrates it. From l = 8 the AD error is 30–75× noise;
+exact-input mode gives the same error (it lives in the carried tensor, not in input drift — this does
+not separate birth from inheritance). The model's AD is ~12% too large at depth.
+
+Downstream (free-running, every layer, final-layer MSE, median over 20 nets; base 2.15e-08):
+AD part → label **−33.1%** (−20.5…−46.4%; rep1 labels −35.5% vs s00 −35.4% on nets 0–7, so not noise);
+full exact D3+D21 −46.9%; repeated part only +4.8%; compression mismatch only −3.4%; AD on D3 only
+−11.6%, on D21 only −9.6%.
+
+**Span of per-neuron factor gates** (features 1, α, α², γ3, Φ(α) on w2b, cA/cB, inherited row scale;
+least squares, leave-one-net-out): AD error at l = 14 0.252 → 0.195 at best; three scalar gains alone
+0.201; two-leg only 0.232; hubs only 0.250. The captured ~40% of squared error is a uniform shrink of
+inherited transport; **applying it without refit worsens final MSE +13.6…+15.8%**, while adding only the
+component orthogonal to the model's AD gives −15.9%. Reading: the end-to-end-trained gains already
+compensate the scalar overshoot; the value is in an out-of-span pattern. Predictions (agent): AD ≥ 70% of
+the D3/D21 error ✓ at depth (84–96%), ✗ early (57–78%); gates capture < 30% ≈ (40% squared, harmful).
+PLAN consequence: B2 gets ONE end-to-end falsification run (transport, gate leaves only); the birth arm
+is not run unless it moves.
+
+## PLAN rev 15 B2 prep — identity-initialised factor gates (2026-09-28)
+
+`tools/build_gate.py`, `experiments/2026-09-27_gates/DESIGN.md`; twin stages G1b/G1t/G1bg/G1tg
+(additive). g = 1 + S·tanh(MLP_8(α, γ3, γ4)), W2 = b2 = 0 ⇒ g ≡ 1. Birth arm gates fac1's ends and
+w2b's middle with p111_21/S_sep/hub compensation from the same vectors; transport arm gates
+`_wick_tower`'s w1 with p111_3/p111_21 recomputed. Identity files bit-identical to v68 (twin raw, hooked,
+and real meter 128×6); gradients finite and non-zero. Full-rank P2 control (n = 64, f64): K3/K21 of the
+gated tower = table to ≤ 2e-15 while the consumed D3 moves 5–26%. Shipped rank 4: 5–30% of a transport
+gate's effect leaks into K3/K21 (birth arm: small, except layers 1 and 6). Real meter at 1024×16: birth
++1.9e-6 of 2^41, +306 ops; transport +1.6e-6, +291 ops (worker-q 2249).
+
 ## Step 2 (HANDOFF 09-27) — refit ceilings: κ3 53%, cov 41%, κ4 28%, all-but-μ ≈ 91% (2026-09-27)
 
 Twin `--subst X` (v62_s1 + the S3 parameter set = v67/v68 accuracy): X replaced by its exact label

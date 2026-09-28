@@ -1,0 +1,56 @@
+{
+ "n6_m6": {
+  "D3_identity_maxrel": 2.4223765627811066e-16,
+  "D21_identity_maxrel": 2.4223765627811066e-16,
+  "D3_with_S_transposed": 0.4578259908594611,
+  "D21_with_S_transposed": 0.4578259908594611,
+  "D3_with_multiplicity_2": 0.11156876086711341,
+  "D3_with_S_diag_not_zeroed": 0.6060328586770174,
+  "D21_is_kappa_iij_of_next": 0.0
+ },
+ "n7_m5": {
+  "D3_identity_maxrel": 1.72581949034646e-15,
+  "D21_identity_maxrel": 7.55084459460259e-16,
+  "D3_with_S_transposed": 10.129769616420012,
+  "D21_with_S_transposed": 1.5511999257857392,
+  "D3_with_multiplicity_2": 1.0977517400531285,
+  "D3_with_S_diag_not_zeroed": 7.7299041940662505,
+  "D21_is_kappa_iij_of_next": 0.0
+ },
+ "n8_m9": {
+  "D3_identity_maxrel": 1.4409590737417507e-16,
+  "D21_identity_maxrel": 2.2154745758779416e-16,
+  "D3_with_S_transposed": 0.44073932810409805,
+  "D21_with_S_transposed": 0.44073932810409805,
+  "D3_with_multiplicity_2": 0.2235621346875948,
+  "D3_with_S_diag_not_zeroed": 0.5042761564306326,
+  "D21_is_kappa_iij_of_next": 0.0
+ },
+ "identities_ok": true,
+ "data_orientation_net0": {
+  "l2": {
+   "var_next_rel_err_W": 6.132171565749936e-08,
+   "var_next_rel_err_WT": 0.11205521805442784,
+   "K21_O_vs_dense_untransposed": 3.530448407360284e-08,
+   "K21_O_vs_dense_transposed": 0.44929097424177933,
+   "K21T_O_vs_denseT": 3.538960447627678e-08,
+   "K21_diag_over_postK3": 1.000003720566639
+  },
+  "l8": {
+   "var_next_rel_err_W": 2.2230348528691265e-07,
+   "var_next_rel_err_WT": 0.18010605217177078,
+   "K21_O_vs_dense_untransposed": 3.57777524310263e-08,
+   "K21_O_vs_dense_transposed": 0.7686386360745069,
+   "K21T_O_vs_denseT": 3.573610352448544e-08,
+   "K21_diag_over_postK3": 0.9999461969362505
+  },
+  "l13": {
+   "var_next_rel_err_W": 4.154298278854447e-07,
+   "var_next_rel_err_WT": 0.25613062042746587,
+   "K21_O_vs_dense_untransposed": 3.605602181254149e-08,
+   "K21_O_vs_dense_transposed": 0.7712491671436298,
+   "K21T_O_vs_denseT": 3.6333324018491526e-08,
+   "K21_diag_over_postK3": 1.0001156217096656
+  }
+ }
+}
