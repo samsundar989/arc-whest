@@ -1,5 +1,10 @@
 # Next representation experiment — September 28, 2026
 
+> **Proposal history.** PLAN rev17 §4 B5 E0–E6 is now the executable queue, including
+> corrected post-fold compensation, one fixed history-factor basis, controlled pilot,
+> cost-aware admission and submission gates. Where this earlier proposal differs,
+> follow PLAN. No experiment result is added by this notice.
+
 This is a proposed bounded experiment, not a validated architecture or a replacement
 for `docs/PLAN.md`. The tested covariance-core **AD correction** and selected covariance
 triangle are closed on current evidence. The next hypothesis is **history distillation**:

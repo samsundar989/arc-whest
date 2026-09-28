@@ -1,7 +1,12 @@
 # CURRENT_STATE — 2026-09-28 review
 
-The only plan is `docs/PLAN.md` rev16. Start there, then read the September 28 review
+The only plan is `docs/PLAN.md` rev17. Start there, then read the September 28 review
 addendum in `RESULTS.md`. The original worker completed S2t3 and both factor-gate fits.
+The current execution handoff is `docs/HANDOFF_2026-09-28_COMPACT_HISTORY.md`.
+Rev17 specifies implementation, algebra/cost screens, a 60-step controlled pilot,
+conditional TRAIN900 expansion, failure diagnostics and the complete canary loop.
+This is a plan update only: the compact student remains unbuilt/unpriced/untrained;
+no new candidate, training result or submission was produced by this handoff turn.
 
 ## Graded incumbent and fallback
 
@@ -48,7 +53,8 @@ Use the detailed result, not the coarse 1.70e-9 board display. Both accuracy and
 - Next is PLAN B5: one replacement history state
   with analytic symmetric-core folding, age3/q32 and q64 as two cost/capacity points.
   Only a cheap, valid implementation goes to shared final-output training and a
-  controlled score comparison. See `experiments/2026-09-28_review_arch/DISTILL_NEXT.md`.
+  controlled score comparison. Execute PLAN E0–E6; the earlier DISTILL_NEXT note is
+  supporting proposal history, not the execution queue.
 - Cost research must include recent dense history: the entire old tier costs only 28.05%
   of FLOPs, so even lossless removal cannot close the present leader gap alone.
 
