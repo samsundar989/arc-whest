@@ -1,0 +1,14 @@
+{
+  "params": "experiments/2026-09-27_S2t3/params_step736.npz",
+  "params_sha256": "17a3c6d47ebb23f6b08b7bb77b810f909728013d86b2662038c48aefad957e91",
+  "source_sha256": "3c3b49933def715293de0c2321ac4b5f9302b42ffa7bbbbe9dcf4126c1421258",
+  "layers": [
+    3,
+    6,
+    9,
+    12,
+    15
+  ],
+  "nets": "0-7",
+  "source": "C:\\Users\\samsu\\.local\\state\\gpuq\\snapshots\\2300\\job-2300\\estimator_k3_v62_s1.py"
+}
