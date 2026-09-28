@@ -12,13 +12,16 @@ no new candidate, training result or submission was produced by this handoff tur
 E2 retention bound (r64 ×15.7, r32 ×26.6 raw vs v72 on TRAIN0–7), and the E5 fallbacks are
 closed at the price screen (best usable structural saving −12.8% cost for ×1.86 raw).
 Nothing was trained or submitted from B5. See `experiments/2026-09-28_compact_history/report.md`.
-Lane A2 (G1bg birth-gate step112 export) is being evaluated separately.
+Lane A2 export `estimator_k3_v73_gb.py` (`8fc42e77`, G1bg birth gates step112) graded
+#332893 **4.6198973531323855e-9** (raw 2.1514587515980564e-8): new best by only 0.018%
+over v72, i.e. incremental. It is now the §5 baseline in `tools/ev.py`. No final entry designated.
 
 ## Graded incumbent and fallback
 
 | role | source / SHA8 | submission | reported score | measured server median / worst |
 |---|---|---|---:|---|
-| best A | `estimator_k3_v72_gt.py` / `3b6cc397` | #332766 | **4.620737758949154e-9** | 83.303 / 86.285s |
+| best A (new) | `estimator_k3_v73_gb.py` / `8fc42e77` | #332893 | **4.6198973531323855e-9** | not collected; projected noisy 103.3s |
+| previous A | `estimator_k3_v72_gt.py` / `3b6cc397` | #332766 | 4.620737758949154e-9 | 83.303 / 86.285s |
 | older wall-safe fallback | `estimator_k3_v68_ws.py` / `0db9afba` | #332544 | 5.0664e-9 | 51.9 / 55.7s |
 
 v72 raw final MSE 2.1518525734620654e-8; reference noise floor approximately 7.7e-11.
