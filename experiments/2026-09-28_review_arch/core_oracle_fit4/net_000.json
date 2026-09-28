@@ -1,0 +1,1046 @@
+{
+  "net": 0,
+  "arms": {
+    "base_legacy": {
+      "final": 1.8987437865976184e-08,
+      "rows": {
+        "0": 6.237815923515466e-10,
+        "1": 5.714635557791572e-10,
+        "2": 7.084318219299592e-10,
+        "3": 1.3522747901271558e-09,
+        "4": 2.1638860404917876e-09,
+        "5": 3.207387395233499e-09,
+        "6": 4.120775853934516e-09,
+        "7": 5.733914982982117e-09,
+        "8": 7.471670317577695e-09,
+        "9": 8.243835732030961e-09,
+        "10": 9.449287091311935e-09,
+        "11": 1.2768834681991319e-08,
+        "12": 1.3838990813655438e-08,
+        "13": 1.4926988304732687e-08,
+        "14": 1.590574211366056e-08,
+        "15": 1.8987437865976184e-08
+      },
+      "core_fits": {},
+      "prepared_consumer_max_abs": 0.0,
+      "relative_final_change": 0.0
+    },
+    "base_consistent": {
+      "final": 1.8987437865976184e-08,
+      "rows": {
+        "0": 6.237815923515466e-10,
+        "1": 5.714635557791572e-10,
+        "2": 7.084318219299592e-10,
+        "3": 1.3522747901271558e-09,
+        "4": 2.1638860404917876e-09,
+        "5": 3.207387395233499e-09,
+        "6": 4.120775853934516e-09,
+        "7": 5.733914982982117e-09,
+        "8": 7.471670317577695e-09,
+        "9": 8.243835732030961e-09,
+        "10": 9.449287091311935e-09,
+        "11": 1.2768834681991319e-08,
+        "12": 1.3838990813655438e-08,
+        "13": 1.4926988304732687e-08,
+        "14": 1.590574211366056e-08,
+        "15": 1.8987437865976184e-08
+      },
+      "core_fits": {},
+      "prepared_consumer_max_abs": 0.0,
+      "relative_final_change": 0.0
+    },
+    "ADorth": {
+      "final": 1.6823271824409314e-08,
+      "rows": {
+        "0": 6.237815923515466e-10,
+        "1": 5.787435718000885e-10,
+        "2": 7.045798702935437e-10,
+        "3": 1.1035630351469572e-09,
+        "4": 1.5339487049151842e-09,
+        "5": 2.1939448129038292e-09,
+        "6": 2.73620491161972e-09,
+        "7": 3.871849424435769e-09,
+        "8": 5.0150494087702955e-09,
+        "9": 5.323608056539256e-09,
+        "10": 6.4886610259492296e-09,
+        "11": 8.184520806152996e-09,
+        "12": 1.1045914239414247e-08,
+        "13": 1.2637920428444135e-08,
+        "14": 1.4508038866538547e-08,
+        "15": 1.6823271824409314e-08
+      },
+      "core_fits": {
+        "1": {
+          "scalar_removed": -3.2284873397110946e-05
+        },
+        "2": {
+          "scalar_removed": 0.0011103295080192388
+        },
+        "3": {
+          "scalar_removed": -0.0002382166643938038
+        },
+        "4": {
+          "scalar_removed": -0.0042646928144281825
+        },
+        "5": {
+          "scalar_removed": -0.010397457159339697
+        },
+        "6": {
+          "scalar_removed": -0.018712696733752292
+        },
+        "7": {
+          "scalar_removed": -0.027635103158220476
+        },
+        "8": {
+          "scalar_removed": -0.038746664736978374
+        },
+        "9": {
+          "scalar_removed": -0.05324693341117012
+        },
+        "10": {
+          "scalar_removed": -0.06718622088689641
+        },
+        "11": {
+          "scalar_removed": -0.07163025231020446
+        },
+        "12": {
+          "scalar_removed": -0.09282065844609301
+        },
+        "13": {
+          "scalar_removed": -0.10237562683452049
+        },
+        "14": {
+          "scalar_removed": -0.10859369356259263
+        },
+        "15": {
+          "scalar_removed": -0.11399339363380209
+        }
+      },
+      "prepared_consumer_max_abs": 0.0,
+      "relative_final_change": -0.11397883468231729
+    },
+    "q32w1": {
+      "final": 1.960781982149288e-08,
+      "rows": {
+        "0": 6.237815923515466e-10,
+        "1": 5.713185160541624e-10,
+        "2": 6.973774718024547e-10,
+        "3": 1.3125199395194232e-09,
+        "4": 2.0386904947177605e-09,
+        "5": 2.9572041348880175e-09,
+        "6": 3.933855836219026e-09,
+        "7": 5.42107703098844e-09,
+        "8": 7.158610741359392e-09,
+        "9": 7.975118036843751e-09,
+        "10": 9.3337708083459e-09,
+        "11": 1.2070398311560697e-08,
+        "12": 1.3674032091808433e-08,
+        "13": 1.4655883535491817e-08,
+        "14": 1.6034611016665846e-08,
+        "15": 1.960781982149288e-08
+      },
+      "core_fits": {
+        "1": {
+          "diagonal_weight": 1.0,
+          "reason": "converged",
+          "iterations": 30,
+          "relative_normal_residual": 6.538435814146779e-08,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.7393450353190907
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.003665397968390688
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 9.616950093867737e-07
+            }
+          ],
+          "offdiag_energy_removed": 0.03053750458246285,
+          "D3_energy_removed": 0.11481486450596978,
+          "weighted_energy_removed": 0.030816105108659175,
+          "core_symmetry_max": 1.6356545024659441e-16,
+          "scalar_removed": -3.2284873397110946e-05
+        },
+        "2": {
+          "diagonal_weight": 1.0,
+          "reason": "converged",
+          "iterations": 30,
+          "relative_normal_residual": 6.841154236536755e-08,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.9415595752756366
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.004759256698044542
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 1.025738144560739e-06
+            }
+          ],
+          "offdiag_energy_removed": 0.04331046008836237,
+          "D3_energy_removed": 0.08748654979894033,
+          "weighted_energy_removed": 0.043440558972858256,
+          "core_symmetry_max": 7.003946034256359e-16,
+          "scalar_removed": 0.0011103663460188694
+        },
+        "3": {
+          "diagonal_weight": 1.0,
+          "reason": "converged",
+          "iterations": 30,
+          "relative_normal_residual": 6.433426086631612e-08,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.9347840777153983
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.004656450423582026
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 8.689223652912921e-07
+            }
+          ],
+          "offdiag_energy_removed": 0.0570736463677366,
+          "D3_energy_removed": 0.12919911888480096,
+          "weighted_energy_removed": 0.057279933418828866,
+          "core_symmetry_max": 9.354496344204932e-16,
+          "scalar_removed": -0.0002401853615530132
+        },
+        "4": {
+          "diagonal_weight": 1.0,
+          "reason": "converged",
+          "iterations": 30,
+          "relative_normal_residual": 7.687717392216854e-08,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.9647723119647196
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.004363802587049438
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 6.772064788309819e-07
+            }
+          ],
+          "offdiag_energy_removed": 0.08220114811148516,
+          "D3_energy_removed": 0.1342887962216911,
+          "weighted_energy_removed": 0.0823464082830917,
+          "core_symmetry_max": 3.684552662974738e-15,
+          "scalar_removed": -0.004253056412771978
+        },
+        "5": {
+          "diagonal_weight": 1.0,
+          "reason": "converged",
+          "iterations": 28,
+          "relative_normal_residual": 9.174341367680981e-08,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.9503576378009014
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.0036766371311553036
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 4.4547270248551334e-07
+            }
+          ],
+          "offdiag_energy_removed": 0.10443959591618401,
+          "D3_energy_removed": 0.14402068742774654,
+          "weighted_energy_removed": 0.10455159287384996,
+          "core_symmetry_max": 6.2727600891321345e-15,
+          "scalar_removed": -0.010381876176925292
+        },
+        "6": {
+          "diagonal_weight": 1.0,
+          "reason": "converged",
+          "iterations": 29,
+          "relative_normal_residual": 8.710607119164844e-08,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.9512059037212383
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.0037803066185017387
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 5.027743149814075e-07
+            }
+          ],
+          "offdiag_energy_removed": 0.12664417095197145,
+          "D3_energy_removed": 0.12293598164533404,
+          "weighted_energy_removed": 0.12663455172799898,
+          "core_symmetry_max": 1.0380585280245214e-14,
+          "scalar_removed": -0.018689412348276088
+        },
+        "7": {
+          "diagonal_weight": 1.0,
+          "reason": "converged",
+          "iterations": 30,
+          "relative_normal_residual": 3.981953766101615e-08,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.9538081234343395
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.003955471623309235
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 5.897472820399829e-07
+            }
+          ],
+          "offdiag_energy_removed": 0.1604424921199511,
+          "D3_energy_removed": 0.15576492480247361,
+          "weighted_energy_removed": 0.1604292982733544,
+          "core_symmetry_max": 1.1299988722512921e-14,
+          "scalar_removed": -0.027591964462822527
+        },
+        "8": {
+          "diagonal_weight": 1.0,
+          "reason": "converged",
+          "iterations": 29,
+          "relative_normal_residual": 8.428742316588226e-08,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.9459207227458123
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.003754751261036732
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 5.310228943197285e-07
+            }
+          ],
+          "offdiag_energy_removed": 0.1900887345318778,
+          "D3_energy_removed": 0.17523436386008318,
+          "weighted_energy_removed": 0.19004630625743513,
+          "core_symmetry_max": 2.1316282072803006e-14,
+          "scalar_removed": -0.038655034107538976
+        },
+        "9": {
+          "diagonal_weight": 1.0,
+          "reason": "converged",
+          "iterations": 28,
+          "relative_normal_residual": 8.652272687849858e-08,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.9332900398931206
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.0036665293975783222
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 5.328371277136072e-07
+            }
+          ],
+          "offdiag_energy_removed": 0.2089130049906699,
+          "D3_energy_removed": 0.1354548141930597,
+          "weighted_energy_removed": 0.20872063099386873,
+          "core_symmetry_max": 2.5375535006588734e-14,
+          "scalar_removed": -0.05296538636937149
+        },
+        "10": {
+          "diagonal_weight": 1.0,
+          "reason": "converged",
+          "iterations": 28,
+          "relative_normal_residual": 9.707947350307767e-08,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.952704824627047
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.0034405700759403773
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 6.279879122250698e-07
+            }
+          ],
+          "offdiag_energy_removed": 0.23518958321820127,
+          "D3_energy_removed": 0.19684649533071596,
+          "weighted_energy_removed": 0.23508093339876923,
+          "core_symmetry_max": 3.375077994860476e-14,
+          "scalar_removed": -0.06674435863589046
+        },
+        "11": {
+          "diagonal_weight": 1.0,
+          "reason": "converged",
+          "iterations": 28,
+          "relative_normal_residual": 9.85696152496801e-08,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.892368741051122
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.0037503730616377097
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 4.704633114611803e-07
+            }
+          ],
+          "offdiag_energy_removed": 0.25359497000638664,
+          "D3_energy_removed": 0.23097203963367607,
+          "weighted_energy_removed": 0.25353064141719006,
+          "core_symmetry_max": 6.572520305780927e-14,
+          "scalar_removed": -0.07108288321813983
+        },
+        "12": {
+          "diagonal_weight": 1.0,
+          "reason": "converged",
+          "iterations": 30,
+          "relative_normal_residual": 4.140963603673204e-08,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.9213035225414126
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.0035590504121146504
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 6.68743732437888e-07
+            }
+          ],
+          "offdiag_energy_removed": 0.27742006172712086,
+          "D3_energy_removed": 0.3047627041283344,
+          "weighted_energy_removed": 0.2775003490218342,
+          "core_symmetry_max": 5.2242064840779534e-14,
+          "scalar_removed": -0.09222604544475925
+        },
+        "13": {
+          "diagonal_weight": 1.0,
+          "reason": "converged",
+          "iterations": 28,
+          "relative_normal_residual": 7.14167409611346e-08,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.978204756034491
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.0029492996772088028
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 3.860176291427218e-07
+            }
+          ],
+          "offdiag_energy_removed": 0.3028525075632301,
+          "D3_energy_removed": 0.3315359739161615,
+          "weighted_energy_removed": 0.30293417834089365,
+          "core_symmetry_max": 6.17284001691587e-14,
+          "scalar_removed": -0.10168003376041117
+        },
+        "14": {
+          "diagonal_weight": 1.0,
+          "reason": "converged",
+          "iterations": 29,
+          "relative_normal_residual": 9.311981333835595e-08,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.8100313637063532
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.003849478383469853
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 5.633507574680925e-07
+            }
+          ],
+          "offdiag_energy_removed": 0.31481241905305846,
+          "D3_energy_removed": 0.3329239861883848,
+          "weighted_energy_removed": 0.31486090997573846,
+          "core_symmetry_max": 4.6629367034256575e-14,
+          "scalar_removed": -0.1075992635672963
+        },
+        "15": {
+          "diagonal_weight": 1.0,
+          "reason": "converged",
+          "iterations": 30,
+          "relative_normal_residual": 4.556255575394949e-08,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.8649802330179165
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.004111932093310214
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 7.73598092740201e-07
+            }
+          ],
+          "offdiag_energy_removed": 0.3346187641538252,
+          "D3_energy_removed": 0.38661927238580207,
+          "weighted_energy_removed": 0.33475814288329886,
+          "core_symmetry_max": 6.52811138479592e-14,
+          "scalar_removed": -0.1128520784201607
+        }
+      },
+      "prepared_consumer_max_abs": 0.0,
+      "relative_final_change": 0.03267328429963512
+    },
+    "q32w1024": {
+      "final": 2.1641691379323013e-08,
+      "rows": {
+        "0": 6.237815923515466e-10,
+        "1": 5.769615396908639e-10,
+        "2": 6.935295950349303e-10,
+        "3": 1.2149845373021163e-09,
+        "4": 1.8765699759635346e-09,
+        "5": 2.778853978335464e-09,
+        "6": 3.3668528816341294e-09,
+        "7": 4.6189945132181855e-09,
+        "8": 6.291945350153209e-09,
+        "9": 7.271690262482971e-09,
+        "10": 8.690646567855359e-09,
+        "11": 1.214569071685665e-08,
+        "12": 1.4288511511333304e-08,
+        "13": 1.6327630423910582e-08,
+        "14": 1.8282656512416858e-08,
+        "15": 2.1641691379323013e-08
+      },
+      "core_fits": {
+        "1": {
+          "diagonal_weight": 1024.0,
+          "reason": "iterations",
+          "iterations": 100,
+          "relative_normal_residual": 6.12888009232794e-07,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.7014544319440298
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.03999975896392432
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 0.007417351346061746
+            },
+            {
+              "iteration": 50,
+              "relative_normal_residual": 0.000316274790110766
+            },
+            {
+              "iteration": 100,
+              "relative_normal_residual": 6.12888009232794e-07
+            }
+          ],
+          "offdiag_energy_removed": -0.22209222528920813,
+          "D3_energy_removed": 0.9893795102500562,
+          "weighted_energy_removed": 0.7138147555897938,
+          "core_symmetry_max": 2.84147705365001e-15,
+          "scalar_removed": -3.2284873397110946e-05
+        },
+        "2": {
+          "diagonal_weight": 1024.0,
+          "reason": "iterations",
+          "iterations": 100,
+          "relative_normal_residual": 4.888903379162642e-07,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.6941372494584737
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.04822560239839072
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 0.0071601210689047025
+            },
+            {
+              "iteration": 50,
+              "relative_normal_residual": 0.0003103176070285463
+            },
+            {
+              "iteration": 100,
+              "relative_normal_residual": 4.888903379162642e-07
+            }
+          ],
+          "offdiag_energy_removed": -0.19595372934836908,
+          "D3_energy_removed": 0.9890488026978066,
+          "weighted_energy_removed": 0.6946082328946911,
+          "core_symmetry_max": 8.423817199343375e-15,
+          "scalar_removed": 0.001110351965155782
+        },
+        "3": {
+          "diagonal_weight": 1024.0,
+          "reason": "iterations",
+          "iterations": 100,
+          "relative_normal_residual": 3.942983950133375e-07,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.6877583584555402
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.0528736580633753
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 0.00705041744412162
+            },
+            {
+              "iteration": 50,
+              "relative_normal_residual": 0.0002988056252921569
+            },
+            {
+              "iteration": 100,
+              "relative_normal_residual": 3.942983950133375e-07
+            }
+          ],
+          "offdiag_energy_removed": -0.15740328845237306,
+          "D3_energy_removed": 0.9903367285139774,
+          "weighted_energy_removed": 0.6987880008606273,
+          "core_symmetry_max": 1.35828848168984e-14,
+          "scalar_removed": -0.00023713697899900476
+        },
+        "4": {
+          "diagonal_weight": 1024.0,
+          "reason": "iterations",
+          "iterations": 100,
+          "relative_normal_residual": 3.316994273755067e-07,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.7216261494666351
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.05587559453943084
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 0.008059889266918164
+            },
+            {
+              "iteration": 50,
+              "relative_normal_residual": 0.00029882217236883954
+            },
+            {
+              "iteration": 100,
+              "relative_normal_residual": 3.316994273755067e-07
+            }
+          ],
+          "offdiag_energy_removed": -0.13638536554887204,
+          "D3_energy_removed": 0.9887932512729267,
+          "weighted_energy_removed": 0.6975717137296251,
+          "core_symmetry_max": 3.0281332996651145e-14,
+          "scalar_removed": -0.0042425991385721135
+        },
+        "5": {
+          "diagonal_weight": 1024.0,
+          "reason": "iterations",
+          "iterations": 100,
+          "relative_normal_residual": 2.761003071057841e-07,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.6881291838971831
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.05773921051639807
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 0.00634209163680587
+            },
+            {
+              "iteration": 50,
+              "relative_normal_residual": 0.00027910408410898016
+            },
+            {
+              "iteration": 100,
+              "relative_normal_residual": 2.761003071057841e-07
+            }
+          ],
+          "offdiag_energy_removed": -0.10689819950477908,
+          "D3_energy_removed": 0.9897278915102766,
+          "weighted_energy_removed": 0.708687159613542,
+          "core_symmetry_max": 2.789955766413499e-14,
+          "scalar_removed": -0.010363407851171335
+        },
+        "6": {
+          "diagonal_weight": 1024.0,
+          "reason": "iterations",
+          "iterations": 100,
+          "relative_normal_residual": 2.317982387569974e-07,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.6591383028859666
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.06244472409589124
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 0.007200779858816615
+            },
+            {
+              "iteration": 50,
+              "relative_normal_residual": 0.00023095214555484612
+            },
+            {
+              "iteration": 100,
+              "relative_normal_residual": 2.317982387569974e-07
+            }
+          ],
+          "offdiag_energy_removed": -0.07393613588195591,
+          "D3_energy_removed": 0.9896296939829707,
+          "weighted_energy_removed": 0.6994422654788082,
+          "core_symmetry_max": 4.123090757701675e-14,
+          "scalar_removed": -0.018734406793499938
+        },
+        "7": {
+          "diagonal_weight": 1024.0,
+          "reason": "iterations",
+          "iterations": 100,
+          "relative_normal_residual": 2.1773877623243672e-07,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.6911579906592383
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.0658780009950873
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 0.006885116955006019
+            },
+            {
+              "iteration": 50,
+              "relative_normal_residual": 0.0002644724994737994
+            },
+            {
+              "iteration": 100,
+              "relative_normal_residual": 2.1773877623243672e-07
+            }
+          ],
+          "offdiag_energy_removed": -0.04509875071878877,
+          "D3_energy_removed": 0.9904920049407571,
+          "weighted_energy_removed": 0.7246641962447358,
+          "core_symmetry_max": 6.879219416333626e-14,
+          "scalar_removed": -0.027779110307150936
+        },
+        "8": {
+          "diagonal_weight": 1024.0,
+          "reason": "iterations",
+          "iterations": 100,
+          "relative_normal_residual": 2.3027405174128045e-07,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.6799939451999143
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.07540474814782826
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 0.007767884210874885
+            },
+            {
+              "iteration": 50,
+              "relative_normal_residual": 0.0002651737424176387
+            },
+            {
+              "iteration": 100,
+              "relative_normal_residual": 2.3027405174128045e-07
+            }
+          ],
+          "offdiag_energy_removed": -0.016117886164560558,
+          "D3_energy_removed": 0.9907540493775917,
+          "weighted_energy_removed": 0.7347947097921954,
+          "core_symmetry_max": 8.6014528832834e-14,
+          "scalar_removed": -0.03909897433098713
+        },
+        "9": {
+          "diagonal_weight": 1024.0,
+          "reason": "iterations",
+          "iterations": 100,
+          "relative_normal_residual": 2.0583349907601011e-07,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.709659211379181
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.07330132012345328
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 0.007730325232055114
+            },
+            {
+              "iteration": 50,
+              "relative_normal_residual": 0.0002635856288674296
+            },
+            {
+              "iteration": 100,
+              "relative_normal_residual": 2.0583349907601011e-07
+            }
+          ],
+          "offdiag_energy_removed": 0.010308104764341741,
+          "D3_energy_removed": 0.9903659981866402,
+          "weighted_energy_removed": 0.7250401463355625,
+          "core_symmetry_max": 1.038613639536834e-13,
+          "scalar_removed": -0.0538177257742431
+        },
+        "10": {
+          "diagonal_weight": 1024.0,
+          "reason": "iterations",
+          "iterations": 100,
+          "relative_normal_residual": 2.1309347189555674e-07,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.7149040286598836
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.0791661606131833
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 0.0069601893604868265
+            },
+            {
+              "iteration": 50,
+              "relative_normal_residual": 0.0002420143296752775
+            },
+            {
+              "iteration": 100,
+              "relative_normal_residual": 2.1309347189555674e-07
+            }
+          ],
+          "offdiag_energy_removed": 0.030921594473378944,
+          "D3_energy_removed": 0.9903419090458488,
+          "weighted_energy_removed": 0.7455411639636778,
+          "core_symmetry_max": 1.0869083411080283e-13,
+          "scalar_removed": -0.06828547003780108
+        },
+        "11": {
+          "diagonal_weight": 1024.0,
+          "reason": "iterations",
+          "iterations": 100,
+          "relative_normal_residual": 2.0003888414812315e-07,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.6811889071724376
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.08171021574382616
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 0.007655161228947955
+            },
+            {
+              "iteration": 50,
+              "relative_normal_residual": 0.00022141568952199997
+            },
+            {
+              "iteration": 100,
+              "relative_normal_residual": 2.0003888414812315e-07
+            }
+          ],
+          "offdiag_energy_removed": 0.05739874969059433,
+          "D3_energy_removed": 0.9909131330900767,
+          "weighted_energy_removed": 0.7537163080068582,
+          "core_symmetry_max": 9.225953334635051e-14,
+          "scalar_removed": -0.0731786141290458
+        },
+        "12": {
+          "diagonal_weight": 1024.0,
+          "reason": "iterations",
+          "iterations": 100,
+          "relative_normal_residual": 3.912473435110412e-07,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.7464373735026524
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.08931896849124116
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 0.008839170777506235
+            },
+            {
+              "iteration": 50,
+              "relative_normal_residual": 0.0003107076220589613
+            },
+            {
+              "iteration": 100,
+              "relative_normal_residual": 3.912473435110412e-07
+            }
+          ],
+          "offdiag_energy_removed": 0.08510250185141499,
+          "D3_energy_removed": 0.9908374799213383,
+          "weighted_energy_removed": 0.7654889537586929,
+          "core_symmetry_max": 2.347011474057581e-13,
+          "scalar_removed": -0.09534892605592989
+        },
+        "13": {
+          "diagonal_weight": 1024.0,
+          "reason": "iterations",
+          "iterations": 100,
+          "relative_normal_residual": 1.581424894475791e-07,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.7270231899592001
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.0821785986767561
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 0.006954075643233812
+            },
+            {
+              "iteration": 50,
+              "relative_normal_residual": 0.00022653750546501814
+            },
+            {
+              "iteration": 100,
+              "relative_normal_residual": 1.581424894475791e-07
+            }
+          ],
+          "offdiag_energy_removed": 0.13109813992496278,
+          "D3_energy_removed": 0.9924494553270178,
+          "weighted_energy_removed": 0.7725586705461471,
+          "core_symmetry_max": 2.0483614804334138e-13,
+          "scalar_removed": -0.10558403945044761
+        },
+        "14": {
+          "diagonal_weight": 1024.0,
+          "reason": "iterations",
+          "iterations": 100,
+          "relative_normal_residual": 1.3503983923567087e-07,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.7189335353022736
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.08840130427904358
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 0.0071618168417392734
+            },
+            {
+              "iteration": 50,
+              "relative_normal_residual": 0.00024186458872312716
+            },
+            {
+              "iteration": 100,
+              "relative_normal_residual": 1.3503983923567087e-07
+            }
+          ],
+          "offdiag_energy_removed": 0.14551879967788928,
+          "D3_energy_removed": 0.991662423933186,
+          "weighted_energy_removed": 0.76678552281279,
+          "core_symmetry_max": 2.495781359357352e-13,
+          "scalar_removed": -0.11247901135921051
+        },
+        "15": {
+          "diagonal_weight": 1024.0,
+          "reason": "iterations",
+          "iterations": 100,
+          "relative_normal_residual": 3.038305959329324e-07,
+          "history": [
+            {
+              "iteration": 1,
+              "relative_normal_residual": 0.6814744848565903
+            },
+            {
+              "iteration": 10,
+              "relative_normal_residual": 0.09995273570318153
+            },
+            {
+              "iteration": 25,
+              "relative_normal_residual": 0.008143046756770316
+            },
+            {
+              "iteration": 50,
+              "relative_normal_residual": 0.00027856986877038923
+            },
+            {
+              "iteration": 100,
+              "relative_normal_residual": 3.038305959329324e-07
+            }
+          ],
+          "offdiag_energy_removed": 0.18636592884395164,
+          "D3_energy_removed": 0.9931540843864858,
+          "weighted_energy_removed": 0.7785061831637864,
+          "core_symmetry_max": 1.944000516118649e-13,
+          "scalar_removed": -0.11882533292387351
+        }
+      },
+      "prepared_consumer_max_abs": 0.0,
+      "relative_final_change": 0.13978997756737988
+    }
+  },
+  "baseline_all_layers_bit_equal": true,
+  "seconds": 10.151047706604004,
+  "peak_vram_gib": 4.405350208282471
+}

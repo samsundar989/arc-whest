@@ -1,0 +1,23 @@
+{
+  "source_sha256": "e7ac04805a40cb6d9a04c3130cbc9e797e02747eb0c17f34623ea7bcb1b64c1e",
+  "candidate_sha256": "d1d722dbb23aefc5833da8ace2f8db351e0d73dbb4607db9d7c091328ae05311",
+  "params": "experiments/2026-09-27_S2t3/params_step736.npz",
+  "params_sha256": "17a3c6d47ebb23f6b08b7bb77b810f909728013d86b2662038c48aefad957e91",
+  "layers": [
+    9,
+    12,
+    15
+  ],
+  "ranks": [
+    16,
+    32
+  ],
+  "diag_weights": [
+    1.0,
+    1024.0
+  ],
+  "cg_steps": 100,
+  "nets": "0-1",
+  "target": "normalized AD label-model residual orthogonal to ONE model-AD direction",
+  "interpretation": "core coefficients are per-net oracle fits; finite CG capture is a feasible lower bound, unconstrained product-space projection is an upper bound"
+}

@@ -1,0 +1,33 @@
+{
+  "source_sha256": "39c3b8932068bd3e291df89f5e57221dab65ade0b8ef8dfb248fc380a4c30afd",
+  "params": "experiments/2026-09-27_S2t3/params_step736.npz",
+  "params_sha256": "17a3c6d47ebb23f6b08b7bb77b810f909728013d86b2662038c48aefad957e91",
+  "candidate_sha256": "d1d722dbb23aefc5833da8ace2f8db351e0d73dbb4607db9d7c091328ae05311",
+  "core_fitter_sha256": "e7ac04805a40cb6d9a04c3130cbc9e797e02747eb0c17f34623ea7bcb1b64c1e",
+  "nets": "0-3",
+  "layers": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "arms": [
+    "ADorth",
+    "q32w1",
+    "q32w1024"
+  ],
+  "cg_steps": 100,
+  "semantics": "normalized AD correction, one scaling direction removed; saved actual slices compensate; fitted cores oracle-only",
+  "final_layer_noise_floor_approx": 7.7e-11
+}

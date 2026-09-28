@@ -1,0 +1,70 @@
+{
+  "0.0": {
+    "diagonal_weight": 0.0,
+    "reason": "converged",
+    "iterations": 11,
+    "relative_normal_residual": 2.01892403593258e-16,
+    "history": [
+      {
+        "iteration": 1,
+        "relative_normal_residual": 0.30576566932861277
+      },
+      {
+        "iteration": 10,
+        "relative_normal_residual": 2.01892403593258e-16
+      }
+    ],
+    "offdiag_energy_removed": 0.07524799205395316,
+    "D3_energy_removed": 0.1103898166911752,
+    "weighted_energy_removed": 0.07524799205395316,
+    "core_symmetry_max": 1.687538997430238e-14,
+    "dense_ls_max_abs": 4.6629367034256575e-15,
+    "full_tensor_slice_max_abs": 4.440892098500626e-16
+  },
+  "1.0": {
+    "diagonal_weight": 1.0,
+    "reason": "converged",
+    "iterations": 11,
+    "relative_normal_residual": 1.733617647970205e-13,
+    "history": [
+      {
+        "iteration": 1,
+        "relative_normal_residual": 0.4338161457968008
+      },
+      {
+        "iteration": 10,
+        "relative_normal_residual": 1.733617647970205e-13
+      }
+    ],
+    "offdiag_energy_removed": 0.06332504274087414,
+    "D3_energy_removed": 0.3263687361547395,
+    "weighted_energy_removed": 0.09759790628579657,
+    "core_symmetry_max": 1.1546319456101628e-14,
+    "dense_ls_max_abs": 3.6992631180510216e-13,
+    "full_tensor_slice_max_abs": 6.661338147750939e-16
+  },
+  "11.0": {
+    "diagonal_weight": 11.0,
+    "reason": "converged",
+    "iterations": 14,
+    "relative_normal_residual": 7.85250245317479e-17,
+    "history": [
+      {
+        "iteration": 1,
+        "relative_normal_residual": 0.30138282210158496
+      },
+      {
+        "iteration": 10,
+        "relative_normal_residual": 5.242195652500753e-06
+      }
+    ],
+    "offdiag_energy_removed": -0.08573719703312621,
+    "D3_energy_removed": 0.5579963911333884,
+    "weighted_energy_removed": 0.31488943467045993,
+    "core_symmetry_max": 3.097522238704187e-14,
+    "dense_ls_max_abs": 7.105427357601002e-15,
+    "full_tensor_slice_max_abs": 8.881784197001252e-16
+  },
+  "exact_signal_max_abs": 4.360956040727615e-13,
+  "passed": true
+}
