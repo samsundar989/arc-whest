@@ -11,7 +11,7 @@ The plan is `docs/PLAN.md`; the submission gates are its §5.
 | **date** | UTC date of the evaluation or of the submission |
 | **file** | candidate source in the repo root |
 | **sha8** | first 8 hex of sha256 of the *estimator source bytes* (not the package) |
-| **panel** | `DEV` = the 100 organizer mini nets · `FIT` = 100 full-split nets disjoint from mini · `HOLDOUT` = the remaining **900** (≤2 reads/week, never fitted) · `GRADED` = AIcrowd server, 100 nets (50 public + 50 sealed) |
+| **panel** | Current: `DEV` = mini0–99, never fitted; `FIT` = full0–99, a subset of `TRAIN` full0–899; `VAL` = full900–999, checkpoint selection, never fitted. Historical `HOLDOUT` rows include now-trained networks and are not independent tests. `GRADED` = AIcrowd server,100 executed nets with50 public per-net scores and50 sealed. PLAN §3 is authoritative. |
 | **raw MSE** | final-layer MSE, unweighted |
 | **F/B** | FLOPs per MLP ÷ 2^41, i.e. the score multiplier before the 0.1 floor |
 | **ops** | flopscope operation calls per MLP (drives residual wall time) |
@@ -2234,3 +2234,148 @@ classifier, not by any project gate. Samuel runs it, or grants the permission:
 ```
 
 Slot ledger at the time of packaging: 0/10 used on 2026-09-21 UTC.
+
+## September 28 independent worker review and new structural screens
+
+This addendum qualifies earlier causal/ceiling language without deleting the recorded runs.
+Canonical continuation: PLAN rev16. Three audit agents plus the integrator reviewed source,
+training artifacts, hashes, public grading, and primary literature. No new candidate was
+submitted by this review. Final-layer MSE reference floor is approximately 7.7e-11;
+intermediate moment-label uncertainty is a different quantity.
+
+### v72 graded closeout and calibration
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-09-28 | `estimator_k3_v72_gt.py` | `3b6cc397` | GRADED | 2.1518525734620654e-8 | 0.2147330086 | 22,992 | measured median83.30295s, worst86.2848s, p90 84.6671s | WSL PASS, VmPeak6703MiB, same full source hash | 4.623412276936314e-9 | **4.620737758949154e-9** | DEV vs v71 mean paired score delta1.99373665e-11, t95[8.89778792e-12,3.09769451e-11] | 70/100 DEV | #332766. Exact score/raw from local submission ledger, GRADED status and rounded score/raw verified in user's Chrome.100 completed/0failed. Wall derived from100 rendered telemetry rows. Implied noisy worst103.295658s. Public-score projection differs by−0.05785%; implied DEV factor1.0386008. Keep PUBLIC_FACTOR1.038. |
+
+Source: https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/332766 .
+No full machine-readable graded report was synthesized from UI numbers. Evaluator baseline
+is now the exact v72 graded score. Full WSL and package hashes of v70/v71/v72 match their
+sources; the new memory-evidence bug did not invalidate those actual artifacts.
+
+Chrome board at review: rank36, leader J2W #332700 detailed public score1.748e-9,
+raw1.616e-8, mean cost0.1082B. The coarse board prints1.70e-9; do not treat it as precise.
+CSV `docs/research/2026-09-28_public_pairs_332766_vs_332700.csv` records50 common names
+from the two rendered ledgers (rounded values). Mean paired leader/ours score0.37974978,
+raw0.75376030, FLOPs0.50423729; leader wins50/50 on each metric. Paired score improvement
+ours−leader2.8742e-9, t95[2.75638555e-9,2.99201445e-9]; raw improvement5.36e-9,
+t95[4.88690922e-9,5.83309078e-9]. These are paired public comparisons, not unseen-test claims.
+Leader source: https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/332700 .
+
+### Review corrections
+
+1. `tools/ev.py` could reuse an old memory PASS when a new subprocess failed, and did
+   not enforce matching source SHA256 at acceptance. Fixed with private per-call output,
+   required success, full hash checks, and source-mutation rejection.13 mocked CPU tests
+   pass; portability102/102. Existing artifacts are retained. Manual PLAN §5.8 wall
+   evidence remains mandatory; the evaluator advisory wall row does not enforce it.
+2. D3/D21 oracle hooks changed the closure input but also incorrectly changed the
+   subtraction for an unchanged carried tensor. Tiny actual-source full-rank regression
+   reproduces the error exactly and corrects repeated slices to~1e-15. Shipped v72's
+   actual gated factors and compensation are consistent. Old interventions retain their
+   original meaning, but are not clean realizable candidate ceilings.
+3. B1's finite feature span omits some deployed nonlinear gate features. AD_orth removes
+   only one model-AD scaling direction. Neither proves exclusion from every gate function.
+   Actual gate gains remain small. The low-rank oracle separately corrects full D3;
+   its18.9% result is not a standalone rank32 tensor predictor.
+4. S2t3 control used784-step cosine versus736 and died before completion. No positive
+   d8b benefit was established, but 'adds nothing' is stronger than this attribution test.
+   Birth gate G1bg's best checkpoint is step112, VAL2.213009e-8; finalstep196 is worse.
+   It has no current DEV/package/grade. VAL floor7.7e-11 as above.
+
+### New probes (diagnostics, not candidate scores)
+
+| probe | source / evidence | panel and jobs | measured result | decision |
+|---|---|---|---|---|
+| compensation-consistent oracle | `tools/k111_consistent_probe.py`, `experiments/2026-09-28_review_arch/consistent_fit2/` | FIT0–1, job2293, v68-equivalent S3 parameters | Baseline identical. Median paired final-MSE reduction: AD34.86% vs legacy37.63%; rank32+fullD3 22.59% vs23.06%; full D3/D21 47.75% both. | Important AD signal survives; this two-net check does not replace20-net evidence or establish learnability. |
+| current-state feature/basis screen | `tools/k111_feature_probe.py`, `experiments/2026-09-28_ad_features/report.md` | FIT0–7, jobs2292smoke/2300full, v71-equivalent parameters | LONO16-feature fit removes6.2/7.7/7.9% of orthogonal error at consumerlayers9/12/15. Covariance right32 modes capture57.8/64.4/68.0%; left32 same modes~3%; selected quadratic-left128 with right128 captures24.8/29.7/32.7%. | No long generic feature fit. Test coherent quadratic/symmetric core; known right basis is useful but left basis remains limiting. |
+| symmetric core representability | `tools/k111_core_probe.py`, `experiments/2026-09-28_review_arch/core_fit2/` | FIT0–1, job2302, v71-equivalent parameters | q32 symmetric fit captures~21/28/33% orthogonal energy atlayers9/12/15. Unconstrained quadratic-left/right upper control37/44/48%. Weighting D3 by1024 fits~99% D3 but sacrifices offdiagonal fit (1–3/9–11/16–20%). | Test downstream score before any trainable core. Generic low-rank matrix spectrum substantially overstates coherent-core representation. |
+
+Feature LONO holds out coefficient fitting only: these FIT networks were in baseline
+training. Basis/core projection coefficients are per-net label oracles. Symmetric CG's
+attained fit is a feasible lower bound, not the best-possible upper bound; its normal
+residual is logged. Tiny dense symmetric-orbit least squares agrees to3.7e-13. No full
+n-cubed tensor or new dataset was used. Finite pre-sanitization checks passed for the
+feature probe's observed means, variances, D3/D21, covariance and closure outputs.
+
+Resource reviews precede all heavy jobs. Feature smoke: torchpeak4.48GiB; full streams
+one net/layer at16GiBhost/8GiBVRAM/2CPU declaration. Core job2302 took9.5s total,
+queue-measured peak8.53GiBhost/6.05GiBVRAM under16/10/2 declaration. Local runtime is
+research throughput only, never a server-wall projection. Job2291 was cancelled while
+queued before execution to fix last-layer diagnostic reconstruction.
+
+Cost implication: measured full old-tier deletion saves132.442G FLOPs =28.05%, while
+ruining accuracy. A hypothetical lossless removal still cannot reach the leader alone.
+Future compression must preserve useful readouts and eventually reduce recent dense
+history too. Literature mechanisms and derivations are in
+`docs/research/2026-09-28_frontier_options_codex.md`; no adjacent paper supplies a
+comparable Phase2 score or a proven online predictor of our missing tensor.
+
+### Downstream falsification and selected-diagram result (September 28)
+
+| probe | panel/job | measured outcome | decision |
+|---|---|---|---|
+| coherent covariance-core oracle, actual rollouts | FIT0–3, v71-equivalent, workerq2305 | Baseline final MSE2.020133883e-8. Unrestricted orthogonal AD oracle1.550730824e-8: paired improvement4.694030589e-9 (23.236%,4/4wins). q32 symmetric moment fit2.115260987e-8: paired change−9.512710411e-10 (4.709%worse,0/4wins). Diagonal-weight1024 fit2.137423812e-8: paired change−1.172899283e-9 (5.806%worse,1/4wins). Floor7.7e-11 for all finalMSEs. | **Close direct moment-fitted covariance-core correction as posed.** Explaining tensor-slice energy did not improve the objective. No long predictor fit justified from this result. |
+| selected low-rank Gaussian triangle | FIT0–1, q4/8, source2/5/8/11/14, workerq2304 | Deep-layer D21 alignment explains under0.01% of orthogonal moment-error energy, even with per-net oracle scalar. Theoretical D3 correction generally worsens momenterror; independent-label replicate is recorded. | **Close this selected one-step q4/8 Gaussian-triangle route.** This does not exclude all covariance-cycle/non-Gaussian diagrams or full-rank accumulated corrections. |
+
+Core downstream evidence: `experiments/2026-09-28_review_arch/core_oracle_fit4/`.
+All prepared D3/D21/variance values match actual consumers bit-for-bit; legacy and
+consistent baseline means match at every layer. All finite checks pass. The joint
+slices are compatible with a symmetric tensor at each consumer, but the full extra
+tensor is not carried onward: the oracle re-solves each next state. This is an optimistic
+readout intervention, not the measured behavior of a causal trainable carrier. The
+unrestricted oracle's positive result does not license a projected core's negative result.
+
+Job2303 stopped on a one-ULP consumer-equality assertion before completing any net;
+its preparatory transpose was made contiguous while production used a view. Job2305
+retained the production layout, kept the strict assertion, and completed4nets. No failed
+run was used as a scientific observation. Resource estimate remained16GiBhost/10GiBVRAM
+based on comparable current measured runs and explicit streaming-memory analysis;
+queue dispatch's historical whole-card warning referred to broader command history.
+
+Triangle evidence: `experiments/2026-09-28_triangle/report.md`, per-net JSON and CPU
+checks. It measured alignment of a single next-layer term, not final-score change.
+The orthogonal table projects both feature and target off model AD, which includes a
+compensating scalar change; raw coefficient-one columns represent the actual direct term.
+
+**Strategy change:** these are informative negatives, not a new best submission.
+The remaining promising question is whether a cheaper representation can be learned
+against the final output while replacing expensive recent history, rather than adding
+more moment-correction machinery. PLAN rev16 sets a cost-first, objective-trained
+compression/distillation test with explicit shipping and cross-network constraints.
+
+### Current exact cost census — job2309, September28
+
+`tools/cost_site_probe.py` profiles unmodified v72 with the real0.12.1 package,
+f64read-only grader weights, one DEV network, CPU2 through workerq. Its installed
+counter getter is verified O(1); no budget summary is called during prediction.
+Every operation belongs to one exclusive category; nested inclusive counts are not added.
+
+| resolved operation group | charged FLOPs | fraction of total |
+|---|---:|---:|
+| recent history transport | 142,515,572,736 | 30.181% |
+| recent history D21 readout | 147,288,383,488 | 31.192% |
+| **recent total** | **289,803,956,224** | **61.3728%** |
+| **old compressed history total** | **127,901,276,856** | **27.0861%** |
+| covariance transport | 36,314,212,352 | 7.6904% |
+| learned mean corrector | 154,763,776 | 0.0328% |
+
+Mixed history/closure/other work remains separately categorized in
+`experiments/2026-09-28_cost_sites/report.md`; the table above is not the full sum.
+Categories, individual exclusive call sites and layer totals each sum exactly to
+**472,202,879,721**, matching the saved current meter anchor.22,992ops,0materializations,
+no errors, source SHA256unchanged. Thus61.4% recent-history computation is a current
+measurement, replacing the stale54% census. Resolved recent+old work is88.4588%; mixed
+history adds2.2136%. The old28.05% deletion delta also changes mixed work, so it is not
+identical to resolved old-site attribution.
+
+Job2308 failed before prediction because the package has no __version__ attribute;
+2309 verifies distribution version AND imported module directory. The same corrected
+guard is covered in the tiny CPU check. Job2309 completed65.07s, in-process peakRSS
+4,751.57MiB (queue sampled4,482.90MiB), declared16GiBhost/0GPU/2CPU. Instrumented elapsed
+and residual are not server estimates. No new submission or training occurred.
+
+This confirms PLAN B5's target: cheaper recent transport/readout plus a replacement for
+old-source storage, trained against actual final means. The small neural corrector is
+not a meaningful compute bottleneck. Core32/64 student cost/accuracy remain unmeasured.

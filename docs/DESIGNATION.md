@@ -1,5 +1,23 @@
 # DESIGNATION — current A and B (maintained by the worker; designating is Samuel's)
 
+## Evidence update — September 28 review (no nomination/designation made)
+
+The best graded source is now **v72_gt**, SHA8 `3b6cc397`, submission **#332766**,
+score **4.620737758949154e-9**. Live Chrome confirms100 completed/0failed; measured
+wall median83.30295s, worst86.2848s, implied noisy worst103.295658s. Exact source/package
+and WSL memory hashes match; VmPeak6702.67MiB. Meter472,202,879,721FLOPs,22,992ops;
+projected residual from ops is approximately0.255s, not a new measured server residual.
+v70 #332737 and v71 #332753 preceded it at4.665633e-9 and4.636794e-9.
+
+The last graded wall-safe fallback is still **v68_ws #332544**, score5.0664e-9;
+it has older accuracy and is not a v72 twin. No refreshed B or final nomination was
+performed by this review. PLAN rev16 governs further work and all acceptance gates,
+including105s noisy for a new A code path and95s for B. The older standing table below
+is retained as historical evidence and is superseded by this update.
+
+Full review and source attribution: `docs/research/2026-09-28_worker_evidence_review_codex.md`
+and the September28 `RESULTS.md` addendum.
+
 *Policy — PLAN rev 13, Samuel's decision 2 (2026-09-25):*
 **A** = the best-scoring entry. Strassen leaf 32 is allowed; implied **noisy-day worst ≤ ~115 s**.
 **B** = its wall-safe twin (leaf 64), implied **noisy-day worst ≤ 95 s**.

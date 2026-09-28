@@ -72,3 +72,9 @@ The final-layer reference noise floor is approximately7.7e-11. TRAIN and VAL hav
 been used in the project's development history; neither should be described as untouched
 competition evidence. Heavy fitting and substantive diagnostics need a fresh resource
 optimization review and workerq submission. No job for this design has been launched.
+
+Current-cost confirmation (job2309): exclusive real-meter recent transport/readout is
+61.3728% ofv72, resolved old work27.0861%, covariance7.6904%, mean corrector0.0328%.
+The full profile reconciles to472,202,879,721 FLOPs. This replaces the historical recent
+percentage and supports targeting both recent and old history. See
+`experiments/2026-09-28_cost_sites/report.md`; the student itself is still unbuilt/unpriced.
