@@ -2408,3 +2408,9 @@ identity-checks against production `_dslice21` (exact k≤5, 2.6e-5 with old tie
 Older lineages' D21 feedback (covariance/closure/corrector) is essential. E5 fallback
 stopped at the price screen: the best measured structural saving with a usable answer is
 −12.8% cost at ×1.86 raw. Jobs 2319/2325/2326, 16 GiB/10 GiB/2 CPU declared.
+
+## v73_gb — Lane A2 birth-gate export (incremental, 2026-09-28)
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-09-28 | `estimator_k3_v73_gb.py` | `8fc42e77` | DEV | 2.227946e-08 | 0.21473 | 23,007 | NEW code path (birth arm vs trans arm; +15 ops, +5.4e5 FLOPs): v72 measured median 83.303 s + 0.005 s → projected noisy **103.3 s** (≤105 s) | VmPeak 6,724 MiB (WSL PASS, same hash) | **4.6090e-09** | PENDING | **1.0031× vs v72** (Δ +1.496e-11, t95 [+1.29e-12, +2.86e-11]) | 55/100 | v71 base + G1bg **birth** gates at best-VAL step 112 (VAL 2.213009e-08 vs G1tg step84 2.215950e-08). Built `tools/build_gate.py --arm birth --base estimator_k3_v71_s2t3f.py --params G1bg/params_best.npz`; same recipe with trans/G1tg rebuilds v72 byte-exact. Twin parity 1.48e-4. Package sha256 `11100ac0…fdbd`, inner estimator = source. **Incremental, not the structural target.** `experiments/2026-09-28_v73gb/`. |
