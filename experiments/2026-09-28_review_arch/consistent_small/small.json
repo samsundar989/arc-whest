@@ -1,0 +1,54 @@
+{
+  "width": 24,
+  "depth": 4,
+  "P2_rank": "full",
+  "shared": false,
+  "candidate": "C:\\Users\\samsu\\Documents\\arc-whest\\estimator_k3_v62_s1.py",
+  "rows": {
+    "base": {
+      "K3_slice_error_abs": 5.873544164760335e-16,
+      "K21_slice_error_abs": 1.1102208693212605e-15,
+      "K3_slice_error_relative": 1.618997357536225e-16,
+      "K21_slice_error_relative": 3.4481279792556e-16,
+      "legacy_formula_K3_residual": 0.003725839467218186,
+      "legacy_formula_K21_residual": 0.0015308608053681014
+    },
+    "consistent_identity": {
+      "K3_slice_error_abs": 5.873544164760335e-16,
+      "K21_slice_error_abs": 1.1102208693212605e-15,
+      "K3_slice_error_relative": 1.618997357536225e-16,
+      "K21_slice_error_relative": 3.4481279792556e-16,
+      "legacy_formula_K3_residual": 0.003725839467218186,
+      "legacy_formula_K21_residual": 0.0015308608053681014
+    },
+    "legacy_inject": {
+      "K3_slice_error_abs": 0.003725839467218191,
+      "K21_slice_error_abs": 0.0015308608053681144,
+      "K3_slice_error_relative": 0.0010269557051135285,
+      "K21_slice_error_relative": 0.0004754463069400151,
+      "legacy_formula_K3_residual": 5.642050404005156e-16,
+      "legacy_formula_K21_residual": 1.094877176016828e-15
+    },
+    "consistent_inject": {
+      "K3_slice_error_abs": 5.761058190373387e-16,
+      "K21_slice_error_abs": 1.0770220606484047e-15,
+      "K3_slice_error_relative": 1.5879244471346675e-16,
+      "K21_slice_error_relative": 3.3449557231630626e-16,
+      "legacy_formula_K3_residual": 0.0037258394672181876,
+      "legacy_formula_K21_residual": 0.0015308608053681012
+    }
+  },
+  "checks": {
+    "identity_mean_bit_equal": true,
+    "identity_cov_bit_equal": true,
+    "identity_K3_bit_equal": true,
+    "identity_K21_bit_equal": true,
+    "injected_mean_bit_equal": true,
+    "injected_cov_bit_equal": true,
+    "injected_closure_K_bit_equal": true,
+    "legacy_mismatch_observed": true,
+    "legacy_formula_verified": true,
+    "consistent_slices_preserved": true
+  },
+  "pass": true
+}
