@@ -1,0 +1,44 @@
+{
+  "pass": true,
+  "stack": {
+    "flopscope_version": "0.12.1",
+    "flopscope_file": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\Lib\\site-packages\\flopscope\\__init__.py",
+    "flopscope_distribution_root": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\Lib\\site-packages\\flopscope"
+  },
+  "counter": {
+    "file": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\flopscope\\_budget.py",
+    "line": 1700,
+    "source": "@property\ndef flops_used(self) -> int:\n    return self._flops_used",
+    "verified_constant_time": true
+  },
+  "wrapped_functions": [
+    "_layer",
+    "_advance",
+    "_dslice3",
+    "_dslice21",
+    "_shared_contract_lean",
+    "_shared_join_lean",
+    "_full_legs_lean",
+    "_wick_tower",
+    "_p4_sym_sandwich",
+    "_p2_compress",
+    "_p2_recon",
+    "_hub_parts",
+    "_p3_compress",
+    "_p3_parts",
+    "_wick",
+    "_closure_apply",
+    "_closure_what",
+    "_protect_factors",
+    "_corr_delta",
+    "_corr_raw",
+    "_gate_eval",
+    "_append",
+    "_truncate",
+    "_mm"
+  ],
+  "tiny_real_meter_flops": 60,
+  "same_as_uninstrumented": true,
+  "exclusive_reconciles": true,
+  "source_sha256": "3b6cc39790295d3be60a88f9dd9053915f695bdf0a0da2cf2e99587cce692bac"
+}
