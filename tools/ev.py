@@ -60,6 +60,7 @@ import math
 import os
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -462,15 +463,35 @@ def memory_gate(candidate: Path, repeats: int = 3, out: Optional[Path] = None) -
     """
     dest = out or (ROOT / "experiments" / "_ev" / f"mem_{candidate.stem}.json")
     dest.parent.mkdir(parents=True, exist_ok=True)
-    r = subprocess.run(
-        [sys.executable, str(LOCAL_SIM / "linux_memory_gate.py"),
-         "--candidate", str(candidate), "--limit-mb", "8192",
-         "--weights-mode", "f64_readonly", "--repeats", str(repeats),
-         "--json", str(dest)],
-        cwd=str(ROOT), capture_output=True, text=True, encoding="utf-8", errors="replace")
-    if not dest.exists():
-        return {"status": "UNAVAILABLE", "detail": (r.stderr or r.stdout)[-600:]}
-    return json.loads(dest.read_text(encoding="utf-8"))
+    expected_sha = sha256_file(candidate)
+    # A prior PASS must never survive a failed launch. Each invocation gets a
+    # private output path; only its successful, hash-matching result is saved.
+    with tempfile.TemporaryDirectory(prefix="memory_gate_", dir=dest.parent) as tmp:
+        fresh = Path(tmp) / "result.json"
+        try:
+            r = subprocess.run(
+                [sys.executable, str(LOCAL_SIM / "linux_memory_gate.py"),
+                 "--candidate", str(candidate), "--limit-mb", "8192",
+                 "--weights-mode", "f64_readonly", "--repeats", str(repeats),
+                 "--json", str(fresh)],
+                cwd=str(ROOT), capture_output=True, text=True, encoding="utf-8", errors="replace")
+        except OSError as exc:
+            return {"status": "UNAVAILABLE", "detail": str(exc)}
+        if r.returncode != 0:
+            return {"status": "FAIL", "detail": f"memory gate exited {r.returncode}: "
+                    + (r.stderr or r.stdout or "")[-600:]}
+        if not fresh.exists():
+            return {"status": "UNAVAILABLE", "detail": "memory gate produced no fresh JSON"}
+        try:
+            result = json.loads(fresh.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            return {"status": "FAIL", "detail": f"invalid memory gate JSON: {exc}"}
+        if not isinstance(result, dict) or result.get("candidate_sha256") != expected_sha:
+            return {"status": "FAIL", "detail": "memory gate source SHA256 mismatch"}
+        if sha256_file(candidate) != expected_sha:
+            return {"status": "FAIL", "detail": "candidate changed during memory gate"}
+        dest.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+        return result
 
 
 # --------------------------------------------------------------------------- #
@@ -535,14 +556,18 @@ def gate_table(r: Dict, best_graded: float) -> List[tuple]:
     proj = r["projected_public"]
     better = 1.0 - proj / best_graded
     res_hi = r["ops"] * US_PER_OP[1] * 1e-6
+    memory = r.get("memory") or {}
+    memory_hash_matches = (bool(r.get("candidate_sha256"))
+                           and memory.get("candidate_sha256") == r["candidate_sha256"])
     return [
         # PLAN rev 13 decision 1 (Samuel, 2026-09-25): any projected improvement
         # over the best graded score qualifies; the 3% margin is retired.
         ("DEV projected vs best graded", f"better than {best_graded:.4e}",
          f"{proj:.4e} = {better * 100:.2f}% better", better > 0.0),
         ("op calls", f"≤ {OP_CEILING:,}", f"{int(r['ops']):,}", r["ops"] <= OP_CEILING),
-        # Not a hard gate since rev 13 (a canary's job is to measure wall); the
-        # threshold is the designation-A policy, noisy-day worst <= ~115 s.
+        # This absolute wall model is advisory only. PLAN rev 15 §5.8 also
+        # requires manual code-path/parent evidence: data-only A <= ~115 s,
+        # new-code-path A <= 105 s, B <= 95 s. This row cannot certify that.
         ("projected server wall (noisy day, A policy)", "≤ 115 s",
          f"{r.get('projected_server_wall_noisy_s', float('nan')):.1f} s (quiet day "
          f"{r['projected_server_wall_s']:.1f} s)",
@@ -567,17 +592,19 @@ def gate_table(r: Dict, best_graded: float) -> List[tuple]:
          f"{r['panel']}, n = {r['n']}", r["panel"] == "dev" and r["n"] == 100),
         ("paired vs incumbent", "--baseline given",
          r.get("baseline_name") or "no baseline", bool(r.get("paired"))),
-        ("WSL RLIMIT_AS 8 GiB gate", "PASS (--mem)",
-         "NOT RUN" if not r.get("memory") else "{} VmPeak {:.0f} MiB".format(
-             r["memory"].get("status", "?"),
-             (r["memory"].get("candidate_run", {}).get("vm_peak_bytes", 0) or 0) / 2 ** 20),
-         bool(r.get("memory")) and r["memory"].get("status") == "PASS"),
+        ("WSL RLIMIT_AS 8 GiB gate", "PASS on candidate SHA256 (--mem)",
+         "NOT RUN" if not memory else "{} VmPeak {:.0f} MiB; source hash {}".format(
+             memory.get("status", "?"),
+             (memory.get("candidate_run", {}).get("vm_peak_bytes", 0) or 0) / 2 ** 20,
+             "matches" if memory_hash_matches else "MISMATCH/MISSING"),
+         memory.get("status") == "PASS" and memory_hash_matches),
     ]
 
 
 def evaluate(candidate: Path, panel: str, n: int, jobs: int, baseline: Optional[Path],
              force: bool, do_cost: bool, quiet: bool, do_mem: bool = False) -> Dict:
     t_all = time.perf_counter()
+    candidate_sha = sha256_file(candidate)
     print(f"[ev] {candidate.name} on {panel.upper()} n={n}", flush=True)
 
     # COST FIRST, deliberately. It is one net and about a minute, and it yields
@@ -623,7 +650,8 @@ def evaluate(candidate: Path, panel: str, n: int, jobs: int, baseline: Optional[
     r = {
         "date": time.strftime("%Y-%m-%d", time.gmtime()),
         "file": candidate.name,
-        "sha8": sha256_file(candidate)[:8],
+        "sha8": candidate_sha[:8],
+        "candidate_sha256": candidate_sha,
         "panel": panel,
         "panel_label": panels.label(panel, n),
         "n": int(mse.size),
@@ -673,8 +701,8 @@ def report(r: Dict, best_graded: float) -> None:
     print("  PLAN §5 gates")
     allpass = True
     for name, thr, reading, ok in gate_table(r, best_graded):
-        # PLAN rev 13 decision 1: wall is NOT a hard gate (a canary measures it);
-        # the row is the designation policy, reported but not counted.
+        # The absolute wall model is advisory; the separate PLAN rev 15 §5.8
+        # check needs measured parent/code-path evidence (see below).
         advisory = name.startswith("projected server wall")
         if not advisory:
             allpass &= bool(ok)
@@ -682,7 +710,8 @@ def report(r: Dict, best_graded: float) -> None:
         print(f"    {tag}  {name:<32} {thr:<34} {reading}")
     print()
     print("  " + ("ALL CHECKABLE GATES PASS (PLAN rev 15 §5 items 3-7) — still needs "
-                  "validate, parity, validate-package + source hash, ledger"
+                  "validate, parity, manual PLAN §5.8 wall evidence, "
+                  "validate-package + source hash, ledger"
                   if allpass else "NOT ACCEPTED — gated or incomplete; not submittable"))
     r["accepted"] = bool(allpass)
     print()
@@ -705,12 +734,12 @@ def main(argv=None) -> int:
     ap.add_argument("--no-cost", action="store_true",
                     help="skip the real-meter run (accuracy only; no score, no gates)")
     ap.add_argument("--mem", action="store_true",
-                    help="also run the WSL RLIMIT_AS 8 GiB gate (2 predictions, ~3 min)")
-    #: THE §5 BASELINE. v71_s2t3f #332753, graded 2026-09-28 (prev v70 #332737 4.6656e-09). Update this the moment a
+                    help="also run the WSL RLIMIT_AS 8 GiB gate (3 predictions)")
+    #: THE §5 BASELINE. v72_gt #332766, graded 2026-09-28 (prev v71 #332753 4.6368e-09). Update this the moment a
     #: better score grades, or every later candidate is gated against a stale bar.
-    ap.add_argument("--best-graded", type=float, default=4.636793809558934e-09,
+    ap.add_argument("--best-graded", type=float, default=4.620737758949154e-09,
                     help="the best graded score, which the §5 gate must beat "
-                         "(default: v71_s2t3f #332753)")
+                         "(default: v72_gt #332766)")
     ap.add_argument("--json", default=None, help="also write the full result here")
     ap.add_argument("--append", action="store_true",
                     help="append the row to RESULTS.md")
