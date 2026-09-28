@@ -1,0 +1,44 @@
+worker-q: job #2319 starting at 2026-09-28T18:28:28.739441+00:00
+worker-q: cwd=C:\Users\samsu\.local\state\gpuq\snapshots\2319\job-2319
+worker-q: snapshot=git 8144ca310104531d304e7bf52d2236718174fe1f
+worker-q: CUDA_VISIBLE_DEVICES=0
+worker-q: command=['.venv-gpu/Scripts/python.exe', 'experiments/2026-09-28_compact_history/retention/probe.py']
+worker-q: ------------------------------------------------------------
+{"arm": "v72", "net": 0, "final_mse": 1.870453921403615e-08, "s": 1.1}
+{"arm": "v72", "net": 1, "final_mse": 1.9969028431418594e-08, "s": 0.6}
+{"arm": "v72", "net": 2, "final_mse": 2.208007619056334e-08, "s": 0.6}
+{"arm": "v72", "net": 3, "final_mse": 1.9590304945702756e-08, "s": 0.6}
+{"arm": "v72", "net": 4, "final_mse": 1.817059768992734e-08, "s": 0.6}
+{"arm": "v72", "net": 5, "final_mse": 2.317163602180425e-08, "s": 0.5}
+{"arm": "v72", "net": 6, "final_mse": 2.0178501984189407e-08, "s": 0.6}
+{"arm": "v72", "net": 7, "final_mse": 2.164987620087269e-08, "s": 0.6}
+{"arm": "age3_r64", "net": 0, "final_mse": 2.511212689343388e-07, "s": 0.4}
+{"arm": "age3_r64", "net": 1, "final_mse": 3.2159798361668584e-07, "s": 0.5}
+{"arm": "age3_r64", "net": 2, "final_mse": 3.114885973103014e-07, "s": 0.5}
+{"arm": "age3_r64", "net": 3, "final_mse": 3.308655075102669e-07, "s": 0.5}
+{"arm": "age3_r64", "net": 4, "final_mse": 3.390023447776149e-07, "s": 0.5}
+{"arm": "age3_r64", "net": 5, "final_mse": 2.9396671852559753e-07, "s": 0.5}
+{"arm": "age3_r64", "net": 6, "final_mse": 3.59711741594437e-07, "s": 0.5}
+{"arm": "age3_r64", "net": 7, "final_mse": 3.5597832078228033e-07, "s": 0.5}
+{"arm": "age3_r32", "net": 0, "final_mse": 4.3122143931412227e-07, "s": 0.5}
+{"arm": "age3_r32", "net": 1, "final_mse": 5.479346679138713e-07, "s": 0.5}
+{"arm": "age3_r32", "net": 2, "final_mse": 4.989793696225816e-07, "s": 0.5}
+{"arm": "age3_r32", "net": 3, "final_mse": 5.39331787937635e-07, "s": 0.4}
+{"arm": "age3_r32", "net": 4, "final_mse": 5.960890242603936e-07, "s": 0.4}
+{"arm": "age3_r32", "net": 5, "final_mse": 5.077730675729245e-07, "s": 0.4}
+{"arm": "age3_r32", "net": 6, "final_mse": 6.157437509193511e-07, "s": 0.4}
+{"arm": "age3_r32", "net": 7, "final_mse": 6.042054272421939e-07, "s": 0.4}
+{"arm": "age3_zero", "net": 0, "final_mse": 7.793376159568056e-07, "s": 0.4}
+{"arm": "age3_zero", "net": 1, "final_mse": 1.0062312782057656e-06, "s": 0.4}
+{"arm": "age3_zero", "net": 2, "final_mse": 1.0163508714442348e-06, "s": 0.4}
+{"arm": "age3_zero", "net": 3, "final_mse": 9.31709015262072e-07, "s": 0.4}
+{"arm": "age3_zero", "net": 4, "final_mse": 1.0513036375299664e-06, "s": 0.4}
+{"arm": "age3_zero", "net": 5, "final_mse": 9.464527617223688e-07, "s": 0.4}
+{"arm": "age3_zero", "net": 6, "final_mse": 1.1416675970856982e-06, "s": 0.4}
+{"arm": "age3_zero", "net": 7, "final_mse": 1.0197057816083258e-06, "s": 0.4}
+v72 mean final 2.0439e-08 x v72 1.000 teacher 0.000e+00 
+age3_r64 mean final 3.2047e-07 x v72 15.679 teacher 3.046e-07 8
+age3_r32 mean final 5.4266e-07 x v72 26.550 teacher 5.252e-07 8
+age3_zero mean final 9.8659e-07 x v72 48.269 teacher 9.683e-07 
+worker-q: ------------------------------------------------------------
+worker-q: job #2319 SUCCEEDED (exit code 0) at 2026-09-28T18:28:50.135886+00:00

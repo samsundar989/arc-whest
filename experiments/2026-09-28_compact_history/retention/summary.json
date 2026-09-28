@@ -1,0 +1,149 @@
+[
+ {
+  "arm": "v72",
+  "mean_final_mse": 2.0439320084814317e-08,
+  "ratio": 1.0,
+  "per_net_ratio": [
+   1.0,
+   1.0
+  ],
+  "wins_vs_v72": 0,
+  "teacher_dist_mean": 0.0,
+  "FB_measured": 0.2147330086,
+  "paired_score_gain_pct": 0.0,
+  "t95_pct": [
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "arm": "age3_r64",
+  "mean_final_mse": 3.204665603814403e-07,
+  "ratio": 15.679,
+  "per_net_ratio": [
+   12.69,
+   18.66
+  ],
+  "wins_vs_v72": 0,
+  "teacher_dist_mean": 3.0455271287664564e-07,
+  "FB_measured": null
+ },
+ {
+  "arm": "age3_r32",
+  "mean_final_mse": 5.426598168478843e-07,
+  "ratio": 26.55,
+  "per_net_ratio": [
+   21.91,
+   32.81
+  ],
+  "wins_vs_v72": 0,
+  "teacher_dist_mean": 5.251913800068829e-07,
+  "FB_measured": null
+ },
+ {
+  "arm": "age3_zero",
+  "mean_final_mse": 9.865948198519046e-07,
+  "ratio": 48.269,
+  "per_net_ratio": [
+   40.85,
+   57.86
+  ],
+  "wins_vs_v72": 0,
+  "teacher_dist_mean": 9.683117487171686e-07,
+  "FB_measured": null
+ },
+ {
+  "arm": "age3_r128",
+  "mean_final_mse": 1.3956332706504187e-07,
+  "ratio": 6.828,
+  "per_net_ratio": [
+   5.56,
+   8.35
+  ],
+  "wins_vs_v72": 0,
+  "teacher_dist_mean": 1.210406378572816e-07,
+  "FB_measured": null
+ },
+ {
+  "arm": "age3_r256",
+  "mean_final_mse": 3.8079279697424866e-08,
+  "ratio": 1.863,
+  "per_net_ratio": [
+   1.58,
+   2.13
+  ],
+  "wins_vs_v72": 0,
+  "teacher_dist_mean": 1.9483893286570397e-08,
+  "FB_measured": 0.18725464495992128,
+  "paired_score_gain_pct": -62.46,
+  "t95_pct": [
+   -74.49,
+   -50.43
+  ]
+ },
+ {
+  "arm": "age3_r64p3",
+  "mean_final_mse": 3.082653679528305e-07,
+  "ratio": 15.082,
+  "per_net_ratio": [
+   12.01,
+   17.95
+  ],
+  "wins_vs_v72": 0,
+  "teacher_dist_mean": 2.932918806735154e-07,
+  "FB_measured": null
+ },
+ {
+  "arm": "d21age1",
+  "mean_final_mse": 1.8298207593548546e-06,
+  "ratio": 89.525,
+  "per_net_ratio": [
+   72.19,
+   109.83
+  ],
+  "wins_vs_v72": 0,
+  "teacher_dist_mean": 1.830091789649358e-06,
+  "FB_measured": null
+ },
+ {
+  "arm": "d21age2",
+  "mean_final_mse": 1.015789921907383e-06,
+  "ratio": 49.698,
+  "per_net_ratio": [
+   36.39,
+   64.94
+  ],
+  "wins_vs_v72": 0,
+  "teacher_dist_mean": 1.009211985398392e-06,
+  "FB_measured": null
+ },
+ {
+  "arm": "d21age3",
+  "mean_final_mse": 5.704258212714925e-07,
+  "ratio": 27.908,
+  "per_net_ratio": [
+   22.06,
+   33.87
+  ],
+  "wins_vs_v72": 0,
+  "teacher_dist_mean": 5.594043477318637e-07,
+  "FB_measured": null
+ },
+ {
+  "arm": "d21age4",
+  "mean_final_mse": 3.196445831625901e-07,
+  "ratio": 15.639,
+  "per_net_ratio": [
+   13.34,
+   19.0
+  ],
+  "wins_vs_v72": 0,
+  "teacher_dist_mean": 3.0547054080563463e-07,
+  "FB_measured": 0.18573030351080888,
+  "paired_score_gain_pct": -1252.65,
+  "t95_pct": [
+   -1364.2,
+   -1141.09
+  ]
+ }
+]

@@ -1,0 +1,80 @@
+worker-q: job #2325 starting at 2026-09-28T18:32:36.175991+00:00
+worker-q: cwd=C:\Users\samsu\.local\state\gpuq\snapshots\2325\job-2325
+worker-q: snapshot=git e124dafd02e58535c589e7f6873c3a7a6e9083d1
+worker-q: CUDA_VISIBLE_DEVICES=0
+worker-q: command=['.venv-gpu/Scripts/python.exe', 'experiments/2026-09-28_compact_history/retention/probe.py', '0,1,2,3,4,5,6,7', 'age3_r128,age3_r256,age3_r64p3,d21age1,d21age2,d21age3,d21age4', '_b2']
+worker-q: ------------------------------------------------------------
+{"arm": "v72", "net": 0, "final_mse": 1.870453921403615e-08, "s": 0.8}
+{"arm": "v72", "net": 1, "final_mse": 1.9969028431418594e-08, "s": 0.5}
+{"arm": "v72", "net": 2, "final_mse": 2.208007619056334e-08, "s": 0.6}
+{"arm": "v72", "net": 3, "final_mse": 1.9590304945702756e-08, "s": 0.6}
+{"arm": "v72", "net": 4, "final_mse": 1.817059768992734e-08, "s": 0.6}
+{"arm": "v72", "net": 5, "final_mse": 2.317163602180425e-08, "s": 0.6}
+{"arm": "v72", "net": 6, "final_mse": 2.0178501984189407e-08, "s": 0.6}
+{"arm": "v72", "net": 7, "final_mse": 2.164987620087269e-08, "s": 0.6}
+{"arm": "age3_r128", "net": 0, "final_mse": 1.0399910855484083e-07, "s": 0.5}
+{"arm": "age3_r128", "net": 1, "final_mse": 1.4414254023742185e-07, "s": 0.5}
+{"arm": "age3_r128", "net": 2, "final_mse": 1.399299363312523e-07, "s": 0.4}
+{"arm": "age3_r128", "net": 3, "final_mse": 1.4145987895135334e-07, "s": 0.4}
+{"arm": "age3_r128", "net": 4, "final_mse": 1.5167098104485253e-07, "s": 0.4}
+{"arm": "age3_r128", "net": 5, "final_mse": 1.3190214155875322e-07, "s": 0.4}
+{"arm": "age3_r128", "net": 6, "final_mse": 1.6152144659618897e-07, "s": 0.5}
+{"arm": "age3_r128", "net": 7, "final_mse": 1.4188058324567195e-07, "s": 0.4}
+{"arm": "age3_r256", "net": 0, "final_mse": 3.373615691524607e-08, "s": 0.5}
+{"arm": "age3_r256", "net": 1, "final_mse": 3.9254366518041446e-08, "s": 0.5}
+{"arm": "age3_r256", "net": 2, "final_mse": 3.4983628084346196e-08, "s": 0.5}
+{"arm": "age3_r256", "net": 3, "final_mse": 3.7345399260770884e-08, "s": 0.5}
+{"arm": "age3_r256", "net": 4, "final_mse": 3.6426350377039535e-08, "s": 0.5}
+{"arm": "age3_r256", "net": 5, "final_mse": 3.783310373163047e-08, "s": 0.5}
+{"arm": "age3_r256", "net": 6, "final_mse": 4.3002221687931405e-08, "s": 0.6}
+{"arm": "age3_r256", "net": 7, "final_mse": 4.205301100439298e-08, "s": 0.5}
+{"arm": "age3_r64p3", "net": 0, "final_mse": 2.582419472909966e-07, "s": 0.5}
+{"arm": "age3_r64p3", "net": 1, "final_mse": 3.1694930983944033e-07, "s": 0.5}
+{"arm": "age3_r64p3", "net": 2, "final_mse": 3.056545813127973e-07, "s": 0.5}
+{"arm": "age3_r64p3", "net": 3, "final_mse": 3.166519300883309e-07, "s": 0.4}
+{"arm": "age3_r64p3", "net": 4, "final_mse": 3.261764405205172e-07, "s": 0.5}
+{"arm": "age3_r64p3", "net": 5, "final_mse": 2.7835801375365773e-07, "s": 0.5}
+{"arm": "age3_r64p3", "net": 6, "final_mse": 3.2606978291355257e-07, "s": 0.4}
+{"arm": "age3_r64p3", "net": 7, "final_mse": 3.3802093790335144e-07, "s": 0.4}
+{"arm": "d21age1", "net": 0, "final_mse": 1.657943401588719e-06, "s": 0.5}
+{"arm": "d21age1", "net": 1, "final_mse": 1.8301050486902801e-06, "s": 0.4}
+{"arm": "d21age1", "net": 2, "final_mse": 1.594059080318587e-06, "s": 0.4}
+{"arm": "d21age1", "net": 3, "final_mse": 2.1515899937442128e-06, "s": 0.4}
+{"arm": "d21age1", "net": 4, "final_mse": 1.8729075062212611e-06, "s": 0.4}
+{"arm": "d21age1", "net": 5, "final_mse": 1.8426767976186669e-06, "s": 0.5}
+{"arm": "d21age1", "net": 6, "final_mse": 2.1072987380879474e-06, "s": 0.5}
+{"arm": "d21age1", "net": 7, "final_mse": 1.5819855085691615e-06, "s": 0.5}
+{"arm": "d21age2", "net": 0, "final_mse": 8.685552586248811e-07, "s": 0.5}
+{"arm": "d21age2", "net": 1, "final_mse": 1.0637470943661266e-06, "s": 0.5}
+{"arm": "d21age2", "net": 2, "final_mse": 8.034069914211833e-07, "s": 0.5}
+{"arm": "d21age2", "net": 3, "final_mse": 1.1661842795009315e-06, "s": 0.5}
+{"arm": "d21age2", "net": 4, "final_mse": 1.0115227770534284e-06, "s": 0.5}
+{"arm": "d21age2", "net": 5, "final_mse": 1.0542695847772849e-06, "s": 0.5}
+{"arm": "d21age2", "net": 6, "final_mse": 1.310457520654051e-06, "s": 0.5}
+{"arm": "d21age2", "net": 7, "final_mse": 8.481758688611783e-07, "s": 0.5}
+{"arm": "d21age3", "net": 0, "final_mse": 4.631962965506584e-07, "s": 0.5}
+{"arm": "d21age3", "net": 1, "final_mse": 5.774902824687037e-07, "s": 0.5}
+{"arm": "d21age3", "net": 2, "final_mse": 4.871608675874101e-07, "s": 0.5}
+{"arm": "d21age3", "net": 3, "final_mse": 6.484979804114742e-07, "s": 0.5}
+{"arm": "d21age3", "net": 4, "final_mse": 6.155156918343281e-07, "s": 0.5}
+{"arm": "d21age3", "net": 5, "final_mse": 5.689867782875419e-07, "s": 0.5}
+{"arm": "d21age3", "net": 6, "final_mse": 6.709361542492613e-07, "s": 0.5}
+{"arm": "d21age3", "net": 7, "final_mse": 5.316225187825625e-07, "s": 0.5}
+{"arm": "d21age4", "net": 0, "final_mse": 2.685884878775086e-07, "s": 0.5}
+{"arm": "d21age4", "net": 1, "final_mse": 3.4515175943833523e-07, "s": 0.5}
+{"arm": "d21age4", "net": 2, "final_mse": 2.9929530013233236e-07, "s": 0.5}
+{"arm": "d21age4", "net": 3, "final_mse": 3.556215400799163e-07, "s": 0.5}
+{"arm": "d21age4", "net": 4, "final_mse": 3.4526389772323867e-07, "s": 0.5}
+{"arm": "d21age4", "net": 5, "final_mse": 3.3609443596250226e-07, "s": 0.5}
+{"arm": "d21age4", "net": 6, "final_mse": 3.183002975199231e-07, "s": 0.5}
+{"arm": "d21age4", "net": 7, "final_mse": 2.8884094656696423e-07, "s": 0.5}
+v72 mean final 2.0439e-08 x v72 1.000 teacher 0.000e+00 
+age3_r128 mean final 1.3956e-07 x v72 6.828 teacher 1.210e-07 
+age3_r256 mean final 3.8079e-08 x v72 1.863 teacher 1.948e-08 
+age3_r64p3 mean final 3.0827e-07 x v72 15.082 teacher 2.933e-07 
+d21age1 mean final 1.8298e-06 x v72 89.525 teacher 1.830e-06 
+d21age2 mean final 1.0158e-06 x v72 49.698 teacher 1.009e-06 
+d21age3 mean final 5.7043e-07 x v72 27.908 teacher 5.594e-07 
+d21age4 mean final 3.1964e-07 x v72 15.639 teacher 3.055e-07 
+worker-q: ------------------------------------------------------------
+worker-q: job #2325 SUCCEEDED (exit code 0) at 2026-09-28T18:33:12.791049+00:00
