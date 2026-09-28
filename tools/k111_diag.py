@@ -850,9 +850,181 @@ def cmd_report(a):
     return 0
 
 
+# ============================================================ rank screen (PLAN rev 15 B3a)
+RANK_LAYERS = (2, 5, 8, 11, 14)
+RANKS = (8, 16, 32, 64, 128)
+RANK_ARMS = (0, 8, 32, 128, 1024)
+
+
+def _energy(sv, ranks=RANKS):
+    e = sv * sv
+    c = np.cumsum(e)
+    return {r: float(c[r - 1] / c[-1]) for r in ranks}
+
+
+def cmd_rank(a):
+    """Rank screen of the AD error in the full D21 form (D3 AD error on the diagonal)."""
+    import torch
+    out = Path(a.out)
+    out.mkdir(parents=True, exist_ok=True)
+    d = Diag(a)
+    n = d.n
+    off = d.off64
+    off32 = off.float()
+    lo, hi = (int(x) for x in a.nets.split("-"))
+    progress = os.environ.get("WORKERQ_PROGRESS")
+    nets = list(range(lo, hi + 1))
+    diag = torch.diag
+    for i, g in enumerate(nets):
+        p = out / f"rank_{g:03d}.json"
+        if p.exists():
+            continue
+        t0 = time.time()
+        torch.cuda.reset_peak_memory_stats()
+        w, truth = d.data.net("full", g)
+        L = d.labels(g)
+        lps = {l: d.label_parts(L, l, w[l + 1].double()) for l in range(d.depth - 1)}
+        res = {"net": g, "spectra": {}, "arms": {}}
+        svs = {}
+
+        # ---- 1-4: spectra on the free-running base run
+        hook = Hook(record=False)
+
+        def analyse(l, state):
+            if l not in RANK_LAYERS:
+                return
+            W = w[l + 1]
+            Wd = W.double()
+            (t, S), (D3m, D21m) = d.state_slices(state[2], W.T.contiguous(), off32)
+            S = S * off
+            m3 = D3m - rep3(t, S, Wd)
+            m21 = (D21m * off - rep21(t, S, Wd)) * off
+            lp = lps[l]
+            Mod = m21 + diag(m3)
+            Lab = lp["AD21"] * off + diag(lp["AD3"])
+            E = Lab - Mod
+            Eo = E - float((E * Mod).sum() / (Mod * Mod).sum()) * Mod
+            mats = {"E": E, "label_AD": Lab, "E_orth": Eo}
+            if "AD21_rep1" in lp:
+                mats["noise"] = ((lp["AD21"] - lp["AD21_rep1"]) * off
+                                 + diag(lp["AD3"] - lp["AD3_rep1"])) / math.sqrt(2.0)
+            r = {}
+            for k, M in mats.items():
+                sv = torch.linalg.svdvals(M).cpu().numpy()
+                svs[f"{k}__{l}"] = sv
+                r[k] = {"fro2": float((sv * sv).sum()), "energy": _energy(sv),
+                        "sv1": float(sv[0])}
+            r["E_diag_share"] = float((torch.diagonal(E) ** 2).sum() / (E * E).sum())
+            if "noise" in r:
+                sE, sN = svs[f"E__{l}"], svs[f"noise__{l}"]
+                r["noise_over_E_fro2"] = r["noise"]["fro2"] / r["E"]["fro2"]
+                r["E_sv_above_noise_sv1"] = int((sE > sN[0]).sum())
+                cE = np.cumsum(sE * sE)
+                # E energy beyond rank r vs the total noise energy (where noise owns the tail)
+                r["E_tail_over_noise"] = {rr: float((cE[-1] - cE[rr - 1]) / r["noise"]["fro2"])
+                                          for rr in RANKS}
+                # noise-adjusted capture: rank-r energy / (|E|^2 - |N|^2)
+                r["E_energy_noise_adj"] = {
+                    rr: float(min(cE[rr - 1] / (cE[-1] - r["noise"]["fro2"]), 1.0)) for rr in RANKS}
+            res["spectra"][l] = r
+
+        mus, _ = d.chain_run(w, hook, analyse)
+        base = d.mse(mus, truth)
+        res["base_final"] = base[d.depth - 1]
+        print(f"  net {g} spectra: {time.time() - t0:.0f}s", flush=True)
+
+        # ---- 5: truncated oracle, every layer, no refit
+        for rk in RANK_ARMS:
+            ctx = {}
+
+            def prep(l, state, ctx=ctx):
+                W = w[l + 1]
+                Wd = W.double()
+                t, S = d.slices(d.mod._advance(d.I32, state[2]), off32)
+                S = S * off
+                ctx[l + 1] = {"r3": rep3(t, S, Wd), "r21": rep21(t, S, Wd) * off, "lp": lps[l]}
+
+            def edit(l, name, v, ctx=ctx, rk=rk):
+                c = ctx.get(l)
+                if c is None:
+                    return v
+                vd = v.double()
+                lp = c["lp"]
+                if name == "D3":
+                    c["e3"] = lp["AD3"] - (vd - c["r3"])
+                    return (vd + c["e3"]).to(v.dtype)
+                Eoff = (lp["AD21"] - (vd * off - c["r21"])) * off
+                if rk >= n:
+                    fix = Eoff
+                elif rk == 0:
+                    fix = Eoff * 0.0
+                else:
+                    U, Sv, Vh = torch.linalg.svd(Eoff + diag(c["e3"]))
+                    fix = ((U[:, :rk] * Sv[:rk]) @ Vh[:rk]) * off
+                return ((vd + fix) * off).to(v.dtype)
+
+            hk = Hook(record=False)
+            hk.edit = edit
+            mus, _ = d.chain_run(w, hk, prep)
+            m = d.mse(mus, truth)
+            res["arms"][rk] = {"final": m[d.depth - 1],
+                               "change": m[d.depth - 1] / res["base_final"] - 1.0}
+        res["seconds"] = round(time.time() - t0, 1)
+        res["peak_vram_gib"] = torch.cuda.max_memory_allocated() / 2 ** 30
+        np.savez_compressed(out / f"sv_{g:03d}.npz", **svs)
+        p.write_text(json.dumps(res))
+        print(f"net {g}: {res['seconds']}s peak VRAM {res['peak_vram_gib']:.2f} GiB  "
+              + " ".join(f"r{k}:{v['change']:+.1%}" for k, v in res["arms"].items()), flush=True)
+        if progress:
+            try:
+                Path(progress).write_text(str((i + 1) / len(nets)))
+            except OSError:
+                pass
+    return 0
+
+
+def cmd_rank_report(a):
+    out = Path(a.out)
+    R = [json.loads(p.read_text()) for p in sorted(out.glob("rank_*.json"))]
+    med = lambda xs: float(np.median(xs))
+    L = [f"# K111 rank screen ({len(R)} nets: {[r['net'] for r in R]}), free mode, medians", ""]
+    L += ["## energy fraction captured by the top-r singular directions (D21 form, D3 on diag)", "",
+          "| l | matrix | r=8 | 16 | 32 | 64 | 128 | Frobenius^2 |", "|---|---|---|---|---|---|---|---|"]
+    for l in RANK_LAYERS:
+        for k in ("E", "label_AD", "E_orth", "noise"):
+            rs = [r["spectra"][str(l)][k] for r in R if k in r["spectra"][str(l)]]
+            L.append(f"| {l} | {k} | " + " | ".join(
+                f"{med([x['energy'][str(rr)] for x in rs]):.3f}" for rr in RANKS)
+                + f" | {med([x['fro2'] for x in rs]):.3e} |")
+    L += ["", "## E vs the rep1 noise matrix", "",
+          "| l | noise/E energy | #sv(E) > sv1(N) | E tail beyond r / noise energy (r=8,16,32,64,128) | "
+          "noise-adjusted E capture (r=8..128) | E diag share |", "|---|---|---|---|---|---|"]
+    for l in RANK_LAYERS:
+        ss = [r["spectra"][str(l)] for r in R]
+        L.append(f"| {l} | {med([s['noise_over_E_fro2'] for s in ss]):.4f} | "
+                 f"{med([s['E_sv_above_noise_sv1'] for s in ss]):.0f} | "
+                 + ", ".join(f"{med([s['E_tail_over_noise'][str(rr)] for s in ss]):.1f}" for rr in RANKS)
+                 + " | " + ", ".join(f"{med([s['E_energy_noise_adj'][str(rr)] for s in ss]):.3f}" for rr in RANKS)
+                 + f" | {med([s['E_diag_share'] for s in ss]):.4f} |")
+    L += ["", "## truncated oracle, every layer, no refit (final-layer MSE change)", "",
+          "D3 gets its full AD fix in every arm; D21 gets model + offdiag(rank-r(E)).", "",
+          "| r | median | pooled mean | per net |", "|---|---|---|---|"]
+    base = np.array([r["base_final"] for r in R])
+    for rk in RANK_ARMS:
+        f = np.array([r["arms"][str(rk)]["final"] for r in R])
+        ch = f / base - 1.0
+        L.append(f"| {rk if rk < 1024 else 'full'} | {med(ch):+.2%} | {f.mean() / base.mean() - 1:+.2%} | "
+                 + ", ".join(f"{x:+.1%}" for x in ch) + " |")
+    txt = "\n".join(L)
+    (out / "report.md").write_text(txt, encoding="utf-8")
+    sys.stdout.reconfigure(encoding="utf-8")
+    print(txt)
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["step0", "run", "report"])
+    ap.add_argument("cmd", choices=["step0", "run", "report", "rank", "rank_report"])
     ap.add_argument("--cand", default=str(ROOT / "estimator_k3_v62_s1.py"))
     ap.add_argument("--params", default=str(ROOT / "experiments" / "2026-09-25_twin" / "S3"
                                             / "params_best.npz"))
@@ -864,7 +1036,8 @@ def main():
     ap.add_argument("--max-layer", type=int, default=99, help="debug: run layers < this only")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
-    return {"step0": cmd_step0, "run": cmd_run, "report": cmd_report}[a.cmd](a)
+    return {"step0": cmd_step0, "run": cmd_run, "report": cmd_report, "rank": cmd_rank,
+            "rank_report": cmd_rank_report}[a.cmd](a)
 
 
 if __name__ == "__main__":

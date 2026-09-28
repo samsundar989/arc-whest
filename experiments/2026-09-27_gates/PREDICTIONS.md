@@ -20,3 +20,19 @@ DESIGN.md) is inside what the twin trains.
 **Stop.** Early stop (patience 3) or VAL gain < 0.1% after one epoch ⇒ close B2 (transport) and record;
 birth arm then not run (diagnostic: two-leg/hub gates capture ≤ 8% of the error). A gain ≥ 0.2% ⇒ bake
 (build_gate on the v71 source), DEV-100 paired vs v71, §5.
+
+## Result G1tg (2026-09-28) and the next two runs (written before they run)
+
+**G1tg result:** VAL 2.232939e-08 (init = exact frozen control) → **2.215950e-08 at step 84 (−0.76%)**, early
+stop at 168. My prediction (0 to −0.4%, P(≥ −0.3%) = 25%) was too pessimistic. Baked → `estimator_k3_v72_gt.py`
+(twin DEV −0.41% vs v71; official DEV running).
+
+**S3c — stricter control (worker-q, below).** The frozen-init control shows the gain is not from moving old
+leaves, but not that it needs the GATES rather than *any* further fitting at lr 3e-4. S3c = stage S3 (the
+existing leaves, no gates), init S2t3 final, lr 3e-4, same eval cadence/patience, TRAIN 900. Prediction (mine):
+≤ −0.25% VAL (S2t3 ran its cosine to 0 and plateaued); if S3c reaches ≥ −0.6%, the gate's gain is not
+specific to the gate and v72's mechanism claim is withdrawn (the candidate itself stays valid on DEV).
+
+**G1bg — birth-gate arm.** Stop rule said: run only if transport moved; it did. Same recipe, birth gates
+(fac1 ends g_e, w2b middle g_m, bound 0.5), init S2t3 final. Prediction: smaller than transport, −0.1% to
+−0.4% VAL (diagnostic: two-leg/hub gates span ≤ 8% of the AD error). Stop: patience 3. Cost +1.9e-6, +306 ops.

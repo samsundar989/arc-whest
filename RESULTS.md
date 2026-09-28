@@ -281,6 +281,27 @@ the D3/D21 error ✓ at depth (84–96%), ✗ early (57–78%); gates capture < 
 PLAN consequence: B2 gets ONE end-to-end falsification run (transport, gate leaves only); the birth arm
 is not run unless it moves.
 
+## PLAN rev 15 B3a — rank screen of the all-distinct error: NOT rejected, compact at depth (2026-09-28)
+
+`tools/k111_diag.py rank`, `experiments/2026-09-27_k111/rank/` (worker-q 2262, 11 min; FIT 0–7, free-running,
+v62_s1 + S3 set, no refit). E = label AD − model AD in full D21 form, D3 AD error restored on the diagonal
+(it carries only 0.3% of ‖E‖²). Fraction of ‖·‖²_F in the top-r singular directions (median, 8 nets):
+
+| l | E r=8 / 16 / 32 / 64 / 128 | E ⊥ model AD, r = 64 | ‖noise‖²/‖E‖² (rep1) |
+|---:|---|---:|---:|
+| 2 | 0.15 / 0.23 / 0.34 / 0.50 / 0.70 | 0.50 | 3.5e-3 |
+| 5 | 0.31 / 0.42 / 0.55 / 0.69 / 0.83 | 0.67 | 6e-4 |
+| 8 | 0.48 / 0.59 / 0.70 / **0.81** / 0.91 | 0.78 | 2e-4 |
+| 11 | 0.59 / 0.71 / 0.80 / **0.88** / 0.94 | 0.83 | 1e-4 |
+| 14 | 0.67 / 0.78 / 0.85 / **0.92** / 0.96 | 0.86 | 4e-5 |
+
+Truncated oracle (every layer; D3 full AD fix + D21 model + rank-r(E) off-diagonal), final-MSE change, median:
+r = 0 (D3 only) −9.5%; r = 8 −13.6%; **r = 32 −18.9%**; r = 128 −30.4%; full −35.3%. Stop rules (rank 64 < 50%
+at l ≥ 8; rank-32 oracle < 1/3 of full) do not fire (0.54 of full; 0.36 of the D21-only increment). Energy and
+score value do not scale together (rank 32 = 70–85% of energy, ~half the value). **Label-oracle evidence only:
+it says a compact extra third-order component COULD carry most of the missing AD content, not that an online
+update can produce it.** Prediction (agent): rejection ✗; rank-32 oracle −17…−20% ✓.
+
 ## PLAN rev 15 B2 prep — identity-initialised factor gates (2026-09-28)
 
 `tools/build_gate.py`, `experiments/2026-09-27_gates/DESIGN.md`; twin stages G1b/G1t/G1bg/G1tg
