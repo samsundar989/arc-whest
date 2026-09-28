@@ -1917,3 +1917,8 @@ What to do: stream the split ONCE into `cache/twin/*_w.f32` (`tools/twin/export_
 plain seek-and-write) and read nets with `np.fromfile(..., offset=)` (`tools/twin/twin.py
 Data.net`). Anything that loops over hundreds of full-split nets through `real_data`
 should declare `--ram 40` or use the export.
+
+**workerq job outputs written relative to `__file__` land in the snapshot, not the repo**
+(2026-09-28, jobs 2319/2325). A probe that saved `Path(__file__).parent / "x.json"` wrote
+into `~/.local/state/gpuq/snapshots/<id>/job-<id>/...` and the live repo got nothing; copy
+back from there, or write to an absolute repo path (`C:\Users\samsu\Documents\arc-whest\...`).

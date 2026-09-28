@@ -2379,3 +2379,32 @@ and residual are not server estimates. No new submission or training occurred.
 This confirms PLAN B5's target: cheaper recent transport/readout plus a replacement for
 old-source storage, trained against actual final means. The small neural corrector is
 not a meaningful compute bottleneck. Core32/64 student cost/accuracy remain unmeasured.
+
+## PLAN rev17 B5 compact-history carrier — closed at the E2 retention bound (2026-09-28)
+
+Full note: `experiments/2026-09-28_compact_history/report.md`. **Diagnostics on TRAIN full 0–7,
+not candidate scores; no training, no candidate, no submission.** Final-layer floor ≈7.7e-11.
+Teacher = baked v72 (`3b6cc397`) through the torch twin `--raw`; mean final MSE 2.0439e-08,
+bit-identical on rerun.
+
+A q-dim symmetric core in basis U carries exactly the all-mode projection of old history onto
+span(U). v72 with `_SHARED_AGE=3, _SHARED_RANK=q` carries that projection for the A_L/M legs
+and keeps P2/hub factors exact, so it **upper-bounds** the analytic age3/q student's retention.
+
+| arm (one source change from v72) | × v72 final MSE | wins/8 | F/B (real f64 meter) | paired score change |
+|---|---:|---:|---:|---:|
+| age3 bound r64 | 15.68 | 0 | not metered (core est. ≈0.134) | — |
+| age3 bound r64, 3 power passes | 15.08 | 0 | — | — |
+| age3 bound r32 | 26.55 | 0 | not metered (core est. ≈0.115) | — |
+| age3 bound r128 / r256 | 6.83 / 1.863 | 0 / 0 | — / **0.18725** | — / **−62.5%** (t95 −74.5, −50.4) |
+| age3 zero history (E2 control) | 48.27 | 0 | — | — |
+| D21 read from youngest 4/3/2/1 lineages (new, E5) | 15.64 / 27.91 / 49.70 / 89.53 | 0 | **0.18573** (m=4) | −1253% (m=4) |
+
+r64 beats the zero control on teacher distortion 8/8 (E2 wording passes), but at ≤0.12B
+a 20% gain needs raw ≤1.43× v72: pilot gates would have to remove ~91–95% of the bound's
+error without enlarging the retained subspace. **Carrier closed for both capacities before
+E1 build.** Basis quality is not the limit (3 passes: 15.7→15.1). The D21-age slice
+identity-checks against production `_dslice21` (exact k≤5, 2.6e-5 with old tier; job 2326).
+Older lineages' D21 feedback (covariance/closure/corrector) is essential. E5 fallback
+stopped at the price screen: the best measured structural saving with a usable answer is
+−12.8% cost at ×1.86 raw. Jobs 2319/2325/2326, 16 GiB/10 GiB/2 CPU declared.

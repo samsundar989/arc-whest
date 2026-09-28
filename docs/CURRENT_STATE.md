@@ -8,6 +8,12 @@ conditional TRAIN900 expansion, failure diagnostics and the complete canary loop
 This is a plan update only: the compact student remains unbuilt/unpriced/untrained;
 no new candidate, training result or submission was produced by this handoff turn.
 
+**Update 2026-09-28 (Claude execution of rev17):** B5's age3/q32/q64 carrier is closed at the
+E2 retention bound (r64 ×15.7, r32 ×26.6 raw vs v72 on TRAIN0–7), and the E5 fallbacks are
+closed at the price screen (best usable structural saving −12.8% cost for ×1.86 raw).
+Nothing was trained or submitted from B5. See `experiments/2026-09-28_compact_history/report.md`.
+Lane A2 (G1bg birth-gate step112 export) is being evaluated separately.
+
 ## Graded incumbent and fallback
 
 | role | source / SHA8 | submission | reported score | measured server median / worst |

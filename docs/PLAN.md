@@ -72,6 +72,8 @@ B5. **Primary new hypothesis: compact history trained for the final output.** Go
 
 **B5 is now the first implementation lane.** Execute stages E0–E6 below in order. This replaces the looser rev 16 queue. No new experiment or result is claimed by this revision.
 
+**B5 outcome [M], September 28 (after rev17):** closed at the E2 retention screen, before the E1 build. v72 with age3 plus shared rank q upper-bounds the analytic age3/q core's retention (same all-mode projection, P2/hub kept exact). On TRAIN0–7: r64 ×15.7 raw, r32 ×26.6, r128 ×6.8, r256 ×1.86 (metered 0.18725B, −62.5% paired score); 3 power passes do not help. The E5 fallbacks also fail at the price screen: age3/r256 as above, and a new youngest-m D21 read (m=4, 0.18573B, ×15.6 raw). No pilot, fit or candidate. `experiments/2026-09-28_compact_history/report.md`, RESULTS § "PLAN rev17 B5". Missing evidence for a ≥15% route: a κ3 representation whose dense (2,1) readout is materially cheaper than one n×(lineage columns)×n contraction per lineage-layer while retaining ≳256-dim content.
+
 #### E0 — pin the comparison and the actual teacher
 
 - Re-read current RESULTS and the submission ledger; preserve all existing dirty logs, checkpoints and archives. If a genuinely better graded incumbent has appeared, refresh the baseline explicitly before starting a comparison. Otherwise freeze v72 SHA256 `3b6cc39790295d3be60a88f9dd9053915f695bdf0a0da2cf2e99587cce692bac` as teacher and control.
