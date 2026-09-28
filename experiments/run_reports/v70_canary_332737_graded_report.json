@@ -1,0 +1,3572 @@
+{
+  "id": "332737",
+  "createdAt": "2026-09-28T02:17:31Z",
+  "status": "GRADED",
+  "gradingMessage": "<p>Graded successfully</p>\n",
+  "score": 4.665632983001898e-09,
+  "scoreSecondary": 2.172776433440049e-08,
+  "participant": {
+    "name": "neopok919",
+    "avatarUrl": "https://assets.aicrowd.com/avatars/p/513543/100x100/8f0d14b0",
+    "profileUrl": "/participants/neopok919",
+    "affiliation": ""
+  },
+  "team": null,
+  "round": {
+    "name": "Phase 2"
+  },
+  "viewerCanManage": false,
+  "gradingLogUrl": null,
+  "submissionFiles": null,
+  "evaluation": {
+    "schema_version": "2.0",
+    "session_id": "sess-2a5c3d3ab2bf",
+    "submission_id": "332737",
+    "state": "completed",
+    "phase": "scoring",
+    "started_at": "2026-09-28T02:17:48Z",
+    "updated_at": "2026-09-28T02:45:41Z",
+    "completed_at": "2026-09-28T02:45:41Z",
+    "config_snapshot": {
+      "n_mlps": 100,
+      "depth": 16,
+      "width": 1024,
+      "flop_budget": 2199023255552.0
+    },
+    "progress": {
+      "total_mlps": 100,
+      "mlps_completed": 100,
+      "mlps_in_flight": 0,
+      "mlps_failed": 0,
+      "pct_complete": 100.0
+    },
+    "truncation": null,
+    "workers": [
+      {
+        "worker_id": "w-0",
+        "state": "idle",
+        "current_mlp": null
+      },
+      {
+        "worker_id": "w-1",
+        "state": "idle",
+        "current_mlp": null
+      },
+      {
+        "worker_id": "w-2",
+        "state": "idle",
+        "current_mlp": null
+      },
+      {
+        "worker_id": "w-3",
+        "state": "idle",
+        "current_mlp": null
+      },
+      {
+        "worker_id": "w-4",
+        "state": "idle",
+        "current_mlp": null
+      }
+    ],
+    "partial_metrics": null,
+    "smoke_test_result": {
+      "passed": true,
+      "duration_ms": 22768.619393000336,
+      "worker_passes": 5,
+      "worker_failures": 0,
+      "error_code": null
+    },
+    "results": {
+      "per_mlp": [
+        {
+          "mlp_index": 0,
+          "mlp_name": "natasha-heath",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 84.11950453499958,
+            "flopscope_server_kernel_wall_s": 75.752009572,
+            "flopscope_server_overhead_wall_s": 8.136636969999572,
+            "residual_wall_time_s": 0.23085799300000076,
+            "flopscope_self_report": {
+              "wall_s": 84.119463559,
+              "backend_s": 75.752009572,
+              "overhead_s": 8.13659599399999,
+              "residual_s": 0.23085799300000076
+            },
+            "participant_setup_wall_s": 0.03233790800004499,
+            "participant_roundtrip_wall_s": 84.49744789499891,
+            "flopscope_server_comms_wall_s": 0.779374966,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 1,
+          "mlp_name": "caitlin-kemp",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 83.55843595700026,
+            "flopscope_server_kernel_wall_s": 75.183145637,
+            "flopscope_server_overhead_wall_s": 8.144031094000255,
+            "residual_wall_time_s": 0.23125922600000592,
+            "flopscope_self_report": {
+              "wall_s": 83.558375114,
+              "backend_s": 75.183145637,
+              "overhead_s": 8.143970250999999,
+              "residual_s": 0.23125922600000592
+            },
+            "participant_setup_wall_s": 0.030455504000201472,
+            "participant_roundtrip_wall_s": 83.92959666800016,
+            "flopscope_server_comms_wall_s": 0.777733121,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 2,
+          "mlp_name": "jennifer-jordan",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 84.38759482699993,
+            "flopscope_server_kernel_wall_s": 75.899161354,
+            "flopscope_server_overhead_wall_s": 8.252958754999938,
+            "residual_wall_time_s": 0.23547471799999187,
+            "flopscope_self_report": {
+              "wall_s": 84.387501664,
+              "backend_s": 75.899161354,
+              "overhead_s": 8.252865592000006,
+              "residual_s": 0.23547471799999187
+            },
+            "participant_setup_wall_s": 0.03040550300011091,
+            "participant_roundtrip_wall_s": 84.76741924899989,
+            "flopscope_server_comms_wall_s": 0.795574417,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 3,
+          "mlp_name": "brandon-chen",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 82.40072346200031,
+            "flopscope_server_kernel_wall_s": 74.083557818,
+            "flopscope_server_overhead_wall_s": 8.084385566000321,
+            "residual_wall_time_s": 0.23278007799999045,
+            "flopscope_self_report": {
+              "wall_s": 82.400652602,
+              "backend_s": 74.083557818,
+              "overhead_s": 8.084314706,
+              "residual_s": 0.23278007799999045
+            },
+            "participant_setup_wall_s": 0.03025197900024068,
+            "participant_roundtrip_wall_s": 82.771407997001,
+            "flopscope_server_comms_wall_s": 0.782730609,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 4,
+          "mlp_name": "nicholas-gonzalez",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 83.92824522499905,
+            "flopscope_server_kernel_wall_s": 75.464638448,
+            "flopscope_server_overhead_wall_s": 8.228738664999042,
+            "residual_wall_time_s": 0.2348681120000009,
+            "flopscope_self_report": {
+              "wall_s": 83.928188265,
+              "backend_s": 75.464638448,
+              "overhead_s": 8.228681705,
+              "residual_s": 0.2348681120000009
+            },
+            "participant_setup_wall_s": 0.03113824699903489,
+            "participant_roundtrip_wall_s": 84.29768229900037,
+            "flopscope_server_comms_wall_s": 0.790734247,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 5,
+          "mlp_name": "thomas-anderson",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 82.57754009699966,
+            "flopscope_server_kernel_wall_s": 74.213654329,
+            "flopscope_server_overhead_wall_s": 8.12908483499966,
+            "residual_wall_time_s": 0.2348009330000025,
+            "flopscope_self_report": {
+              "wall_s": 82.577485426,
+              "backend_s": 74.213654329,
+              "overhead_s": 8.129030164,
+              "residual_s": 0.2348009330000025
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 82.94742809499985,
+            "flopscope_server_comms_wall_s": 0.781581086,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 6,
+          "mlp_name": "jill-gardner",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 83.14747573800014,
+            "flopscope_server_kernel_wall_s": 74.782461159,
+            "flopscope_server_overhead_wall_s": 8.13275311700015,
+            "residual_wall_time_s": 0.23226146199999675,
+            "flopscope_self_report": {
+              "wall_s": 83.147414144,
+              "backend_s": 74.782461159,
+              "overhead_s": 8.132691523000005,
+              "residual_s": 0.23226146199999675
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 83.52482767299989,
+            "flopscope_server_comms_wall_s": 0.773515143,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 7,
+          "mlp_name": "amanda-richmond",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 83.98429564499929,
+            "flopscope_server_kernel_wall_s": 75.596631569,
+            "flopscope_server_overhead_wall_s": 8.154404403999294,
+            "residual_wall_time_s": 0.23325967200000264,
+            "flopscope_self_report": {
+              "wall_s": 83.984260938,
+              "backend_s": 75.596631569,
+              "overhead_s": 8.154369697000007,
+              "residual_s": 0.23325967200000264
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 84.36819878200004,
+            "flopscope_server_comms_wall_s": 0.784056189,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 8,
+          "mlp_name": "tina-garcia",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 83.75644154200018,
+            "flopscope_server_kernel_wall_s": 75.374416652,
+            "flopscope_server_overhead_wall_s": 8.146074856000183,
+            "residual_wall_time_s": 0.23595003399999825,
+            "flopscope_self_report": {
+              "wall_s": 83.756420624,
+              "backend_s": 75.374416652,
+              "overhead_s": 8.146053938000009,
+              "residual_s": 0.23595003399999825
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 84.13426173399967,
+            "flopscope_server_comms_wall_s": 0.787432425,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 9,
+          "mlp_name": "alicia-levy",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 84.73099952899997,
+            "flopscope_server_kernel_wall_s": 76.215383244,
+            "flopscope_server_overhead_wall_s": 8.278455336999983,
+            "residual_wall_time_s": 0.2371609479999961,
+            "flopscope_self_report": {
+              "wall_s": 84.730898767,
+              "backend_s": 76.215383244,
+              "overhead_s": 8.278354575000009,
+              "residual_s": 0.2371609479999961
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 85.116572421,
+            "flopscope_server_comms_wall_s": 0.791644431,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 10,
+          "mlp_name": "jennifer-miller",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 79.43536987699918,
+            "flopscope_server_kernel_wall_s": 71.287439479,
+            "flopscope_server_overhead_wall_s": 7.921253888999175,
+            "residual_wall_time_s": 0.2266765090000007,
+            "flopscope_self_report": {
+              "wall_s": 79.435349439,
+              "backend_s": 71.287439479,
+              "overhead_s": 7.921233451000006,
+              "residual_s": 0.2266765090000007
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 79.80241483400096,
+            "flopscope_server_comms_wall_s": 0.766238113,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 11,
+          "mlp_name": "richard-contreras",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 83.5630036069997,
+            "flopscope_server_kernel_wall_s": 75.156823627,
+            "flopscope_server_overhead_wall_s": 8.174666171999704,
+            "residual_wall_time_s": 0.23151380800000254,
+            "flopscope_self_report": {
+              "wall_s": 83.562965062,
+              "backend_s": 75.156823627,
+              "overhead_s": 8.174627627000007,
+              "residual_s": 0.23151380800000254
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 83.94484445200032,
+            "flopscope_server_comms_wall_s": 0.773432933,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 12,
+          "mlp_name": "david-webb",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.40357171899996,
+            "flopscope_server_kernel_wall_s": 73.237330879,
+            "flopscope_server_overhead_wall_s": 7.940815059999963,
+            "residual_wall_time_s": 0.2254257799999948,
+            "flopscope_self_report": {
+              "wall_s": 81.403540025,
+              "backend_s": 73.237330879,
+              "overhead_s": 7.940783366000005,
+              "residual_s": 0.2254257799999948
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.79132436100008,
+            "flopscope_server_comms_wall_s": 0.76364831,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 13,
+          "mlp_name": "bradley-king",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.5915534880005,
+            "flopscope_server_kernel_wall_s": 73.39646451,
+            "flopscope_server_overhead_wall_s": 7.9658053790005,
+            "residual_wall_time_s": 0.22928359899999862,
+            "flopscope_self_report": {
+              "wall_s": 81.591532598,
+              "backend_s": 73.39646451,
+              "overhead_s": 7.965784489000001,
+              "residual_s": 0.22928359899999862
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.96794382200096,
+            "flopscope_server_comms_wall_s": 0.76631652,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 14,
+          "mlp_name": "jodi-morales",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 83.40814980999994,
+            "flopscope_server_kernel_wall_s": 74.939405302,
+            "flopscope_server_overhead_wall_s": 8.233869879999943,
+            "residual_wall_time_s": 0.23487462800000003,
+            "flopscope_self_report": {
+              "wall_s": 83.40810508,
+              "backend_s": 74.939405302,
+              "overhead_s": 8.233825150000001,
+              "residual_s": 0.23487462800000003
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 83.79036026400013,
+            "flopscope_server_comms_wall_s": 0.791041552,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 15,
+          "mlp_name": "travis-ward",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.11452189299962,
+            "flopscope_server_kernel_wall_s": 71.983654267,
+            "flopscope_server_overhead_wall_s": 7.903425051999619,
+            "residual_wall_time_s": 0.22744257399999412,
+            "flopscope_self_report": {
+              "wall_s": 80.114496096,
+              "backend_s": 71.983654267,
+              "overhead_s": 7.9033992549999965,
+              "residual_s": 0.22744257399999412
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.49086230899957,
+            "flopscope_server_comms_wall_s": 0.752130656,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 16,
+          "mlp_name": "tanya-bennett",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.85218140799952,
+            "flopscope_server_kernel_wall_s": 73.662489049,
+            "flopscope_server_overhead_wall_s": 7.965083194999522,
+            "residual_wall_time_s": 0.2246091640000003,
+            "flopscope_self_report": {
+              "wall_s": 81.852155094,
+              "backend_s": 73.662489049,
+              "overhead_s": 7.965056880999995,
+              "residual_s": 0.2246091640000003
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 82.23999462900065,
+            "flopscope_server_comms_wall_s": 0.766361243,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 17,
+          "mlp_name": "joseph-vega",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.4977169800004,
+            "flopscope_server_kernel_wall_s": 73.280744789,
+            "flopscope_server_overhead_wall_s": 7.986123099000409,
+            "residual_wall_time_s": 0.2308490919999997,
+            "flopscope_self_report": {
+              "wall_s": 81.497687196,
+              "backend_s": 73.280744789,
+              "overhead_s": 7.986093315000005,
+              "residual_s": 0.2308490919999997
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.88312721200055,
+            "flopscope_server_comms_wall_s": 0.776354198,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 18,
+          "mlp_name": "amy-young",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.6709914160001,
+            "flopscope_server_kernel_wall_s": 72.491422377,
+            "flopscope_server_overhead_wall_s": 7.952831770000088,
+            "residual_wall_time_s": 0.22673726900001157,
+            "flopscope_self_report": {
+              "wall_s": 80.670990036,
+              "backend_s": 72.491422377,
+              "overhead_s": 7.952830389999988,
+              "residual_s": 0.22673726900001157
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.05442473899893,
+            "flopscope_server_comms_wall_s": 0.759307227,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 19,
+          "mlp_name": "april-rogers",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 82.15965000300002,
+            "flopscope_server_kernel_wall_s": 73.780951145,
+            "flopscope_server_overhead_wall_s": 8.146847392000012,
+            "residual_wall_time_s": 0.23185146600000905,
+            "flopscope_self_report": {
+              "wall_s": 82.159631023,
+              "backend_s": 73.780951145,
+              "overhead_s": 8.14682841199999,
+              "residual_s": 0.23185146600000905
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 82.54783101899989,
+            "flopscope_server_comms_wall_s": 0.779232624,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 20,
+          "mlp_name": "william-white",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.03170395699999,
+            "flopscope_server_kernel_wall_s": 72.791684192,
+            "flopscope_server_overhead_wall_s": 8.01166058599999,
+            "residual_wall_time_s": 0.22835917899999458,
+            "flopscope_self_report": {
+              "wall_s": 81.031687013,
+              "backend_s": 72.791684192,
+              "overhead_s": 8.011643641999996,
+              "residual_s": 0.22835917899999458
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.40858030100026,
+            "flopscope_server_comms_wall_s": 0.754394129,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 21,
+          "mlp_name": "evan-jennings",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.7058694970001,
+            "flopscope_server_kernel_wall_s": 72.591662763,
+            "flopscope_server_overhead_wall_s": 7.889960420000094,
+            "residual_wall_time_s": 0.2242463139999984,
+            "flopscope_self_report": {
+              "wall_s": 80.705844892,
+              "backend_s": 72.591662763,
+              "overhead_s": 7.889935815000001,
+              "residual_s": 0.2242463139999984
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.09594457099956,
+            "flopscope_server_comms_wall_s": 0.759903303,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 22,
+          "mlp_name": "julie-grant",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.30382195600032,
+            "flopscope_server_kernel_wall_s": 72.147255416,
+            "flopscope_server_overhead_wall_s": 7.932431588000327,
+            "residual_wall_time_s": 0.224134952,
+            "flopscope_self_report": {
+              "wall_s": 80.303839782,
+              "backend_s": 72.147255416,
+              "overhead_s": 7.932449414000004,
+              "residual_s": 0.224134952
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.68961294099972,
+            "flopscope_server_comms_wall_s": 0.758813068,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 23,
+          "mlp_name": "chad-cortez",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.47516548300155,
+            "flopscope_server_kernel_wall_s": 73.244611327,
+            "flopscope_server_overhead_wall_s": 8.001689908001538,
+            "residual_wall_time_s": 0.22886424800000782,
+            "flopscope_self_report": {
+              "wall_s": 81.475141773,
+              "backend_s": 73.244611327,
+              "overhead_s": 8.001666197999995,
+              "residual_s": 0.22886424800000782
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.86514430999887,
+            "flopscope_server_comms_wall_s": 0.77404893,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 24,
+          "mlp_name": "diana-summers",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.66501264899989,
+            "flopscope_server_kernel_wall_s": 72.399428929,
+            "flopscope_server_overhead_wall_s": 8.036511910999891,
+            "residual_wall_time_s": 0.22907180900000412,
+            "flopscope_self_report": {
+              "wall_s": 80.664983949,
+              "backend_s": 72.399428929,
+              "overhead_s": 8.036483211000004,
+              "residual_s": 0.22907180900000412
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.05436432700003,
+            "flopscope_server_comms_wall_s": 0.7758621,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 25,
+          "mlp_name": "lauren-nelson",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 79.59103121799853,
+            "flopscope_server_kernel_wall_s": 71.444498838,
+            "flopscope_server_overhead_wall_s": 7.921028423998536,
+            "residual_wall_time_s": 0.22550395599999717,
+            "flopscope_self_report": {
+              "wall_s": 79.591016826,
+              "backend_s": 71.444498838,
+              "overhead_s": 7.921014032000002,
+              "residual_s": 0.22550395599999717
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 79.96635984299974,
+            "flopscope_server_comms_wall_s": 0.745952658,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 26,
+          "mlp_name": "stephen-kelly",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.02789271599977,
+            "flopscope_server_kernel_wall_s": 71.887390219,
+            "flopscope_server_overhead_wall_s": 7.916210346999776,
+            "residual_wall_time_s": 0.22429214999999658,
+            "flopscope_self_report": {
+              "wall_s": 80.027903807,
+              "backend_s": 71.887390219,
+              "overhead_s": 7.916221438000008,
+              "residual_s": 0.22429214999999658
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.41341046600064,
+            "flopscope_server_comms_wall_s": 0.758438575,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 27,
+          "mlp_name": "brandy-johnston",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.25575191000098,
+            "flopscope_server_kernel_wall_s": 73.089384367,
+            "flopscope_server_overhead_wall_s": 7.9417980140009945,
+            "residual_wall_time_s": 0.22456952899999294,
+            "flopscope_self_report": {
+              "wall_s": 81.255713659,
+              "backend_s": 73.089384367,
+              "overhead_s": 7.941759763000007,
+              "residual_s": 0.22456952899999294
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.64816751599938,
+            "flopscope_server_comms_wall_s": 0.763105592,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 28,
+          "mlp_name": "joshua-reed",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.80814996000117,
+            "flopscope_server_kernel_wall_s": 73.54816318,
+            "flopscope_server_overhead_wall_s": 8.031497631001173,
+            "residual_wall_time_s": 0.22848914899999784,
+            "flopscope_self_report": {
+              "wall_s": 81.808104009,
+              "backend_s": 73.54816318,
+              "overhead_s": 8.031451680000004,
+              "residual_s": 0.22848914899999784
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 82.19526054199923,
+            "flopscope_server_comms_wall_s": 0.775588349,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 29,
+          "mlp_name": "william-saunders",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.53850197299994,
+            "flopscope_server_kernel_wall_s": 72.317345631,
+            "flopscope_server_overhead_wall_s": 7.99293364199994,
+            "residual_wall_time_s": 0.22822270000000344,
+            "flopscope_self_report": {
+              "wall_s": 80.538497066,
+              "backend_s": 72.317345631,
+              "overhead_s": 7.992928735000007,
+              "residual_s": 0.22822270000000344
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.92488061199992,
+            "flopscope_server_comms_wall_s": 0.774037751,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 30,
+          "mlp_name": "john-fischer",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.4207110569987,
+            "flopscope_server_kernel_wall_s": 72.250447842,
+            "flopscope_server_overhead_wall_s": 7.943494021998703,
+            "residual_wall_time_s": 0.22676919299999554,
+            "flopscope_self_report": {
+              "wall_s": 80.420679485,
+              "backend_s": 72.250447842,
+              "overhead_s": 7.943462449999998,
+              "residual_s": 0.22676919299999554
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.79314932399939,
+            "flopscope_server_comms_wall_s": 0.751948441,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 31,
+          "mlp_name": "stacey-cunningham",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 79.36027319200002,
+            "flopscope_server_kernel_wall_s": 71.26979749,
+            "flopscope_server_overhead_wall_s": 7.865853902000026,
+            "residual_wall_time_s": 0.2246217999999942,
+            "flopscope_self_report": {
+              "wall_s": 79.360249062,
+              "backend_s": 71.26979749,
+              "overhead_s": 7.865829771999998,
+              "residual_s": 0.2246217999999942
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 79.74417561500013,
+            "flopscope_server_comms_wall_s": 0.753299369,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 32,
+          "mlp_name": "jeffery-bailey",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.40685095200024,
+            "flopscope_server_kernel_wall_s": 73.250527124,
+            "flopscope_server_overhead_wall_s": 7.930954679000237,
+            "residual_wall_time_s": 0.22536914900000227,
+            "flopscope_self_report": {
+              "wall_s": 81.406843445,
+              "backend_s": 73.250527124,
+              "overhead_s": 7.930947172000003,
+              "residual_s": 0.22536914900000227
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.7974985969995,
+            "flopscope_server_comms_wall_s": 0.763382508,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 33,
+          "mlp_name": "sandra-fernandez",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 82.47820163200049,
+            "flopscope_server_kernel_wall_s": 74.204441103,
+            "flopscope_server_overhead_wall_s": 8.04338924300049,
+            "residual_wall_time_s": 0.23037128600000756,
+            "flopscope_self_report": {
+              "wall_s": 82.478184466,
+              "backend_s": 74.204441103,
+              "overhead_s": 8.043372077,
+              "residual_s": 0.23037128600000756
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 82.8712052259998,
+            "flopscope_server_comms_wall_s": 0.779682635,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 34,
+          "mlp_name": "patricia-douglas",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.84700453599999,
+            "flopscope_server_kernel_wall_s": 73.535805365,
+            "flopscope_server_overhead_wall_s": 8.082269250999985,
+            "residual_wall_time_s": 0.2289299199999988,
+            "flopscope_self_report": {
+              "wall_s": 81.846982379,
+              "backend_s": 73.535805365,
+              "overhead_s": 8.082247093999996,
+              "residual_s": 0.2289299199999988
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 82.23066107599993,
+            "flopscope_server_comms_wall_s": 0.778270476,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 35,
+          "mlp_name": "donald-nguyen",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 79.05819434300065,
+            "flopscope_server_kernel_wall_s": 71.005621601,
+            "flopscope_server_overhead_wall_s": 7.825881268000643,
+            "residual_wall_time_s": 0.2266914740000061,
+            "flopscope_self_report": {
+              "wall_s": 79.058162576,
+              "backend_s": 71.005621601,
+              "overhead_s": 7.825849500999993,
+              "residual_s": 0.2266914740000061
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 79.4335581389987,
+            "flopscope_server_comms_wall_s": 0.747920614,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 36,
+          "mlp_name": "ian-lara",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.43271661499966,
+            "flopscope_server_kernel_wall_s": 72.276285119,
+            "flopscope_server_overhead_wall_s": 7.931475755999671,
+            "residual_wall_time_s": 0.22495573999999863,
+            "flopscope_self_report": {
+              "wall_s": 80.432699693,
+              "backend_s": 72.276285119,
+              "overhead_s": 7.931458834000011,
+              "residual_s": 0.22495573999999863
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.81438465000065,
+            "flopscope_server_comms_wall_s": 0.754626324,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 37,
+          "mlp_name": "margaret-miller",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.9325883770016,
+            "flopscope_server_kernel_wall_s": 72.774348258,
+            "flopscope_server_overhead_wall_s": 7.933361529001601,
+            "residual_wall_time_s": 0.22487858999998878,
+            "flopscope_self_report": {
+              "wall_s": 80.932582891,
+              "backend_s": 72.774348258,
+              "overhead_s": 7.933356043000003,
+              "residual_s": 0.22487858999998878
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.32284641500155,
+            "flopscope_server_comms_wall_s": 0.762409306,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 38,
+          "mlp_name": "gabriel-baird",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.72100042300008,
+            "flopscope_server_kernel_wall_s": 72.514152732,
+            "flopscope_server_overhead_wall_s": 7.9784703420000795,
+            "residual_wall_time_s": 0.22837734899999873,
+            "flopscope_self_report": {
+              "wall_s": 80.720970362,
+              "backend_s": 72.514152732,
+              "overhead_s": 7.978440281000005,
+              "residual_s": 0.22837734899999873
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.10884186799922,
+            "flopscope_server_comms_wall_s": 0.768730772,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 39,
+          "mlp_name": "jason-davies",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.53708234800024,
+            "flopscope_server_kernel_wall_s": 72.273251862,
+            "flopscope_server_overhead_wall_s": 8.034777893000253,
+            "residual_wall_time_s": 0.2290525929999916,
+            "flopscope_self_report": {
+              "wall_s": 80.537074901,
+              "backend_s": 72.273251862,
+              "overhead_s": 8.03477044600001,
+              "residual_s": 0.2290525929999916
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.91867053300007,
+            "flopscope_server_comms_wall_s": 0.763060808,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 40,
+          "mlp_name": "jerry-kerr",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 79.54659044399887,
+            "flopscope_server_kernel_wall_s": 71.488472713,
+            "flopscope_server_overhead_wall_s": 7.831579026998881,
+            "residual_wall_time_s": 0.2265387039999922,
+            "flopscope_self_report": {
+              "wall_s": 79.546537698,
+              "backend_s": 71.488472713,
+              "overhead_s": 7.831526281000009,
+              "residual_s": 0.2265387039999922
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 79.92144866999843,
+            "flopscope_server_comms_wall_s": 0.748263951,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 41,
+          "mlp_name": "travis-fox",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 79.62460039799953,
+            "flopscope_server_kernel_wall_s": 71.478023793,
+            "flopscope_server_overhead_wall_s": 7.921203359999524,
+            "residual_wall_time_s": 0.2253732450000001,
+            "flopscope_self_report": {
+              "wall_s": 79.624573137,
+              "backend_s": 71.478023793,
+              "overhead_s": 7.921176098999993,
+              "residual_s": 0.2253732450000001
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.00839457999973,
+            "flopscope_server_comms_wall_s": 0.75566026,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 42,
+          "mlp_name": "tim-richardson",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.5519818619996,
+            "flopscope_server_kernel_wall_s": 73.42156187,
+            "flopscope_server_overhead_wall_s": 7.9054571239995965,
+            "residual_wall_time_s": 0.22496286799999154,
+            "flopscope_self_report": {
+              "wall_s": 81.551989032,
+              "backend_s": 73.42156187,
+              "overhead_s": 7.905464293999998,
+              "residual_s": 0.22496286799999154
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.94583981799951,
+            "flopscope_server_comms_wall_s": 0.765077721,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 43,
+          "mlp_name": "seth-griffin",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.62271925800087,
+            "flopscope_server_kernel_wall_s": 73.395686582,
+            "flopscope_server_overhead_wall_s": 7.997065091000877,
+            "residual_wall_time_s": 0.22996758499999714,
+            "flopscope_self_report": {
+              "wall_s": 81.62267443,
+              "backend_s": 73.395686582,
+              "overhead_s": 7.99702026300001,
+              "residual_s": 0.22996758499999714
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 82.00853716599886,
+            "flopscope_server_comms_wall_s": 0.771227032,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 44,
+          "mlp_name": "stephanie-garcia",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.20825042200022,
+            "flopscope_server_kernel_wall_s": 73.016857011,
+            "flopscope_server_overhead_wall_s": 7.962271302000218,
+            "residual_wall_time_s": 0.22912210900000218,
+            "flopscope_self_report": {
+              "wall_s": 81.208238059,
+              "backend_s": 73.016857011,
+              "overhead_s": 7.9622589389999945,
+              "residual_s": 0.22912210900000218
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.58952188600006,
+            "flopscope_server_comms_wall_s": 0.760612837,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 45,
+          "mlp_name": "daniel-martinez",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 78.57244183199873,
+            "flopscope_server_kernel_wall_s": 70.514633247,
+            "flopscope_server_overhead_wall_s": 7.830792109998725,
+            "residual_wall_time_s": 0.22701647499999922,
+            "flopscope_self_report": {
+              "wall_s": 78.572401772,
+              "backend_s": 70.514633247,
+              "overhead_s": 7.830752050000001,
+              "residual_s": 0.22701647499999922
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 78.94933718100037,
+            "flopscope_server_comms_wall_s": 0.747994031,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 46,
+          "mlp_name": "jared-parker",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.49333507100164,
+            "flopscope_server_kernel_wall_s": 72.31557899,
+            "flopscope_server_overhead_wall_s": 7.952699427001633,
+            "residual_wall_time_s": 0.2250566539999994,
+            "flopscope_self_report": {
+              "wall_s": 80.493343094,
+              "backend_s": 72.31557899,
+              "overhead_s": 7.952707449999991,
+              "residual_s": 0.2250566539999994
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.87854752299972,
+            "flopscope_server_comms_wall_s": 0.760902615,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 47,
+          "mlp_name": "ronnie-carpenter",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.65420832199925,
+            "flopscope_server_kernel_wall_s": 73.455260075,
+            "flopscope_server_overhead_wall_s": 7.97242527799925,
+            "residual_wall_time_s": 0.22652296900000124,
+            "flopscope_self_report": {
+              "wall_s": 81.654176269,
+              "backend_s": 73.455260075,
+              "overhead_s": 7.972393225000005,
+              "residual_s": 0.22652296900000124
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 82.04984914000124,
+            "flopscope_server_comms_wall_s": 0.765047541,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 48,
+          "mlp_name": "leah-fields",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.79217164299916,
+            "flopscope_server_kernel_wall_s": 72.629071284,
+            "flopscope_server_overhead_wall_s": 7.935086823999171,
+            "residual_wall_time_s": 0.2280135349999881,
+            "flopscope_self_report": {
+              "wall_s": 80.792131515,
+              "backend_s": 72.629071284,
+              "overhead_s": 7.935046696000001,
+              "residual_s": 0.2280135349999881
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.17762009599937,
+            "flopscope_server_comms_wall_s": 0.755376324,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 49,
+          "mlp_name": "tyler-espinoza",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 79.82165699699999,
+            "flopscope_server_kernel_wall_s": 71.695581926,
+            "flopscope_server_overhead_wall_s": 7.897426947,
+            "residual_wall_time_s": 0.22864812399998868,
+            "flopscope_self_report": {
+              "wall_s": 79.821629381,
+              "backend_s": 71.695581926,
+              "overhead_s": 7.897399331000003,
+              "residual_s": 0.22864812399998868
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.20636662900006,
+            "flopscope_server_comms_wall_s": 0.758384839,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 50,
+          "mlp_name": "robert-gilbert",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.09297372299989,
+            "flopscope_server_kernel_wall_s": 71.983467718,
+            "flopscope_server_overhead_wall_s": 7.8822175879998895,
+            "residual_wall_time_s": 0.2272884169999969,
+            "flopscope_self_report": {
+              "wall_s": 80.092924215,
+              "backend_s": 71.983467718,
+              "overhead_s": 7.88216808,
+              "residual_s": 0.2272884169999969
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.48801698700117,
+            "flopscope_server_comms_wall_s": 0.756960759,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 51,
+          "mlp_name": "crystal-mann",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 79.55078631299875,
+            "flopscope_server_kernel_wall_s": 71.43905917,
+            "flopscope_server_overhead_wall_s": 7.8873688699987525,
+            "residual_wall_time_s": 0.2243582730000071,
+            "flopscope_self_report": {
+              "wall_s": 79.550773148,
+              "backend_s": 71.43905917,
+              "overhead_s": 7.8873557050000045,
+              "residual_s": 0.2243582730000071
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 79.93622016199879,
+            "flopscope_server_comms_wall_s": 0.753679873,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 52,
+          "mlp_name": "sheri-lopez",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.24448390399994,
+            "flopscope_server_kernel_wall_s": 73.075451335,
+            "flopscope_server_overhead_wall_s": 7.9443213169999325,
+            "residual_wall_time_s": 0.22471125200000586,
+            "flopscope_self_report": {
+              "wall_s": 81.244489809,
+              "backend_s": 73.075451335,
+              "overhead_s": 7.944327221999998,
+              "residual_s": 0.22471125200000586
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.63821383899995,
+            "flopscope_server_comms_wall_s": 0.76344882,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 53,
+          "mlp_name": "ryan-peck",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.16564832500035,
+            "flopscope_server_kernel_wall_s": 72.837397676,
+            "flopscope_server_overhead_wall_s": 8.097080553000353,
+            "residual_wall_time_s": 0.2311700959999996,
+            "flopscope_self_report": {
+              "wall_s": 81.165634198,
+              "backend_s": 72.837397676,
+              "overhead_s": 8.097066426000012,
+              "residual_s": 0.2311700959999996
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.55060913700027,
+            "flopscope_server_comms_wall_s": 0.770439058,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 54,
+          "mlp_name": "barbara-williams",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.1938292449995,
+            "flopscope_server_kernel_wall_s": 72.053670128,
+            "flopscope_server_overhead_wall_s": 7.911766510999513,
+            "residual_wall_time_s": 0.2283926059999999,
+            "flopscope_self_report": {
+              "wall_s": 80.193783991,
+              "backend_s": 72.053670128,
+              "overhead_s": 7.911721257000011,
+              "residual_s": 0.2283926059999999
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.57621523399939,
+            "flopscope_server_comms_wall_s": 0.755502989,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 55,
+          "mlp_name": "joshua-willis",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 79.49200850600027,
+            "flopscope_server_kernel_wall_s": 71.395601461,
+            "flopscope_server_overhead_wall_s": 7.869568591000274,
+            "residual_wall_time_s": 0.2268384540000028,
+            "flopscope_self_report": {
+              "wall_s": 79.491976479,
+              "backend_s": 71.395601461,
+              "overhead_s": 7.869536564000001,
+              "residual_s": 0.2268384540000028
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 79.8710578650007,
+            "flopscope_server_comms_wall_s": 0.749232569,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 56,
+          "mlp_name": "mary-castro",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.50007606200052,
+            "flopscope_server_kernel_wall_s": 72.309049533,
+            "flopscope_server_overhead_wall_s": 7.966267871000497,
+            "residual_wall_time_s": 0.22475865800001316,
+            "flopscope_self_report": {
+              "wall_s": 80.500082907,
+              "backend_s": 72.309049533,
+              "overhead_s": 7.966274715999987,
+              "residual_s": 0.22475865800001316
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.89349694900011,
+            "flopscope_server_comms_wall_s": 0.771094396,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 57,
+          "mlp_name": "kathleen-carlson",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.0999587690003,
+            "flopscope_server_kernel_wall_s": 72.044090713,
+            "flopscope_server_overhead_wall_s": 7.831890481000286,
+            "residual_wall_time_s": 0.22397757500000637,
+            "flopscope_self_report": {
+              "wall_s": 80.09991042,
+              "backend_s": 72.044090713,
+              "overhead_s": 7.831842131999991,
+              "residual_s": 0.22397757500000637
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.49071033700056,
+            "flopscope_server_comms_wall_s": 0.75969043,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 58,
+          "mlp_name": "hunter-cooper",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.0980321499992,
+            "flopscope_server_kernel_wall_s": 72.956403876,
+            "flopscope_server_overhead_wall_s": 7.9140514669992115,
+            "residual_wall_time_s": 0.22757680699999128,
+            "flopscope_self_report": {
+              "wall_s": 81.097988089,
+              "backend_s": 72.956403876,
+              "overhead_s": 7.91400740600001,
+              "residual_s": 0.22757680699999128
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.48124192099931,
+            "flopscope_server_comms_wall_s": 0.752872825,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 59,
+          "mlp_name": "phillip-carter",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.02801768800009,
+            "flopscope_server_kernel_wall_s": 71.849602158,
+            "flopscope_server_overhead_wall_s": 7.950504439000099,
+            "residual_wall_time_s": 0.22791109099999574,
+            "flopscope_self_report": {
+              "wall_s": 80.027962569,
+              "backend_s": 71.849602158,
+              "overhead_s": 7.950449320000004,
+              "residual_s": 0.22791109099999574
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.40460467599996,
+            "flopscope_server_comms_wall_s": 0.753503976,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 60,
+          "mlp_name": "emily-anderson",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 79.83410247200118,
+            "flopscope_server_kernel_wall_s": 71.746097812,
+            "flopscope_server_overhead_wall_s": 7.862114152001169,
+            "residual_wall_time_s": 0.2258905080000062,
+            "flopscope_self_report": {
+              "wall_s": 79.834075162,
+              "backend_s": 71.746097812,
+              "overhead_s": 7.8620868419999965,
+              "residual_s": 0.2258905080000062
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.20845020100023,
+            "flopscope_server_comms_wall_s": 0.746533482,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 61,
+          "mlp_name": "dustin-sanchez",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 79.7544734080002,
+            "flopscope_server_kernel_wall_s": 71.620579564,
+            "flopscope_server_overhead_wall_s": 7.9098302600001915,
+            "residual_wall_time_s": 0.2240635840000067,
+            "flopscope_self_report": {
+              "wall_s": 79.754459905,
+              "backend_s": 71.620579564,
+              "overhead_s": 7.9098167570000015,
+              "residual_s": 0.2240635840000067
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.13959187399996,
+            "flopscope_server_comms_wall_s": 0.754207778,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 62,
+          "mlp_name": "michael-watts",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.29804098799832,
+            "flopscope_server_kernel_wall_s": 73.16778649,
+            "flopscope_server_overhead_wall_s": 7.905503799998314,
+            "residual_wall_time_s": 0.22475069800000824,
+            "flopscope_self_report": {
+              "wall_s": 81.298015159,
+              "backend_s": 73.16778649,
+              "overhead_s": 7.905477970999996,
+              "residual_s": 0.22475069800000824
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.69116380500054,
+            "flopscope_server_comms_wall_s": 0.762471042,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 63,
+          "mlp_name": "christy-dawson",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.57930170100008,
+            "flopscope_server_kernel_wall_s": 72.388562465,
+            "flopscope_server_overhead_wall_s": 7.963556535000066,
+            "residual_wall_time_s": 0.22718270100000382,
+            "flopscope_self_report": {
+              "wall_s": 80.579292558,
+              "backend_s": 72.388562465,
+              "overhead_s": 7.963547391999995,
+              "residual_s": 0.22718270100000382
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.96344369200006,
+            "flopscope_server_comms_wall_s": 0.758306146,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 64,
+          "mlp_name": "samantha-coleman",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.18091734799964,
+            "flopscope_server_kernel_wall_s": 73.026057295,
+            "flopscope_server_overhead_wall_s": 7.926904857999631,
+            "residual_wall_time_s": 0.22795519500000694,
+            "flopscope_self_report": {
+              "wall_s": 81.180897763,
+              "backend_s": 73.026057295,
+              "overhead_s": 7.926885272999996,
+              "residual_s": 0.22795519500000694
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.56376623600045,
+            "flopscope_server_comms_wall_s": 0.756070909,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 65,
+          "mlp_name": "sarah-woods",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 79.7146359970011,
+            "flopscope_server_kernel_wall_s": 71.598834386,
+            "flopscope_server_overhead_wall_s": 7.889269646001111,
+            "residual_wall_time_s": 0.2265319649999924,
+            "flopscope_self_report": {
+              "wall_s": 79.714623866,
+              "backend_s": 71.598834386,
+              "overhead_s": 7.889257515000011,
+              "residual_s": 0.2265319649999924
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.08742211199933,
+            "flopscope_server_comms_wall_s": 0.749036458,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 66,
+          "mlp_name": "natalie-johnson",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.52181484700122,
+            "flopscope_server_kernel_wall_s": 72.402323811,
+            "flopscope_server_overhead_wall_s": 7.895581033001221,
+            "residual_wall_time_s": 0.2239100030000003,
+            "flopscope_self_report": {
+              "wall_s": 80.521787324,
+              "backend_s": 72.402323811,
+              "overhead_s": 7.895553509999999,
+              "residual_s": 0.2239100030000003
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.90827330199863,
+            "flopscope_server_comms_wall_s": 0.76050048,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 67,
+          "mlp_name": "jerry-bailey",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.32615549599996,
+            "flopscope_server_kernel_wall_s": 72.186391327,
+            "flopscope_server_overhead_wall_s": 7.911664297999948,
+            "residual_wall_time_s": 0.22809987100001194,
+            "flopscope_self_report": {
+              "wall_s": 80.326106042,
+              "backend_s": 72.186391327,
+              "overhead_s": 7.911614843999999,
+              "residual_s": 0.22809987100001194
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.71000775199991,
+            "flopscope_server_comms_wall_s": 0.75952238,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 68,
+          "mlp_name": "shannon-snyder",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.31988792099946,
+            "flopscope_server_kernel_wall_s": 72.2257235,
+            "flopscope_server_overhead_wall_s": 7.869763528999471,
+            "residual_wall_time_s": 0.22440089199999136,
+            "flopscope_self_report": {
+              "wall_s": 80.319811772,
+              "backend_s": 72.2257235,
+              "overhead_s": 7.869687380000002,
+              "residual_s": 0.22440089199999136
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.7131379399998,
+            "flopscope_server_comms_wall_s": 0.755934,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 69,
+          "mlp_name": "donna-bryant",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.4810591209989,
+            "flopscope_server_kernel_wall_s": 73.342711822,
+            "flopscope_server_overhead_wall_s": 7.911030541998912,
+            "residual_wall_time_s": 0.22731675699999698,
+            "flopscope_self_report": {
+              "wall_s": 81.481075167,
+              "backend_s": 73.342711822,
+              "overhead_s": 7.911046588000005,
+              "residual_s": 0.22731675699999698
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.86859109800025,
+            "flopscope_server_comms_wall_s": 0.764259516,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 70,
+          "mlp_name": "renee-bryant",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 79.45068688900028,
+            "flopscope_server_kernel_wall_s": 71.401705523,
+            "flopscope_server_overhead_wall_s": 7.822556579000278,
+            "residual_wall_time_s": 0.22642478699999913,
+            "flopscope_self_report": {
+              "wall_s": 79.450643856,
+              "backend_s": 71.401705523,
+              "overhead_s": 7.822513545999996,
+              "residual_s": 0.22642478699999913
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 79.82860226699995,
+            "flopscope_server_comms_wall_s": 0.7503673,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 71,
+          "mlp_name": "raymond-fields",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.06491724599982,
+            "flopscope_server_kernel_wall_s": 71.927304726,
+            "flopscope_server_overhead_wall_s": 7.913130132999811,
+            "residual_wall_time_s": 0.224482387000009,
+            "flopscope_self_report": {
+              "wall_s": 80.064696733,
+              "backend_s": 71.927304726,
+              "overhead_s": 7.9129096199999935,
+              "residual_s": 0.224482387000009
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.45147753899982,
+            "flopscope_server_comms_wall_s": 0.761658293,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 72,
+          "mlp_name": "mark-watson",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 79.20627316299988,
+            "flopscope_server_kernel_wall_s": 71.116878719,
+            "flopscope_server_overhead_wall_s": 7.862317553999873,
+            "residual_wall_time_s": 0.22707689000000641,
+            "flopscope_self_report": {
+              "wall_s": 79.206248321,
+              "backend_s": 71.116878719,
+              "overhead_s": 7.862292711999999,
+              "residual_s": 0.22707689000000641
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 79.58670442499988,
+            "flopscope_server_comms_wall_s": 0.753648701,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 73,
+          "mlp_name": "laurie-miller",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 79.75472240800082,
+            "flopscope_server_kernel_wall_s": 71.681029183,
+            "flopscope_server_overhead_wall_s": 7.849699548000814,
+            "residual_wall_time_s": 0.22399367699999573,
+            "flopscope_self_report": {
+              "wall_s": 79.754720756,
+              "backend_s": 71.681029183,
+              "overhead_s": 7.849697895999995,
+              "residual_s": 0.22399367699999573
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.14464996199968,
+            "flopscope_server_comms_wall_s": 0.753789251,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 74,
+          "mlp_name": "gregory-lopez",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.28473113700056,
+            "flopscope_server_kernel_wall_s": 73.122736896,
+            "flopscope_server_overhead_wall_s": 7.933860983000557,
+            "residual_wall_time_s": 0.22813325799999973,
+            "flopscope_self_report": {
+              "wall_s": 81.284749616,
+              "backend_s": 73.122736896,
+              "overhead_s": 7.933879461999993,
+              "residual_s": 0.22813325799999973
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.6702738640015,
+            "flopscope_server_comms_wall_s": 0.753657805,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 75,
+          "mlp_name": "mary-barber",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.59704258400052,
+            "flopscope_server_kernel_wall_s": 72.475059113,
+            "flopscope_server_overhead_wall_s": 7.89423366300052,
+            "residual_wall_time_s": 0.22774980799999867,
+            "flopscope_self_report": {
+              "wall_s": 80.596983096,
+              "backend_s": 72.475059113,
+              "overhead_s": 7.894174175000003,
+              "residual_s": 0.22774980799999867
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.97390974200061,
+            "flopscope_server_comms_wall_s": 0.75116504,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 76,
+          "mlp_name": "robert-wood",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 79.29793932900066,
+            "flopscope_server_kernel_wall_s": 71.218720745,
+            "flopscope_server_overhead_wall_s": 7.855335988000647,
+            "residual_wall_time_s": 0.22388259600000993,
+            "flopscope_self_report": {
+              "wall_s": 79.297914015,
+              "backend_s": 71.218720745,
+              "overhead_s": 7.855310673999995,
+              "residual_s": 0.22388259600000993
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 79.68559343900051,
+            "flopscope_server_comms_wall_s": 0.756230595,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 77,
+          "mlp_name": "pamela-sharp",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 79.83370328599995,
+            "flopscope_server_kernel_wall_s": 71.64502754,
+            "flopscope_server_overhead_wall_s": 7.962102037999941,
+            "residual_wall_time_s": 0.22657370800000365,
+            "flopscope_self_report": {
+              "wall_s": 79.833677496,
+              "backend_s": 71.64502754,
+              "overhead_s": 7.9620762480000025,
+              "residual_s": 0.22657370800000365
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.21218986800022,
+            "flopscope_server_comms_wall_s": 0.755060357,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 78,
+          "mlp_name": "joseph-mccormick",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.44843483300065,
+            "flopscope_server_kernel_wall_s": 73.242894466,
+            "flopscope_server_overhead_wall_s": 7.981773298000661,
+            "residual_wall_time_s": 0.22376706899999022,
+            "flopscope_self_report": {
+              "wall_s": 81.448416887,
+              "backend_s": 73.242894466,
+              "overhead_s": 7.9817553520000075,
+              "residual_s": 0.22376706899999022
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.84013106100065,
+            "flopscope_server_comms_wall_s": 0.766170711,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 79,
+          "mlp_name": "jeremy-ali",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.95413782200012,
+            "flopscope_server_kernel_wall_s": 72.835654539,
+            "flopscope_server_overhead_wall_s": 7.89043103500012,
+            "residual_wall_time_s": 0.22805224799999735,
+            "flopscope_self_report": {
+              "wall_s": 80.95410761,
+              "backend_s": 72.835654539,
+              "overhead_s": 7.890400822999993,
+              "residual_s": 0.22805224799999735
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.33776992999992,
+            "flopscope_server_comms_wall_s": 0.751924419,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 80,
+          "mlp_name": "jesse-stewart",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.4594268689998,
+            "flopscope_server_kernel_wall_s": 72.298751957,
+            "flopscope_server_overhead_wall_s": 7.932184329999814,
+            "residual_wall_time_s": 0.22849058199999206,
+            "flopscope_self_report": {
+              "wall_s": 80.459384445,
+              "backend_s": 72.298751957,
+              "overhead_s": 7.9321419060000125,
+              "residual_s": 0.22849058199999206
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.83463026700156,
+            "flopscope_server_comms_wall_s": 0.759002998,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 81,
+          "mlp_name": "mark-kelley",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.29411331800111,
+            "flopscope_server_kernel_wall_s": 72.169564219,
+            "flopscope_server_overhead_wall_s": 7.900426085001115,
+            "residual_wall_time_s": 0.2241230139999999,
+            "flopscope_self_report": {
+              "wall_s": 80.294116899,
+              "backend_s": 72.169564219,
+              "overhead_s": 7.900429666000008,
+              "residual_s": 0.2241230139999999
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.68206614500014,
+            "flopscope_server_comms_wall_s": 0.760469964,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 82,
+          "mlp_name": "michael-white",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.51428487399971,
+            "flopscope_server_kernel_wall_s": 72.365957534,
+            "flopscope_server_overhead_wall_s": 7.921375932999723,
+            "residual_wall_time_s": 0.22695140699998717,
+            "flopscope_self_report": {
+              "wall_s": 80.514272681,
+              "backend_s": 72.365957534,
+              "overhead_s": 7.921363740000004,
+              "residual_s": 0.22695140699998717
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.89364301500018,
+            "flopscope_server_comms_wall_s": 0.756920958,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 83,
+          "mlp_name": "christine-rios",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.10891210000045,
+            "flopscope_server_kernel_wall_s": 72.945756765,
+            "flopscope_server_overhead_wall_s": 7.939102988000457,
+            "residual_wall_time_s": 0.2240523469999971,
+            "flopscope_self_report": {
+              "wall_s": 81.108889652,
+              "backend_s": 72.945756765,
+              "overhead_s": 7.939080540000006,
+              "residual_s": 0.2240523469999971
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.50302550699962,
+            "flopscope_server_comms_wall_s": 0.764146821,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 84,
+          "mlp_name": "melvin-brooks",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.10494560900042,
+            "flopscope_server_kernel_wall_s": 72.040384954,
+            "flopscope_server_overhead_wall_s": 7.835810679000417,
+            "residual_wall_time_s": 0.22874997600000313,
+            "flopscope_self_report": {
+              "wall_s": 80.104880338,
+              "backend_s": 72.040384954,
+              "overhead_s": 7.835745407999994,
+              "residual_s": 0.22874997600000313
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.4894293239995,
+            "flopscope_server_comms_wall_s": 0.750375153,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 85,
+          "mlp_name": "jamie-mcdaniel",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.61854914700052,
+            "flopscope_server_kernel_wall_s": 72.251380615,
+            "flopscope_server_overhead_wall_s": 8.138259151000526,
+            "residual_wall_time_s": 0.22890938099999403,
+            "flopscope_self_report": {
+              "wall_s": 80.618503048,
+              "backend_s": 72.251380615,
+              "overhead_s": 8.138213051999998,
+              "residual_s": 0.22890938099999403
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.99367981200157,
+            "flopscope_server_comms_wall_s": 0.758438367,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 86,
+          "mlp_name": "michael-thomas",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.64162736700018,
+            "flopscope_server_kernel_wall_s": 72.302079777,
+            "flopscope_server_overhead_wall_s": 8.114937790000184,
+            "residual_wall_time_s": 0.22460979999999608,
+            "flopscope_self_report": {
+              "wall_s": 80.641614869,
+              "backend_s": 72.302079777,
+              "overhead_s": 8.114925291999995,
+              "residual_s": 0.22460979999999608
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.02965081799994,
+            "flopscope_server_comms_wall_s": 0.758752704,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 87,
+          "mlp_name": "patricia-colon",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.55648824199989,
+            "flopscope_server_kernel_wall_s": 73.155447594,
+            "flopscope_server_overhead_wall_s": 8.174220649999896,
+            "residual_wall_time_s": 0.2268199979999963,
+            "flopscope_self_report": {
+              "wall_s": 81.55645176,
+              "backend_s": 73.155447594,
+              "overhead_s": 8.17418416800001,
+              "residual_s": 0.2268199979999963
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.9382025079999,
+            "flopscope_server_comms_wall_s": 0.760135493,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 88,
+          "mlp_name": "sara-mack",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.8234132009984,
+            "flopscope_server_kernel_wall_s": 72.531485164,
+            "flopscope_server_overhead_wall_s": 8.067424893998407,
+            "residual_wall_time_s": 0.22450314299999263,
+            "flopscope_self_report": {
+              "wall_s": 80.82337738,
+              "backend_s": 72.531485164,
+              "overhead_s": 8.067389073000001,
+              "residual_s": 0.22450314299999263
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.22014957200008,
+            "flopscope_server_comms_wall_s": 0.765129903,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 89,
+          "mlp_name": "jason-cameron",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.86389426099959,
+            "flopscope_server_kernel_wall_s": 72.550446711,
+            "flopscope_server_overhead_wall_s": 8.084633175999585,
+            "residual_wall_time_s": 0.22881437399999527,
+            "flopscope_self_report": {
+              "wall_s": 80.863870908,
+              "backend_s": 72.550446711,
+              "overhead_s": 8.084609822999994,
+              "residual_s": 0.22881437399999527
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.24295442999937,
+            "flopscope_server_comms_wall_s": 0.748411557,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 90,
+          "mlp_name": "dawn-watson",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.20725608900102,
+            "flopscope_server_kernel_wall_s": 73.040229564,
+            "flopscope_server_overhead_wall_s": 7.937774488001011,
+            "residual_wall_time_s": 0.22925203700000907,
+            "flopscope_self_report": {
+              "wall_s": 81.207205103,
+              "backend_s": 73.040229564,
+              "overhead_s": 7.937723501999997,
+              "residual_s": 0.22925203700000907
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.58689311200033,
+            "flopscope_server_comms_wall_s": 0.752835473,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 91,
+          "mlp_name": "jennifer-douglas",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 79.66167298499931,
+            "flopscope_server_kernel_wall_s": 71.52081106,
+            "flopscope_server_overhead_wall_s": 7.916505113999307,
+            "residual_wall_time_s": 0.22435681100000693,
+            "flopscope_self_report": {
+              "wall_s": 79.661643377,
+              "backend_s": 71.52081106,
+              "overhead_s": 7.916475505999998,
+              "residual_s": 0.22435681100000693
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.0470839059999,
+            "flopscope_server_comms_wall_s": 0.761830074,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 92,
+          "mlp_name": "lauren-martinez",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.22982099199999,
+            "flopscope_server_kernel_wall_s": 72.081336742,
+            "flopscope_server_overhead_wall_s": 7.921527378999983,
+            "residual_wall_time_s": 0.22695687099999873,
+            "flopscope_self_report": {
+              "wall_s": 80.229808017,
+              "backend_s": 72.081336742,
+              "overhead_s": 7.921514403999993,
+              "residual_s": 0.22695687099999873
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.61694351000006,
+            "flopscope_server_comms_wall_s": 0.75487662,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 93,
+          "mlp_name": "patricia-johnson",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.3863844059997,
+            "flopscope_server_kernel_wall_s": 72.25533836,
+            "flopscope_server_overhead_wall_s": 7.9073233759997095,
+            "residual_wall_time_s": 0.2237226700000008,
+            "flopscope_self_report": {
+              "wall_s": 80.386363942,
+              "backend_s": 72.25533836,
+              "overhead_s": 7.907302912000006,
+              "residual_s": 0.2237226700000008
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.78476153200063,
+            "flopscope_server_comms_wall_s": 0.765060183,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 94,
+          "mlp_name": "emily-soto",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 79.93384939799944,
+            "flopscope_server_kernel_wall_s": 71.893110638,
+            "flopscope_server_overhead_wall_s": 7.811948686999443,
+            "residual_wall_time_s": 0.22879007299999898,
+            "flopscope_self_report": {
+              "wall_s": 79.933815718,
+              "backend_s": 71.893110638,
+              "overhead_s": 7.81191500700001,
+              "residual_s": 0.22879007299999898
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.31135880900001,
+            "flopscope_server_comms_wall_s": 0.745876087,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 95,
+          "mlp_name": "samantha-davis",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 81.06734592400062,
+            "flopscope_server_kernel_wall_s": 72.896165123,
+            "flopscope_server_overhead_wall_s": 7.94209289800061,
+            "residual_wall_time_s": 0.22908790300000703,
+            "flopscope_self_report": {
+              "wall_s": 81.067254359,
+              "backend_s": 72.896165123,
+              "overhead_s": 7.942001332999993,
+              "residual_s": 0.22908790300000703
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.44237072999931,
+            "flopscope_server_comms_wall_s": 0.756420471,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 96,
+          "mlp_name": "nicholas-trujillo",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 79.43022125800053,
+            "flopscope_server_kernel_wall_s": 71.299940999,
+            "flopscope_server_overhead_wall_s": 7.9063244020005214,
+            "residual_wall_time_s": 0.22395585700000709,
+            "flopscope_self_report": {
+              "wall_s": 79.430190601,
+              "backend_s": 71.299940999,
+              "overhead_s": 7.906293744999999,
+              "residual_s": 0.22395585700000709
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 79.81735485900026,
+            "flopscope_server_comms_wall_s": 0.754861751,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 97,
+          "mlp_name": "jimmy-reynolds",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.03165893899995,
+            "flopscope_server_kernel_wall_s": 71.894429231,
+            "flopscope_server_overhead_wall_s": 7.909224548999958,
+            "residual_wall_time_s": 0.2280051589999914,
+            "flopscope_self_report": {
+              "wall_s": 80.031648142,
+              "backend_s": 71.894429231,
+              "overhead_s": 7.909213751999999,
+              "residual_s": 0.2280051589999914
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.40935329500007,
+            "flopscope_server_comms_wall_s": 0.749622152,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 98,
+          "mlp_name": "michelle-curtis",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.58952944599878,
+            "flopscope_server_kernel_wall_s": 72.461417681,
+            "flopscope_server_overhead_wall_s": 7.90199504499877,
+            "residual_wall_time_s": 0.22611672000000738,
+            "flopscope_self_report": {
+              "wall_s": 80.589500505,
+              "backend_s": 72.461417681,
+              "overhead_s": 7.901966103999996,
+              "residual_s": 0.22611672000000738
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 80.98460603700005,
+            "flopscope_server_comms_wall_s": 0.75784083,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        },
+        {
+          "mlp_index": 99,
+          "mlp_name": "jeremiah-neal",
+          "dataset_row": null,
+          "state": "completed",
+          "telemetry": {
+            "flops_used": 472199314830.0,
+            "effective_compute": 472199314830.0,
+            "participant_predict_wall_s": 80.69142514099985,
+            "flopscope_server_kernel_wall_s": 72.539159054,
+            "flopscope_server_overhead_wall_s": 7.921840191999863,
+            "residual_wall_time_s": 0.23042589499999622,
+            "flopscope_self_report": {
+              "wall_s": 80.691393639,
+              "backend_s": 72.539159054,
+              "overhead_s": 7.921808690000006,
+              "residual_s": 0.23042589499999622
+            },
+            "participant_setup_wall_s": null,
+            "participant_roundtrip_wall_s": 81.07294856099907,
+            "flopscope_server_comms_wall_s": 0.751777299,
+            "budget_exhausted": false,
+            "time_exhausted": false,
+            "residual_wall_time_exhausted": false,
+            "combined_budget_exhausted": false,
+            "setup_generation": 0,
+            "telemetry_schema_version": 4
+          },
+          "error_code": null
+        }
+      ],
+      "public_scores": [
+        {
+          "mlp_index": 0,
+          "scores": {
+            "final_layer_mse": 2.06e-08,
+            "all_layers_mse": 8.435e-09,
+            "adjusted_final_layer_score": 4.424e-09
+          }
+        },
+        {
+          "mlp_index": 1,
+          "scores": {
+            "final_layer_mse": 2.225e-08,
+            "all_layers_mse": 8.547e-09,
+            "adjusted_final_layer_score": 4.777e-09
+          }
+        },
+        {
+          "mlp_index": 2,
+          "scores": {
+            "final_layer_mse": 1.753e-08,
+            "all_layers_mse": 8.369e-09,
+            "adjusted_final_layer_score": 3.765e-09
+          }
+        },
+        {
+          "mlp_index": 3,
+          "scores": {
+            "final_layer_mse": 1.913e-08,
+            "all_layers_mse": 7.431e-09,
+            "adjusted_final_layer_score": 4.107e-09
+          }
+        },
+        {
+          "mlp_index": 4,
+          "scores": {
+            "final_layer_mse": 1.951e-08,
+            "all_layers_mse": 8.591e-09,
+            "adjusted_final_layer_score": 4.188e-09
+          }
+        },
+        {
+          "mlp_index": 5,
+          "scores": {
+            "final_layer_mse": 2.029e-08,
+            "all_layers_mse": 7.294e-09,
+            "adjusted_final_layer_score": 4.358e-09
+          }
+        },
+        {
+          "mlp_index": 6,
+          "scores": {
+            "final_layer_mse": 2.183e-08,
+            "all_layers_mse": 8.787e-09,
+            "adjusted_final_layer_score": 4.687e-09
+          }
+        },
+        {
+          "mlp_index": 7,
+          "scores": {
+            "final_layer_mse": 2.235e-08,
+            "all_layers_mse": 8.976e-09,
+            "adjusted_final_layer_score": 4.8e-09
+          }
+        },
+        {
+          "mlp_index": 8,
+          "scores": {
+            "final_layer_mse": 1.857e-08,
+            "all_layers_mse": 7.514e-09,
+            "adjusted_final_layer_score": 3.987e-09
+          }
+        },
+        {
+          "mlp_index": 9,
+          "scores": {
+            "final_layer_mse": 2.295e-08,
+            "all_layers_mse": 8.616e-09,
+            "adjusted_final_layer_score": 4.928e-09
+          }
+        },
+        {
+          "mlp_index": 10,
+          "scores": {
+            "final_layer_mse": 1.95e-08,
+            "all_layers_mse": 7.684e-09,
+            "adjusted_final_layer_score": 4.187e-09
+          }
+        },
+        {
+          "mlp_index": 11,
+          "scores": {
+            "final_layer_mse": 2.056e-08,
+            "all_layers_mse": 8.785e-09,
+            "adjusted_final_layer_score": 4.415e-09
+          }
+        },
+        {
+          "mlp_index": 12,
+          "scores": {
+            "final_layer_mse": 1.841e-08,
+            "all_layers_mse": 8.271e-09,
+            "adjusted_final_layer_score": 3.953e-09
+          }
+        },
+        {
+          "mlp_index": 13,
+          "scores": {
+            "final_layer_mse": 1.959e-08,
+            "all_layers_mse": 7.641e-09,
+            "adjusted_final_layer_score": 4.206e-09
+          }
+        },
+        {
+          "mlp_index": 14,
+          "scores": {
+            "final_layer_mse": 2.075e-08,
+            "all_layers_mse": 8.993e-09,
+            "adjusted_final_layer_score": 4.455e-09
+          }
+        },
+        {
+          "mlp_index": 15,
+          "scores": {
+            "final_layer_mse": 2.098e-08,
+            "all_layers_mse": 8.746e-09,
+            "adjusted_final_layer_score": 4.506e-09
+          }
+        },
+        {
+          "mlp_index": 16,
+          "scores": {
+            "final_layer_mse": 1.992e-08,
+            "all_layers_mse": 8.032e-09,
+            "adjusted_final_layer_score": 4.277e-09
+          }
+        },
+        {
+          "mlp_index": 17,
+          "scores": {
+            "final_layer_mse": 2.213e-08,
+            "all_layers_mse": 8.364e-09,
+            "adjusted_final_layer_score": 4.752e-09
+          }
+        },
+        {
+          "mlp_index": 18,
+          "scores": {
+            "final_layer_mse": 2.997e-08,
+            "all_layers_mse": 9.56e-09,
+            "adjusted_final_layer_score": 6.436e-09
+          }
+        },
+        {
+          "mlp_index": 19,
+          "scores": {
+            "final_layer_mse": 2.13e-08,
+            "all_layers_mse": 8.006e-09,
+            "adjusted_final_layer_score": 4.573e-09
+          }
+        },
+        {
+          "mlp_index": 20,
+          "scores": {
+            "final_layer_mse": 2.337e-08,
+            "all_layers_mse": 9.073e-09,
+            "adjusted_final_layer_score": 5.017e-09
+          }
+        },
+        {
+          "mlp_index": 21,
+          "scores": {
+            "final_layer_mse": 2.713e-08,
+            "all_layers_mse": 1.004e-08,
+            "adjusted_final_layer_score": 5.825e-09
+          }
+        },
+        {
+          "mlp_index": 22,
+          "scores": {
+            "final_layer_mse": 2.073e-08,
+            "all_layers_mse": 8.214e-09,
+            "adjusted_final_layer_score": 4.451e-09
+          }
+        },
+        {
+          "mlp_index": 23,
+          "scores": {
+            "final_layer_mse": 2.259e-08,
+            "all_layers_mse": 8.477e-09,
+            "adjusted_final_layer_score": 4.851e-09
+          }
+        },
+        {
+          "mlp_index": 24,
+          "scores": {
+            "final_layer_mse": 2.268e-08,
+            "all_layers_mse": 8.382e-09,
+            "adjusted_final_layer_score": 4.871e-09
+          }
+        },
+        {
+          "mlp_index": 25,
+          "scores": {
+            "final_layer_mse": 2.277e-08,
+            "all_layers_mse": 9.208e-09,
+            "adjusted_final_layer_score": 4.889e-09
+          }
+        },
+        {
+          "mlp_index": 26,
+          "scores": {
+            "final_layer_mse": 2.137e-08,
+            "all_layers_mse": 7.721e-09,
+            "adjusted_final_layer_score": 4.59e-09
+          }
+        },
+        {
+          "mlp_index": 27,
+          "scores": {
+            "final_layer_mse": 2.371e-08,
+            "all_layers_mse": 9.134e-09,
+            "adjusted_final_layer_score": 5.092e-09
+          }
+        },
+        {
+          "mlp_index": 28,
+          "scores": {
+            "final_layer_mse": 2.587e-08,
+            "all_layers_mse": 9.552e-09,
+            "adjusted_final_layer_score": 5.555e-09
+          }
+        },
+        {
+          "mlp_index": 29,
+          "scores": {
+            "final_layer_mse": 2.164e-08,
+            "all_layers_mse": 8.701e-09,
+            "adjusted_final_layer_score": 4.647e-09
+          }
+        },
+        {
+          "mlp_index": 30,
+          "scores": {
+            "final_layer_mse": 2.494e-08,
+            "all_layers_mse": 8.661e-09,
+            "adjusted_final_layer_score": 5.354e-09
+          }
+        },
+        {
+          "mlp_index": 31,
+          "scores": {
+            "final_layer_mse": 2.117e-08,
+            "all_layers_mse": 8.761e-09,
+            "adjusted_final_layer_score": 4.545e-09
+          }
+        },
+        {
+          "mlp_index": 32,
+          "scores": {
+            "final_layer_mse": 2.33e-08,
+            "all_layers_mse": 8.996e-09,
+            "adjusted_final_layer_score": 5.003e-09
+          }
+        },
+        {
+          "mlp_index": 33,
+          "scores": {
+            "final_layer_mse": 2.041e-08,
+            "all_layers_mse": 8.521e-09,
+            "adjusted_final_layer_score": 4.382e-09
+          }
+        },
+        {
+          "mlp_index": 34,
+          "scores": {
+            "final_layer_mse": 1.971e-08,
+            "all_layers_mse": 8.002e-09,
+            "adjusted_final_layer_score": 4.233e-09
+          }
+        },
+        {
+          "mlp_index": 35,
+          "scores": {
+            "final_layer_mse": 2.016e-08,
+            "all_layers_mse": 7.933e-09,
+            "adjusted_final_layer_score": 4.33e-09
+          }
+        },
+        {
+          "mlp_index": 36,
+          "scores": {
+            "final_layer_mse": 2.279e-08,
+            "all_layers_mse": 9.301e-09,
+            "adjusted_final_layer_score": 4.893e-09
+          }
+        },
+        {
+          "mlp_index": 37,
+          "scores": {
+            "final_layer_mse": 2.116e-08,
+            "all_layers_mse": 8.872e-09,
+            "adjusted_final_layer_score": 4.544e-09
+          }
+        },
+        {
+          "mlp_index": 38,
+          "scores": {
+            "final_layer_mse": 2.217e-08,
+            "all_layers_mse": 9.151e-09,
+            "adjusted_final_layer_score": 4.76e-09
+          }
+        },
+        {
+          "mlp_index": 39,
+          "scores": {
+            "final_layer_mse": 1.8e-08,
+            "all_layers_mse": 7.436e-09,
+            "adjusted_final_layer_score": 3.864e-09
+          }
+        },
+        {
+          "mlp_index": 40,
+          "scores": {
+            "final_layer_mse": 2.546e-08,
+            "all_layers_mse": 9.406e-09,
+            "adjusted_final_layer_score": 5.467e-09
+          }
+        },
+        {
+          "mlp_index": 41,
+          "scores": {
+            "final_layer_mse": 2.122e-08,
+            "all_layers_mse": 7.566e-09,
+            "adjusted_final_layer_score": 4.558e-09
+          }
+        },
+        {
+          "mlp_index": 42,
+          "scores": {
+            "final_layer_mse": 2.025e-08,
+            "all_layers_mse": 8.385e-09,
+            "adjusted_final_layer_score": 4.347e-09
+          }
+        },
+        {
+          "mlp_index": 43,
+          "scores": {
+            "final_layer_mse": 2.194e-08,
+            "all_layers_mse": 8.493e-09,
+            "adjusted_final_layer_score": 4.712e-09
+          }
+        },
+        {
+          "mlp_index": 44,
+          "scores": {
+            "final_layer_mse": 2.46e-08,
+            "all_layers_mse": 9.557e-09,
+            "adjusted_final_layer_score": 5.283e-09
+          }
+        },
+        {
+          "mlp_index": 45,
+          "scores": {
+            "final_layer_mse": 2.42e-08,
+            "all_layers_mse": 9.475e-09,
+            "adjusted_final_layer_score": 5.197e-09
+          }
+        },
+        {
+          "mlp_index": 46,
+          "scores": {
+            "final_layer_mse": 1.801e-08,
+            "all_layers_mse": 7.645e-09,
+            "adjusted_final_layer_score": 3.868e-09
+          }
+        },
+        {
+          "mlp_index": 47,
+          "scores": {
+            "final_layer_mse": 2.281e-08,
+            "all_layers_mse": 8.646e-09,
+            "adjusted_final_layer_score": 4.899e-09
+          }
+        },
+        {
+          "mlp_index": 48,
+          "scores": {
+            "final_layer_mse": 2.056e-08,
+            "all_layers_mse": 8.008e-09,
+            "adjusted_final_layer_score": 4.415e-09
+          }
+        },
+        {
+          "mlp_index": 49,
+          "scores": {
+            "final_layer_mse": 2.357e-08,
+            "all_layers_mse": 8.895e-09,
+            "adjusted_final_layer_score": 5.061e-09
+          }
+        }
+      ],
+      "aggregates": {
+        "public": {
+          "score": 4.666e-09,
+          "score_secondary": 2.173e-08,
+          "sampling_mse": 1.132e-06,
+          "adjusted_final_layer_score": 4.666e-09,
+          "final_layer_mse": 2.173e-08,
+          "all_layers_mse": 8.537e-09,
+          "best_mlp_adjusted_final_layer_score": 3.765e-09,
+          "worst_mlp_adjusted_final_layer_score": 6.436e-09,
+          "mean_score_multiplier": 0.21473138750934595,
+          "mean_compute_utilization": 0.21473138750934595,
+          "mean_effective_compute": 472199314830.0,
+          "n_failed_mlps": 0,
+          "failure_breakdown": {
+            "budget_exhausted": 0,
+            "time_exhausted": 0,
+            "residual_wall_time_exhausted": 0,
+            "combined_budget_exhausted": 0,
+            "error": 0
+          }
+        }
+      },
+      "breakdowns": {
+        "sampling": null,
+        "estimator": null
+      },
+      "setup_executions": [
+        {
+          "worker_id": "w-0",
+          "generation": 0,
+          "flops": 0,
+          "wall_s": 0.03233790800004499,
+          "kernel_ns": 0,
+          "comms_ns": 61070,
+          "error_code": "SUCCESS"
+        },
+        {
+          "worker_id": "w-2",
+          "generation": 0,
+          "flops": 0,
+          "wall_s": 0.030455504000201472,
+          "kernel_ns": 0,
+          "comms_ns": 67300,
+          "error_code": "SUCCESS"
+        },
+        {
+          "worker_id": "w-1",
+          "generation": 0,
+          "flops": 0,
+          "wall_s": 0.03025197900024068,
+          "kernel_ns": 0,
+          "comms_ns": 61033,
+          "error_code": "SUCCESS"
+        },
+        {
+          "worker_id": "w-3",
+          "generation": 0,
+          "flops": 0,
+          "wall_s": 0.03040550300011091,
+          "kernel_ns": 0,
+          "comms_ns": 59933,
+          "error_code": "SUCCESS"
+        },
+        {
+          "worker_id": "w-4",
+          "generation": 0,
+          "flops": 0,
+          "wall_s": 0.03113824699903489,
+          "kernel_ns": 0,
+          "comms_ns": 64709,
+          "error_code": "SUCCESS"
+        }
+      ]
+    },
+    "runtime_environment": {
+      "whestbench_version": "0.16.1",
+      "flopscope_version": "0.12.1",
+      "flopscope_server_version": "0.12.1",
+      "numpy_version": "2.2.6",
+      "python_version": "3.10.21",
+      "flopscope_patches": [],
+      "flopscope_client_version": "0.12.1",
+      "participant_shim_version": "0.1.0",
+      "participant_python_version": "3.10.21"
+    },
+    "error": null
+  }
+}

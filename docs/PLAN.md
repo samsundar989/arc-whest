@@ -64,7 +64,7 @@ Mechanism results already write-up grade: channel-drift anatomy, refit ceilings,
 Exit code 0 or an "all gates pass" line is **not** acceptance; `tools/ev.py` now exits non-zero unless every hard gate below that it can check has run and passed. Evidence recorded in `RESULTS.md` against the source sha8:
 
 1. `whest validate` passes (official contract).
-2. Numerical parity: the exported file reproduces the fitted twin computation (VAL or DEV panel mean within 1e-4 relative; data-only diffs checked by diff).
+2. Numerical parity: the exported file reproduces the fitted twin computation — DEV panel mean within **1e-3 relative** (the twin's acceptance bar, RESULTS § Step 2 twin; two float32 backends differ ~1e-3 per net), and the build pipeline reproduces a known export byte-exact; data-only diffs checked by diff. *(Rev 15 first said 1e-4; corrected Sep 28 after v71 read 1.9e-4 — the 1e-4 figure had no basis in the backend noise; prior exports read 1.4e-5–6.3e-5.)*
 3. **Full DEV-100** evaluation with `tools/ev.py --baseline <incumbent>`: 100/100, **zero failed nets**, paired statistics reported.
 4. **Projected public score** (DEV ÷ current `PUBLIC_FACTOR`, 1.038) **better than the best graded row**.
 5. FLOPs from the real f64 read-only flopscope meter (`tools/_cost_worker.py`), never the counting shim.
