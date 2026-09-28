@@ -1,0 +1,1117 @@
+{
+  "net": 0,
+  "layers": {
+    "2": {
+      "source_layer": 2,
+      "consumer_layer": 3,
+      "covariance_symmetry_relative_error": 1.1759844781592336e-05,
+      "covariance_min_eigenvalue": -3.1984069537930783e-07,
+      "covariance_negative_energy_fraction": 3.042680324108358e-17,
+      "D3_AD_relative_error": 0.07932505835688057,
+      "D21_AD_relative_error": 0.07736164027090206,
+      "ranks": {
+        "4": {
+          "positive_modes": 4,
+          "covariance_energy_fraction": 0.07349168073808561,
+          "D21_diagonal_identity_relative_error": 1.821123078968503e-15,
+          "D3": {
+            "raw": {
+              "target_energy": 0.0001392235693993132,
+              "feature_energy": 1.998297489547925e-09,
+              "dot": -2.5242488671231456e-08,
+              "feature_over_target_norm": 0.0037885558107923784,
+              "cosine": -0.04785702711155869,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -0.00037697119143297687,
+              "oracle_scalar": -12.631997389408754,
+              "oracle_energy_removed": 0.0022902950439564634
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.00013917680316375086,
+              "feature_energy": 1.9926701425542404e-09,
+              "dot": -2.4729487857296567e-08,
+              "feature_over_target_norm": 0.003783853195112543,
+              "cosine": -0.04695847528602261,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -0.00036968549849942346,
+              "oracle_scalar": -12.410226524294616,
+              "oracle_energy_removed": 0.002205098401187996
+            },
+            "orthogonal_target_energy_fraction": 0.9996640925400482
+          },
+          "D21": {
+            "raw": {
+              "target_energy": 0.04782706232027095,
+              "feature_energy": 5.904215148856647e-07,
+              "dot": 5.27901880858178e-07,
+              "feature_over_target_norm": 0.0035135345974386762,
+              "cosine": 0.0031414870150985965,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 9.73052126250799e-06,
+              "oracle_scalar": 0.8941101696817507,
+              "oracle_energy_removed": 9.86894066603309e-06
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.04782626538960313,
+              "feature_energy": 5.90419594446793e-07,
+              "dot": 5.291389971148834e-07,
+              "feature_over_target_norm": 0.0035135581561749874,
+              "cosine": 0.0031488803158798186,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 9.782457316533038e-06,
+              "oracle_scalar": 0.896208394998598,
+              "oracle_energy_removed": 9.915447243735388e-06
+            },
+            "orthogonal_target_energy_fraction": 0.999983337244038
+          },
+          "D3_rep1": {
+            "raw": {
+              "target_energy": 0.00013830511450073346,
+              "feature_energy": 1.998297489547925e-09,
+              "dot": -2.7264620016998295e-08,
+              "feature_over_target_norm": 0.0038011144927586893,
+              "cosine": -0.05186211904295414,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -0.0004087161760257589,
+              "oracle_scalar": -13.64392447050833,
+              "oracle_energy_removed": 0.0026896793916255457
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.00013827059642231834,
+              "feature_energy": 1.9926701425542404e-09,
+              "dot": -2.6823887439580708e-08,
+              "feature_over_target_norm": 0.0037962323757711183,
+              "cosine": -0.051102140674245955,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -0.00040240258204841804,
+              "oracle_scalar": -13.461278345445256,
+              "oracle_energy_removed": 0.0026114287814904226
+            },
+            "orthogonal_target_energy_fraction": 0.9997504208102518
+          },
+          "D21_rep1": {
+            "raw": {
+              "target_energy": 0.04782922445376217,
+              "feature_energy": 5.904215148856647e-07,
+              "dot": 4.7118385652593575e-07,
+              "feature_over_target_norm": 0.003513455181383247,
+              "cosine": 0.002803900807062856,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 7.358392325730534e-06,
+              "oracle_scalar": 0.7980465559714243,
+              "oracle_energy_removed": 7.861859735847736e-06
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.04782832419354792,
+              "feature_energy": 5.90419594446793e-07,
+              "dot": 4.724987309344512e-07,
+              "feature_over_target_norm": 0.0035134825335668253,
+              "cosine": 0.0028117563405499245,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 7.413554068656713e-06,
+              "oracle_scalar": 0.8002761686409978,
+              "oracle_energy_removed": 7.905973718622705e-06
+            },
+            "orthogonal_target_energy_fraction": 0.9999811776121287
+          }
+        },
+        "8": {
+          "positive_modes": 8,
+          "covariance_energy_fraction": 0.13787928086281986,
+          "D21_diagonal_identity_relative_error": 2.868576968766537e-15,
+          "D3": {
+            "raw": {
+              "target_energy": 0.0001392235693993132,
+              "feature_energy": 6.942887956083744e-09,
+              "dot": -4.440828631273871e-09,
+              "feature_over_target_norm": 0.007061772077506259,
+              "cosine": -0.004516869612138949,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -0.0001136628322841258,
+              "oracle_scalar": -0.6396226843013605,
+              "oracle_energy_removed": 2.0402111093064258e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.00013917680316375086,
+              "feature_energy": 6.941307418870683e-09,
+              "dot": -4.1689540726606925e-09,
+              "feature_over_target_norm": 0.007062154446063427,
+              "cosine": -0.004241534881402066,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -0.00010978277426170686,
+              "oracle_scalar": -0.6006006968265009,
+              "oracle_energy_removed": 1.7990618150150437e-05
+            },
+            "orthogonal_target_energy_fraction": 0.9996640925400482
+          },
+          "D21": {
+            "raw": {
+              "target_energy": 0.04782706232027095,
+              "feature_energy": 2.346827438352463e-06,
+              "dot": 2.210695796659419e-06,
+              "feature_over_target_norm": 0.007004928803650983,
+              "cosine": 0.006598596219328828,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 4.337636589665877e-05,
+              "oracle_scalar": 0.9419933313083247,
+              "oracle_energy_removed": 4.3541472065740693e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.04782626538960313,
+              "feature_energy": 2.3468269069718857e-06,
+              "dot": 2.211346545058026e-06,
+              "feature_over_target_norm": 0.00700498637203751,
+              "cosine": 0.006600594345482026,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 4.340431280246765e-05,
+              "oracle_scalar": 0.9422708332210703,
+              "oracle_energy_removed": 4.3567845713609296e-05
+            },
+            "orthogonal_target_energy_fraction": 0.999983337244038
+          },
+          "D3_rep1": {
+            "raw": {
+              "target_energy": 0.00013830511450073346,
+              "feature_energy": 6.942887956083744e-09,
+              "dot": -7.767624477799235e-09,
+              "feature_over_target_norm": 0.0070851811426142185,
+              "cosine": -0.007926820484664024,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -0.00016252570986131543,
+              "oracle_scalar": -1.1187886837483545,
+              "oracle_energy_removed": 6.283448299608918e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.00013827059642231834,
+              "feature_energy": 6.941307418870683e-09,
+              "dot": -7.53404984848674e-09,
+              "feature_over_target_norm": 0.007085258853454153,
+              "cosine": -0.0076902937977123,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -0.00015917633745225973,
+              "oracle_scalar": -1.085393484807289,
+              "oracle_energy_removed": 5.914061869513227e-05
+            },
+            "orthogonal_target_energy_fraction": 0.9997504208102518
+          },
+          "D21_rep1": {
+            "raw": {
+              "target_energy": 0.04782922445376217,
+              "feature_energy": 2.346827438352463e-06,
+              "dot": 2.211171137709029e-06,
+              "feature_over_target_norm": 0.007004770471977074,
+              "cosine": 0.006599865861797527,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 4.3394281650375756e-05,
+              "oracle_scalar": 0.9421958775381166,
+              "oracle_energy_removed": 4.3558229393720414e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.04782832419354792,
+              "feature_energy": 2.3468269069718857e-06,
+              "dot": 2.211862788482409e-06,
+              "feature_over_target_norm": 0.007004835603125754,
+              "cosine": 0.00660199316956962,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 4.342403178477049e-05,
+              "oracle_scalar": 0.9424908082958615,
+              "oracle_energy_removed": 4.358631381104392e-05
+            },
+            "orthogonal_target_energy_fraction": 0.9999811776121287
+          }
+        }
+      }
+    },
+    "5": {
+      "source_layer": 5,
+      "consumer_layer": 6,
+      "covariance_symmetry_relative_error": 9.414827607099073e-06,
+      "covariance_min_eigenvalue": -8.305523971012185e-07,
+      "covariance_negative_energy_fraction": 8.091255853184359e-16,
+      "D3_AD_relative_error": 0.11116849870103139,
+      "D21_AD_relative_error": 0.11636335658770121,
+      "ranks": {
+        "4": {
+          "positive_modes": 4,
+          "covariance_energy_fraction": 0.16812261697784475,
+          "D21_diagonal_identity_relative_error": 1.9658534725409635e-15,
+          "D3": {
+            "raw": {
+              "target_energy": 0.00014442526273291133,
+              "feature_energy": 2.0769611020550034e-09,
+              "dot": -4.804609943117111e-09,
+              "feature_over_target_norm": 0.003792211914518654,
+              "cosine": -0.008772479683358548,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -8.091507515482748e-05,
+              "oracle_scalar": -2.3132883607513377,
+              "oracle_energy_removed": 7.695639979493851e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.0001376033414186306,
+              "feature_energy": 2.0766038014181726e-09,
+              "dot": -6.365852022360498e-09,
+              "feature_over_target_norm": 0.003884743353830574,
+              "cosine": -0.011908723907008763,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -0.00010761590302584195,
+              "oracle_scalar": -3.0655111090584897,
+              "oracle_energy_removed": 0.000141817705093362
+            },
+            "orthogonal_target_energy_fraction": 0.9527650413425478
+          },
+          "D21": {
+            "raw": {
+              "target_energy": 0.05495589830896276,
+              "feature_energy": 7.195535368606423e-07,
+              "dot": 1.1943003796966452e-06,
+              "feature_over_target_norm": 0.003618465202288279,
+              "cosine": 0.006005855219427476,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 3.0370665822788362e-05,
+              "oracle_scalar": 1.6597797363449667,
+              "oracle_energy_removed": 3.607029691672426e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.05340693431098921,
+              "feature_energy": 7.195394683106068e-07,
+              "dot": 1.341920424095742e-06,
+              "feature_over_target_norm": 0.0036705275312957134,
+              "cosine": 0.00684542833072946,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 3.677989394490848e-05,
+              "oracle_scalar": 1.8649712534135365,
+              "oracle_energy_removed": 4.685988903115353e-05
+            },
+            "orthogonal_target_energy_fraction": 0.9718144176396635
+          },
+          "D3_rep1": {
+            "raw": {
+              "target_energy": 0.00014433462310619924,
+              "feature_energy": 2.0769611020550034e-09,
+              "dot": -4.0014579251004e-09,
+              "feature_over_target_norm": 0.0037934024491201625,
+              "cosine": -0.007308341151939956,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -6.983686059054024e-05,
+              "oracle_scalar": -1.926592617040948,
+              "oracle_energy_removed": 5.341185039313903e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.00013763242627640014,
+              "feature_energy": 2.0766038014181726e-09,
+              "dot": -5.548939490564349e-09,
+              "feature_over_target_norm": 0.003884332864889865,
+              "cosine": -0.010379412776652209,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -9.572223013847938e-05,
+              "oracle_scalar": -2.672122379230365,
+              "oracle_energy_removed": 0.00010773220958813109
+            },
+            "orthogonal_target_energy_fraction": 0.9535648710921723
+          },
+          "D21_rep1": {
+            "raw": {
+              "target_energy": 0.05494070073616293,
+              "feature_energy": 7.195535368606423e-07,
+              "dot": 1.2257422169607473e-06,
+              "feature_over_target_norm": 0.0036189656335277012,
+              "cosine": 0.006164821283623425,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 3.152364046789205e-05,
+              "oracle_scalar": 1.7034760503138766,
+              "oracle_energy_removed": 3.800502145901637e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.053392261574013625,
+              "feature_energy": 7.195394683106068e-07,
+              "dot": 1.373337250174395e-06,
+              "feature_over_target_norm": 0.003671031845814876,
+              "cosine": 0.00700665495427378,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 3.7966832126564264e-05,
+              "oracle_scalar": 1.9086336617487123,
+              "oracle_energy_removed": 4.9093213648249305e-05
+            },
+            "orthogonal_target_energy_fraction": 0.9718161737764277
+          }
+        },
+        "8": {
+          "positive_modes": 8,
+          "covariance_energy_fraction": 0.281515635878537,
+          "D21_diagonal_identity_relative_error": 2.71922993756042e-15,
+          "D3": {
+            "raw": {
+              "target_energy": 0.00014442526273291133,
+              "feature_energy": 8.354517459604333e-09,
+              "dot": 2.4516503078669235e-08,
+              "feature_over_target_norm": 0.0076056984464596845,
+              "cosine": 0.022319078304600205,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 0.0002816577095169404,
+              "oracle_scalar": 2.934520539003138,
+              "oracle_energy_removed": 0.0004981412563668756
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.0001376033414186306,
+              "feature_energy": 8.340727543913172e-09,
+              "dot": 1.4817342301794498e-08,
+              "feature_over_target_norm": 0.007785517360362683,
+              "cosine": 0.013831008760050483,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 0.00015474883705689406,
+              "oracle_scalar": 1.7765047741677857,
+              "oracle_energy_removed": 0.00019129680332059318
+            },
+            "orthogonal_target_energy_fraction": 0.9527650413425478
+          },
+          "D21": {
+            "raw": {
+              "target_energy": 0.05495589830896276,
+              "feature_energy": 3.0890339419487635e-06,
+              "dot": 3.938723171952253e-06,
+              "feature_over_target_norm": 0.00749728783473536,
+              "cosine": 0.009559539285229936,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 8.713191030078748e-05,
+              "oracle_scalar": 1.275066330112077,
+              "oracle_energy_removed": 9.138479134585445e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.05340693431098921,
+              "feature_energy": 3.088954053365811e-06,
+              "dot": 4.290496591702225e-06,
+              "feature_over_target_norm": 0.007605134509167542,
+              "cosine": 0.01056338266199394,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 0.00010283382113001337,
+              "oracle_scalar": 1.3889803854567468,
+              "oracle_energy_removed": 0.00011158505326371417
+            },
+            "orthogonal_target_energy_fraction": 0.9718144176396635
+          },
+          "D3_rep1": {
+            "raw": {
+              "target_energy": 0.00014433462310619924,
+              "feature_energy": 8.354517459604333e-09,
+              "dot": 2.501667158196111e-08,
+              "feature_over_target_norm": 0.007608086194658693,
+              "cosine": 0.02278156633453761,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 0.0002887652650996375,
+              "oracle_scalar": 2.994388569168888,
+              "oracle_energy_removed": 0.0005189997646549375
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.00013763242627640014,
+              "feature_energy": 8.340727543913172e-09,
+              "dot": 1.5402997506536235e-08,
+              "feature_over_target_norm": 0.0077846946885712556,
+              "cosine": 0.01437615990282696,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 0.00016322655988090668,
+              "oracle_scalar": 1.846721095424932,
+              "oracle_energy_removed": 0.0002066739735516497
+            },
+            "orthogonal_target_energy_fraction": 0.9535648710921723
+          },
+          "D21_rep1": {
+            "raw": {
+              "target_energy": 0.05494070073616293,
+              "feature_energy": 3.0890339419487635e-06,
+              "dot": 3.981127671018506e-06,
+              "feature_over_target_norm": 0.007498324704467054,
+              "cosine": 0.009663794094927621,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 8.869965862813631e-05,
+              "oracle_scalar": 1.2887937607143778,
+              "oracle_energy_removed": 9.338891630915795e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.053392261574013625,
+              "feature_energy": 3.088954053365811e-06,
+              "dot": 4.332841489985445e-06,
+              "feature_over_target_norm": 0.007606179421573308,
+              "cosine": 0.01066910326560414,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 0.00010444826201779231,
+              "oracle_scalar": 1.402688876276505,
+              "oracle_energy_removed": 0.00011382976449212493
+            },
+            "orthogonal_target_energy_fraction": 0.9718161737764277
+          }
+        }
+      }
+    },
+    "8": {
+      "source_layer": 8,
+      "consumer_layer": 9,
+      "covariance_symmetry_relative_error": 8.219193940121595e-06,
+      "covariance_min_eigenvalue": -1.4556543471526207e-06,
+      "covariance_negative_energy_fraction": 1.4636850243368632e-14,
+      "D3_AD_relative_error": 0.16749729066412103,
+      "D21_AD_relative_error": 0.16832319440464139,
+      "ranks": {
+        "4": {
+          "positive_modes": 4,
+          "covariance_energy_fraction": 0.27576863744807967,
+          "D21_diagonal_identity_relative_error": 1.5854354126069234e-15,
+          "D3": {
+            "raw": {
+              "target_energy": 0.00020994680865164285,
+              "feature_energy": 2.475150538749201e-09,
+              "dot": -1.4383966079969758e-08,
+              "feature_over_target_norm": 0.0034335720909252202,
+              "cosine": -0.01995368916589504,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -0.00014881427776560887,
+              "oracle_scalar": -5.811349998630219,
+              "oracle_energy_removed": 0.0003981497113291571
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.00018371686008787223,
+              "feature_energy": 2.4723821064324087e-09,
+              "dot": -5.86247341308526e-09,
+              "feature_over_target_norm": 0.003668455782962724,
+              "cosine": -0.00869858442946379,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -7.727831253926456e-05,
+              "oracle_scalar": -2.371184210495956,
+              "oracle_energy_removed": 7.566537107650991e-05
+            },
+            "orthogonal_target_energy_fraction": 0.8750638376823673
+          },
+          "D21": {
+            "raw": {
+              "target_energy": 0.07879908564893212,
+              "feature_energy": 7.51572570131761e-07,
+              "dot": 1.6159243028093247e-06,
+              "feature_over_target_norm": 0.003088338330380133,
+              "cosine": 0.006640105242909441,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 3.1475949435975477e-05,
+              "oracle_scalar": 2.150057581965812,
+              "oracle_energy_removed": 4.409099763691345e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.06922426190689052,
+              "feature_energy": 7.515715624240487e-07,
+              "dot": 1.71415171104228e-06,
+              "feature_over_target_norm": 0.0032950044286424412,
+              "cosine": 0.007515102701640754,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 3.8667539182444814e-05,
+              "oracle_scalar": 2.280756479813599,
+              "oracle_energy_removed": 5.6476768616208155e-05
+            },
+            "orthogonal_target_energy_fraction": 0.8784906745656971
+          },
+          "D3_rep1": {
+            "raw": {
+              "target_energy": 0.00021013087114711608,
+              "feature_energy": 2.475150538749201e-09,
+              "dot": -1.4838725991482862e-08,
+              "feature_over_target_norm": 0.0034320679561407404,
+              "cosine": -0.02057552265530359,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -0.00015301227442779866,
+              "oracle_scalar": -5.995080201861783,
+              "oracle_energy_removed": 0.00042335213253891126
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.00018386464301342094,
+              "feature_energy": 2.4723821064324087e-09,
+              "dot": -6.311342171952699e-09,
+              "feature_over_target_norm": 0.003666981208788726,
+              "cosine": -0.009360839931082506,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -8.209879943712704e-05,
+              "oracle_scalar": -2.5527373602698584,
+              "oracle_energy_removed": 8.762532421534874e-05
+            },
+            "orthogonal_target_energy_fraction": 0.8750006222774105
+          },
+          "D21_rep1": {
+            "raw": {
+              "target_energy": 0.07880060400992253,
+              "feature_energy": 7.51572570131761e-07,
+              "dot": 1.6232997497509257e-06,
+              "feature_over_target_norm": 0.0030883085765787913,
+              "cosine": 0.006670347932781923,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 3.166253559497993e-05,
+              "oracle_scalar": 2.1598709349735032,
+              "oracle_energy_removed": 4.449354154436808e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.06922456925001949,
+              "feature_energy": 7.515715624240487e-07,
+              "dot": 1.721533369658788e-06,
+              "feature_over_target_norm": 0.0032949971140566947,
+              "cosine": 0.0075474482649165444,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 3.88806345211425e-05,
+              "oracle_scalar": 2.2905781108938115,
+              "oracle_energy_removed": 5.696397531159175e-05
+            },
+            "orthogonal_target_energy_fraction": 0.8784776477259333
+          }
+        },
+        "8": {
+          "positive_modes": 8,
+          "covariance_energy_fraction": 0.41448921158214475,
+          "D21_diagonal_identity_relative_error": 2.4587521136884797e-15,
+          "D3": {
+            "raw": {
+              "target_energy": 0.00020994680865164285,
+              "feature_energy": 8.63667169258317e-09,
+              "dot": -9.57132061460825e-08,
+              "feature_over_target_norm": 0.006413846571820142,
+              "cosine": -0.0710794436756407,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -0.0009529227201386311,
+              "oracle_scalar": -11.082186466376532,
+              "oracle_energy_removed": 0.005052287313238578
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.00018371686008787223,
+              "feature_energy": 8.634406430849493e-09,
+              "dot": -8.80049184790423e-08,
+              "feature_over_target_norm": 0.006855541064950783,
+              "cosine": -0.06987409469111161,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -0.0010050478943555768,
+              "oracle_scalar": -10.192353022046007,
+              "oracle_energy_removed": 0.004882389108902431
+            },
+            "orthogonal_target_energy_fraction": 0.8750638376823673
+          },
+          "D21": {
+            "raw": {
+              "target_energy": 0.07879908564893212,
+              "feature_energy": 2.809059597159049e-06,
+              "dot": 3.793524417254233e-06,
+              "feature_over_target_norm": 0.005970626271570397,
+              "cosine": 0.008063095767141702,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 6.063508476020201e-05,
+              "oracle_scalar": 1.3504606385321356,
+              "oracle_energy_removed": 6.501351335009844e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.06922426190689052,
+              "feature_energy": 2.8090533123266167e-06,
+              "dot": 4.038832718748802e-06,
+              "feature_over_target_norm": 0.006370167087614971,
+              "cosine": 0.00915897150988804,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 7.6109329013251e-05,
+              "oracle_scalar": 1.4377914085950945,
+              "oracle_energy_removed": 8.388675911894082e-05
+            },
+            "orthogonal_target_energy_fraction": 0.8784906745656971
+          },
+          "D3_rep1": {
+            "raw": {
+              "target_energy": 0.00021013087114711608,
+              "feature_energy": 8.63667169258317e-09,
+              "dot": -9.563986717692493e-08,
+              "feature_over_target_norm": 0.00641103687699635,
+              "cosine": -0.07099386629560643,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -0.0009513899835615693,
+              "oracle_scalar": -11.073694888628989,
+              "oracle_energy_removed": 0.005040129051598443
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.00018386464301342094,
+              "feature_energy": 8.634406430849493e-09,
+              "dot": -8.792625054921335e-08,
+              "feature_over_target_norm": 0.006852785408510788,
+              "cosine": -0.06978357245680782,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -0.001003384362026634,
+              "oracle_scalar": -10.18324203908974,
+              "oracle_energy_removed": 0.004869746984834546
+            },
+            "orthogonal_target_energy_fraction": 0.8750006222774105
+          },
+          "D21_rep1": {
+            "raw": {
+              "target_energy": 0.07880060400992253,
+              "feature_energy": 2.809059597159049e-06,
+              "dot": 3.780897203119403e-06,
+              "feature_over_target_norm": 0.005970568749107193,
+              "cosine": 0.008036179334664844,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 6.031343120772647e-05,
+              "oracle_scalar": 1.345965463653112,
+              "oracle_energy_removed": 6.45801782988943e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.06922456925001949,
+              "feature_energy": 2.8090533123266167e-06,
+              "dot": 4.0262210173455835e-06,
+              "feature_over_target_norm": 0.006370152946470584,
+              "cosine": 0.009130351340873246,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 7.574462043132285e-05,
+              "oracle_scalar": 1.4333017460643493,
+              "oracle_energy_removed": 8.336331560778589e-05
+            },
+            "orthogonal_target_energy_fraction": 0.8784776477259333
+          }
+        }
+      }
+    },
+    "11": {
+      "source_layer": 11,
+      "consumer_layer": 12,
+      "covariance_symmetry_relative_error": 7.588751308775023e-06,
+      "covariance_min_eigenvalue": -1.848558526993775e-06,
+      "covariance_negative_energy_fraction": 7.41332360977467e-14,
+      "D3_AD_relative_error": 0.23237215000203276,
+      "D21_AD_relative_error": 0.22026353227036427,
+      "ranks": {
+        "4": {
+          "positive_modes": 4,
+          "covariance_energy_fraction": 0.40503215203138515,
+          "D21_diagonal_identity_relative_error": 1.8481586764506378e-15,
+          "D3": {
+            "raw": {
+              "target_energy": 0.00030378308954990413,
+              "feature_energy": 1.2786826648278014e-09,
+              "dot": -4.721560776763931e-09,
+              "feature_over_target_norm": 0.0020516326004660426,
+              "cosine": -0.007575693548637553,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -3.529427603834522e-05,
+              "oracle_scalar": -3.6925195802195203,
+              "oracle_energy_removed": 5.7391132742868645e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.00021580330797143512,
+              "feature_energy": 1.2769003609106373e-09,
+              "dot": 7.800687796816964e-09,
+              "feature_over_target_norm": 0.0024324809965790683,
+              "cosine": 0.0148602235592378,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 6.637745902680674e-05,
+              "oracle_scalar": 6.109081049404518,
+              "oracle_energy_removed": 0.0002208262442305262
+            },
+            "orthogonal_target_energy_fraction": 0.7103861781482866
+          },
+          "D21": {
+            "raw": {
+              "target_energy": 0.09338929732952288,
+              "feature_energy": 4.532011076865086e-07,
+              "dot": 1.016449263414782e-06,
+              "feature_over_target_norm": 0.002202910877902495,
+              "cosine": 0.004940736245422596,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 1.6915186903795995e-05,
+              "oracle_scalar": 2.242821666088882,
+              "oracle_energy_removed": 2.441087464683257e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.06979539050728738,
+              "feature_energy": 4.5319887520124556e-07,
+              "dot": 1.2459553619796474e-06,
+              "feature_over_target_norm": 0.002548185504741411,
+              "cosine": 0.007005589745873776,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 2.920983511862701e-05,
+              "oracle_scalar": 2.749246368774357,
+              "oracle_energy_removed": 4.907828768749181e-05
+            },
+            "orthogonal_target_energy_fraction": 0.7473596279562451
+          },
+          "D3_rep1": {
+            "raw": {
+              "target_energy": 0.0003039791580038561,
+              "feature_energy": 1.2786826648278014e-09,
+              "dot": -4.476310827461916e-09,
+              "feature_over_target_norm": 0.0020509708358227973,
+              "cosine": -0.007179875986227254,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -3.365791387454875e-05,
+              "oracle_scalar": -3.500720664000505,
+              "oracle_energy_removed": 5.155061917760278e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.00021582338122711056,
+              "feature_energy": 1.2769003609106373e-09,
+              "dot": 8.058456273279887e-09,
+              "feature_over_target_norm": 0.0024323678741080762,
+              "cosine": 0.015350555731734543,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 6.875998374816035e-05,
+              "oracle_scalar": 6.310951519766898,
+              "oracle_energy_removed": 0.00023563956127308823
+            },
+            "orthogonal_target_energy_fraction": 0.7099940096036872
+          },
+          "D21_rep1": {
+            "raw": {
+              "target_energy": 0.09339125885686449,
+              "feature_energy": 4.532011076865086e-07,
+              "dot": 1.016348426055685e-06,
+              "feature_over_target_norm": 0.0022028877435499848,
+              "cosine": 0.004940194216125118,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 1.691267216823435e-05,
+              "oracle_scalar": 2.242599165840346,
+              "oracle_energy_removed": 2.4405518893036063e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.06979924333017858,
+              "feature_energy": 4.5319887520124556e-07,
+              "dot": 1.2458453257929651e-06,
+              "feature_over_target_norm": 0.0025481151755912656,
+              "cosine": 0.00700477771416096,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 2.9205069842115566e-05,
+              "oracle_scalar": 2.7490035698781035,
+              "oracle_energy_removed": 4.906691082480604e-05
+            },
+            "orthogonal_target_energy_fraction": 0.7473851855574186
+          }
+        },
+        "8": {
+          "positive_modes": 8,
+          "covariance_energy_fraction": 0.5590248342328884,
+          "D21_diagonal_identity_relative_error": 2.658486500931546e-15,
+          "D3": {
+            "raw": {
+              "target_energy": 0.00030378308954990413,
+              "feature_energy": 4.9915426361357845e-09,
+              "dot": 1.1637954837531104e-08,
+              "feature_over_target_norm": 0.004053550567901192,
+              "cosine": 0.009450993786843281,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 6.018889025724636e-05,
+              "oracle_scalar": 2.3315346949616873,
+              "oracle_energy_removed": 8.93212835589503e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.00021580330797143512,
+              "feature_energy": 4.9913677336153136e-09,
+              "dot": 7.715215291165771e-09,
+              "feature_over_target_norm": 0.004809287442346355,
+              "cosine": 0.00743377166240699,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 4.83730437074579e-05,
+              "oracle_scalar": 1.5457116571889082,
+              "oracle_energy_removed": 5.526096112880518e-05
+            },
+            "orthogonal_target_energy_fraction": 0.7103861781482866
+          },
+          "D21": {
+            "raw": {
+              "target_energy": 0.09338929732952288,
+              "feature_energy": 1.6349830887590034e-06,
+              "dot": 2.8348482588721334e-06,
+              "feature_over_target_norm": 0.00418415802730184,
+              "cosine": 0.007254786413445809,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 4.320316721892479e-05,
+              "oracle_scalar": 1.733870079979763,
+              "oracle_energy_removed": 5.2631925904717905e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.06979539050728738,
+              "feature_energy": 1.6349816703777316e-06,
+              "dot": 3.0177830985510055e-06,
+              "feature_over_target_norm": 0.004839974498163199,
+              "cosine": 0.008933429348232602,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 6.304978731030686e-05,
+              "oracle_scalar": 1.8457595905976143,
+              "oracle_energy_removed": 7.980615991986357e-05
+            },
+            "orthogonal_target_energy_fraction": 0.7473596279562451
+          },
+          "D3_rep1": {
+            "raw": {
+              "target_energy": 0.0003039791580038561,
+              "feature_energy": 4.9915426361357845e-09,
+              "dot": 1.2248696944693016e-08,
+              "feature_over_target_norm": 0.004052243074325182,
+              "cosine": 0.009943759070455443,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 6.416838371860615e-05,
+              "oracle_scalar": 2.4538900771917227,
+              "oracle_energy_removed": 9.887834445126489e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.00021582338122711056,
+              "feature_energy": 4.9913677336153136e-09,
+              "dot": 8.322035824556982e-09,
+              "feature_over_target_norm": 0.004809063786548035,
+              "cosine": 0.008018083068635079,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 5.399185134272607e-05,
+              "oracle_scalar": 1.667285655695262,
+              "oracle_energy_removed": 6.428965609553252e-05
+            },
+            "orthogonal_target_energy_fraction": 0.7099940096036872
+          },
+          "D21_rep1": {
+            "raw": {
+              "target_energy": 0.09339125885686449,
+              "feature_energy": 1.6349830887590034e-06,
+              "dot": 2.8299626964375482e-06,
+              "feature_over_target_norm": 0.0041841140864471585,
+              "cosine": 0.007242207496636483,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 4.309763411889431e-05,
+              "oracle_scalar": 1.7308819374918225,
+              "oracle_energy_removed": 5.244956942433769e-05
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.06979924333017858,
+              "feature_energy": 1.6349816703777316e-06,
+              "dot": 3.0128902039101743e-06,
+              "feature_over_target_norm": 0.004839840916329166,
+              "cosine": 0.008918698936803929,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 6.290610797415621e-05,
+              "oracle_scalar": 1.842766960937307,
+              "oracle_energy_removed": 7.954319072534751e-05
+            },
+            "orthogonal_target_energy_fraction": 0.7473851855574186
+          }
+        }
+      }
+    },
+    "14": {
+      "source_layer": 14,
+      "consumer_layer": 15,
+      "covariance_symmetry_relative_error": 6.9600916461378055e-06,
+      "covariance_min_eigenvalue": -1.9097458083243415e-06,
+      "covariance_negative_energy_fraction": 1.4275496917901688e-13,
+      "D3_AD_relative_error": 0.2564652828126113,
+      "D21_AD_relative_error": 0.2532861494462761,
+      "ranks": {
+        "4": {
+          "positive_modes": 4,
+          "covariance_energy_fraction": 0.5105935041689844,
+          "D21_diagonal_identity_relative_error": 1.6246205869683973e-15,
+          "D3": {
+            "raw": {
+              "target_energy": 0.0002203472566925905,
+              "feature_energy": 1.1450332277664083e-09,
+              "dot": -2.0362536428110687e-08,
+              "feature_over_target_norm": 0.002279582009530893,
+              "cosine": -0.040538624193889386,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -0.000190018730945225,
+              "oracle_scalar": -17.78335853871372,
+              "oracle_energy_removed": 0.001643380051533394
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.00015920228514730952,
+              "feature_energy": 1.1420960074286034e-09,
+              "dot": -6.961183736039455e-09,
+              "feature_over_target_norm": 0.002678407534832996,
+              "cosine": -0.016325148541534096,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -9.462466864447581e-05,
+              "oracle_scalar": -6.095095062728012,
+              "oracle_energy_removed": 0.0002665104749031529
+            },
+            "orthogonal_target_energy_fraction": 0.7225063181495145
+          },
+          "D21": {
+            "raw": {
+              "target_energy": 0.07736761327993577,
+              "feature_energy": 3.7287111627216593e-07,
+              "dot": -9.669214846841564e-08,
+              "feature_over_target_norm": 0.002195329795146778,
+              "cosine": -0.0005692882747574578,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -7.319023932664701e-06,
+              "oracle_scalar": -0.25931788290578706,
+              "oracle_energy_removed": 3.2408913977632273e-07
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.05329902536601643,
+              "feature_energy": 3.7286774064973434e-07,
+              "dot": 1.8834550739208382e-07,
+              "feature_over_target_norm": 0.002644951859119373,
+              "cosine": 0.0013360362016445965,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 7.173253372229623e-08,
+              "oracle_scalar": 0.5051268502442329,
+              "oracle_energy_removed": 1.7849927321049215e-06
+            },
+            "orthogonal_target_energy_fraction": 0.6889061599091464
+          },
+          "D3_rep1": {
+            "raw": {
+              "target_energy": 0.00022032131193581363,
+              "feature_energy": 1.1450332277664083e-09,
+              "dot": -2.0472485576100604e-08,
+              "feature_over_target_norm": 0.0022797162259151735,
+              "cosine": -0.04075991545126765,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -0.00019103918731307176,
+              "oracle_scalar": -17.879381208906786,
+              "oracle_energy_removed": 0.0016613707075944868
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.00015917543708268985,
+              "feature_energy": 1.1420960074286034e-09,
+              "dot": -7.071033893859168e-09,
+              "feature_over_target_norm": 0.002678633408334227,
+              "cosine": -0.016584164112611936,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -9.6020869018924e-05,
+              "oracle_scalar": -6.191278008036644,
+              "oracle_energy_removed": 0.00027503449931404563
+            },
+            "orthogonal_target_energy_fraction": 0.7224695408906359
+          },
+          "D21_rep1": {
+            "raw": {
+              "target_energy": 0.07736482672672924,
+              "feature_energy": 3.7287111627216593e-07,
+              "dot": -9.562713065193819e-08,
+              "feature_over_target_norm": 0.0021953693308664015,
+              "cosine": -0.0005630279758080871,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -7.291755199926522e-06,
+              "oracle_scalar": -0.256461620326038,
+              "oracle_energy_removed": 3.1700050154255193e-07
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.05329414644350426,
+              "feature_energy": 3.7286774064973434e-07,
+              "dot": 1.894229146159266e-07,
+              "feature_over_target_norm": 0.0026450729251341334,
+              "cosine": 0.0013437403353197246,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 1.1217157945208974e-07,
+              "oracle_scalar": 0.5080163660333042,
+              "oracle_energy_removed": 1.805638088765166e-06
+            },
+            "orthogonal_target_energy_fraction": 0.6888679093375562
+          }
+        },
+        "8": {
+          "positive_modes": 8,
+          "covariance_energy_fraction": 0.6578574869450462,
+          "D21_diagonal_identity_relative_error": 2.827947900039974e-15,
+          "D3": {
+            "raw": {
+              "target_energy": 0.0002203472566925905,
+              "feature_energy": 3.6090566299280713e-09,
+              "dot": -1.7729003483474628e-08,
+              "feature_over_target_norm": 0.004047091508969128,
+              "cosine": -0.019880790693462817,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -0.0001772977080961817,
+              "oracle_scalar": -4.912365003213587,
+              "oracle_energy_removed": 0.0003952458385972777
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.00015920228514730952,
+              "feature_energy": 3.6086556163419325e-09,
+              "dot": -1.277723972560812e-08,
+              "feature_over_target_norm": 0.004760998783205044,
+              "cosine": -0.016857364418720783,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -0.0001831828923848272,
+              "oracle_scalar": -3.540720169512965,
+              "oracle_energy_removed": 0.00028417073514555347
+            },
+            "orthogonal_target_energy_fraction": 0.7225063181495145
+          },
+          "D21": {
+            "raw": {
+              "target_energy": 0.07736761327993577,
+              "feature_energy": 1.2532551566893727e-06,
+              "dot": 7.23109823714625e-07,
+              "feature_over_target_norm": 0.004024761503870107,
+              "cosine": 0.00232222829167921,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 2.494124900062286e-06,
+              "oracle_scalar": 0.5769853168805692,
+              "oracle_energy_removed": 5.392744238675341e-06
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.05329902536601643,
+              "feature_energy": 1.253225903632995e-06,
+              "dot": 1.562204430523644e-06,
+              "feature_over_target_norm": 0.004849031973006216,
+              "cosine": 0.006044544092187465,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 3.5107264055289144e-05,
+              "oracle_scalar": 1.2465465531752469,
+              "oracle_energy_removed": 3.6536513282398386e-05
+            },
+            "orthogonal_target_energy_fraction": 0.6889061599091464
+          },
+          "D3_rep1": {
+            "raw": {
+              "target_energy": 0.00022032131193581363,
+              "feature_energy": 3.6090566299280713e-09,
+              "dot": -1.8300461811375355e-08,
+              "feature_over_target_norm": 0.004047329792122318,
+              "cosine": -0.02052281576425483,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -0.00018250608576801317,
+              "oracle_scalar": -5.070705086647555,
+              "oracle_energy_removed": 0.0004211859668935466
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.00015917543708268985,
+              "feature_energy": 3.6086556163419325e-09,
+              "dot": -1.3348661476907333e-08,
+              "feature_over_target_norm": 0.004761400284265108,
+              "cosine": -0.017612742059086778,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": -0.00019039356276064745,
+              "oracle_scalar": -3.6990677127674414,
+              "oracle_energy_removed": 0.00031020868283992433
+            },
+            "orthogonal_target_energy_fraction": 0.7224695408906359
+          },
+          "D21_rep1": {
+            "raw": {
+              "target_energy": 0.07736482672672924,
+              "feature_energy": 1.2532551566893727e-06,
+              "dot": 7.192398416046771e-07,
+              "feature_over_target_norm": 0.0040248339858464915,
+              "cosine": 0.0023098416495746774,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 2.3941697326388125e-06,
+              "oracle_scalar": 0.5738973725866306,
+              "oracle_energy_removed": 5.335368446109867e-06
+            },
+            "orthogonal_to_model": {
+              "target_energy": 0.05329414644350426,
+              "feature_energy": 1.253225903632995e-06,
+              "dot": 1.5583709203839356e-06,
+              "feature_over_target_norm": 0.004849253925241148,
+              "cosine": 0.0060299873157317815,
+              "theory_coefficient": 1.0,
+              "theory_energy_removed": 3.4966615688466664e-05,
+              "oracle_scalar": 1.2434876392726573,
+              "oracle_energy_removed": 3.6360747027886175e-05
+            },
+            "orthogonal_target_energy_fraction": 0.6888679093375562
+          }
+        }
+      }
+    }
+  },
+  "baseline_final_mse": 1.8987437865976184e-08,
+  "seconds": 3.7937936782836914,
+  "finite_hooks": {
+    "checked_hook_values": 184
+  },
+  "peak_vram_gib": 4.412811756134033,
+  "final_layer_label_noise_floor": 7.7e-11
+}

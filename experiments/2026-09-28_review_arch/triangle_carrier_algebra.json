@@ -1,0 +1,19 @@
+{
+  "n": 7,
+  "q": 3,
+  "next_width": 6,
+  "extra_P2_columns_per_source": 6,
+  "checks_absolute": {
+    "triangle_trace_equals_covariance_product": 8.526512829121202e-14,
+    "packed_pair_readout": 2.842170943040401e-14,
+    "packed_diagonal_readout": 2.842170943040401e-14,
+    "birth_repeated_slices_cancel": 8.526512829121202e-14,
+    "packed_H_reuses_Z_transport": 8.881784197001252e-16,
+    "transport_and_wick_full_tensor": 1.567634910770721e-13,
+    "next_pair_readout": 2.842170943040401e-14,
+    "next_diagonal_readout": 3.552713678800501e-15
+  },
+  "transport_scale": 6.7497066706110385,
+  "next_D3_nonzero_norm": 4.777348343493542,
+  "pass": true
+}

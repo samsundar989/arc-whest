@@ -1,0 +1,24 @@
+{
+  "candidate": "estimator_k3_v62_s1.py",
+  "candidate_sha256": "d1d722dbb23aefc5833da8ace2f8db351e0d73dbb4607db9d7c091328ae05311",
+  "params": "experiments/2026-09-27_S2t3/params_step736.npz",
+  "params_sha256": "17a3c6d47ebb23f6b08b7bb77b810f909728013d86b2662038c48aefad957e91",
+  "probe_sha256": "5a93ec564ca6c940e54808abd9216f8d002bb7678a1d6471edf433dba2021996",
+  "diag_sha256": "4112d814030e47e1d8170b0c571b84cd88f829d1b053b4f0928e6ffe5f20212d",
+  "twin_sha256": "58a8e629fef8423ea79ec1ccc565e343018c4b423576870e39f7bd4cc2ad229e",
+  "layers_source_zero_based": [
+    2,
+    5,
+    8,
+    11,
+    14
+  ],
+  "ranks": [
+    4,
+    8
+  ],
+  "coefficient": 1.0,
+  "meaning": "Gaussian quadratic-Hermite triangle only",
+  "panel": "FIT/TRAIN; not independent validation",
+  "device": "NVIDIA GeForce RTX 5090"
+}

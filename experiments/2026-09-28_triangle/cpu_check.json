@@ -1,0 +1,42 @@
+{
+  "pass": true,
+  "coefficient": 1.0,
+  "dense_cases": [
+    {
+      "n": 6,
+      "m": 7,
+      "q": 3,
+      "trace_matches_coefficient_one_cycle": 4.440892098500626e-16,
+      "symmetry_max_error": 1.1102230246251565e-16,
+      "D3_relative_error": 2.793347217610426e-15,
+      "D21_relative_error": 4.433705045790488e-15,
+      "D21_diagonal_matches_D3": 8.700130429103727e-15,
+      "uncompensated_D3_relative_error": 30.500634190997538,
+      "wrong_repeated_orientation_D21_error": 8.606585862165256
+    },
+    {
+      "n": 7,
+      "m": 5,
+      "q": 4,
+      "trace_matches_coefficient_one_cycle": 4.547473508864641e-13,
+      "symmetry_max_error": 5.684341886080802e-14,
+      "D3_relative_error": 2.476385697765164e-13,
+      "D21_relative_error": 1.4137377295080043e-13,
+      "D21_diagonal_matches_D3": 1.6386710374182835e-13,
+      "uncompensated_D3_relative_error": 860.9067840904561,
+      "wrong_repeated_orientation_D21_error": 86.0783767309966
+    },
+    {
+      "n": 5,
+      "m": 6,
+      "q": 5,
+      "trace_matches_coefficient_one_cycle": 5.684341886080802e-14,
+      "symmetry_max_error": 1.4210854715202004e-14,
+      "D3_relative_error": 1.0250382253196008e-13,
+      "D21_relative_error": 5.122981306058413e-14,
+      "D21_diagonal_matches_D3": 1.6128125521673808e-14,
+      "uncompensated_D3_relative_error": 113.18545950090972,
+      "wrong_repeated_orientation_D21_error": 11.279437985460387
+    }
+  ]
+}
