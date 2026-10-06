@@ -31,3 +31,16 @@ HURT, E21b alone gives most). The trend is DOWN (×0.59 per width doubling), whi
 Prediction (worker) if the decline is a power law n^-0.77: G_drop(384) ≈ 20 %, G_drop(768) ≈ 11 %,
 extrapolated n = 1024 ≈ 9 %. If instead 256 was an outlier and the trend is flat:
 G_drop(768) ≈ 15 %. I put 60 % on the power-law reading.
+
+## Outcome of the trend runs (2026-10-06)
+
+G_drop final layer: n = 256 26.6 %, 384 18.6 %, 512 15.6 %, 768 16.8 % (8/8 nets at every width;
+all-layer 19.4 / 16.1 / 12.1 / 14.4 %). Flat from n = 384 on; my power-law reading (768 ≈ 11 %)
+was WRONG, the flat reading (≈ 15 %) right. E21b alone carries ~80 % at every width (13.5 of
+16.8 at n = 768); the full E family reproduces c to 0.2 pp; T1 ≈ 0.
+
+**M3 by the handoff rule: GO** (≥ 10 % at n = 512, trend flat 384 → 768). Caveat for the
+transfer: ARC factored AUGMENT at n = 768 sits at final MSE 4.57e-8, which scales (n^-3) to
+~1.9e-8 at n = 1024 — the same level as v73 raw 2.15e-8, so the reference is a fair proxy
+for our chain's diagram set, but v73's fitted gains/corrector may already absorb part of it.
+The prototype on the v73 path is what decides.

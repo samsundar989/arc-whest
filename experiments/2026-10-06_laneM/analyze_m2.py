@@ -25,7 +25,7 @@ def rel_gain(base, var):
 def main() -> int:
     out = {}
     lines = []
-    for w in (256, 512, 1024):
+    for w in (256, 384, 512, 768, 1024):
         p = HERE / f"m2_w{w}.json"
         if not p.exists():
             continue
