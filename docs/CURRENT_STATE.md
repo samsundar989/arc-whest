@@ -9,7 +9,8 @@ acceptance uses DEV-100 + VAL-100, as the handoff allows.
 
 | role | source / SHA8 | submission | score | F/B |
 |---|---|---|---:|---:|
-| **best A** | `estimator_k3_v75_kas.py` / `d4d7885c` | #334464 | **4.1871242928610786e-9** (raw 2.2014e-8) | 0.19020 |
+| **best A** | `estimator_k3_v77_kash.py` / `4ff8018f` | #334487 | **3.959571663492616e-9** (raw 2.2021e-8) | 0.17981 |
+| A (prev.) | `estimator_k3_v75_kas.py` / `d4d7885c` | #334464 | 4.1871242928610786e-9 (raw 2.2014e-8) | 0.19020 |
 | B | `estimator_k3_v76_kasws.py` / `fe05c0a4` | #334474 | **4.4952209455824486e-9** (raw 2.2018e-8) | 0.20416 |
 | previous A | `estimator_k3_v73_gb.py` / `8fc42e77` | #332893 | 4.6198973531323855e-9 | 0.21473 |
 | previous B | `estimator_k3_v74_ws.py` / `5aa60322` | #334434 | 4.976093977527745e-9 | 0.23128 |
@@ -30,7 +31,10 @@ v73. Cost ×0.886, raw +2.3 %, score −9.4 % graded.
 
 - P0 done (v74_ws B). P1 done: `RESULTS.md` § "PLAN rev 18 — Lane P" (mask table, H
   decomposition, corrected D table, frontier, K quantiles).
-- P2 first build shipped (v75/v76). **Next: v77 = v75 + Hd (drop dead birth columns).**
+- **P2 shipped: v75 (R + D rows), v76 (its B), v77 (+ Hd dead birth columns, new best 3.9596e-9).**
+  v78 (v77's B, block 40) is gated and waits for the Oct 7 A/B slot. Every role sits at its
+  threshold optimum (R 2.0, Dz 2.5, Hd 2.5: each has a cliff just below). Refitting is closed.
+- (superseded) Next: v77 = v75 + Hd (drop dead birth columns).
   The twin with fixed K reads raw +2.58 % at modeled F 0.839, about −5 % score vs v75. It
   needs variable lineage widths: P2 pages and hub coefficients kept in groups of
   consecutive equal-width lineages.

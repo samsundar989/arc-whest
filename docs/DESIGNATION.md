@@ -1,5 +1,17 @@
 # DESIGNATION — current A and B (maintained by the worker; designating is Samuel's)
 
+## Evidence update — 2026-10-06 night (no nomination/designation made)
+
+| role | file | sha8 | submission | score | raw | F/B | wall evidence | VmPeak |
+|---|---|---|---|---:|---:|---:|---|---|
+| **A (candidate)** | `estimator_k3_v77_kash.py` | `4ff8018f` | #334487 | **3.959571663492616e-9** | 2.202053984490249e-8 | 0.17981 | local A/B vs v73 = 0.897 → ≈ 74.7 s median, **≈ 92.7 s noisy-implied** (A ≤ 105 s); law 83.5 / 98.1 s | 6,116 MiB |
+| **B (graded)** | `estimator_k3_v76_kasws.py` | `fe05c0a4` | #334474 | 4.4952209455824486e-9 | 2.2018e-8 | 0.20416 | ≈ 62.6 s noisy-implied | 4,885 MiB |
+| B (built, gated, not submitted) | `estimator_k3_v78_kashws.py` | `6b3db2a5` | — | projected 4.2260e-9 | DEV 2.2733e-8 | 0.19296 | local A/B vs v74_ws = 0.890 → ≈ 57.4 s noisy-implied | 4,687 MiB |
+
+v78 = v77 at Strassen block 40, the matching wall-safe B; queued for the Oct 7 A/B slot. All
+walls are measured-parent projections, not server reads. Read the server walls of v77 and
+v76/v78 from the result pages before designation.
+
 ## Evidence update — 2026-10-06 evening (Lane P P2; no nomination/designation made)
 
 | role | file | sha8 | submission | score | raw | F/B | wall evidence | VmPeak |
