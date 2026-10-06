@@ -1,0 +1,246 @@
+{
+ "date": "2026-10-06",
+ "file": "estimator_k3_v76_kasws.py",
+ "sha8": "fe05c0a4",
+ "candidate_sha256": "fe05c0a4edce08422cdbb77c54a4937eaecf416286aa420658e7e108eb90a182",
+ "panel": "dev",
+ "panel_label": "DEV",
+ "n": 100,
+ "raw_mse": 2.2763723119822997e-08,
+ "flops": 448958664569.0,
+ "multiplier": 0.2041627633702774,
+ "ops": 19951.0,
+ "materializations": 0.0,
+ "setup_s": 0.001,
+ "worst_wall_local_s": 27.158020400005626,
+ "projected_server_wall_s": 91.6452173832922,
+ "projected_server_wall_noisy_s": 107.7157057396041,
+ "peak_rss_mib": 3037.2,
+ "adjusted_score_dev": 4.647504616738936e-09,
+ "projected_public": 4.477364756010536e-09,
+ "failed_nets": [],
+ "baseline_name": "estimator_k3_v74_ws",
+ "paired": {
+  "n": 100,
+  "mean_difference": 5.043316647248388e-10,
+  "relative_improvement": 0.09789357370291756,
+  "arithmetic_gain": 1.1085166570697715,
+  "t95_lo": 4.74854970929453e-10,
+  "t95_hi": 5.338083585202246e-10,
+  "wins": 100,
+  "geometric_gain_diagnostic": 1.1081773875959744
+ },
+ "memory": {
+  "artifact": "linux_memory_gate",
+  "artifact_version": 5,
+  "candidate": "estimator_k3_v76_kasws.py",
+  "candidate_sha256": "fe05c0a4edce08422cdbb77c54a4937eaecf416286aa420658e7e108eb90a182",
+  "instrument": "local_sim/linux_memory_gate.py",
+  "instrument_sha256": "463b8560aa5be78bd18270a3507b80edb552ee8b1b7929d4089f7624a7261e8f",
+  "instrument_policy": "current-source-sha256",
+  "limit_mb": 8192,
+  "width": 1024,
+  "depth": 16,
+  "budget": 2199023255552,
+  "seed": 90000000101,
+  "suite_n_mlps": 100,
+  "weights_mode": "f64_readonly",
+  "repeats": 3,
+  "host_platform": "win32",
+  "generated_utc": "2026-10-06T17:53:54Z",
+  "linux_kind": "wsl",
+  "linux_note": "WSL2 Ubuntu, official stack in $HOME/.arcwhest-linux",
+  "negative_control": {
+   "limit_mb": 8192,
+   "request_gib": 9.0,
+   "cap_applied": true,
+   "allocated": false,
+   "survived": false,
+   "error": "MemoryError: "
+  },
+  "positive_control": {
+   "limit_mb": 0,
+   "request_gib": 9.0,
+   "cap_applied": false,
+   "allocated": true,
+   "survived": true
+  },
+  "lifecycle_controls": {
+   "growth_threshold_bytes": 67108864,
+   "stateless": {
+    "completed": true,
+    "retain": false,
+    "allocation_mib": 96,
+    "repeats": 3,
+    "rows": [
+     {
+      "i": 0,
+      "vm_size_settled_bytes": 16080896
+     },
+     {
+      "i": 1,
+      "vm_size_settled_bytes": 16080896
+     },
+     {
+      "i": 2,
+      "vm_size_settled_bytes": 16080896
+     }
+    ],
+    "growth_bytes": 0,
+    "error": "",
+    "cap_applied": true
+   },
+   "retaining": {
+    "completed": true,
+    "retain": true,
+    "allocation_mib": 96,
+    "repeats": 3,
+    "rows": [
+     {
+      "i": 0,
+      "vm_size_settled_bytes": 116748288
+     },
+     {
+      "i": 1,
+      "vm_size_settled_bytes": 217415680
+     },
+     {
+      "i": 2,
+      "vm_size_settled_bytes": 318083072
+     }
+    ],
+    "growth_bytes": 201334784,
+    "error": "",
+    "cap_applied": true
+   }
+  },
+  "candidate_run": {
+   "stage": "done",
+   "limit_mb": 8192,
+   "setrlimit_raised": null,
+   "soft_limit_bytes": 8589934592,
+   "hard_limit_bytes": 8589934592,
+   "cap_requested_bytes": 8589934592,
+   "cap_applied": true,
+   "whestbench_file": "/home/samsu/.arcwhest-linux/lib/python3.12/site-packages/whestbench/__init__.py",
+   "flopscope_file": "/home/samsu/.arcwhest-linux/lib/python3.12/site-packages/flopscope/__init__.py",
+   "numpy_version": "2.4.6",
+   "whestbench_version": "0.16.1",
+   "flopscope_version": "0.12.1",
+   "stack_version_source": "importlib.metadata.version",
+   "python_version": "3.12.3",
+   "weights_mode": "f64_readonly",
+   "repeats": 3,
+   "suite_n_mlps": 100,
+   "weight_dtype": "float64",
+   "weight_writeable": false,
+   "setup_raised": null,
+   "setup_s": 0.026906207999999765,
+   "predict_s": 49.186408132000004,
+   "predict_error": "",
+   "shape": [
+    16,
+    1024
+   ],
+   "finite": true,
+   "dtype": "float32",
+   "largest_array_bytes": 65536,
+   "repeat_runs": [
+    {
+     "i": 0,
+     "vm_peak_bytes": 5076250624,
+     "vm_size_settled_bytes": 2158837760,
+     "flops_used": 448958664569.0,
+     "error": ""
+    },
+    {
+     "i": 1,
+     "vm_peak_bytes": 5122596864,
+     "vm_size_settled_bytes": 2169323520,
+     "flops_used": 448958664569.0,
+     "error": ""
+    },
+    {
+     "i": 2,
+     "vm_peak_bytes": 5122596864,
+     "vm_size_settled_bytes": 2179809280,
+     "flops_used": 448958664569.0,
+     "error": ""
+    }
+   ],
+   "repeat_error": "",
+   "repeat_vm_size_growth_bytes": 20971520,
+   "repeat_flops_identical": true,
+   "repeat_flops_observed": [
+    448958664569.0,
+    448958664569.0,
+    448958664569.0
+   ],
+   "flops_used": 448958664569.0,
+   "residual_wall_time_s": 0.6964578680003264,
+   "wall_time_s": 49.186407816,
+   "multiplier": 0.2041627633702774,
+   "peak_rss_bytes": 3167223808,
+   "vm_peak_bytes": 5122596864,
+   "vm_hwm_bytes": 3167223808,
+   "ok": true
+  },
+  "child_stderr": {
+   "negative": "",
+   "positive": "",
+   "lifecycle_stateless": "",
+   "lifecycle_retaining": "",
+   "candidate": ""
+  },
+  "child_stderr_tail": "",
+  "stack": {
+   "whestbench": "0.16.1",
+   "flopscope": "0.12.1",
+   "numpy": "2.4.6",
+   "python": "3.12.3",
+   "source": "importlib.metadata.version"
+  },
+  "status": "PASS",
+  "checks_total": 23,
+  "checks_failed": []
+ },
+ "accuracy_meta": {
+  "sha256": "fe05c0a4edce08422cdbb77c54a4937eaecf416286aa420658e7e108eb90a182",
+  "panel": "dev",
+  "n": 100,
+  "workers": 3,
+  "blas_threads_each": 2,
+  "wall_s": 1310.4,
+  "per_net_s": 13.1,
+  "worker_peak_rss_mib": 5569.2,
+  "failed_nets": [],
+  "built_utc": "2026-10-06T17:53:18Z",
+  "cached": false
+ },
+ "cost_meta": {
+  "net": "logan-fitzgerald",
+  "panel": "dev",
+  "split": "mini",
+  "index": 0,
+  "flops": 448958664569.0,
+  "multiplier": 0.2041627633702774,
+  "ops": 19951.0,
+  "materializations": 0,
+  "materialization_detail": {
+   "__bool__": 0,
+   "__float__": 0,
+   "__int__": 0,
+   "__index__": 0
+  },
+  "wall_s": 27.158020400005626,
+  "residual_local_s": 3.593295395578025,
+  "setup_s": 0.001,
+  "setup_error": "",
+  "peak_rss_mib": 3037.2,
+  "weights_mode": "f64_readonly",
+  "error": ""
+ },
+ "ev_wall_s": 1518.5,
+ "note": "",
+ "accepted": true
+}

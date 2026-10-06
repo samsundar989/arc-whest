@@ -1,0 +1,31 @@
+[ev] estimator_k3_v76_kasws.py on DEV n=100
+[ev] cost: 448,958,664,569 FLOPs, 19,951 ops, peak RSS 2.97 GiB -> budget 7.4 GiB/worker
+  [mem] 34.6 GiB free, 7.4 GiB per worker -> 3 workers, not 4
+  3 workers x 2 BLAS threads over 100 nets ...
+[ev] accuracy: 1310.4 s, raw MSE 2.276372e-08
+
+  raw MSE            2.276372e-08   (label noise floor at layer 16 ~7.7e-11)
+  FLOPs / MLP        448,958,664,569   = 0.20416 x 2^41
+  op calls           19,951
+  materializations   0
+  adjusted (panel)   4.647505e-09
+  PROJECTED PUBLIC   4.477365e-09   (÷ 1.038)
+  paired vs estimator_k3_v74_ws:  gain 1.1085×, Δ +5.0433e-10, t95 [+4.7485e-10, +5.3381e-10], wins 100/100
+    (geometric 1.1082× — diagnostic only, no authority over an outcome)
+
+  PLAN §5 gates
+    PASS  DEV projected vs best graded     better than 4.6199e-09             4.4774e-09 = 3.09% better
+    PASS  op calls                         ≤ 26,000                           19,951
+    ok    projected server wall (noisy day, A policy) ≤ 115 s                            107.7 s (quiet day 91.6 s)
+    PASS  setup                            < 2 s                              0.00 s
+    PASS  scalar materializations          0                                  0
+    PASS  failed nets on panel             0                                  0
+    PASS  projected server residual        ≤ 0.33 s (D7 finals bound)         0.221 s (1.81× headroom vs the 0.4 s cliff)
+    PASS  full DEV-100 panel               dev, n = 100                       dev, n = 100
+    PASS  paired vs incumbent              --baseline given                   estimator_k3_v74_ws
+    PASS  WSL RLIMIT_AS 8 GiB gate         PASS on candidate SHA256 (--mem)   PASS VmPeak 4885 MiB; source hash matches
+
+  ALL CHECKABLE GATES PASS (PLAN rev 15 §5 items 3-7) — still needs validate, parity, manual PLAN §5.8 wall evidence, validate-package + source hash, ledger
+
+  RESULTS.md row:
+  | 2026-10-06 | `estimator_k3_v76_kasws.py` | `fe05c0a4` | DEV | 2.276372e-08 | 0.20416 | 19,951 | 27.158 s (local) → 91.6 s proj | 3037 MiB | **4.4774e-09** | PENDING | 1.1085× vs estimator_k3_v74_ws (Δ +5.043e-10, t95 [+4.749e-10, +5.338e-10]) | 100/100 |  |
