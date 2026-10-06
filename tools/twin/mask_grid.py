@@ -62,6 +62,8 @@ GRID = [
     # threshold frontier around R2.0/Dz2.5 (score, not raw, decides)
     ("r15dz", "R=1.5,Dz=2.5"), ("r175dz", "R=1.75,Dz=2.5"), ("r225dz", "R=2.25,Dz=2.5"),
     ("rdz225", "R=2.0,Dz=2.25"), ("rdz275", "R=2.0,Dz=2.75"), ("rdz20", "R=2.0,Dz=2.0"),
+    # Hd under fixed K (the v77 candidate before it is built)
+    ("aggr-zK", "R=2.0,Hd=2.5,Dz=2.5,K=" + str(KT / "aggr_q50.json")),
 ]
 
 
