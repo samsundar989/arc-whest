@@ -179,5 +179,4 @@ only the head trains, from twin-v73 (S2t3 step-736 leaves + G1bg gates). One epo
 900, VAL every 28 steps. VAL raw: init 2.213009e-08 (equals v73's recorded VAL) → +0.79 %,
 +0.26 %, +0.10 %; early stop at step 84. Never beat init: **< 2 % → killed**. Deviation from
 the handoff: the kernel uses similarity exp(−β(1−ρ²)), because exp(−βρ²) weights the
-uncorrelated bulk; this does not change the verdict (the top-8 partner block, which needs
-no kernel, carried no signal either).
+uncorrelated bulk. Feature blocks were not ablated separately: the verdict is on the set.
