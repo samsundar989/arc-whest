@@ -64,6 +64,9 @@ GRID = [
     ("rdz225", "R=2.0,Dz=2.25"), ("rdz275", "R=2.0,Dz=2.75"), ("rdz20", "R=2.0,Dz=2.0"),
     # Hd under fixed K (the v77 candidate before it is built)
     ("aggr-zK", "R=2.0,Hd=2.5,Dz=2.5,K=" + str(KT / "aggr_q50.json")),
+    ("h20K", "R=2.0,Hd=2.0,Dz=2.5,K=" + str(KT / "h20_q50.json")),
+    ("h175K", "R=2.0,Hd=1.75,Dz=2.5,K=" + str(KT / "h175_q50.json")),
+    ("h15K", "R=2.0,Hd=1.5,Dz=2.5,K=" + str(KT / "h15_q50.json")),
 ]
 
 
