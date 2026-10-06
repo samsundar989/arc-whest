@@ -58,13 +58,13 @@ torch.backends.cudnn.allow_tf32 = False
 
 BUDGET = 2 ** 41
 DEV = torch.device(os.environ.get("TWIN_DEVICE") or "cuda")   # TWIN_DEVICE=cpu: CPU-only jobs
-CACHE = ROOT / "cache" / "twin"
+CACHE = Path(os.environ.get("TWIN_CACHE") or ROOT / "cache" / "twin")   # worktrees: point at the main checkout
 #: keenanpepper/arc-whestbench-p2-d8b-corpus-14k shards 00..15 (nets 0..2047, MC N = 1e8,
 #: noise ~9e-10 at the final layer): per-layer post-ReLU means, (2048, 16, 1024) float32,
 #: row = net idx. Built by `twin.py d8bprep`; weights regenerate from seed 770000 + idx
 #: (checked 2026-09-26 against the exact layer-0 closed form: MSE 7e-9 = the N = 1e8 floor,
 #: vs 3e-4 for the wrong net, on idx 0, 1, 2, 777, 2047).
-D8B_MEAN = ROOT / "cache" / "d8b" / "d8b_mean.npy"
+D8B_MEAN = CACHE.parent / "d8b" / "d8b_mean.npy"
 DEFAULT_CAND = ROOT / "estimator_k3_v59_corr400.py"
 #: Stage -> trainable leaves, as "group/name" over the chain's constant groups.
 TRAINABLE = {
@@ -97,6 +97,8 @@ TRAINABLE = {
 _GATE_LEAVES = tuple(f"gate/{k}" for k in ("W1", "b1", "W2", "b2"))
 TRAINABLE.update({"G1b": TRAINABLE["S3"] + _GATE_LEAVES, "G1t": TRAINABLE["S3"] + _GATE_LEAVES,
                   "G1bg": _GATE_LEAVES, "G1tg": _GATE_LEAVES})
+# 2026-10-06 Lane M4: the neighbor head (`--arm nbr`) alone; everything else frozen at --init.
+TRAINABLE["N1"] = tuple(f"nbr/{k}" for k in ("W1", "b1", "W2", "b2"))
 
 
 # --------------------------------------------------------------------- data
@@ -253,7 +255,7 @@ SUB_PATCHES = [
 #: makes the final mean nearly exact by construction, which leaves nothing to refit.
 SUBST = {"cov": ("var", "C11"), "k3": ("D3", "D21"), "k4": ("dG", "D22", "Q31n"),
          "all": ("var", "C11", "D3", "D21", "dG", "D22", "Q31n")}
-LABELS = ROOT / "cache" / "twin_labels"
+LABELS = CACHE.parent / "twin_labels"
 
 
 class Subst:
@@ -287,7 +289,67 @@ ARMS = {
          "    _dl = mu_out - _mu_unc\n"
          "    cov_out = cov_out - fnp.diag(_dl * _mu_unc * 2.0 + _dl * _dl)\n"),
     ],
+    # HANDOFF 2026-10-06 Lane V+M, M4: neighbor-feature corrector screen (twin only).
+    # A second additive head on mu_out, beside the shipped corrector, reading each
+    # neuron's strongest-correlated partners (Puffi-style). Kernel weights are the
+    # SIMILARITY exp(-beta (1 - rho^2)) (the handoff's exp(-beta rho^2) would weight the
+    # uncorrelated bulk most); C+ and R+ are ridge solves (1e-3 relative) in float32.
+    # Its output page W2/b2 is
+    # zero-initialised, so the arm starts as an exact identity on the chain. Features
+    # are detached inputs (only `nbr/*` trains) and RMS-normalised per net, so no
+    # standardiser file is needed. At the last layer (no cov_pre) the neighbor block
+    # is zero and only the neuron's own features remain.
+    "nbr": [
+        ("def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n",
+         "_NBR_K = 8\n"
+         "_NBR_OUT = 1e-3\n\n\n"
+         "def _nbr_feats(alpha, sigma, D3, cov_pre, last_layer):\n"
+         "    import torch as _t\n"
+         "    with _t.no_grad():\n"
+         "        n = alpha.shape[0]\n"
+         "        Phi = _t.special.ndtr(alpha)\n"
+         "        phi = _t.exp(-0.5 * alpha * alpha) * 0.3989422804014327\n"
+         "        g3 = D3 / (sigma * sigma * sigma)\n"
+         "        own = _t.stack([alpha, Phi, phi, g3], 1)\n"
+         "        if last_layer or cov_pre is None:\n"
+         "            nb = _t.zeros((n, _NBR_K * 5 + 12), dtype=alpha.dtype, device=alpha.device)\n"
+         "        else:\n"
+         "            rho = cov_pre / (sigma[:, None] * sigma[None, :])\n"
+         "            off = rho - _t.diag(_t.diagonal(rho))\n"
+         "            top = _t.topk(off.abs(), _NBR_K, dim=1).indices\n"
+         "            r_top = _t.gather(off, 1, top)\n"
+         "            nbk = _t.cat([r_top[:, :, None], own[top]], 2).reshape(n, -1)\n"
+         "            eye = _t.eye(n, device=alpha.device, dtype=alpha.dtype)\n"
+         "            kern = []\n"
+         "            for beta in (8.0, 32.0):\n"
+         "                Kb = _t.exp(-beta * (1.0 - off * off)) * (1.0 - eye)\n"
+         "                m = Kb.sum(1, keepdim=True)\n"
+         "                kern += [(Kb @ own) / (m + 1e-30), _t.log(m + 1e-30)]\n"
+         "            rC = 1e-3 * _t.diagonal(cov_pre).mean()\n"
+         "            Cp_a = _t.linalg.solve(cov_pre + rC * eye, alpha[:, None])[:, 0]\n"
+         "            Rp_1 = _t.linalg.solve(rho + 1e-3 * eye, _t.ones_like(alpha)[:, None])[:, 0]\n"
+         "            nb = _t.cat([nbk] + kern + [Cp_a[:, None], Rp_1[:, None]], 1)\n"
+         "        X = _t.cat([own, nb], 1)\n"
+         "        X = X / (X.pow(2).mean(0, keepdim=True).sqrt() + 1e-12)\n"
+         "        X = _t.where(_t.isfinite(X), X, _t.zeros_like(X))\n"
+         "    return X\n\n\n"
+         "def _nbr_delta(li, p, alpha, sigma, D3, cov_pre, last_layer, dtype):\n"
+         "    import torch as _t\n"
+         "    if li >= p['W1'].shape[0]:\n"
+         "        return 0.0\n"
+         "    X = _nbr_feats(alpha, sigma, D3, cov_pre, last_layer)\n"
+         "    h = _t.tanh(X @ p['W1'][li] + p['b1'][li])\n"
+         "    return ((h @ p['W2'][li])[:, 0] + p['b2'][li]) * _NBR_OUT\n\n\n"
+         "def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n"),
+        ("    if last_layer:\n        return (mu_out, None, None, 0.0, dG)\n",
+         "    if const.get('nbr') is not None:\n"
+         "        mu_out = mu_out + _nbr_delta(layer_index, const['nbr'], alpha, sigma, D3,\n"
+         "                                     cov_pre, last_layer, dtype)\n"
+         "    if last_layer:\n        return (mu_out, None, None, 0.0, dG)\n"),
+    ],
 }
+#: M4 neighbor head: 4 own + 5*K partners + 2 x (4 kernel means + log mass) + C+alpha + R+1.
+NBR_F, NBR_H = 4 + 5 * 8 + 12, 32
 
 
 def load_module(path: Path, name="_twin_candidate", arm="", raw=False):
@@ -353,6 +415,15 @@ class Twin:
         # S3: additive multi-mode correction to the normalised kappa4_iiij slice,
         # zero-initialised (an exact identity) -- see TWIN_PATCHES "q31"
         self.base["gain"]["q31"] = torch.zeros((depth, 5), dtype=torch.float32, device=DEV)
+        if "nbr" in arm.split("+"):
+            # M4 neighbor head; W2/b2 zero -> exact identity at init. W1 deterministic.
+            g = torch.Generator(device="cpu").manual_seed(20261006)
+            self.base["nbr"] = {
+                "W1": (torch.randn((depth, NBR_F, NBR_H), generator=g) / math.sqrt(NBR_F)).to(DEV),
+                "b1": torch.zeros((depth, NBR_H), device=DEV),
+                "W2": torch.zeros((depth, NBR_H, 1), device=DEV),
+                "b2": torch.zeros((depth,), device=DEV)}
+            self.const["nbr"] = self.base["nbr"]
 
     def leaf(self, key):
         g, k = key.split("/")
