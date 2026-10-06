@@ -22,6 +22,8 @@ if "--cpu" in sys.argv:          # read by twin at import: a CPU-only job beside
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import twin  # noqa: E402  (puts the torch shim on the path)
 
+KT = twin.ROOT / "experiments" / "2026-10-06_mask" / "ktab"
+
 GRID = [
     ("ctl", ""),
     ("R2.0", "R=2.0"), ("R2.5", "R=2.5"),
@@ -41,6 +43,10 @@ GRID = [
     ("Dr2.5", "Dr=2.5"), ("Dr3.0", "Dr=3.0"), ("Dr2.0", "Dr=2.0"),
     ("safe-r", "R=2.0,Hd=3.0,Dr=3.0"), ("aggr-r", "R=2.0,Hd=2.5,Dr=2.5"),
     ("lean-r", "R=2.5,Hd=2.5,Dr=2.5"),
+    # P2 variant A: fixed per-layer top-K (median kept count on FIT-100, nearest 32)
+    ("aggr-rK", "R=2.0,Hd=2.5,Dr=2.5,K=" + str(KT / "aggr-r_m32.json")),
+    ("safe-rK", "R=2.0,Hd=3.0,Dr=3.0,K=" + str(KT / "safe-r_m32.json")),
+    ("lean-rK", "R=2.5,Hd=2.5,Dr=2.5,K=" + str(KT / "lean-r_m32.json")),
 ]
 
 

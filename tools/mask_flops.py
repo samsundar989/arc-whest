@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 
 import numpy as np
@@ -78,6 +79,17 @@ def fractions(stats, cfg, depth=16):
     return R, A, M, D, Dc
 
 
+def fixed_k(frs, q=99.9, margin=32, mult=64):
+    """Per-layer kept fraction -> the fixed count a shape-only table would ship."""
+    out = []
+    for role in zip(*frs):                           # role: per-net lists of per-layer fractions
+        arr = np.array(role)                         # (nets, depth)
+        k = np.percentile(arr * N, q, axis=0) + margin
+        k = np.minimum(np.ceil(k / mult) * mult, N)
+        out.append([float(x) / N for x in k])
+    return tuple(out)
+
+
 def factor(sites, R, A, M, D, Dc):
     tot = kept = 0.0
     recent_k = {}
@@ -122,19 +134,53 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--stats", required=True, help="a mask_grid JSON with per-net stats")
     ap.add_argument("--json", default="")
+    ap.add_argument("--q", type=float, default=99.9, help="--fixed-k percentile")
+    ap.add_argument("--margin", type=float, default=32)
+    ap.add_argument("--mult", type=int, default=64)
+    ap.add_argument("--round", type=int, default=0,
+                    help="P2 variant B: per-net count rounded UP to this multiple")
+    ap.add_argument("--ktab-cfg", default="", help="write the median-K table for this config")
+    ap.add_argument("--ktab-out", default="")
+    ap.add_argument("--fixed-k", action="store_true",
+                    help="P2 variant A: per-layer keep count = ceil64(q99.9(kept) + 32) "
+                         "over these nets, the same for every net")
     a = ap.parse_args()
     census = json.loads(CENSUS.read_text())
     sites = census["call_sites"]
     for s in sites:
         s["layer"] = None if s.get("layer") in (None, "") else int(s["layer"])
     st = json.loads(Path(a.stats).read_text())["stats"]
+    if a.ktab_cfg:
+        cfg = CONFIGS[a.ktab_cfg]
+        R, A, M, D, _ = zip(*[fractions(v, cfg) for v in st.values()])
+        def tab(fr):                                  # nearest multiple of --mult, <= N
+            med = np.median(np.array(fr) * N, axis=0)
+            return [int(min(N, max(a.mult, round(m / a.mult) * a.mult))) for m in med]
+        K = {}
+        if "R" in cfg:
+            K["R"] = tab(R)
+        if "H" in cfg:
+            K["H"] = tab(M)                           # dead-only H keeps alpha >= -tau
+        if "D" in cfg:
+            K["D"] = tab(D)
+        Path(a.ktab_out).write_text(json.dumps({"config": a.ktab_cfg, "stats": a.stats,
+                                                "rule": f"median kept count, nearest {a.mult}",
+                                                "K": K}, indent=1))
+        print(json.dumps(K))
+        return
     base_b = census["total_flops"] / 2 ** 41
     out = {}
     print(f"census {census['total_flops']:,} FLOPs = {base_b:.5f} B; {len(st)} nets")
     print("| config | modeled F factor (mean) | F/B | CV across nets | max/min |")
     print("|---|---:|---:|---:|---:|")
     for name, cfg in CONFIGS.items():
-        fs = np.array([factor(sites, *fractions(v, cfg)) for v in st.values()])
+        fr = [fractions(v, cfg) for v in st.values()]
+        if a.fixed_k:                                # one table for all nets
+            fr = [fixed_k(fr, a.q, a.margin, a.mult)] * len(fr)
+        elif a.round:
+            fr = [tuple([min(1.0, math.ceil(x * N / a.round) * a.round / N) for x in r]
+                        for r in f) for f in fr]
+        fs = np.array([factor(sites, *f) for f in fr])
         out[name] = {"mean": float(fs.mean()), "cv": float(fs.std() / fs.mean()),
                      "maxmin": float(fs.max() / fs.min()), "per_net": fs.tolist()}
         print(f"| {name} | {fs.mean():.4f} | {fs.mean() * base_b:.4f} | "

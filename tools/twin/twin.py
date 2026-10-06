@@ -334,6 +334,20 @@ ARMS = {
          "            _mS = _mask_keep(alpha, _MASK['H'], 'dead', dtype)\n"
          "        if _MASK.get('D'):\n"
          "            _mD = _mask_keep(alpha, _MASK['D'], 'dead', dtype)\n"
+         "    if _MASK is not None and _MASK.get('Ktab') and not last_layer:\n"
+         "        _rk = fnp.argsort(fnp.argsort(alpha))\n"
+         "        for _role in ('R', 'H', 'D'):\n"
+         "            _kt = _MASK['Ktab'].get(_role)\n"
+         "            if _kt is None or not _MASK.get(_role):\n"
+         "                continue\n"
+         "            _k = int(_kt[layer_index]) if layer_index < len(_kt) else n\n"
+         "            _m = fnp.where(_rk >= n - _k, dtype(1.0), dtype(0.0))\n"
+         "            if _role == 'R':\n"
+         "                _mR = _m\n"
+         "            elif _role == 'H':\n"
+         "                _mH = _mS = _m\n"
+         "            else:\n"
+         "                _mD = _m\n"
          "    _mA = _mW = _mC = _mSl = None\n"
          "    if _mH is not None:\n"
          "        _hm = _MASK.get('Hmode', '')\n"
@@ -407,6 +421,9 @@ def parse_mask(spec):
     out = {}
     for part in filter(None, spec.split(",")):
         k, v = part.split("=")
+        if k == "K":             # P2 variant A: top-K per role/layer from a table (JSON path)
+            out["Ktab"] = json.loads(Path(v).read_text())["K"]
+            continue
         # H parts: A = A_L column (carries e_b), W = two-leg w2b, C = hubs, Sl = slice
         # (sb, residual row). Default H: A W C on |alpha| > tau, Sl on alpha < -tau.
         #   Hk  A on dead only            Hkh  A, C on dead only     Hd  everything dead-only
