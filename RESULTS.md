@@ -2588,3 +2588,30 @@ sits at the optimum of every role.
 **v77_kash graded (#334487): 3.959571663492616e-09, NEW BEST**, raw 2.202053984490249e-08, 100
 clean; +0.53 % vs projected 3.9389e-09 (implied DEV factor 1.0326; keep 1.038). −5.43 % vs v75,
 −14.3 % vs v73 (this morning's A). `tools/ev.py --best-graded` updated.
+
+## PLAN rev 19 — Lane P2 (2026-10-07)
+
+### P2.0 — housekeeping
+- Rev 19 docs committed unchanged (93913f5); `lane-m` merged into main (1a84c67): FRESH-A /
+  FRESH-LOCK / FRESH-D panels, `tools/fresh/`, `ev.py --panel fresh_a|fresh_lock|fresh_d`,
+  `FRESH_PUBLIC_FACTOR = 1.019`. `tools/panels.py --check` PANELS OK. **Acceptance from now on:
+  FRESH-A paired vs the incumbent.**
+- flopscope #275 exposure: AST scan of v77 and v78 finds no `out=` / `where=` keyword and no
+  symmetry API. Exposure: none.
+
+### P2.0.4 — exact cost census of v77 (real meter, f64 read-only, DEV net 0)
+`tools/cost_site_probe.py` now anchors by source hash (v72, v77, v78) and adds a category ×
+layer table; `experiments/2026-10-07_p2/census_v77/` (job 2426). Total 395,412,204,457 =
+anchor exactly; exclusive sum reconciles; 0 materializations; ops 24,642.
+
+| tier | categories | share |
+|---|---|---:|
+| **recent exact κ3** | D21 readout 30.26 % + transport 27.79 % | **58.05 %** |
+| old tier | reconstruct legs 10.33 + compression (join) 9.28 + D21 readout 7.66 + transport 0.78 | 28.05 % |
+| covariance | `W^T C W` sandwich | 9.18 % |
+| closure | correction | 1.36 % |
+| other | P2/hub/D3 readout glue, births, gathers, corrector, … | 3.36 % |
+
+By layer: 0.7 % (L0), 1.7 / 3.0 / 4.2 / 5.3 % (L1–4), 6.9–9.0 % (L5–14), 4.1 % (L15). The
+recent tier is still ≈ 60 %, as PLAN rev 19 §1.4 assumed. Covariance costs 0.59 % per layer,
+the same at L0 (where `cov = I`).
