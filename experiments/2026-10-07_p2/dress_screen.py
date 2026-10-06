@@ -21,9 +21,10 @@ sys.path.insert(0, str(ROOT / "tools" / "twin"))
 import numpy as np  # noqa: E402
 import twin  # noqa: E402
 
+MAIN = Path(r"C:/Users/samsu/Documents/arc-whest")   # untracked params/K tables live here, not in a job snapshot
 CAND = ROOT / "experiments" / "2026-09-27_gates" / "estimator_k3_v62_gb.py"
-INIT = ROOT / "experiments" / "2026-09-27_gates" / "G1bg" / "params_best.npz"
-MASK = ("R=2.0,Hd=2.5,Dz=2.5,K=" + str(ROOT / "experiments" / "2026-10-06_mask" / "ktab"
+INIT = MAIN / "experiments" / "2026-09-27_gates" / "G1bg" / "params_best.npz"
+MASK = ("R=2.0,Hd=2.5,Dz=2.5,K=" + str(MAIN / "experiments" / "2026-10-06_mask" / "ktab"
                                        / "aggr_q50.json"))
 
 
