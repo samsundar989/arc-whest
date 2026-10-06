@@ -4,6 +4,7 @@
  "|b - a| (scale)": 0.008008518869144415,
  "|b - ARC b| / scale": 0.0,
  "|dressed_nospur - ARC b| / scale": 2.7726051290274765e-14,
+ "|2c_asym - ARC b| / scale": 2.7726051290274765e-14,
  "|2_dressed - ARC b| / scale": 0.15322402768843432,
  "|1_simple_legs - ARC b| / scale": 0.6067433654053114,
  "|3a_memoryless - ARC b| / scale": 1.2320927185229047,

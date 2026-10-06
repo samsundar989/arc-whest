@@ -12,6 +12,8 @@ With the default `Ablate()` it is ARC's augment path line for line (checked: `--
                                + (w3_j/w2_j)(½ w1_a D21[j,a] + ¼ w2_a K22[a,j] + ½ w2_a C_aj²)
                       births Sym(X̃ ⊗ 3 w2 e_j ⊗ X̃)  (includes the spurious H ⊗ H piece)
            "dressed_nospur"  dressed minus Sym(H ⊗ 3 w2 e_j ⊗ H): algebraically == "aug"
+           "asym"     ONE triple Sym(X ⊗ 3 w2 e_j ⊗ (X + 2H)), X = w1∘C: algebraically == "aug"
+                      (Sym is bilinear), same column count as "dressed", no spurious term
     k4     "full"     ARC's r = 1 κ4 core
            "memoryless"  drop every d = 4 pK term that reads the input κ4 (a block with
                       |v| = 4): the core is rebuilt from this layer's κ2/κ3 only. The
@@ -69,12 +71,17 @@ class Ablate:
     no211: bool = False
     noK211: bool = False
     beta: float = 0.7
+    dress_s: float = 1.0   # "dressed": X̃ = w1∘C + s·H (spurious term × s², useful cross term × s)
 
 
 ARMS = {
     "b": Ablate(),
     "1_simple_legs": Ablate(legs="simple"),
     "2_dressed": Ablate(legs="dressed"),
+    "2c_asym": Ablate(legs="asym"),
+    "2d_dressed_s0.5": Ablate(legs="dressed", dress_s=0.5),
+    "2e_dressed_s0.7": Ablate(legs="dressed", dress_s=0.7),
+    "2f_dressed_s0.3": Ablate(legs="dressed", dress_s=0.3),
     "3a_memoryless": Ablate(k4="memoryless"),
     "3b_gain": Ablate(k4="gain"),
     "3c_memoryless+gain": Ablate(k4="memoryless+gain"),
@@ -176,10 +183,15 @@ def factored_nonlin_kprop_k3_ablate(K_in, nonlin_wick_coef, augment=False, base=
         if K22 is not None:
             heavy = heavy + 0.25 * w2[:, None] * K22   # ¼ w2_a K22[a,j]
         H = H + heavy * ratio[None, :]
-        X = w1[:, None] * WK_11 + H
-        pK_111.add_factors_((X, fac2, (X * w2[None, :])))
-        if cfg.legs == "dressed_nospur":
-            pK_111.add_factors_((-H, fac2, (H * w2[None, :])))
+        if cfg.legs == "asym":
+            # Sym is bilinear: light×light + light×heavy + heavy×light == Sym(X ⊗ e ⊗ (X + 2H)), exactly
+            X = w1[:, None] * WK_11
+            pK_111.add_factors_((X, fac2, ((X + 2.0 * H) * w2[None, :])))
+        else:
+            X = w1[:, None] * WK_11 + cfg.dress_s * H
+            pK_111.add_factors_((X, fac2, (X * w2[None, :])))
+            if cfg.legs == "dressed_nospur":
+                pK_111.add_factors_((-H, fac2, (H * w2[None, :])))
 
     if 4 in WK and not cfg.no211:
         core, metric = WK[4].core, WK[4].metric
@@ -259,7 +271,7 @@ def calibrate(dev) -> dict:
     a_s, _ = m2.run_variant(mlp, n, depth, "a", dev, dtype)
     scale = float(np.abs(ref - a_s).max())
     out = {"n": n, "depth": depth, "|b - a| (scale)": scale}
-    for name in ("b", "dressed_nospur", "2_dressed", "1_simple_legs", "3a_memoryless", "3b_gain"):
+    for name in ("b", "dressed_nospur", "2c_asym", "2_dressed", "1_simple_legs", "3a_memoryless", "3b_gain"):
         cfg = Ablate(legs="dressed_nospur") if name == "dressed_nospur" else ARMS[name]
         got, _ = run_arm(mlp, n, depth, cfg, dev, dtype)
         out[f"|{name} - ARC b| / scale"] = float(np.abs(got - ref).max()) / scale
