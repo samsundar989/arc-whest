@@ -2484,7 +2484,7 @@ refit (vs the refit control) closes the lane.
 
 ### P1 (cont.) — D21 rows only, the corrector, and fixed keep counts (2026-10-06)
 
-**Correction first.** The first row-only D runs ("Dr", grid commit `a0…` on Oct 6) were wrong
+**Correction first.** The first row-only D runs ("Dr", commit `d36833f`) were wrong
 in the twin: the corrector still read the *unmasked* D21. That is the unservable `Dc` diagnostic,
 not row-only D. Those numbers (Dr3.0 +0.04 %, safe-r +0.92 %, aggr-r +1.32 %) are void. The
 files are kept in `experiments/2026-10-06_mask/grid/_stale_Dr_corrector_unmasked/`, and the
