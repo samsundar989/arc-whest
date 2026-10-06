@@ -2481,3 +2481,42 @@ Refits queued (S3 stage, init G1bg = v73, lr 3e-4, 2 epochs TRAIN-900, VAL selec
 R2.0/Hd3.0/D3.0 (job 2404, init VAL **2.394411e-08 = +8.2 %**), aggr-d R2.0/Hd2.5/D2.5 (2405),
 and an unmasked control with the identical recipe (2406). Kill rule: safe-d > +3 % raw after
 refit (vs the refit control) closes the lane.
+
+### P1 (cont.) — D21 rows only, the corrector, and fixed keep counts (2026-10-06)
+
+**Correction first.** The first row-only D runs ("Dr", grid commit `a0…` on Oct 6) were wrong
+in the twin: the corrector still read the *unmasked* D21. That is the unservable `Dc` diagnostic,
+not row-only D. Those numbers (Dr3.0 +0.04 %, safe-r +0.92 %, aggr-r +1.32 %) are void. The
+files are kept in `experiments/2026-10-06_mask/grid/_stale_Dr_corrector_unmasked/`, and the
+aggr-r refit started on them (job 2409) was cancelled. Found by the v75 parity check: v75
+reproduced the corrected twin and not the buggy one. Corrected values (VAL-100, control
+2.213359e-08):
+
+| config | Δ raw | note |
+|---|---:|---|
+| Dr2.5 / Dr3.0 | +2.48 / +0.61 % | D21 dead rows zero; corrector reads d21e = 0 there |
+| **Dz2.5 / Dz3.0** | **+0.62 / +0.02 %** | Dr + no corrector delta on the dropped rows |
+| rd R2.0/Dr2.5 · rd3 R2.0/Dr3.0 | +3.45 · +1.50 % | |
+| rdz R2.0/Dz2.5 · rdz3 R2.0/Dz3.0 | +1.57 · +0.92 % | |
+| rdK / **rdzK** (fixed median K, ×32, FIT-100) | +4.94 / **+2.72 %** | top-K at a fixed count costs ~1.1 pt over thresholds |
+| safe-r · aggr-r · lean-r (true Dr) | +1.43 · +2.93 · +2.11 % | |
+| aggr-z R2.0/Hd2.5/Dz2.5 | +1.35 % | |
+
+The corrector's `d21e` for a dropped row is unknown. Skipping the correction there is better
+than feeding it 0. A corrector refit on the compact chain could recover more.
+
+### P2 — `estimator_k3_v75_kas.py` (R + row-only D21 + Dz, variant A)
+
+Built by `tools/build_kas.py` from v73_gb, with the `rd` table (`ktab/rd_m32.json`: median
+kept count on FIT-100, nearest 32; R(l) 1024 → 736, D(l) 1024 → 800). Hd is not built: it
+changes each lineage's width, which the wide layout does not allow. Real flopscope:
+- **Selection and gathers bill 0 materializations.** A gather costs 8 FLOPs per output element.
+  Scatter-back is a zero-pad plus `take` (`gather_probe.json`).
+- **Strassen trap.** At `_STRASSEN_MIN_BLOCK = 32` every compact K < 1024 loses the fifth
+  Strassen level, so K = 992 costs 4.4 % MORE than 1024. v75 uses 20, where the compact
+  products track K/n. v73's own products move −0.02 % FLOPs and +220 ops
+  (`strassen_probe.json`).
+- **Meter (DEV net 0, before Dz):** 418,252,650,361 FLOPs = **0.19020 B** (×0.8857 vs v73;
+  modeled 0.883), 23,475 ops, 0 materializations.
+- **Twin parity** (v75 itself vs v73 + top-K mask `R=2.0,Dz=2.5,K=rd_m32`): 5.4e-4 / 8.2e-5
+  relative on VAL nets 900/901.
