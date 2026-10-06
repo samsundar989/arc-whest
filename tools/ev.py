@@ -108,10 +108,13 @@ BUDGET = 2 ** 41
 #: pessimistic again, which is the side this constant exists to err on.
 #: Change this and the matching block in RESULTS.md § Calibration TOGETHER.
 PUBLIC_FACTOR = 1.038
-#: FRESH-A score (floor-subtracted) / this = predicted public score. PLAN rev 18 §2:
-#: FRESH-A replaces DEV as the acceptance panel. UNCALIBRATED (1.0) until Lane V's
-#: V4 table (`docs/research/2026-10-0X_laneV_report.md`) sets it from v73_gb/v68_ws.
-FRESH_PUBLIC_FACTOR = {"fresh_a": 1.0, "fresh_lock": 1.0, "fresh_d": 1.0}
+#: FRESH score (floor-subtracted) / this = predicted public score. PLAN rev 18 §2:
+#: FRESH-A replaces DEV as the acceptance panel. Set 2026-10-06 from Lane V's V4 table
+#: (`docs/research/2026-10-06_laneV_report.md`): fresh / graded = 1.0177 (v73 FRESH-A),
+#: 1.0197 (v68_ws FRESH-A), 1.0186 / 1.0213 (FRESH-D), mean 1.0193. One factor for all
+#: three panels: they are draws from the same distribution. Recalibrate if a graded row
+#: deviates from its FRESH-A projection by > 2 %.
+FRESH_PUBLIC_FACTOR = {"fresh_a": 1.019, "fresh_lock": 1.019, "fresh_d": 1.019}
 #: FRESH-LOCK is the designation lockbox: every read is logged, and a fourth read
 #: is refused unless the reader says it is the designation read.
 FRESH_LOCK_LOG = ROOT / "experiments" / "fresh_lock_reads.jsonl"

@@ -14,8 +14,14 @@ floor sum (8.2e-10 vs 8.7e-10), and against the EXACT layer-1 closed form 0.992 
 floor — unbiased. A third panel, FRESH-D (d8b corpus extension nets the twin never read,
 other generator, other labeller), is built and verified. `tools/ev.py` gains `--panel
 fresh_a|fresh_lock|fresh_d` (floor-subtracted absolutes, raw paired differences, FRESH-LOCK read
-log refusing a 4th read without `--i-am-designating`). FRESH-A/LOCK labels are on the queue
-behind Lane P; V4 (v73 vs v68_ws) is running on FRESH-D now, FRESH-A next.
+log refusing a 4th read without `--i-am-designating`). **V4 calibration (100 nets each):** v73 scores
+4.702e-9 on FRESH-A and 4.706e-9 on FRESH-D (+1.8 / +1.9 % vs graded 4.620e-9); v68_ws reads
+1.020 / 1.021 × its graded. Paired v73 − v68 = −9.00 % ± 0.45 pp (FRESH-A), −9.06 % ± 0.43 pp
+(FRESH-D) vs graded −8.81 %; 100/100 wins on both. Per-net CV 12.8 % / 16.3 %. Factor fresh ÷
+1.019 = projected public, set in `ev.py`. Strategist's three predictions hold (CV on FRESH-D
+just outside). FRESH-A is ready to be the acceptance panel once Lane P merges; FRESH-LOCK
+labels are queued. M4 (neighbor-feature corrector, twin) never beat v73 on VAL (best +0.10 %):
+closed.
 
 **M (dropped diagrams) — measured, GO by rule, CLOSED on cost.** Factored AUGMENT drops exactly
 4 of 91 terms: the covariance triangle T1 and three κ3 × edge terms (E3, E21a, E21b). Unfactored
