@@ -162,6 +162,154 @@ PATCHES = [
      "            out_tw.rows = _kr\n"),
 ]
 
+#: --hd: H = DEAD BIRTH COLUMNS (P1: dropping a dead column whole -- A_L, M, two-leg,
+#: hubs, slice -- costs +0.15 % raw at tau 2.5; always-on columns must stay, their kappa4
+#: hubs are not small). Each lineage then has its own width K_H(b), so the P2 pages `L`
+#: travel as a LIST of groups of consecutive equal-width lineages, each (g, w, r), and the
+#: two readouts that reshape the wide layout per lineage loop over those groups. The masks at
+#: birth are the twin's `Hd` mode exactly, then only the live columns are stored.
+HD_PATCHES = [
+    ("        _KD = int(_KAS_K[\"D\"][layer_index])\n",
+     "        _KD = int(_KAS_K[\"D\"][layer_index])\n"
+     "        _KH = int(_KAS_K[\"H\"][layer_index])\n"
+     "        if _KH < n:\n"
+     "            _rkh = fnp.argsort(_perm)\n"
+     "            _mh = fnp.where(_rkh >= n - _KH, dtype(1.0), dtype(0.0))\n"
+     "            _kh = _perm[n - _KH:]\n"),
+    ("    _kr = _kd = _kz = None\n", "    _kr = _kd = _kz = _mh = _kh = None\n"),
+    ('                 "rows", "kd")',
+     '                 "rows", "kd",\n'
+     "                 # KAS (H): live birth columns of the YOUNGEST lineage (its M = I)\n"
+     '                 "hcols")'),
+    ("        self.rows = self.kd = None\n", "        self.rows = self.kd = self.hcols = None\n"),
+    # the youngest block's implicit M = I keeps only its live columns
+    ("    M = WT if tw.M is None else fnp.concatenate([_mm(WTr, tw.M), WT], axis=1)\n",
+     "    WTh = WT if tw.hcols is None else fnp.take(WT, tw.hcols, axis=1)\n"
+     "    M = WTh if tw.M is None else fnp.concatenate([_mm(WTr, tw.M), WTh], axis=1)\n"),
+    # P2 pages as groups
+    ("                     None if Lb is None else Lb[None], sb, eb)\n",
+     "                     None if Lb is None else [Lb[None]], sb, eb)\n"),
+    ("                 None if Lb is None else fnp.concatenate([tw.L, Lb[None]], axis=0),\n",
+     "                 None if Lb is None else _l_append(tw.L, Lb),\n"),
+    ("        r = tw.L.shape[2]\n", "        r = tw.L[0].shape[2]\n"),
+    ("                     tw.Z[:, -(g * r):], tw.L[-g:],\n",
+     "                     tw.Z[:, -(g * r):], [fnp.concatenate(tw.L, axis=0)[-g:]],\n"),
+    ("    n, k = M.shape[0], tw.k\n    r = tw.L.shape[2]\n"
+     "    # (n, k r) -> (k, n, r): SMALL, `k n r` not `k n^2`.\n"
+     "    Z3 = fnp.reshape(tw.Z, (n, k, r)).transpose(1, 0, 2)\n"
+     "    Zres = fnp.reshape((Z3 @ tw.L.transpose(0, 2, 1)).transpose(1, 0, 2),\n"
+     "                       (n, k * n))\n"
+     "    PP = M * M\n"
+     "    MP = PP * tw.sb + (A_L * M) * (3.0 * tw.eb) + Zres * M\n"
+     "    PPL = fnp.reshape(PP, (n, k, n)).transpose(1, 0, 2) @ tw.L\n"
+     "    tw._p2 = (MP, PP, fnp.reshape(PPL.transpose(1, 0, 2), (n, k * r)))\n",
+     "    n = M.shape[0]\n"
+     "    PP = M * M\n"
+     "    # KAS (H): one batched product per GROUP of equal-width lineages\n"
+     "    Zres, PPL = [], []\n"
+     "    off = lin = 0\n"
+     "    for Lg in tw.L:\n"
+     "        g, w, r = Lg.shape[0], Lg.shape[1], Lg.shape[2]\n"
+     "        Z3 = fnp.reshape(tw.Z[:, lin * r:(lin + g) * r], (n, g, r)).transpose(1, 0, 2)\n"
+     "        Zres.append(fnp.reshape((Z3 @ Lg.transpose(0, 2, 1)).transpose(1, 0, 2),\n"
+     "                                (n, g * w)))\n"
+     "        P3 = fnp.reshape(PP[:, off:off + g * w], (n, g, w)).transpose(1, 0, 2) @ Lg\n"
+     "        PPL.append(fnp.reshape(P3.transpose(1, 0, 2), (n, g * r)))\n"
+     "        off += g * w\n"
+     "        lin += g\n"
+     "    Zres = _cat1(Zres)\n"
+     "    MP = PP * tw.sb + (A_L * M) * (3.0 * tw.eb) + Zres * M\n"
+     "    tw._p2 = (MP, PP, _cat1(PPL))\n"),
+    ("    n, k = M.shape[0], tw.k\n"
+     "    Y3 = fnp.reshape(tw.Y, (n, k, 2))\n"
+     "    cA = fnp.reshape(tw.CA, (k, n))\n"
+     "    cB = fnp.reshape(tw.CB, (k, n))\n"
+     "    yA = Y3[:, :, 0]\n"
+     "    yB = Y3[:, :, 1]\n"
+     "    G = fnp.reshape(yA[:, :, None] * cA[None, :, :] + yB[:, :, None] * cB[None, :, :],\n"
+     "                    (n, k * n))\n"
+     "    AM3 = fnp.reshape(A_L * M, (n, k, n))\n"
+     "    RA = (AM3 * cA[None, :, :]).sum(axis=2)\n"
+     "    RB = (AM3 * cB[None, :, :]).sum(axis=2)\n",
+     "    n, k = M.shape[0], tw.k\n"
+     "    Y3 = fnp.reshape(tw.Y, (n, k, 2))\n"
+     "    yA = Y3[:, :, 0]\n"
+     "    yB = Y3[:, :, 1]\n"
+     "    AM = A_L * M\n"
+     "    # KAS (H): per GROUP of equal-width lineages\n"
+     "    G, RA, RB = [], [], []\n"
+     "    off = lin = 0\n"
+     "    for Lg in tw.L:\n"
+     "        g, w = Lg.shape[0], Lg.shape[1]\n"
+     "        cA = fnp.reshape(tw.CA[off:off + g * w], (g, w))\n"
+     "        cB = fnp.reshape(tw.CB[off:off + g * w], (g, w))\n"
+     "        G.append(fnp.reshape(yA[:, lin:lin + g, None] * cA[None, :, :]\n"
+     "                             + yB[:, lin:lin + g, None] * cB[None, :, :], (n, g * w)))\n"
+     "        AM3 = fnp.reshape(AM[:, off:off + g * w], (n, g, w))\n"
+     "        RA.append((AM3 * cA[None, :, :]).sum(axis=2))\n"
+     "        RB.append((AM3 * cB[None, :, :]).sum(axis=2))\n"
+     "        off += g * w\n"
+     "        lin += g\n"
+     "    G, RA, RB = _cat1(G), _cat1(RA), _cat1(RB)\n"),
+    # lineage widths, not w2b / k
+    ("    n = tw.w2b.shape[0] // tw.k\n    c = tw.ko * n\n",
+     "    _w = _lin_widths(tw)\n    c = sum(_w[:tw.ko])\n    n = _w[tw.ko]\n"),
+    ("    n = tw.w2b.shape[0] // tw.k                  # KAS: lineage width, not rows\n",
+     "    n = _lin_widths(tw)[tw.ko]                   # KAS: the joiner's width\n"),
+    # birth: the twin's Hd masks, in the same places
+    ("        fac1 = w1e[:, None] * C11\n",
+     "        fac1 = w1e[:, None] * C11\n"
+     "        if _mh is not None:\n"
+     "            fac1 = fac1 * _mh[None, :]\n"
+     "            w2m = w2m * _mh\n"),
+    ("        S_sep = (e_b[:, None] * C11) * w1e[None, :]\n",
+     "        S_sep = (e_b[:, None] * C11) * w1e[None, :]\n"
+     "        if _mh is not None:\n"
+     "            S_sep = S_sep * _mh[:, None]\n"),
+    ("            resid = S21 - S_sep\n",
+     "            if _mh is not None:\n"
+     "                cA = cA * _mh\n"
+     "                cB = cB * _mh\n"
+     "            resid = S21 - S_sep\n"),
+    ("            if _PROTECT_FEED:\n",
+     "            if _mh is not None:\n"
+     "                e_b = e_b * _mh\n"
+     "                resid = resid * _mh[:, None]\n"
+     "                S3 = S3 * _mh\n"
+     "            if _PROTECT_FEED:\n"),
+    ("            out_tw = _append(adv, None, fac1, w2b_vec, n, Zb, Lb, _sb, e_b,\n"
+     "                             _Yb, cA, cB)\n"
+     "            out_tw.rows = _kr\n",
+     "            if _kh is not None:\n"
+     "                # KAS (H): a dead birth column carries nothing -- store the live ones\n"
+     "                fac1 = fnp.take(fac1, _kh, axis=1)\n"
+     "                w2b_vec = fnp.take(w2b_vec, _kh)\n"
+     "                _sb = fnp.take(_sb, _kh)\n"
+     "                e_b = fnp.take(e_b, _kh)\n"
+     "                cA = fnp.take(cA, _kh)\n"
+     "                cB = fnp.take(cB, _kh)\n"
+     "                Lb = fnp.take(Lb, _kh, axis=0)\n"
+     "            out_tw = _append(adv, None, fac1, w2b_vec, n, Zb, Lb, _sb, e_b,\n"
+     "                             _Yb, cA, cB)\n"
+     "            out_tw.rows = _kr\n"
+     "            out_tw.hcols = _kh\n"),
+]
+
+HD_HELPERS = (
+    "def _cat1(xs):\n"
+    "    return xs[0] if len(xs) == 1 else fnp.concatenate(xs, axis=1)\n\n\n"
+    "def _l_append(L, Lb):\n"
+    '    """Append a P2 page to its width group (a new group when the width changes)."""\n'
+    "    if L[-1].shape[1] == Lb.shape[0]:\n"
+    "        return L[:-1] + [fnp.concatenate([L[-1], Lb[None]], axis=0)]\n"
+    "    return L + [Lb[None]]\n\n\n"
+    "def _lin_widths(tw):\n"
+    '    """Every lineage\'s column width, oldest first, from the page groups (Python ints)."""\n'
+    "    out = []\n"
+    "    for Lg in tw.L:\n"
+    "        out += [Lg.shape[1]] * Lg.shape[0]\n"
+    "    return out\n\n\n")
+
 HELPERS_ANCHOR = "def _truncate(tw, gens, n):\n"
 
 
@@ -176,7 +324,10 @@ def helpers(ktab):
         f"#: at config {ktab['config']}. Any other shape runs the unpruned chain.\n"
         "_KAS_ON = True\n"
         "_KAS_SHAPE = (1024, 16)\n"
-        f"_KAS_K = {{\"R\": {K['R']},\n          \"D\": {K['D']}}}\n\n\n"
+        + (f"_KAS_K = {{\"R\": {K['R']},\n          \"D\": {K['D']},\n"
+           f"          \"H\": {K['H']}}}\n\n\n" if "H" in K else
+           f"_KAS_K = {{\"R\": {K['R']},\n          \"D\": {K['D']}}}\n\n\n")
+        + ("" if "H" not in K else HD_HELPERS) +
         "def _kas_rows(tw, idx):\n"
         '    """Keep only rows `idx` of every carried leg (R). Lineage width unchanged."""\n'
         "    out = _Tower(None, fnp.take(tw.A_L, idx, axis=0),\n"
@@ -196,7 +347,7 @@ def helpers(ktab):
 
 def build(base: Path, ktab: dict) -> str:
     src = base.read_text(encoding="utf-8")
-    for a, b in PATCHES:
+    for a, b in PATCHES + (HD_PATCHES if "H" in ktab["K"] else []):
         if src.count(a) != 1:
             raise SystemExit(f"anchor occurs {src.count(a)}x:\n{a}")
         src = src.replace(a, b, 1)
