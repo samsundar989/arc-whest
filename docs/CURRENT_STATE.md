@@ -11,7 +11,7 @@ Lane P (this file's owner; main, decided-neuron pruning, cost) per
 | role | source / SHA8 | submission | score |
 |---|---|---|---:|
 | best A | `estimator_k3_v73_gb.py` / `8fc42e77` | #332893 | **4.6198973531323855e-9** (raw 2.1515e-8, F/B 0.21473) |
-| new B (P0) | `estimator_k3_v74_ws.py` / `5aa60322` | #334434 | PENDING (expected ≈ 4.98e-9; F/B 0.23128) |
+| new B (P0) | `estimator_k3_v74_ws.py` / `5aa60322` | #334434 | **4.976093977527745e-9** (raw 2.1516e-8, F/B 0.23128) |
 | old B | `estimator_k3_v68_ws.py` / `0db9afba` | #332544 | 5.0664e-9 |
 
 No final entry designated (Samuel designates; `docs/DESIGNATION.md` keeps the evidence).

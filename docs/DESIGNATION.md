@@ -5,7 +5,7 @@
 | role | file | sha8 | submission | score | raw | F/B | wall evidence | VmPeak |
 |---|---|---|---|---:|---:|---:|---|---|
 | **A (candidate)** | `estimator_k3_v73_gb.py` | `8fc42e77` | #332893 | **4.6198973531323855e-9** | 2.1514587515980564e-8 | 0.21473 | projected noisy 103.3 s (v72 measured median 83.30 s + 0.005 s); A policy ≤ 105 s | 6,724 MiB |
-| **B (candidate)** | `estimator_k3_v74_ws.py` | `5aa60322` | #334434 | PENDING (expected ≈ 4.98e-9) | — | 0.23128 | projected quiet 58.1 s / noisy 68.3 s from the wall law; B policy ≤ 95 s | 5,073 MiB |
+| **B (candidate)** | `estimator_k3_v74_ws.py` | `5aa60322` | #334434 | **4.976093977527745e-9** | 2.1515782080427925e-8 | 0.23128 | projected quiet 58.1 s / noisy 68.3 s from the wall law; B policy ≤ 95 s | 5,073 MiB |
 
 v74_ws is v73_gb with `_STRASSEN_MIN_BLOCK = 64` and nothing else. DEV raw 2.227566e-8 vs v73's
 2.227946e-8 (−0.017 %); 19,667 ops; residual 0.218 s; packaged estimator = tested source;

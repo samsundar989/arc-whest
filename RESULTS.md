@@ -2429,7 +2429,14 @@ updated to this score.
 
 | date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
 |---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
-| 2026-10-06 | `estimator_k3_v74_ws.py` | `5aa60322` | DEV | 2.227566e-08 | 0.23128 | 19,667 | wall law: quiet 58.1 s, noisy 68.3 s (B ≤ 95 s) | VmPeak 5,073 MiB (WSL PASS, same hash) | 4.9632e-09 | PENDING (#334434) | 0.9286× score vs v73 (raw −0.017 %; the cost rises by design) | 0/100 | `estimator_k3_v73_gb.py` with `_STRASSEN_MIN_BLOCK = 64` and nothing else (the v68_wino → v68_ws recipe). Residual 0.218 s. Package sha256 `2bad853c…db47`, inner estimator = source. The ev.py "better than best graded" line fails by design: B is A's wall-safe copy, submitted on the A/B slot (Samuel's decision 3). `experiments/2026-10-06_v74ws/`. |
+| 2026-10-06 | `estimator_k3_v74_ws.py` | `5aa60322` | DEV | 2.227566e-08 | 0.23128 | 19,667 | wall law: quiet 58.1 s, noisy 68.3 s (B ≤ 95 s) | VmPeak 5,073 MiB (WSL PASS, same hash) | 4.9632e-09 | **4.976093977527745e-09** (#334434, raw 2.1515782080427925e-08) | 0.9286× score vs v73 (raw −0.017 %; the cost rises by design) | 0/100 | `estimator_k3_v73_gb.py` with `_STRASSEN_MIN_BLOCK = 64` and nothing else (the v68_wino → v68_ws recipe). Residual 0.218 s. Package sha256 `2bad853c…db47`, inner estimator = source. The ev.py "better than best graded" line fails by design: B is A's wall-safe copy, submitted on the A/B slot (Samuel's decision 3). `experiments/2026-10-06_v74ws/`. |
+
+**v74_ws graded (#334434, 2026-10-06):** score **4.976093977527745e-09**, raw
+2.1515782080427925e-08 (v73 graded raw 2.1514587515980564e-08: +0.006 %), 100 graded clean.
+Graded vs projected 4.9632e-09: +0.26 % (within 2 %; implied DEV factor 1.0353; keep 1.038).
+**New wall-safe B** (old B v68_ws #332544 5.0664e-09). Server wall/residual telemetry not
+collected (needs the result page); the wall-law projection (quiet 58.1 s / noisy 68.3 s)
+stands until it is read.
 
 ### P1 — decided-neuron masks, accuracy only (twin, VAL-100 free-running)
 
