@@ -12,7 +12,9 @@ machinery, so their arithmetic can be skipped. This builder ships two of the thr
      The next transport multiplies W^T[:, kept] (n x K) by the compact legs, which is the
      inner dimension of the most expensive matmuls in the chain. The youngest block's
      implicit M = I is never compacted (it enters the next transport as W^T, free).
-  D  D21 ROWS ONLY. The (2,1) readout forms only the K_D(l) kept rows; the dead rows
+  D  D21 ROWS ONLY, and no corrector delta on those rows ("Dz": their d21e feature would
+     read 0, which the corrector never saw). The (2,1) readout forms only the K_D(l) kept
+     rows; the dead rows
      are zero, scattered back as a GATHER from the block padded with one zero row (grader
      arrays are immutable). Columns stay, so the mean corrector's d21e feature is exact
      for every kept neuron (the two-sided mask cost +7 % raw through that feature).
@@ -113,7 +115,7 @@ PATCHES = [
     ('    w = _wick(mu_pre, sigma, alpha, table, dtype, const["wick"])\n',
      '    w = _wick(mu_pre, sigma, alpha, table, dtype, const["wick"])\n'
      "    # ---- KAS selection (variant A): fixed per-layer counts, device-side indices ----\n"
-     "    _kr = _kd = None\n"
+     "    _kr = _kd = _kz = None\n"
      "    if (_KAS_ON and not last_layer and (n, depth) == _KAS_SHAPE\n"
      '            and layer_index < len(_KAS_K["R"])):\n'
      "        _perm = fnp.argsort(alpha)\n"
@@ -124,7 +126,20 @@ PATCHES = [
      "        if _KD < n and adv is not None:\n"
      "            _rank = fnp.argsort(_perm)\n"
      "            adv.kd = (_perm[n - _KD:],\n"
-     "                      fnp.where(_rank >= n - _KD, _rank - (n - _KD), _KD))\n"),
+     "                      fnp.where(_rank >= n - _KD, _rank - (n - _KD), _KD))\n"
+     "            _kz = fnp.where(_rank >= n - _KD, dtype(1.0), dtype(0.0))\n"),
+    # Dz: no mean correction on the rows whose D21 was never formed
+    ("        mu_out = mu_out + _corr_delta(\n"
+     '            layer_index, const["corr"], mu_pre, sigma, D3, D4, W,\n'
+     "            None if last_layer else D21, mu, mu_out, n, dtype)\n",
+     "        _cd = _corr_delta(\n"
+     '            layer_index, const["corr"], mu_pre, sigma, D3, D4, W,\n'
+     "            None if last_layer else D21, mu, mu_out, n, dtype)\n"
+     "        if _kz is not None:\n"
+     "            # KAS (D): their d21e feature would read 0, which the corrector was\n"
+     "            # never fitted on (P1: +2.5 % raw at tau 2.5 with it, +0.6 % without)\n"
+     "            _cd = _cd * _kz\n"
+     "        mu_out = mu_out + _cd\n"),
     ("        adv = _wick_tower(w1t[:, None], adv)\n"
      "        if _SHARED_ON and gens is None and not last_layer:\n"
      "            adv = _shared_join_lean(adv)\n",

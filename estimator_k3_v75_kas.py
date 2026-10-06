@@ -3948,7 +3948,7 @@ def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,
     alpha = fnp.clip(mu_pre / sigma, dtype(-ALPHA_CAP), dtype(ALPHA_CAP))
     w = _wick(mu_pre, sigma, alpha, table, dtype, const["wick"])
     # ---- KAS selection (variant A): fixed per-layer counts, device-side indices ----
-    _kr = _kd = None
+    _kr = _kd = _kz = None
     if (_KAS_ON and not last_layer and (n, depth) == _KAS_SHAPE
             and layer_index < len(_KAS_K["R"])):
         _perm = fnp.argsort(alpha)
@@ -3960,6 +3960,7 @@ def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,
             _rank = fnp.argsort(_perm)
             adv.kd = (_perm[n - _KD:],
                       fnp.where(_rank >= n - _KD, _rank - (n - _KD), _KD))
+            _kz = fnp.where(_rank >= n - _KD, dtype(1.0), dtype(0.0))
 
     D3 = _dslice3(adv) if adv is not None else fnp.zeros(n, dtype=dtype)
     # ---- THE PER-NEURON FOURTH-ORDER CORE ---------------------------------
@@ -4145,9 +4146,14 @@ def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,
     # channels are deliberately left alone. Inert when `_CORR_ON` is False or a
     # layer's weights are zero.
     if _CORR_ON and const.get("corr") is not None:
-        mu_out = mu_out + _corr_delta(
+        _cd = _corr_delta(
             layer_index, const["corr"], mu_pre, sigma, D3, D4, W,
             None if last_layer else D21, mu, mu_out, n, dtype)
+        if _kz is not None:
+            # KAS (D): their d21e feature would read 0, which the corrector was
+            # never fitted on (P1: +2.5 % raw at tau 2.5 with it, +0.6 % without)
+            _cd = _cd * _kz
+        mu_out = mu_out + _cd
     if last_layer:
         return (mu_out, None, None, 0.0, dG)
 
