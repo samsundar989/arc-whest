@@ -52,3 +52,5 @@ Factored E21b validated exactly (coef 24/(2n+8) reproduces unfactored d+E21b to 
 kept when E21b reads only the κ3 columns born at the last g layers: g = 1 → 40 % (≈ 5 pp),
 g = 2 → 65 %, g = 3 → 80 %; E21b on ALL columns reproduces m2's d+E21b (13.1 % / 13.5 %).
 Rationale: v73's own census says exact RECENT lineages carry most of κ3's value (age 5).
+Measured: g = 1/2/3 keep 2.8/6.5/8.7 % (n = 512) and 2.5/5.6/8.0 % (n = 768) of the ~13 % — i.e.
+≈ 20/45/63 % of the gain, below my 40/65/80 %. M3 = CLOSE on cost (report §6).

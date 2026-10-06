@@ -133,3 +133,38 @@ work): implement E21b in ARC's FACTORED path (validated against unfactored d+E21
 restrict it to the most recently born factor columns, and read what share of the 13–16 pp
 the young-only version keeps. GO to a v73 twin prototype only if young-only keeps ≥ ~1/3
 (≥ 5 % raw) — the handoff's ≥ 5 % raw at ≤ +5 % FLOPs bar.
+
+## 6. Young-lineage screen and the M3 decision: **CLOSE**
+
+Factored E21b, written as an add-on to ARC's factored AUGMENT κ4 core
+(`m3_young.py`), reproduces the unfactored d+E21b to **2.3e-13 relative** at coefficient
+24/(2n+8) = ARC's 12/(2n+8) × the term's multiplicity 2 (`m3_calibrate.json`). Restricting
+it to the κ3 columns born at the last g layers (8 nets each, `m3_young_w{512,768}.json`):
+
+| E21b reads | n = 512 gain vs b | wins | n = 768 gain vs b | wins |
+|---|---|---|---|---|
+| all columns | +13.1 % | 8/8 | +13.5 % | 8/8 |
+| births of last 1 layer (M = I: O(n²) in v73) | +2.8 % | 4/8 | +2.5 % | 6/8 |
+| last 2 layers | +6.5 % | 8/8 | +5.6 % | 7/8 |
+| last 3 layers | +8.7 % | 7/8 | +8.0 % | 8/8 |
+
+Worker prediction was 40 / 65 / 80 % of the gain for g = 1/2/3; measured ≈ 20 / 45 / 63 %.
+
+**Pricing in v73.** Whatever form is used, v73 has no off-diagonal κ4-core channel to put B
+in (λ·C_off is memoryless; only the diagonal is transported). Consuming B at the next layer
+needs Wᵀ B W: two n³ products per layer ≈ 6.4e10 FLOPs ≈ **+14 %** of 4.72e11. Then:
+
+- g = 1: B is O(n²), total ≈ +14 % FLOPs for ≤ 2.5–2.8 % raw (marginal rule needs ≥ 12 %).
+- g = 3: two extra n³ lineage contractions per layer (+14 %) + transport ≈ +27 % for ≤ 8–9 %
+  raw (needs ≥ 21 %).
+- all columns: ≥ +40 % for ≤ 13–16 %.
+
+None reaches the handoff bar (≥ 5 % raw at ≤ +5 % FLOPs), and these are ARC-chain gains,
+an optimistic ceiling for v73. **M3 = CLOSE.** The GO-by-rule result stands as a
+measurement for the write-up: ARC's own warning is quantitatively right (≈ 16 % of final-
+layer MSE, flat in width, all of it κ3 × edge, the triangle worthless), and the exact
+factored form of the dominant term (E21b) is now validated.
+
+What would reopen it: a low-rank transport of B (rank ≤ ~64 would make the channel ≈ +1 %),
+which this lane has not measured; only worth testing if a future chain carries an
+off-diagonal κ4 core for another reason.
