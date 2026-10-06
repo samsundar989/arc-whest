@@ -2569,3 +2569,9 @@ keep 1.038). The DEV paired prediction (score ×0.905, 100/100) transferred. `to
 | date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
 |---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
 | 2026-10-06 | `estimator_k3_v77_kash.py` | `4ff8018f` | DEV | 2.273812e-08 | 0.17981 | 24,642 | NEW code path: local A/B on DEV net 3 (×2, with v73 and v75): v77/v73 = **0.897** → × 83.31 s = 74.7 s, noisy-implied **92.7 s** (A ≤ 105 s); law 83.5 / 98.1 s | VmPeak 6,116 MiB (WSL PASS, same hash) | **3.9389e-09** | PENDING (#334487) | **×0.944 score vs v75** (paired gain 1.0592×, t95 excludes 0) | **100/100** | v75 + **Hd**: dead birth columns dropped whole (top-K_H by α at birth; `aggr_q50` table H 1024 → 800), P2 pages in equal-width groups, the newborn's M = W^T[:, live]. Raw −0.14 % vs v75 at F ×0.9454. VAL (twin, equivalent mask) vs v75: ratio 0.944, 100/100. Twin parity 8.1e-6. Package `d881eb60…ee21`, inner = source. Third canary of UTC Oct 6. `experiments/2026-10-06_v77kash/`. |
+
+**Corrector-only refit on the v77 chain** (S1 stage, lr 1e-4, twin mask = v77's rule, init v73
+params; job 2423): VAL-100 2.269883e-08 at init → 2.270075e-08 at step 28 → 2.269599e-08 at step
+56 (−0.01 %). No spike at this lr, and no gain either; cancelled. Together with the S3 runs,
+**refitting is closed**: the pruned chain's raw cost (+2.6 %) is not a corrector miscalibration
+that more training recovers.
