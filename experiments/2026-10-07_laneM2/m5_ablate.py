@@ -72,6 +72,7 @@ class Ablate:
     noK211: bool = False
     beta: float = 0.7
     dress_s: float = 1.0   # "dressed": X̃ = w1∘C + s·H (spurious term × s², useful cross term × s)
+    k4_from: int = 0       # the k4 variant applies only at nonlinear steps t >= k4_from (0-based)
 
 
 ARMS = {
@@ -87,6 +88,11 @@ ARMS = {
     "3c_memoryless+gain": Ablate(k4="memoryless+gain"),
     "4_no211": Ablate(no211=True),
     "5_noK211": Ablate(noK211=True),
+    "45_no_k3k4_loop": Ablate(no211=True, noK211=True),
+    "145_simple_legs_no_loop": Ablate(legs="simple", no211=True, noK211=True),
+    "3d_gain_from6": Ablate(k4="gain", k4_from=5),
+    "3e_memoryless+gain_from6": Ablate(k4="memoryless+gain", k4_from=5),
+    "3f_memoryless_from6": Ablate(k4="memoryless", k4_from=5),
 }
 
 
@@ -111,6 +117,10 @@ def _has_k4_block(vec_part) -> bool:
 def factored_nonlin_kprop_k3_ablate(K_in, nonlin_wick_coef, augment=False, base=False, use_pK=True,
                                     cfg: Ablate = Ablate()):
     assert augment and not base and use_pK, "ablation is defined for factored AUGMENT only"
+    step = STATS.get("step", 0)
+    STATS["step"] = step + 1
+    if step < cfg.k4_from and cfg.k4 != "full":
+        cfg = Ablate(legs=cfg.legs, no211=cfg.no211, noK211=cfg.noK211, beta=cfg.beta, dress_s=cfg.dress_s)
     WK = K_in
     n = WK[1].n
     assert WK[1].r == 0 and WK[2].r == 0
