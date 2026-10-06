@@ -5,7 +5,7 @@
 | role | file | sha8 | submission | score | raw | F/B | wall evidence | VmPeak |
 |---|---|---|---|---:|---:|---:|---|---|
 | **A (candidate)** | `estimator_k3_v75_kas.py` | `d4d7885c` | #334464 | **4.1871242928610786e-9** | 2.201440164384394e-8 | 0.19020 | NEW code path: local A/B vs v73 = 0.951 → ≈ 79.2 s median, **≈ 98.2 s noisy-implied** (A ≤ 105 s); law 87.3 / 102.6 s | 6,388 MiB |
-| **B (candidate)** | `estimator_k3_v76_kasws.py` | `fe05c0a4` | #334474 | PENDING (projected 4.4774e-9) | — | 0.20416 | local A/B vs v74_ws = 0.971 → ≈ 50.5 s median, **≈ 62.6 s noisy-implied** (B ≤ 95 s) | 4,885 MiB |
+| **B (candidate)** | `estimator_k3_v76_kasws.py` | `fe05c0a4` | #334474 | **4.4952209455824486e-9** | 2.201782972832689e-8 | 0.20416 | local A/B vs v74_ws = 0.971 → ≈ 50.5 s median, **≈ 62.6 s noisy-implied** (B ≤ 95 s) | 4,885 MiB |
 
 v75 = v73 + decided-neuron pruning (`tools/build_kas.py`); v76 = v75 at Strassen block 40. Both
 walls are measured-parent projections (local ratio × a parent's measured server median), not

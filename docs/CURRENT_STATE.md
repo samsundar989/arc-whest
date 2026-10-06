@@ -10,7 +10,7 @@ acceptance uses DEV-100 + VAL-100, as the handoff allows.
 | role | source / SHA8 | submission | score | F/B |
 |---|---|---|---:|---:|
 | **best A** | `estimator_k3_v75_kas.py` / `d4d7885c` | #334464 | **4.1871242928610786e-9** (raw 2.2014e-8) | 0.19020 |
-| B (pending) | `estimator_k3_v76_kasws.py` / `fe05c0a4` | #334474 | projected 4.4774e-9 | 0.20416 |
+| B | `estimator_k3_v76_kasws.py` / `fe05c0a4` | #334474 | **4.4952209455824486e-9** (raw 2.2018e-8) | 0.20416 |
 | previous A | `estimator_k3_v73_gb.py` / `8fc42e77` | #332893 | 4.6198973531323855e-9 | 0.21473 |
 | previous B | `estimator_k3_v74_ws.py` / `5aa60322` | #334434 | 4.976093977527745e-9 | 0.23128 |
 
