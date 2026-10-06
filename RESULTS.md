@@ -2422,3 +2422,55 @@ nine observations now, mean ≈1.0398). F/B from the real meter 0.21473 (server 
 read here). Per-net telemetry and server wall were not collected (needs the result page).
 The DEV paired +0.31% mostly did not transfer: incremental only. `tools/ev.py --best-graded`
 updated to this score.
+
+## PLAN rev 18 — Lane P (2026-10-06)
+
+### P0 — v74_ws, the wall-safe insurance B
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-06 | `estimator_k3_v74_ws.py` | `5aa60322` | DEV | 2.227566e-08 | 0.23128 | 19,667 | wall law: quiet 58.1 s, noisy 68.3 s (B ≤ 95 s) | VmPeak 5,073 MiB (WSL PASS, same hash) | 4.9632e-09 | PENDING (#334434) | 0.9286× score vs v73 (raw −0.017 %; the cost rises by design) | 0/100 | `estimator_k3_v73_gb.py` with `_STRASSEN_MIN_BLOCK = 64` and nothing else (the v68_wino → v68_ws recipe). Residual 0.218 s. Package sha256 `2bad853c…db47`, inner estimator = source. The ev.py "better than best graded" line fails by design: B is A's wall-safe copy, submitted on the A/B slot (Samuel's decision 3). `experiments/2026-10-06_v74ws/`. |
+
+### P1 — decided-neuron masks, accuracy only (twin, VAL-100 free-running)
+
+`tools/twin/twin.py --arm mask` on v73 (`--raw`), driver `tools/twin/mask_grid.py`, results
+`experiments/2026-10-06_mask/grid/*.json`; predictions written first
+(`experiments/2026-10-06_mask/PREDICTIONS.md`). Control (arm loaded, no mask) = plain v73 bit for
+bit; VAL-100 control raw **2.213359e-08**. Modeled F = the job2309 per-site census scaled by
+the kept fractions on FIT-100 (`tools/mask_flops.py`, rules in its header; conservative:
+mixed elementwise reads and full-row old-leg reconstruction are not credited).
+
+| config | Δ raw (VAL-100) | modeled F | F/B | strategist | worker |
+|---|---:|---:|---:|---|---|
+| R2.0 | +0.90 % | 0.926 | 0.199 | ≤ +0.5 % | +0.3 % |
+| R2.5 | +0.06 % | 0.946 | 0.203 | — | +0.15 % |
+| H2.5 / 3.0 / 3.5 (literal) | +3.41 / +2.01 / +1.38 % | 0.903 / 0.936 / 0.960 | | H3.0 ≤ +0.5 % | +7 / +3 / +1.5 % |
+| Hk2.5 / 3.0 / 3.5 (A_L kept on always-on) | +2.96 / +2.00 / +1.39 % | 0.936 / 0.959 / 0.974 | | — | +1.0 / +0.4 / +0.2 % |
+| **Hd2.5 / Hd3.0 (every H part, dead columns only)** | **+0.15 / +0.03 %** | 0.936 / 0.959 | 0.201 / 0.206 | — | (run after the grid) |
+| Hkh3.0 (hubs kept on always-on) | 0.00 % | — | | | diagnostic |
+| Hw3.0 (two-leg w2b only) / Hs3.0 (slice only) | −0.02 / −0.01 % | — | | | diagnostic |
+| D2.5 / D3.0 | +10.55 / +7.09 % | 0.910 / 0.934 | 0.195 / 0.201 | D3.0 ≤ +0.5 % | +0.6 / +0.3 % |
+| Dc2.5 / Dc3.0 (corrector reads unmasked D21) | +0.56 / +0.03 % | — | | | +0.5 / +0.3 % |
+| safe R2.0/H3.0/D3.0 | +9.91 % | 0.812 | 0.174 | ≤ +1.5 %, F −20 to −30 % | +4 % |
+| safeK / safeKc | +9.82 / +2.92 % | 0.829 | 0.178 | — | +1.2 / +1.5 % |
+| aggr R2.0/H2.5/D2.5 / aggrK | +15.12 / +14.32 % | 0.763 / 0.789 | 0.164 / 0.169 | +3 to +8 % | +12 / +2.5 % |
+
+**What the table says.**
+1. **H's whole cost is the κ4 hubs on always-on columns.** For an always-on neuron the hub
+   coefficient `cA = w1 · (m/8) λ` has `w1 ≈ 1`, so it is not small. Dropping a *dead* birth
+   column entirely (A_L, M, two-leg, hubs and slice) costs +0.03 % at τ 3.0 and +0.15 % at 2.5.
+   `Hd` is the variant to build, and it is also the clean compact form, since a dead column
+   leaves both A_L and M.
+2. **D's cost is the mean corrector, not the closure.** The corrector's `d21e` feature is
+   `rowsum(D21²)/σ⁴` over all columns, and a dead column j does not make the pre-activation
+   κ(i,i,j) small. With the feature unmasked, D3.0 costs +0.03 %. A compact chain can only
+   serve the kept-column feature, so the refit has to absorb this.
+3. R2.0 costs +0.9 %; R2.5 is almost free.
+4. Every mask is score-positive by the marginal rule (e.g. R2.0: raw +0.9 %, F −7.4 %), but the
+   modeled cost floor of the best sets is F/B ≈ 0.17. The strategist's 0.14–0.16 needs more
+   than this mask set, or credit for the elementwise reads that this model does not give.
+
+Refits queued (S3 stage, init G1bg = v73, lr 3e-4, 2 epochs TRAIN-900, VAL selection): safe-d
+R2.0/Hd3.0/D3.0 (job 2404, init VAL **2.394411e-08 = +8.2 %**), aggr-d R2.0/Hd2.5/D2.5 (2405),
+and an unmasked control with the identical recipe (2406). Kill rule: safe-d > +3 % raw after
+refit (vs the refit control) closes the lane.
