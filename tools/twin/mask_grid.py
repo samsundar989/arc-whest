@@ -37,6 +37,10 @@ GRID = [
     ("Hw3.0", "Hw=3.0"), ("Hs3.0", "Hs=3.0"),
     # R decomposition: inherited legs (post-Wick, incl. old-tier Q) vs newborn rows
     ("Ri2.0", "Ri=2.0"), ("Rn2.0", "Rn=2.0"),
+    # D on dead ROWS only (the corrector's d21e stays exact for live rows)
+    ("Dr2.5", "Dr=2.5"), ("Dr3.0", "Dr=3.0"), ("Dr2.0", "Dr=2.0"),
+    ("safe-r", "R=2.0,Hd=3.0,Dr=3.0"), ("aggr-r", "R=2.0,Hd=2.5,Dr=2.5"),
+    ("lean-r", "R=2.5,Hd=2.5,Dr=2.5"),
 ]
 
 

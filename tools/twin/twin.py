@@ -349,7 +349,9 @@ ARMS = {
          "        _MASK['stats'].append(_st)\n"),
         ("        D22 = ((metric / 6.0) * (dG[:, None] + dG[None, :])) * off_mask\n",
          "        _D21c = D21\n"
-         "        if _mD is not None:\n"
+         "        if _mD is not None and _MASK.get('Drows'):\n"
+         "            D21 = D21 * _mD[:, None]\n"
+         "        elif _mD is not None:\n"
          "            D21 = D21 * (_mD[:, None] * _mD[None, :])\n"
          "            if not _MASK.get('Dfull'):\n"
          "                _D21c = D21\n"
@@ -411,7 +413,7 @@ def parse_mask(spec):
         #   Hw  W only (diagnostic)       Hs   Sl only (diagnostic)
         hmodes = {"Hk": "k", "Hkh": "kh", "Hd": "d", "Hw": "w", "Hs": "s"}
         rparts = {"Ri": "i", "Rn": "n"}     # R on inherited legs only / newborn rows only
-        if k not in ("R", "H", "D", "Dc", *hmodes, *rparts):
+        if k not in ("R", "H", "D", "Dc", "Dr", *hmodes, *rparts):
             raise SystemExit(f"--mask: unknown role {k}")
         if k in rparts:
             k, out["Rpart"] = "R", rparts[k]
@@ -419,6 +421,8 @@ def parse_mask(spec):
             k, out["Hmode"] = "H", hmodes[k]
         if k == "Dc":            # diagnostic: the corrector's d21e reads the UNMASKED D21
             k, out["Dfull"] = "D", True
+        if k == "Dr":            # dead ROWS of D21 only: every live row's d21e stays exact
+            k, out["Drows"] = "D", True
         out[k] = float(v)
     return out
 
