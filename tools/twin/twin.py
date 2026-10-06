@@ -600,7 +600,7 @@ def cmd_d8bprep(a):
 def cmd_train(a):
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
-    tw = Twin(Path(a.cand))
+    tw = Twin(Path(a.cand), arm=a.arm)
     names = TRAINABLE[a.stage]
     params = {k: tw.leaf(k).clone().requires_grad_(True) for k in names}
     if a.init:
