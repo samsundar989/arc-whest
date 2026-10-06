@@ -166,6 +166,19 @@ def argsort(x):
     return _t.argsort(x)
 
 
+def take(x, idx, axis=0):
+    """numpy.take with an integer index tensor (P2 compaction gathers)."""
+    return _t.index_select(x, axis, idx.long())
+
+
+def pad(x, widths):
+    """numpy.pad (constant zero) with numpy's per-axis ((lo, hi), ...) order."""
+    flat = []
+    for lo, hi in reversed(widths):
+        flat += [int(lo), int(hi)]
+    return _t.nn.functional.pad(x, flat)
+
+
 def matmul(a, b):
     return _t.matmul(a, b)
 

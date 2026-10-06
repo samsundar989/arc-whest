@@ -55,6 +55,10 @@ CONFIGS = {
     "safe-r R2.0/Hd3.0/Dr3.0": {"R": 2.0, "H": 3.0, "Hk": 1, "D": 3.0, "Dr": 1},
     "aggr-r R2.0/Hd2.5/Dr2.5": {"R": 2.0, "H": 2.5, "Hk": 1, "D": 2.5, "Dr": 1},
     "lean-r R2.5/Hd2.5/Dr2.5": {"R": 2.5, "H": 2.5, "Hk": 1, "D": 2.5, "Dr": 1},
+    # no H: R and row-only D keep the uniform lineage width (cheap to build)
+    "rd R2.0/Dr2.5": {"R": 2.0, "D": 2.5, "Dr": 1},
+    "rd3 R2.0/Dr3.0": {"R": 2.0, "D": 3.0, "Dr": 1},
+    "rdl R2.5/Dr2.5": {"R": 2.5, "D": 2.5, "Dr": 1},
 }
 
 

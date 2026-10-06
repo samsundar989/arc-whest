@@ -326,6 +326,7 @@ ARMS = {
         ('    w = _wick(mu_pre, sigma, alpha, table, dtype, const["wick"])\n',
          '    w = _wick(mu_pre, sigma, alpha, table, dtype, const["wick"])\n'
          "    _mR = _mH = _mS = _mD = None\n"
+         "    _kz = 1.0\n"
          "    if _MASK is not None and not last_layer:\n"
          "        if _MASK.get('R'):\n"
          "            _mR = _mask_keep(alpha, _MASK['R'], 'dead', dtype)\n"
@@ -367,9 +368,14 @@ ARMS = {
          "            D21 = D21 * _mD[:, None]\n"
          "        elif _mD is not None:\n"
          "            D21 = D21 * (_mD[:, None] * _mD[None, :])\n"
-         "            if not _MASK.get('Dfull'):\n"
-         "                _D21c = D21\n"
+         "        if _mD is not None and not _MASK.get('Dfull'):\n"
+         "            _D21c = D21\n"
+         "        if _mD is not None and _MASK.get('Dzero'):\n"
+         "            _kz = _mD\n"
          "        D22 = ((metric / 6.0) * (dG[:, None] + dG[None, :])) * off_mask\n"),
+        # Dz: the corrector's delta is zeroed on the D-dropped rows
+        ("        mu_out = mu_out + _corr_delta(\n",
+         "        mu_out = mu_out + _kz * _corr_delta(\n"),
         # the corrector's d21e feature reads _D21c: masked D21 unless `Dc` (diagnostic)
         ('            layer_index, const["corr"], mu_pre, sigma, D3, D4, W,\n'
          "            None if last_layer else D21, mu, mu_out, n, dtype)\n",
@@ -430,7 +436,7 @@ def parse_mask(spec):
         #   Hw  W only (diagnostic)       Hs   Sl only (diagnostic)
         hmodes = {"Hk": "k", "Hkh": "kh", "Hd": "d", "Hw": "w", "Hs": "s"}
         rparts = {"Ri": "i", "Rn": "n"}     # R on inherited legs only / newborn rows only
-        if k not in ("R", "H", "D", "Dc", "Dr", *hmodes, *rparts):
+        if k not in ("R", "H", "D", "Dc", "Dr", "Dz", *hmodes, *rparts):
             raise SystemExit(f"--mask: unknown role {k}")
         if k in rparts:
             k, out["Rpart"] = "R", rparts[k]
@@ -440,6 +446,8 @@ def parse_mask(spec):
             k, out["Dfull"] = "D", True
         if k == "Dr":            # dead ROWS of D21 only: every live row's d21e stays exact
             k, out["Drows"] = "D", True
+        if k == "Dz":            # Dr + no corrector delta on the dropped rows (d21e unknown)
+            k, out["Drows"], out["Dzero"] = "D", True, True
         out[k] = float(v)
     return out
 

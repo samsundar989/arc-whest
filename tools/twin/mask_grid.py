@@ -47,6 +47,13 @@ GRID = [
     ("aggr-rK", "R=2.0,Hd=2.5,Dr=2.5,K=" + str(KT / "aggr-r_m32.json")),
     ("safe-rK", "R=2.0,Hd=3.0,Dr=3.0,K=" + str(KT / "safe-r_m32.json")),
     ("lean-rK", "R=2.5,Hd=2.5,Dr=2.5,K=" + str(KT / "lean-r_m32.json")),
+    # after the Dr fix (the corrector now reads the masked D21 in every D mode) + Dz
+    ("Dz2.5", "Dz=2.5"), ("Dz3.0", "Dz=3.0"),
+    ("rd", "R=2.0,Dr=2.5"), ("rd3", "R=2.0,Dr=3.0"),
+    ("rdz", "R=2.0,Dz=2.5"), ("rdz3", "R=2.0,Dz=3.0"),
+    ("rdK", "R=2.0,Dr=2.5,K=" + str(KT / "rd_m32.json")),
+    ("rdzK", "R=2.0,Dz=2.5,K=" + str(KT / "rd_m32.json")),
+    ("aggr-z", "R=2.0,Hd=2.5,Dz=2.5"),
 ]
 
 
