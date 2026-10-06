@@ -59,6 +59,9 @@ CONFIGS = {
     "rd R2.0/Dr2.5": {"R": 2.0, "D": 2.5, "Dr": 1},
     "rd3 R2.0/Dr3.0": {"R": 2.0, "D": 3.0, "Dr": 1},
     "rdl R2.5/Dr2.5": {"R": 2.5, "D": 2.5, "Dr": 1},
+    "r15dz": {"R": 1.5, "D": 2.5, "Dr": 1}, "r175dz": {"R": 1.75, "D": 2.5, "Dr": 1},
+    "r225dz": {"R": 2.25, "D": 2.5, "Dr": 1}, "rdz225": {"R": 2.0, "D": 2.25, "Dr": 1},
+    "rdz275": {"R": 2.0, "D": 2.75, "Dr": 1}, "rdz20": {"R": 2.0, "D": 2.0, "Dr": 1},
 }
 
 
@@ -67,7 +70,10 @@ def fractions(stats, cfg, depth=16):
     by_l = {s["l"]: s for s in stats}
 
     def dead(l, t):
-        return by_l[l][f"dead{t:.1f}"] if l in by_l else 0.0
+        if l not in by_l:
+            return 0.0
+        s = by_l[l]
+        return s[f"dead{t:.2f}"] if f"dead{t:.2f}" in s else s[f"dead{t:.1f}"]
 
     def dec(l, t):
         return by_l[l][f"dec{t:.1f}"] if l in by_l else 0.0

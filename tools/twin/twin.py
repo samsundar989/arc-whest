@@ -361,6 +361,8 @@ ARMS = {
          "        for _t in (2.0, 2.5, 3.0, 3.5):\n"
          "            _st['dead%.1f' % _t] = float((alpha < -_t).sum()) / n\n"
          "            _st['dec%.1f' % _t] = float((alpha * alpha > _t * _t).sum()) / n\n"
+         "        for _t in (1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0):\n"
+         "            _st['dead%.2f' % _t] = float((alpha < -_t).sum()) / n\n"
          "        _MASK['stats'].append(_st)\n"),
         ("        D22 = ((metric / 6.0) * (dG[:, None] + dG[None, :])) * off_mask\n",
          "        _D21c = D21\n"
