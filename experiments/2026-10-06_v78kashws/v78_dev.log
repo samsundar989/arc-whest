@@ -1,0 +1,30 @@
+[ev] estimator_k3_v78_kashws.py on DEV n=100
+[ev] cost: 424,325,247,737 FLOPs, 21,082 ops, peak RSS 2.69 GiB -> budget 6.7 GiB/worker
+  4 workers x 2 BLAS threads over 100 nets ...
+[ev] accuracy: 1156.4 s, raw MSE 2.273284e-08
+
+  raw MSE            2.273284e-08   (label noise floor at layer 16 ~7.7e-11)
+  FLOPs / MLP        424,325,247,737   = 0.19296 x 2^41
+  op calls           21,082
+  materializations   0
+  adjusted (panel)   4.386546e-09
+  PROJECTED PUBLIC   4.225959e-09   (÷ 1.038)
+  paired vs estimator_k3_v76_kasws:  gain 1.0595×, Δ +2.6096e-10, t95 [+2.5026e-10, +2.7166e-10], wins 100/100
+    (geometric 1.0596× — diagnostic only, no authority over an outcome)
+
+  PLAN §5 gates
+    FAIL  DEV projected vs best graded     better than 4.1871e-09             4.2260e-09 = -0.93% better
+    PASS  op calls                         ≤ 26,000                           21,082
+    ok    projected server wall (noisy day, A policy) ≤ 115 s                            102.8 s (quiet day 87.5 s)
+    PASS  setup                            < 2 s                              0.00 s
+    PASS  scalar materializations          0                                  0
+    PASS  failed nets on panel             0                                  0
+    PASS  projected server residual        ≤ 0.33 s (D7 finals bound)         0.234 s (1.71× headroom vs the 0.4 s cliff)
+    PASS  full DEV-100 panel               dev, n = 100                       dev, n = 100
+    PASS  paired vs incumbent              --baseline given                   estimator_k3_v76_kasws
+    PASS  WSL RLIMIT_AS 8 GiB gate         PASS on candidate SHA256 (--mem)   PASS VmPeak 4687 MiB; source hash matches
+
+  NOT ACCEPTED — gated or incomplete; not submittable
+
+  RESULTS.md row:
+  | 2026-10-06 | `estimator_k3_v78_kashws.py` | `6b3db2a5` | DEV | 2.273284e-08 | 0.19296 | 21,082 | 27.047 s (local) → 87.5 s proj | 2755 MiB | **4.2260e-09** | PENDING | 1.0595× vs estimator_k3_v76_kasws (Δ +2.610e-10, t95 [+2.503e-10, +2.717e-10]) | 100/100 |  |
