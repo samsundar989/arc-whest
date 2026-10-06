@@ -158,7 +158,7 @@ def main():
         cfg = CONFIGS[a.ktab_cfg]
         R, A, M, D, _ = zip(*[fractions(v, cfg) for v in st.values()])
         def tab(fr):                                  # nearest multiple of --mult, <= N
-            med = np.median(np.array(fr) * N, axis=0)
+            med = np.percentile(np.array(fr) * N, a.q, axis=0)
             return [int(min(N, max(a.mult, round(m / a.mult) * a.mult))) for m in med]
         K = {}
         if "R" in cfg:
@@ -168,7 +168,7 @@ def main():
         if "D" in cfg:
             K["D"] = tab(D)
         Path(a.ktab_out).write_text(json.dumps({"config": a.ktab_cfg, "stats": a.stats,
-                                                "rule": f"median kept count, nearest {a.mult}",
+                                                "rule": f"q{a.q:g} kept count, nearest {a.mult}",
                                                 "K": K}, indent=1))
         print(json.dumps(K))
         return

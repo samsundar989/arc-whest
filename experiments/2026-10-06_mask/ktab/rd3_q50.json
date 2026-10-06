@@ -1,7 +1,7 @@
 {
  "config": "rd3 R2.0/Dr3.0",
  "stats": "experiments/2026-10-06_mask/grid/fit_ctl.json",
- "rule": "median kept count, nearest 32",
+ "rule": "q50 kept count, nearest 32",
  "K": {
   "R": [
    1024,
