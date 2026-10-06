@@ -54,6 +54,11 @@ GRID = [
     ("rdK", "R=2.0,Dr=2.5,K=" + str(KT / "rd_m32.json")),
     ("rdzK", "R=2.0,Dz=2.5,K=" + str(KT / "rd_m32.json")),
     ("aggr-z", "R=2.0,Hd=2.5,Dz=2.5"),
+    # K-table quantile (fixed-K top-K costs ~1.1 pt over thresholds at the median)
+    ("rdzK75", "R=2.0,Dz=2.5,K=" + str(KT / "rd_q75.json")),
+    ("rdzK90", "R=2.0,Dz=2.5,K=" + str(KT / "rd_q90.json")),
+    ("rdz3K50", "R=2.0,Dz=3.0,K=" + str(KT / "rd3_q50.json")),
+    ("rdz3K75", "R=2.0,Dz=3.0,K=" + str(KT / "rd3_q75.json")),
 ]
 
 
