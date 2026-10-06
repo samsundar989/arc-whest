@@ -2520,3 +2520,31 @@ changes each lineage's width, which the wide layout does not allow. Real flopsco
   modeled 0.883), 23,475 ops, 0 materializations.
 - **Twin parity** (v75 itself vs v73 + top-K mask `R=2.0,Dz=2.5,K=rd_m32`): 5.4e-4 / 8.2e-5
   relative on VAL nets 900/901.
+
+**R decomposition** (CPU twin, job 2407; Ri = inherited legs only after the Wick scale, incl.
+old-tier Q; Rn = the newborn's A_L/Z/Y rows only): Ri2.0 **+2.27 %**, Rn2.0 +0.86 %, against
+R2.0 +0.90 % with both. The parts are not additive: masking only the inherited rows is worse
+than masking both. A newborn row and its transported ancestors evidently have to agree
+about which rows exist.
+
+**Refit (S3 stage, lr 3e-4) cannot beat the control on converged params.** The unmasked control
+(job 2414) went 2.2130e-08 → 2.3639e-08 (+6.8 %) at step 28. That is the same spike-then-recover
+as the Sep 28 continued-S3 run S3c (+7 % at step 28, back to init by 84, early stop). The masked
+safe-d run (D two-sided) went +8.2 % → +7.8 % at step 28. Both refits were cancelled: with Dz the
+mask-induced shift is ≤ 1–3 %, and this recipe's noise is larger than that. A corrector-only,
+lower-lr refit on the compact chain is the remaining option.
+
+**Fixed keep counts (variant A), quantile of the FIT-100 kept count, nearest 32** (twin,
+VAL-100, R2.0 + Dz2.5; F = modeled):
+
+| table | Δ raw | F | score factor (F × raw) |
+|---|---:|---:|---:|
+| thresholds (per net) | +1.57 % | 0.871 | 0.885 (not shippable without materializations) |
+| q50 | +2.72 % | 0.883 | 0.907 |
+| q75 | +1.92 % | 0.891 | 0.908 |
+| q90 | +1.08 % | 0.898 | 0.908 |
+| R2.0 + Dz3.0, q75 | +1.17 % | 0.905 | 0.916 |
+
+The score is flat in the quantile: keeping more neurons buys back what it costs. (The first
+q75/q90 tables were silently equal to q50 because the writer ignored `--q`. They are fixed and
+the stale results moved aside.)
