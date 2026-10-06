@@ -1,0 +1,80 @@
+{
+ "N": 100000000,
+ "n": 5,
+ "rows": [
+  {
+   "i": 0,
+   "name": "logan-fitzgerald",
+   "mse_final": 8.506572346935542e-10,
+   "floor_ours_final": 7.867575878845015e-10,
+   "floor_org_final": 7.867601418567388e-11,
+   "ratio_final": 0.9829260530891393,
+   "mse_l1_vs_exact": 7.310253487165746e-09,
+   "floor_ours_l1": 6.812390768337789e-09,
+   "ratio_l1": 1.0730819378626801,
+   "ratio_all_layers": 1.0428553201197346
+  },
+  {
+   "i": 1,
+   "name": "william-graves",
+   "mse_final": 9.634131514769763e-10,
+   "floor_ours_final": 8.599127118239561e-10,
+   "floor_org_final": 8.598799810004777e-11,
+   "ratio_final": 1.0185140378575035,
+   "mse_l1_vs_exact": 6.878547142722965e-09,
+   "floor_ours_l1": 6.824048672246988e-09,
+   "ratio_l1": 1.0079862370703214,
+   "ratio_all_layers": 1.0103162751350803
+  },
+  {
+   "i": 2,
+   "name": "raymond-barnes",
+   "mse_final": 1.1941164224847465e-09,
+   "floor_ours_final": 9.646434600858022e-10,
+   "floor_org_final": 9.646568412457116e-11,
+   "ratio_final": 1.1253474055897905,
+   "mse_l1_vs_exact": 6.4526607908863475e-09,
+   "floor_ours_l1": 6.825279368779322e-09,
+   "ratio_l1": 0.9454061060712865,
+   "ratio_all_layers": 1.0726606628214288
+  },
+  {
+   "i": 3,
+   "name": "steven-rice",
+   "mse_final": 7.330965720618191e-10,
+   "floor_ours_final": 8.699232765741863e-10,
+   "floor_org_final": 8.699114696662113e-11,
+   "ratio_final": 0.7661046317487724,
+   "mse_l1_vs_exact": 6.4018497401217e-09,
+   "floor_ours_l1": 6.826955518022152e-09,
+   "ratio_l1": 0.9377312805425149,
+   "ratio_all_layers": 0.8899325557254888
+  },
+  {
+   "i": 4,
+   "name": "sarah-kelley",
+   "mse_final": 8.205258216410344e-10,
+   "floor_ours_final": 7.1847133619303e-10,
+   "floor_org_final": 7.184662918899353e-11,
+   "ratio_final": 1.0382224086787764,
+   "mse_l1_vs_exact": 7.227569498346696e-09,
+   "floor_ours_l1": 6.8085343440983e-09,
+   "ratio_l1": 1.0615455739915036,
+   "ratio_all_layers": 1.106722490991889
+  }
+ ],
+ "ratio_final": {
+  "mean": 0.9862229073927964,
+  "se": 0.05981856557961033
+ },
+ "ratio_l1_exact": {
+  "mean": 1.0051502271076613,
+  "se": 0.028211584307801487
+ },
+ "ratio_all_layers": {
+  "mean": 1.0244974609587243,
+  "se": 0.03723337234417016
+ },
+ "pooled_final_mse": 9.12361840471626e-10,
+ "pooled_floor_sum": 9.239351690254767e-10
+}

@@ -1,0 +1,52 @@
+{
+ "whestbench": "?",
+ "numpy": "2.2.6",
+ "rows": [
+  {
+   "i": 0,
+   "name": "logan-fitzgerald",
+   "mlp_seed": 6319981554997072999,
+   "whestbench_bitexact": true,
+   "numpy_bitexact": true,
+   "estimator_seed_match": true,
+   "sha256": "d524e662eca3d117e9ba164fc3ae51a790dd675c585914a895ec69725fd880d0"
+  },
+  {
+   "i": 1,
+   "name": "william-graves",
+   "mlp_seed": 2392109381927064353,
+   "whestbench_bitexact": true,
+   "numpy_bitexact": true,
+   "estimator_seed_match": true,
+   "sha256": "41f9a2a1d715abfc9f0ca535b515fb0aa0ae0edda0f022b3f76d61abfc69ae54"
+  },
+  {
+   "i": 2,
+   "name": "raymond-barnes",
+   "mlp_seed": 4030325997523501402,
+   "whestbench_bitexact": true,
+   "numpy_bitexact": true,
+   "estimator_seed_match": true,
+   "sha256": "fa27cbef6ca4fd7bcc9f268412d5007b336253cbe45c69f20c8b5d91afbc9220"
+  },
+  {
+   "i": 3,
+   "name": "steven-rice",
+   "mlp_seed": 6959524404880716684,
+   "whestbench_bitexact": true,
+   "numpy_bitexact": true,
+   "estimator_seed_match": true,
+   "sha256": "0945d215cd8af51b84b9549f3eba74403ebe735279ad8f550cfbb67b0a64a23b"
+  },
+  {
+   "i": 4,
+   "name": "sarah-kelley",
+   "mlp_seed": 3958198382245770826,
+   "whestbench_bitexact": true,
+   "numpy_bitexact": true,
+   "estimator_seed_match": true,
+   "sha256": "1c95727081303ffed879f1962aa7e48dcdd250ce0cf1db3485233d43d69fa87d"
+  }
+ ],
+ "verdict": "BIT-IDENTICAL"
+}
