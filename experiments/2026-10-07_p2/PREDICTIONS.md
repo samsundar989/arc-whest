@@ -20,3 +20,12 @@ missing families' mean effect, the corrector targets the residual, and our κ4 (
 a crude additive template, so the F3 family is carried with the wrong shape.
 
 Kill (handoff): full set after refit better than −2 % raw on VAL fails ⇒ record and stop.
+
+## P2.2 — gain-mode κ4 (twin, VAL-100; written 2026-10-06 23:05 UTC, before any run)
+| arm | strategist | worker |
+|---|---|---|
+| (a) D22 product template, β 0.7, unrefit | — | −0.5 % to +2 % raw (layers 1–4 obey the law weakly; β 0.7 is too big there) |
+| (b) + Q31 template, keep / drop q31 modes, unrefit | — | within ±1 % of (a); drop slightly worse |
+| (c) blend γ 0.35, unrefit | — | +0 to +2 % (adds κ4 on top of an already-fitted slice) |
+| best arm after refit (β or γ per layer learned) | −2 to −8 % raw | −1 to −3 % raw [35 % that it is ≥ 2 %] |
+Kill (handoff): best arm after refit better than −1 % fails ⇒ record and stop.
