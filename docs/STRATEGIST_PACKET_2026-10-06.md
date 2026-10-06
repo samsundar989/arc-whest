@@ -76,3 +76,8 @@ reality is F/B ≈ 0.180 at +2.6 %, about 3.95e-9. Three reasons, all measured:
 
 The next lever, which the masks cannot reach, is structural: the transport and D21 readout
 still run at ~0.8 n on their inner dimension.
+
+**Night:** v77_kash graded **3.9596e-9** (#334487; projected 3.9389e-9, +0.53 %): new best,
+−14.3 % vs this morning's v73. v78 (its block-40 B, projected 4.226e-9, all gates) waits for
+the Oct 7 A/B slot. A corrector-only refit (lr 1e-4) gained −0.01 %: refitting is closed. Hd
+threshold sweep: 2.5 is optimal (2.0 → score 0.873, 1.5 → 1.075 vs 0.861).

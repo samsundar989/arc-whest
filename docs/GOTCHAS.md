@@ -1922,3 +1922,17 @@ should declare `--ram 40` or use the export.
 (2026-09-28, jobs 2319/2325). A probe that saved `Path(__file__).parent / "x.json"` wrote
 into `~/.local/state/gpuq/snapshots/<id>/job-<id>/...` and the live repo got nothing; copy
 back from there, or write to an absolute repo path (`C:\Users\samsu\Documents\arc-whest\...`).
+
+## 2026-10-06 — decided-neuron pruning (Lane P): four traps
+
+1. **A compact inner dimension loses a Strassen level.** With `_STRASSEN_MIN_BLOCK = 32`, only
+   width 1024 gets the 5th level. K = 992 then costs 4.4 % MORE than 1024. Compact chains ship
+   block 20 (A) or 40 (B); see `experiments/2026-10-06_mask/strassen_probe.json`.
+2. **The mean corrector reads `d21e = rowsum(D21²)/σ⁴`.** Any D21 mask changes that feature:
+   two-sided masks cost +7–10 % raw through it alone. Ship row-only D plus no correction on
+   the dropped rows (Dz). A twin diagnostic that forgets to feed the masked D21 to the
+   corrector measures an unservable chain (this happened: commit `d36833f`, voided).
+3. **Gathers bill 8 FLOPs per output element**, not 4. Selection (`argsort`) and `take` bill 0
+   materializations. Scatter-back = zero-pad + `take` (never assign into an array).
+4. **The `wall_class` law classes any block < 64 as leaf 32.** Block 40 builds are over-projected
+   by ~45 %. Use a local alternating A/B against a parent with a measured server median.
