@@ -104,3 +104,32 @@ The transfer to v73 is NOT automatic, and the reason is structural:
 cached per-net DEV MSE (`m2_mini1024.json`): if v73 already beats ARC-b by more than ~16 %,
 its surrogates likely capture much of the family, and the prototype's expected gain shrinks
 accordingly.
+
+## 5. Transfer check and pricing (2026-10-06, later)
+
+**ARC at full width on organizer DEV nets** (16 mini nets, n = 1024, organizer N = 1e9 labels;
+`m2_mini1024.json`): factored SIMPLE (a) 3.93e-8, factored AUGMENT (b) **1.79e-8**, v73 2.32e-8
+(cached DEV preds). b beats v73 raw on 16/16 nets (v73 is 29 % ± 6 % worse); c ≈ b × 0.835 ≈
+1.50e-8. This is known in kind (CLAIMS_LEDGER #39, the d8b README's "k3af teacher 1.8023e-8 on
+mini-8"): AUGMENT's 8n-column lineages cost ~8× and lose on SCORE. It does mean v73 sits
+between SIMPLE and AUGMENT on accuracy, so the dropped family is not obviously "already
+absorbed" — the gap to b alone is 23 %.
+
+**Where E21b would land in v73 and what it costs.** ARC zeroes κ3's repeated entries before
+the (2,1,1) → κ4-core projection (`factor_k3.py:502-505`), so E21b writes only the
+OFF-DIAGONAL κ4 core B_jk ∝ W11_j W21_k Σ_i W22_i C_ik κ3_ijk (j ≠ k) — the part v73
+replaces with the memoryless surrogate λ_l·C_off (its per-neuron core g_out, `:4229-4233`,
+is the r = 1 projection's diagonal and has no K211 term to extend). Computing B from v73's
+tower needs κ3 contracted with a vector (rank-1 C = s v vᵀ → c = W22 ⊙ v): for every carried
+lineage that is `M diag(Aᵀc) Mᵀ`-type work, i.e. at least one (n, kn) @ (kn, n) product per
+layer. At k n ≈ 5n that is ≈ 1.6e11 FLOPs over 15 layers before Strassen, **≈ +25–35 % of
+v73's 4.72e11** — and the E family only works as a set, so E3/E21a add similar work. Under
+PLAN §1's marginal rule +30 % FLOPs needs ≥ 23 % lower raw; the full ARC G_drop (16 %) would
+not pay even if it transferred completely. **The exact form fails the cost bar.**
+
+**What could pay.** The youngest lineage has M = I, so its contraction with c is O(n²)
+elementwise work — essentially free. Next measurement (reference-side, before any twin
+work): implement E21b in ARC's FACTORED path (validated against unfactored d+E21b), then
+restrict it to the most recently born factor columns, and read what share of the 13–16 pp
+the young-only version keeps. GO to a v73 twin prototype only if young-only keeps ≥ ~1/3
+(≥ 5 % raw) — the handoff's ≥ 5 % raw at ≤ +5 % FLOPs bar.
