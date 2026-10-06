@@ -17,12 +17,17 @@ fresh_a|fresh_lock|fresh_d` (floor-subtracted absolutes, raw paired differences,
 log refusing a 4th read without `--i-am-designating`). FRESH-A/LOCK labels are on the queue
 behind Lane P; V4 (v73 vs v68_ws) is running on FRESH-D now, FRESH-A next.
 
-**M (dropped diagrams).** Factored AUGMENT drops exactly 4 of 91 terms: the covariance
-triangle T1 and three κ3 × edge terms (E3 top slice, E21a/E21b (2,1,1) analogues). Unfactored
+**M (dropped diagrams) — measured, GO by rule, CLOSED on cost.** Factored AUGMENT drops exactly
+4 of 91 terms: the covariance triangle T1 and three κ3 × edge terms (E3, E21a, E21b). Unfactored
 restricted to the kept terms reproduces factored to float32 rounding. On 8 nets per width,
-**G_drop = +26.6 % [16.5, 36.6] at n = 256 and +15.6 % [7.8, 23.5] at n = 512**, 8/8 wins each.
-T1 contributes ≈ 0; the κ3 × edge family carries all of it, but only as a set (E3 or E21a alone
-make it worse; E21b alone gives most). Strategist predicted 5–25 % with κ3 × edge dominant —
-right; I predicted 3 % — wrong. The trend is down (×0.59 per doubling), so the GO rule's "flat
-or growing" clause currently fails; n = 384 and 768 (n = 1024 does not fit in VRAM unfactored)
-are queued to settle it before the Oct 8 decision.
+**G_drop (final layer) = 26.6 / 18.6 / 15.6 / 16.8 % at n = 256 / 384 / 512 / 768**, 8/8 wins
+everywhere — flat from 384 on. T1 ≈ 0; the κ3 × edge set carries all of it (E21b alone ~80 %;
+E3 or E21a alone make it worse). Strategist's 5–25 % / κ3×edge call was right; mine (3 %) wrong.
+Two findings decide it: (1) on 16 DEV nets at n = 1024, ARC factored AUGMENT beats v73 raw 16/16
+(1.79e-8 vs 2.32e-8 — known in kind, CLAIMS #39: AUGMENT costs ~8×); (2) E21b lands in the
+OFF-DIAGONAL κ4 core, which v73 does not carry (memoryless λ·C_off). I wrote E21b in ARC's factored
+form (exact vs unfactored to 2.3e-13) and restricted it to recent κ3 births: last 1 / 2 / 3 layers
+keep 2.8 / 6.5 / 8.7 % (n = 512) and 2.5 / 5.6 / 8.0 % (n = 768) of the 13 %. In v73 any form also
+needs an n×n κ4-core transport (≈ +14 % FLOPs), so the best case is ≈ +14 % FLOPs for ≤ 2.8 % or
+≈ +27 % for ≤ 9 % — far below the ≥ 5 % at ≤ +5 % bar. **M3 = CLOSE**; write-up negative result
+(`docs/research/2026-10-06_laneM_report.md`). Moving to M4 (neighbor-feature corrector screen).
