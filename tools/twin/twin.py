@@ -287,7 +287,112 @@ ARMS = {
          "    _dl = mu_out - _mu_unc\n"
          "    cov_out = cov_out - fnp.diag(_dl * _mu_unc * 2.0 + _dl * _dl)\n"),
     ],
+    # HANDOFF 2026-10-06 Lane P, P1: decided-neuron masks on the v73 kappa3 path,
+    # accuracy only (nothing is compacted, so no FLOP is saved here). Inert while
+    # `_MASK` is None. alpha_l = mu_pre / sigma at the layer the mask is read.
+    #   R: rows i with alpha_l,i < -tau_R of every carried leg, after the Wick scale
+    #      (inherited: before the join, so Q is masked too) and of the newborn legs.
+    #      The newborn M = I is implicit and left alone (its transport is free).
+    #   H: newborn two-leg + hub columns j with |alpha_b,j| > tau_H (A_L[:, j], w2b_j,
+    #      cA_j, cB_j; e_b_j rides on A_L so its separable S21 row moves into the P2
+    #      residual); slice columns (sb_j, residual row j) only where alpha_b,j < -tau_H.
+    #   D: rows and columns i of D21 with alpha_l,i < -tau_D (no D21 at the last layer).
+    # mu, C and D3 are never masked.
+    "mask": [
+        ("def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n",
+         "_MASK = None\n\n\n"
+         "def _mask_keep(alpha, tau, mode, dtype):\n"
+         "    if mode == 'dead':\n"
+         "        return fnp.where(alpha < -tau, dtype(0.0), dtype(1.0))\n"
+         "    return fnp.where(alpha * alpha > tau * tau, dtype(0.0), dtype(1.0))\n\n\n"
+         "def _mask_rows(tw, k):\n"
+         "    c = k[:, None]\n"
+         "    tw.A_L = tw.A_L * c\n"
+         "    for _a in ('M', 'Z', 'Y', 'Q', 'F'):\n"
+         "        if getattr(tw, _a) is not None:\n"
+         "            setattr(tw, _a, getattr(tw, _a) * c)\n"
+         "    tw._legs = tw._p2 = tw._hub = tw._p3 = None\n"
+         "    return tw\n\n\n"
+         "def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n"),
+        ('    w = _wick(mu_pre, sigma, alpha, table, dtype, const["wick"])\n',
+         '    w = _wick(mu_pre, sigma, alpha, table, dtype, const["wick"])\n'
+         "    _mR = _mH = _mS = _mD = None\n"
+         "    if _MASK is not None and not last_layer:\n"
+         "        if _MASK.get('R'):\n"
+         "            _mR = _mask_keep(alpha, _MASK['R'], 'dead', dtype)\n"
+         "        if _MASK.get('H'):\n"
+         "            _mH = _mask_keep(alpha, _MASK['H'], 'abs', dtype)\n"
+         "            _mS = _mask_keep(alpha, _MASK['H'], 'dead', dtype)\n"
+         "        if _MASK.get('D'):\n"
+         "            _mD = _mask_keep(alpha, _MASK['D'], 'dead', dtype)\n"
+         "    _mA = _mS if _MASK is not None and _MASK.get('Hkeep') else _mH\n"
+         "    if _MASK is not None and _MASK.get('stats') is not None:\n"
+         "        _st = {'l': layer_index}\n"
+         "        for _t in (2.0, 2.5, 3.0, 3.5):\n"
+         "            _st['dead%.1f' % _t] = float((alpha < -_t).sum()) / n\n"
+         "            _st['dec%.1f' % _t] = float((alpha * alpha > _t * _t).sum()) / n\n"
+         "        _MASK['stats'].append(_st)\n"),
+        ("        D22 = ((metric / 6.0) * (dG[:, None] + dG[None, :])) * off_mask\n",
+         "        _D21c = D21\n"
+         "        if _mD is not None:\n"
+         "            D21 = D21 * (_mD[:, None] * _mD[None, :])\n"
+         "            if not _MASK.get('Dfull'):\n"
+         "                _D21c = D21\n"
+         "        D22 = ((metric / 6.0) * (dG[:, None] + dG[None, :])) * off_mask\n"),
+        # the corrector's d21e feature reads _D21c: masked D21 unless `Dc` (diagnostic)
+        ('            layer_index, const["corr"], mu_pre, sigma, D3, D4, W,\n'
+         "            None if last_layer else D21, mu, mu_out, n, dtype)\n",
+         '            layer_index, const["corr"], mu_pre, sigma, D3, D4, W,\n'
+         "            None if last_layer else _D21c, mu, mu_out, n, dtype)\n"),
+        ("        fac1 = w1e[:, None] * C11\n",
+         "        fac1 = w1e[:, None] * C11\n"
+         "        if _mH is not None:\n"
+         "            fac1 = fac1 * _mA[None, :]\n"
+         "            w2m = w2m * _mH\n"),
+        ("        S_sep = (e_b[:, None] * C11) * w1e[None, :]\n",
+         "        S_sep = (e_b[:, None] * C11) * w1e[None, :]\n"
+         "        if _mH is not None:\n"
+         "            S_sep = S_sep * _mA[:, None]\n"),
+        ("            resid = S21 - S_sep\n",
+         "            if _mH is not None:\n"
+         "                cA = cA * _mH\n"
+         "                cB = cB * _mH\n"
+         "            resid = S21 - S_sep\n"),
+        ("            if _PROTECT_FEED:\n",
+         "            if _mH is not None:\n"
+         "                e_b = e_b * _mA\n"
+         "                resid = resid * _mS[:, None]\n"
+         "                S3 = S3 * _mS\n"
+         "            if _PROTECT_FEED:\n"),
+        ("        adv = _wick_tower(w1t[:, None], adv)\n",
+         "        adv = _wick_tower(w1t[:, None], adv)\n"
+         "        if _mR is not None:\n"
+         "            adv = _mask_rows(adv, _mR)\n"),
+        ("    out_tw = _truncate(out_tw, gens, n)\n",
+         "    out_tw = _truncate(out_tw, gens, n)\n"
+         "    if _mR is not None:\n"
+         "        out_tw = _mask_rows(out_tw, _mR)\n"),
+    ],
 }
+
+
+def parse_mask(spec):
+    """'R=2.0,H=3.0,D=3.0' -> {'R': 2.0, 'H': 3.0, 'D': 3.0}; '' -> {}.
+
+    `Hk=tau` is H with the always-on columns' A_L kept as the carrier of e_b
+    (only w2b and the hubs are zeroed there); plain `H` drops A_L[:, j] for every
+    decided column and folds e_b's separable S21 row into the rank-4 P2 residual."""
+    out = {}
+    for part in filter(None, spec.split(",")):
+        k, v = part.split("=")
+        if k not in ("R", "H", "Hk", "D", "Dc"):
+            raise SystemExit(f"--mask: unknown role {k}")
+        if k == "Hk":
+            k, out["Hkeep"] = "H", True
+        if k == "Dc":            # diagnostic: the corrector's d21e reads the UNMASKED D21
+            k, out["Dfull"] = "D", True
+        out[k] = float(v)
+    return out
 
 
 def load_module(path: Path, name="_twin_candidate", arm="", raw=False):
@@ -460,17 +565,31 @@ def cmd_eval(a, tw=None, params=None, quiet=False):
     data = Data()
     rows = panel(a.panel)[: a.n or None]
     fin = []
+    mask = parse_mask(getattr(a, "mask", ""))
+    stats = {} if getattr(a, "mask_stats", False) else None
+    if mask or stats is not None:
+        assert hasattr(tw.mod, "_MASK"), "--mask needs --arm mask"
     with torch.no_grad():
         for split, i in rows:
             w, truth = data.net(split, i)
             set_subst(tw, getattr(a, "subst", ""), split, i)
+            if mask or stats is not None:
+                tw.mod._MASK = dict(mask, stats=[] if stats is not None else None)
             fin.append(float(mse_rows(tw.forward(w), truth)[-1]))
+            if stats is not None:
+                stats[f"{split}:{i}"] = tw.mod._MASK["stats"]
     r = {"panel": a.panel, "arm": getattr(a, "arm", ""), "n": len(fin),
          "raw_mse": float(np.mean(fin)), "per_net": fin}
+    if mask or stats is not None:
+        r["mask"] = mask
+        r["nets"] = [f"{s}:{i}" for s, i in rows]
+    if stats is not None:
+        r["stats"] = stats
     if getattr(a, "json", ""):
         Path(a.json).write_text(json.dumps(r))
     if not quiet:
-        print(json.dumps({k: v for k, v in r.items() if k != "per_net"}), flush=True)
+        print(json.dumps({k: v for k, v in r.items() if k not in ("per_net", "stats")}),
+              flush=True)
     return r
 
 
@@ -685,6 +804,9 @@ def main():
     ap.add_argument("--raw", action="store_true",
                     help="eval a file with baked-in gains: skip the twin's gain hooks")
     ap.add_argument("--json", default="", help="eval: write per-net results here")
+    ap.add_argument("--mask", default="", help="eval with --arm mask: 'R=2.0,H=3.0,D=3.0'")
+    ap.add_argument("--mask-stats", action="store_true",
+                    help="eval with --arm mask: log per-layer alpha kept fractions per net")
     ap.add_argument("--zero-scale", type=float, default=1e-2,
                     help="RMS assumed for a zero-initialised tensor's step size")
     ap.add_argument("--max-steps", type=int, default=0, help="stop after N steps (smoke)")
