@@ -52,7 +52,18 @@ if str(LOCAL_SIM) not in sys.path:
 os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
 
 PANEL_DIR = ROOT / "data" / "panels"
-PANELS = ("dev", "fit", "val", "holdout_legacy", "holdout")
+PANELS = ("dev", "fit", "val", "fresh_a", "fresh_lock", "fresh_d", "holdout_legacy",
+          "holdout")
+#: PLAN rev 18 §2. Nets minted by whestbench's own generator from reserved seeds
+#: (`tools/fresh/gen.py`), labelled by our GPU Monte Carlo at N = 1e8
+#: (`tools/fresh/mc.py`). Nothing has ever been fitted, selected or submitted on them.
+#:   FRESH-A     acceptance of canaries (paired vs incumbent). Never fit/select on it.
+#:   FRESH-LOCK  designation only, <= 3 logged reads (`tools/ev.py` enforces).
+#:   FRESH-D     calibration cross-check: d8b corpus nets 2048+8k, k<100 (never read by the
+#:               twin, which trains on 0-2047); other generator, other labeller
+#:               (`tools/fresh/fresh_d.py`). Same rules as FRESH-A.
+FRESH = ("fresh_a", "fresh_lock", "fresh_d")
+FRESH_SEEDS = ROOT / "experiments" / "2026-10-06_laneV" / "seeds.json"
 #: Files `--build` writes. `val` / `holdout_legacy` are views over them plus the
 #: pinned twin split; `holdout` is refused (see the module docstring).
 BUILT = ("dev", "fit", "holdout")
@@ -145,7 +156,32 @@ def train_indices() -> set:
     return set(twin_split()["train"]["indices"])
 
 
+def _load_fresh(panel: str) -> dict:
+    if not FRESH_SEEDS.exists():
+        raise SystemExit(f"fresh panels are not built ({FRESH_SEEDS}); "
+                         "run: python tools/fresh/gen.py --build")
+    if panel == "fresh_d":
+        p = FRESH_SEEDS.parent / "fresh_d.json"
+        if not p.exists():
+            raise SystemExit(f"FRESH-D is not built ({p}); run tools/fresh/fresh_d.py")
+        rec = json.loads(p.read_text(encoding="utf-8"))
+    else:
+        rec = json.loads(FRESH_SEEDS.read_text(encoding="utf-8"))["panels"][panel]
+    n = len(rec["seeds"])
+    purpose = {"fresh_a": "ACCEPTANCE (paired vs incumbent); never fitted or selected on",
+               "fresh_lock": "DESIGNATION LOCKBOX; <= 3 logged reads "
+                             "(experiments/fresh_lock_reads.jsonl)",
+               "fresh_d": "CALIBRATION cross-check (d8b ext 2048+8k); never fitted or selected on",
+               }[panel]
+    return {"panel": panel, "split": "fresh", "identity": "mlp_seed (reserved range)",
+            "indices": list(range(n)), "seeds": list(rec["seeds"]),
+            "names": [f"{panel}_{i:03d}" for i in range(n)],
+            "weight_sha256": list(rec["weight_sha256"]), "purpose": purpose}
+
+
 def load(panel: str) -> dict:
+    if panel in FRESH:
+        return _load_fresh(panel)
     if panel == "holdout":
         raise SystemExit(
             "--panel holdout is RETIRED (2026-09-27): data/panels/holdout.json is the "
@@ -218,6 +254,25 @@ def check() -> int:
     ok(len(set(legacy["indices"]) & tr) == 800,
        "HOLDOUT-LEGACY holds 800 TRAIN rows (why --panel holdout is refused)")
     ok(not set(fit["seeds"]) & set(legacy["seeds"]), "FIT and HOLDOUT-LEGACY seeds disjoint")
+    if FRESH_SEEDS.exists():
+        fa, fl = _load_fresh("fresh_a"), _load_fresh("fresh_lock")
+        organizer = set(dev["seeds"]) | full_seeds
+        lo, hi = json.loads(FRESH_SEEDS.read_text(encoding="utf-8"))["reserved_range"]
+        ok(len(fa["seeds"]) == 100 and len(fl["seeds"]) == 200, "FRESH-A 100 / FRESH-LOCK 200")
+        ok(all(lo <= s < hi for s in fa["seeds"] + fl["seeds"]),
+           f"fresh seeds inside the reserved range [{lo:,}, {hi:,})")
+        ok(not set(fa["seeds"]) & set(fl["seeds"]), "FRESH-A and FRESH-LOCK seeds disjoint")
+        ok(not (set(fa["seeds"]) | set(fl["seeds"])) & organizer,
+           "fresh seeds disjoint from DEV + TRAIN + VAL (every organizer mini/full seed)")
+        # The d8b TRAIN corpus needs no seed check: its nets come from a different
+        # generator (torch CPU Philox, seed 770000 + idx -- tools/twin/twin.py), so a
+        # numeric seed overlap would mean nothing and a weight collision is impossible.
+        fh = set(fa["weight_sha256"]) | set(fl["weight_sha256"])
+        ok(len(fh) == 300, "300 distinct fresh weight hashes")
+        ok(not fh & (set(dev["weight_sha256"]) | set(fit["weight_sha256"])),
+           "fresh weight hashes disjoint from DEV + FIT hashes")
+    else:
+        ok(False, f"fresh panels not built ({FRESH_SEEDS})")
     print("PANELS OK" if not bad else f"{bad} PANEL CHECK FAILURES")
     return bad
 

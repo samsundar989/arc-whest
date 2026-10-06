@@ -1,0 +1,140 @@
+{
+ "N": 100000000,
+ "n": 10,
+ "rows": [
+  {
+   "i": 0,
+   "name": "logan-fitzgerald",
+   "mse_final": 8.506572346935542e-10,
+   "floor_ours_final": 7.867575878845015e-10,
+   "floor_org_final": 7.867601418567388e-11,
+   "ratio_final": 0.9829260530891393,
+   "mse_l1_vs_exact": 7.310253487165746e-09,
+   "floor_ours_l1": 6.812390768337789e-09,
+   "ratio_l1": 1.0730819378626801,
+   "ratio_all_layers": 1.0428553201197346
+  },
+  {
+   "i": 1,
+   "name": "william-graves",
+   "mse_final": 9.634131514769763e-10,
+   "floor_ours_final": 8.599127118239561e-10,
+   "floor_org_final": 8.598799810004777e-11,
+   "ratio_final": 1.0185140378575035,
+   "mse_l1_vs_exact": 6.878547142722965e-09,
+   "floor_ours_l1": 6.824048672246988e-09,
+   "ratio_l1": 1.0079862370703214,
+   "ratio_all_layers": 1.0103162751350803
+  },
+  {
+   "i": 2,
+   "name": "raymond-barnes",
+   "mse_final": 1.1941164224847465e-09,
+   "floor_ours_final": 9.646434600858022e-10,
+   "floor_org_final": 9.646568412457116e-11,
+   "ratio_final": 1.1253474055897905,
+   "mse_l1_vs_exact": 6.4526607908863475e-09,
+   "floor_ours_l1": 6.825279368779322e-09,
+   "ratio_l1": 0.9454061060712865,
+   "ratio_all_layers": 1.0726606628214288
+  },
+  {
+   "i": 3,
+   "name": "steven-rice",
+   "mse_final": 7.330965720618191e-10,
+   "floor_ours_final": 8.699232765741863e-10,
+   "floor_org_final": 8.699114696662113e-11,
+   "ratio_final": 0.7661046317487724,
+   "mse_l1_vs_exact": 6.4018497401217e-09,
+   "floor_ours_l1": 6.826955518022152e-09,
+   "ratio_l1": 0.9377312805425149,
+   "ratio_all_layers": 0.8899325557254888
+  },
+  {
+   "i": 4,
+   "name": "sarah-kelley",
+   "mse_final": 8.205258216410344e-10,
+   "floor_ours_final": 7.1847133619303e-10,
+   "floor_org_final": 7.184662918899353e-11,
+   "ratio_final": 1.0382224086787764,
+   "mse_l1_vs_exact": 7.227569498346696e-09,
+   "floor_ours_l1": 6.8085343440983e-09,
+   "ratio_l1": 1.0615455739915036,
+   "ratio_all_layers": 1.106722490991889
+  },
+  {
+   "i": 5,
+   "name": "christopher-morales",
+   "mse_final": 7.649824679766695e-10,
+   "floor_ours_final": 7.328750293790515e-10,
+   "floor_org_final": 7.32888491955503e-11,
+   "ratio_final": 0.9489168248635176,
+   "mse_l1_vs_exact": 6.9609141706129275e-09,
+   "floor_ours_l1": 6.8288823447971895e-09,
+   "ratio_l1": 1.0193343242933934,
+   "ratio_all_layers": 1.0671229729128406
+  },
+  {
+   "i": 6,
+   "name": "cheryl-graham",
+   "mse_final": 7.183829898606864e-10,
+   "floor_ours_final": 6.148890219027491e-10,
+   "floor_org_final": 6.148789097003966e-11,
+   "ratio_final": 1.062104539922104,
+   "mse_l1_vs_exact": 6.3021456070563974e-09,
+   "floor_ours_l1": 6.820104440568147e-09,
+   "ratio_l1": 0.9240541199881389,
+   "ratio_all_layers": 0.9395239982723135
+  },
+  {
+   "i": 7,
+   "name": "renee-park",
+   "mse_final": 6.782978568415326e-10,
+   "floor_ours_final": 7.840016953656773e-10,
+   "floor_org_final": 7.84007893324418e-11,
+   "ratio_final": 0.7865212228359573,
+   "mse_l1_vs_exact": 6.629130824721289e-09,
+   "floor_ours_l1": 6.820720633856655e-09,
+   "ratio_l1": 0.9719106206777692,
+   "ratio_all_layers": 0.8906333812350418
+  },
+  {
+   "i": 8,
+   "name": "justin-johnson",
+   "mse_final": 8.800031565833943e-10,
+   "floor_ours_final": 7.002758393542738e-10,
+   "floor_org_final": 7.002605071845814e-11,
+   "ratio_final": 1.1424133419954405,
+   "mse_l1_vs_exact": 6.6253501477808065e-09,
+   "floor_ours_l1": 6.7988253569531544e-09,
+   "ratio_l1": 0.9744845322442449,
+   "ratio_all_layers": 1.1414983659626732
+  },
+  {
+   "i": 9,
+   "name": "christina-lopez",
+   "mse_final": 6.223625174069233e-10,
+   "floor_ours_final": 8.656188069181445e-10,
+   "floor_org_final": 8.655981042993095e-11,
+   "ratio_final": 0.6536195059076971,
+   "mse_l1_vs_exact": 6.851456441702037e-09,
+   "floor_ours_l1": 6.8145951753857984e-09,
+   "ratio_l1": 1.0054091645017127,
+   "ratio_all_layers": 0.7813861516721852
+  }
+ ],
+ "ratio_final": {
+  "mean": 0.95246899724887,
+  "se": 0.05187837855821534
+ },
+ "ratio_l1_exact": {
+  "mean": 0.9920943897243566,
+  "se": 0.015998753914633658
+ },
+ "ratio_all_layers": {
+  "mean": 0.9942652174848676,
+  "se": 0.03626077323638727
+ },
+ "pooled_final_mse": 8.225838191027335e-10,
+ "pooled_floor_sum": 8.6870996286937e-10
+}

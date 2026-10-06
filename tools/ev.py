@@ -1,6 +1,7 @@
 """THE evaluator. One candidate in, one RESULTS.md row out.
 
-    python tools/ev.py <candidate.py> [--panel dev|fit|val|holdout_legacy] [--n 100]
+    python tools/ev.py <candidate.py> [--panel dev|fit|val|fresh_a|fresh_lock|holdout_legacy]
+                       [--n 100]
                        [--baseline <file.py>] [--jobs K] [--note "..."]
 
 PLAN §4. There is one evaluator, one results table and one decision rule; this
@@ -107,6 +108,17 @@ BUDGET = 2 ** 41
 #: pessimistic again, which is the side this constant exists to err on.
 #: Change this and the matching block in RESULTS.md § Calibration TOGETHER.
 PUBLIC_FACTOR = 1.038
+#: FRESH score (floor-subtracted) / this = predicted public score. PLAN rev 18 §2:
+#: FRESH-A replaces DEV as the acceptance panel. Set 2026-10-06 from Lane V's V4 table
+#: (`docs/research/2026-10-06_laneV_report.md`): fresh / graded = 1.0177 (v73 FRESH-A),
+#: 1.0197 (v68_ws FRESH-A), 1.0186 / 1.0213 (FRESH-D), mean 1.0193. One factor for all
+#: three panels: they are draws from the same distribution. Recalibrate if a graded row
+#: deviates from its FRESH-A projection by > 2 %.
+FRESH_PUBLIC_FACTOR = {"fresh_a": 1.019, "fresh_lock": 1.019, "fresh_d": 1.019}
+#: FRESH-LOCK is the designation lockbox: every read is logged, and a fourth read
+#: is refused unless the reader says it is the designation read.
+FRESH_LOCK_LOG = ROOT / "experiments" / "fresh_lock_reads.jsonl"
+FRESH_LOCK_MAX_READS = 3
 #: SERVER WALL -- REFIT 2026-09-23 on nine graded runs (six candidates), using
 #: the per-net telemetry split the server reports: `flopscope_server_overhead_wall_s`
 #: (per op call) and `flopscope_server_kernel_wall_s` (the arithmetic itself).
@@ -414,6 +426,54 @@ def predictions(candidate: Path, panel: str, n: int, jobs: int,
     return preds, truth, meta
 
 
+def label_floors(panel: str, n: int) -> Optional[np.ndarray]:
+    """Per-net expected label-noise MSE at the scored layer, or None (organizer
+    panels: their N = 1e9 floor ~7.7e-11 is ~0.3% of raw and is not subtracted).
+
+    Fresh labels are our N = 1e8 Monte Carlo, whose floor (~7.7e-10, ~3.6% of raw)
+    must come off an ABSOLUTE number. It is common to both arms of a pair, so
+    paired differences are reported raw.
+    """
+    if panel not in panels.FRESH:
+        return None
+    sys.path.append(str(TOOLS / "fresh"))
+    import gen  # noqa: PLC0415
+    return np.array([gen.load_label(panel, i)["floor"][-1]
+                     for _s, i, _seed, _nm in panels.nets(panel, n)], dtype=np.float64)
+
+
+def fresh_lock_reads() -> List[dict]:
+    if not FRESH_LOCK_LOG.exists():
+        return []
+    return [json.loads(l) for l in FRESH_LOCK_LOG.read_text(encoding="utf-8").splitlines()
+            if l.strip()]
+
+
+def fresh_lock_gate(candidate: Path, baseline: Optional[Path], designating: bool,
+                    note: str) -> None:
+    """Log this FRESH-LOCK read; refuse a 4th unless it is the designation read.
+
+    A read is one ev.py invocation, cached or not -- a cached result still shows
+    the number to whoever ran it."""
+    prior = fresh_lock_reads()
+    if len(prior) >= FRESH_LOCK_MAX_READS and not designating:
+        raise SystemExit(
+            f"FRESH-LOCK has been read {len(prior)} times ({FRESH_LOCK_LOG}); the limit is "
+            f"{FRESH_LOCK_MAX_READS}. It exists to designate finals (PLAN rev 18 §2). "
+            "Pass --i-am-designating only for the designation read itself.")
+    FRESH_LOCK_LOG.parent.mkdir(parents=True, exist_ok=True)
+    entry = {"utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+             "read": len(prior) + 1, "candidate": candidate.name,
+             "candidate_sha256": sha256_file(candidate),
+             "baseline": baseline.name if baseline else None,
+             "baseline_sha256": sha256_file(baseline) if baseline else None,
+             "designating": bool(designating), "note": note}
+    with open(FRESH_LOCK_LOG, "a", encoding="utf-8") as fh:
+        fh.write(json.dumps(entry) + "\n")
+    print(f"[ev] FRESH-LOCK read {entry['read']} of {FRESH_LOCK_MAX_READS} logged "
+          f"-> {FRESH_LOCK_LOG}", flush=True)
+
+
 def per_net_mse(preds: np.ndarray, truth: np.ndarray) -> np.ndarray:
     """float32, as the grader computes it (`scoring.py`)."""
     p = np.asarray(preds, dtype=np.float32)
@@ -433,8 +493,11 @@ def cost(candidate: Path, panel: str = "dev", index: int = 0) -> Dict[str, float
     """FLOPs, op calls and scalar materializations on one net, f64 read-only.
 
     Runs in a subprocess so the real flopscope is imported in a process where
-    the shim has never been on the path.
+    the shim has never been on the path. FLOPs are net-independent, so a fresh
+    panel is costed on DEV net 0 (the cost worker reads organizer rows only).
     """
+    if panel in panels.FRESH:
+        panel, index = "dev", 0
     out = subprocess.run(
         [sys.executable, str(TOOLS / "_cost_worker.py"), str(candidate), panel, str(index)],
         cwd=str(ROOT), capture_output=True, text=True, encoding="utf-8", errors="replace")
@@ -562,7 +625,7 @@ def gate_table(r: Dict, best_graded: float) -> List[tuple]:
     return [
         # PLAN rev 13 decision 1 (Samuel, 2026-09-25): any projected improvement
         # over the best graded score qualifies; the 3% margin is retired.
-        ("DEV projected vs best graded", f"better than {best_graded:.4e}",
+        ("panel projected vs best graded", f"better than {best_graded:.4e}",
          f"{proj:.4e} = {better * 100:.2f}% better", better > 0.0),
         ("op calls", f"≤ {OP_CEILING:,}", f"{int(r['ops']):,}", r["ops"] <= OP_CEILING),
         # This absolute wall model is advisory only. PLAN rev 15 §5.8 also
@@ -585,11 +648,11 @@ def gate_table(r: Dict, best_graded: float) -> List[tuple]:
          f"{res_hi:.3f} s ({RESIDUAL_CLIFF_S / res_hi:.2f}× headroom vs the "
          f"{RESIDUAL_CLIFF_S} s cliff)",
          res_hi <= RESIDUAL_GATE_S),
-        # PLAN rev 15 §5 (2026-09-27): acceptance needs the full DEV-100 read,
-        # paired against the incumbent, and the memory gate on THIS hash. A run
-        # that skipped any of them is INCOMPLETE, never "all gates pass".
-        ("full DEV-100 panel", "dev, n = 100",
-         f"{r['panel']}, n = {r['n']}", r["panel"] == "dev" and r["n"] == 100),
+        # PLAN rev 18 §2 (2026-10-06): acceptance is read on FRESH-A (100 fresh
+        # nets), paired against the incumbent, with the memory gate on THIS hash.
+        # DEV-100 is still accepted until the Lane V calibration is merged.
+        ("full acceptance panel", "fresh_a (or dev), n = 100",
+         f"{r['panel']}, n = {r['n']}", r["panel"] in ("fresh_a", "dev") and r["n"] == 100),
         ("paired vs incumbent", "--baseline given",
          r.get("baseline_name") or "no baseline", bool(r.get("paired"))),
         ("WSL RLIMIT_AS 8 GiB gate", "PASS on candidate SHA256 (--mem)",
@@ -628,7 +691,15 @@ def evaluate(candidate: Path, panel: str, n: int, jobs: int, baseline: Optional[
     flops = float(c.get("flops", float("nan")))
     mult = multiplier(flops)
     scores = mse * mult
-    projected = float(scores.mean()) / PUBLIC_FACTOR
+    floors = label_floors(panel, n)
+    if floors is None:
+        abs_scores = scores
+        projected = float(scores.mean()) / PUBLIC_FACTOR
+    else:
+        # ABSOLUTE numbers are floor-subtracted (PLAN rev 18 §2); the paired
+        # statistic below uses `scores` -- the floor is common to both arms.
+        abs_scores = (mse - floors) * mult
+        projected = float(abs_scores.mean()) / FRESH_PUBLIC_FACTOR[panel]
 
     pair = None
     base_name = ""
@@ -656,6 +727,11 @@ def evaluate(candidate: Path, panel: str, n: int, jobs: int, baseline: Optional[
         "panel_label": panels.label(panel, n),
         "n": int(mse.size),
         "raw_mse": float(mse.mean()),
+        "label_floor": float(floors.mean()) if floors is not None else None,
+        "raw_mse_floor_free": float((mse - floors).mean()) if floors is not None else None,
+        "score_cv": float(np.std(abs_scores, ddof=1) / np.mean(abs_scores)),
+        "per_net_mse": [float(x) for x in mse],
+        "per_net_floor": [float(x) for x in floors] if floors is not None else None,
         "flops": flops,
         "multiplier": mult,
         "ops": float(c.get("ops", float("nan"))),
@@ -667,7 +743,7 @@ def evaluate(candidate: Path, panel: str, n: int, jobs: int, baseline: Optional[
         "projected_server_wall_noisy_s": projected_server_wall_s(
             flops, float(c.get("ops", float("nan"))), wall_class(candidate), noisy=True),
         "peak_rss_mib": c.get("peak_rss_mib") or pmeta.get("worker_peak_rss_mib"),
-        "adjusted_score_dev": float(scores.mean()),
+        "adjusted_score_dev": float(abs_scores.mean()),
         "projected_public": projected,
         "failed_nets": pmeta.get("failed_nets", []),
         "baseline_name": base_name,
@@ -682,12 +758,19 @@ def evaluate(candidate: Path, panel: str, n: int, jobs: int, baseline: Optional[
 
 def report(r: Dict, best_graded: float) -> None:
     print()
-    print(f"  raw MSE            {r['raw_mse']:.6e}   (label noise floor at layer 16 ~7.7e-11)")
+    if r.get("label_floor") is not None:
+        print(f"  raw MSE            {r['raw_mse']:.6e}   (our N = 1e8 labels; mean floor "
+              f"{r['label_floor']:.3e})")
+        print(f"  raw MSE floor-free {r['raw_mse_floor_free']:.6e}")
+    else:
+        print(f"  raw MSE            {r['raw_mse']:.6e}   (label noise floor at layer 16 ~7.7e-11)")
     print(f"  FLOPs / MLP        {r['flops']:,.0f}   = {r['multiplier']:.5f} x 2^41")
     print(f"  op calls           {r['ops']:,.0f}")
     print(f"  materializations   {r['materializations']:,.0f}")
     print(f"  adjusted (panel)   {r['adjusted_score_dev']:.6e}")
-    print(f"  PROJECTED PUBLIC   {r['projected_public']:.6e}   (÷ {PUBLIC_FACTOR})")
+    fac = FRESH_PUBLIC_FACTOR.get(r["panel"], PUBLIC_FACTOR)
+    print(f"  per-net score CV   {r['score_cv']:.3f}")
+    print(f"  PROJECTED PUBLIC   {r['projected_public']:.6e}   (÷ {fac})")
     if r["paired"]:
         p = r["paired"]
         print(f"  paired vs {r['baseline_name']}:  gain {p['arithmetic_gain']:.4f}×, "
@@ -745,6 +828,8 @@ def main(argv=None) -> int:
                     help="append the row to RESULTS.md")
     ap.add_argument("--note", default="")
     ap.add_argument("--quiet", action="store_true")
+    ap.add_argument("--i-am-designating", action="store_true",
+                    help="permit a FRESH-LOCK read beyond the 3-read limit (designation only)")
     a = ap.parse_args(argv)
 
     cand = Path(a.candidate)
@@ -763,6 +848,8 @@ def main(argv=None) -> int:
     if panels.trained_fraction(a.panel, a.n) > 0:
         print(f"[ev] WARNING: {panels.label(a.panel, a.n)} -- these nets are in the "
               f"twin's TRAIN set; this is not held-out evidence", flush=True)
+    if a.panel == "fresh_lock":
+        fresh_lock_gate(cand, base, a.i_am_designating, a.note)
     r = evaluate(cand, a.panel, a.n, a.jobs, base, a.force, not a.no_cost, a.quiet,
                  do_mem=a.mem)
     r["note"] = a.note

@@ -109,6 +109,16 @@ def main(argv) -> int:
 
     rd = _real_dataset()
 
+    def get_net(idx, split):
+        """(weights f32, all-layer truth) -- organizer row, or a fresh net rebuilt
+        from its reserved seed (sha256-checked) with our N = 1e8 MC label."""
+        if split == "fresh":
+            sys.path.append(str(ROOT / "tools" / "fresh"))
+            import gen  # noqa: PLC0415  numpy-only, safe under the shim
+            return gen.mint_checked(panel, idx), gen.load_label(panel, idx)["means"]
+        w, tr, _ = rd.get(idx, split, dtype=np.float32)
+        return w, tr
+
     spec = importlib.util.spec_from_file_location("_ev_candidate", cand)
     mod = importlib.util.module_from_spec(spec)
     sys.modules["_ev_candidate"] = mod
@@ -129,7 +139,7 @@ def main(argv) -> int:
     est = mod.Estimator()
     # The grader calls setup() once per submission, not per MLP.
     first_split, first_idx = rows[0][0], rows[0][1]
-    w0, truth0, _ = rd.get(first_idx, first_split, dtype=np.float32)
+    w0, truth0 = get_net(first_idx, first_split)
     depth, width = w0.shape[0], w0.shape[1]
     try:
         est.setup(_Ctx(width, depth, BUDGET, 0))
@@ -157,7 +167,7 @@ def main(argv) -> int:
         if k == 0:
             w, tr = w0, truth0
         else:
-            w, tr, _ = rd.get(idx, split, dtype=np.float32)
+            w, tr = get_net(idx, split)
         note(f"net {k + 1}/{len(rows)} (panel index {idx}) predicting")
         # The grader's weights are float64 and immutable. Reproduce both, so the
         # opening cast in the candidate takes the branch it takes on the server.
