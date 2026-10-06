@@ -1,10 +1,10 @@
 # Lane P2 predictions (written before each run)
 
-## P2.0.3 — v77 on FRESH-A (written 2026-10-06 22:40 UTC)
+## P2.0.3 — v77 on FRESH-A (written ~22:30 UTC while the eval, started 22:22, had produced no result)
 - Strategist: ≈ 4.03e-9 (graded 3.9596e-9 × 1.019).
 - Worker: 4.02–4.06e-9 floor-free; paired vs v73 ≈ −14 % score (graded −14.3 %).
 
-## P2.1 — dressed legs (twin, VAL-100 free-running; written 2026-10-06 22:45 UTC)
+## P2.1 — dressed legs (twin, VAL-100 free-running; written 2026-10-06 22:25 UTC)
 Baseline: v62_gb + mask R2.0/Hd2.5/Dz2.5 (q50 K table), G1bg params (VAL 2.2699e-8 at init, job 2423).
 
 | arm | strategist | worker |
@@ -21,7 +21,7 @@ a crude additive template, so the F3 family is carried with the wrong shape.
 
 Kill (handoff): full set after refit better than −2 % raw on VAL fails ⇒ record and stop.
 
-## P2.2 — gain-mode κ4 (twin, VAL-100; written 2026-10-06 23:05 UTC, before any run)
+## P2.2 — gain-mode κ4 (twin, VAL-100; written 2026-10-06 22:33 UTC, before any run)
 | arm | strategist | worker |
 |---|---|---|
 | (a) D22 product template, β 0.7, unrefit | — | −0.5 % to +2 % raw (layers 1–4 obey the law weakly; β 0.7 is too big there) |
