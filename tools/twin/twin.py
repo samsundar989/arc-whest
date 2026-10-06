@@ -325,7 +325,13 @@ ARMS = {
          "            _mS = _mask_keep(alpha, _MASK['H'], 'dead', dtype)\n"
          "        if _MASK.get('D'):\n"
          "            _mD = _mask_keep(alpha, _MASK['D'], 'dead', dtype)\n"
-         "    _mA = _mS if _MASK is not None and _MASK.get('Hkeep') else _mH\n"
+         "    _mA = _mW = _mC = _mSl = None\n"
+         "    if _mH is not None:\n"
+         "        _hm = _MASK.get('Hmode', '')\n"
+         "        _mA = {'k': _mS, 'kh': _mS, 'd': _mS, 'w': None, 's': None}.get(_hm, _mH)\n"
+         "        _mW = {'d': _mS, 's': None}.get(_hm, _mH)\n"
+         "        _mC = {'kh': _mS, 'd': _mS, 'w': None, 's': None}.get(_hm, _mH)\n"
+         "        _mSl = {'w': None}.get(_hm, _mS)\n"
          "    if _MASK is not None and _MASK.get('stats') is not None:\n"
          "        _st = {'l': layer_index}\n"
          "        for _t in (2.0, 2.5, 3.0, 3.5):\n"
@@ -346,23 +352,25 @@ ARMS = {
          "            None if last_layer else _D21c, mu, mu_out, n, dtype)\n"),
         ("        fac1 = w1e[:, None] * C11\n",
          "        fac1 = w1e[:, None] * C11\n"
-         "        if _mH is not None:\n"
+         "        if _mA is not None:\n"
          "            fac1 = fac1 * _mA[None, :]\n"
-         "            w2m = w2m * _mH\n"),
+         "        if _mW is not None:\n"
+         "            w2m = w2m * _mW\n"),
         ("        S_sep = (e_b[:, None] * C11) * w1e[None, :]\n",
          "        S_sep = (e_b[:, None] * C11) * w1e[None, :]\n"
-         "        if _mH is not None:\n"
+         "        if _mA is not None:\n"
          "            S_sep = S_sep * _mA[:, None]\n"),
         ("            resid = S21 - S_sep\n",
-         "            if _mH is not None:\n"
-         "                cA = cA * _mH\n"
-         "                cB = cB * _mH\n"
+         "            if _mC is not None:\n"
+         "                cA = cA * _mC\n"
+         "                cB = cB * _mC\n"
          "            resid = S21 - S_sep\n"),
         ("            if _PROTECT_FEED:\n",
-         "            if _mH is not None:\n"
+         "            if _mA is not None:\n"
          "                e_b = e_b * _mA\n"
-         "                resid = resid * _mS[:, None]\n"
-         "                S3 = S3 * _mS\n"
+         "            if _mSl is not None:\n"
+         "                resid = resid * _mSl[:, None]\n"
+         "                S3 = S3 * _mSl\n"
          "            if _PROTECT_FEED:\n"),
         ("        adv = _wick_tower(w1t[:, None], adv)\n",
          "        adv = _wick_tower(w1t[:, None], adv)\n"
@@ -385,10 +393,15 @@ def parse_mask(spec):
     out = {}
     for part in filter(None, spec.split(",")):
         k, v = part.split("=")
-        if k not in ("R", "H", "Hk", "D", "Dc"):
+        # H parts: A = A_L column (carries e_b), W = two-leg w2b, C = hubs, Sl = slice
+        # (sb, residual row). Default H: A W C on |alpha| > tau, Sl on alpha < -tau.
+        #   Hk  A on dead only            Hkh  A, C on dead only     Hd  everything dead-only
+        #   Hw  W only (diagnostic)       Hs   Sl only (diagnostic)
+        hmodes = {"Hk": "k", "Hkh": "kh", "Hd": "d", "Hw": "w", "Hs": "s"}
+        if k not in ("R", "H", "D", "Dc", *hmodes):
             raise SystemExit(f"--mask: unknown role {k}")
-        if k == "Hk":
-            k, out["Hkeep"] = "H", True
+        if k in hmodes:
+            k, out["Hmode"] = "H", hmodes[k]
         if k == "Dc":            # diagnostic: the corrector's d21e reads the UNMASKED D21
             k, out["Dfull"] = "D", True
         out[k] = float(v)
@@ -648,7 +661,11 @@ def cmd_d8bprep(a):
 def cmd_train(a):
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
-    tw = Twin(Path(a.cand))
+    tw = Twin(Path(a.cand), arm=a.arm)
+    if a.mask:                    # P1 refit on the masked chain: set once, read every forward
+        assert hasattr(tw.mod, "_MASK"), "--mask needs --arm mask"
+        tw.mod._MASK = parse_mask(a.mask)
+        print(f"  mask {tw.mod._MASK}", flush=True)
     names = TRAINABLE[a.stage]
     params = {k: tw.leaf(k).clone().requires_grad_(True) for k in names}
     if a.init:

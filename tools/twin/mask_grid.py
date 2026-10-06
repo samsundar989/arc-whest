@@ -30,6 +30,9 @@ GRID = [
     ("safe", "R=2.0,H=3.0,D=3.0"), ("safeK", "R=2.0,Hk=3.0,D=3.0"),
     ("safeKc", "R=2.0,Hk=3.0,Dc=3.0"),
     ("aggr", "R=2.0,H=2.5,D=2.5"), ("aggrK", "R=2.0,Hk=2.5,D=2.5"),
+    # H decomposition (after the first grid: H ~ Hk, so e_b's carrier is not the cost)
+    ("Hd2.5", "Hd=2.5"), ("Hd3.0", "Hd=3.0"), ("Hkh3.0", "Hkh=3.0"),
+    ("Hw3.0", "Hw=3.0"), ("Hs3.0", "Hs=3.0"),
 ]
 
 

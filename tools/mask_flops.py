@@ -1,0 +1,140 @@
+"""P1 modeled FLOP factor of decided-neuron pruning (HANDOFF 2026-10-06 Lane P).
+
+    uv run python tools/mask_flops.py --stats experiments/2026-10-06_mask/grid/fit_ctl.json
+
+Scales every site of the v72/v73 per-site census (`experiments/2026-09-28_cost_sites/
+profile.json`, one net, 472.2 G, line numbers identical in v73) by the kept fractions a
+compact chain would see, per net, from the alpha statistics `twin.py eval --mask-stats`
+logs. A MODEL, not a meter: it says what shrinks, assuming every compacted product is
+billed at its kept shape, and charges nothing for gathers/scatters.
+
+Rules (l = the layer the site runs at; b = a lineage's birth layer):
+  R(l)   rows kept after layer l's Wick scale (alpha_l >= -tau_R)
+  A(b)   A_L columns kept: H -> |alpha_b| <= tau_H ; Hk -> alpha_b >= -tau_H
+  M(b)   M columns kept (two-leg middle or slice column): alpha_b >= -tau_H
+  D(l)   D21 rows kept: alpha_l >= -tau_D
+  recent transport A_L        R(l-1) x mean A(b) over the recent lineages
+  recent transport M (older)  R(l-1) x mean M(b)
+  thin Z / Y / old Q transport R(l-1)
+  recent D21 readout          D(l)^2 x mean (A + M)/2 over the recent lineages
+  thin D21 readout            D(l)^2
+  old D21 readout (764)       D(l) x mean old (A + M)/2 ; (766) D(l)^2
+  old leg reconstruction      mean old (A + M)/2   (rows stay full: D3 reads every row)
+  old compression (join)      R(l) x (A + M)/2 of the joiner
+  everything else             1 (covariance, closure, corrector, gates, P2 birth,
+                              mixed elementwise D3/P2/hub readouts -- conservative)
+"""
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+
+import numpy as np
+
+ROOT = Path(__file__).resolve().parents[1]
+CENSUS = ROOT / "experiments" / "2026-09-28_cost_sites" / "profile.json"
+N = 1024
+
+CONFIGS = {
+    "R2.0": {"R": 2.0}, "R2.5": {"R": 2.5},
+    "H2.5": {"H": 2.5}, "H3.0": {"H": 3.0}, "H3.5": {"H": 3.5},
+    "Hk2.5": {"H": 2.5, "Hk": 1}, "Hk3.0": {"H": 3.0, "Hk": 1}, "Hk3.5": {"H": 3.5, "Hk": 1},
+    "D2.5": {"D": 2.5}, "D3.0": {"D": 3.0},
+    "safe": {"R": 2.0, "H": 3.0, "D": 3.0}, "safeK": {"R": 2.0, "H": 3.0, "Hk": 1, "D": 3.0},
+    "aggr": {"R": 2.0, "H": 2.5, "D": 2.5}, "aggrK": {"R": 2.0, "H": 2.5, "Hk": 1, "D": 2.5},
+    # Hd: every H part on dead columns only -> A = M = alpha >= -tau (same cost as Hk)
+    "Hd2.5": {"H": 2.5, "Hk": 1}, "Hd3.0": {"H": 3.0, "Hk": 1},
+    "R2.0/Hd3.0/D3.0": {"R": 2.0, "H": 3.0, "Hk": 1, "D": 3.0},
+    "R2.0/Hd2.5/D2.5": {"R": 2.0, "H": 2.5, "Hk": 1, "D": 2.5},
+    "R2.0/H2.5/D3.0": {"R": 2.0, "H": 2.5, "D": 3.0},
+}
+
+
+def fractions(stats, cfg, depth=16):
+    """Per-layer kept fractions (R, A, M, D) for one net's alpha statistics."""
+    by_l = {s["l"]: s for s in stats}
+
+    def dead(l, t):
+        return by_l[l][f"dead{t:.1f}"] if l in by_l else 0.0
+
+    def dec(l, t):
+        return by_l[l][f"dec{t:.1f}"] if l in by_l else 0.0
+
+    R = [1.0 - dead(l, cfg["R"]) if "R" in cfg else 1.0 for l in range(depth)]
+    if "H" in cfg:
+        M = [1.0 - dead(b, cfg["H"]) for b in range(depth)]
+        A = M[:] if cfg.get("Hk") else [1.0 - dec(b, cfg["H"]) for b in range(depth)]
+    else:
+        A = M = [1.0] * depth
+    D = [1.0 - dead(l, cfg["D"]) if "D" in cfg else 1.0 for l in range(depth)]
+    return R, A, M, D
+
+
+def factor(sites, R, A, M, D):
+    tot = kept = 0.0
+    recent_k = {}
+    for s in sites:                                  # recent count per layer, from 755
+        if s["line"] == 755 and s["caller"] == "_shared_contract_lean":
+            recent_k[s["layer"]] = s["matrix_shapes"][0][1] // (2 * N)
+    for s in sites:
+        f, l, line = s["exclusive_flops"], s["layer"], s["line"]
+        tot += f
+        if l is None or l < 1:
+            kept += f
+            continue
+        k = recent_k.get(l, 0)
+        rec = list(range(max(0, l - k), l))          # recent births (incl. youngest)
+        old = list(range(0, max(0, l - k)))
+        am = lambda bs: float(np.mean([(A[b] + M[b]) / 2 for b in bs])) if bs else 1.0
+        if line == 1163:
+            nk = s["matrix_shapes"][1][1] // N
+            g = R[l - 1] * float(np.mean([A[b] for b in range(l - nk, l)]))
+        elif line == 1164:
+            nk = s["matrix_shapes"][1][1] // N
+            g = R[l - 1] * float(np.mean([M[b] for b in range(l - 1 - nk, l - 1)]))
+        elif line in (1170, 1174, 1177):
+            g = R[l - 1]
+        elif line == 755:
+            g = D[l] ** 2 * am(rec)
+        elif line in (1425, 1429, 766):
+            g = D[l] ** 2
+        elif line == 764:
+            g = D[l] * am(old)
+        elif line == 739:
+            g = am(old)
+        elif s["category"] == "old.compression":
+            g = R[l] * am([max(0, l - k)])
+        else:
+            g = 1.0
+        kept += f * g
+    return kept / tot
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--stats", required=True, help="a mask_grid JSON with per-net stats")
+    ap.add_argument("--json", default="")
+    a = ap.parse_args()
+    census = json.loads(CENSUS.read_text())
+    sites = census["call_sites"]
+    for s in sites:
+        s["layer"] = None if s.get("layer") in (None, "") else int(s["layer"])
+    st = json.loads(Path(a.stats).read_text())["stats"]
+    base_b = census["total_flops"] / 2 ** 41
+    out = {}
+    print(f"census {census['total_flops']:,} FLOPs = {base_b:.5f} B; {len(st)} nets")
+    print("| config | modeled F factor (mean) | F/B | CV across nets | max/min |")
+    print("|---|---:|---:|---:|---:|")
+    for name, cfg in CONFIGS.items():
+        fs = np.array([factor(sites, *fractions(v, cfg)) for v in st.values()])
+        out[name] = {"mean": float(fs.mean()), "cv": float(fs.std() / fs.mean()),
+                     "maxmin": float(fs.max() / fs.min()), "per_net": fs.tolist()}
+        print(f"| {name} | {fs.mean():.4f} | {fs.mean() * base_b:.4f} | "
+              f"{100 * fs.std() / fs.mean():.2f} % | {fs.max() / fs.min():.3f} |")
+    if a.json:
+        Path(a.json).write_text(json.dumps(out, indent=1))
+
+
+if __name__ == "__main__":
+    main()
