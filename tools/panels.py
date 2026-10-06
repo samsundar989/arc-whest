@@ -52,13 +52,17 @@ if str(LOCAL_SIM) not in sys.path:
 os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
 
 PANEL_DIR = ROOT / "data" / "panels"
-PANELS = ("dev", "fit", "val", "fresh_a", "fresh_lock", "holdout_legacy", "holdout")
+PANELS = ("dev", "fit", "val", "fresh_a", "fresh_lock", "fresh_d", "holdout_legacy",
+          "holdout")
 #: PLAN rev 18 §2. Nets minted by whestbench's own generator from reserved seeds
 #: (`tools/fresh/gen.py`), labelled by our GPU Monte Carlo at N = 1e8
 #: (`tools/fresh/mc.py`). Nothing has ever been fitted, selected or submitted on them.
 #:   FRESH-A     acceptance of canaries (paired vs incumbent). Never fit/select on it.
 #:   FRESH-LOCK  designation only, <= 3 logged reads (`tools/ev.py` enforces).
-FRESH = ("fresh_a", "fresh_lock")
+#:   FRESH-D     calibration cross-check: d8b corpus nets 2048+8k, k<100 (never read by the
+#:               twin, which trains on 0-2047); other generator, other labeller
+#:               (`tools/fresh/fresh_d.py`). Same rules as FRESH-A.
+FRESH = ("fresh_a", "fresh_lock", "fresh_d")
 FRESH_SEEDS = ROOT / "experiments" / "2026-10-06_laneV" / "seeds.json"
 #: Files `--build` writes. `val` / `holdout_legacy` are views over them plus the
 #: pinned twin split; `holdout` is refused (see the module docstring).
@@ -156,11 +160,19 @@ def _load_fresh(panel: str) -> dict:
     if not FRESH_SEEDS.exists():
         raise SystemExit(f"fresh panels are not built ({FRESH_SEEDS}); "
                          "run: python tools/fresh/gen.py --build")
-    rec = json.loads(FRESH_SEEDS.read_text(encoding="utf-8"))["panels"][panel]
+    if panel == "fresh_d":
+        p = FRESH_SEEDS.parent / "fresh_d.json"
+        if not p.exists():
+            raise SystemExit(f"FRESH-D is not built ({p}); run tools/fresh/fresh_d.py")
+        rec = json.loads(p.read_text(encoding="utf-8"))
+    else:
+        rec = json.loads(FRESH_SEEDS.read_text(encoding="utf-8"))["panels"][panel]
     n = len(rec["seeds"])
-    purpose = ("ACCEPTANCE (paired vs incumbent); never fitted or selected on"
-               if panel == "fresh_a" else
-               "DESIGNATION LOCKBOX; <= 3 logged reads (experiments/fresh_lock_reads.jsonl)")
+    purpose = {"fresh_a": "ACCEPTANCE (paired vs incumbent); never fitted or selected on",
+               "fresh_lock": "DESIGNATION LOCKBOX; <= 3 logged reads "
+                             "(experiments/fresh_lock_reads.jsonl)",
+               "fresh_d": "CALIBRATION cross-check (d8b ext 2048+8k); never fitted or selected on",
+               }[panel]
     return {"panel": panel, "split": "fresh", "identity": "mlp_seed (reserved range)",
             "indices": list(range(n)), "seeds": list(rec["seeds"]),
             "names": [f"{panel}_{i:03d}" for i in range(n)],

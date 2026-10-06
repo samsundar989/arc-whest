@@ -117,6 +117,16 @@ def load_seeds() -> dict:
     return json.loads(SEEDS_JSON.read_text(encoding="utf-8"))
 
 
+FRESH_D_JSON = ROOT / "experiments" / "2026-10-06_laneV" / "fresh_d.json"
+
+
+def panel_record(panel: str) -> dict:
+    """seeds + weight hashes (+ label_n) of a pinned fresh panel."""
+    if panel == "fresh_d":
+        return json.loads(FRESH_D_JSON.read_text(encoding="utf-8"))
+    return load_seeds()["panels"][panel]
+
+
 def label_path(tag: str, seed: int, n: int) -> Path:
     """Where `mc.py` writes the label of one net (tag = panel, 'mini', 'lane_m_w512')."""
     return cache_dir() / "labels" / tag / f"{seed}_N{n:.0e}.npz".replace("+", "")
@@ -129,7 +139,8 @@ def load_label(panel: str, i: int, n: int = 10**8) -> dict:
     own Monte Carlo noise at layer l. Subtract floor[-1] from a final-layer MSE to
     get a floor-free absolute number; paired differences need no correction.
     """
-    rec = load_seeds()["panels"][panel]
+    rec = panel_record(panel)
+    n = rec.get("label_n", n)
     p = label_path(panel, rec["seeds"][i], n)
     if not p.exists():
         raise SystemExit(f"{panel}[{i}] has no N={n:.0e} label at {p}; run tools/fresh/mc.py")
@@ -142,8 +153,12 @@ def load_label(panel: str, i: int, n: int = 10**8) -> dict:
 
 def mint_checked(panel: str, i: int) -> np.ndarray:
     """Rebuild net i of a fresh panel and verify it against the recorded hash."""
-    rec = load_seeds()["panels"][panel]
-    w = mint_numpy(rec["seeds"][i])
+    rec = panel_record(panel)
+    if panel == "fresh_d":   # torch-generated d8b nets: staged float32 files
+        w = np.fromfile(cache_dir() / "fresh_d_weights" / f"{rec['seeds'][i]}.f32",
+                        dtype=np.float32).reshape(DEPTH, WIDTH, WIDTH)
+    else:
+        w = mint_numpy(rec["seeds"][i])
     h = sha256_weights(w)
     if h != rec["weight_sha256"][i]:
         raise SystemExit(f"{panel}[{i}] seed {rec['seeds'][i]}: weight hash {h[:12]} != "

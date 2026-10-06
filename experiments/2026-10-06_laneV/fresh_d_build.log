@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "C:\Users\samsu\Documents\arc-whest-lane-m\tools\fresh\fresh_d.py", line 84, in <module>
+    sys.exit(main())
+  File "C:\Users\samsu\Documents\arc-whest-lane-m\tools\fresh\fresh_d.py", line 48, in main
+    from huggingface_hub import hf_hub_download  # noqa: PLC0415
+ModuleNotFoundError: No module named 'huggingface_hub'

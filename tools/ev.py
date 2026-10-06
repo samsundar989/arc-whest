@@ -111,7 +111,7 @@ PUBLIC_FACTOR = 1.038
 #: FRESH-A score (floor-subtracted) / this = predicted public score. PLAN rev 18 §2:
 #: FRESH-A replaces DEV as the acceptance panel. UNCALIBRATED (1.0) until Lane V's
 #: V4 table (`docs/research/2026-10-0X_laneV_report.md`) sets it from v73_gb/v68_ws.
-FRESH_PUBLIC_FACTOR = {"fresh_a": 1.0, "fresh_lock": 1.0}
+FRESH_PUBLIC_FACTOR = {"fresh_a": 1.0, "fresh_lock": 1.0, "fresh_d": 1.0}
 #: FRESH-LOCK is the designation lockbox: every read is logged, and a fourth read
 #: is refused unless the reader says it is the designation read.
 FRESH_LOCK_LOG = ROOT / "experiments" / "fresh_lock_reads.jsonl"
