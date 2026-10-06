@@ -2548,3 +2548,7 @@ VAL-100, R2.0 + Dz2.5; F = modeled):
 The score is flat in the quantile: keeping more neurons buys back what it costs. (The first
 q75/q90 tables were silently equal to q50 because the writer ignored `--q`. They are fixed and
 the stale results moved aside.)
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-06 | `estimator_k3_v75_kas.py` | `d4d7885c` | DEV | 2.276927e-08 | 0.19020 | 23,511 | NEW code path: local A/B on DEV net 3, alternating ×2, v75 41.18 s / v73 43.31 s = **0.951** → × v72 measured median 83.31 s = 79.2 s, noisy-implied **98.2 s** (A ≤ 105 s); wall law 87.3 / 102.6 s | VmPeak 6,388 MiB (WSL PASS, same hash) | **4.1722e-09** | PENDING (#334464) | **0.9052× score** vs v73 (paired gain 1.1047×, t95 excludes 0) | **100/100** | R2.0 + D21 rows Dz2.5, fixed `rd_m32` K tables (R 1024→736, D 1024→800), Strassen block 20, built by `tools/build_kas.py`. Raw +2.20 % vs v73 at F ×0.8857. VAL-100 (twin, equivalent mask): score ratio 0.910, t95 excludes 0, 99/100. Twin↔export parity 4.7e-5 (DEV). Package sha256 `31bf52e8…5a81`, inner = source. First canary of UTC Oct 6. `experiments/2026-10-06_v75kas/`. |
