@@ -97,6 +97,9 @@ TRAINABLE = {
 _GATE_LEAVES = tuple(f"gate/{k}" for k in ("W1", "b1", "W2", "b2"))
 TRAINABLE.update({"G1b": TRAINABLE["S3"] + _GATE_LEAVES, "G1t": TRAINABLE["S3"] + _GATE_LEAVES,
                   "G1bg": _GATE_LEAVES, "G1tg": _GATE_LEAVES})
+# 2026-10-07 Lane P2: the gentle refit stage (S2t) plus the gain-mode coefficients.
+TRAINABLE["S2tgb"] = TRAINABLE["S2t"] + ("gain/gmb",)
+TRAINABLE["S2tgg"] = TRAINABLE["S2t"] + ("gain/gmg",)
 # 2026-10-06 Lane M4: the neighbor head (`--arm nbr`) alone; everything else frozen at --init.
 TRAINABLE["N1"] = tuple(f"nbr/{k}" for k in ("W1", "b1", "W2", "b2"))
 
@@ -490,74 +493,79 @@ ARMS = {
     # `_DRESS` None = inert (exact identity). Keys: c2, d21, d22 (family scales, 1 = on),
     # gate ('light': the birth gate multiplies w1 C only; 'both': it multiplies X~).
     "dress": [
-        ("def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,
-",
-         "_DRESS = None
-
-
-"
-         "def _dress_H(w, alpha, sigma, C11, D21, D22, dtype):
-"
-         "    w1, w2 = w[(1, 1)], w[(2, 1)]
-"
-         "    r = -(alpha / sigma)
-"
-         "    H = None
-"
-         "    _d = _DRESS
-"
-         "    if _d.get('d21', 0.0):
-"
-         "        H = (w2[:, None] * D21 + (w1[:, None] * D21.T) * r[None, :]) * (0.5 * _d['d21'])
-"
-         "    if _d.get('d22', 0.0):
-"
-         "        _t = ((w2[:, None] * D22) * r[None, :]) * (0.25 * _d['d22'])
-"
-         "        H = _t if H is None else H + _t
-"
-         "    if _d.get('c2', 0.0):
-"
-         "        _t = ((w2[:, None] * (C11 * C11)) * r[None, :]) * (0.5 * _d['c2'])
-"
-         "        H = _t if H is None else H + _t
-"
-         "    return H
-
-
-"
-         "def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,
-"),
-        ("        fac1 = w1e[:, None] * C11
-",
-         "        fac1 = w1e[:, None] * C11
-"
-         "        if _DRESS is not None:
-"
-         "            _Hd = _dress_H(w, alpha, sigma, C11, D21, D22, dtype)
-"
-         "            if _Hd is not None:
-"
-         "                if _DRESS.get('gate', 'light') == 'both':
-"
-         "                    _Hd = _Hd * (w1e / fnp.where(w1 == 0.0, dtype(1.0), w1))[:, None]
-"
-         "                fac1 = fac1 + _Hd
-"
-         "        _Xd = fac1
-"),
-        ("        S_sep = (e_b[:, None] * C11) * w1e[None, :]
-",
-         "        S_sep = e_b[:, None] * _Xd.T
-"),
-        ("                resid = (resid - ((yA * w1e)[:, None] * C11) * (cA * _t)[None, :]
-"
-         "                         - ((yB * w1e)[:, None] * C11) * (cB * _t)[None, :])
-",
-         "                resid = (resid - (yA[:, None] * _Xd) * (cA * _t)[None, :]
-"
-         "                         - (yB[:, None] * _Xd) * (cB * _t)[None, :])
-"),
+        ("def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n",
+         "_DRESS = None\n\n\n"
+         "def _dress_H(w, alpha, sigma, C11, D21, D22, dtype):\n"
+         "    w1, w2 = w[(1, 1)], w[(2, 1)]\n"
+         "    r = -(alpha / sigma)\n"
+         "    H = None\n"
+         "    _d = _DRESS\n"
+         "    if _d.get('d21', 0.0):\n"
+         "        H = (w2[:, None] * D21 + (w1[:, None] * D21.T) * r[None, :]) * (0.5 * _d['d21'])\n"
+         "    if _d.get('d22', 0.0):\n"
+         "        _t = ((w2[:, None] * D22) * r[None, :]) * (0.25 * _d['d22'])\n"
+         "        H = _t if H is None else H + _t\n"
+         "    if _d.get('c2', 0.0):\n"
+         "        _t = ((w2[:, None] * (C11 * C11)) * r[None, :]) * (0.5 * _d['c2'])\n"
+         "        H = _t if H is None else H + _t\n"
+         "    return H\n\n\n"
+         "def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n"),
+        ("        fac1 = w1e[:, None] * C11\n",
+         "        fac1 = w1e[:, None] * C11\n"
+         "        if _DRESS is not None:\n"
+         "            _Hd = _dress_H(w, alpha, sigma, C11, D21, D22, dtype)\n"
+         "            if _Hd is not None:\n"
+         "                if _DRESS.get('gate', 'light') == 'both':\n"
+         "                    _Hd = _Hd * (w1e / fnp.where(w1 == 0.0, dtype(1.0), w1))[:, None]\n"
+         "                fac1 = fac1 + _Hd\n"
+         "        _Xd = fac1\n"),
+        ("        S_sep = (e_b[:, None] * C11) * w1e[None, :]\n",
+         "        S_sep = e_b[:, None] * _Xd.T\n"),
+        ("                resid = (resid - ((yA * w1e)[:, None] * C11) * (cA * _t)[None, :]\n"
+         "                         - ((yB * w1e)[:, None] * C11) * (cB * _t)[None, :])\n",
+         "                resid = (resid - (yA[:, None] * _Xd) * (cA * _t)[None, :]\n"
+         "                         - (yB[:, None] * _Xd) * (cB * _t)[None, :])\n"),
+    ],
+    # HANDOFF 2026-10-07 Lane P2, P2.2: GAIN-MODE kappa4 (R2 §1.5). z = g zhat with Var g =
+    # c^2, c^2 = m^T C m / |m|^4 from the chain's own post-ReLU state (one matvec). Templates
+    # (pre-activation): D22_ij = 4 b c^2 (s_i^2 s_j^2 + 2 C_ij^2), Q31_ij = 12 b c^2 s_i^2 C_ij
+    # (normalised by s_i^3 s_j: 12 b c^2 Cn_ij). D4 stays the chain's dG form.
+    # `_GM` None = inert. Keys: mode 'a' (D22 template), 'b' (D22 + Q31 templates), 'c'
+    # (blend: existing + gamma * template, on D22, and on Q31 if q31b=1); beta (default 0.7)
+    # / gamma (default 0), overridden per layer by gain/gmb, gain/gmg once installed;
+    # q31 = 'keep' | 'drop' (the 5 learned q31 modes).
+    "gm": [
+        ("def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n",
+         "_GM = None\n_GMS = {}\n\n\n"
+         "def _gm_coef(key, default, li):\n"
+         "    tk = {'beta': 'gmb', 'gamma': 'gmg'}[key]\n"
+         "    if _TWG is not None and tk in _TWG:\n"
+         "        return _TWG[tk][li]\n"
+         "    return _GM.get(key, default)\n\n\n"
+         "def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n"),
+        ("        D22 = ((metric / 6.0) * (dG[:, None] + dG[None, :])) * off_mask\n",
+         "        D22 = ((metric / 6.0) * (dG[:, None] + dG[None, :])) * off_mask\n"
+         "        _GMS.clear()\n"
+         "        if _GM is not None:\n"
+         "            _mm2 = (mu * mu).sum()\n"
+         "            _c2 = (mu * (cov @ mu)).sum() / fnp.maximum(_mm2 * _mm2, dtype(1e-30))\n"
+         "            _tpl = ((var[:, None] * var[None, :]) + (C11 * C11) * 2.0) * off_mask\n"
+         "            if _GM['mode'] in ('a', 'b'):\n"
+         "                _bc = _gm_coef('beta', 0.7, layer_index) * _c2\n"
+         "                D22 = _tpl * (_bc * 4.0)\n"
+         "            else:\n"
+         "                _bc = _gm_coef('gamma', 0.0, layer_index) * _c2\n"
+         "                D22 = D22 + _tpl * (_bc * 4.0)\n"
+         "            if _GM['mode'] == 'b' or (_GM['mode'] == 'c' and _GM.get('q31b')):\n"
+         "                _GMS['q31'] = _bc * 12.0\n"),
+        ('        nb["Q31"] = Cn * inv2[:, None] * (0.5 * blocks["metric"] * blocks["lam"])\n',
+         '        nb["Q31"] = Cn * inv2[:, None] * (0.5 * blocks["metric"] * blocks["lam"])\n'
+         "        if 'q31' in _GMS:\n"
+         "            nb['Q31'] = (Cn * _GMS['q31'] if _GM['mode'] == 'b'\n"
+         "                         else nb['Q31'] + Cn * _GMS['q31'])\n"),
+        ('        if _TWG is not None and "q31" in _TWG:\n',
+         '        if (_TWG is not None and "q31" in _TWG\n'
+         "                and not (_GM is not None and _GM.get('q31') == 'drop')):\n"),
     ],
 }
 #: M4 neighbor head: 4 own + 5*K partners + 2 x (4 kernel means + log mass) + C+alpha + R+1.
@@ -614,6 +622,26 @@ def parse_dress(spec):
             out[k] = float(v)
         else:
             raise SystemExit(f"--dress: unknown key {k}")
+    return out
+
+
+def parse_gm(spec):
+    """'mode=a,beta=0.7,q31=keep' -> dict; '' -> None (inert)."""
+    if not spec:
+        return None
+    out = {"mode": "a", "q31": "keep"}
+    for part in filter(None, spec.split(",")):
+        k, v = part.split("=")
+        if k == "mode":
+            assert v in ("a", "b", "c"), v
+            out[k] = v
+        elif k == "q31":
+            assert v in ("keep", "drop"), v
+            out[k] = v
+        elif k in ("beta", "gamma", "q31b"):
+            out[k] = float(v)
+        else:
+            raise SystemExit(f"--gm: unknown key {k}")
     return out
 
 
@@ -681,6 +709,10 @@ class Twin:
         # S3: additive multi-mode correction to the normalised kappa4_iiij slice,
         # zero-initialised (an exact identity) -- see TWIN_PATCHES "q31"
         self.base["gain"]["q31"] = torch.zeros((depth, 5), dtype=torch.float32, device=DEV)
+        # P2.2 gain-mode kappa4: per-layer beta (template scale, init 0.7) and gamma (blend
+        # weight, init 0). Read only by the `gm` arm, and only once installed as params.
+        self.base["gain"]["gmb"] = torch.full((depth,), 0.7, dtype=torch.float32, device=DEV)
+        self.base["gain"]["gmg"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
         if "nbr" in arm.split("+"):
             # M4 neighbor head; W2/b2 zero -> exact identity at init. W1 deterministic.
             g = torch.Generator(device="cpu").manual_seed(20261006)
@@ -802,6 +834,9 @@ def cmd_eval(a, tw=None, params=None, quiet=False):
     if getattr(a, "dress", ""):
         assert hasattr(tw.mod, "_DRESS"), "--dress needs --arm dress (or mask+dress)"
         tw.mod._DRESS = parse_dress(a.dress)
+    if getattr(a, "gm", ""):
+        assert hasattr(tw.mod, "_GM"), "--gm needs --arm gm (or mask+gm)"
+        tw.mod._GM = parse_gm(a.gm)
     if mask or stats is not None:
         assert hasattr(tw.mod, "_MASK"), "--mask needs --arm mask"
     with torch.no_grad():
@@ -815,7 +850,7 @@ def cmd_eval(a, tw=None, params=None, quiet=False):
                 stats[f"{split}:{i}"] = tw.mod._MASK["stats"]
     r = {"panel": a.panel, "arm": getattr(a, "arm", ""), "n": len(fin),
          "raw_mse": float(np.mean(fin)), "per_net": fin,
-         "dress": getattr(tw.mod, "_DRESS", None)}
+         "dress": getattr(tw.mod, "_DRESS", None), "gm": getattr(tw.mod, "_GM", None)}
     if mask or stats is not None:
         r["mask"] = mask
         r["nets"] = [f"{s}:{i}" for s, i in rows]
@@ -893,6 +928,10 @@ def cmd_train(a):
         assert hasattr(tw.mod, "_DRESS"), "--dress needs --arm dress (or mask+dress)"
         tw.mod._DRESS = parse_dress(a.dress)
         print(f"  dress {tw.mod._DRESS}", flush=True)
+    if a.gm:
+        assert hasattr(tw.mod, "_GM"), "--gm needs --arm gm (or mask+gm)"
+        tw.mod._GM = parse_gm(a.gm)
+        print(f"  gm {tw.mod._GM}", flush=True)
     names = TRAINABLE[a.stage]
     params = {k: tw.leaf(k).clone().requires_grad_(True) for k in names}
     if a.init:
@@ -1051,6 +1090,8 @@ def main():
     ap.add_argument("--mask", default="", help="eval with --arm mask: 'R=2.0,H=3.0,D=3.0'")
     ap.add_argument("--dress", default="",
                     help="with --arm dress / mask+dress: 'all' or 'c2=1,d21=1,d22=1,gate=light'")
+    ap.add_argument("--gm", default="",
+                    help="with --arm gm / mask+gm: 'mode=a|b|c,beta=0.7,gamma=0,q31=keep|drop,q31b=1'")
     ap.add_argument("--mask-stats", action="store_true",
                     help="eval with --arm mask: log per-layer alpha kept fractions per net")
     ap.add_argument("--zero-scale", type=float, default=1e-2,

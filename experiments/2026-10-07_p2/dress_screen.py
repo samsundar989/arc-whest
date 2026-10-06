@@ -1,9 +1,12 @@
-"""P2.1 unrefit screen: v77-equivalent twin (v62_gb + mask R2.0/Hd2.5/Dz2.5 q50) vs dressed legs.
+"""P2.1/P2.2 unrefit screen: v77-equivalent twin (v62_gb + mask R2.0/Hd2.5/Dz2.5 q50) vs dressed
+legs and gain-mode kappa4 templates.
 
     .venv-gpu/Scripts/python.exe experiments/2026-10-07_p2/dress_screen.py --n 100 \
-        --configs off,all,c2=1,d21=1,d22=1 --out experiments/2026-10-07_p2/dress_unrefit.json
+        --configs "off;all;c2=1;gm:mode=a;all|gm:mode=b" --out experiments/2026-10-07_p2/x.json
 
-One twin process, one module (arm mask+dress); `_DRESS` is switched per config, so every
+A config is `<dress spec>`, `gm:<gm spec>` or `<dress spec>|gm:<gm spec>`.
+
+One twin process, one module (arm mask+dress+gm); `_DRESS` is switched per config, so every
 config sees the same nets, params and mask. Writes per-net final MSEs and paired ratios vs
 `off` (which must equal the plain mask arm: the dress arm is an exact identity at None).
 """
@@ -32,7 +35,7 @@ def main():
     ap.add_argument("--params", default=str(INIT))
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
-    tw = twin.Twin(CAND, arm="mask+dress")
+    tw = twin.Twin(CAND, arm="mask+dress+gm")
     params = twin.load_params(a.params)
     tw.install(params)
     res = {"cand": str(CAND), "params": a.params, "mask": MASK, "panel": a.panel, "configs": {}}
@@ -40,12 +43,19 @@ def main():
     # "c2=1" style single-key configs come through the comma split as their own items
     prog = os.environ.get("WORKERQ_PROGRESS")
     for ci, c in enumerate(cfgs):
+        dr, gm = "", ""
+        for part in ([] if c == "off" else c.split("|")):
+            if part.startswith("gm:"):
+                gm = part[3:]
+            else:
+                dr = part
         ns = argparse.Namespace(panel=a.panel, n=a.n, cand=str(CAND), params=None, subst="",
-                                mask=MASK, arm="mask+dress", dress="" if c == "off" else c)
+                                mask=MASK, arm="mask+dress+gm", dress=dr, gm=gm)
         tw.mod._DRESS = None
+        tw.mod._GM = None
         r = twin.cmd_eval(ns, tw=tw, quiet=True)
         res["configs"][c] = {"raw_mse": r["raw_mse"], "per_net": r["per_net"],
-                             "dress": r["dress"]}
+                             "dress": r["dress"], "gm": r["gm"]}
         line = {"config": c, "raw_mse": r["raw_mse"]}
         if "off" in res["configs"] and c != "off":
             b = np.array(res["configs"]["off"]["per_net"])
