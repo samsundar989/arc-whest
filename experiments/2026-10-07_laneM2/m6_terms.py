@@ -102,6 +102,20 @@ def e21b_gain_closed(w, mu, Cm, n, beta, c2, sb_x):
     return B.fill_diagonal_(0.0)
 
 
+def e21a_gain_closed(w, mu, Cm, n, beta, c2, sa_x):
+    """E21a with κ3 -> gain template, all-distinct i,j,k: O(n²)."""
+    w12 = w[(1, 2)]
+    s = float(w12 @ mu)
+    t = Cm @ w12                                  # t_k = Σ_i Cm_ki w12_i
+    wm = w12 * mu
+    X = Cm * (s - wm[:, None] - wm[None, :])
+    X = X + mu[:, None] * (t[None, :] - w12[:, None] * Cm)
+    X = X + mu[None, :] * (t[:, None] - w12[None, :] * Cm)
+    X = (2 * beta * c2) * X
+    B = (sa_x / (2 * n + 8)) * w[(2, 1)][:, None] * w[(2, 1)][None, :] * Cm * X
+    return B.fill_diagonal_(0.0)
+
+
 def _arc_term(name, mu, C, K3):
     """ARC's own evaluation of one dropped term: symmetrised ΔpK slice (E3) or Δcore (E21*)."""
     n = mu.shape[0]
@@ -147,6 +161,9 @@ def calibrate(dev) -> dict:
     dense = e21b_core(w, Cm, zero_repeated(gk), n, out["sb_x(2n+8)"])
     closed = e21b_gain_closed(w, mu, Cm, n, 0.7, c2, out["sb_x(2n+8)"])
     out["e21b_gain_closed_rel_err"] = float((dense - closed).norm() / dense.norm())
+    dense = e21a_core(w, Cm, zero_repeated(gk), n, out["sa_x(2n+8)"])
+    closed = e21a_gain_closed(w, mu, Cm, n, 0.7, c2, out["sa_x(2n+8)"])
+    out["e21a_gain_closed_rel_err"] = float((dense - closed).norm() / dense.norm())
     print(json.dumps(out, indent=1))
     _CAL.write_text(json.dumps(out, indent=1) + "\n", encoding="utf-8")
     return out

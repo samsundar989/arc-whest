@@ -6,5 +6,6 @@
  "E21a_rel_resid": 2.6062056790399493e-16,
  "sb_x(2n+8)": 24.000000000000004,
  "E21b_rel_resid": 3.314308979975198e-16,
- "e21b_gain_closed_rel_err": 2.3432334289495146e-16
+ "e21b_gain_closed_rel_err": 2.3432334289495146e-16,
+ "e21a_gain_closed_rel_err": 2.1512572988814284e-16
 }
