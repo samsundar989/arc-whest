@@ -16,9 +16,10 @@ Rules (l = the layer the site runs at; b = a lineage's birth layer):
   recent transport A_L        R(l-1) x mean A(b) over the recent lineages
   recent transport M (older)  R(l-1) x mean M(b)
   thin Z / Y / old Q transport R(l-1)
-  recent D21 readout          D(l)^2 x mean (A + M)/2 over the recent lineages
-  thin D21 readout            D(l)^2
-  old D21 readout (764)       D(l) x mean old (A + M)/2 ; (766) D(l)^2
+  recent D21 readout          D(l) Dc(l) x mean (A + M)/2 over the recent lineages
+  thin D21 readout            D(l) Dc(l)
+  old D21 readout (764)       D(l) x mean old (A + M)/2 ; (766) D(l) Dc(l)
+  Dc(l) = D(l) when rows AND columns are masked, 1 for row-only D (Dr)
   old leg reconstruction      mean old (A + M)/2   (rows stay full: D3 reads every row)
   old compression (join)      R(l) x (A + M)/2 of the joiner
   everything else             1 (covariance, closure, corrector, gates, P2 birth,
@@ -48,6 +49,11 @@ CONFIGS = {
     "R2.0/Hd3.0/D3.0": {"R": 2.0, "H": 3.0, "Hk": 1, "D": 3.0},
     "R2.0/Hd2.5/D2.5": {"R": 2.0, "H": 2.5, "Hk": 1, "D": 2.5},
     "R2.0/H2.5/D3.0": {"R": 2.0, "H": 2.5, "D": 3.0},
+    # row-only D21 (Dr): readouts scale by kept rows, not rows squared
+    "Dr2.5": {"D": 2.5, "Dr": 1}, "Dr3.0": {"D": 3.0, "Dr": 1},
+    "safe-r R2.0/Hd3.0/Dr3.0": {"R": 2.0, "H": 3.0, "Hk": 1, "D": 3.0, "Dr": 1},
+    "aggr-r R2.0/Hd2.5/Dr2.5": {"R": 2.0, "H": 2.5, "Hk": 1, "D": 2.5, "Dr": 1},
+    "lean-r R2.5/Hd2.5/Dr2.5": {"R": 2.5, "H": 2.5, "Hk": 1, "D": 2.5, "Dr": 1},
 }
 
 
@@ -68,10 +74,11 @@ def fractions(stats, cfg, depth=16):
     else:
         A = M = [1.0] * depth
     D = [1.0 - dead(l, cfg["D"]) if "D" in cfg else 1.0 for l in range(depth)]
-    return R, A, M, D
+    Dc = [1.0] * depth if cfg.get("Dr") else D      # row-only D keeps every column
+    return R, A, M, D, Dc
 
 
-def factor(sites, R, A, M, D):
+def factor(sites, R, A, M, D, Dc):
     tot = kept = 0.0
     recent_k = {}
     for s in sites:                                  # recent count per layer, from 755
@@ -96,9 +103,9 @@ def factor(sites, R, A, M, D):
         elif line in (1170, 1174, 1177):
             g = R[l - 1]
         elif line == 755:
-            g = D[l] ** 2 * am(rec)
+            g = D[l] * Dc[l] * am(rec)
         elif line in (1425, 1429, 766):
-            g = D[l] ** 2
+            g = D[l] * Dc[l]
         elif line == 764:
             g = D[l] * am(old)
         elif line == 739:
