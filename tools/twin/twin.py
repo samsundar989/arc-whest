@@ -477,6 +477,88 @@ ARMS = {
          "                                     cov_pre, last_layer, dtype)\n"
          "    if last_layer:\n        return (mu_out, None, None, 0.0, dG)\n"),
     ],
+    # HANDOFF 2026-10-07 Lane P2, P2.1: DRESSED LEGS (R1 §5.1). AUGMENT's heavy-edge kappa3
+    # birth families fold into the newborn's light leg:
+    #   X~[a, j] = w1e_a C_aj + H[a, j],
+    #   H[a, j]  = 1/2 w2_a D21[a, j]
+    #            + (w3_j / w2_j) (1/2 w1_a D21[j, a] + 1/4 w2_a D22[a, j] + 1/2 w2_a C_aj^2)
+    # with w3/w2 = -alpha/sigma, D21[a, j] = kappa3_aaj and D22 the chain's (2,2) slice, all
+    # off-diagonal. The stored A_L (fac1) IS the light leg, so every repeated-slice term that
+    # reads it is recomputed from X~ -- p111_21's two-leg slice (through fac1), S_sep =
+    # (X~ d(e))^T and the hub compensation d(y) X~ d(c) -- which keeps the newborn's repeated
+    # slices at the table's values and changes only its distinct-index content. No matmul.
+    # `_DRESS` None = inert (exact identity). Keys: c2, d21, d22 (family scales, 1 = on),
+    # gate ('light': the birth gate multiplies w1 C only; 'both': it multiplies X~).
+    "dress": [
+        ("def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,
+",
+         "_DRESS = None
+
+
+"
+         "def _dress_H(w, alpha, sigma, C11, D21, D22, dtype):
+"
+         "    w1, w2 = w[(1, 1)], w[(2, 1)]
+"
+         "    r = -(alpha / sigma)
+"
+         "    H = None
+"
+         "    _d = _DRESS
+"
+         "    if _d.get('d21', 0.0):
+"
+         "        H = (w2[:, None] * D21 + (w1[:, None] * D21.T) * r[None, :]) * (0.5 * _d['d21'])
+"
+         "    if _d.get('d22', 0.0):
+"
+         "        _t = ((w2[:, None] * D22) * r[None, :]) * (0.25 * _d['d22'])
+"
+         "        H = _t if H is None else H + _t
+"
+         "    if _d.get('c2', 0.0):
+"
+         "        _t = ((w2[:, None] * (C11 * C11)) * r[None, :]) * (0.5 * _d['c2'])
+"
+         "        H = _t if H is None else H + _t
+"
+         "    return H
+
+
+"
+         "def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,
+"),
+        ("        fac1 = w1e[:, None] * C11
+",
+         "        fac1 = w1e[:, None] * C11
+"
+         "        if _DRESS is not None:
+"
+         "            _Hd = _dress_H(w, alpha, sigma, C11, D21, D22, dtype)
+"
+         "            if _Hd is not None:
+"
+         "                if _DRESS.get('gate', 'light') == 'both':
+"
+         "                    _Hd = _Hd * (w1e / fnp.where(w1 == 0.0, dtype(1.0), w1))[:, None]
+"
+         "                fac1 = fac1 + _Hd
+"
+         "        _Xd = fac1
+"),
+        ("        S_sep = (e_b[:, None] * C11) * w1e[None, :]
+",
+         "        S_sep = e_b[:, None] * _Xd.T
+"),
+        ("                resid = (resid - ((yA * w1e)[:, None] * C11) * (cA * _t)[None, :]
+"
+         "                         - ((yB * w1e)[:, None] * C11) * (cB * _t)[None, :])
+",
+         "                resid = (resid - (yA[:, None] * _Xd) * (cA * _t)[None, :]
+"
+         "                         - (yB[:, None] * _Xd) * (cB * _t)[None, :])
+"),
+    ],
 }
 #: M4 neighbor head: 4 own + 5*K partners + 2 x (4 kernel means + log mass) + C+alpha + R+1.
 NBR_F, NBR_H = 4 + 5 * 8 + 12, 32
@@ -516,6 +598,25 @@ def parse_mask(spec):
     return out
 
 
+def parse_dress(spec):
+    """'c2=1,d21=1,d22=1,gate=light' -> dict; 'all' = every family at 1; '' -> None (inert)."""
+    if not spec:
+        return None
+    if spec == "all":
+        spec = "c2=1,d21=1,d22=1"
+    out = {"gate": "light"}
+    for part in filter(None, spec.split(",")):
+        k, v = part.split("=")
+        if k == "gate":
+            assert v in ("light", "both"), v
+            out[k] = v
+        elif k in ("c2", "d21", "d22"):
+            out[k] = float(v)
+        else:
+            raise SystemExit(f"--dress: unknown key {k}")
+    return out
+
+
 def load_module(path: Path, name="_twin_candidate", arm="", raw=False):
     """Import the candidate from a PATCHED copy (see TWIN_PATCHES), kept for audit.
 
@@ -524,11 +625,12 @@ def load_module(path: Path, name="_twin_candidate", arm="", raw=False):
     longer match the hooks' anchors. `install` refuses gain parameters then."""
     import importlib.util
     src = path.read_text(encoding="utf-8")
-    for a, b in ([] if raw else TWIN_PATCHES) + (ARMS[arm] if arm else []) + SUB_PATCHES:
+    arm_patches = [pt for x in arm.split("+") if x for pt in ARMS[x]]   # "mask+dress"
+    for a, b in ([] if raw else TWIN_PATCHES) + arm_patches + SUB_PATCHES:
         if src.count(a) != 1:
             raise SystemExit(f"twin patch anchor occurs {src.count(a)}x:\n{a}")
         src = src.replace(a, b, 1)
-    pp = ROOT / "cache" / "twin" / f"_twin_{path.stem}{'_' + arm if arm else ''}.py"
+    pp = ROOT / "cache" / "twin" / f"_twin_{path.stem}{'_' + arm.replace('+', '_') if arm else ''}.py"
     pp.parent.mkdir(parents=True, exist_ok=True)
     pp.write_text(src, encoding="utf-8", newline="\n")
     spec = importlib.util.spec_from_file_location(name, pp)
@@ -697,6 +799,9 @@ def cmd_eval(a, tw=None, params=None, quiet=False):
     fin = []
     mask = parse_mask(getattr(a, "mask", ""))
     stats = {} if getattr(a, "mask_stats", False) else None
+    if getattr(a, "dress", ""):
+        assert hasattr(tw.mod, "_DRESS"), "--dress needs --arm dress (or mask+dress)"
+        tw.mod._DRESS = parse_dress(a.dress)
     if mask or stats is not None:
         assert hasattr(tw.mod, "_MASK"), "--mask needs --arm mask"
     with torch.no_grad():
@@ -709,7 +814,8 @@ def cmd_eval(a, tw=None, params=None, quiet=False):
             if stats is not None:
                 stats[f"{split}:{i}"] = tw.mod._MASK["stats"]
     r = {"panel": a.panel, "arm": getattr(a, "arm", ""), "n": len(fin),
-         "raw_mse": float(np.mean(fin)), "per_net": fin}
+         "raw_mse": float(np.mean(fin)), "per_net": fin,
+         "dress": getattr(tw.mod, "_DRESS", None)}
     if mask or stats is not None:
         r["mask"] = mask
         r["nets"] = [f"{s}:{i}" for s, i in rows]
@@ -783,6 +889,10 @@ def cmd_train(a):
         assert hasattr(tw.mod, "_MASK"), "--mask needs --arm mask"
         tw.mod._MASK = parse_mask(a.mask)
         print(f"  mask {tw.mod._MASK}", flush=True)
+    if a.dress:
+        assert hasattr(tw.mod, "_DRESS"), "--dress needs --arm dress (or mask+dress)"
+        tw.mod._DRESS = parse_dress(a.dress)
+        print(f"  dress {tw.mod._DRESS}", flush=True)
     names = TRAINABLE[a.stage]
     params = {k: tw.leaf(k).clone().requires_grad_(True) for k in names}
     if a.init:
@@ -939,6 +1049,8 @@ def main():
                     help="eval a file with baked-in gains: skip the twin's gain hooks")
     ap.add_argument("--json", default="", help="eval: write per-net results here")
     ap.add_argument("--mask", default="", help="eval with --arm mask: 'R=2.0,H=3.0,D=3.0'")
+    ap.add_argument("--dress", default="",
+                    help="with --arm dress / mask+dress: 'all' or 'c2=1,d21=1,d22=1,gate=light'")
     ap.add_argument("--mask-stats", action="store_true",
                     help="eval with --arm mask: log per-layer alpha kept fractions per net")
     ap.add_argument("--zero-scale", type=float, default=1e-2,

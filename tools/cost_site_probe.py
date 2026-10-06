@@ -1,7 +1,8 @@
-"""Exclusive charged-FLOP profile of unchanged v72 with the real meter.
+"""Exclusive charged-FLOP profile of an anchored candidate (v72, v77, v78) with the real meter.
 
     python tools/cost_site_probe.py check                 # tiny CPU tests only
     python tools/cost_site_probe.py run --out <directory> # queue: 16 GiB/0 GPU/2 CPU
+    python tools/cost_site_probe.py run --candidate estimator_k3_v77_kash.py --out <dir>
 
 Harness wrappers observe BudgetContext.flops_used, verified to be an O(1)
 integer getter. They do not call a budget summary inside prediction, mutate
@@ -34,7 +35,14 @@ for _path in (ROOT, ROOT / "tools", ROOT / "local_sim"):
     if str(_path) not in sys.path:
         sys.path.append(str(_path))  # Real flopscope must precede the local shim.
 
-EXPECTED_FLOPS = 472202879721
+# Verified anchors: source sha256 -> (label, exact real-meter FLOPs on f64 read-only weights).
+# A candidate not listed here is refused (the census is tied to a measured source).
+ANCHORS = {
+    "3b6cc39790295d3be60a88f9dd9053915f695bdf0a0da2cf2e99587cce692bac": ("v72_gt", 472202879721),
+    "4ff8018f8cef1422eccc19389ba4cddb3cb1b572ccaf81f5ffe64fdacf1c78fe": ("v77_kash", 395412204457),
+    "6b3db2a545287afce469d22c46387a43bdff7ebc3c8a4bb639b33e2a2666bf51": ("v78_kashws", None),
+}
+EXPECTED_FLOPS = 472202879721     # v72 (kept for the check fixture and old reports)
 EXPECTED_SHA = "3b6cc39790295d3be60a88f9dd9053915f695bdf0a0da2cf2e99587cce692bac"
 BUDGET = 2**41
 FUNCTIONS = (
@@ -44,6 +52,8 @@ FUNCTIONS = (
     "_wick", "_closure_apply", "_closure_what", "_protect_factors",
     "_corr_delta", "_corr_raw", "_gate_eval", "_append", "_truncate", "_mm",
 )
+# Wrapped only when the candidate defines them (the KAS compact chains, v75+).
+OPTIONAL_FUNCTIONS = ("_kas_rows",)
 
 
 def meter_stack(flops):
@@ -159,6 +169,7 @@ class Sites:
             "_corr_delta": "mean_corrector", "_corr_raw": "mean_corrector",
             "_gate_eval": "transport_gate", "_append": "history.bookkeeping",
             "_truncate": "history.bookkeeping",
+            "_kas_rows": "kas.row_gather",
             "_layer": "layer.other_table_birth_covariance_glue",
             "predict_and_materialize": "prediction.casts_constants_output",
         }.get(function, "other")
@@ -209,7 +220,8 @@ class Profiler:
 
     @contextmanager
     def install(self, module):
-        originals = {name: getattr(module, name) for name in FUNCTIONS}
+        originals = {name: getattr(module, name) for name in FUNCTIONS + OPTIONAL_FUNCTIONS
+                     if hasattr(module, name)}
         try:
             for name, fn in originals.items():
                 setattr(module, name, self.wrapper(name, fn))
@@ -323,8 +335,8 @@ def check(candidate):
 
 def markdown(result):
     total = result["total_flops"]
-    lines = ["# Current v72 charged-FLOP profile", "",
-        f"Total: **{total:,} FLOPs**. Expected anchor: {EXPECTED_FLOPS:,}. "
+    lines = [f"# {result.get('anchor_label', 'v72_gt')} charged-FLOP profile", "",
+        f"Total: **{total:,} FLOPs**. Expected anchor: {result.get('expected_flops')}. "
         f"Exclusive sum reconciles: {result['exclusive_reconciles']}.", "",
         "Categories sum child-subtracted exclusive costs. Inclusive function totals overlap and "
         "must not be added. Recent/old labels identify measured matrix calls; mixed elementwise "
@@ -333,6 +345,17 @@ def markdown(result):
         "| category | exclusive FLOPs | share |", "|---|---:|---:|"]
     for k, v in result["categories"].items():
         lines.append(f"| {k} | {v:,} | {100*v/total:.3f}% |")
+    # Category x layer (exclusive, % of total). Layer -1 is outside any `_layer` call.
+    grid = defaultdict(lambda: defaultdict(int))
+    for r in result["call_sites"]:
+        grid[r["category"]][r["layer"]] += r["exclusive_flops"]
+    layers = sorted({r["layer"] for r in result["call_sites"]})
+    lines += ["", "| category | " + " | ".join(f"L{l}" for l in layers) + " |",
+              "|---|" + "---:|" * len(layers)]
+    for k in result["categories"]:
+        lines.append(f"| {k} | " + " | ".join(f"{100*grid[k][l]/total:.2f}" for l in layers) + " |")
+    lines.append("| **layer total** | " + " | ".join(
+        f"{100*result['layer_exclusive_totals'].get(str(l), 0)/total:.2f}" for l in layers) + " |")
     lines += ["", "| function | calls | inclusive FLOPs | exclusive FLOPs |", "|---|---:|---:|---:|"]
     for name, row in sorted(result["functions"].items(), key=lambda x: -x[1]["inclusive_flops"]):
         lines.append(f"| {name} | {row['calls']} | {row['inclusive_flops']:,} | {row['exclusive_flops']:,} |")
@@ -358,8 +381,9 @@ def run(a):
     candidate = (ROOT / a.candidate).resolve()
     source_bytes = candidate.read_bytes()
     sha = hashlib.sha256(source_bytes).hexdigest()
-    if sha != EXPECTED_SHA:
-        raise RuntimeError("candidate does not match the verified current v72 source hash")
+    if sha not in ANCHORS:
+        raise RuntimeError("candidate source hash is not an anchored census target")
+    anchor_label, expected_flops = ANCHORS[sha]
     counter = counter_evidence(flops.BudgetContext)
     mod, _ = le.load_candidate(str(candidate))
     split, idx, seed, name = panels.nets("dev")[a.index]
@@ -401,8 +425,9 @@ def run(a):
                   peak_rss_mib=peak_rss_mib(), materializations=sum(mc.counts.values()),
                   materialization_detail=mc.counts, error=error,
                   candidate_source_unchanged=unchanged,
-                  expected_flops=EXPECTED_FLOPS,
-                  exact_anchor_match=int(budget.flops_used) == EXPECTED_FLOPS)
+                  anchor_label=anchor_label, expected_flops=expected_flops,
+                  exact_anchor_match=(expected_flops is None or
+                                      int(budget.flops_used) == expected_flops))
     result["pass"] = (not error and unchanged and result["exclusive_reconciles"] and
                       result["exact_anchor_match"] and result["materializations"] == 0)
     out = Path(a.out)
