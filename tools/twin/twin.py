@@ -313,6 +313,15 @@ ARMS = {
          "            setattr(tw, _a, getattr(tw, _a) * c)\n"
          "    tw._legs = tw._p2 = tw._hub = tw._p3 = None\n"
          "    return tw\n\n\n"
+         "def _mask_rows_new(tw, k, n):\n"
+         "    c = k[:, None]\n"
+         "    tw.A_L = fnp.concatenate([tw.A_L[:, :-n], tw.A_L[:, -n:] * c], axis=1)\n"
+         "    r = tw.L.shape[2]\n"
+         "    tw.Z = fnp.concatenate([tw.Z[:, :-r], tw.Z[:, -r:] * c], axis=1)\n"
+         "    if tw.Y is not None:\n"
+         "        tw.Y = fnp.concatenate([tw.Y[:, :-2], tw.Y[:, -2:] * c], axis=1)\n"
+         "    tw._legs = tw._p2 = tw._hub = tw._p3 = None\n"
+         "    return tw\n\n\n"
          "def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n"),
         ('    w = _wick(mu_pre, sigma, alpha, table, dtype, const["wick"])\n',
          '    w = _wick(mu_pre, sigma, alpha, table, dtype, const["wick"])\n'
@@ -374,12 +383,15 @@ ARMS = {
          "            if _PROTECT_FEED:\n"),
         ("        adv = _wick_tower(w1t[:, None], adv)\n",
          "        adv = _wick_tower(w1t[:, None], adv)\n"
-         "        if _mR is not None:\n"
+         "        if _mR is not None and _MASK.get('Rpart', '') != 'n':\n"
          "            adv = _mask_rows(adv, _mR)\n"),
+        # Rpart '' both, 'i' inherited legs only (post-Wick), 'n' newborn A_L/Z/Y rows only
         ("    out_tw = _truncate(out_tw, gens, n)\n",
          "    out_tw = _truncate(out_tw, gens, n)\n"
-         "    if _mR is not None:\n"
-         "        out_tw = _mask_rows(out_tw, _mR)\n"),
+         "    if _mR is not None and _MASK.get('Rpart', '') == '':\n"
+         "        out_tw = _mask_rows(out_tw, _mR)\n"
+         "    elif _mR is not None and _MASK.get('Rpart', '') == 'n':\n"
+         "        out_tw = _mask_rows_new(out_tw, _mR, n)\n"),
     ],
 }
 
@@ -398,8 +410,11 @@ def parse_mask(spec):
         #   Hk  A on dead only            Hkh  A, C on dead only     Hd  everything dead-only
         #   Hw  W only (diagnostic)       Hs   Sl only (diagnostic)
         hmodes = {"Hk": "k", "Hkh": "kh", "Hd": "d", "Hw": "w", "Hs": "s"}
-        if k not in ("R", "H", "D", "Dc", *hmodes):
+        rparts = {"Ri": "i", "Rn": "n"}     # R on inherited legs only / newborn rows only
+        if k not in ("R", "H", "D", "Dc", *hmodes, *rparts):
             raise SystemExit(f"--mask: unknown role {k}")
+        if k in rparts:
+            k, out["Rpart"] = "R", rparts[k]
         if k in hmodes:
             k, out["Hmode"] = "H", hmodes[k]
         if k == "Dc":            # diagnostic: the corrector's d21e reads the UNMASKED D21

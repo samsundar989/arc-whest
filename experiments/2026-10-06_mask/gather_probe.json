@@ -1,0 +1,173 @@
+[
+ {
+  "step": "argsort(n)",
+  "flops": 81920,
+  "ops": 1.0,
+  "materializations": 0,
+  "detail": {
+   "__bool__": 0,
+   "__float__": 0,
+   "__int__": 0,
+   "__index__": 0
+  },
+  "shape": [
+   1024
+  ]
+ },
+ {
+  "step": "perm[-K:] (view)",
+  "flops": 0,
+  "ops": 0,
+  "materializations": 0,
+  "detail": {
+   "__bool__": 0,
+   "__float__": 0,
+   "__int__": 0,
+   "__index__": 0
+  },
+  "shape": [
+   896
+  ]
+ },
+ {
+  "step": "argpartition(n, n-K)",
+  "flops": 8192,
+  "ops": 1.0,
+  "materializations": 0,
+  "detail": {
+   "__bool__": 0,
+   "__float__": 0,
+   "__int__": 0,
+   "__index__": 0
+  },
+  "shape": [
+   896
+  ]
+ },
+ {
+  "step": "take rows A[keep] (K x 4n)",
+  "flops": 29360128,
+  "ops": 1.0,
+  "materializations": 0,
+  "detail": {
+   "__bool__": 0,
+   "__float__": 0,
+   "__int__": 0,
+   "__index__": 0
+  },
+  "shape": [
+   896,
+   4096
+  ]
+ },
+ {
+  "step": "fancy A[keep] (K x 4n)",
+  "flops": 29360128,
+  "ops": 1.0,
+  "materializations": 0,
+  "detail": {
+   "__bool__": 0,
+   "__float__": 0,
+   "__int__": 0,
+   "__index__": 0
+  },
+  "shape": [
+   896,
+   4096
+  ]
+ },
+ {
+  "step": "take cols A[:, keep]",
+  "flops": 7340032,
+  "ops": 1.0,
+  "materializations": 0,
+  "detail": {
+   "__bool__": 0,
+   "__float__": 0,
+   "__int__": 0,
+   "__index__": 0
+  },
+  "shape": [
+   1024,
+   896
+  ]
+ },
+ {
+  "step": "take 2x B[keep][:, keep] (K x K)",
+  "flops": 13762560,
+  "ops": 2.0,
+  "materializations": 0,
+  "detail": {
+   "__bool__": 0,
+   "__float__": 0,
+   "__int__": 0,
+   "__index__": 0
+  },
+  "shape": [
+   896,
+   896
+  ]
+ },
+ {
+  "step": "argsort(perm) = rank",
+  "flops": 81920,
+  "ops": 1.0,
+  "materializations": 0,
+  "detail": {
+   "__bool__": 0,
+   "__float__": 0,
+   "__int__": 0,
+   "__index__": 0
+  },
+  "shape": [
+   1024
+  ]
+ },
+ {
+  "step": "inverse index where(rank>=n-K, rank-(n-K), K)",
+  "flops": 12288,
+  "ops": 3.0,
+  "materializations": 0,
+  "detail": {
+   "__bool__": 0,
+   "__float__": 0,
+   "__int__": 0,
+   "__index__": 0
+  },
+  "shape": [
+   1024
+  ]
+ },
+ {
+  "step": "scatter-as-gather: pad K+1 then take x2 (n x n)",
+  "flops": 17346050,
+  "ops": 3.0,
+  "materializations": 0,
+  "detail": {
+   "__bool__": 0,
+   "__float__": 0,
+   "__int__": 0,
+   "__index__": 0
+  },
+  "shape": [
+   1024,
+   1024
+  ]
+ },
+ {
+  "step": "matmul W[:, keep]^T-style (n x K)@(K x 4n)",
+  "flops": 15060697088,
+  "ops": 3.0,
+  "materializations": 0,
+  "detail": {
+   "__bool__": 0,
+   "__float__": 0,
+   "__int__": 0,
+   "__index__": 0
+  },
+  "shape": [
+   1024,
+   4096
+  ]
+ }
+]

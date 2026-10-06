@@ -17,6 +17,8 @@ import sys
 import time
 from pathlib import Path
 
+if "--cpu" in sys.argv:          # read by twin at import: a CPU-only job beside a GPU one
+    os.environ["TWIN_DEVICE"] = "cpu"
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import twin  # noqa: E402  (puts the torch shim on the path)
 
@@ -33,6 +35,8 @@ GRID = [
     # H decomposition (after the first grid: H ~ Hk, so e_b's carrier is not the cost)
     ("Hd2.5", "Hd=2.5"), ("Hd3.0", "Hd=3.0"), ("Hkh3.0", "Hkh=3.0"),
     ("Hw3.0", "Hw=3.0"), ("Hs3.0", "Hs=3.0"),
+    # R decomposition: inherited legs (post-Wick, incl. old-tier Q) vs newborn rows
+    ("Ri2.0", "Ri=2.0"), ("Rn2.0", "Rn=2.0"),
 ]
 
 
@@ -44,6 +48,7 @@ def main():
     ap.add_argument("--n", type=int, default=0)
     ap.add_argument("--only", default="", help="comma list of config names")
     ap.add_argument("--fit-stats", action="store_true")
+    ap.add_argument("--cpu", action="store_true", help="TWIN_DEVICE=cpu (set before import)")
     a = ap.parse_args()
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
