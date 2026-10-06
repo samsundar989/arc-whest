@@ -1,0 +1,4 @@
+[ev] estimator_k3_v73_gb.py on FRESH_D n=100
+[ev] cost: 472,203,417,465 FLOPs, 23,007 ops, peak RSS 5.07 GiB -> budget 12.7 GiB/worker
+  [mem] 21.4 GiB free, 12.7 GiB per worker -> 1 workers, not 3
+  1 workers x 2 BLAS threads over 100 nets ...
