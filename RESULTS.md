@@ -2579,3 +2579,8 @@ that more training recovers.
 | date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
 |---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
 | 2026-10-06 | `estimator_k3_v78_kashws.py` | `6b3db2a5` | DEV | 2.273284e-08 | 0.19296 | 21,082 | local A/B vs v74_ws (×2) = **0.890** → × v68_ws parent 52.0 s ≈ 46.3 s, noisy-implied **≈ 57.4 s** (B ≤ 95 s); law 87.5 / 102.8 s (classes block 40 as leaf 32) | VmPeak 4,687 MiB (WSL PASS, same hash) | 4.2260e-09 | NOT SUBMITTED | ×0.944 score vs v76 (paired gain 1.0595×) | 100/100 | v77 at block 40: the wall-safe pruned B with Hd. Twin parity 4.6e-5. All hard gates pass. It is B, so it does not beat the best graded A (v75 4.1871e-09) and today's A/B slot went to v74_ws. **Queued for the Oct 7 A/B slot.** |
+
+**Hd threshold sweep** (twin, VAL-100, R2.0/Dz2.5, fixed q50 tables; score = raw × modeled F):
+Hd2.5 (v77) +2.58 % / 0.8389 → **0.861**; Hd2.0 +7.12 % / 0.8151 → 0.873; Hd1.75 +15.97 % /
+0.7966 → 0.924; Hd1.5 +38.3 % / 0.7775 → 1.075. Like R and D, H has a cliff below τ 2.5. v77
+sits at the optimum of every role.
