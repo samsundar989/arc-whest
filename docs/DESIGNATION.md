@@ -1,5 +1,18 @@
 # DESIGNATION — current A and B (maintained by the worker; designating is Samuel's)
 
+## Evidence update — 2026-10-06 (PLAN rev 18, Lane P P0; no nomination/designation made)
+
+| role | file | sha8 | submission | score | raw | F/B | wall evidence | VmPeak |
+|---|---|---|---|---:|---:|---:|---|---|
+| **A (candidate)** | `estimator_k3_v73_gb.py` | `8fc42e77` | #332893 | **4.6198973531323855e-9** | 2.1514587515980564e-8 | 0.21473 | projected noisy 103.3 s (v72 measured median 83.30 s + 0.005 s); A policy ≤ 105 s | 6,724 MiB |
+| **B (candidate)** | `estimator_k3_v74_ws.py` | `5aa60322` | #334434 | PENDING (expected ≈ 4.98e-9) | — | 0.23128 | projected quiet 58.1 s / noisy 68.3 s from the wall law; B policy ≤ 95 s | 5,073 MiB |
+
+v74_ws is v73_gb with `_STRASSEN_MIN_BLOCK = 64` and nothing else. DEV raw 2.227566e-8 vs v73's
+2.227946e-8 (−0.017 %); 19,667 ops; residual 0.218 s; packaged estimator = tested source;
+validate + validate-package OK. It replaces v68_ws #332544 (5.0664e-9) as the wall-safe B once
+graded. Under PLAN rev 18 §2, designation is decided on FRESH-LOCK plus wall/residual margins
+(Oct 14–16); this table is evidence only. **Samuel designates.**
+
 ## Evidence update — September 28 review (no nomination/designation made)
 
 The best graded source is now **v72_gt**, SHA8 `3b6cc397`, submission **#332766**,
