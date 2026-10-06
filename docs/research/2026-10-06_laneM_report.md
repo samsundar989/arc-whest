@@ -168,3 +168,16 @@ factored form of the dominant term (E21b) is now validated.
 What would reopen it: a low-rank transport of B (rank ≤ ~64 would make the channel ≈ +1 %),
 which this lane has not measured; only worth testing if a future chain carries an
 off-diagonal κ4 core for another reason.
+
+## 7. M4 — neighbor-feature corrector screen: **CLOSED**
+
+Twin arm `nbr` (`tools/twin/twin.py`, lane-m): a zero-initialised additive head on μ_out
+beside the shipped corrector, 56 detached per-net-normalised features per neuron (own α, Φ,
+φ, γ3; the top-8 |ρ| partners' signed ρ, α, Φ, φ, γ3; similarity-kernel means
+exp(−β(1−ρ²)), β ∈ {8, 32}, and log kernel mass; ridge (C⁺α)_i and (R⁺1)_i), MLP 56-32-1;
+only the head trains, from twin-v73 (S2t3 step-736 leaves + G1bg gates). One epoch on TRAIN
+900, VAL every 28 steps. VAL raw: init 2.213009e-08 (equals v73's recorded VAL) → +0.79 %,
++0.26 %, +0.10 %; early stop at step 84. Never beat init: **< 2 % → killed**. Deviation from
+the handoff: the kernel uses similarity exp(−β(1−ρ²)), because exp(−βρ²) weights the
+uncorrelated bulk; this does not change the verdict (the top-8 partner block, which needs
+no kernel, carried no signal either).

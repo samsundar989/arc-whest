@@ -13,3 +13,12 @@ Worker prediction: VAL raw −1.0 % (80 % interval −0.2 … −2.5 %), i.e. P(
 Reason: the shipped corrector already sees D21 energy (Σ_j D21²) and the chain carries the
 dense covariance; a neighbor's α/Φ is mostly a proxy for the neuron's own C-row, which the
 chain propagates exactly. Gains, if any, should be at the deepest layers.
+
+## Outcome (2026-10-06, worker-q 2402)
+
+VAL (full 900-999) raw: init 2.213009e-08 (= v73's recorded VAL exactly, so the twin-v73
+assembly is right) → step 28 2.230591e-08 (+0.79 %), step 56 2.218732e-08 (+0.26 %),
+step 84 2.215317e-08 (+0.10 %); early stop (patience 3). Never beat init. Train-batch MSE fell
+(noisy, 2.4e-8 → ~2.1e-8 at times) while VAL did not: what the head learned does not
+generalise. **Kill rule (< 2 % VAL gain) met → M4 CLOSED.** Prediction −1.0 % (P(≥ 2 %) 15 %)
+was on the optimistic side of an exact null.
