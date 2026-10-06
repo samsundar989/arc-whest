@@ -19,3 +19,15 @@ growing. Worker expectation: CLOSE → M4.
 
 Caveat recorded in advance: n = 1024 unfactored needs ~54 GiB (dense κ3 n³ temporaries,
 0.85 GiB at n = 256 scaling n³), so it is out of reach on the 32 GiB card unless chunked.
+
+## Addendum after the n = 256/512 read (2026-10-06, before the n = 384/768 runs)
+
+Measured G_drop: n = 256 +26.6 % [16.5, 36.6]; n = 512 +15.6 % [7.8, 23.5] (8/8 nets each).
+My 3 % prediction was wrong (too low by ~5x); the strategist's 5-25 % range and "κ3 × edge
+dominates" were right (T1 ≈ 0; the E family as a whole carries all of it, E3 and E21a alone
+HURT, E21b alone gives most). The trend is DOWN (×0.59 per width doubling), which fails the
+"flat or growing" half of the GO rule, so a third and fourth width settle it.
+
+Prediction (worker) if the decline is a power law n^-0.77: G_drop(384) ≈ 20 %, G_drop(768) ≈ 11 %,
+extrapolated n = 1024 ≈ 9 %. If instead 256 was an outlier and the trend is flat:
+G_drop(768) ≈ 15 %. I put 60 % on the power-law reading.

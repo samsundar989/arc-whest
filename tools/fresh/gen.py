@@ -20,7 +20,7 @@ Seed reservation (never reuse a number from these ranges for anything else):
 
     FRESH-A      9_100_000 + i,  i in [0, 100)     acceptance panel
     FRESH-LOCK   9_100_100 + i,  i in [0, 200)     designation lockbox
-    LANE-M       9_200_000 + 1000*w_tag + i        width-override nets (n = 256/512/1024)
+    LANE-M       9_200_000 + 1000*w_tag + i        width-override nets (n = 256/512/1024/768/384)
 
 Organizer seeds are random int63 (~1e18); a collision with this 7-digit range is
 impossible in practice and `tools/panels.py --check` asserts it anyway.
@@ -72,7 +72,7 @@ def cache_dir() -> Path:
 
 
 def lane_m_seed(width: int, i: int) -> int:
-    tag = {256: 0, 512: 1, 1024: 2}[width]
+    tag = {256: 0, 512: 1, 1024: 2, 768: 3, 384: 4}[width]
     return LANE_M_BASE + 1000 * tag + i
 
 
