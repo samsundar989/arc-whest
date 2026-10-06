@@ -44,3 +44,11 @@ transfer: ARC factored AUGMENT at n = 768 sits at final MSE 4.57e-8, which scale
 ~1.9e-8 at n = 1024 — the same level as v73 raw 2.15e-8, so the reference is a fair proxy
 for our chain's diagram set, but v73's fitted gains/corrector may already absorb part of it.
 The prototype on the v73 path is what decides.
+
+## M3 young-lineage screen — prediction (2026-10-06, before running)
+
+Factored E21b validated exactly (coef 24/(2n+8) reproduces unfactored d+E21b to 2.3e-13 rel,
+`m3_calibrate.json`). Worker prediction for the share of E21b's gain (≈ 13 pp at n = 512/768)
+kept when E21b reads only the κ3 columns born at the last g layers: g = 1 → 40 % (≈ 5 pp),
+g = 2 → 65 %, g = 3 → 80 %; E21b on ALL columns reproduces m2's d+E21b (13.1 % / 13.5 %).
+Rationale: v73's own census says exact RECENT lineages carry most of κ3's value (age 5).
