@@ -131,6 +131,9 @@ def main(argv=None) -> int:
     ap.add_argument("--variants", default="a,b,c,d0,d+T1,d+E3,d+E21a,d+E21b,d+E")
     ap.add_argument("--dtype", default="float32", choices=["float32", "float64"])
     ap.add_argument("--no-labels", action="store_true", help="timing/bench only")
+    ap.add_argument("--mini", action="store_true",
+                    help="organizer DEV nets (width 1024): weights by the bit-exact mint, "
+                         "labels = organizer N=1e9 from cache/fresh/mini16_truth.npz")
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)
     dev = torch.device("cuda")
@@ -142,12 +145,18 @@ def main(argv=None) -> int:
            "k_max": K_MAX, "torch": torch.__version__, "nets": []}
     prog = os.environ.get("WORKERQ_PROGRESS")
     outp = Path(a.out)
+    mini = np.load(gen.cache_dir() / "mini16_truth.npz") if a.mini else None
     for i in range(lo, hi):
-        seed = gen.lane_m_seed(a.width, i)
+        seed = int(mini["seeds"][i]) if a.mini else gen.lane_m_seed(a.width, i)
         w = gen.mint_numpy(seed, a.width, a.depth)
         rec = {"i": i, "seed": seed, "variants": {}}
         lab = None
-        if not a.no_labels:
+        if a.mini:
+            lab = {"means": np.array(mini["truth"][i]),
+                   "floor": np.full(a.depth, float(mini["avg_variance"][i]) / 1e9)}
+            rec["floor_final"] = float(lab["floor"][-1])
+            rec["v73_mse_final"] = float(mini["v73_mse"][i])
+        elif not a.no_labels:
             with np.load(gen.label_path(f"lane_m_w{a.width}", seed, 10**8)) as d:
                 assert str(d["weight_sha256"]) == gen.sha256_weights(w)
                 lab = {"means": np.array(d["means"]), "floor": np.array(d["var"]).mean(1) / int(d["n"])}
