@@ -35,3 +35,10 @@ Twin: dressed refit VAL 2.11466e-8 vs refit control 2.26911e-8 = **−6.81 % raw
 - Worker: FRESH-A paired raw −5 to −7 % vs v77 (VAL→fresh shrink ~1 pp), F/B +0.05 %; fresh
   score ≈ 3.75–3.83e-9 → projected public ≈ 3.68–3.76e-9; graded ≈ 3.70e-9 ± 2 %.
 - Strategist (P2.3, both levers): graded 3.4–3.8e-9; no figure for dressing alone.
+
+## P2.2 revised (written 2026-10-07 ~01:55 UTC, after the unrefit screen, before the refits)
+Unrefit β 0.7 blew up (×7.7): the chain's D22 is 0.31 (L1) → 0.56 (L14) of the β=1 template, with
+corr 0.86–0.97, so β 0.7 doubled κ4. Refits start from β_l = chain-matched (0.31 → 0.56), learned:
+- Worker: a / b / c after refit vs the refit control (2.26911e-8): −0.3 to −1.5 % each [25 % that
+  the best is ≥ 1 %]; the template's shape barely differs from the chain's at depth (corr 0.97).
+- Strategist: best arm −2 to −8 %. Kill: < −1 %.
