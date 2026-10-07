@@ -31,6 +31,7 @@ def main() -> int:
     ap.add_argument("--n", type=float, default=1e9)
     ap.add_argument("--chunk", type=int, default=1 << 16)
     ap.add_argument("--blocks", type=int, default=10)
+    ap.add_argument("--nets", default=None, help="lo:hi rows of the state file")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     st = np.load(a.state)
@@ -39,10 +40,12 @@ def main() -> int:
     per_block = N // a.blocks
     n_chunks = per_block // a.chunk
     prog = os.environ.get("WORKERQ_PROGRESS")
-    nets = st["seeds"]
+    lo, hi = (int(x) for x in a.nets.split(":")) if a.nets else (0, len(st["seeds"]))
+    nets = st["seeds"][lo:hi]
     L = st["U"].shape[1]
     out = {k: [] for k in ("S1", "S2", "P1", "P2")}
-    for k, seed in enumerate(nets):
+    for kk, seed in enumerate(nets):
+        k = lo + kk
         w = torch.as_tensor(gen.mint_numpy(int(seed))[:L], device=dev)
         U = torch.as_tensor(st["U"][k], device=dev, dtype=torch.float32)   # (L, n, 5)
         n = w.shape[1]
@@ -63,7 +66,7 @@ def main() -> int:
                     P1[b, l] += p.sum(0)
                     P2[b, l] += p.T @ p
             if prog:
-                Path(prog).write_text(f"{(k * a.blocks + b + 1) / (len(nets) * a.blocks):.3f}")
+                Path(prog).write_text(f"{(kk * a.blocks + b + 1) / (len(nets) * a.blocks):.3f}")
         cnt = float(n_chunks * a.chunk)
         out["S1"].append((S1 / cnt).cpu().numpy())
         out["S2"].append((S2 / cnt).cpu().numpy())
@@ -71,7 +74,8 @@ def main() -> int:
         out["P2"].append((P2 / cnt).cpu().numpy())
         print(f"net {k} seed {seed} done", flush=True)
         np.savez(a.out, **{kk: np.array(v) for kk, v in out.items()},
-                 per_block=np.int64(n_chunks * a.chunk), seeds=nets[: k + 1])
+                 per_block=np.int64(n_chunks * a.chunk), seeds=nets[: kk + 1],
+                 rows=np.arange(lo, k + 1))
     return 0
 
 

@@ -33,11 +33,13 @@ def ci(x):
 
 
 def main() -> int:
-    st = np.load(HERE / "m7_state.npz")
-    mc = np.load(HERE / "m7_mc.npz")
-    K = len(mc["seeds"])
-    S1, S2, P1, P2 = mc["S1"], mc["S2"], mc["P1"], mc["P2"]          # (K, B, L, ...)
-    N_block = int(mc["per_block"])
+    st0 = np.load(HERE / "m7_state.npz")
+    parts = [np.load(p) for p in sorted(HERE.glob("m7_mc_*.npz"))]
+    rows_ = np.concatenate([p["rows"] for p in parts])
+    S1, S2, P1, P2 = (np.concatenate([p[k] for p in parts]) for k in ("S1", "S2", "P1", "P2"))  # (K, B, L, ...)
+    st = {k: st0[k][rows_] for k in ("U", "mu", "var", "uCu")}
+    K = len(rows_)
+    N_block = int(parts[0]["per_block"])
     B = S1.shape[1]
     L = S1.shape[2]
     keys = ["mean_mhat", "var_mhat", "var_u1", "var_u2", "var_u3", "var_u4", "trC", "mse_layer", "frac_mhat", "frac_top4"]
