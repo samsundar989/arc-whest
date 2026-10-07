@@ -532,14 +532,14 @@ ARMS = {
     # (normalised by s_i^3 s_j: 12 b c^2 Cn_ij). D4 stays the chain's dG form.
     # `_GM` None = inert. Keys: mode 'a' (D22 template), 'b' (D22 + Q31 templates), 'c'
     # (blend: existing + gamma * template, on D22, and on Q31 if q31b=1); beta (default 0.7)
-    # / gamma (default 0), overridden per layer by gain/gmb, gain/gmg once installed;
+    # / gamma (default 0), overridden per layer by gain/gmb, gain/gmg when learn=1 (training);
     # q31 = 'keep' | 'drop' (the 5 learned q31 modes).
     "gm": [
         ("def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n",
          "_GM = None\n_GMS = {}\n\n\n"
          "def _gm_coef(key, default, li):\n"
          "    tk = {'beta': 'gmb', 'gamma': 'gmg'}[key]\n"
-         "    if _TWG is not None and tk in _TWG:\n"
+         "    if _GM.get('learn') and _TWG is not None and tk in _TWG:\n"
          "        return _TWG[tk][li]\n"
          "    return _GM.get(key, default)\n\n\n"
          "def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n"),
@@ -638,7 +638,7 @@ def parse_gm(spec):
         elif k == "q31":
             assert v in ("keep", "drop"), v
             out[k] = v
-        elif k in ("beta", "gamma", "q31b"):
+        elif k in ("beta", "gamma", "q31b", "learn"):
             out[k] = float(v)
         else:
             raise SystemExit(f"--gm: unknown key {k}")
