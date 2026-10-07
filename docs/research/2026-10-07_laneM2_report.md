@@ -157,7 +157,8 @@ E21b form** on the end-to-end evidence and hand it to Lane P (done, 2026-10-07):
     v = Cm(w22∘μ),  q = (Cm∘Cm)ᵀw22,  P = Cm diag(w22) Cm      (pre-activation μ, C; β = 0.7;
     ΔB = 24/(2n+8) · sym[w11_j X_jk w21_k], diag 0             c² = μᵀCμ/‖μ‖⁴)
 
-Unit price: one n³ product per layer (~2.1e9 FLOPs at n = 1024, ≈ +0.5 % of v77) plus O(n²),
+Unit price: one n³ product per layer (2.1e9 FLOPs at n = 1024; ≈ 3.2e10 over 15 layers ≈ +8 % of
+v77's ~4e11 before Strassen; ≈ +4 % if applied only from layer 6, which keeps −10.5 %) plus O(n²),
 **plus the transport of an off-diagonal κ4 core if the host chain carries one** (W B Wᵀ, two
 n³ per layer ≈ +14 % in v73 terms, Lane M §5 of the 10-06 report). Expected gain: ≤ 10–12 % raw
 (an ARC-chain number; v77 has no off-diagonal κ4-core channel, so the gain depends on the host
