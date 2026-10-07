@@ -29,3 +29,9 @@ Kill (handoff): full set after refit better than −2 % raw on VAL fails ⇒ rec
 | (c) blend γ 0.35, unrefit | — | +0 to +2 % (adds κ4 on top of an already-fitted slice) |
 | best arm after refit (β or γ per layer learned) | −2 to −8 % raw | −1 to −3 % raw [35 % that it is ≥ 2 %] |
 Kill (handoff): best arm after refit better than −1 % fails ⇒ record and stop.
+
+## P2.1 result → v79_dress on FRESH-A (written 2026-10-07 ~01:00 UTC, eval just launched)
+Twin: dressed refit VAL 2.11466e-8 vs refit control 2.26911e-8 = **−6.81 % raw** (unrefit −1.58 %).
+- Worker: FRESH-A paired raw −5 to −7 % vs v77 (VAL→fresh shrink ~1 pp), F/B +0.05 %; fresh
+  score ≈ 3.75–3.83e-9 → projected public ≈ 3.68–3.76e-9; graded ≈ 3.70e-9 ± 2 %.
+- Strategist (P2.3, both levers): graded 3.4–3.8e-9; no figure for dressing alone.
