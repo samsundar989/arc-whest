@@ -354,6 +354,8 @@ ARMS = {
          "                _mH = _mS = _m\n"
          "            else:\n"
          "                _mD = _m\n"
+         "    if _MASK is not None and not last_layer:\n"
+         "        _MASK['_prevR'] = _mR\n"
          "    _mon = _mDd = None\n"
          "    if _MASK is not None and _MASK.get('Da') and not last_layer:\n"
          "        _mon = fnp.where(alpha > _MASK['Da'], dtype(0.0), dtype(1.0))\n"
@@ -435,6 +437,18 @@ ARMS = {
          "        out_tw = _mask_rows(out_tw, _mR)\n"
          "    elif _mR is not None and _MASK.get('Rpart', '') == 'n':\n"
          "        out_tw = _mask_rows_new(out_tw, _mR, n)\n"),
+        # P2.4.2 (key C): the covariance sandwich reads C on the previous layer's R rows only
+        ("    mu_pre = WT @ mu\n",
+         "    mu_pre = WT @ mu\n"
+         "    _covS = cov\n"
+         "    if _MASK is not None and _MASK.get('C') and _MASK.get('_prevR') is not None:\n"
+         "        _pc = _MASK['_prevR']\n"
+         "        _covS = cov * (_pc[:, None] * _pc[None, :])\n"),
+        ("        _X4 = _mm(WT, cov)\n", "        _X4 = _mm(WT, _covS)\n"),
+        ("        cov_pre = (_p4_sym_sandwich(WT, cov, W) if _P4_BLOCKSYM\n"
+         "                   else _mm(_mm(WT, cov), W))\n",
+         "        cov_pre = (_p4_sym_sandwich(WT, _covS, W) if _P4_BLOCKSYM\n"
+         "                   else _mm(_mm(WT, _covS), W))\n"),
     ],
     # HANDOFF 2026-10-06 Lane V+M, M4: neighbor-feature corrector screen (twin only).
     # A second additive head on mu_out, beside the shipped corrector, reading each
@@ -610,7 +624,7 @@ def parse_mask(spec):
         if k == "Daz":           # always-on rows' corrector: z zero (Dz), f full row, c column
             out["Daz"] = {"0": "z", "1": "f", "2": "c"}.get(v, v)
             continue
-        if k not in ("R", "H", "D", "Dc", "Dr", "Dz", *hmodes, *rparts):
+        if k not in ("R", "H", "D", "C", "Dc", "Dr", "Dz", *hmodes, *rparts):
             raise SystemExit(f"--mask: unknown role {k}")
         if k in rparts:
             k, out["Rpart"] = "R", rparts[k]

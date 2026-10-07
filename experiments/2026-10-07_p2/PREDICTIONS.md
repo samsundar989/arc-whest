@@ -48,3 +48,9 @@ corr 0.86–0.97, so β 0.7 doubled κ4. Refits start from β_l = chain-matched 
 - Worker: Da3.0 +0.2 to +0.8 % raw; Da2.5 +0.5 to +1.5 %; Da2.0 +1.5 to +4 % (the corrector
   delta is lost on those rows, as it was for dead rows before Dz). FLOP saving ≈ 30 % (D21
   readout) × always-on fraction (≈ 8–14 % of rows at τ 2.5 by depth) ≈ −2.5 to −4 %.
+
+## P2.4.1 result (recorded) and P2.4.2 prediction (written before the run)
+P2.4.1 always-on D21 rows: Da3.0 +34 %, Da2.5 +87 %, Da2.0 ×3.9; the corrector variants
+(full-row diag +34 %, column proxy +38 %) prove the corrector is not the cause. Closed.
+P2.4.2 covariance sandwich on the previous layer's R rows (alive block): worker +0.0 to +0.3 %
+raw; FLOPs −1.5 to −2.5 % (covariance 9.2 %; compact K_R/n 0.72–1.0). Handoff −2 to −3 %.
