@@ -69,7 +69,8 @@ def others_waiting() -> list[int]:
 
 def main() -> int:
     start = int(sys.argv[1]) if len(sys.argv) > 1 else 0
-    for k, (desc, eta, res, args) in enumerate(JOBS[start:], start):
+    stop = int(sys.argv[2]) if len(sys.argv) > 2 else len(JOBS)
+    for k, (desc, eta, res, args) in enumerate(JOBS[start:stop], start):
         while True:
             busy = others_waiting()
             if not busy:
