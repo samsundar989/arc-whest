@@ -16,3 +16,6 @@ Traceback (most recent call last):
            ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 UnicodeEncodeError: 'charmap' codec can't encode character '\u2297' in position 52: character maps to <undefined>
 20:29:27 [3] submitted #2447: M5 12 arms, nets 7:10
+20:39:52 [3] #2447 finished, exit 0
+20:40:58 [4] submitted #2449: M5 12 arms, nets 10:13
+20:52:30 [4] #2449 finished, exit 0
