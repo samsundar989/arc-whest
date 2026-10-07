@@ -21,7 +21,7 @@ PARAMS = MAIN / "experiments" / "2026-10-07_p2" / "refit_dress_all" / "params_be
 BASE = "R=2.0,Hd=2.5,Dz=2.5,K=" + str(MAIN / "experiments" / "2026-10-06_mask" / "ktab" / "aggr_q50.json")
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--taus", default="0,3.0,2.5,2.0")
+ap.add_argument("--configs", default=";Da=3.0;Da=2.5;Da=2.0", help="mask suffixes, ;-separated (empty = base)")
 ap.add_argument("--n", type=int, default=100)
 ap.add_argument("--out", default=str(MAIN / "experiments" / "2026-10-07_p2" / "da_screen.json"))
 a = ap.parse_args()
@@ -29,14 +29,14 @@ tw = twin.Twin(CAND, arm="mask+dress")
 tw.install(twin.load_params(PARAMS))
 res = {}
 prog = os.environ.get("WORKERQ_PROGRESS")
-taus = [float(x) for x in a.taus.split(",")]
+taus = a.configs.split(";")
 for k, t in enumerate(taus):
-    mask = BASE + (f",Da={t}" if t else "")
+    mask = BASE + (f",{t}" if t else "")
     ns = argparse.Namespace(panel="hold100", n=a.n, cand=str(CAND), params=None, subst="",
                             mask=mask, arm="mask+dress", dress="all", gm="",
                             mask_stats=(k == 0))
     r = twin.cmd_eval(ns, tw=tw, quiet=True)
-    res[str(t)] = {"raw_mse": r["raw_mse"], "per_net": r["per_net"]}
+    res[t or "base"] = {"raw_mse": r["raw_mse"], "per_net": r["per_net"]}
     if "stats" in r:
         # mean over nets of the per-layer always-on fractions alpha > t (dec - dead)
         L = {}
@@ -45,9 +45,9 @@ for k, t in enumerate(taus):
                 for tt in (2.0, 2.5, 3.0):
                     L.setdefault((st["l"], tt), []).append(st["dec%.1f" % tt] - st["dead%.1f" % tt])
         res["on_frac"] = {f"{l}:{tt}": float(np.mean(v)) for (l, tt), v in sorted(L.items())}
-    line = {"Da": t, "raw_mse": r["raw_mse"]}
-    if "0.0" in res and t:
-        b, x = np.array(res["0.0"]["per_net"]), np.array(r["per_net"])
+    line = {"mask": t or "base", "raw_mse": r["raw_mse"]}
+    if "base" in res and t:
+        b, x = np.array(res["base"]["per_net"]), np.array(r["per_net"])
         d = x / b - 1
         line.update(ratio=float(x.mean() / b.mean()), wins=int((x < b).sum()),
                     paired_mean=float(d.mean()), paired_se=float(d.std(ddof=1) / len(d) ** .5))

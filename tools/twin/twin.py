@@ -354,8 +354,10 @@ ARMS = {
          "                _mH = _mS = _m\n"
          "            else:\n"
          "                _mD = _m\n"
+         "    _mon = _mDd = None\n"
          "    if _MASK is not None and _MASK.get('Da') and not last_layer:\n"
          "        _mon = fnp.where(alpha > _MASK['Da'], dtype(0.0), dtype(1.0))\n"
+         "        _mDd = _mD\n"
          "        _mD = _mon if _mD is None else _mD * _mon\n"
          "    _mA = _mW = _mC = _mSl = None\n"
          "    if _mH is not None:\n"
@@ -373,7 +375,7 @@ ARMS = {
          "            _st['dead%.2f' % _t] = float((alpha < -_t).sum()) / n\n"
          "        _MASK['stats'].append(_st)\n"),
         ("        D22 = ((metric / 6.0) * (dG[:, None] + dG[None, :])) * off_mask\n",
-         "        _D21c = D21\n"
+         "        _D21c = _D21f = D21\n"
          "        if _mD is not None and _MASK.get('Drows'):\n"
          "            D21 = D21 * _mD[:, None]\n"
          "        elif _mD is not None:\n"
@@ -382,6 +384,15 @@ ARMS = {
          "            _D21c = D21\n"
          "        if _mD is not None and _MASK.get('Dzero'):\n"
          "            _kz = _mD\n"
+         "        if _mon is not None and _MASK.get('Daz', 'z') != 'z':\n"
+         "            # always-on rows keep their corrector delta; its d21e feature reads the\n"
+         "            # full row ('f', diagnostic) or the row's own COLUMN ('c', servable)\n"
+         "            _kz = 1.0 if _mDd is None else _mDd\n"
+         "            _off = 1.0 - _mon\n"
+         "            if _MASK['Daz'] == 'f':\n"
+         "                _D21c = D21 + _D21f * _off[:, None]\n"
+         "            else:\n"
+         "                _D21c = D21 + D21.T * _off[:, None]\n"
          "        D22 = ((metric / 6.0) * (dG[:, None] + dG[None, :])) * off_mask\n"),
         # Dz: the corrector's delta is zeroed on the D-dropped rows
         ("        mu_out = mu_out + _corr_delta(\n",
@@ -595,6 +606,9 @@ def parse_mask(spec):
         rparts = {"Ri": "i", "Rn": "n"}     # R on inherited legs only / newborn rows only
         if k == "Da":            # P2.4.1: ALSO drop D21 rows with alpha > +tau (always-on)
             out["Da"] = float(v)
+            continue
+        if k == "Daz":           # always-on rows' corrector: z zero (Dz), f full row, c column
+            out["Daz"] = {"0": "z", "1": "f", "2": "c"}.get(v, v)
             continue
         if k not in ("R", "H", "D", "Dc", "Dr", "Dz", *hmodes, *rparts):
             raise SystemExit(f"--mask: unknown role {k}")
