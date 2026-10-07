@@ -2652,3 +2652,22 @@ re-run PASSES (+26 MiB). `experiments/2026-10-07_p2/v7{7,9}_mem6.json`, `v79_mem
 projection 3.6595e-09 (fresh/graded 1.0072 vs the 1.019 factor); +2.9 % vs the DEV projection
 3.5979e-09 (implied DEV factor 1.0089 — the refit was selected on VAL, so DEV/fresh both read a
 little optimistic for refit builds). `tools/ev.py --best-graded` updated.
+
+### P2.2 — gain-mode κ4 templates (twin, VAL-100) — KILLED
+Arm `gm` in `tools/twin/twin.py`: c² = mᵀCm/‖m‖⁴ from the chain's post-ReLU state; D22 template
+4βc²(σ_i²σ_j² + 2C_ij²), Q31 template 12βc²σ_i²C_ij; D4 kept from dG. Same baseline/control as P2.1.
+
+| arm | VAL raw | vs baseline / refit control |
+|---|---:|---:|
+| (a) D22 template, β 0.7, unrefit | 1.7605e-07 | ×7.76 (blow-up) |
+| (b) + Q31 template, unrefit (keep / drop q31 modes) | 1.7310 / 1.7572e-07 | ×7.63 / ×7.74 |
+| (a) refit, per-layer β learned from chain-matched init | 2.349147e-08 | **+3.53 %** |
+| (b) refit, same | 2.36696e-08 (step 84) | +4.31 % |
+| (c) blend existing + γ·template (D22 + Q31), γ learned from 0 | 2.269276e-08 | +0.01 % |
+
+Diagnostic (`gm_diag.json`, 3 VAL nets): the chain's D22 is 0.31 (L1) → 0.56 (L14) of the β = 1
+template with correlation 0.86 (L1) → 0.97 (L4+); D4 likewise 0.30 → 0.56. c² = 0.0026 (L1) →
+0.0073 (L14), matching R2. So β 0.7 doubled κ4 (blow-up), and at the chain's own scale the
+product shape is slightly worse than the additive form the gains were fitted with. Predictions:
+strategist −2 to −8 %, worker −0.3 to −1.5 %; kill line −1 %. **Closed.** The law itself
+(c² from the chain's state, κ4 ≈ 0.3–0.56 of a pure scale mixture) stays a write-up item.
