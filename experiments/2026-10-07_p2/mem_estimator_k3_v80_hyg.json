@@ -1,0 +1,176 @@
+{
+  "artifact": "linux_memory_gate",
+  "artifact_version": 5,
+  "candidate": "estimator_k3_v80_hyg.py",
+  "candidate_sha256": "73b2c19ca92584c751f399e5b16bd19dfa0c66174b7d3f28e10f4b2b05c71c17",
+  "instrument": "local_sim/linux_memory_gate.py",
+  "instrument_sha256": "463b8560aa5be78bd18270a3507b80edb552ee8b1b7929d4089f7624a7261e8f",
+  "instrument_policy": "current-source-sha256",
+  "limit_mb": 8192,
+  "width": 1024,
+  "depth": 16,
+  "budget": 2199023255552,
+  "seed": 90000000101,
+  "suite_n_mlps": 100,
+  "weights_mode": "f64_readonly",
+  "repeats": 3,
+  "host_platform": "win32",
+  "generated_utc": "2026-10-07T09:23:39Z",
+  "linux_kind": "wsl",
+  "linux_note": "WSL2 Ubuntu, official stack in $HOME/.arcwhest-linux",
+  "negative_control": {
+    "limit_mb": 8192,
+    "request_gib": 9.0,
+    "cap_applied": true,
+    "allocated": false,
+    "survived": false,
+    "error": "MemoryError: "
+  },
+  "positive_control": {
+    "limit_mb": 0,
+    "request_gib": 9.0,
+    "cap_applied": false,
+    "allocated": true,
+    "survived": true
+  },
+  "lifecycle_controls": {
+    "growth_threshold_bytes": 67108864,
+    "stateless": {
+      "completed": true,
+      "retain": false,
+      "allocation_mib": 96,
+      "repeats": 3,
+      "rows": [
+        {
+          "i": 0,
+          "vm_size_settled_bytes": 16080896
+        },
+        {
+          "i": 1,
+          "vm_size_settled_bytes": 16080896
+        },
+        {
+          "i": 2,
+          "vm_size_settled_bytes": 16080896
+        }
+      ],
+      "growth_bytes": 0,
+      "error": "",
+      "cap_applied": true
+    },
+    "retaining": {
+      "completed": true,
+      "retain": true,
+      "allocation_mib": 96,
+      "repeats": 3,
+      "rows": [
+        {
+          "i": 0,
+          "vm_size_settled_bytes": 116748288
+        },
+        {
+          "i": 1,
+          "vm_size_settled_bytes": 217415680
+        },
+        {
+          "i": 2,
+          "vm_size_settled_bytes": 318083072
+        }
+      ],
+      "growth_bytes": 201334784,
+      "error": "",
+      "cap_applied": true
+    }
+  },
+  "candidate_run": {
+    "stage": "done",
+    "limit_mb": 8192,
+    "setrlimit_raised": null,
+    "soft_limit_bytes": 8589934592,
+    "hard_limit_bytes": 8589934592,
+    "cap_requested_bytes": 8589934592,
+    "cap_applied": true,
+    "whestbench_file": "/home/samsu/.arcwhest-linux/lib/python3.12/site-packages/whestbench/__init__.py",
+    "flopscope_file": "/home/samsu/.arcwhest-linux/lib/python3.12/site-packages/flopscope/__init__.py",
+    "numpy_version": "2.4.6",
+    "whestbench_version": "0.16.1",
+    "flopscope_version": "0.12.1",
+    "stack_version_source": "importlib.metadata.version",
+    "python_version": "3.12.3",
+    "weights_mode": "f64_readonly",
+    "repeats": 3,
+    "suite_n_mlps": 100,
+    "weight_dtype": "float64",
+    "weight_writeable": false,
+    "setup_raised": null,
+    "setup_s": 0.005048562999999007,
+    "predict_s": 44.389753489,
+    "predict_error": "",
+    "shape": [
+      16,
+      1024
+    ],
+    "finite": true,
+    "dtype": "float32",
+    "largest_array_bytes": 65536,
+    "repeat_runs": [
+      {
+        "i": 0,
+        "vm_peak_bytes": 6429913088,
+        "vm_size_settled_bytes": 2476290048,
+        "flops_used": 387079927313.0,
+        "error": ""
+      },
+      {
+        "i": 1,
+        "vm_peak_bytes": 6436868096,
+        "vm_size_settled_bytes": 2490970112,
+        "flops_used": 387079927313.0,
+        "error": ""
+      },
+      {
+        "i": 2,
+        "vm_peak_bytes": 6475272192,
+        "vm_size_settled_bytes": 2553389056,
+        "flops_used": 387079927313.0,
+        "error": ""
+      }
+    ],
+    "repeat_error": "",
+    "repeat_vm_size_growth_bytes": 77099008,
+    "repeat_flops_identical": true,
+    "repeat_flops_observed": [
+      387079927313.0,
+      387079927313.0,
+      387079927313.0
+    ],
+    "flops_used": 387079927313.0,
+    "residual_wall_time_s": 1.0004456830000112,
+    "wall_time_s": 44.389743759000005,
+    "multiplier": 0.17602357152691184,
+    "peak_rss_bytes": 4513734656,
+    "vm_peak_bytes": 6475272192,
+    "vm_hwm_bytes": 4513734656,
+    "ok": true
+  },
+  "child_stderr": {
+    "negative": "",
+    "positive": "",
+    "lifecycle_stateless": "",
+    "lifecycle_retaining": "",
+    "candidate": ""
+  },
+  "child_stderr_tail": "",
+  "stack": {
+    "whestbench": "0.16.1",
+    "flopscope": "0.12.1",
+    "numpy": "2.4.6",
+    "python": "3.12.3",
+    "source": "importlib.metadata.version"
+  },
+  "status": "FAIL",
+  "checks_total": 23,
+  "checks_failed": [
+    "C: ...and SETTLED address space did not GROW across them"
+  ]
+}

@@ -1,0 +1,32 @@
+[ev] estimator_k3_v80_hyg.py on FRESH_A n=100
+[ev] cost: 387,079,927,313 FLOPs, 25,631 ops, peak RSS 4.18 GiB -> budget 10.5 GiB/worker
+  2 workers x 2 BLAS threads over 100 nets ...
+[ev] accuracy: 3201.5 s, raw MSE 2.147862e-08
+
+  raw MSE            2.147862e-08   (our N = 1e8 labels; mean floor 7.476e-10)
+  raw MSE floor-free 2.073097e-08
+  FLOPs / MLP        387,079,927,313   = 0.17602 x 2^41
+  op calls           25,631
+  materializations   0
+  adjusted (panel)   3.649139e-09
+  per-net score CV   0.125
+  PROJECTED PUBLIC   3.581098e-09   (÷ 1.019)
+  paired vs estimator_k3_v79_dress:  gain 1.0219×, Δ +8.2844e-11, t95 [+8.0275e-11, +8.5413e-11], wins 100/100
+    (geometric 1.0219× — diagnostic only, no authority over an outcome)
+
+  PLAN §5 gates
+    PASS  panel projected vs best graded   better than 3.7025e-09             3.5811e-09 = 3.28% better
+    PASS  op calls                         ≤ 26,000                           25,631
+    ok    projected server wall (noisy day, A policy) ≤ 115 s                            96.7 s (quiet day 82.3 s)
+    PASS  setup                            < 2 s                              0.00 s
+    PASS  scalar materializations          0                                  0
+    PASS  failed nets on panel             0                                  0
+    PASS  projected server residual        ≤ 0.33 s (D7 finals bound)         0.284 s (1.41× headroom vs the 0.4 s cliff)
+    PASS  full acceptance panel            fresh_a (or dev), n = 100          fresh_a, n = 100
+    PASS  paired vs incumbent              --baseline given                   estimator_k3_v79_dress
+    FAIL  WSL RLIMIT_AS 8 GiB gate         PASS on candidate SHA256 (--mem)   FAIL VmPeak 0 MiB; source hash MISMATCH/MISSING
+
+  NOT ACCEPTED — gated or incomplete; not submittable
+
+  RESULTS.md row:
+  | 2026-10-07 | `estimator_k3_v80_hyg.py` | `73b2c19c` | FRESH-A | 2.147862e-08 | 0.17602 | 25,631 | 90.031 s (local) → 82.3 s proj | 4285 MiB | **3.5811e-09** | PENDING | 1.0219× vs estimator_k3_v79_dress (Δ +8.284e-11, t95 [+8.027e-11, +8.541e-11]) | 100/100 |  |

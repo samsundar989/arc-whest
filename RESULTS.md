@@ -2671,3 +2671,24 @@ template with correlation 0.86 (L1) → 0.97 (L4+); D4 likewise 0.30 → 0.56. c
 product shape is slightly worse than the additive form the gains were fitted with. Predictions:
 strategist −2 to −8 %, worker −0.3 to −1.5 %; kill line −1 %. **Closed.** The law itself
 (c² from the chain's state, κ4 ≈ 0.3–0.56 of a pure scale mixture) stays a write-up item.
+
+### P2.1b — exact spurious-term correction (Lane M2's −w2 family) — CLOSED
+`tools/build_dress.py --corr f`: extra newborn birth columns H[:, J] with hub weight −w2 on the
+top f·n hubs by w2‖H_j‖² (widths rounded to multiples of 32; f = 0.15 costs +14.2 % FLOPs).
+Twin, VAL-100, unrefit: on v79 (refit sym) f = 0.0625 / 0.15 / 0.4 / 1.0 → +0.34 / +0.76 / +1.51 /
++1.88 %; on the dressed chain with G1bg (pre-refit) params f = 1 (exact asym) → +3.57 %. In ARC's
+learned-free chain the same correction is worth −41 % (Lane M2, 16 nets); in ours it hurts.
+
+### P2.4 — cost hygiene on the v79 chain
+| item | twin / meter | verdict |
+|---|---|---|
+| 4.1 always-on D21 rows (Da τ) | Da3.0 +34 %, 2.5 +87 %, 2.0 ×3.9 raw; corrector kept on full row +34 %, column proxy +38 % | closed (not the corrector) |
+| 4.2 covariance sandwich on alive block | C=1 ×13; keep dropped variances C=2 ×3.2 | closed |
+| 4.4 layer-0 `W^T W` (no `W^T @ I`) | F −0.32 %, ops −101, wall −0.4 % | kept |
+| 4.3 join re-rotation `T @ [FA|FM]` via `_mm` | F −0.79 % more, ops +540, wall +1.7 % | kept |
+| 4.5 one extra Strassen level for m·k·n ≥ 2^30 | F −1.0 % more, ops +320, wall +6 % | kept (wall within A rule) |
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-07 | `estimator_k3_v80_hyg.py` | `73b2c19c` | FRESH-A | 2.147862e-08 | 0.17602 | 25,631 | local A/B on DEV net 3 (×2) v80/v79 = **1.0863** → × v79's 92.0 s projected max ≈ 100 s; noisy-implied ≈ **101.3 s** (A ≤ 105 s) | VmPeak 6,185 MiB (WSL PASS r2, same hash; r1/r3 FAIL only on the settled-growth check, see note) | **3.5811e-09** | PENDING | **1.0219× vs v79** (Δ +8.28e-11, t95 [+8.03e-11, +8.54e-11]) | 100/100 | v79 + P2.4.4/4.3/4.5 (`tools/build_hyg.py --l0 --join --bigvol 2^30`). F −2.16 %, raw +0.02 % (rounding). residual 0.284 s. |
+| 2026-10-07 | `estimator_k3_v79_dressws.py` | `16379e50` | FRESH-A | 2.147464e-08 | 0.19306 | 21,292 | block-40 twin of v79 | VmPeak 4,677 MiB (WSL PASS) | 3.9270e-09 | — | 1.0783× vs v78 (t95 [+2.65e-10, +3.84e-10]) | 86/100 | B twin of v79; waits for the Oct 8 A/B slot (wall A/B vs v78 still to do). |
