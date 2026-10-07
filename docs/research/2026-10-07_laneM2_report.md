@@ -189,12 +189,12 @@ In ARC (`m6_e2e.py` arms `E21b_gain_diag*`, B never enters the off-diagonal core
 
 | arm (paired vs b) | final MSE Δ | wins |
 |---|---|---|
-| E21b gain-mode, full off-diagonal core | −11.7 % ± 2.3 | 10/10 |
-| B only via diag(W B Wᵀ) into the next diagonal core | −1.1 % ± 0.8 | 9/10 |
-| same, from layer 6 | −1.6 % ± 0.8 | 9/10 |
+| E21b gain-mode, full off-diagonal core | −11.6 % ± 1.4 | 16/16 |
+| B only via diag(W B Wᵀ) into the next diagonal core | −1.4 % ± 0.7 | 15/16 |
+| same, from layer 6 | −1.9 % ± 0.7 | 15/16 |
 
-(10 of 16 nets; the last 6 were still running when this was written.) The diagonal route keeps
-~10–14 % of the gain, an order of magnitude short of the +16 % port's bar. E21b's value lives in the
+(16 DEV nets.) The diagonal route keeps
+~12–16 % of the gain, an order of magnitude short of the +16 % port's bar. E21b's value lives in the
 off-diagonal κ4 core and its consumers. **Recommendation for the Oct 10 decision: close the E21b
 port for v77**, unless a future chain carries an off-diagonal κ4 core for another reason (≈ +24 %
 F, ARC evidence only).
