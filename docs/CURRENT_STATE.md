@@ -9,7 +9,8 @@ vs the incumbent** (`tools/ev.py --panel fresh_a --baseline <incumbent>`); lane-
 
 | role | source / SHA8 | submission | score | F/B |
 |---|---|---|---:|---:|
-| **best A** | `estimator_k3_v79_dress.py` / `2cf3acf4` | #334576 | **3.7025275784494673e-9** (raw 2.0580e-8) | 0.17991 |
+| **best A** | `estimator_k3_v80_hyg.py` / `73b2c19c` | #334659 | **3.6223815250878947e-9** (raw 2.0579e-8) | 0.17602 |
+| A (prev.) | `estimator_k3_v79_dress.py` / `2cf3acf4` | #334576 | 3.7025275784494673e-9 (raw 2.0580e-8) | 0.17991 |
 | **B** (wall-safe) | `estimator_k3_v78_kashws.py` / `6b3db2a5` | #334545 | **4.249585835999417e-9** (raw 2.2023e-8) | 0.19296 |
 | A (prev.) | `estimator_k3_v77_kash.py` / `4ff8018f` | #334487 | 3.959571663492616e-9 | 0.17981 |
 | B (prev.) | `estimator_k3_v76_kasws.py` / `fe05c0a4` | #334474 | 4.4952209455824486e-9 | 0.20416 |
@@ -34,7 +35,13 @@ twin, raw error fell 6.8 % on VAL, 7.4 % on FRESH-A, and 6.5 % on the graded run
   --corr`), f = 0.15 costs +14.2 % FLOPs; unrefit twin screen pending.
 - P2.2 gain-mode κ4: unrefit β 0.7 blew up (κ4 doubled); chain-matched β refits arm a +3.5 %,
   arm b ≈ +4 % vs control; arm c (blend) pending. Heading for the kill line.
-- Next: P2.3 combine whatever survives; P2.4 cost hygiene on the v79 chain.
+- P2.1b closed (exact correction hurts in our chain). P2.4: always-on D21 rows and alive-block
+  covariance closed (accuracy cliffs); layer-0 + join-via-Strassen + big-product level shipped as
+  **v80_hyg (new best 3.6224e-9)**. v80's local wall is +8.6 % vs v79 (noisy-implied ≈ 101 s, A ≤ 105 s).
+- Open for the Oct 10 decision: Lane M2's gain-mode E21b (−11.6 % in ARC's chain; in v77 it needs an
+  off-diagonal κ4-core channel, ≈ +16–24 % F). Lane M2 is measuring a diagonal-only route.
+- B for the Oct 8 A/B slot: v79_dressws gated except wall A/B; a v80 B twin (block 40) is the
+  better candidate — build and gate it.
 
 ## Traps found today
 

@@ -2692,3 +2692,8 @@ learned-free chain the same correction is worth −41 % (Lane M2, 16 nets); in o
 |---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
 | 2026-10-07 | `estimator_k3_v80_hyg.py` | `73b2c19c` | FRESH-A | 2.147862e-08 | 0.17602 | 25,631 | local A/B on DEV net 3 (×2) v80/v79 = **1.0863** → × v79's 92.0 s projected max ≈ 100 s; noisy-implied ≈ **101.3 s** (A ≤ 105 s) | VmPeak 6,185 MiB (WSL PASS r2, same hash; r1/r3 FAIL only on the settled-growth check, see note) | **3.5811e-09** | PENDING | **1.0219× vs v79** (Δ +8.28e-11, t95 [+8.03e-11, +8.54e-11]) | 100/100 | v79 + P2.4.4/4.3/4.5 (`tools/build_hyg.py --l0 --join --bigvol 2^30`). F −2.16 %, raw +0.02 % (rounding). residual 0.284 s. |
 | 2026-10-07 | `estimator_k3_v79_dressws.py` | `16379e50` | FRESH-A | 2.147464e-08 | 0.19306 | 21,292 | block-40 twin of v79 | VmPeak 4,677 MiB (WSL PASS) | 3.9270e-09 | — | 1.0783× vs v78 (t95 [+2.65e-10, +3.84e-10]) | 86/100 | B twin of v79; waits for the Oct 8 A/B slot (wall A/B vs v78 still to do). |
+
+**v80_hyg graded (#334659): 3.6223815250878947e-09, NEW BEST**, raw 2.0578957169448132e-08
+(= v79's graded raw to 0.001 %), 100 clean. −2.16 % vs v79, exactly the FLOP cut. +1.15 % vs the
+FRESH-A projection 3.5811e-09 (v79: +1.18 %): FRESH-A ÷ 1.019 reads ~1.2 % optimistic for these
+builds; the implied fresh/graded factor is 1.0074 on both. `tools/ev.py --best-graded` updated.
