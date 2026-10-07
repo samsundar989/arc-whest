@@ -354,6 +354,9 @@ ARMS = {
          "                _mH = _mS = _m\n"
          "            else:\n"
          "                _mD = _m\n"
+         "    if _MASK is not None and _MASK.get('Da') and not last_layer:\n"
+         "        _mon = fnp.where(alpha > _MASK['Da'], dtype(0.0), dtype(1.0))\n"
+         "        _mD = _mon if _mD is None else _mD * _mon\n"
          "    _mA = _mW = _mC = _mSl = None\n"
          "    if _mH is not None:\n"
          "        _hm = _MASK.get('Hmode', '')\n"
@@ -590,6 +593,9 @@ def parse_mask(spec):
         #   Hw  W only (diagnostic)       Hs   Sl only (diagnostic)
         hmodes = {"Hk": "k", "Hkh": "kh", "Hd": "d", "Hw": "w", "Hs": "s"}
         rparts = {"Ri": "i", "Rn": "n"}     # R on inherited legs only / newborn rows only
+        if k == "Da":            # P2.4.1: ALSO drop D21 rows with alpha > +tau (always-on)
+            out["Da"] = float(v)
+            continue
         if k not in ("R", "H", "D", "Dc", "Dr", "Dz", *hmodes, *rparts):
             raise SystemExit(f"--mask: unknown role {k}")
         if k in rparts:

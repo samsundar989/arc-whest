@@ -42,3 +42,9 @@ corr 0.86–0.97, so β 0.7 doubled κ4. Refits start from β_l = chain-matched 
 - Worker: a / b / c after refit vs the refit control (2.26911e-8): −0.3 to −1.5 % each [25 % that
   the best is ≥ 1 %]; the template's shape barely differs from the chain's at depth (corr 0.97).
 - Strategist: best arm −2 to −8 %. Kill: < −1 %.
+
+## P2.4.1 — always-on D21 rows (twin, VAL-100, v79-equivalent; written 2026-10-07 before the run)
+- Handoff: −4 to −7 % FLOPs at ≤ +1 % raw.
+- Worker: Da3.0 +0.2 to +0.8 % raw; Da2.5 +0.5 to +1.5 %; Da2.0 +1.5 to +4 % (the corrector
+  delta is lost on those rows, as it was for dead rows before Dz). FLOP saving ≈ 30 % (D21
+  readout) × always-on fraction (≈ 8–14 % of rows at τ 2.5 by depth) ≈ −2.5 to −4 %.
