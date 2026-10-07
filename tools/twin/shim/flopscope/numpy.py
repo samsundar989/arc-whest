@@ -80,6 +80,11 @@ def zeros(shape, dtype=float32):
     return _t.zeros(shape, dtype=_td(dtype), device=DEVICE)
 
 
+def arange(n):
+    """Integer index range (int64), as the KAS hcols concatenation uses it."""
+    return _t.arange(n, device=DEVICE)
+
+
 def ones(shape, dtype=float32):
     return _t.ones(shape, dtype=_td(dtype), device=DEVICE)
 

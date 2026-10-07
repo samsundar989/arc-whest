@@ -73,6 +73,58 @@ def _dress_H(w, alpha, sigma, C11, D21, D22):
 
 '''
 
+
+CORR_CONST = """
+# P2.1b: the symmetric dressing's spurious second-order term Sym(H (x) 3 w2 e_j (x) H) is
+# subtracted on the top _DRESS_CORR * n hubs by w2_j |H_j|^2 (Lane M2's identity: asym =
+# sym - that term, an ordinary one-leg family with hub weight -w2). It rides as EXTRA birth
+# columns of the newborn lineage (A_L = [X~ | H_J], w2b = [w2 | -w2_J], hcols = [kh | J]) with
+# zero slice/hub/P2-page entries, so it adds only (distinct-index) two-leg content.
+_DRESS_CORR = {corr!r}
+"""
+
+CORR_PATCHES = [
+    ("        _Xd = fac1\n",
+     "        _Xd = fac1\n"
+     "        _mJ = _kJ = None\n"
+     "        if _DRESS_CORR > 0.0 and _Hd is not None:\n"
+     "            _FJ = max(32, int(round(_DRESS_CORR * n / 32.0)) * 32)  # Strassen: widths stay multiples of 32\n"
+     "            _pJ = fnp.argsort((_Hd * _Hd).sum(axis=0) * w2m)\n"
+     "            _kJ = _pJ[n - _FJ:]\n"
+     "            _mJ = fnp.where(fnp.argsort(_pJ) >= n - _FJ, dtype(1.0), dtype(0.0))\n"),
+    ("        w2b_vec = w2m\n",
+     "        w2b_vec = w2m\n"
+     "        _w2full = w2m\n"),
+    ("                   + ((fac1 * fac1) * w2b) * off_mask)\n",
+     "                   + ((fac1 * fac1) * w2b) * off_mask)\n"
+     "        if _mJ is not None:\n"
+     "            # the correction family's own (2,1) slice, -(H_J . H_J) w2_J\n"
+     "            p111_21 = p111_21 - ((_Hd * _Hd) * (w2b * _mJ[None, :])) * off_mask\n"),
+    ("            out_tw = _append(adv, None, fac1, w2b_vec, n, Zb, Lb, _sb, e_b,\n"
+     "                             _Yb, cA, cB)\n"
+     "            out_tw.rows = _kr\n"
+     "            out_tw.hcols = _kh\n",
+     "            _hc = _kh\n"
+     "            if _kJ is not None:\n"
+     "                _Hc = fnp.take(_Hd, _kJ, axis=1)\n"
+     "                if _kr is not None:\n"
+     "                    _Hc = fnp.take(_Hc, _kr, axis=0)\n"
+     "                _zJ = fnp.zeros(_kJ.shape[0], dtype=dtype)\n"
+     "                fac1 = fnp.concatenate([fac1, _Hc], axis=1)\n"
+     "                w2b_vec = fnp.concatenate([w2b_vec, fnp.take(_w2full, _kJ) * -1.0])\n"
+     "                _sb = fnp.concatenate([_sb, _zJ])\n"
+     "                e_b = fnp.concatenate([e_b, _zJ])\n"
+     "                cA = fnp.concatenate([cA, _zJ])\n"
+     "                cB = fnp.concatenate([cB, _zJ])\n"
+     "                Lb = fnp.concatenate([Lb, fnp.zeros((_kJ.shape[0], Lb.shape[1]), dtype=dtype)],\n"
+     "                                     axis=0)\n"
+     "                _hc = fnp.concatenate([fnp.arange(n) if _kh is None else _kh, _kJ])\n"
+     "            out_tw = _append(adv, None, fac1, w2b_vec, n, Zb, Lb, _sb, e_b,\n"
+     "                             _Yb, cA, cB)\n"
+     "            out_tw.rows = _kr\n"
+     "            out_tw.hcols = _hc\n"),
+]
+
 PATCHES = [
     ("        fac1 = w1e[:, None] * C11\n",
      "        fac1 = w1e[:, None] * C11\n"
@@ -97,7 +149,7 @@ def _table(src, name):
     return m, np.array(ast.literal_eval(m.group(1)), dtype=float)
 
 
-def build(base: Path, params: Path, dress=(1.0, 1.0, 1.0)) -> str:
+def build(base: Path, params: Path, dress=(1.0, 1.0, 1.0), corr=None) -> str:
     src = build_twin.build(base, _corr_only(params))
     p = dict(np.load(params))
     for name, key in TABLES:
@@ -125,6 +177,12 @@ def build(base: Path, params: Path, dress=(1.0, 1.0, 1.0)) -> str:
             if src.count(a) != 1:
                 raise SystemExit(f"anchor occurs {src.count(a)}x:\n{a}")
             src = src.replace(a, b, 1)
+        if corr is not None:
+            src = src.replace(anchor, CORR_CONST.format(corr=float(corr)) + "\n" + anchor, 1)
+            for a, b in CORR_PATCHES:
+                if src.count(a) != 1:
+                    raise SystemExit(f"corr anchor occurs {src.count(a)}x:\n{a}")
+                src = src.replace(a, b, 1)
     return src
 
 
@@ -144,6 +202,8 @@ def main(argv=None) -> int:
     ap.add_argument("--params", default="")
     ap.add_argument("--out", default="")
     ap.add_argument("--dress", default="1,1,1", help="family scales c2,d21,d22 ('0,0,0' = off)")
+    ap.add_argument("--corr", type=float, default=None,
+                    help="P2.1b: subtract the spurious H(x)H term on this fraction of hubs")
     ap.add_argument("--selftest", action="store_true",
                     help="G1bg params with dressing off must rebuild the base byte-exact")
     a = ap.parse_args(argv)
@@ -154,7 +214,7 @@ def main(argv=None) -> int:
         print("selftest: G1bg + no dressing rebuilds the base byte-exact:", same)
         return 0 if same else 1
     dress = tuple(float(x) for x in a.dress.split(","))
-    out = build(base, Path(a.params), dress)
+    out = build(base, Path(a.params), dress, a.corr)
     Path(a.out).write_text(out, encoding="utf-8", newline="\n")
     print(f"wrote {a.out}")
     return 0
