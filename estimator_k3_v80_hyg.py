@@ -844,7 +844,8 @@ def _shared_join_lean(tw):
     if tw.ko:
         T = Qn.T @ tw.Q
         c = tw.FA.shape[1]
-        FF = T @ fnp.concatenate([tw.FA, tw.FM], axis=1)
+        # P2.4.3: the old-coordinate re-rotation (r x r @ r x 2C, C up to ~17k) through _mm
+        FF = _mm(T, fnp.concatenate([tw.FA, tw.FM], axis=1))
         FA = fnp.concatenate([FF[:, :c], FJ[:, :n]], axis=1)
         FM = fnp.concatenate([FF[:, c:], FJ[:, n:]], axis=1)
         # The carried Gram exists ONLY for the diagonal surrogate's memory of
@@ -1145,7 +1146,7 @@ def _sb(A, B, depth):
 #: fifth Strassen level with a smaller leaf; at 32 K = 992 cost 4.4 % MORE than 1024
 #: (experiments/2026-10-06_mask/strassen_probe.json). v73's own products: -0.02 %.
 _STRASSEN_MIN_BLOCK = 20
-_STRASSEN_BIG_VOL = 536870912
+_STRASSEN_BIG_VOL = 1073741824
 _STRASSEN_BIG_BLOCK = 16
 
 

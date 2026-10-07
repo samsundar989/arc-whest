@@ -6,6 +6,8 @@
          `fnp.eye`), so `W^T I W = W^T W`: the sandwich's first product `W^T @ I` is skipped and
          the block-symmetric second product is applied to `W^T` directly. Exact in real
          arithmetic (float32 drops one rounded product).
+--join   P2.4.3: the join's old-coordinate re-rotation `T @ [FA|FM]` goes through `_mm` (Strassen).
+--bigvol One extra Strassen level for products with m*k*n >= this (P2.4.5, ops-efficient).
 --block  `_STRASSEN_MIN_BLOCK` (v77/v79: 20). Smaller blocks give compact (K < 1024) products
          their 5th Strassen level more often: fewer FLOPs, more operations.
 """
@@ -51,8 +53,16 @@ DEPTH_NEW = ("    while d < _STRASSEN_DEPTH and (lo >> (d + 1)) >= _STRASSEN_MIN
              "    return d\n")
 
 
+JOIN_SITE = "        FF = T @ fnp.concatenate([tw.FA, tw.FM], axis=1)\n"
+JOIN_NEW = ("        # P2.4.3: the old-coordinate re-rotation (r x r @ r x 2C, C up to ~17k) through _mm\n"
+            "        FF = _mm(T, fnp.concatenate([tw.FA, tw.FM], axis=1))\n")
+
+
 def build(src: str, l0: bool, block: int | None, bigvol: int | None = None,
-          bigblock: int = 16) -> str:
+          bigblock: int = 16, join: bool = False) -> str:
+    if join:
+        assert src.count(JOIN_SITE) == 1
+        src = src.replace(JOIN_SITE, JOIN_NEW, 1)
     if bigvol is not None:
         assert src.count(DEPTH_SITE) == 1
         src = src.replace(DEPTH_SITE, DEPTH_NEW, 1)
@@ -79,9 +89,10 @@ def main():
     ap.add_argument("--block", type=int, default=None)
     ap.add_argument("--bigvol", type=int, default=None, help="extra Strassen level at m*k*n >= this")
     ap.add_argument("--bigblock", type=int, default=16)
+    ap.add_argument("--join", action="store_true", help="route the join's re-rotation via _mm")
     a = ap.parse_args()
     Path(a.out).write_text(build(Path(a.base).read_text(encoding="utf-8"), a.l0, a.block,
-                                 a.bigvol, a.bigblock),
+                                 a.bigvol, a.bigblock, a.join),
                            encoding="utf-8", newline="\n")
     print(f"wrote {a.out}")
 

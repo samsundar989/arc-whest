@@ -61,3 +61,6 @@ covariance is not negligible at our accuracy. Closed.
 v80_hyg = v79 + layer-0 W^T W (−0.32 %) + one extra Strassen level for products with
 m·k·n ≥ 2^29 (P2.4.5): F −1.49 %, ops 25,411. Worker: raw within ±0.1 % of v79 (rounding only),
 score −1.4 % ± 0.2 %, projected public ≈ 3.61e-9 on FRESH-A.
+REVISED before any v80 result (the run above was stopped unread): v80_hyg rebuilt as v79 + l0 +
+join re-rotation via _mm + extra level at m·k·n ≥ 2^30: F −2.16 %, ops 25,631. Worker: raw within
+±0.1 % of v79; score −2.1 % ± 0.2 %; projected public ≈ 3.58e-9 on FRESH-A.
