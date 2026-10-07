@@ -86,7 +86,7 @@ def oracle() -> list[str]:
 
 
 def e2e() -> list[str]:
-    ps = sorted(HERE.glob("m6_e2e_*.json"))
+    ps = sorted(HERE.glob("m6_e2e_[0-9]*.json"))
     if not ps:
         return ["(e2e not run)"]
     ds = [json.loads(p.read_text()) for p in ps]

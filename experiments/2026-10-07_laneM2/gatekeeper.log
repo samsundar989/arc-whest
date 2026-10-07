@@ -20,3 +20,6 @@ UnicodeEncodeError: 'charmap' codec can't encode character '\u2297' in position 
 20:40:58 [4] submitted #2449: M5 12 arms, nets 10:13
 20:52:30 [4] #2449 finished, exit 0
 00:08:16 [5] submitted #2454: M5 12 arms, nets 13:16
+02:34:21 [8] submitted #2455: M6 dense oracle, nets 0:3
+02:44:19 [8] #2455 finished, exit 0
+02:44:19 ALL DONE
