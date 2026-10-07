@@ -54,3 +54,10 @@ P2.4.1 always-on D21 rows: Da3.0 +34 %, Da2.5 +87 %, Da2.0 ×3.9; the corrector 
 (full-row diag +34 %, column proxy +38 %) prove the corrector is not the cause. Closed.
 P2.4.2 covariance sandwich on the previous layer's R rows (alive block): worker +0.0 to +0.3 %
 raw; FLOPs −1.5 to −2.5 % (covariance 9.2 %; compact K_R/n 0.72–1.0). Handoff −2 to −3 %.
+
+## P2.4.2 result (recorded) and v80_hyg prediction (written before its FRESH-A read)
+P2.4.2: alive-block covariance C=1 ×13, C=2 (keep dropped variances) ×3.2 — the dead rows'
+covariance is not negligible at our accuracy. Closed.
+v80_hyg = v79 + layer-0 W^T W (−0.32 %) + one extra Strassen level for products with
+m·k·n ≥ 2^29 (P2.4.5): F −1.49 %, ops 25,411. Worker: raw within ±0.1 % of v79 (rounding only),
+score −1.4 % ± 0.2 %, projected public ≈ 3.61e-9 on FRESH-A.
