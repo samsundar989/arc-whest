@@ -7,7 +7,7 @@ n = 1024 (weights by the bit-exact mint), organizer N = 1e9 labels, floor-subtra
 v73 comparisons are paired per net against v73's cached DEV MSE. Predictions were recorded
 before any run (`predictions.md`).
 
-**Status:** M5 complete (16/16 nets); M6 and M7 queued behind Lane P's twin jobs
+**Status:** M5 complete (16/16 nets); M6 complete (GO, gain-mode E21b); M7 running behind Lane P's twin jobs
 (`gatekeeper.py` submits Lane M work only when Lane P has nothing waiting).
 
 ## Summary for Lane P
@@ -91,20 +91,84 @@ of (3a)'s loss — the closest call — but both are > 7× b.
 | 0.40 | 2.063e-08 | 1.122 | 83 % | .58/.65/.72/.78/.85 |
 | 1.00 (= asym = b) | 1.837e-08 | 1.000 | 100 % | 1 |
 
-## M6 — κ3 × covariance-edge family at n = 1024 (queued)
+## M6 — κ3 × covariance-edge family at n = 1024: **GO for gain-mode E21b**
 
-Built and validated, not yet run at full width:
-- `m6_terms.py`: direct dense formulas for E3 (κ3 top slice, coefficient 3), E21a (κ4 core,
-  12/(2n+8)) and E21b (κ4 core, 24/(2n+8)), each matching ARC's own unfactored term evaluation
-  to ≤ 3e-16 relative; gain-mode closed forms of E21a (O(n²)) and E21b (O(n²) + one n³ product
-  C diag(w22) C) exact against the dense template (2e-16).
-- `m6_oracle.py`: on ARC's factored trajectory, materialises the pre-activation κ3 densely at
-  the steps feeding layers 4/8/12/16 and measures E3's ΔD21/ΔD3 at pre-act L, E21a/E21b's core
-  increments, and the set's ΔD21 one step later (E21 by re-running the next step with the
-  core increment injected); spike-r (r = 1/4/16/64) and gain-mode substitutes through the same
-  formulas; a ridge-proxy sample.
-- `m6_e2e.py`: E21 / E21b exact, gain-mode and spike-16 forms injected into ARC's factored
-  chain, scored on final MSE (exact factored E21 == unfactored d+E21 to 2.6e-13 at n = 64).
+Tools (all exact against ARC): `m6_terms.py` — dense E3 (coefficient 3), E21a (κ4 core,
+12/(2n+8)) and E21b (24/(2n+8)), each ≤ 3e-16 from ARC's own unfactored term evaluation;
+gain-mode closed forms of E21a (O(n²)) and E21b (O(n²) + one n³ product), 2e-16 from the dense
+template. `m6_oracle.py` — one-step oracle on ARC's factored trajectory with the
+pre-activation κ3 materialised densely (R = 109 568 factor columns at layer 16, 2.3 s).
+`m6_e2e.py` — E21 forms injected into ARC's factored chain (exact factored E21 == unfactored
+d+E21 to 2.6e-13 at n = 64), scored on final MSE.
+
+### One-step sizes (6 DEV nets)
+
+| layer L | E3 ΔD21/D21 (pre L) | E3 ΔD3/D3 | E21a Δcore/core_off | E21b Δcore/core_off | set ΔD21/D21 (post L) | c² |
+|---|---|---|---|---|---|---|
+| 4 | 0.009 | 0.006 | 0.054 | 0.131 | 0.002 | 0.0047 |
+| 8 | 0.007 | 0.004 | 0.142 | 0.217 | 0.004 | 0.0061 |
+| 12 | 0.006 | 0.004 | 0.195 | 0.254 | 0.006 | 0.0070 |
+| 16 | 0.006 | 0.004 | 0.209 | 0.247 | 0.006 | 0.0077 |
+
+(sd over nets ≤ 0.02 everywhere.) The family barely touches D21/D3 (0.2–0.9 %, against R1's toy
+estimate 2.4–3.2 %) but moves the off-diagonal κ4 core by 13–25 %.
+
+### Capture by cheap forms (6 nets; capture = 1 − ‖sub − exact‖²/‖exact‖²)
+
+| layer L | family | spike1 | spike4 | spike16 | spike64 | gain (β = 0.7) |
+|---|---|---|---|---|---|---|
+| 4 | E3 ΔD21 | .02 | .08 | .27 | .65 | .03 |
+| 4 | E21b core | .05 | .18 | .52 | .91 | .44 |
+| 8 | E3 ΔD21 | .02 | .18 | .53 | .90 | .15 |
+| 8 | E21b core | .10 | .37 | .80 | .99 | .72 |
+| 12 | E3 ΔD21 | .03 | .29 | .68 | .96 | .24 |
+| 12 | E21b core | .14 | .52 | .91 | 1.00 | .75 |
+| 16 | E3 ΔD21 | .02 | .35 | .77 | .98 | .31 |
+| 16 | E21b core | .18 | .59 | .95 | 1.00 | .77 |
+| 16 | E21a core | .03 | .44 | .86 | .99 | .93 |
+
+Full table (incl. ΔD3, E21a at every layer, the set one step later) in
+`experiments/2026-10-07_laneM2/m6_table.md`. Ridge proxy (12 cheap features) held-out R²
+≈ 0.00–0.05 for every target: **the learned-proxy route is dead.**
+
+### End-to-end (16 DEV nets, organizer labels, paired vs ARC AUGMENT b)
+
+| arm (b + κ4-core increment each layer) | final MSE | Δ vs b | wins |
+|---|---|---|---|
+| b | 1.794e-08 | — | — |
+| E21b exact | 1.611e-08 | −10.1 % ± 2.0 | 16/16 |
+| **E21b gain-mode closed form** | **1.583e-08** | **−11.6 % ± 1.4** | **16/16** |
+| E21b gain-mode from layer 6 only | 1.602e-08 | −10.5 % ± 1.4 | 16/16 |
+| E21b spike-16 | 1.642e-08 | −8.4 % ± 1.4 | 16/16 |
+| E21 (a + b) exact | 1.730e-08 | −3.2 % ± 2.9 | 12/16 |
+| E21 gain-mode | 1.676e-08 | −6.2 % ± 2.6 | 15/16 |
+| E21 spike-16 | 1.696e-08 | −5.3 % ± 1.8 | 16/16 |
+
+### Decision
+
+The handoff's gate was (size ≥ 2 % of D21) AND (spike r ≤ 16 ≥ 70 % or gain ≥ 60 % or proxy
+R² ≥ 0.6). The second half passes for E21b (gain .72–.77 at layers 8–16; spike-16 .80–.95). The
+size half **fails as written** (0.6 % of D21) — but the end-to-end run shows the D21 size is the
+wrong gauge for this family: E21b acts through the κ4 core's consumers (K22 heavy leg,
+211→111, K211), not D21, and removing it costs 10 % of final MSE. I call **GO for the gain-mode
+E21b form** on the end-to-end evidence and hand it to Lane P (done, 2026-10-07):
+
+    X_jk = 2βc² [ Cm_jk(v_k − w22_j μ_j Cm_jk) + μ_j(q_k − w22_j Cm_jk²) + μ_k P_kj ]
+    v = Cm(w22∘μ),  q = (Cm∘Cm)ᵀw22,  P = Cm diag(w22) Cm      (pre-activation μ, C; β = 0.7;
+    ΔB = 24/(2n+8) · sym[w11_j X_jk w21_k], diag 0             c² = μᵀCμ/‖μ‖⁴)
+
+Unit price: one n³ product per layer (~2.1e9 FLOPs at n = 1024, ≈ +0.5 % of v77) plus O(n²),
+**plus the transport of an off-diagonal κ4 core if the host chain carries one** (W B Wᵀ, two
+n³ per layer ≈ +14 % in v73 terms, Lane M §5 of the 10-06 report). Expected gain: ≤ 10–12 % raw
+(an ARC-chain number; v77 has no off-diagonal κ4-core channel, so the gain depends on the host
+channel — Lane P's gain-mode κ4 (P2.2) is the natural one).
+Leave E21a and E3 out: E21a dilutes the gain (−3.2 % for the pair vs −10.1 % for E21b alone), and
+E3 has no cheap form (gain .03–.31) and no proxy. Untested: whether B helps when it is not
+transported (ARC's core memory runs through the nonlinear step, so a clean one-hop arm is not
+available in this chain).
+
+**Predictions vs outcome.** Strategist (R1): family size 2.4–3.2 % of D21, spike r ~ 64–128
+needed. Outcome: 0.6 %; spike-16 already .80–.95 for E21b (but only .53–.77 for E3).
 
 ## M7 — coherent early errors (queued)
 

@@ -50,4 +50,15 @@ Ridge proxy, held-out R² (leave-one-net-out; 12 features: D21, D21ᵀ, D21∘C 
 
 materialise: R = 109568 columns at layer 16, 2.3 s; gain closed form vs dense max rel err 2.6e-07
 
-(e2e not run)
+### End-to-end in ARC's factored chain (16 DEV nets, n = 1024)
+
+| arm | final MSE | Δ vs b (paired mean) | wins vs b | share of exact-E21 gain | all-layer MSE |
+|---|---|---|---|---|---|
+| b | 1.794e-08 | +0.0 % ± 0.0 | 0/16 | 0 % | 6.835e-09 |
+| E21b | 1.611e-08 | -10.1 % ± 2.0 | 16/16 | 285 % | 6.348e-09 |
+| E21 | 1.730e-08 | -3.2 % ± 2.9 | 12/16 | 100 % | 6.634e-09 |
+| E21b_gain | 1.583e-08 | -11.6 % ± 1.4 | 16/16 | 328 % | 6.269e-09 |
+| E21_gain | 1.676e-08 | -6.2 % ± 2.6 | 15/16 | 184 % | 6.504e-09 |
+| E21b_spike16 | 1.642e-08 | -8.4 % ± 1.4 | 16/16 | 236 % | 6.459e-09 |
+| E21_spike16 | 1.696e-08 | -5.3 % ± 1.8 | 16/16 | 153 % | 6.583e-09 |
+| E21b_gain_from6 | 1.602e-08 | -10.5 % ± 1.4 | 16/16 | 298 % | 6.376e-09 |

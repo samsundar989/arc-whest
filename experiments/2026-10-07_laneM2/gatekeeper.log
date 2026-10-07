@@ -27,3 +27,12 @@ UnicodeEncodeError: 'charmap' codec can't encode character '\u2297' in position 
 03:34:17 [9] #2458 finished, exit 0
 03:34:17 ALL DONE
 03:34:32 [10] submitted #2462: M6 e2e E21 forms, nets 0:4
+04:00:31 [10] #2462 finished, exit 0
+04:00:37 [11] submitted #2463: M6 e2e E21 forms, nets 4:8
+04:28:26 [11] #2463 finished, exit 0
+04:28:31 [12] submitted #2464: M6 e2e E21 forms, nets 8:12
+04:44:10 [12] #2464 finished, exit 0
+04:46:17 [13] submitted #2466: M6 e2e E21 forms, nets 12:16
+05:29:24 [13] #2466 finished, exit 143
+05:29:24 [13] FAILED #2466; stopping (resume with: gatekeeper.py 14 after fixing)
+05:37:36 [6] submitted #2467: M5 loop/late-gain arms, nets 0:8
