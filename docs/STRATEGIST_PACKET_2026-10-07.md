@@ -42,7 +42,7 @@ unchanged). Kept: layer-0 WᵀW (−0.32 % F), the join's re-rotation T@[FA|FM] 
 not the corrector: full-row diagnostic also +34 %) and the alive-block covariance (×13; keeping
 the dropped variances ×3.2). The handoff's premises (w2 ≈ 0 ⇒ row unused; dead C ≈ 0) fail at our
 accuracy. B for the Oct 8 slot: v80_hygws (block 40, F/B 0.18004, wall ×1.49 vs v78 ≈ 85 s
-noisy-implied) in gating; ultra-safe fallback l0+join only (F/B 0.19136, wall ×1.02).
+noisy-implied) GATED: FRESH-A 1.156× vs v78 (98/100), projected 3.66e-9, parity 1.6e-5, WSL PASS; submits in the Oct 8 A/B slot. Ultra-safe fallback l0+join only (F/B 0.19136, wall ×1.02).
 
 **Calibration.** FRESH-A ÷ 1.019 read 1.2 % optimistic on both v79 and v80 (implied fresh/graded
 1.0074); v77 was on target (1.0183). Refit builds (selected on VAL) read slightly optimistic on
