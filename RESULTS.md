@@ -2615,3 +2615,9 @@ anchor exactly; exclusive sum reconciles; 0 materializations; ops 24,642.
 By layer: 0.7 % (L0), 1.7 / 3.0 / 4.2 / 5.3 % (L1–4), 6.9–9.0 % (L5–14), 4.1 % (L15). The
 recent tier is still ≈ 60 %, as PLAN rev 19 §1.4 assumed. Covariance costs 0.59 % per layer,
 the same at L0 (where `cov = I`).
+
+### P2.0.1 — v78_kashws graded
+**v78_kashws graded (#334545): 4.249585835999417e-09**, raw 2.2023054633280026e-08; +0.56 %
+vs projected 4.2260e-09 (implied DEV factor 1.032; keep 1.038). **New wall-safe B** (v76
+4.4952e-09 → −5.46 %). Raw equals v77's graded raw to 0.01 %, as a block-40 twin should.
+Oct 7 A/B slot.
