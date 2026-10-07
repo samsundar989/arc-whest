@@ -2621,3 +2621,28 @@ the same at L0 (where `cov = I`).
 vs projected 4.2260e-09 (implied DEV factor 1.032; keep 1.038). **New wall-safe B** (v76
 4.4952e-09 → −5.46 %). Raw equals v77's graded raw to 0.01 %, as a block-40 twin should.
 Oct 7 A/B slot.
+
+### P2.1 — dressed legs (twin, VAL-100 free-running; `experiments/2026-10-07_p2/`)
+Baseline: v62_gb + v77's mask (R2.0/Hd2.5/Dz2.5, q50 K table), G1bg params, VAL 2.269912e-08.
+Arm `dress` in `tools/twin/twin.py`; refits = stage S2t, lr 1e-4, 1 epoch TRAIN-900, select on VAL.
+
+| arm | VAL raw | vs baseline / control | wins |
+|---|---:|---:|---:|
+| full set, unrefit | 2.234055e-08 | −1.58 % | 57/100 |
+| {C²} / {D21, D21ᵀ} / {D22} alone, unrefit | 2.28151 / 2.24455 / 2.29897e-08 | +0.51 / −1.12 / +1.28 % | 35 / 56 / 2 |
+| full set, birth gate on both parts, unrefit | 2.229701e-08 | −1.77 % | 60/100 |
+| refit control (no dressing) | 2.269110e-08 (best, step 84) | — | |
+| **full set, refit** | **2.114657e-08** (step 112) | **−6.81 % vs control** | |
+
+Predictions: strategist −4 to −12 % [60 % ≥ 4 %]; worker −1 to −5 %. Kill line −2 %: PASS.
+Families only help as a set (D22 and C² alone hurt), as R1 warned.
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-07 | `estimator_k3_v77_kash.py` | `4ff8018f` | FRESH-A | 2.317028e-08 (floor-free 2.242263e-08) | 0.17981 | 24,642 | — | — | 3.9567e-09 (fresh 4.0319e-09) | 3.9596e-09 | 1.1670× vs v73 (t95 excludes 0) | 100/100 | calibration of the current A: fresh/graded 1.0183 (strategist ≈ 1.019). |
+| 2026-10-07 | `estimator_k3_v79_dress.py` | `2cf3acf4` | FRESH-A | 2.147478e-08 (floor-free 2.072713e-08) | 0.17991 | 24,852 | local A/B on DEV net 3 (×2) v79/v77 = **1.0059** → ~79.9 s median / ~92.0 s max on v77's server telemetry, noisy-implied 93.2 s (A ≤ 105 s) | VmPeak 6,173 MiB (WSL PASS, same hash) | **3.6595e-09** (fresh 3.7291e-09) | PENDING (#334576) | **1.0784× vs v77** (Δ +3.03e-10, t95 [+2.48e-10, +3.58e-10]) | 85/100 | v77 + dressed legs (`tools/build_dress.py`) + S2t refit baked (VAL step 112). DEV: raw 2.075778e-08, DEV-projected 3.5979e-09, 1.0948× vs v77, 89/100. Twin parity 4.2e-5. F +0.06 %, ops +210. Package `b6a5b248…81fa`, inner = source. First canary of UTC Oct 7. |
+
+WSL note: the first `ev --mem` read FAILED only on "settled address space did not grow"
+(+255 MiB, one jump at repeat 3; VmPeak 6.45 GB). Six repeats: v79 +64 MiB, **v77 +406 MiB**
+(v77 graded 100/100 clean); both peak at ≈ 6.2 GB. Allocator noise, not a cache; the 3-repeat
+re-run PASSES (+26 MiB). `experiments/2026-10-07_p2/v7{7,9}_mem6.json`, `v79_mem_r2.json`.
