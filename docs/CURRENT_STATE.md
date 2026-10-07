@@ -16,7 +16,7 @@ vs the incumbent** (`tools/ev.py --panel fresh_a --baseline <incumbent>`); lane-
 | B (prev.) | `estimator_k3_v76_kasws.py` / `fe05c0a4` | #334474 | 4.4952209455824486e-9 | 0.20416 |
 
 No final entry designated (Samuel designates; evidence in `docs/DESIGNATION.md`).
-v79's B twin `estimator_k3_v79_dressws.py` (`16379e50`) is built, not yet gated or submitted.
+v79's B twin `estimator_k3_v79_dressws.py` (`16379e50`) passes FRESH-A (1.078× vs v78) and WSL; v80's B twin is next.
 
 ## What v79 is (plain English)
 
@@ -31,10 +31,7 @@ twin, raw error fell 6.8 % on VAL, 7.4 % on FRESH-A, and 6.5 % on the graded run
 - P2.0 done: rev 19 committed, lane-m merged, v78 graded (new B), v77 FRESH-A 4.032e-9, v77
   census (recent tier 58.1 %), flopscope #275 exposure none.
 - **P2.1 dressed legs: shipped as v79** (RESULTS § "P2.1").
-- P2.1b (Lane M2's spurious-term correction as −w2 birth columns): built (`build_dress.py
-  --corr`), f = 0.15 costs +14.2 % FLOPs; unrefit twin screen pending.
-- P2.2 gain-mode κ4: unrefit β 0.7 blew up (κ4 doubled); chain-matched β refits arm a +3.5 %,
-  arm b ≈ +4 % vs control; arm c (blend) pending. Heading for the kill line.
+- P2.2 gain-mode κ4: KILLED (refit arms +3.5 / +4.3 / +0.01 % vs control).
 - P2.1b closed (exact correction hurts in our chain). P2.4: always-on D21 rows and alive-block
   covariance closed (accuracy cliffs); layer-0 + join-via-Strassen + big-product level shipped as
   **v80_hyg (new best 3.6224e-9)**. v80's local wall is +8.6 % vs v79 (noisy-implied ≈ 101 s, A ≤ 105 s).
