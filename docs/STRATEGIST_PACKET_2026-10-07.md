@@ -26,9 +26,32 @@ asymmetric form X⊗(X+2H) equals AUGMENT; the spurious term can be subtracted a
 (extra birth columns in v77's hcols layout, ≈ +0.7 % FLOPs per 1 % of hubs), but its energy is
 not concentrated (top 5 % of hubs = 10–16 %). Candidate follow-up after v79 ships.
 
-**P2.2 gain-mode κ4 — in refit.** Unrefit with β 0.7 blew the chain up (×7.7): the chain's κ4
-slices are 0.31 (L1) → 0.56 (L14) of the β=1 template, with correlation 0.86–0.97, so β 0.7 doubled
-κ4. Refits (arms a/b/c) start from chain-matched per-layer β and learn it.
+**P2.1b exact correction — CLOSED.** Lane M2's −w2 family as extra birth columns
+(`build_dress.py --corr`; f = 0.15 costs +14.2 % F). Unrefit on v79: f = .0625/.15/.4/1 →
++0.34/+0.76/+1.51/+1.88 %; f = 1 on the pre-refit dressed chain +3.6 %. In ARC's learned-free
+chain the same correction is −41 %: our chain prefers the symmetric form.
+
+**P2.2 gain-mode κ4 — KILLED.** Unrefit β 0.7 ×7.7 (templates are 2–3× our chain's κ4 at β = 1,
+corr 0.86–0.97); refits with learned per-layer β: D22 template +3.5 %, + Q31 +4.3 %, blend +0.01 %
+vs control (strategist −2 to −8 %, worker −0.3 to −1.5 %; kill −1 %).
+
+**P2.4 cost hygiene → v80_hyg, graded #334659 3.6224e-9, NEW BEST** (−2.16 % vs v79, raw
+unchanged). Kept: layer-0 WᵀW (−0.32 % F), the join's re-rotation T@[FA|FM] through Strassen
+(−0.8 %), one extra Strassen level for m·k·n ≥ 2³⁰ (−1.0 %); ops 25,631; local wall +8.6 % vs v79
+(noisy-implied ≈ 101 s vs A ≤ 105 s). Closed on accuracy cliffs: always-on D21 rows (Da3.0 +34 %,
+not the corrector: full-row diagnostic also +34 %) and the alive-block covariance (×13; keeping
+the dropped variances ×3.2). The handoff's premises (w2 ≈ 0 ⇒ row unused; dead C ≈ 0) fail at our
+accuracy. B for the Oct 8 slot: v80_hygws (block 40, F/B 0.18004, wall ×1.49 vs v78 ≈ 85 s
+noisy-implied) in gating; ultra-safe fallback l0+join only (F/B 0.19136, wall ×1.02).
+
+**Calibration.** FRESH-A ÷ 1.019 read 1.2 % optimistic on both v79 and v80 (implied fresh/graded
+1.0074); v77 was on target (1.0183). Refit builds (selected on VAL) read slightly optimistic on
+DEV too (implied DEV factor 1.009 for v79).
+
+**For the Oct 10 decision (Samuel/strategist).** Lane M2's gain-mode E21b is −11.6 % in ARC's
+chain, but v77 carries no off-diagonal post-activation κ4 core: porting needs P (n³, +8 %) plus at
+least diag(WᵀBW) (+8 %), ≈ +16 % F (needs −14 % raw), or ≈ +24 % with the full transport and K211.
+Two ARC→v77 transfers failed today; Lane M2 is measuring the diagonal-only route in ARC first.
 
 ## Lane M2 (session 2, branch `lane-m`; pasted from `docs/STRATEGIST_PACKET_2026-10-07_laneM2.md` @ 3532090)
 
