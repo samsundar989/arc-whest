@@ -2646,3 +2646,9 @@ WSL note: the first `ev --mem` read FAILED only on "settled address space did no
 (+255 MiB, one jump at repeat 3; VmPeak 6.45 GB). Six repeats: v79 +64 MiB, **v77 +406 MiB**
 (v77 graded 100/100 clean); both peak at ≈ 6.2 GB. Allocator noise, not a cache; the 3-repeat
 re-run PASSES (+26 MiB). `experiments/2026-10-07_p2/v7{7,9}_mem6.json`, `v79_mem_r2.json`.
+
+**v79_dress graded (#334576): 3.7025275784494673e-09, NEW BEST**, raw 2.05795687335808e-08,
+100 clean. −6.49 % vs v77 (3.9596e-09); raw −6.54 % at F +0.06 %. +1.18 % vs the FRESH-A
+projection 3.6595e-09 (fresh/graded 1.0072 vs the 1.019 factor); +2.9 % vs the DEV projection
+3.5979e-09 (implied DEV factor 1.0089 — the refit was selected on VAL, so DEV/fresh both read a
+little optimistic for refit builds). `tools/ev.py --best-graded` updated.
