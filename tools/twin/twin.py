@@ -443,7 +443,10 @@ ARMS = {
          "    _covS = cov\n"
          "    if _MASK is not None and _MASK.get('C') and _MASK.get('_prevR') is not None:\n"
          "        _pc = _MASK['_prevR']\n"
-         "        _covS = cov * (_pc[:, None] * _pc[None, :])\n"),
+         "        _covS = cov * (_pc[:, None] * _pc[None, :])\n"
+         "        if _MASK['C'] == 2.0:\n"
+         "            # keep the dropped rows' VARIANCES; drop only their cross-covariances\n"
+         "            _covS = _covS + fnp.diag(fnp.diagonal(cov) * (1.0 - _pc))\n"),
         ("        _X4 = _mm(WT, cov)\n", "        _X4 = _mm(WT, _covS)\n"),
         ("        cov_pre = (_p4_sym_sandwich(WT, cov, W) if _P4_BLOCKSYM\n"
          "                   else _mm(_mm(WT, cov), W))\n",
