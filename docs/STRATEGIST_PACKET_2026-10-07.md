@@ -52,6 +52,10 @@ DEV too (implied DEV factor 1.009 for v79).
 chain, but v77 carries no off-diagonal post-activation κ4 core: porting needs P (n³, +8 %) plus at
 least diag(WᵀBW) (+8 %), ≈ +16 % F (needs −14 % raw), or ≈ +24 % with the full transport and K211.
 Two ARC→v77 transfers failed today; Lane M2 is measuring the diagonal-only route in ARC first.
+**Update (Lane M2, 10/16 nets):** diagonal-only route = −1.1 % ± 0.8 (from L6 −1.6 %) vs full B
+−11.7 % ± 2.3: the cheap route keeps 10–14 % of the gain, so a +16 % F port fails by ~10×. Only the
+full off-diagonal channel (≈ +24 % F, ARC evidence only) could carry it. Lane M2 and Lane P both
+recommend CLOSING the E21b port for v77 at the Oct 10 decision.
 
 ## Lane M2 (session 2, branch `lane-m`; pasted from `docs/STRATEGIST_PACKET_2026-10-07_laneM2.md` @ 3532090)
 
