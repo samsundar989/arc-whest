@@ -53,6 +53,11 @@ for lo in (0, 2, 4, 6):
     JOBS.append((f"M7 MC N=1e9, nets {lo}:{lo + 2}", "12m", ["--vram", "4", "--ram", "8", "--cpus", "2"],
                  ["m7_mc.py", "--state", f"{O}/m7_state.npz", "--n", "1e9", "--nets", f"{lo}:{lo + 2}",
                   "--out", f"{O}/m7_mc_{lo}.npz"]))
+# [18], [19] Lane P's v77-port test (2026-10-07): E21b gain-mode entering only via diag(W B Wᵀ)
+for lo in (0, 8):
+    JOBS.append((f"M6 e2e E21b diag-only (v77 port test), nets {lo}:{lo + 8}", "25m", BIG,
+                 ["m6_e2e.py", "--nets", f"{lo}:{lo + 8}", "--arms", "b,E21b_gain,E21b_gain_diag,E21b_gain_diag_from6",
+                  "--out", f"{O}/m6_diag_{lo}.json"]))
 
 
 def log(msg):

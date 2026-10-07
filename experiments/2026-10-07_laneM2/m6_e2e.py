@@ -34,6 +34,7 @@ sys.path.append(str(HERE))
 import m5_ablate as m5  # noqa: E402
 import m6_terms as mt  # noqa: E402
 from m5_ablate import ARMS, STATS, factored_nonlin_kprop_k3_ablate, fk3, gen, m2  # noqa: E402
+from mlp_kprop.harmonic import HTensor  # noqa: E402
 
 FactoredTensor = fk3.FactoredTensor
 BETA = 0.7
@@ -96,6 +97,10 @@ E2E = {
     "E21b_spike16": ("spike16", "E21b", 0),
     "E21_spike16": ("spike16", "E21", 0),
     "E21b_gain_from6": ("gain", "E21b", 5),
+    # Lane P's v77-port test: B never enters the off-diagonal core; only diag(W B Wᵀ) is added to the
+    # next step's (pre-activation) diagonal core -- what v77's dG transport could carry
+    "E21b_gain_diag": ("gain", "E21b", 0, "diag"),
+    "E21b_gain_diag_from6": ("gain", "E21b", 5, "diag"),
 }
 
 
@@ -104,12 +109,23 @@ def run(mlp, n, depth, arm, dev, dtype):
     STATS.clear()
     cnt = {"t": 0}
 
+    diag_mode = spec is not None and len(spec) > 3 and spec[3] == "diag"
+
     def hook(K_in, nonlin_wick_coef, augment=False, base=False, use_pK=True):
         t = cnt["t"]
         cnt["t"] += 1
+        if diag_mode and "B" in cnt:
+            W = mlp.Ws[t].weight                    # this step's pre-activation = W · post(t-1)
+            d = ((W @ cnt.pop("B")) * W).sum(1)     # diag(W B Wᵀ): one n³ product
+            K_in = dict(K_in)
+            K_in[4] = HTensor(core=K_in[4].core + torch.diag(d), r=1, metric=K_in[4].metric)
         out = factored_nonlin_kprop_k3_ablate(K_in, nonlin_wick_coef, augment=True, cfg=ARMS["b"])
         if spec is not None and 3 in K_in and t >= spec[2]:
-            out[4].core = out[4].core + e21_cores(K_in, spec[0], spec[1])
+            B = e21_cores(K_in, spec[0], spec[1])
+            if diag_mode:
+                cnt["B"] = B
+            else:
+                out[4].core = out[4].core + B
         return out
 
     fk3.factored_nonlin_kprop_k3 = hook
