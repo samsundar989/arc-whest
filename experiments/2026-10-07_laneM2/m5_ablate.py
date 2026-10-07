@@ -73,6 +73,9 @@ class Ablate:
     beta: float = 0.7
     dress_s: float = 1.0   # "dressed": X̃ = w1∘C + s·H (spurious term × s², useful cross term × s)
     k4_from: int = 0       # the k4 variant applies only at nonlinear steps t >= k4_from (0-based)
+    dress_corr: float = 0.0  # "dressed": subtract the spurious Sym(H ⊗ 3w2 e_j ⊗ H) on the top fraction of hubs
+    #                          ranked by w2_j‖H_j‖² (1.0 == "dressed_nospur" == "aug"); a symmetric lineage with
+    #                          leg H and negative hub weight, so it fits a one-leg lineage representation
 
 
 ARMS = {
@@ -83,6 +86,9 @@ ARMS = {
     "2d_dressed_s0.5": Ablate(legs="dressed", dress_s=0.5),
     "2e_dressed_s0.7": Ablate(legs="dressed", dress_s=0.7),
     "2f_dressed_s0.3": Ablate(legs="dressed", dress_s=0.3),
+    "2g_dressed_corr0.05": Ablate(legs="dressed", dress_corr=0.05),
+    "2h_dressed_corr0.15": Ablate(legs="dressed", dress_corr=0.15),
+    "2i_dressed_corr0.4": Ablate(legs="dressed", dress_corr=0.4),
     "3a_memoryless": Ablate(k4="memoryless"),
     "3b_gain": Ablate(k4="gain"),
     "3c_memoryless+gain": Ablate(k4="memoryless+gain"),
@@ -202,6 +208,13 @@ def factored_nonlin_kprop_k3_ablate(K_in, nonlin_wick_coef, augment=False, base=
             pK_111.add_factors_((X, fac2, (X * w2[None, :])))
             if cfg.legs == "dressed_nospur":
                 pK_111.add_factors_((-H, fac2, (H * w2[None, :])))
+            elif cfg.dress_corr > 0:
+                k = max(1, int(round(cfg.dress_corr * n)))
+                S = torch.topk(w2 * (H * H).sum(0), k).indices
+                Hs = H[:, S]
+                pK_111.add_factors_((-Hs, fac2[:, S], Hs * w2[S][None, :]))
+                STATS.setdefault("corr_energy_share", []).append(
+                    float((w2[S] * (Hs * Hs).sum(0)).sum() / (w2 * (H * H).sum(0)).sum()))
 
     if 4 in WK and not cfg.no211:
         core, metric = WK[4].core, WK[4].metric
@@ -281,7 +294,8 @@ def calibrate(dev) -> dict:
     a_s, _ = m2.run_variant(mlp, n, depth, "a", dev, dtype)
     scale = float(np.abs(ref - a_s).max())
     out = {"n": n, "depth": depth, "|b - a| (scale)": scale}
-    for name in ("b", "dressed_nospur", "2c_asym", "2_dressed", "1_simple_legs", "3a_memoryless", "3b_gain"):
+    ARMS["corr1.0"] = Ablate(legs="dressed", dress_corr=1.0)  # calibration-only arm
+    for name in ("b", "dressed_nospur", "2c_asym", "corr1.0", "2h_dressed_corr0.15", "2_dressed", "1_simple_legs", "3a_memoryless", "3b_gain"):
         cfg = Ablate(legs="dressed_nospur") if name == "dressed_nospur" else ARMS[name]
         got, _ = run_arm(mlp, n, depth, cfg, dev, dtype)
         out[f"|{name} - ARC b| / scale"] = float(np.abs(got - ref).max()) / scale
@@ -338,6 +352,8 @@ def main(argv=None) -> int:
                       "s": time.perf_counter() - t0, "peak_gib": torch.cuda.max_memory_allocated() / 2**30}
             if "c2" in STATS:
                 rec[k]["c2"] = STATS["c2"]
+            if "corr_energy_share" in STATS:
+                rec[k]["corr_energy_share"] = STATS["corr_energy_share"]
             print(json.dumps({"i": i, "arm": k, "mse_final": rec[k]["mse_final"], "s": round(rec[k]["s"], 1)}),
                   flush=True)
             torch.cuda.empty_cache()

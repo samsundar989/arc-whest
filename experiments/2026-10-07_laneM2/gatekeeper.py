@@ -28,7 +28,14 @@ A5 = "45_no_k3k4_loop,145_simple_legs_no_loop,3d_gain_from6,3e_memoryless+gain_f
 JOBS = [("M5 asym + dressing s, nets 0:4", "8m", BIG,
          ["m5_ablate.py", "--mini", "--nets", "0:4", "--arms", "2c_asym,2d_dressed_s0.5,2e_dressed_s0.7,2f_dressed_s0.3",
           "--out", f"{O}/m5_mini1024_part2.json"])]
-for lo in (4, 7, 10, 13):
+JOBS.append(("M5 12 arms, nets 4:7", "14m", BIG,
+             ["m5_ablate.py", "--mini", "--nets", "4:7", "--arms", A12, "--out", f"{O}/m5_mini1024_part1_4.json"]))
+# Lane P's question (2026-10-07): sym dressing with the spurious H⊗H subtracted on the top-f hubs only
+JOBS.append(("M5 dressed + top-hub H⊗H correction f=0.05/0.15/0.4, nets 0:8", "10m", BIG,
+             ["m5_ablate.py", "--mini", "--nets", "0:8", "--arms",
+              "2g_dressed_corr0.05,2h_dressed_corr0.15,2i_dressed_corr0.4",
+              "--out", f"{O}/m5_mini1024_part4.json"]))
+for lo in (7, 10, 13):
     JOBS.append((f"M5 12 arms, nets {lo}:{lo + 3}", "14m", BIG,
                  ["m5_ablate.py", "--mini", "--nets", f"{lo}:{lo + 3}", "--arms", A12,
                   "--out", f"{O}/m5_mini1024_part1_{lo}.json"]))
@@ -56,7 +63,8 @@ def others_waiting() -> list[int]:
     out = subprocess.run(["workerq", "status", "--json"], capture_output=True, text=True).stdout
     jobs = json.loads(out).get("jobs", [])
     return [j["id"] for j in jobs if j["state"] in ("QUEUED", "RUNNING")
-            and j["priority"] in ("high", "critical") and j.get("repo_root") != LANE_M]
+            and ((j["priority"] in ("high", "critical") and j.get("repo_root") != LANE_M)
+                 or j.get("repo_root") == LANE_M)]   # also never stack on our own unfinished job
 
 
 def main() -> int:
