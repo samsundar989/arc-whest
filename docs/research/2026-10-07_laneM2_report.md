@@ -7,7 +7,7 @@ n = 1024 (weights by the bit-exact mint), organizer N = 1e9 labels, floor-subtra
 v73 comparisons are paired per net against v73's cached DEV MSE. Predictions were recorded
 before any run (`predictions.md`).
 
-**Status:** M5 13/16 nets (last 3 queued); M6 and M7 queued behind Lane P's twin jobs
+**Status:** M5 complete (16/16 nets); M6 and M7 queued behind Lane P's twin jobs
 (`gatekeeper.py` submits Lane M work only when Lane P has nothing waiting).
 
 ## Summary for Lane P
@@ -17,14 +17,17 @@ before any run (`predictions.md`).
    (211→111 births and the K211 core contributions) blows up exponentially with depth if
    either leg is cut.
 2. **Symmetric dressed legs (R1 §5.1) keep only ~40 % of AUGMENT's gain** in ARC's chain:
-   final MSE +69 % ± 5 vs AUGMENT (13/13 nets worse), growing with depth (1.07 / 1.27 / 1.69× at
+   final MSE +70 % ± 5 vs AUGMENT (16/16 nets worse), growing with depth (1.07 / 1.28 / 1.70× at
    layers 8 / 12 / 16). The spurious Sym(H ⊗ w2 e_j ⊗ H) term is not benign in a 16-layer chain.
+   Transfer (Lane P, graded): v79_dress = v77 + symmetric dressing + refit, #334576 at 3.7025e-9
+   (raw 2.058e-8, −6.5 % vs v77). The learned gains absorb part of the spurious term; the ARC
+   number (asym −41 % raw vs sym, no gains) bounds what the exact correction can still add.
 3. **Shrinking the dressing makes it worse, not better:** s·H with s = 0.7 / 0.5 / 0.3 gives
-   5.0 / 9.6 / 16× AUGMENT's MSE. Losing heavy-leg content hurts more than the s² spurious term.
+   5.1 / 9.7 / 16× AUGMENT's MSE. Losing heavy-leg content hurts more than the s² spurious term.
 4. **Exact dressing at SIMPLE leg count exists.** Sym is bilinear, so AUGMENT's light×light +
    light×heavy + heavy×light births are exactly Sym(X ⊗ 3w2 e_j ⊗ (X + 2H)), X = w1∘C — or,
    equivalently, symmetric dressing **minus** a symmetric lineage with leg H and hub weight
-   −w2. Both reproduce AUGMENT to 3e-14 (n = 64) and to the last digit at n = 1024 (13 nets).
+   −w2. Both reproduce AUGMENT to 3e-14 (n = 64) and to the last digit at n = 1024 (16 nets).
    The second form fits v77's one-leg lineage representation (Lane P: +0.7 % FLOPs per 1 % of hubs).
 5. **Top-hub correction:** subtracting the spurious lineage on the top-f hubs (by w2_j‖H_j‖²)
    closes a share of the sym→AUGMENT gap ≈ the spurious energy captured; the energy is spread
@@ -32,7 +35,7 @@ before any run (`predictions.md`).
    raw −7.5 / −17.8 / −34.5 % vs symmetric dressing at ≈ +3.5 / +10 / +28 % FLOPs (all pass the
    marginal rule by ~2× in ARC's chain, which has no learned gains — an upper bound for v77).
 
-## M5 — ARC-b ablation at n = 1024 (13 of 16 DEV nets)
+## M5 — ARC-b ablation at n = 1024 (16 DEV nets)
 
 One ingredient changed at a time (driver `m5_ablate.py`, a flag-driven copy of ARC's
 `factored_nonlin_kprop_k3`; with default flags it equals ARC exactly, `m5_calibrate.json`).
@@ -40,29 +43,29 @@ One ingredient changed at a time (driver `m5_ablate.py`, a flag-driven copy of A
 
 | arm | final MSE | Δ vs b (paired, 95 %) | loses | vs v73 (paired) |
 |---|---|---|---|---|
-| a SIMPLE | 3.853e-08 | +118.8 % ± 15.5 | 100 % | +67.1 % ± 8.9 |
-| **b AUGMENT** | **1.782e-08** | 0 | 0 % | **−22.9 % ± 5.6** (13/13) |
-| 1 no heavy legs (SIMPLE births) | 5.441e-07 | +2950 % | 2541 % | |
-| 2 dressed legs (symmetric, R1 §5.1) | 3.024e-08 | **+69.2 % ± 5.1** | **60 %** | +30.7 % ± 11.4 |
-| 2 dressed, s = 0.7 / 0.5 / 0.3 | 8.9e-08 / 1.71e-07 / 2.90e-07 | +398 / +856 / +1523 % | | |
-| 2c asym Sym(X ⊗ e ⊗ (X + 2H)) | 1.782e-08 | 0.0 % (exact) | 0 % | |
-| 3a memoryless κ4 core | 3.151e-07 | +1692 % | 1435 % | |
-| 3b gain-mode core replaces ARC's core | 1.743e-07 | +878 % | 756 % | |
-| 3c memoryless + gain-mode core | 1.331e-07 | +636 % | 557 % | |
-| 4 no 211→111 | 5.654e-06 | +31543 % | | |
-| 5 no K211 | 4.202e-06 | +23117 % | | |
+| a SIMPLE | 3.930e-08 | +121.2 % ± 13.6 | 100 % | +70.0 % ± 10.0 |
+| **b AUGMENT** | **1.794e-08** | 0 | 0 % | **−22.6 % ± 4.9** (16/16) |
+| 1 no heavy legs (SIMPLE births) | 5.536e-07 | +2983 % | 2508 % | |
+| 2 dressed legs (symmetric, R1 §5.1) | 3.062e-08 | **+70.2 % ± 4.9** | **59 %** | +32.1 % ± 10.8 |
+| 2 dressed, s = 0.7 / 0.5 / 0.3 | 9.09e-08 / 1.74e-07 / 2.95e-07 | +405 / +869 / +1543 % | | |
+| 2c asym Sym(X ⊗ e ⊗ (X + 2H)) | 1.794e-08 | 0.0 % (exact) | 0 % | |
+| 3a memoryless κ4 core | 3.062e-07 | +1629 % | 1350 % | |
+| 3b gain-mode core replaces ARC's core | 1.687e-07 | +843 % | 706 % | |
+| 3c memoryless + gain-mode core | 1.307e-07 | +620 % | 528 % | |
+| 4 no 211→111 | 5.653e-06 | +31346 % | | |
+| 5 no K211 | 4.597e-06 | +25113 % | | |
 
 Per-layer MSE ratio to b at layers 1 / 4 / 8 / 12 / 16:
 
 | arm | ratios |
 |---|---|
-| 1 no heavy legs | 1.00 / 1.23 / 4.50 / 13.3 / 30.5 |
-| 2 dressed | 1.00 / 1.00 / 1.07 / 1.27 / 1.69 |
-| 2 dressed s = 0.5 | 1.00 / 1.07 / 2.09 / 4.61 / 9.56 |
-| 3a memoryless | 1.00 / 41.0 / 29.6 / 22.2 / 17.9 |
-| 3b gain core | 1.00 / 63.7 / 27.5 / 14.9 / 9.78 |
-| 4 no 211→111 | 1.00 / 1.05 / 1.56 / 12.4 / 316 |
-| 5 no K211 | 1.00 / 1.75 / 8.16 / 27.7 / 232 |
+| 1 no heavy legs | 1.00 / 1.23 / 4.48 / 13.4 / 30.8 |
+| 2 dressed | 1.00 / 1.00 / 1.07 / 1.28 / 1.70 |
+| 2 dressed s = 0.5 | 1.00 / 1.07 / 2.08 / 4.67 / 9.69 |
+| 3a memoryless | 1.00 / 40.4 / 29.3 / 21.4 / 17.3 |
+| 3b gain core | 1.00 / 63.7 / 27.5 / 14.6 / 9.43 |
+| 4 no 211→111 | 1.00 / 1.05 / 1.55 / 12.5 / 314 |
+| 5 no K211 | 1.00 / 1.73 / 8.12 / 28.9 / 252 |
 
 Readings:
 - The memoryless and gain-mode cores fail *early* (40–100× at layer 4, decaying with depth):
@@ -75,7 +78,7 @@ Readings:
 **Predictions vs outcome.** Strategist: (1) loses 35–60 %; (2) recovers ≥ 70 % of (1)'s loss;
 (3) loses 20–40 %, gain-mode recovers half; (4)/(5) < 10 % each. Worker: 30 / 85 / 20 / 40 % /
 5 / 8 %. Both wrong in kind for 1, 3, 4, 5 (catastrophic, not partial). (2) recovered 98 % of
-(1)'s loss in raw terms (from 2541 % to 60 %) but is still 69 % worse than b; (3c) recovered 61 %
+(1)'s loss in raw terms (from 2508 % to 59 %) but is still 70 % worse than b; (3c) recovered 61 %
 of (3a)'s loss — the closest call — but both are > 7× b.
 
 ### Dressing-strength and top-hub correction (Lane P's questions, 7 nets)
