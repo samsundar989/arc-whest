@@ -2697,3 +2697,4 @@ learned-free chain the same correction is worth −41 % (Lane M2, 16 nets); in o
 (= v79's graded raw to 0.001 %), 100 clean. −2.16 % vs v79, exactly the FLOP cut. +1.15 % vs the
 FRESH-A projection 3.5811e-09 (v79: +1.18 %): FRESH-A ÷ 1.019 reads ~1.2 % optimistic for these
 builds; the implied fresh/graded factor is 1.0074 on both. `tools/ev.py --best-graded` updated.
+| 2026-10-07 | `estimator_k3_v80_hygws.py` | `dd82721c` | FRESH-A | 2.147833e-08 | 0.18004 | 23,071 | local A/B on DEV net 3 (×2) vs v78 = **1.487** → noisy-implied ≈ **85 s** (B ≤ 95 s) | VmPeak 6,128 MiB (WSL PASS, same hash) | 3.6627e-09 | PENDING | **1.1561× vs v78** (t95 [+5.45e-10, +6.62e-10]) | 98/100 | v80's B twin (block 40 base + l0/join/bigvol 2^30). DEV raw 2.075799e-08 (projected 3.6004e-09), 1.1737× vs v78 100/100. Twin parity 1.6e-5. residual 0.256 s. Fallback B (l0+join only, wall ×1.02 vs v78, F/B 0.19136) not built as a candidate. For the Oct 8 A/B slot. |
