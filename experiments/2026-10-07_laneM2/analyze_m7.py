@@ -78,15 +78,24 @@ def main() -> int:
             cells.append(f"{x.mean():+.2e} ± {ci(x):.1e} (se {se[k_][:, l].mean():.0e})")
         lines.append(f"| {l + 1} | " + " | ".join(cells) + " |")
     # projected final-MSE cost of the coherent parts (η² × transfer)
-    proj = ["", "| layer | coherent cov η (rms over nets, max of m̂/trC) | → final MSE | coherent mean η | → final MSE |",
-            "|---|---|---|---|---|"]
+    # R2's transfer coefficients are per η² of a relative error of the WHOLE covariance. A
+    # relative error η_m of the variance along m̂ is a rank-1 perturbation; in tr C units it is
+    # η_m · (m̂ᵀCm̂ / tr C). Compare like with like: η_eq = max(|trC err|, |η_m| · share_m̂).
+    share = st["uCu"][:, :, 0] / np.array([[np.trace(np.diag(v)) for v in vv] for vv in st["var"]])
+    proj = ["", "| layer | share of tr C along m̂ | var-level η (trC) | m̂ η in trC units | budget (R2) | → final MSE (η_eq²·T) | coherent mean η | budget | → final MSE |",
+            "|---|---|---|---|---|---|---|---|---|"]
+    BUD_C = {1: 9e-5, 2: 1.1e-4, 3: 1.35e-4, 4: 1.6e-4, 5: 2.0e-4, 6: 2.3e-4}
+    BUD_M = {1: 5e-5, 2: 5e-5, 3: 6e-5, 4: 7e-5, 5: 7e-5, 6: 7e-5}
     tot = 0.0
     for l in range(L):
-        eta_c = np.sqrt(np.mean(np.maximum(rows["var_mhat"][:, l] ** 2, rows["trC"][:, l] ** 2)))
+        eq_m = rows["var_mhat"][:, l] * share[:, l]
+        eta_c = np.sqrt(np.mean(np.maximum(rows["trC"][:, l] ** 2, eq_m ** 2)))
         eta_m = np.sqrt(np.mean(rows["mean_mhat"][:, l] ** 2))
         fc, fm = T_COV[l + 1] * eta_c ** 2, T_MEAN[l + 1] * eta_m ** 2
         tot += fc + fm
-        proj.append(f"| {l + 1} | {eta_c:.2e} | {fc:.1e} | {eta_m:.2e} | {fm:.1e} |")
+        proj.append(f"| {l + 1} | {share[:, l].mean():.4f} | {np.sqrt(np.mean(rows['trC'][:, l] ** 2)):.2e} | "
+                    f"{np.sqrt(np.mean(eq_m ** 2)):.2e} | {BUD_C[l + 1]:.1e} | {fc:.1e} | {eta_m:.2e} | "
+                    f"{BUD_M[l + 1]:.0e} | {fm:.1e} |")
     proj.append(f"\nsum over layers 1-6 (upper bound, errors not independent): {tot:.2e} "
                 f"vs v77 raw final MSE ≈ 2.2e-8")
     txt = "\n".join(lines + proj)

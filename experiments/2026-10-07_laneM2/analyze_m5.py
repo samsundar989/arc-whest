@@ -34,7 +34,8 @@ def main() -> int:
             nets[r["i"]]["a"] = {"mse_final": r["variants"]["a"]["mse_final"], "mse_all": r["variants"]["a"]["mse_all"]}
     arms = [k for k in ("a", "b", "1_simple_legs", "2_dressed", "2f_dressed_s0.3", "2d_dressed_s0.5",
                         "2e_dressed_s0.7", "2c_asym", "3a_memoryless", "3b_gain", "3c_memoryless+gain",
-                        "4_no211", "5_noK211")]
+                        "4_no211", "5_noK211", "45_no_k3k4_loop", "145_simple_legs_no_loop",
+                        "3d_gain_from6", "3e_memoryless+gain_from6", "3f_memoryless_from6")]
     rows = ["| arm | nets | final MSE (mean) | Δ vs b (paired, 95 %) | loses (arm−b)/(a−b) | vs v73 (paired) | wins vs b | all-layer MSE |",
             "|---|---|---|---|---|---|---|---|"]
     summ = {}

@@ -7,7 +7,7 @@ n = 1024 (weights by the bit-exact mint), organizer N = 1e9 labels, floor-subtra
 v73 comparisons are paired per net against v73's cached DEV MSE. Predictions were recorded
 before any run (`predictions.md`).
 
-**Status:** M5 complete (16/16 nets); M6 complete (GO, gain-mode E21b); M7 running behind Lane P's twin jobs
+**Status:** M5 complete (16/16 nets); M6 complete (GO, gain-mode E21b); M7 complete (early layers are not the lever) behind Lane P's twin jobs
 (`gatekeeper.py` submits Lane M work only when Lane P has nothing waiting).
 
 ## Summary for Lane P
@@ -67,13 +67,26 @@ Per-layer MSE ratio to b at layers 1 / 4 / 8 / 12 / 16:
 | 4 no 211→111 | 1.00 / 1.05 / 1.55 / 12.5 / 314 |
 | 5 no K211 | 1.00 / 1.73 / 8.12 / 28.9 / 252 |
 
+Follow-up arms (16 nets):
+
+| arm | final MSE | Δ vs b | per-layer ratio to b, layers 4/8/12/16 |
+|---|---|---|---|
+| 45 no κ3↔κ4 loop (no 211→111, no K211) | 4.37e-06 | +23829 % | 1.79 / 8.51 / 28.9 / 239 |
+| 145 SIMPLE births + no loop | 4.29e-06 | +23430 % | 1.84 / 8.20 / 27.3 / 235 |
+| 3d gain-mode core replaces ARC's, layers ≥ 6 | 5.98e-08 | +230 % | 1.00 / 3.88 / 4.06 / 3.30 |
+| 3e memoryless + gain-mode, layers ≥ 6 | 3.92e-08 | +119 % (= SIMPLE) | 1.00 / 1.67 / 1.91 / 2.19 |
+| 3f memoryless, layers ≥ 6 | 3.25e-07 | +1725 % | 1.00 / 18.8 / 20.9 / 18.3 |
+
 Readings:
-- The memoryless and gain-mode cores fail *early* (40–100× at layer 4, decaying with depth):
-  ARC's κ4 core carries real information at layers 2–5, where R2 found the gain law weak
-  (R² 0.16–0.45). Arms that switch the core only from layer 6 on are queued (3d/3e/3f).
-- 4 and 5 grow exponentially: the κ3 → κ4 (K211) and κ4 → κ3 (211→111) legs of the loop
-  each compensate the other. Cutting both (arm 45) and cutting both with SIMPLE births
-  (arm 145) are queued, to show whether the loop *as a pair* carries gain.
+- The κ3↔κ4 loop is not a cancelling pair: cutting both legs blows up like cutting K211 alone.
+  Once the chain carries an r = 1 κ4 core, the K211 contributions (κ3 → κ4 core) are what keep it
+  bounded; SIMPLE escapes only because its κ4 is a scalar (r = 2). Any port of an off-diagonal κ4
+  core channel must bring the K211 terms with it.
+- The memoryless and gain-mode cores fail *early* (40–100× at layer 4 when applied from layer 1).
+  Applied only from layer 6, the gain template is far better than a memoryless core (3.3× vs
+  18× at layer 16; memoryless + gain ≈ SIMPLE), but in ARC's chain it cannot replace the
+  transported core: the transported core carries information the zero-parameter gain law does
+  not (consistent with R2's R² 0.55–0.80 for κ4 slices at depth).
 
 **Predictions vs outcome.** Strategist: (1) loses 35–60 %; (2) recovers ≥ 70 % of (1)'s loss;
 (3) loses 20–40 %, gain-mode recovers half; (4)/(5) < 10 % each. Worker: 30 / 85 / 20 / 40 % /
@@ -171,13 +184,52 @@ available in this chain).
 **Predictions vs outcome.** Strategist (R1): family size 2.4–3.2 % of D21, spike r ~ 64–128
 needed. Outcome: 0.6 %; spike-16 already .80–.95 for E21b (but only .53–.77 for E3).
 
-## M7 — coherent early errors (queued)
+## M7 — coherent early errors: **early layers are not the lever**
 
-v77's own post-ReLU mean and covariance at layers 1–6 extracted for 8 DEV nets (`m7_state.py`,
-real flopscope, `_layer` exactly as `_tower` runs it). MC labels N = 1e9 (`m7_mc.py`) for
-per-neuron mean/variance and the projections on v77's m̂ and top-4 covariance directions.
-Deviation from the handoff: DEV nets instead of FRESH-A/FIT (no labels needed from either;
-the MC is exact).
+v77's own post-ReLU mean and covariance at layers 1–6 (`m7_state.py`: `estimator_k3_v77_kash._layer`
+exactly as `_tower` runs it, real flopscope) on 8 DEV nets, against MC labels N = 1e9 per net
+(`m7_mc.py`, 10 blocks for standard errors) of the per-neuron mean/variance and of the
+projections on v77's m̂ and top-4 covariance directions. Deviation from the handoff: DEV nets
+instead of FRESH-A/FIT (the MC labels are exact either way; nothing is fitted).
+
+Relative errors (v77 − truth)/truth, mean ± 95 % over nets (MC se in brackets):
+
+| layer | coherent mean along m̂ | var along m̂ | var along u1 | tr C (variance level) | per-layer MSE |
+|---|---|---|---|---|---|
+| 1 | +2e-07 ± 1e-06 (2e-06) | +9.4e-04 ± 5e-05 | −4.2e-04 | −2e-07 ± 2e-06 | ≈ 0 |
+| 2 | +5.6e-06 ± 2.5e-06 | +2.7e-03 ± 3e-04 | −1.2e-04 | −1.6e-05 ± 2.5e-06 | 1.1e-10 |
+| 3 | +7.7e-06 ± 2.2e-06 | −7.7e-05 ± 2.4e-04 | +2.2e-04 | −4.5e-05 ± 5e-06 | 4.7e-10 |
+| 4 | +7.8e-06 ± 3.5e-06 | −2.9e-03 ± 7e-04 | −3.8e-04 | −8.7e-05 ± 1.1e-05 | 1.2e-09 |
+| 5 | +7.3e-06 ± 4.2e-06 | −5.1e-03 ± 1.2e-03 | −2.0e-03 | −1.25e-04 ± 1.4e-05 | 2.2e-09 |
+| 6 | +8.0e-06 ± 4.9e-06 | −6.7e-03 ± 1.2e-03 | −3.6e-03 | −1.77e-04 ± 2.8e-05 | 3.3e-09 |
+
+Against R2 §3.2's budgets (≤ 1e-9 of final MSE). R2's transfer coefficients are per η² of a
+relative error of the *whole* covariance, so the along-m̂ variance error is converted to tr C
+units (× m̂ᵀCm̂/tr C = 0.35 % at layer 2 … 2 % at layer 6) before comparing:
+
+| layer | variance-level η (tr C) | m̂ error in tr C units | budget | coherent mean η | budget | projected final MSE (cov + mean) |
+|---|---|---|---|---|---|---|
+| 2 | 1.6e-05 | 9.6e-06 | 1.1e-04 | 6.2e-06 | 5e-05 | 2.6e-11 |
+| 3 | 4.5e-05 | 1.8e-06 | 1.4e-04 | 8.1e-06 | 6e-05 | 1.2e-10 |
+| 4 | 8.8e-05 | 3.0e-05 | 1.6e-04 | 8.8e-06 | 7e-05 | 3.2e-10 |
+| 5 | 1.3e-04 | 7.5e-05 | 2.0e-04 | 8.6e-06 | 7e-05 | 4.2e-10 |
+| 6 | 1.8e-04 | 1.3e-04 | 2.3e-04 | 9.6e-06 | 7e-05 | 5.6e-10 |
+
+(Budgets at layers 3, 5, 6 and the transfer coefficients there are interpolated from R2's
+layers 2/4/8.) The sum over layers 1–6, ≤ 1.4e-9, is an upper bound (the errors are one
+propagating error, not independent): ≤ 6 % of v77's raw 2.2e-8.
+
+**Verdict.** At layers 2–4 every coherent part is inside its budget — the mean scale by ~8×,
+the variance level by 1.8–7× — so by the handoff rule no exact layer-2 covariance / κ3 prototype
+is built: **early layers are not the lever.** One systematic item worth recording: v77's
+variance level runs low by a same-sign, nearly linear −3e-5 per layer (−1.8e-4 at layer 6, all 8
+nets), i.e. ~75 % of the budget by layer 6. If it keeps growing past layer 6 it is a cheap
+deep-layer target (a per-layer variance-level gain), not an early-layer one. At layer 1 the
+variance level is exact (the arc-cosine closure), and the along-m̂ error (+9e-4) is an
+off-diagonal covariance truncation worth 1e-12 of final MSE.
+
+**Predictions vs outcome.** R2 §3.3: "if below budget, spend nothing on early layers" — below
+budget. Worker (unrecorded before the run, so not scored).
 
 ## Infrastructure note
 
