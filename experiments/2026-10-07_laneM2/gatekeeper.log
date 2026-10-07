@@ -49,3 +49,8 @@ UnicodeEncodeError: 'charmap' codec can't encode character '\u2297' in position 
 06:41:40 [17] submitted #2472: M7 MC N=1e9, nets 6:8
 06:55:40 [17] #2472 finished, exit 0
 06:55:40 ALL DONE
+09:37:43 [18] submitted #2473: M6 e2e E21b diag-only (v77 port test), nets 0:8
+11:29:19 [18] #2473 finished, exit 0
+11:29:26 [19] submitted #2475: M6 e2e E21b diag-only (v77 port test), nets 8:16
+11:32:38 [19] #2475 finished, exit 143
+11:32:38 [19] FAILED #2475; stopping (resume with: gatekeeper.py 20 after fixing)

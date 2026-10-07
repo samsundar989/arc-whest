@@ -181,6 +181,24 @@ E3 has no cheap form (gain .03–.31) and no proxy. Untested: whether B helps wh
 transported (ARC's core memory runs through the nonlinear step, so a clean one-hop arm is not
 available in this chain).
 
+### v77 port test (Lane P's question, 2026-10-07): the gain needs the off-diagonal channel
+
+v77 carries no off-diagonal post-activation κ4 core; B could only reach it through
+diag(W B Wᵀ) added to the transported diagonal (dG), ≈ +16 % F in v77 (Lane P), needing −14 % raw.
+In ARC (`m6_e2e.py` arms `E21b_gain_diag*`, B never enters the off-diagonal core):
+
+| arm (paired vs b) | final MSE Δ | wins |
+|---|---|---|
+| E21b gain-mode, full off-diagonal core | −11.7 % ± 2.3 | 10/10 |
+| B only via diag(W B Wᵀ) into the next diagonal core | −1.1 % ± 0.8 | 9/10 |
+| same, from layer 6 | −1.6 % ± 0.8 | 9/10 |
+
+(10 of 16 nets; the last 6 were still running when this was written.) The diagonal route keeps
+~10–14 % of the gain, an order of magnitude short of the +16 % port's bar. E21b's value lives in the
+off-diagonal κ4 core and its consumers. **Recommendation for the Oct 10 decision: close the E21b
+port for v77**, unless a future chain carries an off-diagonal κ4 core for another reason (≈ +24 %
+F, ARC evidence only).
+
 **Predictions vs outcome.** Strategist (R1): family size 2.4–3.2 % of D21, spike r ~ 64–128
 needed. Outcome: 0.6 %; spike-16 already .80–.95 for E21b (but only .53–.77 for E3).
 
