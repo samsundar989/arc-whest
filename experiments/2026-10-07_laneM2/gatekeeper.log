@@ -1,3 +1,18 @@
 20:04:46 [0] submitted #2444: M5 asym + dressing s, nets 0:4
 20:09:58 [0] #2444 finished, exit 0
 20:10:04 [1] submitted #2445: M5 12 arms, nets 4:7
+Traceback (most recent call last):
+  File "C:\Users\samsu\Documents\arc-whest-lane-m\experiments\2026-10-07_laneM2\gatekeeper.py", line 97, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "C:\Users\samsu\Documents\arc-whest-lane-m\experiments\2026-10-07_laneM2\gatekeeper.py", line 86, in main
+    log(f"[{k}] submitted #{jid}: {desc}")
+    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\samsu\Documents\arc-whest-lane-m\experiments\2026-10-07_laneM2\gatekeeper.py", line 59, in log
+    print(f"{datetime.now():%H:%M:%S} {msg}", flush=True)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\samsu\AppData\Local\Python\pythoncore-3.14-64\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2297' in position 52: character maps to <undefined>
+20:29:27 [3] submitted #2447: M5 12 arms, nets 7:10
