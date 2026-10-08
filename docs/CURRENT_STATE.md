@@ -1,4 +1,9 @@
-# CURRENT_STATE — 2026-10-07 (PLAN rev 19, Lane P2)
+# CURRENT_STATE — 2026-10-08 (PLAN rev 20, Lane P3)
+
+Rev 20 (`docs/PLAN_rev20_2026-10-08.md`) supersedes rev 19 §1–§4; Lane P3 per
+`docs/HANDOFF_2026-10-08_LANE_P3.md`. Oct 10: GO/no-GO on v90 (κ4-core loop). Rev 19 notes below are history.
+
+# (history) CURRENT_STATE — 2026-10-07 (PLAN rev 19, Lane P2)
 
 The plan is `docs/PLAN.md` rev 18 §2/§5/§6 plus `docs/PLAN_rev19_2026-10-07.md` (§1, §3, §4).
 Lane P2 (main) per `docs/HANDOFF_2026-10-07_LANE_P2.md`; Lane M2 (branch `lane-m`, worktree
@@ -11,7 +16,8 @@ vs the incumbent** (`tools/ev.py --panel fresh_a --baseline <incumbent>`); lane-
 |---|---|---|---:|---:|
 | **best A** | `estimator_k3_v80_hyg.py` / `73b2c19c` | #334659 | **3.6223815250878947e-9** (raw 2.0579e-8) | 0.17602 |
 | A (prev.) | `estimator_k3_v79_dress.py` / `2cf3acf4` | #334576 | 3.7025275784494673e-9 (raw 2.0580e-8) | 0.17991 |
-| **B** (wall-safe) | `estimator_k3_v78_kashws.py` / `6b3db2a5` | #334545 | **4.249585835999417e-9** (raw 2.2023e-8) | 0.19296 |
+| **B** (wall-safe) | `estimator_k3_v80_hygws.py` / `dd82721c` | #334781 | **3.705600144458426e-9** (raw 2.0582e-8) | 0.18004 |
+| B (prev.) | `estimator_k3_v78_kashws.py` / `6b3db2a5` | #334545 | 4.249585835999417e-9 (raw 2.2023e-8) | 0.19296 |
 | A (prev.) | `estimator_k3_v77_kash.py` / `4ff8018f` | #334487 | 3.959571663492616e-9 | 0.17981 |
 | B (prev.) | `estimator_k3_v76_kasws.py` / `fe05c0a4` | #334474 | 4.4952209455824486e-9 | 0.20416 |
 

@@ -2711,3 +2711,7 @@ builds; the implied fresh/graded factor is 1.0074 on both. `tools/ev.py --best-g
   floor: mean Var 0.0747 (range 0.049–0.116) ⇒ **7.47e-11 at N = 1e9** (Anatomy 2's cross
   estimate on FIT nets: 7.71e-11). No estimator was evaluated against those labels and the
   FRESH-LOCK read count is unchanged.
+- **v80_hygws graded (#334781): 3.705600144458426e-09**, raw 2.0582274551372848e-08 (= v80's
+  graded raw to 0.02 %), 100 clean. **New wall-safe B** (v78 4.2496e-09 → −12.80 %). +1.17 % vs the
+  FRESH-A projection 3.6627e-09 (v79 +1.18 %, v80 +1.15 %): the FRESH-A ÷ 1.019 reading stays ~1.2 %
+  optimistic for these builds (implied fresh/graded 1.0072).
