@@ -1,0 +1,31 @@
+{
+ "candidate": "/mnt/c/Users/samsu/Documents/arc-whest/estimator_k3_v80_hyg.py",
+ "n": 2,
+ "rows": [
+  {
+   "i": 0,
+   "wall_s": 54.08,
+   "flops": 387079927313,
+   "ops": 25631,
+   "vm_peak": 6431383552,
+   "vm_hwm": 4470652928,
+   "rss": 441929728,
+   "vm_size": 2402615296,
+   "acc_records": 1,
+   "acc_ops_held": 25631
+  },
+  {
+   "i": 1,
+   "wall_s": 53.02,
+   "flops": 387079927313,
+   "ops": 25631,
+   "vm_peak": 6441852928,
+   "vm_hwm": 4481220608,
+   "rss": 565043200,
+   "vm_size": 2525630464,
+   "acc_records": 2,
+   "acc_ops_held": 51262
+  }
+ ],
+ "elapsed_s": 107.79347610473633
+}

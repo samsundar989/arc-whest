@@ -2742,3 +2742,23 @@ Reading: **the κ4 core does not stand in for the old κ3 tier in our chain** �
 with or without the loop (the loop's ratio-of-ratios is 1.04); at rank 128 the loop narrows the
 damage only from ×1.98 to ×1.72. E21b is worth −5.6 % relative on top of (i). Unrefit the loop is
 +38 to +47 % (learned gains fitted to the memoryless core). Refits (S2tk) queued for (i) and (ii).
+
+### P3.0.2 — long-lived-worker memory growth (forum #18238), v80_hyg in ONE process
+`experiments/2026-10-08_p3/mem_growth.py`: WSL, official stack (whestbench 0.16.1 / flopscope 0.12.1),
+RLIMIT_AS 8,192 MB applied and read back, 60 sequential predicts exactly as `subprocess_worker`
+runs them (fresh BudgetContext each, materialise in-window, `summary_dict` after). No
+`budget_reset()` anywhere. Raw rows: `mem_growth_v80_60.json`.
+
+| | predict 1 | predict 60 | slope (linear fit, predicts 2–60) |
+|---|---:|---:|---:|
+| VmPeak | 6,161 MiB | 6,942 MiB | **+13.9 MiB / predict** |
+| settled RSS | 640 MiB | 1,441 MiB | +13.3 MiB / predict |
+| flopscope session accumulator | 1 record, 25,631 ops | 60 records, 1.54 M ops | +25,631 op records / predict (≈ 540 B each) |
+
+The growth is exactly the accumulator keeping every predict's op log (ops × ~540 B), linear, no
+plateau. **Extrapolation:** VmPeak reaches 8,192 MiB after ≈ 150 predicts; a 200-MLP suite in one
+worker would end at ≈ 8.85–8.90 GB, over the limit. A 100-MLP suite ends at ≈ 7.5 GB (consistent
+with every 100-net graded run passing). Levers in our hands, inside the rules' plain reading: fewer
+op calls (v80_hygws has 23,071 ops ≈ 12.5 MiB / predict) and a lower per-predict transient peak
+(starting VmPeak ≤ ≈ 5.6 GB would clear 200 at this slope). Whether the private re-run uses one
+long-lived worker for 200 MLPs is unknown (organizer question unanswered) — **for Samuel**.
