@@ -1,0 +1,33 @@
+[ev] estimator_k3_v81b_star2ws.py on FRESH_A n=100
+[ev] cost: 396,214,347,465 FLOPs, 23,181 ops, peak RSS 4.18 GiB -> budget 10.5 GiB/worker
+  [mem] 31.5 GiB free, 10.5 GiB per worker -> 2 workers, not 4
+  2 workers x 2 BLAS threads over 100 nets ...
+[ev] accuracy: 2777.0 s, raw MSE 2.030089e-08
+
+  raw MSE            2.030089e-08   (our N = 1e8 labels; mean floor 7.476e-10)
+  raw MSE floor-free 1.955324e-08
+  FLOPs / MLP        396,214,347,465   = 0.18018 x 2^41
+  op calls           23,181
+  materializations   0
+  adjusted (panel)   3.523052e-09
+  per-net score CV   0.123
+  PROJECTED PUBLIC   3.457362e-09   (÷ 1.019)
+  paired vs estimator_k3_v80_hygws:  gain 1.0572×, Δ +2.0916e-10, t95 [+1.8545e-10, +2.3288e-10], wins 98/100
+    (geometric 1.0568× — diagnostic only, no authority over an outcome)
+
+  PLAN §5 gates
+    PASS  panel projected vs best graded   better than 3.4984e-09             3.4574e-09 = 1.17% better
+    PASS  op calls                         ≤ 26,000                           23,181
+    ok    projected server wall (noisy day, A policy) ≤ 115 s                            97.6 s (quiet day 83.1 s)
+    PASS  setup                            < 2 s                              0.00 s
+    PASS  scalar materializations          0                                  0
+    PASS  failed nets on panel             0                                  0
+    PASS  projected server residual        ≤ 0.33 s (D7 finals bound)         0.257 s (1.56× headroom vs the 0.4 s cliff)
+    PASS  full acceptance panel            fresh_a (or dev), n = 100          fresh_a, n = 100
+    PASS  paired vs incumbent              --baseline given                   estimator_k3_v80_hygws
+    PASS  WSL RLIMIT_AS 8 GiB gate         PASS on candidate SHA256 (--mem)   PASS VmPeak 6166 MiB; source hash matches
+
+  ALL CHECKABLE GATES PASS (PLAN rev 15 §5 items 3-7) — still needs validate, parity, manual PLAN §5.8 wall evidence, validate-package + source hash, ledger
+
+  RESULTS.md row:
+  | 2026-10-08 | `estimator_k3_v81b_star2ws.py` | `512c33ec` | FRESH-A | 2.030089e-08 | 0.18018 | 23,181 | 44.985 s (local) → 83.1 s proj | 4282 MiB | **3.4574e-09** | PENDING | 1.0572× vs estimator_k3_v80_hygws (Δ +2.092e-10, t95 [+1.854e-10, +2.329e-10]) | 98/100 |  |

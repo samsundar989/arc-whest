@@ -2791,3 +2791,12 @@ Oct 10: no GO on v90. Star gains learned: 0, 0, .11, .11, .12, .35, .34, .40, .3
 **v81b_star2 graded (#334855): 3.393934944659043e-09, NEW BEST**, raw 1.9265924677824842e-08,
 100 clean. −2.98 % vs v81 (3.4984e-09), −6.31 % vs v80. +0.37 % vs the FRESH-A projection 3.3814e-09.
 `tools/ev.py --best-graded` updated.
+
+Further bank items (twin, VAL-100, 1 epoch from the star2 refit; control = star (recent) continued, 1.979300e-08):
+
+| arm | VAL raw | vs control | verdict |
+|---|---:|---:|---|
+| star over EVERY lineage (old tier via its Q legs; elementwise only) | 1.972654e-08 | −0.34 % | built as v81c_starall (FRESH-A below) |
+| + path-D4 (R3 §3.2, 1 n³ product per recent lineage ≈ +3.6 % F; gains learned 0.18–0.84) | 1.970990e-08 | −0.42 % | closed (marginal rule needs ≈ −3.5 %) |
+
+| 2026-10-08 | `estimator_k3_v81b_star2ws.py` | `512c33ec` | FRESH-A | 2.030089e-08 | 0.18018 | 23,181 | local A/B on DEV net 3 (×2) vs v80_hygws = **0.995** → ≈ 85 s noisy-implied (B ≤ 95 s) | VmPeak 6,166 MiB (WSL PASS, same hash) | 3.4574e-09 | PENDING | **1.0572× vs v80_hygws** (Δ +2.092e-10, t95 [+1.855e-10, +2.329e-10]) | 98/100 | B twin of v81b (block 40). Twin DEV vs v81b 1.4e-4 (block round-off). Package `88a97a75…e283`, inner = source. For the Oct 9 A/B slot. |
