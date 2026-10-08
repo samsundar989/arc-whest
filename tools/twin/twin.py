@@ -628,18 +628,34 @@ ARMS["bank"] = [
      "        _AL, _MM = (_full_legs_lean(adv) if _BANK.get('starall') else (adv.A_L, adv.M))\n"
      "        _w3c = fnp.concatenate(_bkst['w3b'][-(_AL.shape[1] // n):])\n"
      "        _d4s = (((_AL * _AL * _AL) * _MM) * _w3c[None, :]).sum(axis=1) * 4.0\n"
-     "        D4 = D4 + _d4s * _TWG['sg'][layer_index]\n"),
+     "        D4 = D4 + _d4s * _TWG['sg'][layer_index]\n"
+     "    if (_BANK is not None and _BANK.get('path') and _TWG is not None and adv is not None\n"
+     "            and _bkst.get('cb')):\n"
+     "        # R3 3.2 path: D4 = 12 rowsum((A.J) . V), V = (A.J) C~_birth, recent lineages\n"
+     "        _kr0 = adv.k - adv.ko\n"
+     "        _cbs = _bkst['cb'][-_kr0:]\n"
+     "        _w2r = adv.w2b[adv.w2b.shape[0] - _kr0 * n:]\n"
+     "        _d4p = None\n"
+     "        for _i, _Cb in enumerate(_cbs):\n"
+     "            _AJ = adv.A_L[:, _i * n:(_i + 1) * n] * (adv.M[:, _i * n:(_i + 1) * n]\n"
+     "                                                    * _w2r[_i * n:(_i + 1) * n][None, :])\n"
+     "            _t = ((_AJ @ _Cb) * _AJ).sum(axis=1)\n"
+     "            _d4p = _t if _d4p is None else _d4p + _t\n"
+     "        D4 = D4 + _d4p * (12.0 * _TWG['pg'][layer_index])\n"),
     ("    return (mu_out, cov_out, out_tw, c4_out, g_out)\n",
      "    if _BANK is not None and _BANK.get('star'):\n"
      "        _kr = out_tw.k if _BANK.get('starall') else out_tw.k - out_tw.ko\n"
      "        _l3 = (list(_bkst.get('w3b') or []) + [w[(3, 1)]])[-_kr:]\n"
      "        c4_out = {'c4': c4_out, 'w3b': _l3}\n"
+     "        if _BANK.get('path'):\n"
+     "            c4_out['cb'] = (list(_bkst.get('cb') or []) + [C11])[-(out_tw.k - out_tw.ko):]\n"
      "    return (mu_out, cov_out, out_tw, c4_out, g_out)\n"),
     ("def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n",
      "_BANK = None\n\n\ndef _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n"),
 ]
 TRAINABLE["S2tv"] = TRAINABLE["S2t"] + ("gain/vg",)
 TRAINABLE["S2ts"] = TRAINABLE["S2t"] + ("gain/sg",)
+TRAINABLE["S2tsp"] = TRAINABLE["S2t"] + ("gain/sg", "gain/pg")
 
 #: M4 neighbor head: 4 own + 5*K partners + 2 x (4 kernel means + log mass) + C+alpha + R+1.
 NBR_F, NBR_H = 4 + 5 * 8 + 12, 32
@@ -796,6 +812,7 @@ class Twin:
         self.base["gain"]["k4g"] = torch.ones((depth,), dtype=torch.float32, device=DEV)
         self.base["gain"]["vg"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
         self.base["gain"]["sg"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
+        self.base["gain"]["pg"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
         if "nbr" in arm.split("+"):
             # M4 neighbor head; W2/b2 zero -> exact identity at init. W1 deterministic.
             g = torch.Generator(device="cpu").manual_seed(20261006)
