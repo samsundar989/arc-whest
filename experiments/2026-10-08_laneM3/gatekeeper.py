@@ -8,13 +8,16 @@ another checkout is QUEUED or RUNNING and the previous Lane M job has finished. 
 """
 from __future__ import annotations
 
+import importlib.util
 import re
 import subprocess
 import sys
 from pathlib import Path
 
-sys.path.append(str(Path(__file__).resolve().parent.parent / "2026-10-07_laneM2"))
-import gatekeeper as gk2  # noqa: E402
+_spec = importlib.util.spec_from_file_location(
+    "gatekeeper_m2", Path(__file__).resolve().parent.parent / "2026-10-07_laneM2" / "gatekeeper.py")
+gk2 = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(gk2)
 
 LANE_M = gk2.LANE_M
 O = "C:/Users/samsu/Documents/arc-whest-lane-m/experiments/2026-10-08_laneM3"
