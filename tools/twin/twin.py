@@ -625,13 +625,13 @@ ARMS["bank"] = [
      "    D4 = metric * dG\n"
      "    if (_BANK is not None and _BANK.get('star') and _TWG is not None and adv is not None\n"
      "            and _bkst.get('w3b')):\n"
-     "        _AL, _MM = adv.A_L, adv.M\n"
-     "        _w3c = fnp.concatenate(_bkst['w3b'])\n"
+     "        _AL, _MM = (_full_legs_lean(adv) if _BANK.get('starall') else (adv.A_L, adv.M))\n"
+     "        _w3c = fnp.concatenate(_bkst['w3b'][-(_AL.shape[1] // n):])\n"
      "        _d4s = (((_AL * _AL * _AL) * _MM) * _w3c[None, :]).sum(axis=1) * 4.0\n"
      "        D4 = D4 + _d4s * _TWG['sg'][layer_index]\n"),
     ("    return (mu_out, cov_out, out_tw, c4_out, g_out)\n",
      "    if _BANK is not None and _BANK.get('star'):\n"
-     "        _kr = out_tw.k - out_tw.ko\n"
+     "        _kr = out_tw.k if _BANK.get('starall') else out_tw.k - out_tw.ko\n"
      "        _l3 = (list(_bkst.get('w3b') or []) + [w[(3, 1)]])[-_kr:]\n"
      "        c4_out = {'c4': c4_out, 'w3b': _l3}\n"
      "    return (mu_out, cov_out, out_tw, c4_out, g_out)\n"),
