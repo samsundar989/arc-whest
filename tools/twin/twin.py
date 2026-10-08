@@ -599,6 +599,16 @@ ARMS = {
          "                and not (_GM is not None and _GM.get('q31') == 'drop')):\n"),
     ],
 }
+# HANDOFF 2026-10-08 Lane P3, P3.2: the kappa4-core loop (tools/twin/k4l_arm.py).
+import k4l_arm  # noqa: E402
+ARMS["k4l"] = k4l_arm.PATCHES + [
+    ("            out_tw = _append(adv, None, fac1, w2b_vec, n, Zb, Lb, _sb, e_b,\n",
+     "            if _k4l_offpost is not None and _TWG is not None and 'k4g' in _TWG:\n"
+     "                _k4l_offpost = _k4l_offpost * _TWG['k4g'][layer_index]\n"
+     "            out_tw = _append(adv, None, fac1, w2b_vec, n, Zb, Lb, _sb, e_b,\n"),
+]
+TRAINABLE["S2tk"] = TRAINABLE["S2t"] + ("gain/k4g",)
+
 #: M4 neighbor head: 4 own + 5*K partners + 2 x (4 kernel means + log mass) + C+alpha + R+1.
 NBR_F, NBR_H = 4 + 5 * 8 + 12, 32
 
@@ -750,6 +760,8 @@ class Twin:
         # weight, init 0). Read only by the `gm` arm, and only once installed as params.
         self.base["gain"]["gmb"] = torch.full((depth,), 0.7, dtype=torch.float32, device=DEV)
         self.base["gain"]["gmg"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
+        # P3.2 kappa4-core loop: per-layer gain on the off-diagonal core births (k4l arm)
+        self.base["gain"]["k4g"] = torch.ones((depth,), dtype=torch.float32, device=DEV)
         if "nbr" in arm.split("+"):
             # M4 neighbor head; W2/b2 zero -> exact identity at init. W1 deterministic.
             g = torch.Generator(device="cpu").manual_seed(20261006)
@@ -874,6 +886,11 @@ def cmd_eval(a, tw=None, params=None, quiet=False):
     if getattr(a, "gm", ""):
         assert hasattr(tw.mod, "_GM"), "--gm needs --arm gm (or mask+gm)"
         tw.mod._GM = parse_gm(a.gm)
+    if getattr(a, "k4l", ""):
+        assert hasattr(tw.mod, "_K4L"), "--k4l needs --arm ...+k4l"
+        tw.mod._K4L = k4l_arm.parse(a.k4l)
+    if getattr(a, "shared_rank", 0):
+        tw.mod._SHARED_RANK = a.shared_rank
     if mask or stats is not None:
         assert hasattr(tw.mod, "_MASK"), "--mask needs --arm mask"
     with torch.no_grad():
@@ -887,7 +904,8 @@ def cmd_eval(a, tw=None, params=None, quiet=False):
                 stats[f"{split}:{i}"] = tw.mod._MASK["stats"]
     r = {"panel": a.panel, "arm": getattr(a, "arm", ""), "n": len(fin),
          "raw_mse": float(np.mean(fin)), "per_net": fin,
-         "dress": getattr(tw.mod, "_DRESS", None), "gm": getattr(tw.mod, "_GM", None)}
+         "dress": getattr(tw.mod, "_DRESS", None), "gm": getattr(tw.mod, "_GM", None),
+         "k4l": getattr(tw.mod, "_K4L", None), "shared_rank": getattr(tw.mod, "_SHARED_RANK", None)}
     if mask or stats is not None:
         r["mask"] = mask
         r["nets"] = [f"{s}:{i}" for s, i in rows]
@@ -969,6 +987,13 @@ def cmd_train(a):
         assert hasattr(tw.mod, "_GM"), "--gm needs --arm gm (or mask+gm)"
         tw.mod._GM = parse_gm(a.gm)
         print(f"  gm {tw.mod._GM}", flush=True)
+    if a.k4l:
+        assert hasattr(tw.mod, "_K4L"), "--k4l needs --arm ...+k4l"
+        tw.mod._K4L = k4l_arm.parse(a.k4l)
+        print(f"  k4l {tw.mod._K4L}", flush=True)
+    if a.shared_rank:
+        tw.mod._SHARED_RANK = a.shared_rank
+        print(f"  shared rank {a.shared_rank}", flush=True)
     names = TRAINABLE[a.stage]
     params = {k: tw.leaf(k).clone().requires_grad_(True) for k in names}
     if a.init:
@@ -1005,7 +1030,8 @@ def cmd_train(a):
 
     def evaluate(tag):
         ev = argparse.Namespace(panel=a.hold_panel, n=a.hold_n, cand=a.cand, params=None,
-                                subst=a.subst)
+                                subst=a.subst, mask=a.mask, k4l=a.k4l,
+                                shared_rank=a.shared_rank)
         r = cmd_eval(ev, tw=tw, params=params, quiet=True)
         msg = f"[{tag}] HOLDOUT-100 raw {r['raw_mse']:.6e} (n={r['n']})"
         print(msg, flush=True)
@@ -1129,6 +1155,9 @@ def main():
                     help="with --arm dress / mask+dress: 'all' or 'c2=1,d21=1,d22=1,gate=light'")
     ap.add_argument("--gm", default="",
                     help="with --arm gm / mask+gm: 'mode=a|b|c,beta=0.7,gamma=0,q31=keep|drop,q31b=1'")
+    ap.add_argument("--k4l", default="",
+                    help="with --arm ...+k4l: 'core=1,k211=exact|trunc|none,rad=hub|exact|fold|none,e21b=0|1,old=keep|drop'")
+    ap.add_argument("--shared-rank", type=int, default=0, help="override _SHARED_RANK (old tier)")
     ap.add_argument("--mask-stats", action="store_true",
                     help="eval with --arm mask: log per-layer alpha kept fractions per net")
     ap.add_argument("--zero-scale", type=float, default=1e-2,
