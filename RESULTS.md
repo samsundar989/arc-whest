@@ -2762,3 +2762,22 @@ with every 100-net graded run passing). Levers in our hands, inside the rules' p
 op calls (v80_hygws has 23,071 ops ≈ 12.5 MiB / predict) and a lower per-predict transient peak
 (starting VmPeak ≤ ≈ 5.6 GB would clear 200 at this slope). Whether the private re-run uses one
 long-lived worker for 200 MLPs is unknown (organizer question unanswered) — **for Samuel**.
+
+Refits (S2t-family, lr 1e-4, 1 epoch TRAIN-900, from refit_dress_all; jobs 2478–2482):
+
+| arm | VAL raw (best step) | vs refit control |
+|---|---:|---:|
+| refit control (S2t) | 2.087349e-08 (112) | — |
+| P3.1c variance-level gain (S2tv) | 2.087423e-08 (112) | +0.004 % — closed |
+| **P3.1b star-D4 (S2ts, zero-scale 100)** | **2.045544e-08** (112) | **−2.00 %** |
+| P3.2 (i) core + K211 exact + radial exact (S2tk) | 2.321021e-08 (112) | +11.19 % |
+| P3.2 (ii) (i) + E21b (S2tk) | 2.314944e-08 (112) | +10.90 % |
+
+**P3.2 KILLED** (best of (i)–(iii) +10.9 % vs the −8 % bar; (iv)/(v) ×20 / ×2.4 unrefit vs the +10 %
+bar). (iii) not run: P2.1b's correction was +0.3–1.9 % and the margin is 19 pp. Recommendation for
+Oct 10: no GO on v90. Star gains learned: 0, 0, .11, .11, .12, .35, .34, .40, .38, .35, .43, .35,
+.48, .46, .50, .51 (still rising).
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-08 | `estimator_k3_v81_star.py` | `376ae1c5` | DEV | 2.007376e-08 | 0.17616 | 25,741 | law: quiet 82.4 s, noisy 96.9 s | — | 3.4068e-09 | — | **1.0333× vs v80** (Δ +1.179e-10, t95 [+1.077e-10, +1.281e-10]) | 100/100 | v80 + star-D4 + S2ts refit baked (`tools/build_star.py`). residual 0.285 s. |
