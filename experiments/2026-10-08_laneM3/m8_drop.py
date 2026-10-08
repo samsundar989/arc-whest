@@ -60,8 +60,11 @@ def rep_leg(cols):
 class Dropper:
     """Wraps one chain's nonlinear step; keeps the per-column tag array of K[3]."""
 
-    def __init__(self, chain: str, A: int, depth: int, mlp, split_all: bool = False, check: bool = False):
+    def __init__(self, chain: str, A: int, depth: int, mlp, split_all: bool = False, check: bool = False,
+                 rank: int = 0):
         self.chain, self.A, self.depth, self.mlp = chain, A, depth, mlp
+        self.rank = rank          # > 0: fold blocks older than A into a shared rank-r basis instead of dropping
+        self.energy = []          # compression: captured energy share per step
         self.split_all, self.check = split_all, check
         self.t = 0
         self.tags = None          # np.int64 array, one entry per column of the current K[3]
@@ -92,6 +95,22 @@ class Dropper:
             assert F[0].shape[1] == len(self.tags), (F[0].shape, len(self.tags))
             r_in = len(self.tags)
             keep = self.tags >= t - self.A if self.A < INF else np.ones(r_in, bool)
+            if self.rank and not keep.all():
+                # old tier: project every leg of the old columns onto the top-r left singular subspace of
+                # their stacked legs (re-based each step, energy-ordered); nothing is dropped
+                old = torch.as_tensor(np.nonzero(~keep)[0], device=F[0].device)
+                G = sum(f[:, old] @ f[:, old].T for f in F)               # Gram of the stacked legs
+                ev, U = torch.linalg.eigh(G)
+                U = U[:, -self.rank:]
+                self.energy.append(float(ev[-self.rank:].sum() / ev.sum()))
+                legs = []
+                for f in F:
+                    g = f.clone()
+                    g[:, old] = U @ (U.T @ f[:, old])
+                    legs.append(g)
+                K_in = dict(K_in)
+                K_in[3] = FactoredTensor(n=K_in[3].n, d=3, factors=tuple(legs))
+                keep = np.ones(r_in, bool)
             if not keep.all():
                 idx = torch.as_tensor(np.nonzero(keep)[0], device=F[0].device)
                 K_in = dict(K_in)
@@ -110,7 +129,7 @@ class Dropper:
             eye = torch.eye(n, device=F[0].device, dtype=F[0].dtype)
             assert torch.equal(F[1][:, -n:], eye) and torch.equal(F[2][:, -n:], eye)
         # group the old columns by drop step (split_all: one group per tag)
-        key = (lambda tau: tau) if self.split_all else self.drop_step
+        key = (lambda tau: tau) if self.split_all else ((lambda tau: INF) if self.rank else self.drop_step)
         D_total = F[0][:, -n:]
         groups = {}
         for tau in np.unique(old_tags):
@@ -199,6 +218,7 @@ def main(argv=None) -> int:
     ap.add_argument("--nets", default="0:16")
     ap.add_argument("--chains", default="bE,a")
     ap.add_argument("--A", default="inf,8,5,3,2,1")
+    ap.add_argument("--compress", default="", help="A:r,... -> fold blocks older than A into rank r (no drop arms)")
     ap.add_argument("--out", default=None)
     a = ap.parse_args(argv)
     dev = torch.device("cuda")
@@ -211,8 +231,11 @@ def main(argv=None) -> int:
     n, depth = 1024, 16
     mini = np.load(gen.cache_dir() / "mini16_truth.npz")
     lo, hi = (int(x) for x in a.nets.split(":"))
-    As = [INF if x == "inf" else int(x) for x in a.A.split(",")]
-    res = {"chains": a.chains.split(","), "A": [("inf" if x >= INF else x) for x in As], "nets": []}
+    if a.compress:
+        specs = [(int(x.split(":")[0]), int(x.split(":")[1])) for x in a.compress.split(",")]
+    else:
+        specs = [(INF if x == "inf" else int(x), 0) for x in a.A.split(",")]
+    res = {"chains": a.chains.split(","), "specs": [[("inf" if A >= INF else A), r] for A, r in specs], "nets": []}
     prog = os.environ.get("WORKERQ_PROGRESS")
     for i in range(lo, hi):
         seed = int(mini["seeds"][i])
@@ -220,13 +243,14 @@ def main(argv=None) -> int:
         truth, floor = np.array(mini["truth"][i]), float(mini["avg_variance"][i]) / 1e9
         rec = {"i": i, "seed": seed, "floor_final": floor}
         for chain in res["chains"]:
-            for A in As:
+            for A, r in specs:
                 torch.cuda.reset_peak_memory_stats()
-                means, dt, d = run(mlp, n, depth, chain, A, dev, dtype)
+                means, dt, d = run(mlp, n, depth, chain, A, dev, dtype, rank=r)
                 pl = ((means - truth) ** 2).mean(1) - floor
-                arm = f"{chain}_A{'inf' if A >= INF else A}"
+                arm = f"{chain}_A{'inf' if A >= INF else A}" + (f"_r{r}" if r else "")
                 rec[arm] = {"mse_final": float(pl[-1]), "mse_layers": pl.tolist(), "s": dt,
-                            "cols_final": d.log[-1][3], "peak_gib": torch.cuda.max_memory_allocated() / 2**30}
+                            "cols_final": d.log[-1][3], "peak_gib": torch.cuda.max_memory_allocated() / 2**30,
+                            "energy": d.energy}
                 print(json.dumps({"i": i, "arm": arm, "mse_final": rec[arm]["mse_final"], "s": round(dt, 1),
                                   "cols": d.log[-1][3]}), flush=True)
                 torch.cuda.empty_cache()

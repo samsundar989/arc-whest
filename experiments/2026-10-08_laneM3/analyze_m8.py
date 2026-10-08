@@ -24,11 +24,13 @@ def gm_ci(r):
 
 
 def main():
-    nets = []
+    by = {}
     for f in sys.argv[1:]:
-        nets += json.loads(Path(f).read_text())["nets"]
-    nets = sorted({r["i"]: r for r in nets}.values(), key=lambda r: r["i"])
-    arms = [k for k in nets[0] if "_A" in k]
+        for r in json.loads(Path(f).read_text())["nets"]:
+            by.setdefault(r["i"], {}).update(r)
+    arms_all = {k for r in by.values() for k in r if "_A" in k}
+    nets = sorted((r for r in by.values() if all(k in r for k in arms_all)), key=lambda r: r["i"])
+    arms = sorted(arms_all, key=lambda k: (k.split("_A")[0], "_r" in k, k))
     chains = sorted({k.split("_A")[0] for k in arms}, reverse=True)
     out, lines = {"n_nets": len(nets), "rows": []}, []
     lines.append(f"M8 ({len(nets)} DEV nets, n = 1024, organizer labels, floor-subtracted)\n")
@@ -50,7 +52,10 @@ def main():
                          f"{row['worse']}/{len(nets)} | " + " / ".join(f"{x:.2f}" for x in pl) + f" | {row['cols']} |")
     if "bE_Ainf" in nets[0] and "a_Ainf" in nets[0]:
         lines.append("\nb+E vs a at equal A (ratio of means a / b+E):\n")
-        for A in sorted({k.split("_A")[1] for k in arms}, key=lambda x: (x == "inf", int(x) if x != "inf" else 0)):
+        As = {k.split("_A")[1] for k in arms}
+        for A in sorted(As, key=lambda x: (x == "inf", int(x.split("_")[0]) if x != "inf" else 0, x)):
+            if f"a_A{A}" not in nets[0] or f"bE_A{A}" not in nets[0]:
+                continue
             a = np.mean([r[f"a_A{A}"]["mse_final"] for r in nets])
             b = np.mean([r[f"bE_A{A}"]["mse_final"] for r in nets])
             lines.append(f"- A = {A}: a {a:.3e}, b+E {b:.3e}, a / b+E = {a / b:.2f}")
