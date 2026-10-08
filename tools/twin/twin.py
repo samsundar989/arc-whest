@@ -609,6 +609,38 @@ ARMS["k4l"] = k4l_arm.PATCHES + [
 ]
 TRAINABLE["S2tk"] = TRAINABLE["S2t"] + ("gain/k4g",)
 
+# HANDOFF 2026-10-08 Lane P3, P3.1b/c ("bank"): `_BANK` None = inert.
+#   vg   the variance CONSUMED at layer l times (1 + gain/vg[l]) (init 0): a per-layer level gain
+#   star D4 += gain/sg[l] * D4_star (init 0), D4_star[a] = 4 sum_j w3b_j A_L[a,j]^3 M[a,j] over the
+#        RECENT lineages (R3 3.1), w3b = the birth layer's w(3,1); carried in the c4 slot
+ARMS["bank"] = [
+    ("    mu, cov, tw, c4, gk4 = state\n",
+     "    mu, cov, tw, c4, gk4 = state\n"
+     "    _bkst = c4 if isinstance(c4, dict) else {}\n"),
+    ("    metric = float(init_scale)\n",
+     "    if _BANK is not None and _BANK.get('vg') and _TWG is not None:\n"
+     "        var = var * (1.0 + _TWG['vg'][layer_index])\n"
+     "    metric = float(init_scale)\n"),
+    ("    D4 = metric * dG\n",
+     "    D4 = metric * dG\n"
+     "    if (_BANK is not None and _BANK.get('star') and _TWG is not None and adv is not None\n"
+     "            and _bkst.get('w3b')):\n"
+     "        _AL, _MM = adv.A_L, adv.M\n"
+     "        _w3c = fnp.concatenate(_bkst['w3b'])\n"
+     "        _d4s = (((_AL * _AL * _AL) * _MM) * _w3c[None, :]).sum(axis=1) * 4.0\n"
+     "        D4 = D4 + _d4s * _TWG['sg'][layer_index]\n"),
+    ("    return (mu_out, cov_out, out_tw, c4_out, g_out)\n",
+     "    if _BANK is not None and _BANK.get('star'):\n"
+     "        _kr = out_tw.k - out_tw.ko\n"
+     "        _l3 = (list(_bkst.get('w3b') or []) + [w[(3, 1)]])[-_kr:]\n"
+     "        c4_out = {'c4': c4_out, 'w3b': _l3}\n"
+     "    return (mu_out, cov_out, out_tw, c4_out, g_out)\n"),
+    ("def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n",
+     "_BANK = None\n\n\ndef _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n"),
+]
+TRAINABLE["S2tv"] = TRAINABLE["S2t"] + ("gain/vg",)
+TRAINABLE["S2ts"] = TRAINABLE["S2t"] + ("gain/sg",)
+
 #: M4 neighbor head: 4 own + 5*K partners + 2 x (4 kernel means + log mass) + C+alpha + R+1.
 NBR_F, NBR_H = 4 + 5 * 8 + 12, 32
 
@@ -762,6 +794,8 @@ class Twin:
         self.base["gain"]["gmg"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
         # P3.2 kappa4-core loop: per-layer gain on the off-diagonal core births (k4l arm)
         self.base["gain"]["k4g"] = torch.ones((depth,), dtype=torch.float32, device=DEV)
+        self.base["gain"]["vg"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
+        self.base["gain"]["sg"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
         if "nbr" in arm.split("+"):
             # M4 neighbor head; W2/b2 zero -> exact identity at init. W1 deterministic.
             g = torch.Generator(device="cpu").manual_seed(20261006)
@@ -889,6 +923,9 @@ def cmd_eval(a, tw=None, params=None, quiet=False):
     if getattr(a, "k4l", ""):
         assert hasattr(tw.mod, "_K4L"), "--k4l needs --arm ...+k4l"
         tw.mod._K4L = k4l_arm.parse(a.k4l)
+    if getattr(a, "bank", ""):
+        assert hasattr(tw.mod, "_BANK"), "--bank needs --arm ...+bank"
+        tw.mod._BANK = {k: 1 for k in a.bank.split(",")}
     if getattr(a, "shared_rank", 0):
         tw.mod._SHARED_RANK = a.shared_rank
     if mask or stats is not None:
@@ -994,6 +1031,10 @@ def cmd_train(a):
     if a.shared_rank:
         tw.mod._SHARED_RANK = a.shared_rank
         print(f"  shared rank {a.shared_rank}", flush=True)
+    if a.bank:
+        assert hasattr(tw.mod, "_BANK"), "--bank needs --arm ...+bank"
+        tw.mod._BANK = {k: 1 for k in a.bank.split(",")}
+        print(f"  bank {tw.mod._BANK}", flush=True)
     names = TRAINABLE[a.stage]
     params = {k: tw.leaf(k).clone().requires_grad_(True) for k in names}
     if a.init:
@@ -1031,7 +1072,7 @@ def cmd_train(a):
     def evaluate(tag):
         ev = argparse.Namespace(panel=a.hold_panel, n=a.hold_n, cand=a.cand, params=None,
                                 subst=a.subst, mask=a.mask, k4l=a.k4l,
-                                shared_rank=a.shared_rank)
+                                shared_rank=a.shared_rank, bank=a.bank)
         r = cmd_eval(ev, tw=tw, params=params, quiet=True)
         msg = f"[{tag}] HOLDOUT-100 raw {r['raw_mse']:.6e} (n={r['n']})"
         print(msg, flush=True)
@@ -1158,6 +1199,7 @@ def main():
     ap.add_argument("--k4l", default="",
                     help="with --arm ...+k4l: 'core=1,k211=exact|trunc|none,rad=hub|exact|fold|none,e21b=0|1,old=keep|drop'")
     ap.add_argument("--shared-rank", type=int, default=0, help="override _SHARED_RANK (old tier)")
+    ap.add_argument("--bank", default="", help="with --arm ...+bank: 'vg', 'star' or 'vg,star'")
     ap.add_argument("--mask-stats", action="store_true",
                     help="eval with --arm mask: log per-layer alpha kept fractions per net")
     ap.add_argument("--zero-scale", type=float, default=1e-2,
