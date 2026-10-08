@@ -14,19 +14,23 @@ M8 (28 GiB host RAM wanted, ~13 GiB free).
    old tier's rule) with A = 5 exact recent layers costs only **×1.09 [1.06, 1.12]**, inside the
    1.3× bar, and keeps a / b+E = 2.37. A complete-K3 chain becomes cheap through *our* lineage
    representation, not through the core.
-2. **M9 — fourth order is worth ~3–5× at n = 1024 (ARC's sweep, 8 nets per width).** K=4
-   SIMPLE / unfactored K=3 AUGMENT = 0.56 / 0.50 / 0.43 / 0.36 at n = 96 / 128 / 192 / 256 (8/8
-   nets at every n ≥ 128). The ratio trend extrapolates to **0.18–0.36 at n = 1024 (2.8–5.5×
-   headroom)**; per-method slope extrapolation is not usable (it puts K=3 at 1.9e-9 at 1024 vs
-   ~1.5e-8 measured). [n = 320 point pending.]
-3. **M10.1 — the K=4 gain is NOT in the star / path / 3+2 births.** With every top-slice birth
-   switched off ("none": κ4 = the exactly transported repeated-index blocks only), K=4 SIMPLE keeps
-   **all** of its gain (none / full = 1.01 [0.67, 1.53] at n = 128; none / K3 = 0.50, 8/8). Star
-   and star+path are *worse* than none; 3+2 alone is harmful (×2.5 vs full); removing κ4 transport
-   memory loses the gain (×2.3 vs full, 0/8). **The lever is exact transport of the repeated-slice
-   (2,1,1)/(2,2)/(3,1)/(4) blocks**, which K=3 AUGMENT projects to the r = 1 trace core. The
-   M10.2 shared-factor arms (star D4/D31/D22, path D4 read from κ3 legs) target pieces that carry
-   nothing, so they were not built. **Direction needed** (below).
+2. **M9 — fourth order is worth ~7–9× at n = 1024 (ARC's sweep, 8 nets per width).** K=4
+   SIMPLE / unfactored K=3 AUGMENT = 0.56 / 0.50 / 0.43 / 0.36 / **0.28** at n = 96 / 128 / 192 /
+   256 / 320 (8/8 nets at every n ≥ 128). The ratio falls faster with width (log-slope −0.6 over
+   128–320, −0.8 over 192–320) and extrapolates to **0.11–0.15 at n = 1024 (7–9× headroom)**;
+   per-method slope extrapolation is not usable (it puts K=3 at 1.9e-9 at 1024 vs ~1.5e-8 measured).
+3. **M10 — no cheap piece of fourth order exists in the forms tested. NO-GO for Lane P; direction
+   needed.** At n = 256/320 the gain needs every part of exact K=4:
+   - the repeated-index correction blocks alone ("none") give about half (0.58 / 0.49 of the K3→K4
+     gap) and need *full-rank* transport: truncating each block's per-neuron n × n matrix to rank
+     2/4 helps at n ≤ 128 but costs ×1.5–2 against exact K=4 by n = 320 (the needed rank grows
+     with n);
+   - **no single top-slice birth class carries the rest**: on top of "none", path adds +0.09–0.13
+     of the remainder, star −0.22 to −0.36, star+path −0.11 to −0.16, 3+2 −0.39 / +0.23. Only all
+     three together reach exact K=4. The M10.2 shared-factor arms (star/path read off our κ3 legs)
+     therefore cannot capture the large-width gain, and were not built.
+   The n = 96/128 ablation (first version of this report) said the opposite (corrections alone =
+   everything, low rank better than exact): a pre-asymptotic artefact, superseded.
 
 ## M8 — Is κ4 a memory? (16 DEV nets, n = 1024, organizer labels, floor-subtracted)
 
@@ -127,8 +131,11 @@ G_drop 26.6 %) — consistent.
 1.9e-9 at n = 1024 against ~1.5e-8 measured — 8× wrong; the strategist's "naive per-order
 extrapolation overstates" is confirmed. The ratio is better behaved: log-slope of K4/K3 from 128
 to 256 is −0.48; continuing it gives **0.18 at n = 1024**, holding it flat from 256 gives 0.36.
-**Headroom 2.8–5.5× over unfactored K=3 AUGMENT**, i.e. ~3.5–7× over ARC's factored K=3 level
-(the 1.46–1.52e-8 cluster). [n = 320 point pending; it decides where in that range we sit.]
+**Headroom 2.8–5.5× over unfactored K=3 AUGMENT** on the 96–256 data. **n = 320 (added):** K=3
+unfactored 5.86e-7, factored 7.82e-7 (×1.32), K=4 SIMPLE 1.74e-7: K4/K3 = **0.28 [0.23, 0.35]**,
+8/8. Ratios 0.50 / 0.43 / 0.36 / 0.28 at 128 / 192 / 256 / 320 give a log-slope of −0.60 (−0.81
+over 192–320) and **0.11–0.15 at n = 1024: 7–9× headroom** over unfactored K=3, ~9–12× over ARC's
+factored K=3 level (the 1.46–1.52e-8 cluster).
 
 K=4 AUGMENT (factored) is unstable at depth 16 at these widths (NaN at 64, 4/8 finite at 96,
 3× *worse* than K=3 at 128) — ARC's factored AUGMENT at K = 4 is not a usable reference here.
@@ -138,7 +145,7 @@ estimate straddles 3×; M10.1 was run (cheap), M10.2 was not built — see M10.
 
 **Predictions vs outcome.** Strategist: K4S/K3 0.3–0.6 at 256 [I] → 0.36 (hit); 0.05–0.2 at
 1024 [50 %] → 0.18–0.36 (edge); naive overstates → yes. Worker: 0.5 at 256 → 0.36 (miss low);
-0.25 at 1024 → in range.
+0.25 at 1024 → 0.11–0.15 (miss: more headroom than predicted; the strategist's 0.05–0.2 [50 %] hit).
 
 ## M10.1 — which fourth-order pieces carry it (n = 96, 128; 8 nets each; same nets/labels as M9)
 
@@ -172,7 +179,41 @@ SIMPLE exactly.
 but *worse than none*: carries nothing net (miss in kind); D4-star-only ≥ 20 % [30 %] → not built,
 star-only arm is worse than no births. Worker: 45 % / 20 % — same miss.
 
+## M10 at large width (n = 192–320, 8 nets each; added 2026-10-08 evening) — supersedes M10.1
+
+Ratio to unfactored K=3 AUGMENT (geometric mean, 95 %, nets better), same nets and labels as M9:
+
+| arm | n = 128 | 192 | 256 | 320 |
+|---|---|---|---|---|
+| exact K=4 SIMPLE | 0.50 | 0.43 | 0.36 | 0.28 [0.23, 0.35] 8/8 |
+| none (corrections only, exact) | 0.50 | 0.66 [0.56, 0.78] | 0.64 [0.51, 0.81] | 0.66 [0.59, 0.73] 8/8 |
+| none, corrections rank 2 | 0.37 | 0.70 | 1.31 (2/8) | 1.79 (1/8) |
+| none, corrections rank 4 | 0.66 | 0.89 | 0.90 | 0.95 |
+| full, corrections rank 2 | 0.17 | 0.33 | 0.40 | 0.56 [0.43, 0.74] |
+| full, corrections rank 4 | 0.21 | 0.36 | 0.36 | 0.42 [0.33, 0.55] |
+| path only | 0.47 | | 0.61 | 0.63 |
+| star only | 0.67 | | 0.73 | 0.74 |
+| star + path | 0.61 | | 0.68 | 0.70 |
+| 3+2 only | 1.24 | | 0.69 | 0.57 |
+| no κ4 transport memory | 1.16 | | 0.73 | 0.63 |
+
+(Rank-k: each new correction block's per-neuron matrix B_r truncated to its top-k |eigen| part;
+full rank reproduces the exact arm to float rounding. A correction block is Sym(e_r e_r ⊗ B_r), so
+its A leg stays rank 1 under transport and a rank-k B_r would transport at ~(k+1)·2n³ per block.)
+
+Readings: (1) everything that looked cheap at n ≤ 128 — low-rank corrections, "corrections alone
+suffice" — degrades steadily with width while exact K=4 keeps improving; the asymptotic gain needs
+full-rank corrections *and* all birth classes together. (2) No single class is a positive piece:
+the classes interact (each alone ≈ "none"; star / star+path below it). (3) The cheapest partial
+piece is the memoryless arm (κ4 = this layer's births + correction, transported once, never
+carried): 0.63–0.73 of K3, ~40 % of the gap — but its births are still n × n per column (≈ 8n⁴ per
+layer ≈ 4 B), so it is not affordable either.
+
 ## Direction needed (strategist)
+
+*(Superseded in part by the large-width section above: questions 1 and 2 below were answered —
+the needed rank grows with n, and no single slice or birth class carries the gain. What remains
+open is whether ANY O(n³) representation of κ4 tracks the asymptotic gain; I have no candidate.)*
 
 The decision rule (GO if an arm captures ≥ 40 % of the gap at ≤ +10 % F) cannot be met by any
 shared-factor arm. The only piece that carries the gain is the exact transport of the
@@ -197,4 +238,5 @@ Recommendation: do not open a K = 4 prototype for Lane P on this evidence. The M
 `experiments/2026-10-08_laneM3/`: `m8_drop.py`, `m8_calibrate.json`, `m8_all.json`,
 `m8c_all.json`, `m8_table.md`, `m8_summary.json`, `m9_sweep.py`, `m10_ablate.py`,
 `analyze_m8.py`, `analyze_m9.py`, `m9_table_relu_w2_m9.md`, `pod/` (raw ARC outputs and logs).
-Pod cost: ~$10 (8.5 h of it idle after the runs finished — the follow-on runs had not been chained).
+Pod cost: ~$15 (≈ 18 h running, 8.5 h of it idle after the first runs finished — the follow-on
+runs had not been chained). Pod stopped.

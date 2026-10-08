@@ -12,19 +12,20 @@ layers costs ×1.09 [1.06, 1.12]** and keeps AUGMENT's 2.4× edge over SIMPLE; r
 For Lane P's Oct 10 decision: a complete-K3 chain can be cheap via our own 5-exact + rank-256 old
 tier, not via the κ4 core; the fold's rank is the cost driver. No GO form for the core route.
 
-**M9 (2026-10-08) — fourth order is worth ~3–5× at n = 1024.** ARC's sweep, 8 nets per width,
-paired: K=4 SIMPLE / unfactored K=3 AUGMENT = 0.56 / 0.50 / 0.43 / 0.36 at n = 96 / 128 / 192 / 256
-(8/8 at n ≥ 128). Ratio trend → 0.18–0.36 at 1024 (2.8–5.5× headroom over unfactored K=3, ~3.5–7×
-over ARC's factored K=3 level). Per-method slope extrapolation is 8× off at 1024 and was not used.
-K=3 at 256 matches the Oct 6 table (1.10e-6 vs 1.21e-6 unfactored). K=4 AUGMENT (factored) is
-unstable at depth 16. n = 320 point pending.
+**M9 (2026-10-08) — fourth order is worth ~7–9× at n = 1024.** ARC's sweep, 8 nets per width,
+paired: K=4 SIMPLE / unfactored K=3 AUGMENT = 0.56 / 0.50 / 0.43 / 0.36 / 0.28 at n = 96 / 128 /
+192 / 256 / 320 (8/8 at n ≥ 128); the ratio falls faster with width (log-slope −0.6 to −0.8) →
+0.11–0.15 at 1024. Per-method slope extrapolation is 8× off at 1024 and was not used. K=3 at 256
+matches the Oct 6 table. K=4 AUGMENT (factored) is unstable at depth 16.
 
-**M10 (2026-10-08) — the gain is not in star/path; direction needed.** Birth-class ablation of
-K=4 SIMPLE (n = 96/128, 8 nets): with *no* top-slice births K=4 keeps all its gain (none/full 1.01
-[0.67, 1.53]; none/K3 0.50, 8/8); star and star+path are worse than none; 3+2 alone ×2.5 worse;
-no κ4 memory ×2.3 worse. The gain is the exact transport of the repeated-index κ4 blocks (K=3
-AUGMENT keeps only their r = 1 trace), which ARC stores as an n × n matrix per column (~2 B per
-block-layer). No shared-factor arm can meet the ≥ 40 % at ≤ +10 % F rule, so M10.2 was not built
-and no GO goes to Lane P. Proposed next questions (minutes each on the M9 cache): the rank of the
-transported correction blocks; which slice of them carries it ((2,1,1) feedback vs (2,2)/(3,1)/(4));
-a gain-mode template for that content. Strategist's call whether any of this is worth the last week.
+**M10 (2026-10-08, final) — no cheap piece; NO-GO for Lane P; direction needed.** Birth-class and
+correction-rank ablations of K=4 SIMPLE at n = 96–320 (8 nets each). At n ≤ 128 everything looked
+cheap (corrections alone = all of the gain; rank-2 corrections better than exact). Both are
+pre-asymptotic artefacts: by n = 320 corrections-only plateaus at 0.66 of K3 (exact K4 0.28),
+rank-2/4 corrections are ×2.0/×1.5 worse than exact, and on top of the corrections no single birth
+class adds a positive share (path +0.1, star −0.2 to −0.4, star+path −0.1 to −0.2, 3+2 ±). The
+large-width gain needs full-rank repeated-slice transport and all birth classes together — n⁴-class
+as far as we know. M10.2 (star/path shared-factor readouts) cannot meet the ≥ 40 % at ≤ +10 % F
+rule and was not built. Open question for the strategist: is there any O(n³) representation of κ4
+that tracks the asymptotic gain? I have no candidate; otherwise fourth order is write-up material
+(the 7–9× headroom number and the ablation map).
