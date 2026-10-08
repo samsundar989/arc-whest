@@ -2786,3 +2786,4 @@ Oct 10: no GO on v90. Star gains learned: 0, 0, .11, .11, .12, .35, .34, .40, .3
 **v81_star graded (#334848): 3.4983524381277624e-09, NEW BEST**, raw 1.9858658362181815e-08, 100 clean.
 −3.43 % vs v80 (3.6224e-09); raw −3.50 % at F +0.08 %. +0.95 % vs the FRESH-A projection 3.4654e-09
 (fresh/graded 1.0094). `tools/ev.py --best-graded` updated.
+| 2026-10-08 | `estimator_k3_v81b_star2.py` | `09ecbf95` | FRESH-A | 2.030698e-08 | 0.17616 | 25,741 | same code as v81 (constants only) → v81's A/B 0.989 vs v80 | VmPeak 6,147 MiB (WSL PASS, same hash) | **3.3814e-09** | PENDING | **1.0239× vs v81** (Δ +8.565e-11, t95 [+7.204e-11, +9.926e-11]) | 88/100 | star refit 2 epochs, zero-scale 300 (VAL 1.989254e-08; gains 0–1.48). Twin parity arm vs file DEV 3.8e-5. Package `<see ledger>`. Second canary of UTC Oct 8. |
