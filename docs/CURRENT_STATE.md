@@ -14,7 +14,8 @@ vs the incumbent** (`tools/ev.py --panel fresh_a --baseline <incumbent>`); lane-
 
 | role | source / SHA8 | submission | score | F/B |
 |---|---|---|---:|---:|
-| **best A** | `estimator_k3_v81_star.py` / `376ae1c5` | #334848 | **3.4983524381277624e-9** (raw 1.9859e-8) | 0.17616 |
+| **best A** | `estimator_k3_v81b_star2.py` / `09ecbf95` | #334855 | **3.393934944659043e-9** (raw 1.9266e-8) | 0.17616 |
+| A (prev.) | `estimator_k3_v81_star.py` / `376ae1c5` | #334848 | 3.4983524381277624e-9 (raw 1.9859e-8) | 0.17616 |
 | A (prev.) | `estimator_k3_v80_hyg.py` / `73b2c19c` | #334659 | 3.6223815250878947e-9 (raw 2.0579e-8) | 0.17602 |
 | A (prev.) | `estimator_k3_v79_dress.py` / `2cf3acf4` | #334576 | 3.7025275784494673e-9 (raw 2.0580e-8) | 0.17991 |
 | **B** (wall-safe) | `estimator_k3_v80_hygws.py` / `dd82721c` | #334781 | **3.705600144458426e-9** (raw 2.0582e-8) | 0.18004 |
