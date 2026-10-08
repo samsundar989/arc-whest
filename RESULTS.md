@@ -2782,3 +2782,7 @@ Oct 10: no GO on v90. Star gains learned: 0, 0, .11, .11, .12, .35, .34, .40, .3
 |---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
 | 2026-10-08 | `estimator_k3_v81_star.py` | `376ae1c5` | DEV | 2.007376e-08 | 0.17616 | 25,741 | law: quiet 82.4 s, noisy 96.9 s | — | 3.4068e-09 | — | **1.0333× vs v80** (Δ +1.179e-10, t95 [+1.077e-10, +1.281e-10]) | 100/100 | v80 + star-D4 + S2ts refit baked (`tools/build_star.py`). residual 0.285 s. |
 | 2026-10-08 | `estimator_k3_v81_star.py` | `376ae1c5` | FRESH-A | 2.079319e-08 (floor-free 2.004554e-08) | 0.17616 | 25,741 | local A/B on DEV net 3 (×2) v81/v80 = **0.989** → ≈ v80's noisy-implied ~101 s (A ≤ 105 s); law 82.4 / 96.9 s | VmPeak 6,157 MiB (WSL PASS, same hash) | **3.4654e-09** (realistic ≈ 3.51e-09 after the ~1.2 % FRESH-A optimism) | PENDING | **1.0321× vs v80** (Δ +1.178e-10, t95 [+1.062e-10, +1.293e-10]) | 97/100 | Twin parity: file vs ev DEV 6.3e-6, arm vs file 1.7e-5. residual 0.285 s. Package `09ddd63f…e57e`, inner = source. First canary of UTC Oct 8. |
+
+**v81_star graded (#334848): 3.4983524381277624e-09, NEW BEST**, raw 1.9858658362181815e-08, 100 clean.
+−3.43 % vs v80 (3.6224e-09); raw −3.50 % at F +0.08 %. +0.95 % vs the FRESH-A projection 3.4654e-09
+(fresh/graded 1.0094). `tools/ev.py --best-graded` updated.
