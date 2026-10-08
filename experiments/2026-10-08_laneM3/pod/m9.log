@@ -1,0 +1,384 @@
+nohup: ignoring input
+=== k3aug_dense (64, 96, 128, 192, 256)
+  0%|          | 0/40 [00:00<?, ?it/s]n=256, t=1/8:   0%|          | 0/40 [00:00<?, ?it/s]2026-10-08 06:09:05,865 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n256/kmax1_dmax1/N1e+09
+2026-10-08 06:09:06,093 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=1/8:   2%|▎         | 1/40 [00:05<03:17,  5.06s/it]n=256, t=2/8:   2%|▎         | 1/40 [00:05<03:17,  5.06s/it]2026-10-08 06:09:10,653 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n256/kmax1_dmax1/N1e+09
+2026-10-08 06:09:10,801 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=2/8:   5%|▌         | 2/40 [00:09<02:53,  4.55s/it]n=256, t=3/8:   5%|▌         | 2/40 [00:09<02:53,  4.55s/it]2026-10-08 06:09:14,855 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n256/kmax1_dmax1/N1e+09
+2026-10-08 06:18:40,048 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=3/8:   8%|▊         | 3/40 [09:38<2:41:53, 262.53s/it]n=256, t=4/8:   8%|▊         | 3/40 [09:38<2:41:53, 262.53s/it]2026-10-08 06:18:44,382 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n256/kmax1_dmax1/N1e+09
+2026-10-08 06:27:56,131 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=4/8:  10%|█         | 4/40 [18:54<3:47:03, 378.42s/it]n=256, t=5/8:  10%|█         | 4/40 [18:54<3:47:03, 378.42s/it]2026-10-08 06:28:00,463 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n256/kmax1_dmax1/N1e+09
+2026-10-08 06:37:25,667 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=5/8:  12%|█▎        | 5/40 [28:24<4:20:53, 447.26s/it]n=256, t=6/8:  12%|█▎        | 5/40 [28:24<4:20:53, 447.26s/it]2026-10-08 06:37:29,768 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n256/kmax1_dmax1/N1e+09
+2026-10-08 06:46:41,229 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=6/8:  15%|█▌        | 6/40 [37:39<4:34:20, 484.12s/it]n=256, t=7/8:  15%|█▌        | 6/40 [37:39<4:34:20, 484.12s/it]2026-10-08 06:46:45,457 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n256/kmax1_dmax1/N1e+09
+2026-10-08 06:56:10,980 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=7/8:  18%|█▊        | 7/40 [47:09<4:41:39, 512.10s/it]n=256, t=8/8:  18%|█▊        | 7/40 [47:09<4:41:39, 512.10s/it]2026-10-08 06:56:15,150 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n256/kmax1_dmax1/N1e+09
+2026-10-08 07:05:26,915 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=8/8:  20%|██        | 8/40 [56:25<4:40:34, 526.08s/it]n=192, t=1/8:  20%|██        | 8/40 [56:25<4:40:34, 526.08s/it]2026-10-08 07:05:31,175 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n192/kmax1_dmax1/N1e+09
+2026-10-08 07:12:38,680 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=1/8:  22%|██▎       | 9/40 [1:03:36<4:16:26, 496.34s/it]n=192, t=2/8:  22%|██▎       | 9/40 [1:03:36<4:16:26, 496.34s/it]2026-10-08 07:12:42,123 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n192/kmax1_dmax1/N1e+09
+2026-10-08 07:19:49,263 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=2/8:  25%|██▌       | 10/40 [1:10:47<3:58:01, 476.04s/it]n=192, t=3/8:  25%|██▌       | 10/40 [1:10:47<3:58:01, 476.04s/it]2026-10-08 07:19:52,715 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n192/kmax1_dmax1/N1e+09
+2026-10-08 07:26:56,284 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=3/8:  28%|██▊       | 11/40 [1:17:54<3:42:50, 461.04s/it]n=192, t=4/8:  28%|██▊       | 11/40 [1:17:54<3:42:50, 461.04s/it]2026-10-08 07:26:59,725 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n192/kmax1_dmax1/N1e+09
+2026-10-08 07:34:04,493 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=4/8:  30%|███       | 12/40 [1:25:02<3:30:30, 451.08s/it]n=192, t=5/8:  30%|███       | 12/40 [1:25:02<3:30:30, 451.08s/it]2026-10-08 07:34:08,037 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n192/kmax1_dmax1/N1e+09
+2026-10-08 07:41:12,789 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=5/8:  32%|███▎      | 13/40 [1:32:10<3:19:51, 444.13s/it]n=192, t=6/8:  32%|███▎      | 13/40 [1:32:10<3:19:51, 444.13s/it]2026-10-08 07:41:16,155 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n192/kmax1_dmax1/N1e+09
+2026-10-08 07:48:30,102 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=6/8:  35%|███▌      | 14/40 [1:39:27<3:11:27, 441.83s/it]n=192, t=7/8:  35%|███▌      | 14/40 [1:39:27<3:11:27, 441.83s/it]2026-10-08 07:48:32,711 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n192/kmax1_dmax1/N1e+09
+2026-10-08 07:55:38,064 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=7/8:  38%|███▊      | 15/40 [1:46:35<3:02:27, 437.89s/it]n=192, t=8/8:  38%|███▊      | 15/40 [1:46:35<3:02:27, 437.89s/it]2026-10-08 07:55:41,460 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:02:45,466 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=8/8:  40%|████      | 16/40 [1:53:43<2:53:54, 434.76s/it]n=128, t=1/8:  40%|████      | 16/40 [1:53:43<2:53:54, 434.76s/it]2026-10-08 08:02:48,963 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:06:51,815 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=1/8:  42%|████▎     | 17/40 [1:57:49<2:24:57, 378.14s/it]n=128, t=2/8:  42%|████▎     | 17/40 [1:57:49<2:24:57, 378.14s/it]2026-10-08 08:06:55,438 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:10:57,949 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=2/8:  45%|████▌     | 18/40 [2:01:55<2:04:05, 338.45s/it]n=128, t=3/8:  45%|████▌     | 18/40 [2:01:55<2:04:05, 338.45s/it]2026-10-08 08:11:01,493 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:15:04,390 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=3/8:  48%|████▊     | 19/40 [2:06:02<1:48:47, 310.84s/it]n=128, t=4/8:  48%|████▊     | 19/40 [2:06:02<1:48:47, 310.84s/it]2026-10-08 08:15:08,026 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:19:10,351 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=4/8:  50%|█████     | 20/40 [2:10:08<1:37:07, 291.37s/it]n=128, t=5/8:  50%|█████     | 20/40 [2:10:08<1:37:07, 291.37s/it]2026-10-08 08:19:14,021 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:23:16,358 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=5/8:  52%|█████▎    | 21/40 [2:14:14<1:27:57, 277.74s/it]n=128, t=6/8:  52%|█████▎    | 21/40 [2:14:14<1:27:57, 277.74s/it]2026-10-08 08:23:19,982 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:27:23,604 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=6/8:  55%|█████▌    | 22/40 [2:18:19<1:20:21, 267.87s/it]n=128, t=7/8:  55%|█████▌    | 22/40 [2:18:19<1:20:21, 267.87s/it]2026-10-08 08:27:24,820 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:31:34,771 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=7/8:  57%|█████▊    | 23/40 [2:22:30<1:14:28, 262.85s/it]n=128, t=8/8:  57%|█████▊    | 23/40 [2:22:30<1:14:28, 262.85s/it]2026-10-08 08:31:35,940 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:33:22,457 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=8/8:  60%|██████    | 24/40 [2:24:17<57:38, 216.14s/it]  n=96, t=1/8:  60%|██████    | 24/40 [2:24:17<57:38, 216.14s/it] 2026-10-08 08:33:23,097 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:34:42,326 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=1/8:  62%|██████▎   | 25/40 [2:25:37<43:48, 175.25s/it]n=96, t=2/8:  62%|██████▎   | 25/40 [2:25:37<43:48, 175.25s/it]2026-10-08 08:34:42,972 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:36:02,205 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=2/8:  65%|██████▌   | 26/40 [2:26:57<34:12, 146.64s/it]n=96, t=3/8:  65%|██████▌   | 26/40 [2:26:57<34:12, 146.64s/it]2026-10-08 08:36:02,860 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:37:22,104 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=3/8:  68%|██████▊   | 27/40 [2:28:17<27:25, 126.61s/it]n=96, t=4/8:  68%|██████▊   | 27/40 [2:28:17<27:25, 126.61s/it]2026-10-08 08:37:22,748 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:38:41,977 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=4/8:  70%|███████   | 28/40 [2:29:37<22:31, 112.59s/it]n=96, t=5/8:  70%|███████   | 28/40 [2:29:37<22:31, 112.59s/it]2026-10-08 08:38:42,623 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:40:01,859 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=5/8:  72%|███████▎  | 29/40 [2:30:56<18:50, 102.78s/it]n=96, t=6/8:  72%|███████▎  | 29/40 [2:30:56<18:50, 102.78s/it]2026-10-08 08:40:02,503 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:41:21,725 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=6/8:  75%|███████▌  | 30/40 [2:32:16<15:59, 95.90s/it] n=96, t=7/8:  75%|███████▌  | 30/40 [2:32:16<15:59, 95.90s/it]2026-10-08 08:41:22,370 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:42:41,591 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=7/8:  78%|███████▊  | 31/40 [2:33:36<13:39, 91.09s/it]n=96, t=8/8:  78%|███████▊  | 31/40 [2:33:36<13:39, 91.09s/it]2026-10-08 08:42:42,231 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:44:01,468 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=8/8:  80%|████████  | 32/40 [2:34:56<11:41, 87.73s/it]n=64, t=1/8:  80%|████████  | 32/40 [2:34:56<11:41, 87.73s/it]2026-10-08 08:44:02,104 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:44:48,354 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=1/8:  82%|████████▎ | 33/40 [2:35:43<08:48, 75.47s/it]n=64, t=2/8:  82%|████████▎ | 33/40 [2:35:43<08:48, 75.47s/it]2026-10-08 08:44:48,989 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:45:35,214 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=2/8:  85%|████████▌ | 34/40 [2:36:30<06:41, 66.89s/it]n=64, t=3/8:  85%|████████▌ | 34/40 [2:36:30<06:41, 66.89s/it]2026-10-08 08:45:35,847 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:46:22,083 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=3/8:  88%|████████▊ | 35/40 [2:37:17<05:04, 60.89s/it]n=64, t=4/8:  88%|████████▊ | 35/40 [2:37:17<05:04, 60.89s/it]2026-10-08 08:46:22,735 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:47:08,988 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=4/8:  90%|█████████ | 36/40 [2:38:04<03:46, 56.68s/it]n=64, t=5/8:  90%|█████████ | 36/40 [2:38:04<03:46, 56.68s/it]2026-10-08 08:47:09,610 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:47:55,857 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=5/8:  92%|█████████▎| 37/40 [2:38:50<02:41, 53.74s/it]n=64, t=6/8:  92%|█████████▎| 37/40 [2:38:50<02:41, 53.74s/it]2026-10-08 08:47:56,478 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:48:42,731 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=6/8:  95%|█████████▌| 38/40 [2:39:37<01:43, 51.68s/it]n=64, t=7/8:  95%|█████████▌| 38/40 [2:39:37<01:43, 51.68s/it]2026-10-08 08:48:43,353 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:49:29,602 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=7/8:  98%|█████████▊| 39/40 [2:40:24<00:50, 50.25s/it]n=64, t=8/8:  98%|█████████▊| 39/40 [2:40:24<00:50, 50.25s/it]2026-10-08 08:49:30,251 | INFO | kprop_by_width | (Re)sampling cache /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:50:16,504 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=8/8: 100%|██████████| 40/40 [2:41:11<00:00, 49.24s/it]n=64, t=8/8: 100%|██████████| 40/40 [2:41:11<00:00, 241.79s/it]
+=== k3aug_dense done, peak 10.3 GiB
+=== k3aug_fac (64, 96, 128, 192, 256)
+  0%|          | 0/40 [00:00<?, ?it/s]n=256, t=1/8:   0%|          | 0/40 [00:00<?, ?it/s]2026-10-08 08:50:17,159 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:50:17,209 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=1/8:   2%|▎         | 1/40 [00:00<00:36,  1.06it/s]n=256, t=2/8:   2%|▎         | 1/40 [00:00<00:36,  1.06it/s]2026-10-08 08:50:18,102 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:50:18,179 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=2/8:   5%|▌         | 2/40 [00:01<00:35,  1.07it/s]n=256, t=3/8:   5%|▌         | 2/40 [00:01<00:35,  1.07it/s]2026-10-08 08:50:19,038 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:50:19,091 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=3/8:   8%|▊         | 3/40 [00:02<00:34,  1.08it/s]n=256, t=4/8:   8%|▊         | 3/40 [00:02<00:34,  1.08it/s]2026-10-08 08:50:19,945 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:50:19,990 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=4/8:  10%|█         | 4/40 [00:03<00:32,  1.10it/s]n=256, t=5/8:  10%|█         | 4/40 [00:03<00:32,  1.10it/s]2026-10-08 08:50:20,836 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:50:20,890 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=5/8:  12%|█▎        | 5/40 [00:04<00:31,  1.10it/s]n=256, t=6/8:  12%|█▎        | 5/40 [00:04<00:31,  1.10it/s]2026-10-08 08:50:21,743 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:50:21,788 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=6/8:  15%|█▌        | 6/40 [00:05<00:30,  1.10it/s]n=256, t=7/8:  15%|█▌        | 6/40 [00:05<00:30,  1.10it/s]2026-10-08 08:50:22,642 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:50:22,689 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=7/8:  18%|█▊        | 7/40 [00:06<00:29,  1.11it/s]n=256, t=8/8:  18%|█▊        | 7/40 [00:06<00:29,  1.11it/s]2026-10-08 08:50:23,538 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:50:23,591 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=8/8:  20%|██        | 8/40 [00:07<00:28,  1.10it/s]n=192, t=1/8:  20%|██        | 8/40 [00:07<00:28,  1.10it/s]2026-10-08 08:50:24,442 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:50:24,481 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=1/8:  22%|██▎       | 9/40 [00:08<00:26,  1.16it/s]n=192, t=2/8:  22%|██▎       | 9/40 [00:08<00:26,  1.16it/s]2026-10-08 08:50:25,214 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:50:25,277 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=2/8:  25%|██▌       | 10/40 [00:08<00:25,  1.19it/s]n=192, t=3/8:  25%|██▌       | 10/40 [00:08<00:25,  1.19it/s]2026-10-08 08:50:25,995 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:50:26,073 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=3/8:  28%|██▊       | 11/40 [00:09<00:23,  1.21it/s]n=192, t=4/8:  28%|██▊       | 11/40 [00:09<00:23,  1.21it/s]2026-10-08 08:50:26,798 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:50:26,875 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=4/8:  30%|███       | 12/40 [00:10<00:22,  1.22it/s]n=192, t=5/8:  30%|███       | 12/40 [00:10<00:22,  1.22it/s]2026-10-08 08:50:27,601 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:50:27,680 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=5/8:  32%|███▎      | 13/40 [00:11<00:22,  1.23it/s]n=192, t=6/8:  32%|███▎      | 13/40 [00:11<00:22,  1.23it/s]2026-10-08 08:50:28,407 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:50:28,477 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=6/8:  35%|███▌      | 14/40 [00:12<00:21,  1.24it/s]n=192, t=7/8:  35%|███▌      | 14/40 [00:12<00:21,  1.24it/s]2026-10-08 08:50:29,199 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:50:29,272 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=7/8:  38%|███▊      | 15/40 [00:12<00:20,  1.24it/s]n=192, t=8/8:  38%|███▊      | 15/40 [00:12<00:20,  1.24it/s]2026-10-08 08:50:29,993 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:50:30,061 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=8/8:  40%|████      | 16/40 [00:13<00:19,  1.25it/s]n=128, t=1/8:  40%|████      | 16/40 [00:13<00:19,  1.25it/s]2026-10-08 08:50:30,781 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:50:30,803 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=1/8:  42%|████▎     | 17/40 [00:14<00:17,  1.30it/s]n=128, t=2/8:  42%|████▎     | 17/40 [00:14<00:17,  1.30it/s]2026-10-08 08:50:31,475 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:50:31,498 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=2/8:  45%|████▌     | 18/40 [00:15<00:16,  1.35it/s]n=128, t=3/8:  45%|████▌     | 18/40 [00:15<00:16,  1.35it/s]2026-10-08 08:50:32,159 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:50:32,181 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=3/8:  48%|████▊     | 19/40 [00:15<00:15,  1.38it/s]n=128, t=4/8:  48%|████▊     | 19/40 [00:15<00:15,  1.38it/s]2026-10-08 08:50:32,841 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:50:32,863 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=4/8:  50%|█████     | 20/40 [00:16<00:14,  1.40it/s]n=128, t=5/8:  50%|█████     | 20/40 [00:16<00:14,  1.40it/s]2026-10-08 08:50:33,530 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:50:33,552 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=5/8:  52%|█████▎    | 21/40 [00:17<00:13,  1.42it/s]n=128, t=6/8:  52%|█████▎    | 21/40 [00:17<00:13,  1.42it/s]2026-10-08 08:50:34,218 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:50:34,241 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=6/8:  55%|█████▌    | 22/40 [00:17<00:12,  1.43it/s]n=128, t=7/8:  55%|█████▌    | 22/40 [00:17<00:12,  1.43it/s]2026-10-08 08:50:34,902 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:50:34,925 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=7/8:  57%|█████▊    | 23/40 [00:18<00:11,  1.44it/s]n=128, t=8/8:  57%|█████▊    | 23/40 [00:18<00:11,  1.44it/s]2026-10-08 08:50:35,586 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:50:35,608 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=8/8:  60%|██████    | 24/40 [00:19<00:11,  1.45it/s]n=96, t=1/8:  60%|██████    | 24/40 [00:19<00:11,  1.45it/s] 2026-10-08 08:50:36,269 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:50:36,290 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=1/8:  62%|██████▎   | 25/40 [00:19<00:10,  1.45it/s]n=96, t=2/8:  62%|██████▎   | 25/40 [00:19<00:10,  1.45it/s]2026-10-08 08:50:36,956 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:50:36,976 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=2/8:  65%|██████▌   | 26/40 [00:20<00:09,  1.46it/s]n=96, t=3/8:  65%|██████▌   | 26/40 [00:20<00:09,  1.46it/s]2026-10-08 08:50:37,634 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:50:37,654 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=3/8:  68%|██████▊   | 27/40 [00:21<00:08,  1.46it/s]n=96, t=4/8:  68%|██████▊   | 27/40 [00:21<00:08,  1.46it/s]2026-10-08 08:50:38,310 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:50:38,331 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=4/8:  70%|███████   | 28/40 [00:21<00:08,  1.47it/s]n=96, t=5/8:  70%|███████   | 28/40 [00:21<00:08,  1.47it/s]2026-10-08 08:50:38,985 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:50:39,005 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=5/8:  72%|███████▎  | 29/40 [00:22<00:07,  1.47it/s]n=96, t=6/8:  72%|███████▎  | 29/40 [00:22<00:07,  1.47it/s]2026-10-08 08:50:39,667 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:50:39,688 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=6/8:  75%|███████▌  | 30/40 [00:23<00:06,  1.46it/s]n=96, t=7/8:  75%|███████▌  | 30/40 [00:23<00:06,  1.46it/s]2026-10-08 08:50:40,358 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:50:40,379 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=7/8:  78%|███████▊  | 31/40 [00:23<00:06,  1.46it/s]n=96, t=8/8:  78%|███████▊  | 31/40 [00:23<00:06,  1.46it/s]2026-10-08 08:50:41,048 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:50:41,069 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=8/8:  80%|████████  | 32/40 [00:24<00:05,  1.46it/s]n=64, t=1/8:  80%|████████  | 32/40 [00:24<00:05,  1.46it/s]2026-10-08 08:50:41,737 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:50:41,756 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=1/8:  82%|████████▎ | 33/40 [00:25<00:04,  1.45it/s]n=64, t=2/8:  82%|████████▎ | 33/40 [00:25<00:04,  1.45it/s]2026-10-08 08:50:42,431 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:50:42,451 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=2/8:  85%|████████▌ | 34/40 [00:25<00:04,  1.45it/s]n=64, t=3/8:  85%|████████▌ | 34/40 [00:25<00:04,  1.45it/s]2026-10-08 08:50:43,127 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:50:43,147 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=3/8:  88%|████████▊ | 35/40 [00:26<00:03,  1.44it/s]n=64, t=4/8:  88%|████████▊ | 35/40 [00:26<00:03,  1.44it/s]2026-10-08 08:50:43,828 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:50:43,848 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=4/8:  90%|█████████ | 36/40 [00:27<00:02,  1.45it/s]n=64, t=5/8:  90%|█████████ | 36/40 [00:27<00:02,  1.45it/s]2026-10-08 08:50:44,514 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:50:44,534 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=5/8:  92%|█████████▎| 37/40 [00:28<00:02,  1.45it/s]n=64, t=6/8:  92%|█████████▎| 37/40 [00:28<00:02,  1.45it/s]2026-10-08 08:50:45,201 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:50:45,221 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=6/8:  95%|█████████▌| 38/40 [00:28<00:01,  1.45it/s]n=64, t=7/8:  95%|█████████▌| 38/40 [00:28<00:01,  1.45it/s]2026-10-08 08:50:45,891 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:50:45,911 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=7/8:  98%|█████████▊| 39/40 [00:29<00:00,  1.45it/s]n=64, t=8/8:  98%|█████████▊| 39/40 [00:29<00:00,  1.45it/s]2026-10-08 08:50:46,580 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:50:46,599 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=8/8: 100%|██████████| 40/40 [00:30<00:00,  1.45it/s]n=64, t=8/8: 100%|██████████| 40/40 [00:30<00:00,  1.33it/s]
+=== k3aug_fac done, peak 0.6 GiB
+=== k3simple_fac (64, 96, 128, 192, 256)
+  0%|          | 0/40 [00:00<?, ?it/s]n=256, t=1/8:   0%|          | 0/40 [00:00<?, ?it/s]2026-10-08 08:50:47,287 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:50:47,378 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=1/8:   2%|▎         | 1/40 [00:00<00:23,  1.65it/s]n=256, t=2/8:   2%|▎         | 1/40 [00:00<00:23,  1.65it/s]2026-10-08 08:50:47,893 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:50:47,988 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=2/8:   5%|▌         | 2/40 [00:01<00:21,  1.79it/s]n=256, t=3/8:   5%|▌         | 2/40 [00:01<00:21,  1.79it/s]2026-10-08 08:50:48,418 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:50:48,495 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=3/8:   8%|▊         | 3/40 [00:01<00:20,  1.77it/s]n=256, t=4/8:   8%|▊         | 3/40 [00:01<00:20,  1.77it/s]2026-10-08 08:50:48,992 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:50:49,078 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=4/8:  10%|█         | 4/40 [00:02<00:19,  1.83it/s]n=256, t=5/8:  10%|█         | 4/40 [00:02<00:19,  1.83it/s]2026-10-08 08:50:49,507 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:50:49,588 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=5/8:  12%|█▎        | 5/40 [00:02<00:18,  1.84it/s]n=256, t=6/8:  12%|█▎        | 5/40 [00:02<00:18,  1.84it/s]2026-10-08 08:50:50,068 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:50:50,172 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=6/8:  15%|█▌        | 6/40 [00:03<00:18,  1.80it/s]n=256, t=7/8:  15%|█▌        | 6/40 [00:03<00:18,  1.80it/s]2026-10-08 08:50:50,626 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:50:50,697 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=7/8:  18%|█▊        | 7/40 [00:03<00:17,  1.84it/s]n=256, t=8/8:  18%|█▊        | 7/40 [00:03<00:17,  1.84it/s]2026-10-08 08:50:51,169 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:50:51,273 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=8/8:  20%|██        | 8/40 [00:04<00:17,  1.82it/s]n=192, t=1/8:  20%|██        | 8/40 [00:04<00:17,  1.82it/s]2026-10-08 08:50:51,704 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:50:51,785 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=1/8:  22%|██▎       | 9/40 [00:04<00:16,  1.84it/s]n=192, t=2/8:  22%|██▎       | 9/40 [00:04<00:16,  1.84it/s]2026-10-08 08:50:52,230 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:50:52,296 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=2/8:  25%|██▌       | 10/40 [00:05<00:16,  1.81it/s]n=192, t=3/8:  25%|██▌       | 10/40 [00:05<00:16,  1.81it/s]2026-10-08 08:50:52,803 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:50:52,878 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=3/8:  28%|██▊       | 11/40 [00:06<00:16,  1.78it/s]n=192, t=4/8:  28%|██▊       | 11/40 [00:06<00:16,  1.78it/s]2026-10-08 08:50:53,382 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:50:53,468 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=4/8:  30%|███       | 12/40 [00:06<00:15,  1.79it/s]n=192, t=5/8:  30%|███       | 12/40 [00:06<00:15,  1.79it/s]2026-10-08 08:50:53,965 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:50:54,060 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=5/8:  32%|███▎      | 13/40 [00:07<00:15,  1.78it/s]n=192, t=6/8:  32%|███▎      | 13/40 [00:07<00:15,  1.78it/s]2026-10-08 08:50:54,501 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:50:54,580 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=6/8:  35%|███▌      | 14/40 [00:07<00:14,  1.78it/s]n=192, t=7/8:  35%|███▌      | 14/40 [00:07<00:14,  1.78it/s]2026-10-08 08:50:55,063 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:50:55,094 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=7/8:  38%|███▊      | 15/40 [00:08<00:13,  1.83it/s]n=192, t=8/8:  38%|███▊      | 15/40 [00:08<00:13,  1.83it/s]2026-10-08 08:50:55,580 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:50:55,614 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=8/8:  40%|████      | 16/40 [00:08<00:13,  1.84it/s]n=128, t=1/8:  40%|████      | 16/40 [00:08<00:13,  1.84it/s]2026-10-08 08:50:56,111 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:50:56,134 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=1/8:  42%|████▎     | 17/40 [00:09<00:11,  2.06it/s]n=128, t=2/8:  42%|████▎     | 17/40 [00:09<00:11,  2.06it/s]2026-10-08 08:50:56,463 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:50:56,486 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=2/8:  45%|████▌     | 18/40 [00:09<00:09,  2.25it/s]n=128, t=3/8:  45%|████▌     | 18/40 [00:09<00:09,  2.25it/s]2026-10-08 08:50:56,812 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:50:56,835 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=3/8:  48%|████▊     | 19/40 [00:09<00:08,  2.40it/s]n=128, t=4/8:  48%|████▊     | 19/40 [00:09<00:08,  2.40it/s]2026-10-08 08:50:57,162 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:50:57,185 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=4/8:  50%|█████     | 20/40 [00:10<00:07,  2.52it/s]n=128, t=5/8:  50%|█████     | 20/40 [00:10<00:07,  2.52it/s]2026-10-08 08:50:57,512 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:50:57,535 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=5/8:  52%|█████▎    | 21/40 [00:10<00:07,  2.61it/s]n=128, t=6/8:  52%|█████▎    | 21/40 [00:10<00:07,  2.61it/s]2026-10-08 08:50:57,863 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:50:57,885 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=6/8:  55%|█████▌    | 22/40 [00:10<00:06,  2.67it/s]n=128, t=7/8:  55%|█████▌    | 22/40 [00:10<00:06,  2.67it/s]2026-10-08 08:50:58,219 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:50:58,242 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=7/8:  57%|█████▊    | 23/40 [00:11<00:06,  2.72it/s]n=128, t=8/8:  57%|█████▊    | 23/40 [00:11<00:06,  2.72it/s]2026-10-08 08:50:58,572 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:50:58,594 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=8/8:  60%|██████    | 24/40 [00:11<00:05,  2.76it/s]n=96, t=1/8:  60%|██████    | 24/40 [00:11<00:05,  2.76it/s] 2026-10-08 08:50:58,917 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:50:58,938 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=1/8:  62%|██████▎   | 25/40 [00:12<00:05,  2.77it/s]n=96, t=2/8:  62%|██████▎   | 25/40 [00:12<00:05,  2.77it/s]2026-10-08 08:50:59,275 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:50:59,296 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=2/8:  65%|██████▌   | 26/40 [00:12<00:05,  2.79it/s]n=96, t=3/8:  65%|██████▌   | 26/40 [00:12<00:05,  2.79it/s]2026-10-08 08:50:59,627 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:50:59,648 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=3/8:  68%|██████▊   | 27/40 [00:12<00:04,  2.81it/s]n=96, t=4/8:  68%|██████▊   | 27/40 [00:12<00:04,  2.81it/s]2026-10-08 08:50:59,982 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:51:00,008 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=4/8:  70%|███████   | 28/40 [00:13<00:04,  2.78it/s]n=96, t=5/8:  70%|███████   | 28/40 [00:13<00:04,  2.78it/s]2026-10-08 08:51:00,348 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:51:00,368 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=5/8:  72%|███████▎  | 29/40 [00:13<00:03,  2.79it/s]n=96, t=6/8:  72%|███████▎  | 29/40 [00:13<00:03,  2.79it/s]2026-10-08 08:51:00,704 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:51:00,726 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=6/8:  75%|███████▌  | 30/40 [00:13<00:03,  2.70it/s]n=96, t=7/8:  75%|███████▌  | 30/40 [00:13<00:03,  2.70it/s]2026-10-08 08:51:01,107 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:51:01,134 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=7/8:  78%|███████▊  | 31/40 [00:14<00:03,  2.71it/s]n=96, t=8/8:  78%|███████▊  | 31/40 [00:14<00:03,  2.71it/s]2026-10-08 08:51:01,466 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:51:01,487 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=8/8:  80%|████████  | 32/40 [00:14<00:02,  2.74it/s]n=64, t=1/8:  80%|████████  | 32/40 [00:14<00:02,  2.74it/s]2026-10-08 08:51:01,820 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:51:01,840 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=1/8:  82%|████████▎ | 33/40 [00:14<00:02,  2.76it/s]n=64, t=2/8:  82%|████████▎ | 33/40 [00:14<00:02,  2.76it/s]2026-10-08 08:51:02,178 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:51:02,197 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=2/8:  85%|████████▌ | 34/40 [00:15<00:02,  2.76it/s]n=64, t=3/8:  85%|████████▌ | 34/40 [00:15<00:02,  2.76it/s]2026-10-08 08:51:02,538 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:51:02,558 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=3/8:  88%|████████▊ | 35/40 [00:15<00:01,  2.69it/s]n=64, t=4/8:  88%|████████▊ | 35/40 [00:15<00:01,  2.69it/s]2026-10-08 08:51:02,932 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:51:02,952 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=4/8:  90%|█████████ | 36/40 [00:16<00:01,  2.69it/s]n=64, t=5/8:  90%|█████████ | 36/40 [00:16<00:01,  2.69it/s]2026-10-08 08:51:03,306 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:51:03,327 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=5/8:  92%|█████████▎| 37/40 [00:16<00:01,  2.70it/s]n=64, t=6/8:  92%|█████████▎| 37/40 [00:16<00:01,  2.70it/s]2026-10-08 08:51:03,671 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:51:03,692 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=6/8:  95%|█████████▌| 38/40 [00:16<00:00,  2.72it/s]n=64, t=7/8:  95%|█████████▌| 38/40 [00:16<00:00,  2.72it/s]2026-10-08 08:51:04,031 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:51:04,052 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=7/8:  98%|█████████▊| 39/40 [00:17<00:00,  2.74it/s]n=64, t=8/8:  98%|█████████▊| 39/40 [00:17<00:00,  2.74it/s]2026-10-08 08:51:04,392 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:51:04,412 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=8/8: 100%|██████████| 40/40 [00:17<00:00,  2.75it/s]n=64, t=8/8: 100%|██████████| 40/40 [00:17<00:00,  2.29it/s]
+=== k3simple_fac done, peak 0.1 GiB
+=== k4simple_fac (64, 96, 128, 192, 256)
+  0%|          | 0/40 [00:00<?, ?it/s]n=256, t=1/8:   0%|          | 0/40 [00:00<?, ?it/s]2026-10-08 08:51:04,774 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:51:04,872 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=1/8:   2%|▎         | 1/40 [00:02<01:49,  2.81s/it]n=256, t=2/8:   2%|▎         | 1/40 [00:02<01:49,  2.81s/it]2026-10-08 08:51:07,583 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:51:07,669 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=2/8:   5%|▌         | 2/40 [00:05<01:44,  2.76s/it]n=256, t=3/8:   5%|▌         | 2/40 [00:05<01:44,  2.76s/it]2026-10-08 08:51:10,308 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:51:10,369 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=3/8:   8%|▊         | 3/40 [00:08<01:40,  2.72s/it]n=256, t=4/8:   8%|▊         | 3/40 [00:08<01:40,  2.72s/it]2026-10-08 08:51:12,972 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:51:13,062 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=4/8:  10%|█         | 4/40 [00:10<01:37,  2.70s/it]n=256, t=5/8:  10%|█         | 4/40 [00:10<01:37,  2.70s/it]2026-10-08 08:51:15,636 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:51:15,676 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=5/8:  12%|█▎        | 5/40 [00:13<01:33,  2.67s/it]n=256, t=6/8:  12%|█▎        | 5/40 [00:13<01:33,  2.67s/it]2026-10-08 08:51:18,248 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:51:18,287 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=6/8:  15%|█▌        | 6/40 [00:16<01:30,  2.65s/it]n=256, t=7/8:  15%|█▌        | 6/40 [00:16<01:30,  2.65s/it]2026-10-08 08:51:20,868 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:51:20,966 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=7/8:  18%|█▊        | 7/40 [00:18<01:27,  2.66s/it]n=256, t=8/8:  18%|█▊        | 7/40 [00:18<01:27,  2.66s/it]2026-10-08 08:51:23,544 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n256/kmax1_dmax1/N1e+09
+2026-10-08 08:51:23,584 | INFO | kprop_by_width | Sample cumulants done
+n=256, t=8/8:  20%|██        | 8/40 [00:21<01:25,  2.66s/it]n=192, t=1/8:  20%|██        | 8/40 [00:21<01:25,  2.66s/it]2026-10-08 08:51:26,199 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:51:26,234 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=1/8:  22%|██▎       | 9/40 [00:22<01:10,  2.27s/it]n=192, t=2/8:  22%|██▎       | 9/40 [00:22<01:10,  2.27s/it]2026-10-08 08:51:27,607 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:51:27,642 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=2/8:  25%|██▌       | 10/40 [00:24<00:59,  1.99s/it]n=192, t=3/8:  25%|██▌       | 10/40 [00:24<00:59,  1.99s/it]2026-10-08 08:51:28,969 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:51:29,004 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=3/8:  28%|██▊       | 11/40 [00:25<00:52,  1.79s/it]n=192, t=4/8:  28%|██▊       | 11/40 [00:25<00:52,  1.79s/it]2026-10-08 08:51:30,322 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:51:30,357 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=4/8:  30%|███       | 12/40 [00:26<00:46,  1.66s/it]n=192, t=5/8:  30%|███       | 12/40 [00:26<00:46,  1.66s/it]2026-10-08 08:51:31,662 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:51:31,696 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=5/8:  32%|███▎      | 13/40 [00:28<00:41,  1.55s/it]n=192, t=6/8:  32%|███▎      | 13/40 [00:28<00:41,  1.55s/it]2026-10-08 08:51:32,974 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:51:33,009 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=6/8:  35%|███▌      | 14/40 [00:29<00:38,  1.48s/it]n=192, t=7/8:  35%|███▌      | 14/40 [00:29<00:38,  1.48s/it]2026-10-08 08:51:34,288 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:51:34,322 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=7/8:  38%|███▊      | 15/40 [00:30<00:35,  1.43s/it]n=192, t=8/8:  38%|███▊      | 15/40 [00:30<00:35,  1.43s/it]2026-10-08 08:51:35,600 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n192/kmax1_dmax1/N1e+09
+2026-10-08 08:51:35,635 | INFO | kprop_by_width | Sample cumulants done
+n=192, t=8/8:  40%|████      | 16/40 [00:32<00:33,  1.39s/it]n=128, t=1/8:  40%|████      | 16/40 [00:32<00:33,  1.39s/it]2026-10-08 08:51:36,908 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:51:36,930 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=1/8:  42%|████▎     | 17/40 [00:32<00:28,  1.22s/it]n=128, t=2/8:  42%|████▎     | 17/40 [00:32<00:28,  1.22s/it]2026-10-08 08:51:37,727 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:51:37,750 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=2/8:  45%|████▌     | 18/40 [00:33<00:24,  1.09s/it]n=128, t=3/8:  45%|████▌     | 18/40 [00:33<00:24,  1.09s/it]2026-10-08 08:51:38,519 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:51:38,542 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=3/8:  48%|████▊     | 19/40 [00:34<00:21,  1.00s/it]n=128, t=4/8:  48%|████▊     | 19/40 [00:34<00:21,  1.00s/it]2026-10-08 08:51:39,313 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:51:39,337 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=4/8:  50%|█████     | 20/40 [00:35<00:18,  1.06it/s]n=128, t=5/8:  50%|█████     | 20/40 [00:35<00:18,  1.06it/s]2026-10-08 08:51:40,110 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:51:40,133 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=5/8:  52%|█████▎    | 21/40 [00:36<00:17,  1.12it/s]n=128, t=6/8:  52%|█████▎    | 21/40 [00:36<00:17,  1.12it/s]2026-10-08 08:51:40,900 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:51:40,923 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=6/8:  55%|█████▌    | 22/40 [00:36<00:15,  1.16it/s]n=128, t=7/8:  55%|█████▌    | 22/40 [00:36<00:15,  1.16it/s]2026-10-08 08:51:41,689 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:51:41,712 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=7/8:  57%|█████▊    | 23/40 [00:37<00:14,  1.19it/s]n=128, t=8/8:  57%|█████▊    | 23/40 [00:37<00:14,  1.19it/s]2026-10-08 08:51:42,484 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:51:42,507 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=8/8:  60%|██████    | 24/40 [00:38<00:13,  1.21it/s]n=96, t=1/8:  60%|██████    | 24/40 [00:38<00:13,  1.21it/s] 2026-10-08 08:51:43,280 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:51:43,301 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=1/8:  62%|██████▎   | 25/40 [00:39<00:12,  1.23it/s]n=96, t=2/8:  62%|██████▎   | 25/40 [00:39<00:12,  1.23it/s]2026-10-08 08:51:44,063 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:51:44,084 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=2/8:  65%|██████▌   | 26/40 [00:40<00:11,  1.27it/s]n=96, t=3/8:  65%|██████▌   | 26/40 [00:40<00:11,  1.27it/s]2026-10-08 08:51:44,782 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:51:44,803 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=3/8:  68%|██████▊   | 27/40 [00:40<00:10,  1.30it/s]n=96, t=4/8:  68%|██████▊   | 27/40 [00:40<00:10,  1.30it/s]2026-10-08 08:51:45,514 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:51:45,535 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=4/8:  70%|███████   | 28/40 [00:41<00:09,  1.32it/s]n=96, t=5/8:  70%|███████   | 28/40 [00:41<00:09,  1.32it/s]2026-10-08 08:51:46,242 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:51:46,262 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=5/8:  72%|███████▎  | 29/40 [00:42<00:08,  1.34it/s]n=96, t=6/8:  72%|███████▎  | 29/40 [00:42<00:08,  1.34it/s]2026-10-08 08:51:46,964 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:51:46,985 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=6/8:  75%|███████▌  | 30/40 [00:42<00:07,  1.35it/s]n=96, t=7/8:  75%|███████▌  | 30/40 [00:42<00:07,  1.35it/s]2026-10-08 08:51:47,684 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:51:47,705 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=7/8:  78%|███████▊  | 31/40 [00:43<00:06,  1.36it/s]n=96, t=8/8:  78%|███████▊  | 31/40 [00:43<00:06,  1.36it/s]2026-10-08 08:51:48,412 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:51:48,433 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=8/8:  80%|████████  | 32/40 [00:44<00:05,  1.36it/s]n=64, t=1/8:  80%|████████  | 32/40 [00:44<00:05,  1.36it/s]2026-10-08 08:51:49,139 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:51:49,158 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=1/8:  82%|████████▎ | 33/40 [00:45<00:05,  1.37it/s]n=64, t=2/8:  82%|████████▎ | 33/40 [00:45<00:05,  1.37it/s]2026-10-08 08:51:49,866 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:51:49,886 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=2/8:  85%|████████▌ | 34/40 [00:45<00:04,  1.39it/s]n=64, t=3/8:  85%|████████▌ | 34/40 [00:45<00:04,  1.39it/s]2026-10-08 08:51:50,551 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:51:50,570 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=3/8:  88%|████████▊ | 35/40 [00:46<00:03,  1.41it/s]n=64, t=4/8:  88%|████████▊ | 35/40 [00:46<00:03,  1.41it/s]2026-10-08 08:51:51,239 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:51:51,258 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=4/8:  90%|█████████ | 36/40 [00:47<00:02,  1.42it/s]n=64, t=5/8:  90%|█████████ | 36/40 [00:47<00:02,  1.42it/s]2026-10-08 08:51:51,929 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:51:51,949 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=5/8:  92%|█████████▎| 37/40 [00:47<00:02,  1.43it/s]n=64, t=6/8:  92%|█████████▎| 37/40 [00:47<00:02,  1.43it/s]2026-10-08 08:51:52,613 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:51:52,633 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=6/8:  95%|█████████▌| 38/40 [00:48<00:01,  1.44it/s]n=64, t=7/8:  95%|█████████▌| 38/40 [00:48<00:01,  1.44it/s]2026-10-08 08:51:53,302 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:51:53,322 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=7/8:  98%|█████████▊| 39/40 [00:49<00:00,  1.42it/s]n=64, t=8/8:  98%|█████████▊| 39/40 [00:49<00:00,  1.42it/s]2026-10-08 08:51:54,020 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:51:54,040 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=8/8: 100%|██████████| 40/40 [00:49<00:00,  1.43it/s]n=64, t=8/8: 100%|██████████| 40/40 [00:49<00:00,  1.25s/it]
+=== k4simple_fac done, peak 13.6 GiB
+=== k4aug_fac (64, 96, 128)
+  0%|          | 0/24 [00:00<?, ?it/s]n=128, t=1/8:   0%|          | 0/24 [00:00<?, ?it/s]2026-10-08 08:51:54,724 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:51:54,746 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=1/8:   4%|▍         | 1/24 [00:31<11:54, 31.05s/it]n=128, t=2/8:   4%|▍         | 1/24 [00:31<11:54, 31.05s/it]2026-10-08 08:52:25,772 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:52:25,795 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=2/8:   8%|▊         | 2/24 [01:01<11:16, 30.75s/it]n=128, t=3/8:   8%|▊         | 2/24 [01:01<11:16, 30.75s/it]2026-10-08 08:52:56,306 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:52:56,329 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=3/8:  12%|█▎        | 3/24 [01:32<10:43, 30.65s/it]n=128, t=4/8:  12%|█▎        | 3/24 [01:32<10:43, 30.65s/it]2026-10-08 08:53:26,836 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:53:26,859 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=4/8:  17%|█▋        | 4/24 [02:02<10:12, 30.63s/it]n=128, t=5/8:  17%|█▋        | 4/24 [02:02<10:12, 30.63s/it]2026-10-08 08:53:57,435 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:53:57,458 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=5/8:  21%|██        | 5/24 [02:33<09:41, 30.61s/it]n=128, t=6/8:  21%|██        | 5/24 [02:33<09:41, 30.61s/it]2026-10-08 08:54:28,001 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:54:28,024 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=6/8:  25%|██▌       | 6/24 [03:03<09:10, 30.58s/it]n=128, t=7/8:  25%|██▌       | 6/24 [03:03<09:10, 30.58s/it]2026-10-08 08:54:58,533 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:54:58,556 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=7/8:  29%|██▉       | 7/24 [03:34<08:39, 30.56s/it]n=128, t=8/8:  29%|██▉       | 7/24 [03:34<08:39, 30.56s/it]2026-10-08 08:55:29,053 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n128/kmax1_dmax1/N1e+09
+2026-10-08 08:55:29,075 | INFO | kprop_by_width | Sample cumulants done
+n=128, t=8/8:  33%|███▎      | 8/24 [04:04<08:08, 30.55s/it]n=96, t=1/8:  33%|███▎      | 8/24 [04:04<08:08, 30.55s/it] 2026-10-08 08:55:59,574 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:55:59,596 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=1/8:  38%|███▊      | 9/24 [04:17<06:14, 25.00s/it]n=96, t=2/8:  38%|███▊      | 9/24 [04:17<06:14, 25.00s/it]2026-10-08 08:56:12,373 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:56:12,393 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=2/8:  42%|████▏     | 10/24 [04:30<04:57, 21.23s/it]n=96, t=3/8:  42%|████▏     | 10/24 [04:30<04:57, 21.23s/it]2026-10-08 08:56:25,146 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:56:25,167 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=3/8:  46%|████▌     | 11/24 [04:43<04:02, 18.64s/it]n=96, t=4/8:  46%|████▌     | 11/24 [04:43<04:02, 18.64s/it]2026-10-08 08:56:37,937 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:56:37,958 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=4/8:  50%|█████     | 12/24 [04:55<03:22, 16.86s/it]n=96, t=5/8:  50%|█████     | 12/24 [04:55<03:22, 16.86s/it]2026-10-08 08:56:50,719 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:56:50,740 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=5/8:  54%|█████▍    | 13/24 [05:08<02:51, 15.61s/it]n=96, t=6/8:  54%|█████▍    | 13/24 [05:08<02:51, 15.61s/it]2026-10-08 08:57:03,446 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:57:03,467 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=6/8:  58%|█████▊    | 14/24 [05:21<02:27, 14.75s/it]n=96, t=7/8:  58%|█████▊    | 14/24 [05:21<02:27, 14.75s/it]2026-10-08 08:57:16,206 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:57:16,226 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=7/8:  62%|██████▎   | 15/24 [05:34<02:07, 14.15s/it]n=96, t=8/8:  62%|██████▎   | 15/24 [05:34<02:07, 14.15s/it]2026-10-08 08:57:28,978 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n96/kmax1_dmax1/N1e+09
+2026-10-08 08:57:28,999 | INFO | kprop_by_width | Sample cumulants done
+n=96, t=8/8:  67%|██████▋   | 16/24 [05:47<01:49, 13.73s/it]n=64, t=1/8:  67%|██████▋   | 16/24 [05:47<01:49, 13.73s/it]2026-10-08 08:57:41,734 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed0/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:57:41,753 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=1/8:  71%|███████   | 17/24 [05:52<01:19, 11.35s/it]n=64, t=2/8:  71%|███████   | 17/24 [05:52<01:19, 11.35s/it]2026-10-08 08:57:47,530 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed1/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:57:47,550 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=2/8:  75%|███████▌  | 18/24 [05:58<00:57,  9.66s/it]n=64, t=3/8:  75%|███████▌  | 18/24 [05:58<00:57,  9.66s/it]2026-10-08 08:57:53,272 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed2/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:57:53,291 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=3/8:  79%|███████▉  | 19/24 [06:04<00:42,  8.49s/it]n=64, t=4/8:  79%|███████▉  | 19/24 [06:04<00:42,  8.49s/it]2026-10-08 08:57:59,028 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed3/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:57:59,048 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=4/8:  83%|████████▎ | 20/24 [06:10<00:30,  7.67s/it]n=64, t=5/8:  83%|████████▎ | 20/24 [06:10<00:30,  7.67s/it]2026-10-08 08:58:04,780 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed4/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:58:04,800 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=5/8:  88%|████████▊ | 21/24 [06:15<00:21,  7.09s/it]n=64, t=6/8:  88%|████████▊ | 21/24 [06:15<00:21,  7.09s/it]2026-10-08 08:58:10,523 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed5/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:58:10,542 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=6/8:  92%|█████████▏| 22/24 [06:21<00:13,  6.68s/it]n=64, t=7/8:  92%|█████████▏| 22/24 [06:21<00:13,  6.68s/it]2026-10-08 08:58:16,263 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed6/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:58:16,284 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=7/8:  96%|█████████▌| 23/24 [06:27<00:06,  6.40s/it]n=64, t=8/8:  96%|█████████▌| 23/24 [06:27<00:06,  6.40s/it]2026-10-08 08:58:22,014 | INFO | kprop_by_width | Loading from cache dir /workspace/m3/arc/scripts/../data/relu_w2_m9/cache/sampK_L16/seed7/n64/kmax1_dmax1/N1e+09
+2026-10-08 08:58:22,034 | INFO | kprop_by_width | Sample cumulants done
+n=64, t=8/8: 100%|██████████| 24/24 [06:33<00:00,  6.20s/it]n=64, t=8/8: 100%|██████████| 24/24 [06:33<00:00, 16.38s/it]
+=== k4aug_fac done, peak 8.5 GiB

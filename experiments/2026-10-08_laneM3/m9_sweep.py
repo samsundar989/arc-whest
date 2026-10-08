@@ -72,6 +72,9 @@ RUNS = {  # name: (k_maxs, kprop_kwargs, widths)
     "k4simple_fac": ((4,), dict(kind=HKind.SIMPLE, factor=True), NS),
     "k4aug_fac": ((4,), dict(kind=HKind.AUGMENT, factor=True), (64, 96, 128)),
 }
+if os.environ.get("M9_NS"):      # extra widths, written to <name>_n<widths> so earlier runs are kept
+    _ns = tuple(int(x) for x in os.environ["M9_NS"].split(","))
+    RUNS = {f"{k}_n{'_'.join(map(str, _ns))}": (v[0], v[1], _ns) for k, v in RUNS.items()}
 if os.environ.get("M9_SMOKE"):   # tiny end-to-end check of the whole pipeline
     COMMON.update(samples=2**18, batch_size=2**13, batches_per_bs=2**2, trials=2,
                   sampK_cache_name="relu_w2_m9smoke/cache/sampK_L16")
