@@ -42,7 +42,7 @@ PATCHES = [
 ]
 
 
-def build(base: Path, params: Path) -> str:
+def build(base: Path, params: Path, all_lineages: bool = False) -> str:
     src = build_dress.build(base, params, dress=(0.0, 0.0, 0.0))
     g = np.load(params)["gain__sg"].astype(float).tolist()
     const = ("# ---- P3.1b STAR-D4 (tools/build_star.py; R3 §3.1) -- per-layer gain, twin-fitted\n"
@@ -50,6 +50,12 @@ def build(base: Path, params: Path) -> str:
     assert src.count(ANCHOR) == 1
     src = src.replace(ANCHOR, const + ANCHOR, 1)
     for a, b in PATCHES:
+        if all_lineages:
+            # every lineage, the shared old tier through its (already cached) Q legs
+            b = b.replace("        _AL = adv.A_L\n", "        _AL, _ML = _full_legs_lean(adv)\n")
+            b = b.replace("(_AL * adv.M)", "(_AL * _ML)")
+            b = b.replace("[-(out_tw.k - out_tw.ko):]", "[-out_tw.k:]")
+            b = b.replace("over the recent lineages", "over every lineage")
         if src.count(a) != 1:
             raise SystemExit(f"anchor occurs {src.count(a)}x:\n{a}")
         src = src.replace(a, b, 1)
@@ -61,8 +67,10 @@ def main():
     ap.add_argument("--base", required=True)
     ap.add_argument("--params", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--all", action="store_true", help="star over every lineage (twin key starall)")
     a = ap.parse_args()
-    Path(a.out).write_text(build(Path(a.base), Path(a.params)), encoding="utf-8", newline="\n")
+    Path(a.out).write_text(build(Path(a.base), Path(a.params), a.all), encoding="utf-8",
+                           newline="\n")
     print(f"wrote {a.out}")
 
 
