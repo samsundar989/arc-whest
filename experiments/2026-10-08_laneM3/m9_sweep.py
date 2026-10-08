@@ -25,7 +25,37 @@ from kprop_by_width import HKind, KPropByWidthCfg, kprop_by_width
 
 torch.backends.cuda.matmul.allow_tf32 = False
 torch.backends.cudnn.allow_tf32 = False
-kbw.get_sample_cumulants = functools.partial(kbw.get_sample_cumulants, include_pre=False)
+
+
+def fast_sample_means(mlp, samples, batch_size=100_000, return_stderr=False, batches_per_bs=5, *, k_max,
+                      int_cond=None, d_max=None, include_pre=False, include_act=True):
+    """Means-only stand-in for kbw.get_sample_cumulants (k_max = d_max = 1, act layers only).
+
+    ARC's generic cumulant generator costs ~20 min per n = 256 trial at N = 2^30 against ~1.5 min
+    of forward passes. Same estimator: per-bootstrap-block means accumulated in float64, mean of
+    blocks, SE² = Var_blocks(ddof=1) / num_blocks (ARC's Welford M2 / (B−1) / B). Same cache format.
+    """
+    assert k_max == 1 and (d_max or 1) == 1 and include_act
+    n = mlp.input_dim
+    nb = samples // batch_size
+    nbs = nb // batches_per_bs
+    assert samples % (batch_size * batches_per_bs) == 0
+    acc = None
+    for b in range(nb):
+        act = mlp(torch.randn(batch_size, n, device=kbw.device), output_acts=True).act   # (batch, L, n)
+        s = act.sum(0, dtype=torch.float64)
+        if acc is None:
+            acc = torch.zeros((nbs,) + s.shape, dtype=torch.float64, device=s.device)
+        acc[b // batches_per_bs] += s
+    acc /= batch_size * batches_per_bs
+    mean, se = acc.mean(0), acc.std(0, unbiased=True) / nbs ** 0.5
+    mk = lambda v: kbw.DSTower({1: kbw.DSTensor({(1,): v}, n=n, d=1)})  # noqa: E731
+    K = {f"act{l}": mk(mean[l]) for l in range(mean.shape[0])}
+    S = {f"act{l}": mk(se[l]) for l in range(se.shape[0])}
+    return K, (S if return_stderr else None)
+
+
+kbw.get_sample_cumulants = fast_sample_means
 
 COMMON = dict(
     samples=2**30, batch_size=2**17, batches_per_bs=2**7,       # 64 bootstraps; floor ~1e-9 << MSE
