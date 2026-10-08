@@ -2715,3 +2715,30 @@ builds; the implied fresh/graded factor is 1.0074 on both. `tools/ev.py --best-g
   graded raw to 0.02 %), 100 clean. **New wall-safe B** (v78 4.2496e-09 → −12.80 %). +1.17 % vs the
   FRESH-A projection 3.6627e-09 (v79 +1.18 %, v80 +1.15 %): the FRESH-A ÷ 1.019 reading stays ~1.2 %
   optimistic for these builds (implied fresh/graded 1.0072).
+
+### P3.2 — κ4-core loop in the twin (VAL-100 free-running; `experiments/2026-10-08_p3/`)
+Implementation: `tools/twin/k4loop.py` (off-diagonal r = 1 core births: 17 traced (2,1,1) + 15 (3,1)
+AUGMENT terms, the cumulant conversions, K211) — **exact vs ARC's `factored_nonlin_kprop_k3` to 1e-15**
+(`k4loop_check.py`, n = 24, float64); `tools/twin/k4l_arm.py` (core memory Core ← WᵀCoreW, dG =
+diag, D31 = m·Off/2 in Q31; K211 by contraction of our tower — verified against the chain's own
+(2,1) readout to float32 round-off, `k4l_tower_check.py`; 211→111 radial exact / via hub i / folded;
+E21b gain-mode; old tier drop). Baseline = v79/v80-equivalent twin (v62_gb + mask + dress,
+refit_dress_all params), VAL 2.114657e-08 (= P2.1's dressed refit).
+
+Unrefit screen (job 2477, `screen_unrefit.json`), paired vs baseline, 100 nets:
+
+| arm | VAL raw | ratio | wins |
+|---|---:|---:|---:|
+| (i) core + K211 exact + radial exact | 3.1005e-08 | 1.466 | 0 |
+| (i) with the radial via hub i (memoryless λC) | 9.2085e-08 | 4.355 | 0 |
+| (i′) K211 truncated to newborn + age-1 | 3.8499e-08 | 1.821 | 0 |
+| (ii) (i) + E21b | 2.9269e-08 | 1.384 | 0 |
+| (iv) (ii) + old tier dropped | 4.2282e-07 | 19.99 | 0 |
+| control: old tier dropped, no loop | 4.0525e-07 | 19.16 | 0 |
+| (v) (ii) + old tier rank 128 | 5.0379e-08 | 2.382 | 0 |
+| control: old tier rank 128, no loop | 4.1838e-08 | 1.979 | 0 |
+
+Reading: **the κ4 core does not stand in for the old κ3 tier in our chain** — dropping it costs ×20
+with or without the loop (the loop's ratio-of-ratios is 1.04); at rank 128 the loop narrows the
+damage only from ×1.98 to ×1.72. E21b is worth −5.6 % relative on top of (i). Unrefit the loop is
++38 to +47 % (learned gains fitted to the memoryless core). Refits (S2tk) queued for (i) and (ii).
