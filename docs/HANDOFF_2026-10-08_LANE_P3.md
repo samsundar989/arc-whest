@@ -1,0 +1,45 @@
+# HANDOFF — Lane P3 (session 1, main), 2026-10-08: bank the small gains, build the κ4-core loop, decide v90 on Oct 10
+
+Repo `C:\Users\samsu\Documents\arc-whest`, branch main (you own main, RESULTS, ledger, DESIGNATION, CURRENT_STATE, estimator files). Read first: `docs/PLAN_rev20_2026-10-08.md`, `docs/research/2026-10-08_deep_review_strategist.md` (why), `docs/research/2026-10-08_R3_arc_k4_inventory.md` §1.2–1.4 (ARC's κ3 blocks, the r = 1 κ4 core, K211, 211→111, the core's readouts), Lane M2's report on `lane-m` §M6 (E21b gain-mode). Also in the claude.ai project. Standing rules: PLAN rev 18 §5 hard gates; ≤ 5 canaries/UTC day + 1 A/B slot; your prediction and the strategist's written down before each run; Samuel designates; no external messages.
+
+**Why.** v80 (3.6224e-9, raw 2.058e-8, F/B 0.176, rank #34) sits 37 % above the complete-third-order accuracy level (ARC unfactored AUGMENT ≈ 1.50e-8, where eight of the top fifteen now sit) and 1.76× above the 0.10 cost floor; its wall (~101 s noisy-implied vs our 105 s gate) leaves no room for extra FLOPs. Lane M2 showed AUGMENT's gain needs its κ3↔κ4 loop (an off-diagonal κ4 core with memory, K211, 211→111): every graft that left the loop out transferred only partly or hurt. The loop is not cheap in our representation (≈ +30–45 % F, below), so **it pays only if it lets the old tier shrink** — Lane M3's M8 tests that in ARC's chain, arms (iv)/(v) below test it in ours. Samuel chose a **gated big bet**: bank what is cheap, build the loop in the twin, decide a v90 rebuild on **Oct 10**.
+
+## P3.0 — housekeeping (Oct 8 morning)
+0. Commit the strategist's rev 20 docs unchanged in one commit (`docs/PLAN_rev20_2026-10-08.md`, `docs/HANDOFF_2026-10-08_LANE_P3.md`, `docs/HANDOFF_2026-10-08_LANE_M3.md`, `docs/research/2026-10-08_*.md`), so Lane M3 can rebase onto them.
+1. Submit **v80_hygws** on the Oct 8 A/B slot (already gated; projected ≈ 3.66e-9).
+2. **Long-lived-worker memory** (forum #18238, unanswered): whestbench 0.16 runs each predict in a fresh BudgetContext and flopscope 0.12 appends each context's op log to a session-wide accumulator, so one process grows with every MLP. Measure VmPeak/RSS over ≥ 50 sequential predicts of v80 in ONE process and extrapolate to a 200-MLP suite against the 8 GB limit. Do not add `flopscope.budget_reset()` or anything outside the rules' plain reading unless the organizers allow it; record the numbers for Samuel.
+3. Record in RESULTS: the strategist read the FRESH-A/D/LOCK label *variance* arrays to compute the layer-16 label floor (mean Var 0.0747 ⇒ 7.47e-11 at N = 1e9); no estimator was evaluated and the LOCK read count is unchanged.
+
+## P3.1 — bank (Oct 8–9; each a separate measured commit; select on VAL; ship as v81 via FRESH-A acceptance if the sum is ≥ 1.5 % score)
+a. **Strassen leaf for compact products** (block 20 today): test 8 / 12 / 16. Public evidence (ngmitam, forum #18218 post 6, on 504aldo's chain): leaf 32→16→8 cut F by 0.5 % / 3.5 % at identical raw; leaf 4 gives it back. Keep worst residual ≤ 0.33 s, A wall ≤ 105 s, and watch the op count (v80: 25,631) — extra Strassen levels add op calls and residual.
+b. **Star-D4 arm (free fourth order):** D4_star[a] = 4·Σ_lineages Σ_j w3_j A_aj³ B_aj over the exact recent lineages (w3 = −αφ/σ² of each lineage's birth layer; R3 §0(b) for the normalisation), added to the chain's D4 (dG·metric) with a learned per-layer gain γ_l (init 0); refit. O(n²). Anatomy 2's exact D4 made v59 1.3 % *worse* unrefit (the chain's κ4 parameters compensate the model κ4), so expect little; it tells us whether the chain can use traceless κ4 at all.
+c. *(optional, ≤ 1 h)* A per-layer variance-level gain (Lane M2 M7: v77's variance level drifts −3e-5 per layer) is a constant special case of the closed σ corrector (S4, −0.10 %). Run it only if the twin's σ corrector has no per-layer constant; otherwise skip.
+Predictions (strategist): a −1.5 to −3.5 % F at equal raw; b 0 to −2 % raw; c 0 to −1 %.
+
+## P3.2 — the κ4-core loop in the twin (Oct 8–10; accuracy first, cost recorded per arm)
+Composable arms on the v80 chain. Our metric is scalar (ARC's `use_avg_metric`), which simplifies the consumers.
+1. **Off-diagonal post-activation κ4 core with memory**, ARC's r = 1 form κ4 ≈ Sym(core ⊗ g) (R3 §1.3). Per layer: core_out = the r = 1 projection of the post-activation dense d = 4 slices (R3 K4.2) — this carries the old core through the ReLU *and* adds births such as X·diag(2w1)·Xᵀ (M5's memoryless arm, which drops the passage, was 17× worse); v80's g_out is its diagonal only. Then core ← W·core·Wᵀ (K4.0). ≈ 2 u/layer for the sandwich + ≥ 1 u for the projection.
+2. **K211 into the core** (K4.3 / K4.4; coefficients −24/(2n+8) and +12/(2n+8)). K4.3 (vector pK1 = E[φ]) reads pK_111 — every κ3 block after the nonlinear step (old lineages ×w1, this layer's births, the 211→111 blocks); K4.4 (vector w(1,2) = E[∂(φ²)], w1 on the other legs) reads the incoming κ3 — the old lineages. Both remove the repeated part first. For us: ≈ 1 u per carried lineage per layer (one (n, k·n_hubs)@(k·n_hubs, n) product for the recent tier, a rank-256 sandwich for the old tier). Arms: **exact** vs **truncated to the newborn + age-1 lineages**.
+3. **211→111** (K3.5 block B3 only): κ3 += ¼·Sym((w1w1ᵀ∘core) ⊗ u), u = w2∘diag(g), core in the pre-activation basis. Under the scalar metric B1 lives only on repeated indices and is cancelled by ARC's correction — do not port it; B2 needs a full metric. This is a "radial" κ3 term: O(n²) D3/D21 readouts; carrying it forward needs one sandwich per birth layer. Arms: exact transport of the last k radial terms vs folding older ones into one carried radial term.
+4. **Consumers.** With the scalar metric, D22_ac = m·(core_aa + core_cc)/6 is exactly v80's existing (m/6)(dG_a + dG_c) with dG = core_aa — the off-diagonal core does not enter D22. It enters Q31: D31_ac = m·core_ac/2 replaces (m/2)·λ·C_ac. The dressing's K22 heavy leg reads D22 as before.
+5. **E21b gain-mode** into the core (Lane M2 §M6, `m6_terms.py:81-103`): X_jk = 2βc²[Cm_jk(v_k − w22_j μ_j Cm_jk) + μ_j(q_k − w22_j Cm_jk²) + μ_k P_kj], v = Cm(w22∘μ), q = (Cm∘Cm)ᵀw22, P = Cm·diag(w22)·Cm; Cm = pre-activation C with its diagonal zeroed, μ the pre-activation mean, w_kp = E[∂ᵏ(φᵖ)], β = 0.7, c² = μᵀCμ/‖μ‖⁴; ΔB = 24/(2n+8)·sym[w11_j X_jk w21_k] with sym = ½(B + Bᵀ), diag 0. One n³ product per layer; from layer 6 only keeps ~90 % of the gain in ARC's chain.
+6. *(gated re-test of closed P2.1b)* the exact-dressing correction on the top-f hubs (`build_dress.py --corr`, f = 0.15) — only with the loop present, because AUGMENT is non-separable.
+
+Arms on VAL-100 (free running), each **unrefit and after a refit** (S2t-style stages + the new core parameters, lr 1e-4, 1 epoch TRAIN-900): (i) core (1) + K211 exact (2) + 211→111 (3) + consumers (4); (i′) same with truncated K211 and a folded radial term; (ii) best of (i)/(i′) + E21b (5); (iii) (ii) + item 6; **(iv) (ii) with the old tier dropped; (v) (ii) with the old tier at rank 128** — the in-chain version of M8. For each: VAL raw vs the refit control, twin FLOP estimate, projected F/B and projected score (raw × F/B) vs v80.
+- **Cost reality:** the full loop as specified is ≈ 9–10 raw n³ products per layer (≈ +40–45 % F after Strassen); truncated K211 + folded radial ≈ 7 (≈ +30 %). By the marginal rule +30–45 % F needs raw better than −23 to −31 % just to break even.
+- **Kill:** best of (i)–(iii) after refit worse than −8 % raw on VAL, and (iv)/(v) worse than +10 % raw vs v80 ⇒ close the loop port and record.
+- Predictions (strategist): (i) −3 to −8 %; (i′) within 3 pp of (i); (ii) −8 to −18 %; (iii) a further −2 to −6 %; (iv) +15 to +60 % vs v80 (the loop absorbs part of the old tier's ×19, not all) [I]; P(best of (i)–(iii) ≤ −8 %) = 50 %.
+
+## P3.3 — the Oct 10 decision (inputs: P3.2 table, Lane M3 M8 + M9/M10)
+- **GO v90** only if the twin's projected score (including every cost lever the loop makes available: dropping/shrinking the old tier per (iv)/(v) and M8, truncated K211, Strassen) is ≥ 5 % better than v80. Without an old-tier saving the loop is unlikely to pay.
+- If M10 hands over a cheap fourth-order piece (≥ 40 % of the K=4 gain at ≤ +10 % F), add it to v90 in the twin first.
+- Otherwise: ship v81 (P3.1), harden, designate.
+
+## P3.4 — Oct 11–16
+v90 (if GO): build, refit (select on VAL), FRESH-A paired vs the incumbent, all §5 gates (residual ≤ 0.33 s, wall, ops), canary A + block-40 B twin. Hardening; FRESH-LOCK read (≤ 3) on Oct 14–15; Samuel designates A/B by Oct 16.
+
+## Do not
+Use `out=`, `where=` or symmetry tags (flopscope #275 / #285 — the promised re-evaluation targets exactly these); reopen PLAN §6 items or rev 19's closed items (gain-mode κ4 templates, always-on D21 rows, alive-block covariance, the E21b diagonal route) except the one gated re-test labelled above; fit or select on FRESH; designate; contact organizers.
+
+## Report
+Daily paragraph in `docs/STRATEGIST_PACKET_2026-10-0X.md`; RESULTS rows with both predictions; the P3.2 table as soon as it exists (it gates Oct 10).
