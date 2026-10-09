@@ -2804,3 +2804,6 @@ Further bank items (twin, VAL-100, 1 epoch from the star2 refit; control = star 
 
 **v81b_star2ws graded (#334918): 3.4711270541038904e-09, NEW wall-safe B**, raw 1.9265049822081438e-08
 (= v81b's graded raw to 0.005 %), 100 clean. −6.33 % vs v80_hygws; +0.40 % vs the FRESH-A projection.
+
+**v81c_starall graded (#334926): 3.364228068774433e-09, NEW BEST**, raw 1.908354352764263e-08, 100 clean.
+−0.88 % vs v81b (3.3939e-09), −7.13 % vs v80. +0.43 % vs the FRESH-A projection 3.3500e-09.
