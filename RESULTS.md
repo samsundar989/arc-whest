@@ -2801,3 +2801,6 @@ Further bank items (twin, VAL-100, 1 epoch from the star2 refit; control = star 
 
 | 2026-10-08 | `estimator_k3_v81b_star2ws.py` | `512c33ec` | FRESH-A | 2.030089e-08 | 0.18018 | 23,181 | local A/B on DEV net 3 (×2) vs v80_hygws = **0.995** → ≈ 85 s noisy-implied (B ≤ 95 s) | VmPeak 6,166 MiB (WSL PASS, same hash) | 3.4574e-09 | PENDING | **1.0572× vs v80_hygws** (Δ +2.092e-10, t95 [+1.855e-10, +2.329e-10]) | 98/100 | B twin of v81b (block 40). Twin DEV vs v81b 1.4e-4 (block round-off). Package `88a97a75…e283`, inner = source. For the Oct 9 A/B slot. |
 | 2026-10-09 | `estimator_k3_v81c_starall.py` | `71b5e991` | FRESH-A | 2.011139e-08 | 0.17629 | 25,741 | local A/B on DEV net 3 (×2) v81c/v81b = 0.95 (noisy; same ops, F +0.07 %) | VmPeak 6,144 MiB (WSL PASS, same hash) | **3.3500e-09** | PENDING | **1.0090× vs v81b** (Δ +3.19e-11, t95 [+2.59e-11, +3.80e-11]) | 88/100 | star-D4 over every lineage (old tier via Q legs) + starall refit. Twin arm vs file DEV 1.4e-4. residual 0.285 s. Package `422d99a9…8f55`, inner = source. First canary of UTC Oct 9. |
+
+**v81b_star2ws graded (#334918): 3.4711270541038904e-09, NEW wall-safe B**, raw 1.9265049822081438e-08
+(= v81b's graded raw to 0.005 %), 100 clean. −6.33 % vs v80_hygws; +0.40 % vs the FRESH-A projection.
