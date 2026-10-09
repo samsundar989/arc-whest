@@ -63,3 +63,22 @@ A longer star refit (2 epochs, faster γ steps) is queued as a possible v81b.
 
 **Oct 10 inputs from Lane P3:** P3.2 table above (loop killed); v81 (−3.3 % on DEV) as the banked
 improvement; the memory-growth risk. Without the loop, P3.3 says: ship v81, harden, designate.
+
+## Addendum — Oct 8 evening / Oct 9 00:30 UTC (graded)
+
+| build | what | graded | vs prev |
+|---|---|---:|---:|
+| v81_star #334848 | v80 + star-D4 (recent lineages) + refit | 3.4984e-9 | −3.43 % vs v80 |
+| v81b_star2 #334855 | longer star refit (2 ep; gains settle near 1, 1.2–1.5 at depth) | 3.3939e-9 | −2.98 % |
+| v81b_star2ws #334918 | its block-40 B twin (Oct 9 A/B slot) | **3.4711e-9 (new B)** | −6.33 % vs v80ws |
+| **v81c_starall #334926** | star over every lineage incl. the old tier (Q legs; elementwise only) | **3.3642e-9 (new best)** | −0.88 % |
+
+Total today: **−7.1 % vs v80** at F +0.15 %. Closed: path-D4 (−0.42 % at +3.6 % F), variance-level gain
+(null), Strassen leaf (−0.6/−0.9 % F at +8–12 % ops). Projections from FRESH-A ÷ 1.019 graded within
++0.4–1.0 % on all four rows. A 2-epoch continuation of the starall refit is running (possible v81d).
+
+**Direction needed (Oct 10):** the loop is killed (table above), so P3.3's default is "ship v81, harden,
+designate". Open for Samuel / strategist: (1) confirm no-GO on v90; (2) the memory-growth risk
+(VmPeak crosses 8 GiB at ≈ 150 predicts in one worker); (3) what Lane P should do with Oct 10–16 — more
+shared-factor fourth-order pieces (star D22/D31 cost 1–2 u per lineage; Lane M3's M10 sizes them),
+or cost work toward the 0.10 floor (we are at 0.176).
