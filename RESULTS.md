@@ -2807,4 +2807,4 @@ Further bank items (twin, VAL-100, 1 epoch from the star2 refit; control = star 
 
 **v81c_starall graded (#334926): 3.364228068774433e-09, NEW BEST**, raw 1.908354352764263e-08, 100 clean.
 −0.88 % vs v81b (3.3939e-09), −7.13 % vs v80. +0.43 % vs the FRESH-A projection 3.3500e-09.
-| 2026-10-09 | `estimator_k3_v81d_starall2.py` | `b7efb0f5` | FRESH-A | 1.987150e-08 | 0.17629 | 25,741 | same code as v81c (constants only) | VmPeak 6,144 MiB (WSL PASS, same hash) | **3.3085e-09** | PENDING | **1.0121× vs v81c** (Δ +4.229e-11, t95 [+3.740e-11, +4.718e-11]) | 97/100 | starall refit +2 epochs (VAL 1.945887e-08). Twin arm vs file DEV 1.2e-4. Package `d6e9…`, inner = source. Second canary of UTC Oct 9. |
+| 2026-10-09 | `estimator_k3_v81d_starall2.py` | `b7efb0f5` | FRESH-A | 1.987150e-08 | 0.17629 | 25,741 | same code as v81c (constants only) | VmPeak 6,144 MiB (WSL PASS, same hash) | **3.3085e-09** | PENDING | **1.0121× vs v81c** (Δ +4.229e-11, t95 [+3.740e-11, +4.718e-11]) | 97/100 | starall refit +2 epochs (VAL 1.945887e-08). Twin arm vs file DEV 1.2e-4. Package `8b6eeaf7…061c`, inner = source. Second canary of UTC Oct 9. |
