@@ -82,3 +82,6 @@ designate". Open for Samuel / strategist: (1) confirm no-GO on v90; (2) the memo
 (VmPeak crosses 8 GiB at ≈ 150 predicts in one worker); (3) what Lane P should do with Oct 10–16 — more
 shared-factor fourth-order pieces (star D22/D31 cost 1–2 u per lineage; Lane M3's M10 sizes them),
 or cost work toward the 0.10 floor (we are at 0.176).
+- **Oct 9 05:30 UTC: v81d_starall2 #334948 graded 3.3200e-9 (new best, −1.31 % vs v81c, −8.35 % vs v80)** —
+  the starall refit continued 2 more epochs; FRESH-A projection held to +0.35 %. Its B twin
+  `estimator_k3_v81d_starall2ws.py` is built (not yet gated). Refit gains are now ~1 % per 2 epochs and shrinking.
