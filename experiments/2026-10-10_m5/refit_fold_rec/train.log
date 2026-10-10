@@ -61,3 +61,13 @@ ep 0 step 57/112 train final 1.8774e-08 lr 1.15e-05 3397s
 ep 0 step 58/112 train final 1.7801e-08 lr 1.12e-05 3452s
 ep 0 step 59/112 train final 1.9991e-08 lr 1.09e-05 3508s
 ep 0 step 60/112 train final 1.7505e-08 lr 1.05e-05 3561s
+ep 0 step 61/112 train final 1.9264e-08 lr 1.02e-05 3615s
+ep 0 step 62/112 train final 1.7631e-08 lr 9.88e-06 3664s
+ep 0 step 63/112 train final 1.8362e-08 lr 9.55e-06 3714s
+ep 0 step 64/112 train final 1.6731e-08 lr 9.22e-06 3760s
+ep 0 step 65/112 train final 1.8260e-08 lr 8.90e-06 3903s
+ep 0 step 66/112 train final 1.8772e-08 lr 8.58e-06 3985s
+ep 0 step 67/112 train final 1.7306e-08 lr 8.26e-06 4056s
+ep 0 step 68/112 train final 1.7541e-08 lr 7.95e-06 4106s
+ep 0 step 69/112 train final 1.8000e-08 lr 7.63e-06 4156s
+ep 0 step 70/112 train final 1.8714e-08 lr 7.32e-06 4203s
