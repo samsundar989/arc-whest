@@ -180,7 +180,7 @@ def report(a):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--nets", default="0:5")
-    ap.add_argument("--out", default=str(HERE / "hubfid"))
+    ap.add_argument("--out", default="C:/Users/samsu/Documents/arc-whest-lane-m/experiments/2026-10-10_m5/hubfid")
     ap.add_argument("--report", default="")
     a = ap.parse_args()
     return report(a) if a.report else collect(a)

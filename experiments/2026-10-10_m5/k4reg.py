@@ -208,6 +208,8 @@ def layer_stats(l, rec, hook, births, lab, sg, m, off, torch, np, QN, DN):
             star_old = star_old + Qs
             d4star_old = d4star_old + d4
     F["star_old"], F["star_all"] = star_old, star_all
+    for age in range(k + 1, AGES_STAR + 1):
+        F[f"star{age}"] = torch.zeros((n, n), dtype=f64, device=dev)
     # path (birth C11 of that lineage) and (2,2)-block (birth post K22), youngest ages
     d4path, d4k22 = {}, {}
     for age in range(1, AGES_PATH + 1):
@@ -347,7 +349,7 @@ def report(a):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--nets", default="0:20")
-    ap.add_argument("--out", default=str(HERE / "k4reg"))
+    ap.add_argument("--out", default="C:/Users/samsu/Documents/arc-whest-lane-m/experiments/2026-10-10_m5/k4reg")
     ap.add_argument("--report", default="")
     a = ap.parse_args()
     return report(a) if a.report else collect(a)
