@@ -279,7 +279,26 @@ def item7(src, rho=None):
                 "            d21e = (D21 * D21).sum(axis=1) * (inv2 * inv2)\n")
 
 
-ITEMS = {"1": item1, "2": item2, "3": item3, "4": item4, "5": item5, "6": item6, "7": item7}
+def item0(src):
+    """v82a (P5.0c): `fnp.block` reassembly in `_sb` and the sandwich + `nan_to_num`
+    closure guard -- bit-identical. For building from a v81d-family file (build_star)."""
+    src = _rep(src,
+               "    return fnp.concatenate([fnp.concatenate([c11, c12], axis=2),\n"
+               "                            fnp.concatenate([c21, c22], axis=2)], axis=1)\n",
+               "    # P5.0c: one `block` bills numel(out) once; the nested concatenates billed it twice.\n"
+               "    return fnp.block([[c11, c12], [c21, c22]])\n")
+    old = "    return fnp.concatenate([top, fnp.concatenate([top[:, h:].T, b22], axis=1)], axis=0)\n"
+    if src.count(old) != 2:
+        raise SystemExit(f"sandwich anchor occurs {src.count(old)}x")
+    src = src.replace(old, "    return fnp.block([[top], [top[:, h:].T, b22]])\n")
+    return _rep(src,
+                '        X = fnp.einsum("tij,ti,tj->ij", Mt, Li, Rj)\n'
+                "        X = fnp.where(fnp.isfinite(X), X, dtype(0.0))\n",
+                '        X = fnp.einsum("tij,ti,tj->ij", Mt, Li, Rj)\n'
+                "        X = fnp.nan_to_num(X, nan=0.0, posinf=0.0, neginf=0.0)\n")
+
+
+ITEMS = {"0": item0, "1": item1, "2": item2, "3": item3, "4": item4, "5": item5, "6": item6, "7": item7}
 
 
 def build(items, base=BASE):
