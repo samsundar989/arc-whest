@@ -19,7 +19,9 @@ each) is running on the pod.
 | build | ΔF cumulative | Δraw (best evidence) | ops | status |
 |---|---:|---:|---:|---|
 | v82a | −1.22 % | 0 (bit-identical; graded raw identical) | 24,283 | graded 3.2795e-9 |
-| v82b | −6.36 % (F/B 0.16508) | −1.29 % DEV 0–9; twin VAL −0.89 % | 22,375 | FRESH-A running |
+| v82b | −6.36 % (F/B 0.16508) | graded −1.20 % | 22,375 | **graded 3.0717e-9 (#335227)** |
+| v82b_ws (B) | −4.16 % (F/B 0.16895) | graded −1.21 % | 20,269 | **graded 3.1433e-9 (#335250)** |
+| v82c_r1 | −6.36 % | FRESH-A −0.83 % vs v82b | 22,375 | submitted #335253, projected 3.0421e-9 |
 
 ## What the evidence changed in plan rev 22
 
@@ -30,3 +32,15 @@ each) is running on the pod.
   not condemn it directly. Its Hkh2.5 check stands.
 - Revised central path: v82b ≈ 3.07e-9 → refits → Lane M κ₄ items. The 0.145 F/B target now needs the hub move
   plus about 2 % more from elsewhere.
+
+## Evening addendum (Oct 10, ~21:00 UTC)
+
+- **v82b graded 3.0717e-9 (#335227), new best** (−7.5 % vs v81d), 0.11 % above its FRESH-A projection.
+- **v82b_ws graded 3.1433e-9 (#335250), the new wall-safe B.** It took the A/B slot instead of v81d_ws:
+  it is the ws build of the new A and projected 0.26e-9 better. Two v81d_ws FRESH-A runs lost nets to local
+  commit-limit OOMs, and `tools/ev.py` now keeps partial caches so this cannot cost an hour again.
+- R1 (pod): the V8b and v82b arms refit cleanly (−0.92 % / −1.73 % vs the control's best; the control
+  early-stopped). The refit is baked into **v82c_r1** (FRESH-A 1.0083× vs v82b, 99/100), submitted as the
+  third canary of the day. R2 (2 more epochs) is running on the pod.
+- Next (P5.3): Lane M5's items as they arrive; the hub move + H kink-active is now the biggest remaining
+  cost lever.
