@@ -2811,3 +2811,20 @@ Further bank items (twin, VAL-100, 1 epoch from the star2 refit; control = star 
 
 **v81d_starall2 graded (#334948): 3.3200317352723394e-09, NEW BEST**, raw 1.883284035386623e-08, 100 clean.
 −1.31 % vs v81c (3.3642e-09), −8.35 % vs v80. +0.35 % vs the FRESH-A projection 3.3085e-09.
+
+## Plan rev 22 — Lane P5 (2026-10-10)
+
+Handoff `docs/HANDOFF_2026-10-10_LANE_P5.md`; plan `docs/research/2026-10-10_pivot_rev22.md`.
+Cost model `docs/research/2026-10-10_flopmodel/` (run from a copy with the `~/scratch` path line removed).
+
+### P5.0c — v82a (bit-identical billing: `fnp.block` reassembly + `nan_to_num` closure guards)
+- Interpreter on the exact file: 382,927,736,337 FLOPs, 24,283 ops (−1.222 % F, −1,458 ops vs v81d).
+  **Real meter (`_cost_worker`, DEV 0): 382,927,736,337 / 24,283 — identical to the FLOP.**
+- Bit-identical to v81d on DEV nets 0–2 (max |Δ| = 0.0) ⇒ no FRESH-A needed (handoff).
+- **Predictions before the canary.** Strategist: −1.17 % −0.045 % F, raw unchanged (≈ 3.28e-9).
+  Worker: graded F/B 0.174135 exactly (the server bills `block` as 0.12.1 does), raw = v81d's graded
+  1.883284e-08 to ≤ 0.01 % ⇒ **3.2795e-09** (−1.22 %). If the graded F differs, the server bills `block` differently.
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-10 | `estimator_k3_v82a_block.py` | `b65a70a6` | DEV 0–2 bit-identical to v81d | = v81d | 0.17414 | 24,283 | local A/B on DEV net 3 (×2) v82a/v81d = **0.934** | VmPeak 6,152 MiB (WSL PASS 23/23 on the 3rd run; 2 runs before tripped the known "settled growth" allocator-noise check, VmPeak 6,157) | **3.2795e-09** (v81d graded raw × F/B) | PENDING | bit-identical | — | residual projected 24,283 × 11.2 µs = 0.272 s. setup 0.001 s. Package `025fcbcb…8ac2`, inner = source. First canary of UTC Oct 10. |
