@@ -30,7 +30,9 @@ Hkh2.5 +0.0 to +0.5 % (mine) → +0.19 %.
 |---|---|---:|---:|---|
 | control (v81d twin, no arm) | S2ts | 1.941552e-08 (112) | — | |
 | **M5.1 fold rec (τ 2, g★ init = sg)** | S2tsf | **1.891407e-08** (112) | **−2.58 %** | **PASS** (kill: not better than control) |
-| M5.2 fold rec + radial Q31, D4 (0.1× phys, learned v′) | S2tsfr | 1.892346e-08 (112) | +0.05 % vs fold rec | **KILLED** (bar: ≥ 0.3 % better); v′ did not move |
+| M5.2 fold rec + radial Q31, D4 (0.1× phys, learned v′) | S2tsfr | 1.892346e-08 (112) | +0.05 % vs fold rec | under-powered: relative steps froze v′ (re-run below) |
+| M5.2 re-run: fold rec + radial Q31, D4, v′ steps ×300 (`--lr-mult`) | S2tsfr | 1.891959e-08 (112) | +0.03 % vs fold rec | **KILLED** (bar ≥ 0.3 % better); v′ learned ≈ 0.5–1× physical |
+| M5.5: fold rec + qx (D4n·Cn, α_b·γ_a, α_a·D21n; zero-init, zero-scale 100) | S2tsfx | 1.890062e-08 (112) | −0.07 % vs fold rec | **not built** (below the 0.3 % bar); qx[0] learned ±0.1 |
 | M5.4 alt: H2.5 literal (kink-active columns, hubs NOT moved; K table R, D only) | S2ts | 1.967743e-08 (112) | +1.35 % | under the +2 % kill bar; with −6.03 % F ≈ −4.8 % score |
 | **M5.1 + M5.4 alt: fold rec + H2.5 literal** | S2tsf | **1.916160e-08** (112) | −1.31 % vs control; −2.62 % vs H2.5 literal | fold gain survives H in full; with ΔF ≈ −6.03 % + 0.25 % → ≈ −7 % score |
 
@@ -71,3 +73,11 @@ Interpreter on v81d (`build_fold.py`, rec mode): +983,123,392 FLOPs (+0.254 % F,
 Monotone in scale for every slice: the refit-tuned chain has absorbed whatever the radial terms do.
 Refit queued: fold rec + radial (Q31, D4) at 0.1× physical with learned per-layer v′ (S2tsfr), compared
 with the fold-rec refit (same start, same recipe). D22 excluded.
+
+## Verdicts (Oct 10)
+- **M5.1 fold (rec): BUILD** — handed over (`HANDOVER_M5.1_fold.md`).
+- **M5.2 radial Sym(μ⊗κ₃): KILLED** — real in the labels, worth nothing to the refit chain (+0.03 %).
+- **M5.3:** no paid piece passes the build rule (path, (2,2)-block ≤ 0.02 ΔR² each).
+- **M5.4 hub move: CLOSED** at the fidelity gate; **H2.5 literal instead: hand-over** (+1.35 % refit,
+  −6.03 % F; stacks with the fold: −1.31 % vs control) (`HANDOVER_M5.4_Hlit.md`).
+- **M5.5:** the remaining free Q31 modes add −0.07 % → nothing further to build from the regression.

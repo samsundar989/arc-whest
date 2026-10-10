@@ -43,3 +43,11 @@ Q31 (R² ceiling 1.0 vs ≈ 0.6 reachable) is not in any O(n³) readout we teste
 chain's D4 has NEGATIVE R² against the truth at l 2–6 (the refit has made D4 a compensator), and a
 per-layer scale/offset alone would explain 25–86 % there — but the mean-only readout is already refit
 on, so this is likely compensation, not headroom.
+
+## Late Oct 10 addendum
+- Fold + H2.5 literal joint refit: 1.916160e-08, −1.31 % vs control; the fold's gain survives the column
+  drop in full. Stacked ≈ −7 % score.
+- Radial terms re-run with ×300 steps (gains learned to ≈ 0.5–1× physical): +0.03 % vs fold-only → killed.
+- The regression's other free Q31 modes (D4n·Cn, the radial halves), zero-init with real steps: −0.07 %
+  → not built. **The κ₄ D31 channel in our chain is worth the fold's ≈ 2.6 % and no more on this
+  evidence; it cannot carry a top-10 push.**
