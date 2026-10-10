@@ -61,6 +61,8 @@ def val():
     ev(d, "h_d25", "--mask", f"R=2.0,Hd=2.5,Dz=2.5,K={KRD}", "--arm", ARM)
     ev(d, "h_kh25", "--mask", f"R=2.0,Hkh=2.5,Dz=2.5,K={KRD}", "--arm", ARM)
     ev(d, "h_lit25", "--mask", f"R=2.0,H=2.5,Dz=2.5,K={KRD}", "--arm", ARM)
+    # hubs dropped on always-on columns (A_L kept): what the always-on route-(i)+(ii) hubs are worth
+    ev(d, "h_k25", "--mask", f"R=2.0,Hk=2.5,Dz=2.5,K={KRD}", "--arm", ARM)
 
 
 def refit(tag, stage, *extra):
