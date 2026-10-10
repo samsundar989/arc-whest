@@ -28,3 +28,8 @@ Caveats:
 
 Twin command: `experiments/2026-10-10_m5/batch.py refit hlit25 S2ts --mask "R=2.0,H=2.5,Dz=2.5,K=<ktab_RD.json>"`;
 params `refit_hlit25/params_best.npz`.
+
+## Update — joint refit (fold rec + H2.5 literal, S2tsf 1 ep from starall2)
+VAL 1.916160e-08: −1.31 % vs the control (1.941552e-08), −2.62 % vs H2.5 literal alone (1.967743e-08).
+The fold keeps its whole gain when the always-on columns are dropped. Stacked estimate ≈ −7 % score
+(raw −1.3 %, F −6.03 % + 0.25 %). Params: `refit_foldhlit/params_best.npz`.

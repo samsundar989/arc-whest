@@ -39,3 +39,8 @@ read. Folding the old tier too measured worse (−0.95 % vs −1.23 % unrefit) a
   items should re-learn fg together.
 - The fold changes D21 for all consumers (H, d21e, births, closure); |ΔH|/|H| ≤ 1.3 %, |Δd21e| ≤ 0.4 %.
   The refit absorbs that; no variant with τ 1.5 was needed.
+
+## Update — joint refit (fold rec + H2.5 literal, S2tsf 1 ep from starall2)
+VAL 1.916160e-08: −1.31 % vs the control (1.941552e-08), −2.62 % vs H2.5 literal alone (1.967743e-08).
+The fold keeps its whole gain when the always-on columns are dropped. Stacked estimate ≈ −7 % score
+(raw −1.3 %, F −6.03 % + 0.25 %). Params: `refit_foldhlit/params_best.npz`.
