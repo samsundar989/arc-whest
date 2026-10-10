@@ -30,6 +30,7 @@ Hkh2.5 +0.0 to +0.5 % (mine) → +0.19 %.
 |---|---|---:|---:|---|
 | control (v81d twin, no arm) | S2ts | 1.941552e-08 (112) | — | |
 | **M5.1 fold rec (τ 2, g★ init = sg)** | S2tsf | **1.891407e-08** (112) | **−2.58 %** | **PASS** (kill: not better than control) |
+| M5.4 alt: H2.5 literal (kink-active columns, hubs NOT moved; K table R, D only) | S2ts | 1.967743e-08 (112) | +1.35 % | under the +2 % kill bar; with −6.03 % F ≈ −4.8 % score |
 
 Learned g★ ≈ sg (moved < 0.5 %). Params: `refit_fold_rec/params_best.npz`.
 Interpreter on v81d (`build_fold.py`, rec mode): +983,123,392 FLOPs (+0.254 % F, +0.46 u), +243 ops
