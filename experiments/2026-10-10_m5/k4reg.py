@@ -320,8 +320,12 @@ def report(a):
                 if not S:
                     return 0.0
                 G = A["G"][np.ix_(S, S)]
-                lam = 1e-9 * np.trace(G) / len(S)
-                beta = np.linalg.solve(G + lam * np.eye(len(S)), A["b"][S])
+                if np.any(np.diag(G) <= 0):
+                    return 0.0
+                dsc = 1.0 / np.sqrt(np.diag(G))
+                Gs = G * dsc[:, None] * dsc[None, :]
+                beta = np.linalg.lstsq(Gs + 1e-10 * np.eye(len(S)), A["b"][S] * dsc,
+                                       rcond=1e-12)[0] * dsc
                 ssr = B["rr"] - 2 * beta @ B["b"][S] + beta @ B["G"][np.ix_(S, S)] @ beta
                 return (B["rr"] - ssr) / sst
 

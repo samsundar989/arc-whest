@@ -40,3 +40,24 @@ ep 0 step 37/112 train final 1.8050e-08 lr 1.79e-05 2149s
 ep 0 step 38/112 train final 1.8996e-08 lr 1.76e-05 2205s
 ep 0 step 39/112 train final 1.8004e-08 lr 1.73e-05 2260s
 ep 0 step 40/112 train final 1.9792e-08 lr 1.70e-05 2316s
+ep 0 step 41/112 train final 1.8017e-08 lr 1.67e-05 2371s
+ep 0 step 42/112 train final 1.8501e-08 lr 1.64e-05 2426s
+ep 0 step 43/112 train final 1.8520e-08 lr 1.61e-05 2480s
+ep 0 step 44/112 train final 1.6949e-08 lr 1.58e-05 2534s
+ep 0 step 45/112 train final 1.9799e-08 lr 1.55e-05 2589s
+ep 0 step 46/112 train final 1.6784e-08 lr 1.51e-05 2643s
+ep 0 step 47/112 train final 1.7132e-08 lr 1.48e-05 2697s
+ep 0 step 48/112 train final 1.9065e-08 lr 1.45e-05 2753s
+ep 0 step 49/112 train final 1.9416e-08 lr 1.42e-05 2808s
+ep 0 step 50/112 train final 1.6812e-08 lr 1.39e-05 2863s
+ep 0 step 51/112 train final 1.8612e-08 lr 1.35e-05 2918s
+ep 0 step 52/112 train final 1.8668e-08 lr 1.32e-05 2974s
+ep 0 step 53/112 train final 1.8634e-08 lr 1.29e-05 3029s
+ep 0 step 54/112 train final 1.8576e-08 lr 1.25e-05 3084s
+ep 0 step 55/112 train final 2.0835e-08 lr 1.22e-05 3138s
+ep 0 step 56/112 train final 1.8780e-08 lr 1.19e-05 3193s
+[step 56] HOLDOUT-100 raw 1.901657e-08 (n=100)
+ep 0 step 57/112 train final 1.8774e-08 lr 1.15e-05 3397s
+ep 0 step 58/112 train final 1.7801e-08 lr 1.12e-05 3452s
+ep 0 step 59/112 train final 1.9991e-08 lr 1.09e-05 3508s
+ep 0 step 60/112 train final 1.7505e-08 lr 1.05e-05 3561s

@@ -65,6 +65,14 @@ def val():
     ev(d, "h_k25", "--mask", f"R=2.0,Hk=2.5,Dz=2.5,K={KRD}", "--arm", ARM)
 
 
+def radsweep():
+    d = f"{OUT}/val"
+    for sc in ("0.1", "0.3", "0.5"):
+        ev(d, f"rad_q_s{sc}", *MASK, "--arm", ARM + "+rad", "--rad", f"q=1,d22=0,d4=0,scale={sc}")
+        ev(d, f"rad_d4_s{sc}", *MASK, "--arm", ARM + "+rad", "--rad", f"q=0,d22=0,d4=1,scale={sc}")
+        ev(d, f"rad_d22_s{sc}", *MASK, "--arm", ARM + "+rad", "--rad", f"q=0,d22=1,d4=0,scale={sc}")
+
+
 def refit(tag, stage, *extra):
     """1 epoch TRAIN-900, lr 1e-4, cosine, from refit_starall2 (v81d's params)."""
     if "--arm" not in extra:
@@ -78,4 +86,4 @@ def refit(tag, stage, *extra):
 
 if __name__ == "__main__":
     b = sys.argv[1]
-    {"smoke": smoke, "val": val}.get(b, lambda: refit(*sys.argv[2:]))()
+    {"smoke": smoke, "val": val, "radsweep": radsweep}.get(b, lambda: refit(*sys.argv[2:]))()
