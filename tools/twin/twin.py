@@ -356,6 +356,7 @@ ARMS = {
          "                _mD = _m\n"
          "    if _MASK is not None and not last_layer:\n"
          "        _MASK['_prevR'] = _mR\n"
+         "        _MASK['_prevD'] = _mD\n"
          "    _mon = _mDd = None\n"
          "    if _MASK is not None and _MASK.get('Da') and not last_layer:\n"
          "        _mon = fnp.where(alpha > _MASK['Da'], dtype(0.0), dtype(1.0))\n"
@@ -454,13 +455,16 @@ ARMS = {
          "    elif _mR is not None and _MASK.get('Rpart', '') == 'n':\n"
          "        out_tw = _mask_rows_new(out_tw, _mR, n)\n"),
         # P2.4.2 (key C): the covariance sandwich reads C on the previous layer's R rows only
+        # (C=1; C=2 keeps the dropped variances). P5.1 item 6: C=3 / C=4 the same on the
+        # previous layer's D set.
         ("    mu_pre = WT @ mu\n",
          "    mu_pre = WT @ mu\n"
          "    _covS = cov\n"
-         "    if _MASK is not None and _MASK.get('C') and _MASK.get('_prevR') is not None:\n"
-         "        _pc = _MASK['_prevR']\n"
+         "    _ck = None if _MASK is None or not _MASK.get('C') else ('_prevD' if _MASK['C'] >= 3.0 else '_prevR')\n"
+         "    if _ck is not None and _MASK.get(_ck) is not None:\n"
+         "        _pc = _MASK[_ck]\n"
          "        _covS = cov * (_pc[:, None] * _pc[None, :])\n"
-         "        if _MASK['C'] == 2.0:\n"
+         "        if _MASK['C'] in (2.0, 4.0):\n"
          "            # keep the dropped rows' VARIANCES; drop only their cross-covariances\n"
          "            _covS = _covS + fnp.diag(fnp.diagonal(cov) * (1.0 - _pc))\n"),
         ("        _X4 = _mm(WT, cov)\n", "        _X4 = _mm(WT, _covS)\n"),
