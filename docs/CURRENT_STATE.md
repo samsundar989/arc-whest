@@ -29,7 +29,8 @@ vs the incumbent** (`tools/ev.py --panel fresh_a --baseline <incumbent>`); lane-
 | A (prev.) | `estimator_k3_v81_star.py` / `376ae1c5` | #334848 | 3.4983524381277624e-9 (raw 1.9859e-8) | 0.17616 |
 | A (prev.) | `estimator_k3_v80_hyg.py` / `73b2c19c` | #334659 | 3.6223815250878947e-9 (raw 2.0579e-8) | 0.17602 |
 | A (prev.) | `estimator_k3_v79_dress.py` / `2cf3acf4` | #334576 | 3.7025275784494673e-9 (raw 2.0580e-8) | 0.17991 |
-| **B** (wall-safe) | `estimator_k3_v81b_star2ws.py` / `512c33ec` | #334918 | **3.4711270541038904e-9** (raw 1.9265e-8) | 0.18018 |
+| **B** (wall-safe) | `estimator_k3_v82b_bundlews.py` / `7148e22a` | #335250 | **3.1432860023588976e-9** (raw 1.8605e-8) | 0.16895 |
+| B (prev.) | `estimator_k3_v81b_star2ws.py` / `512c33ec` | #334918 | 3.4711270541038904e-9 (raw 1.9265e-8) | 0.18018 |
 | B (prev.) | `estimator_k3_v80_hygws.py` / `dd82721c` | #334781 | 3.705600144458426e-9 (raw 2.0582e-8) | 0.18004 |
 | B (prev.) | `estimator_k3_v78_kashws.py` / `6b3db2a5` | #334545 | 4.249585835999417e-9 (raw 2.2023e-8) | 0.19296 |
 | A (prev.) | `estimator_k3_v77_kash.py` / `4ff8018f` | #334487 | 3.959571663492616e-9 | 0.17981 |

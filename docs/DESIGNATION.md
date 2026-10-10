@@ -1,5 +1,15 @@
 # DESIGNATION — current A and B (maintained by the worker; designating is Samuel's)
 
+## Recommendation — 2026-10-10 evening (Lane P5; no nomination/designation made)
+
+| role | file | sha8 | submission | score | raw | F/B | wall evidence | VmPeak |
+|---|---|---|---|---:|---:|---:|---|---|
+| **A (recommended)** | `estimator_k3_v82b_bundle.py` | `a358fb45` | #335227 | **3.0716825837413753e-9** | 1.8607e-8 | 0.16508 | local A/B 0.953 vs v82a (0.934 vs v81d) → below v81d's ~101 s noisy-implied; law 76.5 / 90.0 s | 6,026 MiB |
+| **B (recommended)** | `estimator_k3_v82b_bundlews.py` | `7148e22a` | #335250 | **3.1432860023588976e-9** | 1.8605e-8 | 0.16895 | A/B 0.916 vs v81b_ws → ≈ 78 s noisy-implied | 6,017 MiB |
+
+v82c_r1 (#335253, refit of v82b, FRESH-A projection 3.0421e-9) replaces A here if it grades as projected.
+**Samuel designates.**
+
 ## Recommendation — 2026-10-10 (Lane P5, plan rev 22; no nomination/designation made)
 
 | role | file | sha8 | submission | score | raw | F/B | wall evidence | VmPeak |
