@@ -2879,3 +2879,10 @@ shape-only model; the builder uses the exact one. Twin VAL-100 unrefit (pod, R1 
 V8b 1.942720e-08 (−0.16 %), v82b-arm (V8b + J=2) 1.928571e-08 (−0.89 %).
 v82b gates so far: meter 363,022,283,745 FLOPs = interpreter; WSL PASS 23/23 VmPeak 6,026 MiB; wall A/B on DEV
 net 3 (×2) v82b/v82a = 0.953; twin(file) vs real DEV 0–9 raw-mean 2.7e-4 (per-net ≤ 2.2e-3, same as v81d's own).
+
+Twin parity (pod): v82b file in the twin, DEV-100 raw 1.891745e-08 vs the v82b arm (V8b + J=2) 1.891697e-08 = 2.5e-5.
+Twin VAL-100 unrefit: J=2 alone 1.931729e-08 (−0.73 % vs control), v82b arm 1.928571e-08 (−0.89 %).
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-10 | `estimator_k3_v82b_bundle.py` | `a358fb45` | FRESH-A | 1.968635e-08 (floor-free 1.893870e-08; −0.93 % vs v81d's 1.987150e-08) | 0.16508 | 22,375 | local A/B on DEV net 3 (×2) v82b/v82a = **0.953** (v82a/v81d 0.934) → below v81d's ~101 s noisy-implied; law 76.5 / 90.0 s | VmPeak 6,026 MiB (WSL PASS 23/23, same hash) | **3.0682e-09** (realistic ≈ 3.08e-09 at the usual +0.4 %) | PENDING | **1.0779× vs v81d** (Δ +2.533e-10, t95 [+2.446e-10, +2.619e-10]) | 100/100 | items 1,4,5 + V8b (`tools/build_v82.py --items 1,4,5,7`). Meter = interpreter. residual 0.248 s. parity file↔arm 2.5e-5. Package `81afa05a…2085`, inner = source. Second canary of UTC Oct 10. Predictions: strategist −4 to −5 % F, Δraw ±0.5 %; worker ≈ 3.07e-9. |
