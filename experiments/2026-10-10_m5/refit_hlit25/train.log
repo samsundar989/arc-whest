@@ -1,0 +1,11 @@
+[init] HOLDOUT-100 raw 1.976883e-08 (n=100)
+ep 0 step 1/112 train final 1.8954e-08 lr 2.37e-05 52s
+ep 0 step 2/112 train final 1.9059e-08 lr 2.37e-05 105s
+ep 0 step 3/112 train final 1.9490e-08 lr 2.37e-05 157s
+ep 0 step 4/112 train final 1.8689e-08 lr 2.37e-05 210s
+ep 0 step 5/112 train final 1.9894e-08 lr 2.36e-05 262s
+ep 0 step 6/112 train final 2.1203e-08 lr 2.36e-05 315s
+ep 0 step 7/112 train final 1.8846e-08 lr 2.35e-05 367s
+ep 0 step 8/112 train final 1.9768e-08 lr 2.34e-05 419s
+ep 0 step 9/112 train final 1.9940e-08 lr 2.34e-05 471s
+ep 0 step 10/112 train final 2.1074e-08 lr 2.33e-05 524s
