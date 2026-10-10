@@ -105,7 +105,7 @@ PATCHES = [
      "        if (_FOLD is not None and adv is not None and _bkst.get('w3b') and _TWG is not None):\n"
      "            _fg = (_TWG['fg'][layer_index] if _FOLD.get('learn')\n"
      "                   else _TWG['sg'][layer_index] * _FOLD.get('scale', 1.0))\n"
-     "            _om = fnp.where(fnp.abs(alpha) <= _FOLD.get('tau', 2.0), dtype(1.0), dtype(0.0))\n"
+     "            _om = fnp.where(alpha * alpha <= _FOLD.get('tau', 2.0) ** 2, dtype(1.0), dtype(0.0))\n"
      "            _FOLDS['v'] = ((-(alpha / sigma)) * _om * _fg, _bkst['w3b'])\n"
      "        C11 = cov_pre * off_mask\n"),
     ("        D21 = (_dslice21(adv, off_mask) if adv is not None\n"
