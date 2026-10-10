@@ -5,6 +5,11 @@ Lane P5 (main) per `docs/HANDOFF_2026-10-10_LANE_P5.md`; Lane M5 (branch `lane-m
 `docs/HANDOFF_2026-10-10_LANE_M5.md`. **`HANDOFF_2026-10-10_LANE_P4.md` and `..._M4.md` are
 SUPERSEDED (never started); do not execute them.** Exact cost model: `docs/research/2026-10-10_flopmodel/`.
 
+**Oct 10 end of day:** A = v82c_r1 #335253 3.0464e-9; B = v82b_bundlews #335250 3.1433e-9. Builder
+`tools/build_v82.py` (items 0,1,4,5,7 live; 2,3,6 closed). Two-sided D ships as V8b (columns + ρ d21e);
+leg-row / dead-row D3 pruning is closed. Pod `acc7entl4kttqk` RUNNING with R2 (v82b-arm, 2 more epochs) in
+`/workspace/p5/r2`; twin on the pod: `cd /workspace/p5/arc && python3 -u tools/twin/twin.py ...`. Next: P5.3.
+
 # (history) CURRENT_STATE — 2026-10-08 (PLAN rev 20, Lane P3)
 
 Rev 20 (`docs/PLAN_rev20_2026-10-08.md`) supersedes rev 19 §1–§4; Lane P3 per
@@ -21,7 +26,8 @@ vs the incumbent** (`tools/ev.py --panel fresh_a --baseline <incumbent>`); lane-
 
 | role | source / SHA8 | submission | score | F/B |
 |---|---|---|---:|---:|
-| **best A** | `estimator_k3_v82b_bundle.py` / `a358fb45` | #335227 | **3.0716825837413753e-9** (raw 1.8607e-8) | 0.16508 |
+| **best A** | `estimator_k3_v82c_r1.py` / `66f3ee4a` | #335253 | **3.0464210089351763e-9** (raw 1.8454e-8) | 0.16508 |
+| A (prev.) | `estimator_k3_v82b_bundle.py` / `a358fb45` | #335227 | 3.0716825837413753e-9 (raw 1.8607e-8) | 0.16508 |
 | A (prev.) | `estimator_k3_v82a_block.py` / `b65a70a6` | #335165 | 3.2794636795053282e-9 (raw 1.8833e-8) | 0.17414 |
 | A (prev.) | `estimator_k3_v81d_starall2.py` / `b7efb0f5` | #334948 | 3.3200317352723394e-9 (raw 1.8833e-8) | 0.17629 |
 | A (prev.) | `estimator_k3_v81c_starall.py` / `71b5e991` | #334926 | 3.364228068774433e-9 (raw 1.9084e-8) | 0.17629 |

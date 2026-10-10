@@ -21,7 +21,7 @@ each) is running on the pod.
 | v82a | −1.22 % | 0 (bit-identical; graded raw identical) | 24,283 | graded 3.2795e-9 |
 | v82b | −6.36 % (F/B 0.16508) | graded −1.20 % | 22,375 | **graded 3.0717e-9 (#335227)** |
 | v82b_ws (B) | −4.16 % (F/B 0.16895) | graded −1.21 % | 20,269 | **graded 3.1433e-9 (#335250)** |
-| v82c_r1 | −6.36 % | FRESH-A −0.83 % vs v82b | 22,375 | submitted #335253, projected 3.0421e-9 |
+| v82c_r1 | −6.36 % | graded −2.01 % | 22,375 | **graded 3.0464e-9 (#335253), new best** |
 
 ## What the evidence changed in plan rev 22
 
