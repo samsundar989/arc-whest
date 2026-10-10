@@ -1,4 +1,11 @@
-# CURRENT_STATE — 2026-10-08 (PLAN rev 20, Lane P3)
+# CURRENT_STATE — 2026-10-10 (plan rev 22, Lane P5)
+
+Plan rev 22 = `docs/research/2026-10-10_pivot_rev22.md` (§3–§6), on top of PLAN rev 18 §5 gates.
+Lane P5 (main) per `docs/HANDOFF_2026-10-10_LANE_P5.md`; Lane M5 (branch `lane-m`) per
+`docs/HANDOFF_2026-10-10_LANE_M5.md`. **`HANDOFF_2026-10-10_LANE_P4.md` and `..._M4.md` are
+SUPERSEDED (never started); do not execute them.** Exact cost model: `docs/research/2026-10-10_flopmodel/`.
+
+# (history) CURRENT_STATE — 2026-10-08 (PLAN rev 20, Lane P3)
 
 Rev 20 (`docs/PLAN_rev20_2026-10-08.md`) supersedes rev 19 §1–§4; Lane P3 per
 `docs/HANDOFF_2026-10-08_LANE_P3.md`. Oct 10: GO/no-GO on v90 (κ4-core loop). Rev 19 notes below are history.
