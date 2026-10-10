@@ -9,6 +9,8 @@ Items (each one a separate measured step; prices from the exact cost model,
   3  old-tier rebuild Q.[FA|FM] on the D-kept rows only                     -1.30 %
   4  fused W^T_r products in `_advance` (one `_mm`, padded to 32)           -0.37 %, -2.1k ops
   5  two-level symmetric sandwich split                                     -0.23 %, +585 ops
+  6  covariance input pruning on the previous D set  (CLOSED: twin +24 %)  -1.24 %
+  7  V8b: D21 columns on the D set + rho-scaled d21e (P5.2)                -3.55 %
 Every per-shape table falls back to v82a's path off the suite shape.
 """
 from __future__ import annotations
@@ -230,7 +232,54 @@ def item6(src):
                 "        if _COV_PRUNE and _KD < n:\n            _COV_KD = _perm[n - _KD:]\n")
 
 
-ITEMS = {"1": item1, "2": item2, "3": item3, "4": item4, "5": item5, "6": item6}
+def item7(src, rho=None):
+    """V8b (P5.2): D21 COLUMNS restricted to the D set (right operand rows gathered), the
+    K_D x K_D block scattered back on both axes; the corrector's d21e then reads only kept
+    columns and is scaled by the per-layer energy ratio rho (twin: -0.16 % unrefit)."""
+    import json
+    rho = rho or json.loads((ROOT / "experiments/2026-10-10_p5/d2/rho.json").read_text())["rho"]
+    src = _rep(src,
+               "    rec = _mm(fnp.concatenate([LA[:, c:], LP[:, c:]], axis=1),\n"
+               "              fnp.concatenate([tw.A_L if tw.ko else A_L, tw.M if tw.ko else M], axis=1).T)\n",
+               "    _R = fnp.concatenate([tw.A_L if tw.ko else A_L, tw.M if tw.ko else M], axis=1)\n"
+               "    if kr is not None:\n"
+               "        # P5.2 V8b: D21 COLUMNS on the D set too (right operand rows gathered)\n"
+               "        _R = fnp.take(_R, kr, axis=0)\n"
+               "    rec = _mm(fnp.concatenate([LA[:, c:], LP[:, c:]], axis=1), _R.T)\n")
+    src = _rep(src, "    old = _mm(Xold, tw.Q.T)\n",
+               "    old = _mm(Xold, (tw.Q if kr is None else fnp.take(tw.Q, kr, axis=0)).T)\n")
+    src = _rep(src,
+               "            acc = acc + _mm(RYk * (2.0 / 3.0), tw.Y.T)\n",
+               "            acc = acc + _mm(RYk * (2.0 / 3.0),\n"
+               "                            (tw.Y if kr is None else fnp.take(tw.Y, kr, axis=0)).T)\n")
+    src = _rep(src,
+               "        acc = acc + _mm(PPL, tw.Z.T) * (1.0 / 3.0)\n",
+               "        acc = acc + _mm(PPL, (tw.Z if kr is None else fnp.take(tw.Z, kr, axis=0)).T) * (1.0 / 3.0)\n")
+    src = _rep(src,
+               "            acc = fnp.take(fnp.pad(acc, ((0, 1), (0, 0))), kd[1], axis=0)\n",
+               "            # P5.2 V8b: rows AND columns, so the gather runs on both axes\n"
+               "            acc = fnp.take(fnp.take(fnp.pad(acc, ((0, 1), (0, 1))), kd[1], axis=0),\n"
+               "                           kd[1], axis=1)\n")
+    if "acc = acc + _mm(TT if kr is None else fnp.take(TT, kr, axis=0), tw.F.T)\n" in src:
+        src = _rep(src, "acc = acc + _mm(TT if kr is None else fnp.take(TT, kr, axis=0), tw.F.T)\n",
+                   "acc = acc + _mm(TT if kr is None else fnp.take(TT, kr, axis=0),\n"
+                   "                            (tw.F if kr is None else fnp.take(tw.F, kr, axis=0)).T)\n")
+    src = _rep(src, "_KAS_SHAPE = (1024, 16)\n",
+               "_KAS_SHAPE = (1024, 16)\n"
+               "#: P5.2 V8b: d21e energy ratio all / kept columns per layer (FIT-100, twin control chain).\n"
+               f"_D21E_RHO = {[round(float(r), 6) for r in rho]}\n")
+    return _rep(src,
+                "        d21e = (D21 * D21).sum(axis=1) * (inv2 * inv2)\n",
+                "        _rh = (_D21E_RHO[_CUR_LAYER] if (_KAS_ON and (sigma.shape[0], _CUR_DEPTH) == _KAS_SHAPE\n"
+                "                                       and _CUR_LAYER < len(_D21E_RHO)) else 1.0)\n"
+                "        if _rh != 1.0:\n"
+                "            # P5.2 V8b: d21e over KEPT columns only, rescaled to the all-column energy\n"
+                "            d21e = (D21 * D21).sum(axis=1) * ((inv2 * inv2) * _rh)\n"
+                "        else:\n"
+                "            d21e = (D21 * D21).sum(axis=1) * (inv2 * inv2)\n")
+
+
+ITEMS = {"1": item1, "2": item2, "3": item3, "4": item4, "5": item5, "6": item6, "7": item7}
 
 
 def build(items, base=BASE):

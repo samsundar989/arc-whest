@@ -448,6 +448,10 @@ ARMS = {
          "        if _mR is not None and _MASK.get('Rpart', '') != 'n':\n"
          "            adv = _mask_rows(adv, _mR)\n"),
         # Rpart '' both, 'i' inherited legs only (post-Wick), 'n' newborn A_L/Z/Y rows only
+        # P5.1 item 1 (key J): no old-tier join at the last J non-final layers
+        ("            adv = _shared_join_lean(adv)\n",
+         "            if _MASK is None or not _MASK.get('J') or layer_index < depth - 1 - int(_MASK['J']):\n"
+         "                adv = _shared_join_lean(adv)\n"),
         ("    out_tw = _truncate(out_tw, gens, n)\n",
          "    out_tw = _truncate(out_tw, gens, n)\n"
          "    if _mR is not None and _MASK.get('Rpart', '') == '':\n"
@@ -708,6 +712,9 @@ def parse_mask(spec):
         if k == "rho":           # P5.2: per-layer d21e energy ratio (JSON list or {"rho": [...]})
             _r = json.loads(Path(v).read_text())
             out["rho"] = _r["rho"] if isinstance(_r, dict) else _r
+            continue
+        if k == "J":             # P5.1 item 1: skip the old-tier join at the last J non-final layers
+            out["J"] = int(float(v))
             continue
         if k == "Daz":           # always-on rows' corrector: z zero (Dz), f full row, c column
             out["Daz"] = {"0": "z", "1": "f", "2": "c"}.get(v, v)

@@ -118,6 +118,17 @@ def stack(seq, axis=0):
     return _t.stack(list(seq), dim=axis)
 
 
+def block(arrays):
+    """numpy.block for nested lists of depth <= 2 (rows of column blocks), as the
+    chain uses it: inner lists join on the last axis, the outer on the one before."""
+    if not isinstance(arrays, (list, tuple)):
+        return arrays
+    if not any(isinstance(r, (list, tuple)) for r in arrays):
+        return _t.cat(list(arrays), dim=-1)
+    rows = [r if not isinstance(r, (list, tuple)) else _t.cat(list(r), dim=-1) for r in arrays]
+    return _t.cat(rows, dim=-2)
+
+
 def reshape(x, shape):
     return x.reshape(shape)
 
@@ -161,6 +172,10 @@ def tanh(x):
 
 def isfinite(x):
     return _t.isfinite(x)
+
+
+def nan_to_num(x, nan=0.0, posinf=None, neginf=None):
+    return _t.nan_to_num(x, nan=nan, posinf=posinf, neginf=neginf)
 
 
 def divide(a, b):

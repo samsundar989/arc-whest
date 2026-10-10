@@ -19,13 +19,22 @@ ARMS = {
     "dzleg": f"{BASE},Dz=2.5,Dleg=1",
     "cov3": f"{BASE},Dz=2.5,C=3.0",
     "cov4": f"{BASE},Dz=2.5,C=4.0",
+    "j2": f"{BASE},Dz=2.5,J=2",
+    "v82b": f"{BASE},D2=2.5,rho={RHO},J=2",
 }
 py = sys.executable
+PANEL = sys.argv[2] if len(sys.argv) > 2 else "hold100"
 for name in sys.argv[1].split(","):
+    if name.startswith("raw:"):          # raw:<estimator file> -- the file itself in the twin
+        f = name[4:]
+        subprocess.run([py, "-u", str(R / "tools/twin/twin.py"), "eval", "--raw", "--cand", f,
+                        "--panel", PANEL, "--json", str(OUT / f"{PANEL}_raw_{Path(f).stem}.json")],
+                       check=True)
+        continue
     cmd = [py, "-u", str(R / "tools/twin/twin.py"), "eval",
            "--cand", "experiments/2026-09-27_gates/estimator_k3_v62_gb.py",
            "--arm", "mask+dress+bank", "--bank", "star,starall", "--mask", ARMS[name],
-           "--dress", "all", "--params", str(P), "--panel", "hold100",
-           "--json", str(OUT / f"val_{name}.json")]
+           "--dress", "all", "--params", str(P), "--panel", PANEL,
+           "--json", str(OUT / (f"val_{name}.json" if PANEL == "hold100" else f"{PANEL}_{name}.json"))]
     print(name, flush=True)
     subprocess.run(cmd, check=True)
