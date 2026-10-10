@@ -2890,4 +2890,21 @@ Twin VAL-100 unrefit: J=2 alone 1.931729e-08 (−0.73 % vs control), v82b arm 1.
 **v82b_bundle graded (#335227): 3.0716825837413753e-09, NEW BEST**, raw 1.8606850780145122e-08 (−1.20 % vs v81d/v82a's
 graded raw), 100 clean. −6.34 % vs v82a, −7.48 % vs v81d. +0.11 % vs the FRESH-A projection 3.0682e-09.
 `tools/ev.py --best-graded` updated.
-| 2026-10-10 | `estimator_k3_v82b_bundlews.py` | `7148e22a` | FRESH-A | 1.968655e-08 | 0.16895 | 20,269 | local A/B on DEV net 3 (×2) vs v81b_star2ws = **0.916** → ≈ 78 s noisy-implied (B ≤ 95 s); law 77.3 / 90.9 s | VmPeak 6,017 MiB (WSL PASS 23/23, same hash) | 3.1401e-09 | PENDING | **1.0997× vs v81b_star2ws** (Δ +3.317e-10, t95 [+3.186e-10, +3.447e-10]) | 100/100 | v82b at Strassen block 40 (B twin). residual 0.225 s. Package `34c6b688…edb8`, inner = source. **Oct 10 A/B slot**, replacing the handoff's v81d_ws: v82b_ws is the ws build of the new A and projects 3.14e-9 vs v81d_ws's ≈ 3.40e-9 (two v81d_ws FRESH-A runs lost nets to local commit-limit OOMs; logs `v81dws_fresh_a_try*`). |
+| 2026-10-10 | `estimator_k3_v82b_bundlews.py` | `7148e22a` | FRESH-A | 1.968655e-08 | 0.16895 | 20,269 | local A/B on DEV net 3 (×2) vs v81b_star2ws = **0.916** → ≈ 78 s noisy-implied (B ≤ 95 s); law 77.3 / 90.9 s | VmPeak 6,017 MiB (WSL PASS 23/23, same hash) | 3.1401e-09 | **3.1432860023588976e-09** | **1.0997× vs v81b_star2ws** (Δ +3.317e-10, t95 [+3.186e-10, +3.447e-10]) | 100/100 | v82b at Strassen block 40 (B twin). residual 0.225 s. Package `34c6b688…edb8`, inner = source. **Oct 10 A/B slot**, replacing the handoff's v81d_ws: v82b_ws is the ws build of the new A and projects 3.14e-9 vs v81d_ws's ≈ 3.40e-9 (two v81d_ws FRESH-A runs lost nets to local commit-limit OOMs; logs `v81dws_fresh_a_try*`). |
+
+**v82b_bundlews graded (#335250): 3.1432860023588976e-09, NEW wall-safe B**, raw 1.860451757096371e-08 (= v82b's graded raw
+to 0.01 %), 100 clean. −9.4 % vs v81b_star2ws; +0.10 % vs the FRESH-A projection.
+
+### R1 (pod, P5.2 step 2) — 2-epoch refits from refit_starall2, S2ts, lr 1e-4, VAL-100 every 28 steps
+| arm | init | step 84 | best (step) | vs control |
+|---|---:|---:|---:|---|
+| control (Dz) | 1.945850e-08 | 1.947256e-08 | 1.945850e-08 (init; early-stopped at 84 by patience 3) | — |
+| V8b (D2 + ρ) | 1.942720e-08 | 1.936620e-08 | 1.927886e-08 (224) | −0.55 % at step 84; −0.92 % at end |
+| v82b arm (V8b + J=2) | 1.928571e-08 | 1.925307e-08 | **1.912189e-08** (224) | −1.13 % at step 84; −1.73 % at end |
+Kill rule (> +1.5 % vs control) not triggered; two-sided D (as V8b) stays. The control's early stop means the
+end-of-run comparison is not epoch-matched; the step-84 numbers are. R2 (pod): v82b arm continued 2 epochs,
+patience off (step 84: 1.915192e-08, not yet below R1's best).
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-10 | `estimator_k3_v82c_r1.py` | `66f3ee4a` | FRESH-A | 1.952520e-08 (floor-free 1.877755e-08) | 0.16508 | 22,375 | same code as v82b (constants only) | VmPeak 6,024 MiB (WSL PASS 23/23, same hash) | **3.0421e-09** | PENDING | **1.0083× vs v82b** (Δ +2.660e-11, t95 [+2.407e-11, +2.913e-11]) | 99/100 | v82b + the R1 v82b-arm refit baked (`build_star --all` on v80_hyg, then `build_v82 --items 0,1,4,5,7`; the same pipeline rebuilds v81d and v82b byte for byte). Twin parity file↔arm DEV 1.7e-4. residual 0.248 s. Package `162f605a…78c6`, inner = source. Third canary of UTC Oct 10. Prediction (worker): −0.8 to −1.2 % raw on FRESH-A. |
