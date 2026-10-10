@@ -1121,6 +1121,9 @@ def cmd_train(a):
         rms = float(v.detach().pow(2).mean().sqrt())
         if rms == 0.0:
             rms = a.zero_scale
+        mult = dict((kv.split("=")[0], float(kv.split("=")[1]))
+                    for kv in filter(None, getattr(a, "lr_mult", "").split(",")))
+        rms = rms * mult.get(k, 1.0)
         groups.append({"params": [v], "lr": a.lr * rms, "name": k})
         print(f"  {k}: rms {rms:.3e} -> lr {a.lr * rms:.3e}", flush=True)
     opt = torch.optim.Adam(groups)
@@ -1270,6 +1273,8 @@ def main():
                     help="with --arm ...+rad: 'all' or 'q=1,d22=1,d4=1,scale=1' (M5.2)")
     ap.add_argument("--mask-stats", action="store_true",
                     help="eval with --arm mask: log per-layer alpha kept fractions per net")
+    ap.add_argument("--lr-mult", default="",
+                    help="train: per-leaf step multipliers, 'gain/rq=300,gain/r4=300'")
     ap.add_argument("--zero-scale", type=float, default=1e-2,
                     help="RMS assumed for a zero-initialised tensor's step size")
     ap.add_argument("--max-steps", type=int, default=0, help="stop after N steps (smoke)")
