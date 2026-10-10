@@ -1,0 +1,33 @@
+[ev] estimator_k3_v79_dressws.py on FRESH_A n=100
+[ev] cost: 424,545,448,697 FLOPs, 21,292 ops, peak RSS 2.69 GiB -> budget 6.7 GiB/worker
+  2 workers x 2 BLAS threads over 100 nets ...
+[ev] accuracy: 1872.6 s, raw MSE 2.147464e-08
+  2 workers x 2 BLAS threads over 100 nets ...
+
+  raw MSE            2.147464e-08   (our N = 1e8 labels; mean floor 7.476e-10)
+  raw MSE floor-free 2.072699e-08
+  FLOPs / MLP        424,545,448,697   = 0.19306 x 2^41
+  op calls           21,292
+  materializations   0
+  adjusted (panel)   4.001571e-09
+  per-net score CV   0.125
+  PROJECTED PUBLIC   3.926959e-09   (÷ 1.019)
+  paired vs estimator_k3_v78_kashws:  gain 1.0783×, Δ +3.2445e-10, t95 [+2.6530e-10, +3.8359e-10], wins 86/100
+    (geometric 1.0779× — diagnostic only, no authority over an outcome)
+
+  PLAN §5 gates
+    FAIL  panel projected vs best graded   better than 3.7025e-09             3.9270e-09 = -6.06% better
+    PASS  op calls                         ≤ 26,000                           21,292
+    ok    projected server wall (noisy day, A policy) ≤ 115 s                            103.0 s (quiet day 87.6 s)
+    PASS  setup                            < 2 s                              0.00 s
+    PASS  scalar materializations          0                                  0
+    PASS  failed nets on panel             0                                  0
+    PASS  projected server residual        ≤ 0.33 s (D7 finals bound)         0.236 s (1.69× headroom vs the 0.4 s cliff)
+    PASS  full acceptance panel            fresh_a (or dev), n = 100          fresh_a, n = 100
+    PASS  paired vs incumbent              --baseline given                   estimator_k3_v78_kashws
+    PASS  WSL RLIMIT_AS 8 GiB gate         PASS on candidate SHA256 (--mem)   PASS VmPeak 4630 MiB; source hash matches
+
+  NOT ACCEPTED — gated or incomplete; not submittable
+
+  RESULTS.md row:
+  | 2026-10-07 | `estimator_k3_v79_dressws.py` | `16379e50` | FRESH-A | 2.147464e-08 | 0.19306 | 21,292 | 41.009 s (local) → 87.6 s proj | 2756 MiB | **3.9270e-09** | PENDING | 1.0783× vs estimator_k3_v78_kashws (Δ +3.244e-10, t95 [+2.653e-10, +3.836e-10]) | 86/100 |  |

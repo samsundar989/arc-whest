@@ -2588,3 +2588,226 @@ sits at the optimum of every role.
 **v77_kash graded (#334487): 3.959571663492616e-09, NEW BEST**, raw 2.202053984490249e-08, 100
 clean; +0.53 % vs projected 3.9389e-09 (implied DEV factor 1.0326; keep 1.038). −5.43 % vs v75,
 −14.3 % vs v73 (this morning's A). `tools/ev.py --best-graded` updated.
+
+## PLAN rev 19 — Lane P2 (2026-10-07)
+
+### P2.0 — housekeeping
+- Rev 19 docs committed unchanged (93913f5); `lane-m` merged into main (1a84c67): FRESH-A /
+  FRESH-LOCK / FRESH-D panels, `tools/fresh/`, `ev.py --panel fresh_a|fresh_lock|fresh_d`,
+  `FRESH_PUBLIC_FACTOR = 1.019`. `tools/panels.py --check` PANELS OK. **Acceptance from now on:
+  FRESH-A paired vs the incumbent.**
+- flopscope #275 exposure: AST scan of v77 and v78 finds no `out=` / `where=` keyword and no
+  symmetry API. Exposure: none.
+
+### P2.0.4 — exact cost census of v77 (real meter, f64 read-only, DEV net 0)
+`tools/cost_site_probe.py` now anchors by source hash (v72, v77, v78) and adds a category ×
+layer table; `experiments/2026-10-07_p2/census_v77/` (job 2426). Total 395,412,204,457 =
+anchor exactly; exclusive sum reconciles; 0 materializations; ops 24,642.
+
+| tier | categories | share |
+|---|---|---:|
+| **recent exact κ3** | D21 readout 30.26 % + transport 27.79 % | **58.05 %** |
+| old tier | reconstruct legs 10.33 + compression (join) 9.28 + D21 readout 7.66 + transport 0.78 | 28.05 % |
+| covariance | `W^T C W` sandwich | 9.18 % |
+| closure | correction | 1.36 % |
+| other | P2/hub/D3 readout glue, births, gathers, corrector, … | 3.36 % |
+
+By layer: 0.7 % (L0), 1.7 / 3.0 / 4.2 / 5.3 % (L1–4), 6.9–9.0 % (L5–14), 4.1 % (L15). The
+recent tier is still ≈ 60 %, as PLAN rev 19 §1.4 assumed. Covariance costs 0.59 % per layer,
+the same at L0 (where `cov = I`).
+
+### P2.0.1 — v78_kashws graded
+**v78_kashws graded (#334545): 4.249585835999417e-09**, raw 2.2023054633280026e-08; +0.56 %
+vs projected 4.2260e-09 (implied DEV factor 1.032; keep 1.038). **New wall-safe B** (v76
+4.4952e-09 → −5.46 %). Raw equals v77's graded raw to 0.01 %, as a block-40 twin should.
+Oct 7 A/B slot.
+
+### P2.1 — dressed legs (twin, VAL-100 free-running; `experiments/2026-10-07_p2/`)
+Baseline: v62_gb + v77's mask (R2.0/Hd2.5/Dz2.5, q50 K table), G1bg params, VAL 2.269912e-08.
+Arm `dress` in `tools/twin/twin.py`; refits = stage S2t, lr 1e-4, 1 epoch TRAIN-900, select on VAL.
+
+| arm | VAL raw | vs baseline / control | wins |
+|---|---:|---:|---:|
+| full set, unrefit | 2.234055e-08 | −1.58 % | 57/100 |
+| {C²} / {D21, D21ᵀ} / {D22} alone, unrefit | 2.28151 / 2.24455 / 2.29897e-08 | +0.51 / −1.12 / +1.28 % | 35 / 56 / 2 |
+| full set, birth gate on both parts, unrefit | 2.229701e-08 | −1.77 % | 60/100 |
+| refit control (no dressing) | 2.269110e-08 (best, step 84) | — | |
+| **full set, refit** | **2.114657e-08** (step 112) | **−6.81 % vs control** | |
+
+Predictions: strategist −4 to −12 % [60 % ≥ 4 %]; worker −1 to −5 %. Kill line −2 %: PASS.
+Families only help as a set (D22 and C² alone hurt), as R1 warned.
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-07 | `estimator_k3_v77_kash.py` | `4ff8018f` | FRESH-A | 2.317028e-08 (floor-free 2.242263e-08) | 0.17981 | 24,642 | — | — | 3.9567e-09 (fresh 4.0319e-09) | 3.9596e-09 | 1.1670× vs v73 (t95 excludes 0) | 100/100 | calibration of the current A: fresh/graded 1.0183 (strategist ≈ 1.019). |
+| 2026-10-07 | `estimator_k3_v79_dress.py` | `2cf3acf4` | FRESH-A | 2.147478e-08 (floor-free 2.072713e-08) | 0.17991 | 24,852 | local A/B on DEV net 3 (×2) v79/v77 = **1.0059** → ~79.9 s median / ~92.0 s max on v77's server telemetry, noisy-implied 93.2 s (A ≤ 105 s) | VmPeak 6,173 MiB (WSL PASS, same hash) | **3.6595e-09** (fresh 3.7291e-09) | PENDING (#334576) | **1.0784× vs v77** (Δ +3.03e-10, t95 [+2.48e-10, +3.58e-10]) | 85/100 | v77 + dressed legs (`tools/build_dress.py`) + S2t refit baked (VAL step 112). DEV: raw 2.075778e-08, DEV-projected 3.5979e-09, 1.0948× vs v77, 89/100. Twin parity 4.2e-5. F +0.06 %, ops +210. Package `b6a5b248…81fa`, inner = source. First canary of UTC Oct 7. |
+
+WSL note: the first `ev --mem` read FAILED only on "settled address space did not grow"
+(+255 MiB, one jump at repeat 3; VmPeak 6.45 GB). Six repeats: v79 +64 MiB, **v77 +406 MiB**
+(v77 graded 100/100 clean); both peak at ≈ 6.2 GB. Allocator noise, not a cache; the 3-repeat
+re-run PASSES (+26 MiB). `experiments/2026-10-07_p2/v7{7,9}_mem6.json`, `v79_mem_r2.json`.
+
+**v79_dress graded (#334576): 3.7025275784494673e-09, NEW BEST**, raw 2.05795687335808e-08,
+100 clean. −6.49 % vs v77 (3.9596e-09); raw −6.54 % at F +0.06 %. +1.18 % vs the FRESH-A
+projection 3.6595e-09 (fresh/graded 1.0072 vs the 1.019 factor); +2.9 % vs the DEV projection
+3.5979e-09 (implied DEV factor 1.0089 — the refit was selected on VAL, so DEV/fresh both read a
+little optimistic for refit builds). `tools/ev.py --best-graded` updated.
+
+### P2.2 — gain-mode κ4 templates (twin, VAL-100) — KILLED
+Arm `gm` in `tools/twin/twin.py`: c² = mᵀCm/‖m‖⁴ from the chain's post-ReLU state; D22 template
+4βc²(σ_i²σ_j² + 2C_ij²), Q31 template 12βc²σ_i²C_ij; D4 kept from dG. Same baseline/control as P2.1.
+
+| arm | VAL raw | vs baseline / refit control |
+|---|---:|---:|
+| (a) D22 template, β 0.7, unrefit | 1.7605e-07 | ×7.76 (blow-up) |
+| (b) + Q31 template, unrefit (keep / drop q31 modes) | 1.7310 / 1.7572e-07 | ×7.63 / ×7.74 |
+| (a) refit, per-layer β learned from chain-matched init | 2.349147e-08 | **+3.53 %** |
+| (b) refit, same | 2.36696e-08 (step 84) | +4.31 % |
+| (c) blend existing + γ·template (D22 + Q31), γ learned from 0 | 2.269276e-08 | +0.01 % |
+
+Diagnostic (`gm_diag.json`, 3 VAL nets): the chain's D22 is 0.31 (L1) → 0.56 (L14) of the β = 1
+template with correlation 0.86 (L1) → 0.97 (L4+); D4 likewise 0.30 → 0.56. c² = 0.0026 (L1) →
+0.0073 (L14), matching R2. So β 0.7 doubled κ4 (blow-up), and at the chain's own scale the
+product shape is slightly worse than the additive form the gains were fitted with. Predictions:
+strategist −2 to −8 %, worker −0.3 to −1.5 %; kill line −1 %. **Closed.** The law itself
+(c² from the chain's state, κ4 ≈ 0.3–0.56 of a pure scale mixture) stays a write-up item.
+
+### P2.1b — exact spurious-term correction (Lane M2's −w2 family) — CLOSED
+`tools/build_dress.py --corr f`: extra newborn birth columns H[:, J] with hub weight −w2 on the
+top f·n hubs by w2‖H_j‖² (widths rounded to multiples of 32; f = 0.15 costs +14.2 % FLOPs).
+Twin, VAL-100, unrefit: on v79 (refit sym) f = 0.0625 / 0.15 / 0.4 / 1.0 → +0.34 / +0.76 / +1.51 /
++1.88 %; on the dressed chain with G1bg (pre-refit) params f = 1 (exact asym) → +3.57 %. In ARC's
+learned-free chain the same correction is worth −41 % (Lane M2, 16 nets); in ours it hurts.
+
+### P2.4 — cost hygiene on the v79 chain
+| item | twin / meter | verdict |
+|---|---|---|
+| 4.1 always-on D21 rows (Da τ) | Da3.0 +34 %, 2.5 +87 %, 2.0 ×3.9 raw; corrector kept on full row +34 %, column proxy +38 % | closed (not the corrector) |
+| 4.2 covariance sandwich on alive block | C=1 ×13; keep dropped variances C=2 ×3.2 | closed |
+| 4.4 layer-0 `W^T W` (no `W^T @ I`) | F −0.32 %, ops −101, wall −0.4 % | kept |
+| 4.3 join re-rotation `T @ [FA|FM]` via `_mm` | F −0.79 % more, ops +540, wall +1.7 % | kept |
+| 4.5 one extra Strassen level for m·k·n ≥ 2^30 | F −1.0 % more, ops +320, wall +6 % | kept (wall within A rule) |
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-07 | `estimator_k3_v80_hyg.py` | `73b2c19c` | FRESH-A | 2.147862e-08 | 0.17602 | 25,631 | local A/B on DEV net 3 (×2) v80/v79 = **1.0863** → × v79's 92.0 s projected max ≈ 100 s; noisy-implied ≈ **101.3 s** (A ≤ 105 s) | VmPeak 6,185 MiB (WSL PASS r2, same hash; r1/r3 FAIL only on the settled-growth check, see note) | **3.5811e-09** | PENDING | **1.0219× vs v79** (Δ +8.28e-11, t95 [+8.03e-11, +8.54e-11]) | 100/100 | v79 + P2.4.4/4.3/4.5 (`tools/build_hyg.py --l0 --join --bigvol 2^30`). F −2.16 %, raw +0.02 % (rounding). residual 0.284 s. |
+| 2026-10-07 | `estimator_k3_v79_dressws.py` | `16379e50` | FRESH-A | 2.147464e-08 | 0.19306 | 21,292 | block-40 twin of v79 | VmPeak 4,677 MiB (WSL PASS) | 3.9270e-09 | — | 1.0783× vs v78 (t95 [+2.65e-10, +3.84e-10]) | 86/100 | B twin of v79; waits for the Oct 8 A/B slot (wall A/B vs v78 still to do). |
+
+**v80_hyg graded (#334659): 3.6223815250878947e-09, NEW BEST**, raw 2.0578957169448132e-08
+(= v79's graded raw to 0.001 %), 100 clean. −2.16 % vs v79, exactly the FLOP cut. +1.15 % vs the
+FRESH-A projection 3.5811e-09 (v79: +1.18 %): FRESH-A ÷ 1.019 reads ~1.2 % optimistic for these
+builds; the implied fresh/graded factor is 1.0074 on both. `tools/ev.py --best-graded` updated.
+| 2026-10-07 | `estimator_k3_v80_hygws.py` | `dd82721c` | FRESH-A | 2.147833e-08 | 0.18004 | 23,071 | local A/B on DEV net 3 (×2) vs v78 = **1.487** → noisy-implied ≈ **85 s** (B ≤ 95 s) | VmPeak 6,128 MiB (WSL PASS, same hash) | 3.6627e-09 | PENDING | **1.1561× vs v78** (t95 [+5.45e-10, +6.62e-10]) | 98/100 | v80's B twin (block 40 base + l0/join/bigvol 2^30). DEV raw 2.075799e-08 (projected 3.6004e-09), 1.1737× vs v78 100/100. Twin parity 1.6e-5. residual 0.256 s. Fallback B (l0+join only, wall ×1.02 vs v78, F/B 0.19136) not built as a candidate. For the Oct 8 A/B slot. |
+
+## PLAN rev 20 — Lane P3 (2026-10-08)
+
+### P3.0 — housekeeping
+- Rev 20 docs committed unchanged (6e66fbc): `docs/PLAN_rev20_2026-10-08.md`, both Oct 8 lane
+  handoffs, `docs/research/2026-10-08_*.md`.
+- **v80_hygws submitted on the Oct 8 A/B slot: #334781** (gates: row above; package
+  `cd5b3ea3…9a77`, inner = `dd82721c` = tested source).
+- **Label-variance read (disclosure).** The strategist (Oct 7 deep review) read the per-neuron
+  label *variance* arrays of FRESH-A / FRESH-D / FRESH-LOCK to compute the layer-16 label-noise
+  floor: mean Var 0.0747 (range 0.049–0.116) ⇒ **7.47e-11 at N = 1e9** (Anatomy 2's cross
+  estimate on FIT nets: 7.71e-11). No estimator was evaluated against those labels and the
+  FRESH-LOCK read count is unchanged.
+- **v80_hygws graded (#334781): 3.705600144458426e-09**, raw 2.0582274551372848e-08 (= v80's
+  graded raw to 0.02 %), 100 clean. **New wall-safe B** (v78 4.2496e-09 → −12.80 %). +1.17 % vs the
+  FRESH-A projection 3.6627e-09 (v79 +1.18 %, v80 +1.15 %): the FRESH-A ÷ 1.019 reading stays ~1.2 %
+  optimistic for these builds (implied fresh/graded 1.0072).
+
+### P3.2 — κ4-core loop in the twin (VAL-100 free-running; `experiments/2026-10-08_p3/`)
+Implementation: `tools/twin/k4loop.py` (off-diagonal r = 1 core births: 17 traced (2,1,1) + 15 (3,1)
+AUGMENT terms, the cumulant conversions, K211) — **exact vs ARC's `factored_nonlin_kprop_k3` to 1e-15**
+(`k4loop_check.py`, n = 24, float64); `tools/twin/k4l_arm.py` (core memory Core ← WᵀCoreW, dG =
+diag, D31 = m·Off/2 in Q31; K211 by contraction of our tower — verified against the chain's own
+(2,1) readout to float32 round-off, `k4l_tower_check.py`; 211→111 radial exact / via hub i / folded;
+E21b gain-mode; old tier drop). Baseline = v79/v80-equivalent twin (v62_gb + mask + dress,
+refit_dress_all params), VAL 2.114657e-08 (= P2.1's dressed refit).
+
+Unrefit screen (job 2477, `screen_unrefit.json`), paired vs baseline, 100 nets:
+
+| arm | VAL raw | ratio | wins |
+|---|---:|---:|---:|
+| (i) core + K211 exact + radial exact | 3.1005e-08 | 1.466 | 0 |
+| (i) with the radial via hub i (memoryless λC) | 9.2085e-08 | 4.355 | 0 |
+| (i′) K211 truncated to newborn + age-1 | 3.8499e-08 | 1.821 | 0 |
+| (ii) (i) + E21b | 2.9269e-08 | 1.384 | 0 |
+| (iv) (ii) + old tier dropped | 4.2282e-07 | 19.99 | 0 |
+| control: old tier dropped, no loop | 4.0525e-07 | 19.16 | 0 |
+| (v) (ii) + old tier rank 128 | 5.0379e-08 | 2.382 | 0 |
+| control: old tier rank 128, no loop | 4.1838e-08 | 1.979 | 0 |
+
+Reading: **the κ4 core does not stand in for the old κ3 tier in our chain** — dropping it costs ×20
+with or without the loop (the loop's ratio-of-ratios is 1.04); at rank 128 the loop narrows the
+damage only from ×1.98 to ×1.72. E21b is worth −5.6 % relative on top of (i). Unrefit the loop is
++38 to +47 % (learned gains fitted to the memoryless core). Refits (S2tk) queued for (i) and (ii).
+
+### P3.0.2 — long-lived-worker memory growth (forum #18238), v80_hyg in ONE process
+`experiments/2026-10-08_p3/mem_growth.py`: WSL, official stack (whestbench 0.16.1 / flopscope 0.12.1),
+RLIMIT_AS 8,192 MB applied and read back, 60 sequential predicts exactly as `subprocess_worker`
+runs them (fresh BudgetContext each, materialise in-window, `summary_dict` after). No
+`budget_reset()` anywhere. Raw rows: `mem_growth_v80_60.json`.
+
+| | predict 1 | predict 60 | slope (linear fit, predicts 2–60) |
+|---|---:|---:|---:|
+| VmPeak | 6,161 MiB | 6,942 MiB | **+13.9 MiB / predict** |
+| settled RSS | 640 MiB | 1,441 MiB | +13.3 MiB / predict |
+| flopscope session accumulator | 1 record, 25,631 ops | 60 records, 1.54 M ops | +25,631 op records / predict (≈ 540 B each) |
+
+The growth is exactly the accumulator keeping every predict's op log (ops × ~540 B), linear, no
+plateau. **Extrapolation:** VmPeak reaches 8,192 MiB after ≈ 150 predicts; a 200-MLP suite in one
+worker would end at ≈ 8.85–8.90 GB, over the limit. A 100-MLP suite ends at ≈ 7.5 GB (consistent
+with every 100-net graded run passing). Levers in our hands, inside the rules' plain reading: fewer
+op calls (v80_hygws has 23,071 ops ≈ 12.5 MiB / predict) and a lower per-predict transient peak
+(starting VmPeak ≤ ≈ 5.6 GB would clear 200 at this slope). Whether the private re-run uses one
+long-lived worker for 200 MLPs is unknown (organizer question unanswered) — **for Samuel**.
+
+Refits (S2t-family, lr 1e-4, 1 epoch TRAIN-900, from refit_dress_all; jobs 2478–2482):
+
+| arm | VAL raw (best step) | vs refit control |
+|---|---:|---:|
+| refit control (S2t) | 2.087349e-08 (112) | — |
+| P3.1c variance-level gain (S2tv) | 2.087423e-08 (112) | +0.004 % — closed |
+| **P3.1b star-D4 (S2ts, zero-scale 100)** | **2.045544e-08** (112) | **−2.00 %** |
+| P3.2 (i) core + K211 exact + radial exact (S2tk) | 2.321021e-08 (112) | +11.19 % |
+| P3.2 (ii) (i) + E21b (S2tk) | 2.314944e-08 (112) | +10.90 % |
+
+**P3.2 KILLED** (best of (i)–(iii) +10.9 % vs the −8 % bar; (iv)/(v) ×20 / ×2.4 unrefit vs the +10 %
+bar). (iii) not run: P2.1b's correction was +0.3–1.9 % and the margin is 19 pp. Recommendation for
+Oct 10: no GO on v90. Star gains learned: 0, 0, .11, .11, .12, .35, .34, .40, .38, .35, .43, .35,
+.48, .46, .50, .51 (still rising).
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-08 | `estimator_k3_v81_star.py` | `376ae1c5` | DEV | 2.007376e-08 | 0.17616 | 25,741 | law: quiet 82.4 s, noisy 96.9 s | — | 3.4068e-09 | — | **1.0333× vs v80** (Δ +1.179e-10, t95 [+1.077e-10, +1.281e-10]) | 100/100 | v80 + star-D4 + S2ts refit baked (`tools/build_star.py`). residual 0.285 s. |
+| 2026-10-08 | `estimator_k3_v81_star.py` | `376ae1c5` | FRESH-A | 2.079319e-08 (floor-free 2.004554e-08) | 0.17616 | 25,741 | local A/B on DEV net 3 (×2) v81/v80 = **0.989** → ≈ v80's noisy-implied ~101 s (A ≤ 105 s); law 82.4 / 96.9 s | VmPeak 6,157 MiB (WSL PASS, same hash) | **3.4654e-09** (realistic ≈ 3.51e-09 after the ~1.2 % FRESH-A optimism) | PENDING | **1.0321× vs v80** (Δ +1.178e-10, t95 [+1.062e-10, +1.293e-10]) | 97/100 | Twin parity: file vs ev DEV 6.3e-6, arm vs file 1.7e-5. residual 0.285 s. Package `09ddd63f…e57e`, inner = source. First canary of UTC Oct 8. |
+
+**v81_star graded (#334848): 3.4983524381277624e-09, NEW BEST**, raw 1.9858658362181815e-08, 100 clean.
+−3.43 % vs v80 (3.6224e-09); raw −3.50 % at F +0.08 %. +0.95 % vs the FRESH-A projection 3.4654e-09
+(fresh/graded 1.0094). `tools/ev.py --best-graded` updated.
+| 2026-10-08 | `estimator_k3_v81b_star2.py` | `09ecbf95` | FRESH-A | 2.030698e-08 | 0.17616 | 25,741 | same code as v81 (constants only) → v81's A/B 0.989 vs v80 | VmPeak 6,147 MiB (WSL PASS, same hash) | **3.3814e-09** | PENDING | **1.0239× vs v81** (Δ +8.565e-11, t95 [+7.204e-11, +9.926e-11]) | 88/100 | star refit 2 epochs, zero-scale 300 (VAL 1.989254e-08; gains 0–1.48). Twin parity arm vs file DEV 3.8e-5. Package `<see ledger>`. Second canary of UTC Oct 8. |
+
+**v81b_star2 graded (#334855): 3.393934944659043e-09, NEW BEST**, raw 1.9265924677824842e-08,
+100 clean. −2.98 % vs v81 (3.4984e-09), −6.31 % vs v80. +0.37 % vs the FRESH-A projection 3.3814e-09.
+`tools/ev.py --best-graded` updated.
+
+Further bank items (twin, VAL-100, 1 epoch from the star2 refit; control = star (recent) continued, 1.979300e-08):
+
+| arm | VAL raw | vs control | verdict |
+|---|---:|---:|---|
+| star over EVERY lineage (old tier via its Q legs; elementwise only) | 1.972654e-08 | −0.34 % | built as v81c_starall (FRESH-A below) |
+| + path-D4 (R3 §3.2, 1 n³ product per recent lineage ≈ +3.6 % F; gains learned 0.18–0.84) | 1.970990e-08 | −0.42 % | closed (marginal rule needs ≈ −3.5 %) |
+
+| 2026-10-08 | `estimator_k3_v81b_star2ws.py` | `512c33ec` | FRESH-A | 2.030089e-08 | 0.18018 | 23,181 | local A/B on DEV net 3 (×2) vs v80_hygws = **0.995** → ≈ 85 s noisy-implied (B ≤ 95 s) | VmPeak 6,166 MiB (WSL PASS, same hash) | 3.4574e-09 | PENDING | **1.0572× vs v80_hygws** (Δ +2.092e-10, t95 [+1.855e-10, +2.329e-10]) | 98/100 | B twin of v81b (block 40). Twin DEV vs v81b 1.4e-4 (block round-off). Package `88a97a75…e283`, inner = source. For the Oct 9 A/B slot. |
+| 2026-10-09 | `estimator_k3_v81c_starall.py` | `71b5e991` | FRESH-A | 2.011139e-08 | 0.17629 | 25,741 | local A/B on DEV net 3 (×2) v81c/v81b = 0.95 (noisy; same ops, F +0.07 %) | VmPeak 6,144 MiB (WSL PASS, same hash) | **3.3500e-09** | PENDING | **1.0090× vs v81b** (Δ +3.19e-11, t95 [+2.59e-11, +3.80e-11]) | 88/100 | star-D4 over every lineage (old tier via Q legs) + starall refit. Twin arm vs file DEV 1.4e-4. residual 0.285 s. Package `422d99a9…8f55`, inner = source. First canary of UTC Oct 9. |
+
+**v81b_star2ws graded (#334918): 3.4711270541038904e-09, NEW wall-safe B**, raw 1.9265049822081438e-08
+(= v81b's graded raw to 0.005 %), 100 clean. −6.33 % vs v80_hygws; +0.40 % vs the FRESH-A projection.
+
+**v81c_starall graded (#334926): 3.364228068774433e-09, NEW BEST**, raw 1.908354352764263e-08, 100 clean.
+−0.88 % vs v81b (3.3939e-09), −7.13 % vs v80. +0.43 % vs the FRESH-A projection 3.3500e-09.
+| 2026-10-09 | `estimator_k3_v81d_starall2.py` | `b7efb0f5` | FRESH-A | 1.987150e-08 | 0.17629 | 25,741 | same code as v81c (constants only) | VmPeak 6,144 MiB (WSL PASS, same hash) | **3.3085e-09** | PENDING | **1.0121× vs v81c** (Δ +4.229e-11, t95 [+3.740e-11, +4.718e-11]) | 97/100 | starall refit +2 epochs (VAL 1.945887e-08). Twin arm vs file DEV 1.2e-4. Package `8b6eeaf7…061c`, inner = source. Second canary of UTC Oct 9. |
+
+**v81d_starall2 graded (#334948): 3.3200317352723394e-09, NEW BEST**, raw 1.883284035386623e-08, 100 clean.
+−1.31 % vs v81c (3.3642e-09), −8.35 % vs v80. +0.35 % vs the FRESH-A projection 3.3085e-09.

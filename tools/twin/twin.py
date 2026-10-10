@@ -97,6 +97,9 @@ TRAINABLE = {
 _GATE_LEAVES = tuple(f"gate/{k}" for k in ("W1", "b1", "W2", "b2"))
 TRAINABLE.update({"G1b": TRAINABLE["S3"] + _GATE_LEAVES, "G1t": TRAINABLE["S3"] + _GATE_LEAVES,
                   "G1bg": _GATE_LEAVES, "G1tg": _GATE_LEAVES})
+# 2026-10-07 Lane P2: the gentle refit stage (S2t) plus the gain-mode coefficients.
+TRAINABLE["S2tgb"] = TRAINABLE["S2t"] + ("gain/gmb",)
+TRAINABLE["S2tgg"] = TRAINABLE["S2t"] + ("gain/gmg",)
 # 2026-10-06 Lane M4: the neighbor head (`--arm nbr`) alone; everything else frozen at --init.
 TRAINABLE["N1"] = tuple(f"nbr/{k}" for k in ("W1", "b1", "W2", "b2"))
 
@@ -351,6 +354,13 @@ ARMS = {
          "                _mH = _mS = _m\n"
          "            else:\n"
          "                _mD = _m\n"
+         "    if _MASK is not None and not last_layer:\n"
+         "        _MASK['_prevR'] = _mR\n"
+         "    _mon = _mDd = None\n"
+         "    if _MASK is not None and _MASK.get('Da') and not last_layer:\n"
+         "        _mon = fnp.where(alpha > _MASK['Da'], dtype(0.0), dtype(1.0))\n"
+         "        _mDd = _mD\n"
+         "        _mD = _mon if _mD is None else _mD * _mon\n"
          "    _mA = _mW = _mC = _mSl = None\n"
          "    if _mH is not None:\n"
          "        _hm = _MASK.get('Hmode', '')\n"
@@ -367,7 +377,7 @@ ARMS = {
          "            _st['dead%.2f' % _t] = float((alpha < -_t).sum()) / n\n"
          "        _MASK['stats'].append(_st)\n"),
         ("        D22 = ((metric / 6.0) * (dG[:, None] + dG[None, :])) * off_mask\n",
-         "        _D21c = D21\n"
+         "        _D21c = _D21f = D21\n"
          "        if _mD is not None and _MASK.get('Drows'):\n"
          "            D21 = D21 * _mD[:, None]\n"
          "        elif _mD is not None:\n"
@@ -376,6 +386,15 @@ ARMS = {
          "            _D21c = D21\n"
          "        if _mD is not None and _MASK.get('Dzero'):\n"
          "            _kz = _mD\n"
+         "        if _mon is not None and _MASK.get('Daz', 'z') != 'z':\n"
+         "            # always-on rows keep their corrector delta; its d21e feature reads the\n"
+         "            # full row ('f', diagnostic) or the row's own COLUMN ('c', servable)\n"
+         "            _kz = 1.0 if _mDd is None else _mDd\n"
+         "            _off = 1.0 - _mon\n"
+         "            if _MASK['Daz'] == 'f':\n"
+         "                _D21c = D21 + _D21f * _off[:, None]\n"
+         "            else:\n"
+         "                _D21c = D21 + D21.T * _off[:, None]\n"
          "        D22 = ((metric / 6.0) * (dG[:, None] + dG[None, :])) * off_mask\n"),
         # Dz: the corrector's delta is zeroed on the D-dropped rows
         ("        mu_out = mu_out + _corr_delta(\n",
@@ -418,6 +437,21 @@ ARMS = {
          "        out_tw = _mask_rows(out_tw, _mR)\n"
          "    elif _mR is not None and _MASK.get('Rpart', '') == 'n':\n"
          "        out_tw = _mask_rows_new(out_tw, _mR, n)\n"),
+        # P2.4.2 (key C): the covariance sandwich reads C on the previous layer's R rows only
+        ("    mu_pre = WT @ mu\n",
+         "    mu_pre = WT @ mu\n"
+         "    _covS = cov\n"
+         "    if _MASK is not None and _MASK.get('C') and _MASK.get('_prevR') is not None:\n"
+         "        _pc = _MASK['_prevR']\n"
+         "        _covS = cov * (_pc[:, None] * _pc[None, :])\n"
+         "        if _MASK['C'] == 2.0:\n"
+         "            # keep the dropped rows' VARIANCES; drop only their cross-covariances\n"
+         "            _covS = _covS + fnp.diag(fnp.diagonal(cov) * (1.0 - _pc))\n"),
+        ("        _X4 = _mm(WT, cov)\n", "        _X4 = _mm(WT, _covS)\n"),
+        ("        cov_pre = (_p4_sym_sandwich(WT, cov, W) if _P4_BLOCKSYM\n"
+         "                   else _mm(_mm(WT, cov), W))\n",
+         "        cov_pre = (_p4_sym_sandwich(WT, _covS, W) if _P4_BLOCKSYM\n"
+         "                   else _mm(_mm(WT, _covS), W))\n"),
     ],
     # HANDOFF 2026-10-06 Lane V+M, M4: neighbor-feature corrector screen (twin only).
     # A second additive head on mu_out, beside the shipped corrector, reading each
@@ -477,7 +511,152 @@ ARMS = {
          "                                     cov_pre, last_layer, dtype)\n"
          "    if last_layer:\n        return (mu_out, None, None, 0.0, dG)\n"),
     ],
+    # HANDOFF 2026-10-07 Lane P2, P2.1: DRESSED LEGS (R1 §5.1). AUGMENT's heavy-edge kappa3
+    # birth families fold into the newborn's light leg:
+    #   X~[a, j] = w1e_a C_aj + H[a, j],
+    #   H[a, j]  = 1/2 w2_a D21[a, j]
+    #            + (w3_j / w2_j) (1/2 w1_a D21[j, a] + 1/4 w2_a D22[a, j] + 1/2 w2_a C_aj^2)
+    # with w3/w2 = -alpha/sigma, D21[a, j] = kappa3_aaj and D22 the chain's (2,2) slice, all
+    # off-diagonal. The stored A_L (fac1) IS the light leg, so every repeated-slice term that
+    # reads it is recomputed from X~ -- p111_21's two-leg slice (through fac1), S_sep =
+    # (X~ d(e))^T and the hub compensation d(y) X~ d(c) -- which keeps the newborn's repeated
+    # slices at the table's values and changes only its distinct-index content. No matmul.
+    # `_DRESS` None = inert (exact identity). Keys: c2, d21, d22 (family scales, 1 = on),
+    # gate ('light': the birth gate multiplies w1 C only; 'both': it multiplies X~).
+    "dress": [
+        ("def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n",
+         "_DRESS = None\n\n\n"
+         "def _dress_H(w, alpha, sigma, C11, D21, D22, dtype):\n"
+         "    w1, w2 = w[(1, 1)], w[(2, 1)]\n"
+         "    r = -(alpha / sigma)\n"
+         "    H = None\n"
+         "    _d = _DRESS\n"
+         "    if _d.get('d21', 0.0):\n"
+         "        H = (w2[:, None] * D21 + (w1[:, None] * D21.T) * r[None, :]) * (0.5 * _d['d21'])\n"
+         "    if _d.get('d22', 0.0):\n"
+         "        _t = ((w2[:, None] * D22) * r[None, :]) * (0.25 * _d['d22'])\n"
+         "        H = _t if H is None else H + _t\n"
+         "    if _d.get('c2', 0.0):\n"
+         "        _t = ((w2[:, None] * (C11 * C11)) * r[None, :]) * (0.5 * _d['c2'])\n"
+         "        H = _t if H is None else H + _t\n"
+         "    return H\n\n\n"
+         "def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n"),
+        ("        fac1 = w1e[:, None] * C11\n",
+         "        fac1 = w1e[:, None] * C11\n"
+         "        if _DRESS is not None:\n"
+         "            _Hd = _dress_H(w, alpha, sigma, C11, D21, D22, dtype)\n"
+         "            if _Hd is not None:\n"
+         "                if _DRESS.get('gate', 'light') == 'both':\n"
+         "                    _Hd = _Hd * (w1e / fnp.where(w1 == 0.0, dtype(1.0), w1))[:, None]\n"
+         "                fac1 = fac1 + _Hd\n"
+         "        _Xd = fac1\n"),
+        ("        S_sep = (e_b[:, None] * C11) * w1e[None, :]\n",
+         "        S_sep = e_b[:, None] * _Xd.T\n"),
+        ("                resid = (resid - ((yA * w1e)[:, None] * C11) * (cA * _t)[None, :]\n"
+         "                         - ((yB * w1e)[:, None] * C11) * (cB * _t)[None, :])\n",
+         "                resid = (resid - (yA[:, None] * _Xd) * (cA * _t)[None, :]\n"
+         "                         - (yB[:, None] * _Xd) * (cB * _t)[None, :])\n"),
+    ],
+    # HANDOFF 2026-10-07 Lane P2, P2.2: GAIN-MODE kappa4 (R2 §1.5). z = g zhat with Var g =
+    # c^2, c^2 = m^T C m / |m|^4 from the chain's own post-ReLU state (one matvec). Templates
+    # (pre-activation): D22_ij = 4 b c^2 (s_i^2 s_j^2 + 2 C_ij^2), Q31_ij = 12 b c^2 s_i^2 C_ij
+    # (normalised by s_i^3 s_j: 12 b c^2 Cn_ij). D4 stays the chain's dG form.
+    # `_GM` None = inert. Keys: mode 'a' (D22 template), 'b' (D22 + Q31 templates), 'c'
+    # (blend: existing + gamma * template, on D22, and on Q31 if q31b=1); beta (default 0.7)
+    # / gamma (default 0), overridden per layer by gain/gmb, gain/gmg when learn=1 (training);
+    # q31 = 'keep' | 'drop' (the 5 learned q31 modes).
+    "gm": [
+        ("def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n",
+         "_GM = None\n_GMS = {}\n\n\n"
+         "def _gm_coef(key, default, li):\n"
+         "    tk = {'beta': 'gmb', 'gamma': 'gmg'}[key]\n"
+         "    if _GM.get('learn') and _TWG is not None and tk in _TWG:\n"
+         "        return _TWG[tk][li]\n"
+         "    return _GM.get(key, default)\n\n\n"
+         "def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n"),
+        ("        D22 = ((metric / 6.0) * (dG[:, None] + dG[None, :])) * off_mask\n",
+         "        D22 = ((metric / 6.0) * (dG[:, None] + dG[None, :])) * off_mask\n"
+         "        _GMS.clear()\n"
+         "        if _GM is not None:\n"
+         "            _mm2 = (mu * mu).sum()\n"
+         "            _c2 = (mu * (cov @ mu)).sum() / fnp.maximum(_mm2 * _mm2, dtype(1e-30))\n"
+         "            _tpl = ((var[:, None] * var[None, :]) + (C11 * C11) * 2.0) * off_mask\n"
+         "            if _GM['mode'] in ('a', 'b'):\n"
+         "                _bc = _gm_coef('beta', 0.7, layer_index) * _c2\n"
+         "                D22 = _tpl * (_bc * 4.0)\n"
+         "            else:\n"
+         "                _bc = _gm_coef('gamma', 0.0, layer_index) * _c2\n"
+         "                D22 = D22 + _tpl * (_bc * 4.0)\n"
+         "            if _GM['mode'] == 'b' or (_GM['mode'] == 'c' and _GM.get('q31b')):\n"
+         "                _GMS['q31'] = _bc * 12.0\n"),
+        ('        nb["Q31"] = Cn * inv2[:, None] * (0.5 * blocks["metric"] * blocks["lam"])\n',
+         '        nb["Q31"] = Cn * inv2[:, None] * (0.5 * blocks["metric"] * blocks["lam"])\n'
+         "        if 'q31' in _GMS:\n"
+         "            nb['Q31'] = (Cn * _GMS['q31'] if _GM['mode'] == 'b'\n"
+         "                         else nb['Q31'] + Cn * _GMS['q31'])\n"),
+        ('        if _TWG is not None and "q31" in _TWG:\n',
+         '        if (_TWG is not None and "q31" in _TWG\n'
+         "                and not (_GM is not None and _GM.get('q31') == 'drop')):\n"),
+    ],
 }
+# HANDOFF 2026-10-08 Lane P3, P3.2: the kappa4-core loop (tools/twin/k4l_arm.py).
+import k4l_arm  # noqa: E402
+ARMS["k4l"] = k4l_arm.PATCHES + [
+    ("            out_tw = _append(adv, None, fac1, w2b_vec, n, Zb, Lb, _sb, e_b,\n",
+     "            if _k4l_offpost is not None and _TWG is not None and 'k4g' in _TWG:\n"
+     "                _k4l_offpost = _k4l_offpost * _TWG['k4g'][layer_index]\n"
+     "            out_tw = _append(adv, None, fac1, w2b_vec, n, Zb, Lb, _sb, e_b,\n"),
+]
+TRAINABLE["S2tk"] = TRAINABLE["S2t"] + ("gain/k4g",)
+
+# HANDOFF 2026-10-08 Lane P3, P3.1b/c ("bank"): `_BANK` None = inert.
+#   vg   the variance CONSUMED at layer l times (1 + gain/vg[l]) (init 0): a per-layer level gain
+#   star D4 += gain/sg[l] * D4_star (init 0), D4_star[a] = 4 sum_j w3b_j A_L[a,j]^3 M[a,j] over the
+#        RECENT lineages (R3 3.1), w3b = the birth layer's w(3,1); carried in the c4 slot
+ARMS["bank"] = [
+    ("    mu, cov, tw, c4, gk4 = state\n",
+     "    mu, cov, tw, c4, gk4 = state\n"
+     "    _bkst = c4 if isinstance(c4, dict) else {}\n"),
+    ("    metric = float(init_scale)\n",
+     "    if _BANK is not None and _BANK.get('vg') and _TWG is not None:\n"
+     "        var = var * (1.0 + _TWG['vg'][layer_index])\n"
+     "    metric = float(init_scale)\n"),
+    ("    D4 = metric * dG\n",
+     "    D4 = metric * dG\n"
+     "    if (_BANK is not None and _BANK.get('star') and _TWG is not None and adv is not None\n"
+     "            and _bkst.get('w3b')):\n"
+     "        _AL, _MM = (_full_legs_lean(adv) if _BANK.get('starall') else (adv.A_L, adv.M))\n"
+     "        _w3c = fnp.concatenate(_bkst['w3b'][-(_AL.shape[1] // n):])\n"
+     "        _d4s = (((_AL * _AL * _AL) * _MM) * _w3c[None, :]).sum(axis=1) * 4.0\n"
+     "        D4 = D4 + _d4s * _TWG['sg'][layer_index]\n"
+     "    if (_BANK is not None and _BANK.get('path') and _TWG is not None and adv is not None\n"
+     "            and _bkst.get('cb')):\n"
+     "        # R3 3.2 path: D4 = 12 rowsum((A.J) . V), V = (A.J) C~_birth, recent lineages\n"
+     "        _kr0 = adv.k - adv.ko\n"
+     "        _cbs = _bkst['cb'][-_kr0:]\n"
+     "        _w2r = adv.w2b[adv.w2b.shape[0] - _kr0 * n:]\n"
+     "        _d4p = None\n"
+     "        for _i, _Cb in enumerate(_cbs):\n"
+     "            _AJ = adv.A_L[:, _i * n:(_i + 1) * n] * (adv.M[:, _i * n:(_i + 1) * n]\n"
+     "                                                    * _w2r[_i * n:(_i + 1) * n][None, :])\n"
+     "            _t = ((_AJ @ _Cb) * _AJ).sum(axis=1)\n"
+     "            _d4p = _t if _d4p is None else _d4p + _t\n"
+     "        D4 = D4 + _d4p * (12.0 * _TWG['pg'][layer_index])\n"),
+    ("    return (mu_out, cov_out, out_tw, c4_out, g_out)\n",
+     "    if _BANK is not None and _BANK.get('star'):\n"
+     "        _kr = out_tw.k if _BANK.get('starall') else out_tw.k - out_tw.ko\n"
+     "        _l3 = (list(_bkst.get('w3b') or []) + [w[(3, 1)]])[-_kr:]\n"
+     "        c4_out = {'c4': c4_out, 'w3b': _l3}\n"
+     "        if _BANK.get('path'):\n"
+     "            c4_out['cb'] = (list(_bkst.get('cb') or []) + [C11])[-(out_tw.k - out_tw.ko):]\n"
+     "    return (mu_out, cov_out, out_tw, c4_out, g_out)\n"),
+    ("def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n",
+     "_BANK = None\n\n\ndef _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n"),
+]
+TRAINABLE["S2tv"] = TRAINABLE["S2t"] + ("gain/vg",)
+TRAINABLE["S2ts"] = TRAINABLE["S2t"] + ("gain/sg",)
+TRAINABLE["S2tsp"] = TRAINABLE["S2t"] + ("gain/sg", "gain/pg")
+
 #: M4 neighbor head: 4 own + 5*K partners + 2 x (4 kernel means + log mass) + C+alpha + R+1.
 NBR_F, NBR_H = 4 + 5 * 8 + 12, 32
 
@@ -500,7 +679,13 @@ def parse_mask(spec):
         #   Hw  W only (diagnostic)       Hs   Sl only (diagnostic)
         hmodes = {"Hk": "k", "Hkh": "kh", "Hd": "d", "Hw": "w", "Hs": "s"}
         rparts = {"Ri": "i", "Rn": "n"}     # R on inherited legs only / newborn rows only
-        if k not in ("R", "H", "D", "Dc", "Dr", "Dz", *hmodes, *rparts):
+        if k == "Da":            # P2.4.1: ALSO drop D21 rows with alpha > +tau (always-on)
+            out["Da"] = float(v)
+            continue
+        if k == "Daz":           # always-on rows' corrector: z zero (Dz), f full row, c column
+            out["Daz"] = {"0": "z", "1": "f", "2": "c"}.get(v, v)
+            continue
+        if k not in ("R", "H", "D", "C", "Dc", "Dr", "Dz", *hmodes, *rparts):
             raise SystemExit(f"--mask: unknown role {k}")
         if k in rparts:
             k, out["Rpart"] = "R", rparts[k]
@@ -516,6 +701,45 @@ def parse_mask(spec):
     return out
 
 
+def parse_dress(spec):
+    """'c2=1,d21=1,d22=1,gate=light' -> dict; 'all' = every family at 1; '' -> None (inert)."""
+    if not spec:
+        return None
+    if spec == "all":
+        spec = "c2=1,d21=1,d22=1"
+    out = {"gate": "light"}
+    for part in filter(None, spec.split(",")):
+        k, v = part.split("=")
+        if k == "gate":
+            assert v in ("light", "both"), v
+            out[k] = v
+        elif k in ("c2", "d21", "d22"):
+            out[k] = float(v)
+        else:
+            raise SystemExit(f"--dress: unknown key {k}")
+    return out
+
+
+def parse_gm(spec):
+    """'mode=a,beta=0.7,q31=keep' -> dict; '' -> None (inert)."""
+    if not spec:
+        return None
+    out = {"mode": "a", "q31": "keep"}
+    for part in filter(None, spec.split(",")):
+        k, v = part.split("=")
+        if k == "mode":
+            assert v in ("a", "b", "c"), v
+            out[k] = v
+        elif k == "q31":
+            assert v in ("keep", "drop"), v
+            out[k] = v
+        elif k in ("beta", "gamma", "q31b", "learn"):
+            out[k] = float(v)
+        else:
+            raise SystemExit(f"--gm: unknown key {k}")
+    return out
+
+
 def load_module(path: Path, name="_twin_candidate", arm="", raw=False):
     """Import the candidate from a PATCHED copy (see TWIN_PATCHES), kept for audit.
 
@@ -524,11 +748,12 @@ def load_module(path: Path, name="_twin_candidate", arm="", raw=False):
     longer match the hooks' anchors. `install` refuses gain parameters then."""
     import importlib.util
     src = path.read_text(encoding="utf-8")
-    for a, b in ([] if raw else TWIN_PATCHES) + (ARMS[arm] if arm else []) + SUB_PATCHES:
+    arm_patches = [pt for x in arm.split("+") if x for pt in ARMS[x]]   # "mask+dress"
+    for a, b in ([] if raw else TWIN_PATCHES) + arm_patches + SUB_PATCHES:
         if src.count(a) != 1:
             raise SystemExit(f"twin patch anchor occurs {src.count(a)}x:\n{a}")
         src = src.replace(a, b, 1)
-    pp = ROOT / "cache" / "twin" / f"_twin_{path.stem}{'_' + arm if arm else ''}.py"
+    pp = ROOT / "cache" / "twin" / f"_twin_{path.stem}{'_' + arm.replace('+', '_') if arm else ''}.py"
     pp.parent.mkdir(parents=True, exist_ok=True)
     pp.write_text(src, encoding="utf-8", newline="\n")
     spec = importlib.util.spec_from_file_location(name, pp)
@@ -579,6 +804,15 @@ class Twin:
         # S3: additive multi-mode correction to the normalised kappa4_iiij slice,
         # zero-initialised (an exact identity) -- see TWIN_PATCHES "q31"
         self.base["gain"]["q31"] = torch.zeros((depth, 5), dtype=torch.float32, device=DEV)
+        # P2.2 gain-mode kappa4: per-layer beta (template scale, init 0.7) and gamma (blend
+        # weight, init 0). Read only by the `gm` arm, and only once installed as params.
+        self.base["gain"]["gmb"] = torch.full((depth,), 0.7, dtype=torch.float32, device=DEV)
+        self.base["gain"]["gmg"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
+        # P3.2 kappa4-core loop: per-layer gain on the off-diagonal core births (k4l arm)
+        self.base["gain"]["k4g"] = torch.ones((depth,), dtype=torch.float32, device=DEV)
+        self.base["gain"]["vg"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
+        self.base["gain"]["sg"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
+        self.base["gain"]["pg"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
         if "nbr" in arm.split("+"):
             # M4 neighbor head; W2/b2 zero -> exact identity at init. W1 deterministic.
             g = torch.Generator(device="cpu").manual_seed(20261006)
@@ -697,6 +931,20 @@ def cmd_eval(a, tw=None, params=None, quiet=False):
     fin = []
     mask = parse_mask(getattr(a, "mask", ""))
     stats = {} if getattr(a, "mask_stats", False) else None
+    if getattr(a, "dress", ""):
+        assert hasattr(tw.mod, "_DRESS"), "--dress needs --arm dress (or mask+dress)"
+        tw.mod._DRESS = parse_dress(a.dress)
+    if getattr(a, "gm", ""):
+        assert hasattr(tw.mod, "_GM"), "--gm needs --arm gm (or mask+gm)"
+        tw.mod._GM = parse_gm(a.gm)
+    if getattr(a, "k4l", ""):
+        assert hasattr(tw.mod, "_K4L"), "--k4l needs --arm ...+k4l"
+        tw.mod._K4L = k4l_arm.parse(a.k4l)
+    if getattr(a, "bank", ""):
+        assert hasattr(tw.mod, "_BANK"), "--bank needs --arm ...+bank"
+        tw.mod._BANK = {k: 1 for k in a.bank.split(",")}
+    if getattr(a, "shared_rank", 0):
+        tw.mod._SHARED_RANK = a.shared_rank
     if mask or stats is not None:
         assert hasattr(tw.mod, "_MASK"), "--mask needs --arm mask"
     with torch.no_grad():
@@ -709,7 +957,9 @@ def cmd_eval(a, tw=None, params=None, quiet=False):
             if stats is not None:
                 stats[f"{split}:{i}"] = tw.mod._MASK["stats"]
     r = {"panel": a.panel, "arm": getattr(a, "arm", ""), "n": len(fin),
-         "raw_mse": float(np.mean(fin)), "per_net": fin}
+         "raw_mse": float(np.mean(fin)), "per_net": fin,
+         "dress": getattr(tw.mod, "_DRESS", None), "gm": getattr(tw.mod, "_GM", None),
+         "k4l": getattr(tw.mod, "_K4L", None), "shared_rank": getattr(tw.mod, "_SHARED_RANK", None)}
     if mask or stats is not None:
         r["mask"] = mask
         r["nets"] = [f"{s}:{i}" for s, i in rows]
@@ -783,6 +1033,25 @@ def cmd_train(a):
         assert hasattr(tw.mod, "_MASK"), "--mask needs --arm mask"
         tw.mod._MASK = parse_mask(a.mask)
         print(f"  mask {tw.mod._MASK}", flush=True)
+    if a.dress:
+        assert hasattr(tw.mod, "_DRESS"), "--dress needs --arm dress (or mask+dress)"
+        tw.mod._DRESS = parse_dress(a.dress)
+        print(f"  dress {tw.mod._DRESS}", flush=True)
+    if a.gm:
+        assert hasattr(tw.mod, "_GM"), "--gm needs --arm gm (or mask+gm)"
+        tw.mod._GM = parse_gm(a.gm)
+        print(f"  gm {tw.mod._GM}", flush=True)
+    if a.k4l:
+        assert hasattr(tw.mod, "_K4L"), "--k4l needs --arm ...+k4l"
+        tw.mod._K4L = k4l_arm.parse(a.k4l)
+        print(f"  k4l {tw.mod._K4L}", flush=True)
+    if a.shared_rank:
+        tw.mod._SHARED_RANK = a.shared_rank
+        print(f"  shared rank {a.shared_rank}", flush=True)
+    if a.bank:
+        assert hasattr(tw.mod, "_BANK"), "--bank needs --arm ...+bank"
+        tw.mod._BANK = {k: 1 for k in a.bank.split(",")}
+        print(f"  bank {tw.mod._BANK}", flush=True)
     names = TRAINABLE[a.stage]
     params = {k: tw.leaf(k).clone().requires_grad_(True) for k in names}
     if a.init:
@@ -819,7 +1088,8 @@ def cmd_train(a):
 
     def evaluate(tag):
         ev = argparse.Namespace(panel=a.hold_panel, n=a.hold_n, cand=a.cand, params=None,
-                                subst=a.subst)
+                                subst=a.subst, mask=a.mask, k4l=a.k4l,
+                                shared_rank=a.shared_rank, bank=a.bank)
         r = cmd_eval(ev, tw=tw, params=params, quiet=True)
         msg = f"[{tag}] HOLDOUT-100 raw {r['raw_mse']:.6e} (n={r['n']})"
         print(msg, flush=True)
@@ -939,6 +1209,14 @@ def main():
                     help="eval a file with baked-in gains: skip the twin's gain hooks")
     ap.add_argument("--json", default="", help="eval: write per-net results here")
     ap.add_argument("--mask", default="", help="eval with --arm mask: 'R=2.0,H=3.0,D=3.0'")
+    ap.add_argument("--dress", default="",
+                    help="with --arm dress / mask+dress: 'all' or 'c2=1,d21=1,d22=1,gate=light'")
+    ap.add_argument("--gm", default="",
+                    help="with --arm gm / mask+gm: 'mode=a|b|c,beta=0.7,gamma=0,q31=keep|drop,q31b=1'")
+    ap.add_argument("--k4l", default="",
+                    help="with --arm ...+k4l: 'core=1,k211=exact|trunc|none,rad=hub|exact|fold|none,e21b=0|1,old=keep|drop'")
+    ap.add_argument("--shared-rank", type=int, default=0, help="override _SHARED_RANK (old tier)")
+    ap.add_argument("--bank", default="", help="with --arm ...+bank: 'vg', 'star' or 'vg,star'")
     ap.add_argument("--mask-stats", action="store_true",
                     help="eval with --arm mask: log per-layer alpha kept fractions per net")
     ap.add_argument("--zero-scale", type=float, default=1e-2,

@@ -1,0 +1,49 @@
+09:35:52  334659  submitted  score=None  secondary=None
+09:37:52  334659  submitted  score=None  secondary=None
+09:39:53  334659  submitted  score=None  secondary=None
+09:41:53  334659  submitted  score=None  secondary=None
+09:43:54  334659  submitted  score=None  secondary=None
+09:45:54  334659  submitted  score=None  secondary=None
+09:47:55  334659  submitted  score=None  secondary=None
+09:49:55  334659  submitted  score=None  secondary=None
+09:51:56  334659  submitted  score=None  secondary=None
+09:53:56  334659  submitted  score=None  secondary=None
+09:55:57  334659  submitted  score=None  secondary=None
+09:57:57  334659  submitted  score=None  secondary=None
+09:59:58  334659  submitted  score=None  secondary=None
+10:01:58  334659  submitted  score=None  secondary=None
+10:03:59  334659  submitted  score=None  secondary=None
+10:05:59  334659  submitted  score=None  secondary=None
+10:08:00  334659  submitted  score=None  secondary=None
+10:10:00  334659  submitted  score=None  secondary=None
+10:12:01  334659  submitted  score=None  secondary=None
+10:14:01  334659  submitted  score=None  secondary=None
+10:16:02  334659  submitted  score=None  secondary=None
+10:18:02  334659  submitted  score=None  secondary=None
+10:20:03  334659  submitted  score=None  secondary=None
+10:22:03  334659  submitted  score=None  secondary=None
+10:24:04  334659  submitted  score=None  secondary=None
+10:26:04  334659  submitted  score=None  secondary=None
+10:28:05  334659  submitted  score=None  secondary=None
+10:30:05  334659  submitted  score=None  secondary=None
+10:32:06  334659  submitted  score=None  secondary=None
+10:34:06  334659  submitted  score=None  secondary=None
+10:36:07  334659  submitted  score=None  secondary=None
+10:38:07  334659  submitted  score=None  secondary=None
+10:40:08  334659  submitted  score=None  secondary=None
+10:42:08  334659  submitted  score=None  secondary=None
+10:44:09  334659  submitted  score=None  secondary=None
+10:46:09  334659  submitted  score=None  secondary=None
+10:48:10  334659  submitted  score=None  secondary=None
+10:50:10  334659  submitted  score=None  secondary=None
+10:52:11  334659  graded  score=3.6223815250878947e-09  secondary=2.0578957169448132e-08
+{
+ "id": 334659,
+ "grading_status_cd": "graded",
+ "score": 3.6223815250878947e-09,
+ "score_secondary": 2.0578957169448132e-08,
+ "grading_message": "<p>Graded successfully</p>\n",
+ "created_at": "2026-10-07T14:35:27.019Z",
+ "updated_at": null
+}
+ledger updated
