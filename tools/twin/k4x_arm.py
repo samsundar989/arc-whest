@@ -61,7 +61,7 @@ def _rad_coef(key, li):
 # eval-only diagnostics (torch), part of the helpers
 STATS = r'''
 
-def _fold_stats(li, D21u, D21f, w, alpha, sigma):
+def _fold_stats(li, D21u, D21f, w, alpha, sigma, adv=None, fv=None, off=None):
     """M5.1 contamination: the fold's change dD of D21 as seen by each consumer."""
     import torch as _t
     with _t.no_grad():
@@ -83,6 +83,16 @@ def _fold_stats(li, D21u, D21f, w, alpha, sigma):
             "rel_d21e": float((e1 - e0).abs().mean() / e0.abs().mean().clamp_min(1e-300)),
             "birth_over_cov": nrm(brt) / max(nrm(cov), 1e-300),
             "rows_on": float((dD.abs().sum(1) > 0).double().mean())})
+        if adv is not None and fv is not None:
+            # exactness: dD must equal (rv/3) sum_j c4_j (A^3 M^T + 3 M A^2 A^T), off-diagonal
+            A, M = _full_legs_lean(adv)
+            A, M = A.double(), M.double()
+            rv = fv[0].double()
+            c4 = _t.cat([x.double() for x in fv[1][-(A.shape[1] // A.shape[0]):]])
+            A2c = (A * A) * c4[None, :]
+            Q = (A2c * A) @ M.T + 3.0 * ((A2c * M) @ A.T)
+            ex = (rv[:, None] / 3.0) * Q * off.double()
+            _FOLDS['stats'][-1]["exact_err"] = nrm(dD - ex) / max(nrm(ex), 1e-300)
 '''
 HELPERS = HELPERS + STATS.lstrip() + "\n\n"
 
@@ -110,7 +120,7 @@ PATCHES = [
      "               else fnp.zeros((n, n), dtype=dtype))\n"
      "        _FOLDS['v'] = None\n"
      "        if _D21u is not None:\n"
-     "            _fold_stats(layer_index, _D21u, D21, w, alpha, sigma)\n"),
+     "            _fold_stats(layer_index, _D21u, D21, w, alpha, sigma, adv, _fv, off_mask)\n"),
     # inside _dslice21 (P2 branch): build the fold's left-operand increments
     ("        acc = _shared_contract_lean(tw, LA, LP, A_L, M)\n",
      "        _FOLDS['d'] = None\n"
