@@ -56,3 +56,15 @@ Interpreter on v81d (`build_fold.py`, rec mode): +983,123,392 FLOPs (+0.254 % F,
   γ₁C̃ + γ₂Wᵀdiag(v)W: **age 1 R² 0.95–0.99**, age 2 0.52–0.80, age ≥ 3 ≤ 0.66 falling with age →
   **gate fails ("R² ≥ 0.8 at every age"); Step 2 arm not built.**
 - Instead: H2.5 literal (no hub move) refit queued — −6.03 % F at +1.59 % unrefit nets ≈ −4.5 % score.
+
+## M5.2 radial scale sweep (VAL-100 unrefit, v′ = scale × physical)
+
+| slice | 0.1 | 0.3 | 0.5 | 1.0 |
+|---|---:|---:|---:|---:|
+| Q31 | +0.10 % | +0.50 % | +1.16 % | +3.91 % |
+| D4 | +0.02 % | +1.59 % | +7.74 % | +25.3 % |
+| D22 | +6.16 % | +66 % | +208 % | +1019 % |
+
+Monotone in scale for every slice: the refit-tuned chain has absorbed whatever the radial terms do.
+Refit queued: fold rec + radial (Q31, D4) at 0.1× physical with learned per-layer v′ (S2tsfr), compared
+with the fold-rec refit (same start, same recipe). D22 excluded.
