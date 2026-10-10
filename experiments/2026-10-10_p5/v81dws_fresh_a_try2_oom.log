@@ -1,0 +1,34 @@
+[ev] estimator_k3_v81d_starall2ws.py on FRESH_A n=100
+[ev] cost: 396,493,421,481 FLOPs, 23,181 ops, peak RSS 4.18 GiB -> budget 10.5 GiB/worker
+  [mem] 27.4 GiB free, 10.5 GiB per worker -> 2 workers, not 4
+  2 workers x 2 BLAS threads over 100 nets ...
+[ev] accuracy: 3414.6 s, raw MSE 2.042675e-02
+
+  raw MSE            2.042675e-02   (our N = 1e8 labels; mean floor 7.476e-10)
+  raw MSE floor-free 2.042675e-02
+  FLOPs / MLP        396,493,421,481   = 0.18030 x 2^41
+  op calls           23,181
+  materializations   0
+  adjusted (panel)   3.683031e-03
+  per-net score CV   7.035
+  PROJECTED PUBLIC   3.614358e-03   (÷ 1.019)
+  paired vs estimator_k3_v81b_star2ws:  gain 0.0000×, Δ -3.6830e-03, t95 [-8.8237e-03, +1.4577e-03], wins 94/100
+    (geometric 0.7163× — diagnostic only, no authority over an outcome)
+  !! 2 FAILED NETS: [{'i': 15, 'error': 'MemoryError', 'detail': 'Unable to allocate 68.2 MiB for an array with shape (7, 4992, 512) and data type float32'}, {'i': 65, 'error': 'MemoryError', 'detail': 'Unable to allocate 569. MiB for an array with shape (16807, 29, 306) and data type float32'}]
+
+  PLAN §5 gates
+    FAIL  panel projected vs best graded   better than 3.2795e-09             3.6144e-03 = -110211757.67% better
+    PASS  op calls                         ≤ 26,000                           23,181
+    ok    projected server wall (noisy day, A policy) ≤ 115 s                            97.7 s (quiet day 83.1 s)
+    PASS  setup                            < 2 s                              0.00 s
+    PASS  scalar materializations          0                                  0
+    FAIL  failed nets on panel             0                                  2
+    PASS  projected server residual        ≤ 0.33 s (D7 finals bound)         0.257 s (1.56× headroom vs the 0.4 s cliff)
+    PASS  full acceptance panel            fresh_a (or dev), n = 100          fresh_a, n = 100
+    PASS  paired vs incumbent              --baseline given                   estimator_k3_v81b_star2ws
+    FAIL  WSL RLIMIT_AS 8 GiB gate         PASS on candidate SHA256 (--mem)   NOT RUN
+
+  NOT ACCEPTED — gated or incomplete; not submittable
+
+  RESULTS.md row:
+  | 2026-10-10 | `estimator_k3_v81d_starall2ws.py` | `1a586019` | FRESH-A | 2.042675e-02 | 0.18030 | 23,181 | 54.503 s (local) → 83.1 s proj | 4282 MiB | **3.6144e-03** | PENDING | 0.0000× vs estimator_k3_v81b_star2ws (Δ -3.683e-03, t95 [-8.824e-03, +1.458e-03]) | 94/100 |  |
