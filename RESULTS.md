@@ -2857,3 +2857,25 @@ Reading:
   (so D3 / star-D4 / births' diagonal of dead neurons vanish) costs +66 % on its own. Dead neurons' κ3 readouts are
   not negligible to the chain. V8 (−8.84 %) is replaced by V8b (−3.55 %).
 - **Item 6 (covariance input pruning) is closed**, consistent with P2.4.2 (alive-block covariance ×13 / ×3.2).
+
+### P5.1 — the bundle, item by item (real flopscope; DEV nets 0–9 paired vs v82a; `experiments/2026-10-10_p5/v82/`)
+Builder `tools/build_v82.py` (items as exact text patches on v82a). F from the interpreter = real meter.
+
+| item | ΔF vs v82a | ops | DEV 0–9 Δraw | verdict |
+|---|---:|---:|---:|---|
+| 1 skip old-tier joins at L14, L15 | −0.90 % | 23,683 | **−1.14 %** (10/10 better) | **in** |
+| 2 last-layer rows K16 = 800 | −0.78 % | 24,293 | **+6.77 %** (9/9 worse; net 7 lost to a local OOM) | **closed** |
+| 3 old rebuild on D-kept rows | −1.26 % | 24,292 | **+10.63 %** (10/10 worse) | **closed** |
+| 4 fused `_advance` products | −0.39 % | 22,351 | reassociation | in |
+| 5 two-level sandwich split | −0.23 % | 24,838 | reassociation (exact symmetry) | in |
+| 6 covariance input pruning | −1.24 % | 24,319 | twin +24 % | closed (above) |
+| 7 V8b (D21 columns on D + ρ d21e) | −3.59 % | 24,352 | twin −0.16 % | **in** |
+| **v82b = 1, 4, 5, 7** | **−5.20 % (F/B 0.16508)** | **22,375** | **−1.29 %** (10/10 better) | candidate |
+
+Items 2, 3 and V8's leg rows all zero dead neurons' κ3 readouts (D3 / old-tier rows), and all three cost +7 to +66 %:
+**dead rows' D3 is not negligible** (their means sit in the tail, where the κ3 correction is first order). The
+interpreter's variant of item 5 had a transposition bug (`t2[:, :q].T` for `t2[:, q:].T`), harmless to a
+shape-only model; the builder uses the exact one. Twin VAL-100 unrefit (pod, R1 init evals): control 1.945850e-08,
+V8b 1.942720e-08 (−0.16 %), v82b-arm (V8b + J=2) 1.928571e-08 (−0.89 %).
+v82b gates so far: meter 363,022,283,745 FLOPs = interpreter; WSL PASS 23/23 VmPeak 6,026 MiB; wall A/B on DEV
+net 3 (×2) v82b/v82a = 0.953; twin(file) vs real DEV 0–9 raw-mean 2.7e-4 (per-net ≤ 2.2e-3, same as v81d's own).

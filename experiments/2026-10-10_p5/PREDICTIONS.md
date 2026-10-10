@@ -24,3 +24,10 @@ Worker reasoning: P1 measured D2.5 +10.55 % (per-net thresholds, no Dzero) and D
 rows-only cost 4× (Dr +2.48 → Dz +0.62), and fixed K adds ~1 pt. A scalar ρ per layer fixes the mean
 energy but not its per-row spread (rows whose energy sits on dead columns), so it recovers well under all
 of the gap.
+
+## v82b_bundle (items 1, 4, 5 + V8b) — written before its FRESH-A (≈ 13:15 UTC)
+Measured before FRESH-A: meter F/B 0.16508 (−5.20 % vs v82a), 22,375 ops; DEV 0–9 raw −1.29 % vs v82a
+(10/10); twin VAL unrefit (v82b arm vs control) −0.89 %.
+Strategist (bundle, pre-pivot): −4 to −5 % F, Δraw within ±0.5 %. Worker: FRESH-A raw −0.9 to −1.3 % vs v82a,
+projected ≈ 1.987e-8 × 0.989 × 0.16508 / 1.019 ≈ 3.18e-9 panel-projected; graded ≈ 1.8833e-8 × 0.989 × 0.16508
+≈ **3.07e-9**.
