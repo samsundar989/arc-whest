@@ -666,6 +666,8 @@ ARMS["rad"] = [k4x_arm.PATCHES[0]] + list(k4x_arm.PATCHES[6:])
 TRAINABLE["S2tsf"] = TRAINABLE["S2ts"] + ("gain/fg",)
 TRAINABLE["S2tsr"] = TRAINABLE["S2ts"] + ("gain/rq", "gain/r22", "gain/r4")
 TRAINABLE["S2tsfr"] = TRAINABLE["S2tsf"] + ("gain/rq", "gain/r22", "gain/r4")
+ARMS["qx"] = list(k4x_arm.QX_PATCHES)
+TRAINABLE["S2tsfx"] = TRAINABLE["S2tsf"] + ("gain/qx",)
 
 #: M4 neighbor head: 4 own + 5*K partners + 2 x (4 kernel means + log mass) + C+alpha + R+1.
 NBR_F, NBR_H = 4 + 5 * 8 + 12, 32
@@ -827,6 +829,7 @@ class Twin:
         _vp = torch.tensor(k4x_arm.vprime(depth), dtype=torch.float32, device=DEV)
         for _k in ("rq", "r22", "r4"):
             self.base["gain"][_k] = _vp.clone()
+        self.base["gain"]["qx"] = torch.zeros((depth, 3), dtype=torch.float32, device=DEV)
         if "nbr" in arm.split("+"):
             # M4 neighbor head; W2/b2 zero -> exact identity at init. W1 deterministic.
             g = torch.Generator(device="cpu").manual_seed(20261006)

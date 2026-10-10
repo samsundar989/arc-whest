@@ -202,3 +202,19 @@ def parse_rad(spec):
             raise SystemExit(f"--rad: unknown key {k}")
         out[k] = float(v)
     return out
+
+
+# M5.5 (from the M5.3 regression): extra FREE Q31 modes, zero-initialised learned per layer
+# (gain/qx, shape (depth, 3)), added to the closure's normalised Q31:
+#   0: D4n_a Cn_ab        (Sym6(M (x) C) with M = diag(dG), via the chain's D4)
+#   1: alpha_b g3_a       (the radial term's second half)
+#   2: alpha_a D21n_ab    (the radial term's first half)
+QX_PATCHES = [
+    ('        nb["Q13"] = nb["Q31"].T\n',
+     "        if _TWG is not None and 'qx' in _TWG and _CUR_LAYER >= 1:\n"
+     "            _qx = _TWG['qx'][_CUR_LAYER]\n"
+     "            nb['Q31'] = nb['Q31'] + ((D4n[:, None] * Cn) * _qx[0]\n"
+     "                                     + (alpha[None, :] * D3n[:, None]) * _qx[1]\n"
+     "                                     + (alpha[:, None] * D21n) * _qx[2]) * off_mask\n"
+     '        nb["Q13"] = nb["Q31"].T\n'),
+]
