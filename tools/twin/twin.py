@@ -657,6 +657,16 @@ TRAINABLE["S2tv"] = TRAINABLE["S2t"] + ("gain/vg",)
 TRAINABLE["S2ts"] = TRAINABLE["S2t"] + ("gain/sg",)
 TRAINABLE["S2tsp"] = TRAINABLE["S2t"] + ("gain/sg", "gain/pg")
 
+# HANDOFF 2026-10-10 Lane M5, M5.1 / M5.2 (tools/twin/k4x_arm.py): the masked star-Q31 fold
+# (gain/fg, init = gain/sg) and the radial Sym(mu_pre x kappa3) kappa4 terms (gain/rq, r22, r4,
+# init at the quenched-gain-law v'). Both need `bank` (star, starall) before them in --arm.
+import k4x_arm  # noqa: E402
+ARMS["fold"] = list(k4x_arm.PATCHES[:6])
+ARMS["rad"] = [k4x_arm.PATCHES[0]] + list(k4x_arm.PATCHES[6:])
+TRAINABLE["S2tsf"] = TRAINABLE["S2ts"] + ("gain/fg",)
+TRAINABLE["S2tsr"] = TRAINABLE["S2ts"] + ("gain/rq", "gain/r22", "gain/r4")
+TRAINABLE["S2tsfr"] = TRAINABLE["S2tsf"] + ("gain/rq", "gain/r22", "gain/r4")
+
 #: M4 neighbor head: 4 own + 5*K partners + 2 x (4 kernel means + log mass) + C+alpha + R+1.
 NBR_F, NBR_H = 4 + 5 * 8 + 12, 32
 
@@ -813,6 +823,10 @@ class Twin:
         self.base["gain"]["vg"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
         self.base["gain"]["sg"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
         self.base["gain"]["pg"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
+        self.base["gain"]["fg"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
+        _vp = torch.tensor(k4x_arm.vprime(depth), dtype=torch.float32, device=DEV)
+        for _k in ("rq", "r22", "r4"):
+            self.base["gain"][_k] = _vp.clone()
         if "nbr" in arm.split("+"):
             # M4 neighbor head; W2/b2 zero -> exact identity at init. W1 deterministic.
             g = torch.Generator(device="cpu").manual_seed(20261006)
@@ -898,6 +912,19 @@ def save_params(path, params):
 
 # ------------------------------------------------------------------ commands
 
+def _set_k4x(tw, a, params):
+    """M5.1 / M5.2 specs onto the module (`--fold`, `--rad`); learn=1 when gain/fg is installed."""
+    if getattr(a, "fold", ""):
+        assert hasattr(tw.mod, "_FOLD"), "--fold needs --arm ...+bank+fold"
+        f = k4x_arm.parse_fold(a.fold)
+        if params is not None and "gain/fg" in params:
+            f["learn"] = 1.0
+        tw.mod._FOLD = f
+    if getattr(a, "rad", ""):
+        assert hasattr(tw.mod, "_RAD"), "--rad needs --arm ...+rad"
+        tw.mod._RAD = k4x_arm.parse_rad(a.rad)
+
+
 def cmd_parity(a):
     """Twin forward vs the cupy probe (anatomy2's plain chain MSE on the same nets)."""
     tw = Twin(Path(a.cand))
@@ -928,7 +955,7 @@ def cmd_eval(a, tw=None, params=None, quiet=False):
         tw.install(params)
     data = Data()
     rows = panel(a.panel)[: a.n or None]
-    fin = []
+    fin, fstats = [], []
     mask = parse_mask(getattr(a, "mask", ""))
     stats = {} if getattr(a, "mask_stats", False) else None
     if getattr(a, "dress", ""):
@@ -945,6 +972,7 @@ def cmd_eval(a, tw=None, params=None, quiet=False):
         tw.mod._BANK = {k: 1 for k in a.bank.split(",")}
     if getattr(a, "shared_rank", 0):
         tw.mod._SHARED_RANK = a.shared_rank
+    _set_k4x(tw, a, params)
     if mask or stats is not None:
         assert hasattr(tw.mod, "_MASK"), "--mask needs --arm mask"
     with torch.no_grad():
@@ -953,13 +981,21 @@ def cmd_eval(a, tw=None, params=None, quiet=False):
             set_subst(tw, getattr(a, "subst", ""), split, i)
             if mask or stats is not None:
                 tw.mod._MASK = dict(mask, stats=[] if stats is not None else None)
+            if getattr(tw.mod, "_FOLDS", None) is not None:
+                tw.mod._FOLDS["stats"] = []
             fin.append(float(mse_rows(tw.forward(w), truth)[-1]))
+            if getattr(tw.mod, "_FOLD", None) and tw.mod._FOLD.get("stats"):
+                fstats.append(tw.mod._FOLDS["stats"])
             if stats is not None:
                 stats[f"{split}:{i}"] = tw.mod._MASK["stats"]
     r = {"panel": a.panel, "arm": getattr(a, "arm", ""), "n": len(fin),
          "raw_mse": float(np.mean(fin)), "per_net": fin,
          "dress": getattr(tw.mod, "_DRESS", None), "gm": getattr(tw.mod, "_GM", None),
          "k4l": getattr(tw.mod, "_K4L", None), "shared_rank": getattr(tw.mod, "_SHARED_RANK", None)}
+    r["fold"] = getattr(tw.mod, "_FOLD", None)
+    r["rad"] = getattr(tw.mod, "_RAD", None)
+    if fstats:
+        r["fold_stats"] = fstats
     if mask or stats is not None:
         r["mask"] = mask
         r["nets"] = [f"{s}:{i}" for s, i in rows]
@@ -1054,12 +1090,20 @@ def cmd_train(a):
         print(f"  bank {tw.mod._BANK}", flush=True)
     names = TRAINABLE[a.stage]
     params = {k: tw.leaf(k).clone().requires_grad_(True) for k in names}
+    _init = load_params(a.init) if a.init else {}
     if a.init:
-        for k, v in load_params(a.init).items():
+        for k, v in _init.items():
             if k in params:
                 params[k] = v.clone().requires_grad_(True)
             else:                                   # frozen, but not the file's value
                 params[k] = v
+    if "gain/fg" in names and "gain/fg" not in _init and "gain/sg" in params:
+        # M5.1: the fold gain starts at the star gain, so D4 and D31 start consistent
+        params["gain/fg"] = params["gain/sg"].detach().clone().requires_grad_(True)
+    _set_k4x(tw, a, params)
+    for _k in ("_FOLD", "_RAD"):
+        if getattr(tw.mod, _k, None) is not None:
+            print(f"  {_k[1:].lower()} {getattr(tw.mod, _k)}", flush=True)
     tw.install(params)
     # PER-TENSOR RELATIVE STEP SIZES. Adam moves every weight by ~lr whatever its
     # gradient, and the corrector's output page W3/b3 carries the target scale
@@ -1089,7 +1133,7 @@ def cmd_train(a):
     def evaluate(tag):
         ev = argparse.Namespace(panel=a.hold_panel, n=a.hold_n, cand=a.cand, params=None,
                                 subst=a.subst, mask=a.mask, k4l=a.k4l,
-                                shared_rank=a.shared_rank, bank=a.bank)
+                                shared_rank=a.shared_rank, bank=a.bank, fold=a.fold, rad=a.rad)
         r = cmd_eval(ev, tw=tw, params=params, quiet=True)
         msg = f"[{tag}] HOLDOUT-100 raw {r['raw_mse']:.6e} (n={r['n']})"
         print(msg, flush=True)
@@ -1217,6 +1261,10 @@ def main():
                     help="with --arm ...+k4l: 'core=1,k211=exact|trunc|none,rad=hub|exact|fold|none,e21b=0|1,old=keep|drop'")
     ap.add_argument("--shared-rank", type=int, default=0, help="override _SHARED_RANK (old tier)")
     ap.add_argument("--bank", default="", help="with --arm ...+bank: 'vg', 'star' or 'vg,star'")
+    ap.add_argument("--fold", default="",
+                    help="with --arm ...+bank+fold: 'tau=2,mode=ns|st|rec,scale=1,stats=1' (M5.1)")
+    ap.add_argument("--rad", default="",
+                    help="with --arm ...+rad: 'all' or 'q=1,d22=1,d4=1,scale=1' (M5.2)")
     ap.add_argument("--mask-stats", action="store_true",
                     help="eval with --arm mask: log per-layer alpha kept fractions per net")
     ap.add_argument("--zero-scale", type=float, default=1e-2,
