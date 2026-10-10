@@ -2827,4 +2827,33 @@ Cost model `docs/research/2026-10-10_flopmodel/` (run from a copy with the `~/sc
 
 | date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
 |---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
-| 2026-10-10 | `estimator_k3_v82a_block.py` | `b65a70a6` | DEV 0–2 bit-identical to v81d | = v81d | 0.17414 | 24,283 | local A/B on DEV net 3 (×2) v82a/v81d = **0.934** | VmPeak 6,152 MiB (WSL PASS 23/23 on the 3rd run; 2 runs before tripped the known "settled growth" allocator-noise check, VmPeak 6,157) | **3.2795e-09** (v81d graded raw × F/B) | PENDING | bit-identical | — | residual projected 24,283 × 11.2 µs = 0.272 s. setup 0.001 s. Package `025fcbcb…8ac2`, inner = source. First canary of UTC Oct 10. |
+| 2026-10-10 | `estimator_k3_v82a_block.py` | `b65a70a6` | DEV 0–2 bit-identical to v81d | = v81d | 0.17414 | 24,283 | local A/B on DEV net 3 (×2) v82a/v81d = **0.934** | VmPeak 6,152 MiB (WSL PASS 23/23 on the 3rd run; 2 runs before tripped the known "settled growth" allocator-noise check, VmPeak 6,157) | **3.2795e-09** (v81d graded raw × F/B) | **3.2794636795053282e-09** | bit-identical | — | residual projected 24,283 × 11.2 µs = 0.272 s. setup 0.001 s. Package `025fcbcb…8ac2`, inner = source. First canary of UTC Oct 10. |
+
+**v82a_block graded (#335165): 3.2794636795053282e-09, NEW BEST**, raw 1.883284035386623e-08 (= v81d's graded
+raw to every digit), 100 clean. −1.22 % vs v81d = the FLOP cut exactly; projection 3.2795e-09 hit to 4 digits.
+**The server bills `fnp.block` as flopscope 0.12.1 does** (the interpreter's F on the exact file is the graded F).
+
+### P5.2 step 1 + P5.1 item 6 — twin, VAL-100 unrefit (`experiments/2026-10-10_p5/d2/`)
+Base = v81d's twin arm (control reproduces 1.945887e-08 exactly). ρ_ℓ = d21e energy all/kept columns on kept
+rows, 1/σ⁴-weighted, FIT-100 control chain: 1.00 (L0–2), 1.12, 1.13, 1.24, 1.33, 1.34, 1.43, 1.52, 1.52, 1.60,
+1.61, 1.66, 1.68 (`rho.json`). Predictions in `experiments/2026-10-10_p5/PREDICTIONS.md`.
+
+| arm | VAL raw | vs control | worse on | strategist | worker |
+|---|---:|---:|---:|---|---|
+| control (Dz rows-only) | 1.945887e-08 | — | — | | |
+| D2 (rows+cols, unscaled d21e) | 2.113223e-08 | +8.60 % | 97/100 | ≈ +10 % | +7 to +10 % |
+| **D2 + ρ (= V8b, columns-only)** | **1.942682e-08** | **−0.16 %** | 38/100 | +1 to +4 % | +2 to +5 % |
+| D2c (diagnostic: corrector reads unmasked d21e) | 1.948220e-08 | +0.12 % | 62/100 | | +0.4 to +1.2 % |
+| D2 + ρ + Dleg (= V8, full two-sided) | 3.000652e-08 | **+54.2 %** | 100/100 | | +2.5 to +5.5 % |
+| Dz + Dleg ((ii)+(iii) alone) | 3.222216e-08 | **+65.6 %** | 100/100 | | +0.1 to +0.6 % |
+| item 6: C on prev D set (C=3) | 2.416543e-08 | +24.2 % | 97/100 | +0–0.5 % | |
+| item 6: same, dropped variances kept (C=4) | 2.164981e-08 | +11.3 % | 99/100 | | |
+
+Reading:
+- **The d21e loss was the whole cost of two-sided D**, and one scalar per layer repairs it (the calibrated
+  feature even beats the control slightly). V8b (D21 columns on the D set, legs untouched; interpreter −3.55 % F on
+  v81d) goes ahead without a refit gate; the refit batch R1 still runs it vs a matched control.
+- **Leg output rows on the D set (V8's (ii)+(iii)) is closed**: zeroing dead rows of the transported legs
+  (so D3 / star-D4 / births' diagonal of dead neurons vanish) costs +66 % on its own. Dead neurons' κ3 readouts are
+  not negligible to the chain. V8 (−8.84 %) is replaced by V8b (−3.55 %).
+- **Item 6 (covariance input pruning) is closed**, consistent with P2.4.2 (alive-block covariance ×13 / ×3.2).
