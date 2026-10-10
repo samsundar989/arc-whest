@@ -327,11 +327,25 @@ def predictions(candidate: Path, panel: str, n: int, jobs: int,
     total = len(panels.nets(panel, n))
     if total == 0:
         raise SystemExit(f"panel {panel!r} is empty")
-    jobs = max(1, min(jobs, total))
-    jobs = _fit_pool_to_memory(jobs, quiet, worker_gib)
-    # Contiguous chunks: each worker pays the dataset open once.
-    edges = [round(k * total / jobs) for k in range(jobs + 1)]
-    spans = [(edges[k], edges[k + 1]) for k in range(jobs) if edges[k] < edges[k + 1]]
+    # REPAIR. A run with failed nets is never cached as a result, but its good nets are
+    # kept in `.partial.npz`; the next run recomputes ONLY the failed indices (a local
+    # MemoryError under commit pressure is not the candidate's fault, and re-running a
+    # whole 100-net panel for two nets cost an hour twice on 2026-10-10).
+    part_p = cdir / f"n{n}.partial.npz"
+    repair = None
+    if part_p.exists() and not force:
+        with np.load(part_p) as d:
+            repair = (np.array(d["preds"]), np.array(d["truth"]), [int(i) for i in d["failed"]])
+        spans = [(i, i + 1) for i in repair[2]]
+        jobs = _fit_pool_to_memory(max(1, min(jobs, len(spans))), quiet, worker_gib)
+        if not quiet:
+            print(f"  [repair] {len(spans)} failed nets from a partial run: {repair[2]}", flush=True)
+    else:
+        jobs = max(1, min(jobs, total))
+        jobs = _fit_pool_to_memory(jobs, quiet, worker_gib)
+        # Contiguous chunks: each worker pays the dataset open once.
+        edges = [round(k * total / jobs) for k in range(jobs + 1)]
+        spans = [(edges[k], edges[k + 1]) for k in range(jobs) if edges[k] < edges[k + 1]]
 
     tmp = cdir / "_parts"
     tmp.mkdir(exist_ok=True)
@@ -403,14 +417,23 @@ def predictions(candidate: Path, panel: str, n: int, jobs: int,
             parts[lo] = (np.array(d["preds"]), np.array(d["truth"]))
     wall = time.perf_counter() - t0
 
-    preds = np.concatenate([parts[lo][0] for lo in sorted(parts)], axis=0)
-    truth = np.concatenate([parts[lo][1] for lo in sorted(parts)], axis=0)
+    if repair is not None:
+        preds, truth = repair[0].copy(), repair[1].copy()
+        for lo in parts:
+            preds[lo:lo + 1], truth[lo:lo + 1] = parts[lo]
+    else:
+        preds = np.concatenate([parts[lo][0] for lo in sorted(parts)], axis=0)
+        truth = np.concatenate([parts[lo][1] for lo in sorted(parts)], axis=0)
     # NEVER CACHE A RUN THAT HAD FAILURES. A failed net is stored as the zeros
     # the grader would score, which is correct for reporting but poison to reuse:
     # the next run would hit the cache, skip the compute, and re-report a number
     # produced by a transient local OOM as though it were the candidate's.
     if not errors:
         np.savez_compressed(blob, preds=preds, truth=truth)
+        part_p.unlink(missing_ok=True)
+    else:
+        np.savez_compressed(part_p, preds=preds, truth=truth,
+                            failed=np.array(sorted(int(e["i"]) for e in errors)))
     meta = {"sha256": sha, "panel": panel, "n": int(preds.shape[0]),
             "workers": len(spans), "blas_threads_each": per,
             "wall_s": round(wall, 1), "per_net_s": round(wall / total, 2),
