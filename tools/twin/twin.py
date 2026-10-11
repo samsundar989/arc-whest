@@ -718,7 +718,9 @@ ARMS["bank"] += [
      "                         dG * _i4,\n"
      "                         (D4 - dG * metric) * _i4], axis=1)\n"
      "        _cf = _cf - _cf.mean(axis=0)[None, :]\n"
-     "        _cf = _cf / (fnp.sqrt((_cf * _cf).mean(axis=0)) + 1e-6)[None, :]\n"
+     "        # eps INSIDE the sqrt: a zero-spread feature (star part where sg = 0, D21 at\n"
+     "        # layer 0) made d sqrt(0) = inf -> NaN gradient -> NaN head (jobs 2637, 2644)\n"
+     "        _cf = _cf / fnp.sqrt((_cf * _cf).mean(axis=0) + 1e-12)[None, :]\n"
      "        _cf = fnp.tanh(_cf * (1.0 / 3.0)) * 3.0   # bounded: job 2637 diverged unbounded\n"
      "        mu_out = mu_out + sigma * (_cf @ _TWG['cf'][layer_index])\n"
      "    if last_layer:\n        return (mu_out, None, None, 0.0, dG)\n"),

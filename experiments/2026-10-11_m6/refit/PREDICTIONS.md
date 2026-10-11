@@ -135,3 +135,12 @@ lever.
 
 Rerun at `--lr-mult 100` (1e-4 per step, up to about 0.01 of movement over the epoch). Same
 prediction and kill rule.
+
+## cfeat root cause (~11:45 local): a NaN gradient, not instability
+
+The retry (2644) hit the same VAL, 9.061023e-01, to 7 digits: that is the MSE of a zeroed (NaN)
+prediction. A zero-spread feature (the star part where sg = 0, D21 sums at layer 0) gives
+d√0 = ∞, so the first backward step produces a NaN gradient and a NaN head.
+
+Unit test: the old normaliser's gradient is non-finite and the new one, √(mean + 1e-12), is
+finite. Fixed in twin.py and requeued. The tanh bound and lr-mult 1 stay.
