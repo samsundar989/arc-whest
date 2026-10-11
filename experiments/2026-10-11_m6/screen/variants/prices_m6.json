@@ -46,5 +46,23 @@
   "flops": 363734467381,
   "F/B": 0.16540728546760874,
   "ops": 22498
+ },
+ "fold+lateage9": {
+  "file": "est_fold_lateage9.py",
+  "flops": 371645394583,
+  "F/B": 0.1690047586557739,
+  "ops": 22323
+ },
+ "fold+lateage11": {
+  "file": "est_fold_lateage11.py",
+  "flops": 367248009511,
+  "F/B": 0.16700505944345423,
+  "ops": 22323
+ },
+ "fold+lateage13": {
+  "file": "est_fold_lateage13.py",
+  "flops": 364016477217,
+  "F/B": 0.16553552869345367,
+  "ops": 22614
  }
 }

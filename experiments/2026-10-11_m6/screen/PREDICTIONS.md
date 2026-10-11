@@ -36,3 +36,23 @@ Expected hand-overs after the unrefit screen:
 - jsvd most likely misses its −1.08 % break-even on fold;
 - J3 most likely clears its −0.24 % break-even narrowly;
 - p2svd will not reach −0.3 %, so it is not handed over.
+
+## Addendum, ~04:00 UTC: M6.4 late-only age 6 (recorded BEFORE the screen)
+
+Prices on fold (F/B 0.16554), from `m6levers.lateage(L0)`: the join bar becomes 6 from layer L0 on.
+
+| variant | lineages kept to age 6 | F/B | ΔF | break-even Δraw |
+|---|---|---:|---:|---:|
+| lateage9 | born ≥ 4 | 0.16900 | +2.09 % | −2.05 % |
+| lateage11 | born ≥ 6 | 0.16701 | +0.89 % | −0.88 % |
+| lateage13 | born ≥ 8 | 0.16554 | ≈ 0 | — (a no-op) |
+
+lateage13 is free because `J=2` already skips the joins at layers 13–14. The handoff's "born ≥ 8"
+lineages are already exact past age 5.
+
+Prediction, unrefit on fold (age6 everywhere gave −5.86 %, at +4.83 % F):
+- lateage9: −2.5 to −4 %, net −0.5 to −2 %;
+- lateage11: −1 to −2 %, net −0.1 to −1.1 %.
+
+Rationale: the anatomy puts the κ3 error late, so the gain per FLOP should rise as the cut moves
+later.
