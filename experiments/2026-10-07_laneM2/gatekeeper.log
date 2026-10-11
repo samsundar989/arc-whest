@@ -1,0 +1,56 @@
+20:04:46 [0] submitted #2444: M5 asym + dressing s, nets 0:4
+20:09:58 [0] #2444 finished, exit 0
+20:10:04 [1] submitted #2445: M5 12 arms, nets 4:7
+Traceback (most recent call last):
+  File "C:\Users\samsu\Documents\arc-whest-lane-m\experiments\2026-10-07_laneM2\gatekeeper.py", line 97, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "C:\Users\samsu\Documents\arc-whest-lane-m\experiments\2026-10-07_laneM2\gatekeeper.py", line 86, in main
+    log(f"[{k}] submitted #{jid}: {desc}")
+    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\samsu\Documents\arc-whest-lane-m\experiments\2026-10-07_laneM2\gatekeeper.py", line 59, in log
+    print(f"{datetime.now():%H:%M:%S} {msg}", flush=True)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\samsu\AppData\Local\Python\pythoncore-3.14-64\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2297' in position 52: character maps to <undefined>
+20:29:27 [3] submitted #2447: M5 12 arms, nets 7:10
+20:39:52 [3] #2447 finished, exit 0
+20:40:58 [4] submitted #2449: M5 12 arms, nets 10:13
+20:52:30 [4] #2449 finished, exit 0
+00:08:16 [5] submitted #2454: M5 12 arms, nets 13:16
+02:34:21 [8] submitted #2455: M6 dense oracle, nets 0:3
+02:44:19 [8] #2455 finished, exit 0
+02:44:19 ALL DONE
+02:52:44 [9] submitted #2458: M6 dense oracle, nets 3:6
+03:34:17 [9] #2458 finished, exit 0
+03:34:17 ALL DONE
+03:34:32 [10] submitted #2462: M6 e2e E21 forms, nets 0:4
+04:00:31 [10] #2462 finished, exit 0
+04:00:37 [11] submitted #2463: M6 e2e E21 forms, nets 4:8
+04:28:26 [11] #2463 finished, exit 0
+04:28:31 [12] submitted #2464: M6 e2e E21 forms, nets 8:12
+04:44:10 [12] #2464 finished, exit 0
+04:46:17 [13] submitted #2466: M6 e2e E21 forms, nets 12:16
+05:29:24 [13] #2466 finished, exit 143
+05:29:24 [13] FAILED #2466; stopping (resume with: gatekeeper.py 14 after fixing)
+05:37:36 [6] submitted #2467: M5 loop/late-gain arms, nets 0:8
+05:48:26 [6] #2467 finished, exit 0
+05:48:31 [7] submitted #2468: M5 loop/late-gain arms, nets 8:16
+05:59:18 [7] #2468 finished, exit 0
+05:59:18 ALL DONE
+05:59:23 [14] submitted #2469: M7 MC N=1e9, nets 0:2
+06:13:23 [14] #2469 finished, exit 0
+06:13:28 [15] submitted #2470: M7 MC N=1e9, nets 2:4
+06:27:29 [15] #2470 finished, exit 0
+06:27:34 [16] submitted #2471: M7 MC N=1e9, nets 4:6
+06:41:35 [16] #2471 finished, exit 0
+06:41:40 [17] submitted #2472: M7 MC N=1e9, nets 6:8
+06:55:40 [17] #2472 finished, exit 0
+06:55:40 ALL DONE
+09:37:43 [18] submitted #2473: M6 e2e E21b diag-only (v77 port test), nets 0:8
+11:29:19 [18] #2473 finished, exit 0
+11:29:26 [19] submitted #2475: M6 e2e E21b diag-only (v77 port test), nets 8:16
+11:32:38 [19] #2475 finished, exit 143
+11:32:38 [19] FAILED #2475; stopping (resume with: gatekeeper.py 20 after fixing)
