@@ -2949,4 +2949,8 @@ carries one `hcols`) — a structural change, handed to the strategist. **v83 = 
 
 | date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
 |---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
-| 2026-10-11 | `estimator_k3_v82c_r2.py` | `a648ba07` | FRESH-A | 1.943554e-08 (floor-free 1.868790e-08; −0.46 % vs v82c_r1) | 0.16508 | 22,375 | same code as v82c_r1/v82b (constants only) | VmPeak 6,027 MiB (WSL PASS, same hash) | **3.0275e-09** | PENDING #335298 | **1.0046× vs v82c_r1** (Δ +1.480e-11, t95 [+1.310e-11, +1.650e-11]) | 96/100 | R2 refit baked (`build_star --all` + `build_v82 --items 0,1,4,5,7`). Parity file↔arm DEV 1.62e-4. residual 0.248 s. Package `cf1b2464…8d03`, inner = source. First canary of UTC Oct 11. Predictions: worker −0.25 to −0.5 % raw, ≈ 3.03e-09; strategist none specific. |
+| 2026-10-11 | `estimator_k3_v82c_r2.py` | `a648ba07` | FRESH-A | 1.943554e-08 (floor-free 1.868790e-08; −0.46 % vs v82c_r1) | 0.16508 | 22,375 | same code as v82c_r1/v82b (constants only) | VmPeak 6,027 MiB (WSL PASS, same hash) | **3.0275e-09** | **3.032324364499572e-09** (#335298) | **1.0046× vs v82c_r1** (Δ +1.480e-11, t95 [+1.310e-11, +1.650e-11]) | 96/100 | R2 refit baked (`build_star --all` + `build_v82 --items 0,1,4,5,7`). Parity file↔arm DEV 1.62e-4. residual 0.248 s. Package `cf1b2464…8d03`, inner = source. First canary of UTC Oct 11. Predictions: worker −0.25 to −0.5 % raw, ≈ 3.03e-09; strategist none specific. |
+
+**v82c_r2 graded (#335298): 3.032324364499572e-09, NEW BEST**, raw 1.8368436656146515e-08, 100 clean. −0.46 % vs v82c_r1
+(raw −0.46 %, exactly the FRESH-A paired gain), −8.67 % vs v81d. +0.16 % vs the FRESH-A projection 3.0275e-09.
+`tools/ev.py --best-graded` updated.
