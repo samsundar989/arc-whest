@@ -3,7 +3,12 @@
 Plan rev 23 = `docs/research/2026-10-10_evening_review.md` (§0, §2, §5, §6), on PLAN rev 18 §5 gates.
 **Lane P5 and Lane M5 are COMPLETE.** Active: Lane P6 (main) per `docs/HANDOFF_2026-10-11_LANE_P6.md`;
 Lane M6 (branch `lane-m`) per `docs/HANDOFF_2026-10-11_LANE_M6.md`. Exact pricing tool:
-`docs/research/2026-10-11_p6price/`. Next: P6.0b (merge lane-m), P6.0c (v82c_r1ws B slot), P6.0d (R2), P6.1 (v83).
+`docs/research/2026-10-11_p6price/`. **Oct 11 ~03:30 UTC:** lane-m merged (480dc74; ρ reproduces exactly). v82c_r2 (R2 refit, FRESH-A −0.46 % vs r1,
+96/100) submitted **#335298**, projected 3.0275e-9; v82c_r2ws (A/B slot) on FRESH-A. **P6.1 kink-active H CLOSED**
+(Hfull +65 % unrefit: always-on residual rows + S3 carry the chain; RESULTS § P6) → **v83 = v82c_r2 + fold**,
+R3 refit (`fold` vs `ctl`, from R2) on pod `acc7entl4kttqk` in `/workspace/p6/r3`, ETA ≈ 07:00 UTC; build with
+`tools/build_v83.py --variant fold`. Next: P6.3 per-shape depth (od12 −1.21 % F on fold) wall A/B
+(`tools/wall_ab.py`) + DEV raw check; P6.2 spend items as M6 evidence arrives.
 
 # (history) CURRENT_STATE — 2026-10-10 (plan rev 22, Lane P5)
 
