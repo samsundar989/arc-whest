@@ -124,3 +124,14 @@ Prediction unchanged (−0.1 to −0.6 %); kill if < 0.3 %.
 age6+J3 is neutral (+0.10 % marginal), so J3 matters only if age 6 is rejected. Its unrefit
 evidence (net −0.40 %) and the p3 refit read (−0.78 % at matched step 84) cover that case. The GPU
 time goes to M6.3.
+
+## acov at lr-mult 1000 FAILED to train (job 2641); rerun at 100
+
+VAL by step: 1.8510 (init) → 60.77 (step 28) → 2.0613 → 1.9799 → 1.9321e-8 (step 112).
+
+That is +4.54 % vs ctl at step 112. The spike at 1e-3 steps on α²-multiplied gains (α² ≲ 9) never
+recovered. Log kept in `refit_acov_lr1000/`. This is a step-size failure, not a verdict on the
+lever.
+
+Rerun at `--lr-mult 100` (1e-4 per step, up to about 0.01 of movement over the epoch). Same
+prediction and kill rule.
