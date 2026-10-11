@@ -2995,3 +2995,5 @@ R4 constants + od16 (the od16 patch is byte-identical on r4) → FRESH-A paired 
 (raw −0.32 %), −12.1 % vs v81d. +0.12 % vs the FRESH-A projection 2.9156e-09. `tools/ev.py --best-graded` updated.
 
 **R5** (fold continued 2 epochs from R4): VAL-100 best **1.836956e-08** (step 224) vs R4 1.843113e-08 = **−0.33 %** (≥ 0.3 %).
+
+R5 parity file↔arm DEV (pod, `estimator_k3_v83_r5od16.py` vs R5 arm): 1.805451e-08 vs 1.804997e-08 = **2.5e-4**.
