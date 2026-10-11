@@ -79,5 +79,11 @@ def inert():
     ev("r3_cfeat_inert10", "cfeat", P_R3, n=10)
 
 
+def fin(*names):
+    """Per-net VAL-100 of each finished refit's params_best (paired comparison vs ctl)."""
+    for nm in names:
+        ev(f"fin_{nm}", nm, str(HERE / f"refit_{nm}" / "params_best.npz"))
+
+
 if __name__ == "__main__":
-    {"parity": parity, "inert": inert, "refit": lambda: refit(sys.argv[2])}[sys.argv[1]]()
+    {"parity": parity, "inert": inert, "fin": lambda: fin(*sys.argv[2].split(",")), "refit": lambda: refit(sys.argv[2])}[sys.argv[1]]()
