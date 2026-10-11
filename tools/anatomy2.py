@@ -386,7 +386,7 @@ ARCH_ARMS = {"T0": {"_SHARED_ON": False},
 
 
 def run_net(mod, est, ctl, wf, width, depth, truth, post_cov, mg, gate_p, gt, kp, xp,
-            k4post=None, quick=False):
+            k4post=None, quick=False, only=None):
     ch = Chain(mod, est, wf, width, depth)
     # `predict` clamps at 0 (post-ReLU means are non-negative); so do we.
     host = lambda a: np.maximum(
@@ -445,7 +445,11 @@ def run_net(mod, est, ctl, wf, width, depth, truth, post_cov, mg, gate_p, gt, kp
         ctl.sub = frozenset()
         return per
 
-    if not quick:
+    if only:
+        # --only: just these full-range rolled arms (objects of ROLLED), nothing else
+        for obj in only:
+            res["rolled"][f"{obj}@{depth - 1}"] = rolled(ROLLED[obj], depth - 1)
+    elif not quick:
         for obj, names in ROLLED.items():
             res["rolled"][f"{obj}@{depth - 1}"] = rolled(names, depth - 1)
         for obj in ROLLED_PREFIX_OBJS:
@@ -496,6 +500,10 @@ def main(argv=None) -> int:
     ap.add_argument("--out")
     ap.add_argument("--verify", action="store_true")
     ap.add_argument("--quick", action="store_true", help="main pass only (timing)")
+    ap.add_argument("--only", default="", help="comma list of ROLLED objects: main pass + "
+                    "only these full-range rolled arms (no branches, k4 or arch arms)")
+    ap.add_argument("--set", action="append", default=[], metavar="NAME=VALUE",
+                    help="override a module global of the patched candidate (literal value)")
     ap.add_argument("--report", default="")
     a = ap.parse_args(argv)
     if a.report:
@@ -523,6 +531,16 @@ def main(argv=None) -> int:
     mod = load_module(patched, "_anatomy2_candidate")
     ctl = Ctl(xp)
     mod._A2 = ctl
+    import ast
+    for kv in a.set:
+        k, v = kv.split("=", 1)
+        if not hasattr(mod, k):
+            raise SystemExit(f"anatomy2 --set: candidate has no global {k}")
+        setattr(mod, k, ast.literal_eval(v))
+    only = tuple(x for x in a.only.split(",") if x)
+    for x in only:
+        if x not in ROLLED:
+            raise SystemExit(f"anatomy2 --only: unknown rolled object {x}")
     est = mod.Estimator()
 
     rows = panels.nets(a.panel)[a.lo:a.lo + a.n]
@@ -589,7 +607,8 @@ def main(argv=None) -> int:
         out.write_text(json.dumps(rep, indent=1))
         return 0 if (a_ok and b_ok and c_err < 1e-5) else 1
 
-    res = {"candidate": cand.name, "panel": a.panel, "backend": BACKEND, "nets": {}}
+    res = {"candidate": cand.name, "panel": a.panel, "backend": BACKEND, "set": a.set,
+           "only": list(only), "nets": {}}
     if out.exists():
         res = json.loads(out.read_text(encoding="utf-8"))
     setup_done = False
@@ -609,7 +628,8 @@ def main(argv=None) -> int:
         kp = L.post_mean()
         t1 = time.time()
         r, _pred = run_net(mod, est, ctl, w32, width, depth, truth, post_cov, mg, gate_p,
-                           tr, kp, xp, k4post=L.post_k4(), quick=a.quick)
+                           tr, kp, xp, k4post=L.post_k4(), quick=a.quick or bool(only),
+                           only=only)
         r["name"] = L.name
         r["seconds"] = round(time.time() - t1, 1)
         res["nets"][key] = r

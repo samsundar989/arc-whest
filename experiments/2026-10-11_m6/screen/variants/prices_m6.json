@@ -1,0 +1,50 @@
+{
+ "fold+Habs+J3": {
+  "file": "est_fold_Habs_J3.py",
+  "flops": 343357388277,
+  "F/B": 0.15614086272626082,
+  "ops": 22806
+ },
+ "fold+Habs+age6": {
+  "file": "est_fold_Habs_age6.py",
+  "flops": 359248395357,
+  "F/B": 0.16336725609880887,
+  "ops": 22592
+ },
+ "fold+Habs+jsvd": {
+  "file": "est_fold_Habs_jsvd.py",
+  "flops": 346267863007,
+  "F/B": 0.15746439339955032,
+  "ops": 22233
+ },
+ "fold+Habs+p2svd": {
+  "file": "est_fold_Habs_p2svd.py",
+  "flops": 342256189587,
+  "F/B": 0.15564009553918368,
+  "ops": 22977
+ },
+ "fold+J3": {
+  "file": "est_fold_J3.py",
+  "flops": 365222694751,
+  "F/B": 0.16608405292163297,
+  "ops": 22327
+ },
+ "fold+age6": {
+  "file": "est_fold_age6.py",
+  "flops": 381613795475,
+  "F/B": 0.17353786255398518,
+  "ops": 22113
+ },
+ "fold+jsvd": {
+  "file": "est_fold_jsvd.py",
+  "flops": 367911494593,
+  "F/B": 0.16730677752684642,
+  "ops": 21754
+ },
+ "fold+p2svd": {
+  "file": "est_fold_p2svd.py",
+  "flops": 363734467381,
+  "F/B": 0.16540728546760874,
+  "ops": 22498
+ }
+}

@@ -57,3 +57,23 @@ Bands (share removed, out of the full-range value for each object):
 Decision rule (handoff): a chunk of ≥ 10 % that maps to a mechanism we can build and refit
 in three days goes to M6.4. My prior is that κ3 band 12–15 will clear 10 %, and that the
 mechanism is "keep late lineages exact longer" (age 6 for late-born lineages / J = 4).
+
+## Addendum, ~02:55 UTC: compensation localisation (recorded BEFORE the run)
+
+Interim on 4 nets (job 2595, nets 0–3). Rolled D21 @2..16 gives −43.7 % (it HURTS), k3 −2.6 %,
+nomu +36.6 % (v59: +80.3 %), all +97.1 %. Reading: the learned parts the chain has acquired since
+v59 are fitted to the chain's biased D21, so exact D21 breaks the compensation.
+
+Run: nets 0–3, rolled arms D21, k3, nomu and all only, with one component switched off at a
+time. Each knockout is its own base (the chain MSE changes too), and the share is measured
+against that base.
+- `corr` = `_CORR_ON=False`: the corrector reads d21e.
+- `dress` = `_DRESS_C2=_DRESS_D21=_DRESS_D22=0`: the dressed leg reads D21.
+- `kas` = `_KAS_ON=False`: the D-mask truncates the D21 rows formed.
+- `alloff` = all three.
+
+Prediction:
+- dress is the main culprit: D21 turns positive (≥ +5 %) with dress off.
+- corr is second.
+- kas alone changes the D21 share by < 10 points.
+- alloff restores nomu to ≥ 70 %.
