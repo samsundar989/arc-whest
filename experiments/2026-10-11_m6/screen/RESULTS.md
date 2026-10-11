@@ -46,3 +46,20 @@ Controls: fold 1.88375e-8 (F/B 0.16554); fold+Habs 3.15284e-8 (F/B 0.15577).
 The refits for age6, jsvd and J3 each need a same-recipe matched control. On which base, fold
 or the H chain P6.1 picks, is P's call given R3. The jsvd refit detaches the SVD basis.
 Hand-over: price.py names `fold+Habs+age6`, `fold+Habs+jsvd`, `fold+Habs+J3`.
+
+## M6.4 late-only age 6 (job 2623, unrefit VAL-100 vs fold, R2)
+
+| arm | raw MSE | Δraw | break-even | ΔF | net score | per-net Δ ± se | wins |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| fold+lateage9 (born ≥ 4) | 1.83045e-8 | −2.83 % | −2.05 % | +2.09 % | −0.80 % | −2.82 ± 0.21 % | 89/100 |
+| fold+lateage11 (born ≥ 6) | 1.85585e-8 | −1.48 % | −0.88 % | +0.89 % | −0.61 % | −1.47 ± 0.14 % | 87/100 |
+| fold+age6 (all), for reference | 1.77337e-8 | −5.86 % | −4.61 % | +4.83 % | **−1.31 %** | −5.82 ± 0.27 % | 99/100 |
+
+- lateage13 (born ≥ 8) is a no-op: `J=2` already skips the joins at layers 13–14.
+- Gain per unit of F (|Δraw| / ΔF) rises toward the late layers: 1.21 for all, 1.35 from born ≥ 4,
+  1.66 from born ≥ 6. This agrees with the anatomy.
+- The variants are nested and age 6 everywhere has the largest net gain, so **age 6 (all) is the
+  pick**. lateage9 and lateage11 are fallbacks if age 6's wall time or VmPeak (~+700 MiB on
+  v53) fails a gate.
+- Both predictions were in range: lateage9 −2.83 % (predicted −2.5 to −4), lateage11 −1.48 %
+  (−1 to −2).
