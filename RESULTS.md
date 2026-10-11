@@ -2946,3 +2946,7 @@ irrelevant (Habs +67.3 % ≈ lit+full +65.1 %). Every habs/hasym variant is **cl
 cuts are not free either (τ2.0 +5.95 % vs fold, unrefit) — fail the marginal rule by ~3×; not refit.
 Shipping H-literal needs two column sets in the lineage (A_L/w2b/hubs on one, Lb/sb on another: today `_append`
 carries one `hcols`) — a structural change, handed to the strategist. **v83 = v82c_r2 + fold** (R3 `fold` arm).
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-11 | `estimator_k3_v82c_r2.py` | `a648ba07` | FRESH-A | 1.943554e-08 (floor-free 1.868790e-08; −0.46 % vs v82c_r1) | 0.16508 | 22,375 | same code as v82c_r1/v82b (constants only) | VmPeak 6,027 MiB (WSL PASS, same hash) | **3.0275e-09** | PENDING #335298 | **1.0046× vs v82c_r1** (Δ +1.480e-11, t95 [+1.310e-11, +1.650e-11]) | 96/100 | R2 refit baked (`build_star --all` + `build_v82 --items 0,1,4,5,7`). Parity file↔arm DEV 1.62e-4. residual 0.248 s. Package `cf1b2464…8d03`, inner = source. First canary of UTC Oct 11. Predictions: worker −0.25 to −0.5 % raw, ≈ 3.03e-09; strategist none specific. |
