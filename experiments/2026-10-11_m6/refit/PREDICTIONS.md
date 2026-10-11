@@ -105,3 +105,16 @@ no eval beat the unrefit start. At matched step 84 it reads 1.836519e-8 vs ctl 1
 ctl ran the full 112 steps (its step 84 eval beat its start by 6e-13). From now on every arm runs
 `--patience 99`, as R4 does, so the epochs match. acov (2634) was cancelled one minute in and
 requeued, and J3 is rerun.
+
+## cfeat diverged (job 2637), retry (~09:00 local)
+
+Train MSE went 1.75e-8 at step 1 → 0.98 at step 5, and VAL was 0.906 at step 28; the job was
+cancelled. The unbounded z-scores (near-constant features turn float noise into huge values) plus
+the chain feedback blew up within the first few Adam steps. The log is kept in `refit_cfeat_div/`.
+
+Retry:
+- z → 3·tanh(z/3), denominator rms + 1e-6;
+- `--lr-mult gain/cf=1` (about 1e-6 per step);
+- inertness is unaffected (zero head ⇒ identity).
+
+Prediction unchanged (−0.1 to −0.6 %); kill if < 0.3 %.
