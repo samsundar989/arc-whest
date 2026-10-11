@@ -26,6 +26,27 @@ sys.path.insert(0, str(ROOT / "docs/research/2026-10-11_p6price"))
 import price  # noqa: E402
 
 
+def patches(variant: str):
+    """A price.py VARIANTS key, or '+'-joined atoms: fold, od<L>, J<k>, age<k>, jsvd."""
+    if variant in price.VARIANTS:
+        return price.VARIANTS[variant]
+    out = []
+    for at in variant.split("+"):
+        if at == "fold":
+            out.append(price.fold)
+        elif at == "jsvd":
+            out.append(price.join_svd)
+        elif at.startswith("od"):
+            out.append(price.optdepth(int(at[2:])))
+        elif at.startswith("age"):
+            out.append(price.age(int(at[3:])))
+        elif at.startswith("J"):
+            out.append(price.J(int(at[1:])))
+        else:
+            raise SystemExit(f"unknown atom {at!r} in {variant!r}")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--params", required=True)
@@ -42,7 +63,7 @@ def main():
                         "--base", str(star), "--out", str(v82)], check=True, cwd=ROOT,
                        stdout=subprocess.DEVNULL)
         src = v82.read_text(encoding="utf-8")
-    for p in price.VARIANTS[a.variant]:
+    for p in patches(a.variant):
         src = p(src)
     z = np.load(a.params)
     if "gain__fg" in z.files:
