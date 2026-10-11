@@ -1,4 +1,11 @@
-# CURRENT_STATE — 2026-10-10 (plan rev 22, Lane P5)
+# CURRENT_STATE — 2026-10-11 (plan rev 23, Lane P6)
+
+Plan rev 23 = `docs/research/2026-10-10_evening_review.md` (§0, §2, §5, §6), on PLAN rev 18 §5 gates.
+**Lane P5 and Lane M5 are COMPLETE.** Active: Lane P6 (main) per `docs/HANDOFF_2026-10-11_LANE_P6.md`;
+Lane M6 (branch `lane-m`) per `docs/HANDOFF_2026-10-11_LANE_M6.md`. Exact pricing tool:
+`docs/research/2026-10-11_p6price/`. Next: P6.0b (merge lane-m), P6.0c (v82c_r1ws B slot), P6.0d (R2), P6.1 (v83).
+
+# (history) CURRENT_STATE — 2026-10-10 (plan rev 22, Lane P5)
 
 Plan rev 22 = `docs/research/2026-10-10_pivot_rev22.md` (§3–§6), on top of PLAN rev 18 §5 gates.
 Lane P5 (main) per `docs/HANDOFF_2026-10-10_LANE_P5.md`; Lane M5 (branch `lane-m`) per
