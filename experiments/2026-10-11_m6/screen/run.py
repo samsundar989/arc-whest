@@ -5,8 +5,10 @@ import sys
 from pathlib import Path
 
 R = Path(__file__).resolve().parents[3]
+# twin.py is identical on main and lane-m; main holds the full-split weight memmaps (cache/twin)
+MAIN = Path("C:/Users/samsu/Documents/arc-whest")
 OUT = Path(__file__).resolve().parent
-tw = [sys.executable, "-u", str(R / "tools/twin/twin.py"), "eval", "--panel", "hold100"]
+tw = [sys.executable, "-u", str(MAIN / "tools/twin/twin.py"), "eval", "--panel", "hold100"]
 for nm in sys.argv[1].split(","):
     tag = nm.replace("+", "_")
     js = OUT / f"val_raw_{tag}.json"
@@ -14,4 +16,4 @@ for nm in sys.argv[1].split(","):
         continue
     print("raw", nm, flush=True)
     subprocess.run(tw + ["--raw", "--cand", str(OUT / f"variants/est_{tag}.py"), "--json", str(js)],
-                   check=True, cwd=R)
+                   check=True, cwd=MAIN)

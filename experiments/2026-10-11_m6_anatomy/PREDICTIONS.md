@@ -77,3 +77,29 @@ Prediction:
 - corr is second.
 - kas alone changes the D21 share by < 10 points.
 - alloff restores nomu to ≥ 70 %.
+
+## Addendum, ~02:40 UTC: localisation result, and the KAS-off anatomy (predicted BEFORE the run)
+
+Localisation on nets 0–3, rolled D21 / k3 / nomu shares:
+- none: −43.7 / −2.6 / 36.6;
+- corr off: +8.2 / +44.3 / 96.2;
+- dress off: −29.7 / +19.4 / 51.5;
+- KAS off: +7.5 / +34.5 / 74.1;
+- all off: +14.4 / +59.7 / 97.3.
+
+**My dress-first prediction was wrong. KAS is the culprit:**
+- with KAS off, the chain MSE barely moves (1.6652e-8 vs 1.6685e-8);
+- with KAS on, the D-mask leaves the chain's D21 rows unformed for dropped neurons, and the
+  corrector is fitted with d21e = 0 there (`_kz`);
+- substituting the full true D21 then feeds rows the downstream path never sees.
+
+The corrector is the second compensator: with corr off, nomu reaches 96 %.
+
+So the interpretable anatomy is the full 20-net run with `_KAS_ON=False`, at the same base MSE.
+
+Prediction for that run (rolled 2..16 shares):
+- var 40–44 %; C11 25–29 %; cov 42–46 % (KAS barely touches covariance);
+- D3 15–25 %; D21 +3 to +12 %; k3 30–40 %;
+- k4 8–14 %;
+- nomu 70–78 %;
+- band 12–15 carries ≥ 50 % of k3.
