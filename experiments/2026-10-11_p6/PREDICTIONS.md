@@ -11,3 +11,8 @@ then `build_v82 --items 0,1,4,5,7` (the same pipeline rebuilds v82c_r1 byte for 
 ## v82c_r1ws / v82c_r2ws (P6.0c, B slot)
 - strategist: v82c_r1ws ≈ 3.12e-09.
 - worker: r1ws ≈ 3.12–3.13e-09 (v82b_ws/v82b ratio 1.0233 applied to 3.0464e-09 → 3.117e-09); r2ws ≈ that × (1 − 0.004).
+
+## 2026-10-11 03:00 UTC — v82c_r2ws (P6.0c A/B slot; replaces v82c_r1ws, which r2 dominates)
+- worker: FRESH-A raw ≈ v82c_r2's (block 40 changes float32 rounding only; v82bws/v82b raw ratio 1.0000);
+  paired vs v82b_bundlews ≈ 1.012×; F/B 0.16895, ops 20,269; graded ≈ 3.10e-09 (3.1433e-09 × 0.9873).
+- strategist: (for r1ws) ≈ 3.12e-09.
