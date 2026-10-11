@@ -84,3 +84,14 @@ Inertness: zero head = ctl bit for bit (10 nets).
 
 Prediction vs ctl: −0.1 to −0.6 % raw. B2: local features explain only 6–8 % of the orthogonal
 error, and the MLP already reads d21e. Kill if < 0.3 % better.
+
+## jsvd refit, restarted (~07:10 local)
+
+Job 2626 stalled: cuSOLVER's default driver failed to converge on the join's X, and there was no
+training step in 45 min. It was cancelled.
+
+Shim fix: the SVD runs outside autograd with the `gesvd` driver. The singular values keep their
+exact first-order gradient through diag(Uᵀ a V). The jsvd patch uses only the detached basis.
+
+Parity re-check: `r2_jsvd_gesvd` must equal r2_jsvd (1.854913e-8) to within 0.01 %. Then the
+refit is requeued. The prediction is unchanged.

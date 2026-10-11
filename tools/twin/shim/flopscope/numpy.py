@@ -227,10 +227,18 @@ class linalg:
         if not compute_uv:
             s = _t.linalg.svdvals(a)
             return s if k is None else s[..., :k]
-        u, s, vh = _t.linalg.svd(a, full_matrices=False)
+        # M6.2: decompose OUTSIDE autograd with cuSOLVER's robust `gesvd` driver. The default
+        # driver failed to converge on the join's X during a refit (job 2626: no training step
+        # in 45 min). The singular values get back their exact first-order gradient as
+        # diag(U^T a V), which is what autograd would give them anyway.
+        drv = {"driver": "gesvd"} if a.is_cuda else {}
+        with _t.no_grad():
+            u, s, vh = _t.linalg.svd(a.detach(), full_matrices=False, **drv)
         if k is not None:
             u, s, vh = u[..., :k], s[..., :k], vh[..., :k, :]
-        return u.detach(), s, vh.detach()
+        if a.requires_grad:
+            s = ((u.transpose(-2, -1) @ a) * vh).sum(dim=-1)
+        return u, s, vh
 
     @staticmethod
     def eigh(a, UPLO="L"):

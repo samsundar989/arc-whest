@@ -86,4 +86,5 @@ def fin(*names):
 
 
 if __name__ == "__main__":
-    {"parity": parity, "inert": inert, "fin": lambda: fin(*sys.argv[2].split(",")), "refit": lambda: refit(sys.argv[2])}[sys.argv[1]]()
+    {"parity": parity, "inert": inert,
+     "ev": lambda: ev(sys.argv[2], sys.argv[3], {"r2": P_R2, "r3": P_R3}[sys.argv[4]]), "fin": lambda: fin(*sys.argv[2].split(",")), "refit": lambda: refit(sys.argv[2])}[sys.argv[1]]()
