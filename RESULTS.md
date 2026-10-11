@@ -2982,3 +2982,7 @@ fold 41.72 s (1.012), **od12 51.50 s (1.250 → ≈ 112.5 s noisy-implied: FAIL,
 
 **v83_fold graded (#335365): 2.9483303409388216e-09, NEW BEST**, raw 1.781068188932977e-08, 100 clean. −2.77 % vs v82c_r2
 (raw −3.04 %), −11.2 % vs v81d. +0.07 % vs the FRESH-A projection 2.9462e-09. `tools/ev.py --best-graded` updated.
+| 2026-10-11 | `estimator_k3_v83_od16.py` | `776b2bc2` | FRESH-A | 1.889759e-08 (+0.075 % vs v83_fold) | 0.16441 | 24,688 | wall A/B 1.133× v82c_r2 → ≈ 101.9 s noisy-implied (A ≤ 105 s, thin) | VmPeak 6,120 MiB (WSL PASS, same hash) | **2.9285e-09** | — (not submitted; folded into v83_r4od16) | **1.0061× vs v83_fold** (Δ +1.888e-11, t95 [+1.718e-11, +2.057e-11]) | 99/100 | P6.3 od16 on v83_fold (R3 constants). |
+
+v83_r4 parity file↔arm DEV (pod) 1.811849e-08 vs 1.811565e-08 = **1.6e-4**. `estimator_k3_v83_r4od16.py` (`e20cf029`) =
+R4 constants + od16 (the od16 patch is byte-identical on r4) → FRESH-A paired vs graded v83_fold.

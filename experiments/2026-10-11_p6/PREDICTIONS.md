@@ -22,3 +22,12 @@ R3 matched end (step 224): fold 1.851037e-08 vs ctl 1.892640e-08 = −2.20 % (ct
 - strategist: (v83 with H, not applicable) fold+H joint −1.3 %, refit −0.5 %; nothing for fold alone.
 - worker: FRESH-A raw −2.3 to −2.8 % vs v82c_r2 (fold −1.03 % unrefit + refit; R3 fold vs R2 init −2.75 % VAL),
   F +0.27 % → score ≈ −2.1 to −2.5 %, graded ≈ 2.96–2.97e-09.
+
+## v83_od16 = v83_fold + per-shape Strassen depth leaf ≥ 16
+- strategist: −0.71 % F at 25,167 ops (on fold+Habs); no gate change needed.
+- worker: F −0.68 % (0.16441, 24,688 ops); DEV raw +0.03 % vs fold → FRESH-A score ≈ 1.006× vs v83_fold; wall
+  1.133× v82c_r2 ≈ 101.9 s noisy-implied (thin vs 105 s).
+
+## 2026-10-11 13:25 UTC — v83_r4od16 = v83_fold + R4 constants + od16 (FRESH-A paired vs graded v83_fold)
+- worker: raw −0.3 to −0.45 % (R4 VAL −0.43 %, od16 +0.075 % FRESH-A), F −0.68 % → score ≈ −1.0 %, graded ≈ 2.92e-09.
+- strategist: od16 −0.71 % F (no raw prediction); refit polish ≈ −0.5 %.
