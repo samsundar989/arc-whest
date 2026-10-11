@@ -2989,4 +2989,9 @@ R4 constants + od16 (the od16 patch is byte-identical on r4) → FRESH-A paired 
 
 | date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
 |---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
-| 2026-10-11 | `estimator_k3_v83_r4od16.py` | `e20cf029` | FRESH-A | 1.881760e-08 (−0.35 % vs v83_fold) | 0.16441 | 24,688 | od16 wall A/B 1.133× v82c_r2 → ≈ 101.9 s noisy-implied (A ≤ 105 s; thin, A only) | VmPeak 6,129 MiB (WSL PASS, same hash) | **2.9156e-09** | PENDING #335407 | **1.0104× vs v83_fold** (Δ +3.203e-11, t95 [+2.907e-11, +3.499e-11]) | 97/100 | R4 constants + P6.3 od16 (`build_v83.py --variant fold+od16`). Parity file↔R4 arm DEV 2.2e-4 (pod). Package `2acf861b…9d61`, inner = source. Third canary of UTC Oct 11. Predictions: worker ≈ 2.92e-09 (−1.0 % score). |
+| 2026-10-11 | `estimator_k3_v83_r4od16.py` | `e20cf029` | FRESH-A | 1.881760e-08 (−0.35 % vs v83_fold) | 0.16441 | 24,688 | od16 wall A/B 1.133× v82c_r2 → ≈ 101.9 s noisy-implied (A ≤ 105 s; thin, A only) | VmPeak 6,129 MiB (WSL PASS, same hash) | **2.9156e-09** | **2.91912543907686e-09** (#335407) | **1.0104× vs v83_fold** (Δ +3.203e-11, t95 [+2.907e-11, +3.499e-11]) | 97/100 | R4 constants + P6.3 od16 (`build_v83.py --variant fold+od16`). Parity file↔R4 arm DEV 2.2e-4 (pod). Package `2acf861b…9d61`, inner = source. Third canary of UTC Oct 11. Predictions: worker ≈ 2.92e-09 (−1.0 % score). |
+
+**v83_r4od16 graded (#335407): 2.91912543907686e-09, NEW BEST**, raw 1.7754640353473407e-08, 100 clean. −0.99 % vs v83_fold
+(raw −0.32 %), −12.1 % vs v81d. +0.12 % vs the FRESH-A projection 2.9156e-09. `tools/ev.py --best-graded` updated.
+
+**R5** (fold continued 2 epochs from R4): VAL-100 best **1.836956e-08** (step 224) vs R4 1.843113e-08 = **−0.33 %** (≥ 0.3 %).
