@@ -63,3 +63,49 @@ needed:
 **Next.** Refit the three winners against a matched control. Which base to refit on (fold, or
 P6.1's H chain once R3 picks it) is P's call. Then price the late-only age 6, and set up the
 M6.3 var-gain and feature refit.
+
+## Oct 11, later: M6.2–M6.4 complete
+
+All refits share one recipe:
+- 1 epoch from R3 fold, R4's recipe, VAL-100;
+- a matched local control: 1.848205e-8.
+
+**age 6: hand-over** (`experiments/2026-10-11_m6/HANDOVER_M6_age6.md`).
+- Refit −6.07 % vs the control (−6.04 ± 0.27 % per net, 99/100), at +4.83 % F: **net −1.54 %**.
+- Twin parity 0.011 %.
+- WSL VmPeak +400 to +670 MB (1.15–1.20× headroom). The lifecycle check passed with 5 repeats and
+  failed once with 3 (a one-off allocator step).
+- Wall time not measured.
+
+**jsvd and J3 substitute for age 6.**
+- jsvd's refit gives −1.48 % (net −0.43 %), but on top of age 6 it is +0.74 % marginal.
+- J3 is neutral on top of age 6 (+0.10 %).
+- Both are fallbacks only, in case age 6 fails a gate. jsvd's hand-over is written.
+
+**M6.4.**
+- The handoff's "age 6 for lineages born ≥ 8" is already in the chain: J=2 skips those joins.
+- lateage9 and lateage11 are nested and lose to age 6 everywhere (net −0.80 % / −0.61 %).
+- Age 7 late on top of age 6: +0.46 %.
+
+**M6.3: both arms killed.**
+- α-dependent cov/var gains: +0.001 % vs the control. The learned ab ≈ −2.5e-4 has a consistent
+  sign, but averaged physics does not transfer.
+- Linear corrector-feature head: +0.046 %.
+- Before the verdicts, three training bugs were fixed: unbounded α² (ALPHA_CAP 40), a √0 NaN
+  gradient in the z-score, and frozen zero-init gains.
+
+Twin fixes on lane-m (P should merge them):
+- the shim SVD runs outside autograd with the `gesvd` driver (cuSOLVER non-convergence stalled
+  the jsvd refit);
+- shim `minimum`;
+- anatomy2: the post-star D4 hook, band arms, `--only` / `--set`;
+- cupy shim `block`.
+
+**Lane status.** The M6 plan is complete. Nothing on it is left to attack:
+- the anatomy's late κ3 chunk is what age 6 buys;
+- the late variance chunk resisted a parametric gain;
+- κ4 and the old tier are below the bar.
+
+Strategist direction is needed for anything further. Candidates: an age-6 + od16 joint price and
+the wall-time A/B (P); or a network-specific variance mechanism, which this lane has no 3-day
+design for.
