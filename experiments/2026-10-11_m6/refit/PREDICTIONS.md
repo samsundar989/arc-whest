@@ -64,3 +64,23 @@ when built.
 - Refit prediction vs ctl: −0.3 to −1.2 % raw. Handoff: −0.5 to −2 % (with features). Kill if
   it beats ctl by less than 0.3 %.
 - Learned va_ℓ should be largest in |value| for layers 12–15 (anatomy band).
+
+## M6.3b `cfeat`: linear feature head (recorded BEFORE any run)
+
+Bank key `cfeat` adds a zero-init head after the corrector, active on non-final layers only:
+mu_out += σ · (Z @ cf_ℓ). Z holds the per-net z-scores over neurons of five features:
+- C̃ row energy;
+- normalised D21 row sums;
+- K22 row sums;
+- dG/σ⁴;
+- the star part (D4 − m·dG)/σ⁴.
+
+Settings: stage S2tsfc, `--lr-mult gain/cf=10` (about 1e-5 per step). ΔF ≈ +5 O(n²) reductions
+per layer, about 0.
+- Not built: Q̂31 row energy (needs the closure's nb) and the previous layer's δv (needs a state
+  carry).
+
+Inertness: zero head = ctl bit for bit (10 nets).
+
+Prediction vs ctl: −0.1 to −0.6 % raw. B2: local features explain only 6–8 % of the orthogonal
+error, and the MLP already reads d21e. Kill if < 0.3 % better.

@@ -24,7 +24,8 @@ COMMON = ["--dress", "all", "--arm", "mask+dress+bank+fold", "--fold", "tau=2,mo
 
 def bank(name):
     """M6.3 `acov` = the alpha-dependent covariance and variance gains (zero-init, stage S2tsfa)."""
-    return ["--bank", "star,starall,acov,avar" if name == "acov" else "star,starall"]
+    return ["--bank", {"acov": "star,starall,acov,avar",
+                       "cfeat": "star,starall,cfeat"}.get(name, "star,starall")]
 TW = [sys.executable, "-u", str(HERE / "tw.py")]
 
 
@@ -64,9 +65,10 @@ def refit(name):
     cmd = TW + ["train", "--cand", cand, "--mask", mask, *COMMON, *bank(name), "--init", P_R3,
                 "--epochs", "1",
                 "--accum", "8", "--lr", "1e-4", "--eval-every", "28", "--patience", "3",
-                "--hold-panel", "hold100", "--stage", "S2tsfa" if name == "acov" else "S2tsf",
+                "--hold-panel", "hold100", "--stage", {"acov": "S2tsfa", "cfeat": "S2tsfc"}.get(name, "S2tsf"),
                 # zero-init gains step at lr x zero_scale (1e-6) unless multiplied (M5 froze so)
-                *(["--lr-mult", "gain/ab=1000,gain/va=1000"] if name == "acov" else []), "--out", str(HERE / f"refit_{name}")]
+                *({"acov": ["--lr-mult", "gain/ab=1000,gain/va=1000"],
+                   "cfeat": ["--lr-mult", "gain/cf=10"]}.get(name, [])), "--out", str(HERE / f"refit_{name}")]
     sys.exit(subprocess.run(cmd).returncode)
 
 
@@ -74,6 +76,7 @@ def inert():
     """acov,avar with zero gains must reproduce r3_ctl (first 10 VAL nets) exactly."""
     ev("r3_acov_inert10", "acov", P_R3, n=10)
     ev("r3_ctl10", "ctl", P_R3, n=10)
+    ev("r3_cfeat_inert10", "cfeat", P_R3, n=10)
 
 
 if __name__ == "__main__":

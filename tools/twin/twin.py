@@ -703,6 +703,24 @@ ARMS["bank"] += [
      "            S[(2, 1)] = D21 * _fa[:, None]\n"
      "            S[(1, 2)] = S[(2, 1)].T\n"
      "            S[(2, 2)] = D22 * ((_fa[:, None] + _fa[None, :]) * 0.5)\n"),
+    # `cfeat` (M6.3 cheap corrector features): a zero-init LINEAR head after the corrector,
+    # mu_out += sigma * (Z @ gain/cf[l]), Z = the per-net z-scores (over neurons) of five O(n^2)
+    # features: row energy of C~ = C/(s s), D21 row sums (normalised), K22 row sums,
+    # dG/s^4 and the star part (D4 - m dG)/s^4. Non-final layers only (no C11/D21 at the last).
+    ("    if last_layer:\n        return (mu_out, None, None, 0.0, dG)\n",
+     "    if (_BANK is not None and _BANK.get('cfeat') and _TWG is not None and not last_layer):\n"
+     "        _iv = 1.0 / sigma\n"
+     "        _cn = C11 * (_iv[:, None] * _iv[None, :])\n"
+     "        _i4 = (_iv * _iv) * (_iv * _iv)\n"
+     "        _cf = fnp.stack([(_cn * _cn).sum(axis=1),\n"
+     "                         (D21 * _iv[None, :]).sum(axis=1) * (_iv * _iv),\n"
+     "                         K[(2, 2)].sum(axis=1),\n"
+     "                         dG * _i4,\n"
+     "                         (D4 - dG * metric) * _i4], axis=1)\n"
+     "        _cf = _cf - _cf.mean(axis=0)[None, :]\n"
+     "        _cf = _cf / (fnp.sqrt((_cf * _cf).mean(axis=0)) + 1e-12)[None, :]\n"
+     "        mu_out = mu_out + sigma * (_cf @ _TWG['cf'][layer_index])\n"
+     "    if last_layer:\n        return (mu_out, None, None, 0.0, dG)\n"),
 ]
 TRAINABLE["S2tv"] = TRAINABLE["S2t"] + ("gain/vg",)
 TRAINABLE["S2ts"] = TRAINABLE["S2t"] + ("gain/sg",)
@@ -716,6 +734,7 @@ ARMS["fold"] = list(k4x_arm.PATCHES[:6])
 ARMS["rad"] = [k4x_arm.PATCHES[0]] + list(k4x_arm.PATCHES[6:])
 TRAINABLE["S2tsf"] = TRAINABLE["S2ts"] + ("gain/fg",)
 TRAINABLE["S2tsfa"] = TRAINABLE["S2tsf"] + ("gain/ab", "gain/va")   # M6.3
+TRAINABLE["S2tsfc"] = TRAINABLE["S2tsf"] + ("gain/cf",)            # M6.3 features
 TRAINABLE["S2tsr"] = TRAINABLE["S2ts"] + ("gain/rq", "gain/r22", "gain/r4")
 TRAINABLE["S2tsfr"] = TRAINABLE["S2tsf"] + ("gain/rq", "gain/r22", "gain/r4")
 ARMS["qx"] = list(k4x_arm.QX_PATCHES)
@@ -902,6 +921,7 @@ class Twin:
         self.base["gain"]["fg"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
         self.base["gain"]["ab"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
         self.base["gain"]["va"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
+        self.base["gain"]["cf"] = torch.zeros((depth, 5), dtype=torch.float32, device=DEV)
         _vp = torch.tensor(k4x_arm.vprime(depth), dtype=torch.float32, device=DEV)
         for _k in ("rq", "r22", "r4"):
             self.base["gain"][_k] = _vp.clone()
