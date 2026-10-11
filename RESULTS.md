@@ -2975,7 +2975,10 @@ fold 41.72 s (1.012), **od12 51.50 s (1.250 → ≈ 112.5 s noisy-implied: FAIL,
 
 | date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
 |---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
-| 2026-10-11 | `estimator_k3_v83_fold.py` | `c1adefbd` | FRESH-A | 1.888349e-08 (floor-free 1.813584e-08; −2.84 % vs v82c_r2) | 0.16554 | 22,618 | wall A/B DEV net 3 ×2: 1.012× v82c_r2 → ≈ 91 s noisy-implied (A ≤ 105 s) | VmPeak 6,148 MiB (WSL PASS run 2, same hash; run 1 failed only the settled-growth check at VmPeak 6,130) | **2.9462e-09** | PENDING #335365 | **1.0264× vs v82c_r2** (Δ +8.257e-11, t95 [+6.686e-11, +9.828e-11]) | 86/100 | v82c_r2 + M5.1 fold (rec, τ2) with the R3 fold-arm refit baked (`tools/build_v83.py --variant fold`; `_FOLD_GAIN` from gain__fg). Parity file↔arm DEV 3.2e-4 (pod). residual 0.251 s. Package `7ea8add2…b59b`, inner = source. Second canary of UTC Oct 11. Predictions: worker −2.3 to −2.8 % raw, ≈ 2.96–2.97e-09. |
+| 2026-10-11 | `estimator_k3_v83_fold.py` | `c1adefbd` | FRESH-A | 1.888349e-08 (floor-free 1.813584e-08; −2.84 % vs v82c_r2) | 0.16554 | 22,618 | wall A/B DEV net 3 ×2: 1.012× v82c_r2 → ≈ 91 s noisy-implied (A ≤ 105 s) | VmPeak 6,148 MiB (WSL PASS run 2, same hash; run 1 failed only the settled-growth check at VmPeak 6,130) | **2.9462e-09** | **2.9483303409388216e-09** (#335365) | **1.0264× vs v82c_r2** (Δ +8.257e-11, t95 [+6.686e-11, +9.828e-11]) | 86/100 | v82c_r2 + M5.1 fold (rec, τ2) with the R3 fold-arm refit baked (`tools/build_v83.py --variant fold`; `_FOLD_GAIN` from gain__fg). Parity file↔arm DEV 3.2e-4 (pod). residual 0.251 s. Package `7ea8add2…b59b`, inner = source. Second canary of UTC Oct 11. Predictions: worker −2.3 to −2.8 % raw, ≈ 2.96–2.97e-09. |
 
 **R4** (fold arm continued 2 epochs from R3, same recipe): VAL-100 best **1.843113e-08** (step 224) vs R3 1.851037e-08 =
 **−0.43 %** (≥ 0.3 %) → `estimator_k3_v83_r4.py` (`9ce6745f`, constants only vs v83_fold). R5 (2 more epochs) on the pod.
+
+**v83_fold graded (#335365): 2.9483303409388216e-09, NEW BEST**, raw 1.781068188932977e-08, 100 clean. −2.77 % vs v82c_r2
+(raw −3.04 %), −11.2 % vs v81d. +0.07 % vs the FRESH-A projection 2.9462e-09. `tools/ev.py --best-graded` updated.

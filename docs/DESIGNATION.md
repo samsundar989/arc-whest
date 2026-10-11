@@ -8,7 +8,9 @@
 | **B (recommended)** | `estimator_k3_v82b_bundlews.py` | `7148e22a` | #335250 | **3.1432860023588976e-9** | 1.8605e-8 | 0.16895 | A/B 0.916 vs v81b_ws → ≈ 78 s noisy-implied | 6,017 MiB |
 
 **Update 03:10 UTC: v82c_r2 graded 3.032324364499572e-9 (#335298) and is now the recommended A** (`a648ba07`,
-constants only vs v82c_r1; VmPeak 6,027 MiB). **B: v82c_r2ws graded 3.1017860563938384e-9 (#335319) and is now the recommended B** (`1c48dfb4`, VmPeak 6,022 MiB,
+constants only vs v82c_r1; VmPeak 6,027 MiB). **Update 13:20 UTC: v83_fold graded 2.9483303409388216e-9 (#335365) and is now the recommended A** (`c1adefbd`,
+VmPeak 6,148 MiB, wall 1.012× v82c_r2 ≈ 91 s noisy-implied). Its ws twin is not yet built; B stays v82c_r2ws.
+**B: v82c_r2ws graded 3.1017860563938384e-9 (#335319) and is now the recommended B** (`1c48dfb4`, VmPeak 6,022 MiB,
 ≈ 78 s noisy-implied). In flight: v82c_r2 (R2 refit, VAL −0.46 %
 vs R1, constants only) on FRESH-A paired vs v82c_r1. **Samuel designates.**
 

@@ -843,7 +843,7 @@ def main(argv=None) -> int:
                     help="also run the WSL RLIMIT_AS 8 GiB gate (3 predictions)")
     #: THE §5 BASELINE. v80_hyg #334659, graded 2026-10-07 (prev v79_dress #334576 3.7025275784494673e-09). Update this the moment a
     #: better score grades, or every later candidate is gated against a stale bar.
-    ap.add_argument("--best-graded", type=float, default=3.032324364499572e-09,
+    ap.add_argument("--best-graded", type=float, default=2.9483303409388216e-09,
                     help="the best graded score, which the §5 gate must beat "
                          "(default: v80_hyg #334659)")
     ap.add_argument("--json", default=None, help="also write the full result here")
