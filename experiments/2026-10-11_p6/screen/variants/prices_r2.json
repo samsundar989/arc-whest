@@ -1,0 +1,38 @@
+{
+ "base": {
+  "file": "est_base.py",
+  "flops": 363022283745,
+  "F/B": 0.16508342184579305,
+  "ops": 22375
+ },
+ "fold": {
+  "file": "est_fold.py",
+  "flops": 364020145441,
+  "F/B": 0.16553719680860013,
+  "ops": 22618
+ },
+ "fold+Habs": {
+  "file": "est_fold_Habs.py",
+  "flops": 342541867647,
+  "F/B": 0.15577000688017506,
+  "ops": 23097
+ },
+ "fold+Hasym2030": {
+  "file": "est_fold_Hasym2030.py",
+  "flops": 337804384858,
+  "F/B": 0.1536156491320071,
+  "ops": 23386
+ },
+ "fold+Hasym2025": {
+  "file": "est_fold_Hasym2025.py",
+  "flops": 331210776849,
+  "F/B": 0.15061722335713057,
+  "ops": 23386
+ },
+ "fold+Habs20": {
+  "file": "est_fold_Habs20.py",
+  "flops": 320066792884,
+  "F/B": 0.14554952617072558,
+  "ops": 23360
+ }
+}
