@@ -2997,3 +2997,4 @@ R4 constants + od16 (the od16 patch is byte-identical on r4) → FRESH-A paired 
 **R5** (fold continued 2 epochs from R4): VAL-100 best **1.836956e-08** (step 224) vs R4 1.843113e-08 = **−0.33 %** (≥ 0.3 %).
 
 R5 parity file↔arm DEV (pod, `estimator_k3_v83_r5od16.py` vs R5 arm): 1.805451e-08 vs 1.804997e-08 = **2.5e-4**.
+| 2026-10-11 | `estimator_k3_v83_r5ws.py` | `b9e64076` | FRESH-A | 1.874278e-08 (−3.56 % vs v82c_r2ws) | 0.16941 | 20,512 | wall A/B 1.0028× v82c_r2ws (r4ws, same code) → ≈ 78 s noisy-implied (B ≤ 95 s) | VmPeak 6,127 MiB (WSL PASS, same hash) | **2.9917e-09** | PACKAGED for the Oct 12 A/B slot (`355f6c65…a675`, inner = source) | **1.0341× vs v82c_r2ws** (Δ +1.084e-10, t95 [+9.180e-11, +1.249e-10]) | 90/100 | B twin of the v83 line: fold + R5 constants at block 40 (no od16 for B). "vs best graded" N/A for B. Prediction (worker) 1.036×, ≈ 2.99e-09. v83_r4ws FRESH-A was stopped part-way (superseded). |
