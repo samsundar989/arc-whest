@@ -31,3 +31,7 @@ R3 matched end (step 224): fold 1.851037e-08 vs ctl 1.892640e-08 = −2.20 % (ct
 ## 2026-10-11 13:25 UTC — v83_r4od16 = v83_fold + R4 constants + od16 (FRESH-A paired vs graded v83_fold)
 - worker: raw −0.3 to −0.45 % (R4 VAL −0.43 %, od16 +0.075 % FRESH-A), F −0.68 % → score ≈ −1.0 %, graded ≈ 2.92e-09.
 - strategist: od16 −0.71 % F (no raw prediction); refit polish ≈ −0.5 %.
+
+## 2026-10-11 14:45 UTC — v83_r4ws (B twin of v83_r4, block 40) for the Oct 12 A/B slot
+- worker: raw ≈ v83_r4 ≈ −3.3 % vs v82c_r2ws's FRESH-A (fold −2.84 %, R4 −0.4 %), F +0.27 % → ≈ 1.033× vs v82c_r2ws;
+  graded ≈ 3.00e-09. Wall A/B 1.0028× v82c_r2ws → ≈ 78 s noisy-implied.
