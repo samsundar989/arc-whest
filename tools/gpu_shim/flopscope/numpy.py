@@ -15,6 +15,7 @@ Two deliberate differences from `local_sim/flopscope/numpy.py`:
   estimator never calls it; `tools/_predict_worker.py` does, once per net.
 """
 
+import builtins as _builtins
 import cupy as _cp
 from cupy import *  # noqa: F401,F403
 from cupy import random  # noqa: F401  (fnp.random.default_rng)
@@ -31,6 +32,15 @@ def einsum(*args, **kwargs):
     # not promise to accept it; drop it rather than pass it through.
     kwargs.pop("optimize", None)
     return _cp.einsum(*args, **kwargs)
+
+
+def block(arrays):
+    # cupy has no `block`. The estimators' Strassen recombination (v70+, `_sb`)
+    # calls it on a 2-D nested list only, so rows then columns is exact; any
+    # other nesting depth is refused rather than guessed.
+    if not (isinstance(arrays, list) and arrays and _builtins.all(isinstance(r, list) for r in arrays)):
+        raise TypeError("gpu_shim block: only a 2-D nested list of arrays is supported")
+    return _cp.concatenate([_cp.concatenate(r, axis=-1) for r in arrays], axis=-2)
 
 
 def __getattr__(name):

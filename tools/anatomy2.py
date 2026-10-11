@@ -19,6 +19,10 @@ THE OBJECTS, and what the chain calls them (all at the pre-activation z_l):
     D3    D3                kappa_iii
     D21   D21               kappa_iij  (first index squared, as the labels)
     dG    dG = D4 / m       kappa_iiii / m,  m = metric = 2
+    D4    D4 (after star)   kappa_iiii -- v82+ adds the star D4_star AFTER dG, so a dG
+                            substitution alone counts the star twice; every arm that
+                            substitutes dG also substitutes D4 (the identity on a
+                            star-free chain such as v59, so Anatomy 2 is comparable)
     D22   D22               kappa_iijj   -- the chain's form is (m/6)(dG_i + dG_j)
     Q31n  nb["Q31"]         kappa_iiij / (s_i^3 s_j) -- chain's form (m/2) lam C_ij
 
@@ -111,6 +115,9 @@ PATCHES = [
      "    D3 = _a2('D3', D3)\n"),
     ("    dG = fnp.where(fnp.isfinite(dG), dG, dtype(0.0))\n",
      "    dG = fnp.where(fnp.isfinite(dG), dG, dtype(0.0))\n    dG = _a2('dG', dG)\n"),
+    ("    if last_layer:\n        S = {(1,): mu_pre, (3,): D3, (4,): D4}\n",
+     "    D4 = _a2('D4', D4)\n"
+     "    if last_layer:\n        S = {(1,): mu_pre, (3,): D3, (4,): D4}\n"),
     ("        C11 = cov_pre * off_mask\n",
      "        C11 = cov_pre * off_mask\n        C11 = _a2('C11', C11)\n"),
     ("        D21 = (_dslice21(adv, off_mask) if adv is not None\n"
@@ -235,7 +242,7 @@ def load_truth(gidx: int, xp, dtype):
     for l in range(depth):
         d = L.layer(l)
         t = {"mu": mg["mu"][l], "var": mg["var"][l], "D3": mg["k3"][l],
-             "dG": mg["k4"][l] / METRIC,
+             "dG": mg["k4"][l] / METRIC, "D4": mg["k4"][l],
              "C11": d["C"], "D21": d["k3_iij"], "D22": d["k4_iijj"], "Q31": d["k4_iiij"]}
         eye = xp.eye(d["C"].shape[0], dtype=bool)
         t["C11"] = t["C11"].copy()
@@ -273,7 +280,7 @@ def object_errors(rec, t, post_cov_l, state_cov, xp):
         return {"rel": float(np.sqrt(ee / max(float((y * y).sum()), 1e-300))),
                 "mse": ee / e.size}
 
-    for k in ("mu", "var", "D3", "dG", "C11", "D21", "D22", "Q31"):
+    for k in ("mu", "var", "D3", "dG", "D4", "C11", "D21", "D22", "Q31"):
         if k in rec:
             out[k] = rel(rec[k], t[k])
     if "C11" in rec:
@@ -345,8 +352,8 @@ ONESTEP = {                      # substituted at layer l, mean read at l
     "base": ("mu",),
     "var": ("mu", "var"),
     "D3": ("mu", "D3"),
-    "D4": ("mu", "dG"),
-    "marg": ("mu", "var", "D3", "dG"),
+    "D4": ("mu", "dG", "D4"),
+    "marg": ("mu", "var", "D3", "dG", "D4"),
 }
 TWOSTEP = {                      # substituted at l-1 (mu at l-1 and l), mean read at l
     "base2": ("mu",),
@@ -355,21 +362,25 @@ TWOSTEP = {                      # substituted at l-1 (mu at l-1 and l), mean re
     "cov": ("mu", "var", "C11"),
     "D3": ("mu", "D3"),
     "D21": ("mu", "D21"),
-    "D4": ("mu", "dG"),
+    "D4": ("mu", "dG", "D4"),
     "D22": ("mu", "D22"),
     "Q31": ("mu", "Q31n"),
     "offdiag": ("mu", "C11", "D21", "D22", "Q31n"),
-    "all": ("mu", "var", "C11", "D3", "D21", "dG", "D22", "Q31n"),
+    "all": ("mu", "var", "C11", "D3", "D21", "dG", "D4", "D22", "Q31n"),
 }
-_NOMU = ("var", "C11", "D3", "D21", "dG", "D22", "Q31n")
+_NOMU = ("var", "C11", "D3", "D21", "dG", "D4", "D22", "Q31n")
 ROLLED = {
     "mu": ("mu",), "var": ("var",), "C11": ("C11",), "cov": ("var", "C11"),
     "D3": ("D3",), "D21": ("D21",), "k3": ("D3", "D21"),
-    "D4": ("dG",), "D22": ("D22",), "Q31": ("Q31n",), "k4": ("dG", "D22", "Q31n"),
+    "D4": ("dG", "D4"), "D22": ("D22",), "Q31": ("Q31n",), "k4": ("dG", "D4", "D22", "Q31n"),
     "nomu": _NOMU, "all": ("mu",) + _NOMU,
 }
 ROLLED_PREFIX_OBJS = ("cov", "D21", "k3", "k4", "nomu")
 ROLLED_PREFIXES = (4, 8, 12)     # substitute at layers 1..P (0-based), free after
+# M6.1 (HANDOFF 2026-10-11 Lane M6): substitute ONLY inside a band, free before and
+# after. 0-based (lo, hi) inclusive = 1-based layers 2-6, 7-11, 12-15.
+ROLLED_BAND_OBJS = ("var", "C11", "D3", "D21", "k4")
+ROLLED_BANDS = ((1, 5), (6, 10), (11, 14))
 ARCH_ARMS = {"T0": {"_SHARED_ON": False},
              "T0x": {"_SHARED_ON": False, "_P2_RANK": 0}}
 
@@ -423,11 +434,11 @@ def run_net(mod, est, ctl, wf, width, depth, truth, post_cov, mg, gate_p, gt, kp
     states = mus = None
 
     # ---- rolled substitution -----------------------------------------------
-    def rolled(names, P):
+    def rolled(names, P, lo=1):
         st = ch.init_state()
         per = {}
         for l in range(depth):
-            ctl.sub = frozenset(names) if 1 <= l <= P else frozenset()
+            ctl.sub = frozenset(names) if lo <= l <= P else frozenset()
             st = ch.step(l, st)
             if l >= 1:
                 per[l] = m2(l, st[0])
@@ -440,6 +451,9 @@ def run_net(mod, est, ctl, wf, width, depth, truth, post_cov, mg, gate_p, gt, kp
         for obj in ROLLED_PREFIX_OBJS:
             for P in ROLLED_PREFIXES:
                 res["rolled"][f"{obj}@{P}"] = rolled(ROLLED[obj], P)
+        for obj in ROLLED_BAND_OBJS:
+            for lo, hi in ROLLED_BANDS:
+                res["rolled"][f"{obj}@{lo}-{hi}"] = rolled(ROLLED[obj], hi, lo)
 
     # ---- architecture arms: object errors only -----------------------------
     for arm, over in ({} if quick else ARCH_ARMS).items():

@@ -83,7 +83,9 @@ def table_rolled(nets):
         m8 = _mean_over(nets, lambda r: (_g(r, "rolled", k, 8) or [None, None])[1])
         m12 = _mean_over(nets, lambda r: (_g(r, "rolled", k, 12) or [None, None])[1])
         obj, P = k.split("@")
-        out.append(f"| {obj} @ 2..{int(P) + 1} | {m:.4e} | {(1 - m / ch) * 100:+.1f}% | "
+        lo, _, hi = P.rpartition("-")      # band keys "obj@lo-hi" (0-based)
+        span = f"{int(lo) + 1}..{int(hi) + 1}" if lo else f"2..{int(P) + 1}"
+        out.append(f"| {obj} @ {span} | {m:.4e} | {(1 - m / ch) * 100:+.1f}% | "
                    f"{m8:.3e} | {m12:.3e} |")
     return "\n".join(out)
 
