@@ -35,3 +35,7 @@ R3 matched end (step 224): fold 1.851037e-08 vs ctl 1.892640e-08 = −2.20 % (ct
 ## 2026-10-11 14:45 UTC — v83_r4ws (B twin of v83_r4, block 40) for the Oct 12 A/B slot
 - worker: raw ≈ v83_r4 ≈ −3.3 % vs v82c_r2ws's FRESH-A (fold −2.84 %, R4 −0.4 %), F +0.27 % → ≈ 1.033× vs v82c_r2ws;
   graded ≈ 3.00e-09. Wall A/B 1.0028× v82c_r2ws → ≈ 78 s noisy-implied.
+
+## 2026-10-11 19:15 UTC — R5 builds (R5 VAL −0.33 % vs R4). v83_r4ws FRESH-A stopped (superseded by r5ws).
+- v83_r5ws vs v82c_r2ws: worker ≈ 1.036× (fold −2.84 %, R4+R5 ≈ −0.7 %, F +0.27 %); graded ≈ 2.99e-09.
+- v83_r5od16 vs v83_r4od16: worker raw −0.2 to −0.35 %, same F; graded ≈ 2.91e-09.

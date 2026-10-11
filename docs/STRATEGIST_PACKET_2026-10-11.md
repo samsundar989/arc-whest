@@ -43,3 +43,19 @@ variant byte for byte.
 **Spend items and depth re-priced on the v83 stack (fold, no H; vs fold F/B 0.16554), exact interpreter:**
 od12 −1.21 % F (24,976 ops) · od16 −0.68 % (24,688) · J3 +0.33 % (22,327) · age 6 +4.83 % (22,113) · SVD join
 +1.07 % (21,754). These are within 0.1 % of the fold+Habs prices, so the break-evens in the P6 handoff table hold.
+
+## Oct 11 afternoon/evening addendum
+
+- **Graded today:** v82c_r2 **3.0323e-9** (#335298); v82c_r2ws **3.1018e-9** (#335319, new B, A/B slot);
+  **v83_fold 2.9483e-9** (#335365; fold + R3 refit, −2.77 %); **v83_r4od16 2.9191e-9** (#335407, new best; R4 refit +
+  per-shape Strassen depth leaf ≥ 16, −0.99 %). All four landed within +0.07 to +0.16 % of their FRESH-A projections.
+  Four canaries used (3 + the A/B slot); target "v83 ≈ 2.8e-9 by Oct 12" is missed without H, but we are at −4.2 %
+  vs this morning's best.
+- **Refit polish keeps paying:** fold R3 −2.20 % vs matched ctl; continuations R4 −0.43 %, R5 −0.33 % (VAL). R6 running;
+  by the restart rule the recipe stops after two consecutive restarts < 0.3 %.
+- **P6.3:** od12 closed on wall (1.25×, ≈ 112.5 s); od16 shipped (1.133×, ≈ 101.9 s noisy-implied, raw +0.075 %).
+  The A wall margin is now 3 % under the 105 s gate, so no further wall-costing item stacks on A without a wall cut.
+- **B line:** v83_r5ws (fold, block 40, wall 1.003× v82c_r2ws ≈ 78 s) on FRESH-A for the Oct 12 A/B slot.
+- **Ledger vs v81d:** v83_r4od16 ΔF −6.74 % (F/B 0.16441), graded Δraw −5.73 %, ops 24,688 (−1,053).
+- **Still needed from the strategist:** go/no-go on the two-column-set H lineage (see above); the M6.2 spend items
+  (age 6 +4.83 % F, SVD join +1.07 %, J3 +0.33 %) need their twin evidence before P6.2 can integrate them.
