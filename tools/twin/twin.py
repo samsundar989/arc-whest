@@ -348,6 +348,13 @@ ARMS = {
          "                continue\n"
          "            _k = int(_kt[layer_index]) if layer_index < len(_kt) else n\n"
          "            _m = fnp.where(_rk >= n - _k, dtype(1.0), dtype(0.0))\n"
+         "            if _role == 'H' and _MASK.get('Hrank'):\n"
+         "                # P6.1: keep the K_H SMALLEST scores (abs: alpha^2; asym a,b: max(-alpha/a, alpha/b)),\n"
+         "                # as the estimator's `_kh = argsort(score)[:K_H]` -- drops always-on columns too\n"
+         "                _hr = _MASK['Hrank']\n"
+         "                _sc = (alpha * alpha if _hr[0] == 'abs' else\n"
+         "                       fnp.maximum(alpha * dtype(-1.0 / _hr[1]), alpha * dtype(1.0 / _hr[2])))\n"
+         "                _m = fnp.where(fnp.argsort(fnp.argsort(_sc)) < _k, dtype(1.0), dtype(0.0))\n"
          "            if _role == 'R':\n"
          "                _mR = _m\n"
          "            elif _role == 'H':\n"
@@ -356,6 +363,7 @@ ARMS = {
          "                _mD = _m\n"
          "    if _MASK is not None and not last_layer:\n"
          "        _MASK['_prevR'] = _mR\n"
+         "        _MASK['_prevD'] = _mD\n"
          "    _mon = _mDd = None\n"
          "    if _MASK is not None and _MASK.get('Da') and not last_layer:\n"
          "        _mon = fnp.where(alpha > _MASK['Da'], dtype(0.0), dtype(1.0))\n"
@@ -368,6 +376,8 @@ ARMS = {
          "        _mW = {'d': _mS, 's': None}.get(_hm, _mH)\n"
          "        _mC = {'kh': _mS, 'd': _mS, 'w': None, 's': None}.get(_hm, _mH)\n"
          "        _mSl = {'w': None}.get(_hm, _mS)\n"
+         "        if _MASK.get('Hfull'):\n"
+         "            _mSl = _mH       # P6.1: residual rows + S3 dropped on every dropped column (as shipped)\n"
          "    if _MASK is not None and _MASK.get('stats') is not None:\n"
          "        _st = {'l': layer_index}\n"
          "        for _t in (2.0, 2.5, 3.0, 3.5):\n"
@@ -376,14 +386,30 @@ ARMS = {
          "        for _t in (1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0):\n"
          "            _st['dead%.2f' % _t] = float((alpha < -_t).sum()) / n\n"
          "        _MASK['stats'].append(_st)\n"),
+        # P5.2 (ii)+(iii): `Dleg` -- the transported legs keep only D-set rows, so D3, the
+        # star-D4 part and both sides of D21 vanish on dead rows (the compact chain never
+        # computes them). Applied before the readouts; the R mask (tau 2.0, inside D) follows.
+        ("    D3 = _dslice3(adv) if adv is not None else fnp.zeros(n, dtype=dtype)\n",
+         "    if _mD is not None and _MASK.get('Dleg') and adv is not None:\n"
+         "        adv = _mask_rows(adv, _mD)\n"
+         "    D3 = _dslice3(adv) if adv is not None else fnp.zeros(n, dtype=dtype)\n"),
         ("        D22 = ((metric / 6.0) * (dG[:, None] + dG[None, :])) * off_mask\n",
          "        _D21c = _D21f = D21\n"
+         "        if _mD is not None and _MASK.get('stats') is not None and _MASK['stats']:\n"
+         "            # P5.2 rho: d21e energy over all vs kept columns, on kept rows\n"
+         "            _iw = _mD * (1.0 / (var * var))\n"
+         "            _rs = D21 * D21\n"
+         "            _MASK['stats'][-1]['e_all'] = float((_rs.sum(axis=1) * _iw).sum())\n"
+         "            _MASK['stats'][-1]['e_kept'] = float(((_rs * _mD[None, :]).sum(axis=1) * _iw).sum())\n"
          "        if _mD is not None and _MASK.get('Drows'):\n"
          "            D21 = D21 * _mD[:, None]\n"
          "        elif _mD is not None:\n"
          "            D21 = D21 * (_mD[:, None] * _mD[None, :])\n"
          "        if _mD is not None and not _MASK.get('Dfull'):\n"
          "            _D21c = D21\n"
+         "        if _mD is not None and _MASK.get('rho') and not _MASK.get('Dfull'):\n"
+         "            _rho = _MASK['rho']\n"
+         "            _D21c = _D21c * (float(_rho[layer_index]) ** 0.5 if layer_index < len(_rho) else 1.0)\n"
          "        if _mD is not None and _MASK.get('Dzero'):\n"
          "            _kz = _mD\n"
          "        if _mon is not None and _MASK.get('Daz', 'z') != 'z':\n"
@@ -431,6 +457,10 @@ ARMS = {
          "        if _mR is not None and _MASK.get('Rpart', '') != 'n':\n"
          "            adv = _mask_rows(adv, _mR)\n"),
         # Rpart '' both, 'i' inherited legs only (post-Wick), 'n' newborn A_L/Z/Y rows only
+        # P5.1 item 1 (key J): no old-tier join at the last J non-final layers
+        ("            adv = _shared_join_lean(adv)\n",
+         "            if _MASK is None or not _MASK.get('J') or layer_index < depth - 1 - int(_MASK['J']):\n"
+         "                adv = _shared_join_lean(adv)\n"),
         ("    out_tw = _truncate(out_tw, gens, n)\n",
          "    out_tw = _truncate(out_tw, gens, n)\n"
          "    if _mR is not None and _MASK.get('Rpart', '') == '':\n"
@@ -438,13 +468,16 @@ ARMS = {
          "    elif _mR is not None and _MASK.get('Rpart', '') == 'n':\n"
          "        out_tw = _mask_rows_new(out_tw, _mR, n)\n"),
         # P2.4.2 (key C): the covariance sandwich reads C on the previous layer's R rows only
+        # (C=1; C=2 keeps the dropped variances). P5.1 item 6: C=3 / C=4 the same on the
+        # previous layer's D set.
         ("    mu_pre = WT @ mu\n",
          "    mu_pre = WT @ mu\n"
          "    _covS = cov\n"
-         "    if _MASK is not None and _MASK.get('C') and _MASK.get('_prevR') is not None:\n"
-         "        _pc = _MASK['_prevR']\n"
+         "    _ck = None if _MASK is None or not _MASK.get('C') else ('_prevD' if _MASK['C'] >= 3.0 else '_prevR')\n"
+         "    if _ck is not None and _MASK.get(_ck) is not None:\n"
+         "        _pc = _MASK[_ck]\n"
          "        _covS = cov * (_pc[:, None] * _pc[None, :])\n"
-         "        if _MASK['C'] == 2.0:\n"
+         "        if _MASK['C'] in (2.0, 4.0):\n"
          "            # keep the dropped rows' VARIANCES; drop only their cross-covariances\n"
          "            _covS = _covS + fnp.diag(fnp.diagonal(cov) * (1.0 - _pc))\n"),
         ("        _X4 = _mm(WT, cov)\n", "        _X4 = _mm(WT, _covS)\n"),
@@ -694,10 +727,28 @@ def parse_mask(spec):
         if k == "Da":            # P2.4.1: ALSO drop D21 rows with alpha > +tau (always-on)
             out["Da"] = float(v)
             continue
+        if k == "Dleg":          # P5.2 (ii)+(iii): legs' output rows on the D set only
+            out["Dleg"] = bool(float(v))
+            continue
+        if k == "rho":           # P5.2: per-layer d21e energy ratio (JSON list or {"rho": [...]})
+            _r = json.loads(Path(v).read_text())
+            out["rho"] = _r["rho"] if isinstance(_r, dict) else _r
+            continue
+        if k == "J":             # P5.1 item 1: skip the old-tier join at the last J non-final layers
+            out["J"] = int(float(v))
+            continue
+        if k == "Hrank":         # P6.1: K-table H ranking 'abs' (alpha^2) or 'asym:a:b' (max(-alpha/a, alpha/b))
+            out["Hrank"] = ("abs",) if v == "abs" else ("asym", *map(float, v.split(":")[1:]))
+            if not (v == "abs" or (v.startswith("asym:") and len(out["Hrank"]) == 3)):
+                raise SystemExit(f"--mask: bad Hrank {v}")
+            continue
+        if k == "Hfull":         # P6.1: _mSl = _mH (residual rows and S3 follow the full H drop)
+            out["Hfull"] = bool(float(v))
+            continue
         if k == "Daz":           # always-on rows' corrector: z zero (Dz), f full row, c column
             out["Daz"] = {"0": "z", "1": "f", "2": "c"}.get(v, v)
             continue
-        if k not in ("R", "H", "D", "C", "Dc", "Dr", "Dz", *hmodes, *rparts):
+        if k not in ("R", "H", "D", "C", "Dc", "Dr", "Dz", "D2", "D2c", *hmodes, *rparts):
             raise SystemExit(f"--mask: unknown role {k}")
         if k in rparts:
             k, out["Rpart"] = "R", rparts[k]
@@ -709,6 +760,10 @@ def parse_mask(spec):
             k, out["Drows"] = "D", True
         if k == "Dz":            # Dr + no corrector delta on the dropped rows (d21e unknown)
             k, out["Drows"], out["Dzero"] = "D", True, True
+        if k == "D2":            # P5.2 two-sided D (rows AND columns) + no delta on dropped rows
+            k, out["Dzero"] = "D", True
+        if k == "D2c":           # diagnostic: D2 with the corrector reading the UNMASKED d21e
+            k, out["Dzero"], out["Dfull"] = "D", True, True
         out[k] = float(v)
     return out
 

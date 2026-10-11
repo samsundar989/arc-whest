@@ -1,0 +1,35 @@
+11:22:47  335227  submitted  score=None  secondary=None
+11:24:47  335227  submitted  score=None  secondary=None
+11:26:48  335227  submitted  score=None  secondary=None
+11:28:48  335227  submitted  score=None  secondary=None
+11:30:49  335227  submitted  score=None  secondary=None
+11:32:49  335227  submitted  score=None  secondary=None
+11:34:50  335227  submitted  score=None  secondary=None
+11:36:50  335227  submitted  score=None  secondary=None
+11:38:51  335227  submitted  score=None  secondary=None
+11:40:51  335227  submitted  score=None  secondary=None
+11:42:52  335227  submitted  score=None  secondary=None
+11:44:52  335227  submitted  score=None  secondary=None
+11:46:53  335227  submitted  score=None  secondary=None
+11:48:53  335227  submitted  score=None  secondary=None
+11:50:54  335227  submitted  score=None  secondary=None
+11:52:55  335227  submitted  score=None  secondary=None
+11:54:55  335227  submitted  score=None  secondary=None
+11:56:56  335227  submitted  score=None  secondary=None
+11:58:56  335227  submitted  score=None  secondary=None
+12:00:57  335227  submitted  score=None  secondary=None
+12:02:57  335227  submitted  score=None  secondary=None
+12:04:58  335227  submitted  score=None  secondary=None
+12:06:58  335227  submitted  score=None  secondary=None
+12:08:58  335227  submitted  score=None  secondary=None
+12:10:59  335227  graded  score=3.0716825837413753e-09  secondary=1.8606850780145122e-08
+{
+ "id": 335227,
+ "grading_status_cd": "graded",
+ "score": 3.0716825837413753e-09,
+ "score_secondary": 1.8606850780145122e-08,
+ "grading_message": "<p>Graded successfully</p>\n",
+ "created_at": "2026-10-10T16:22:33.442Z",
+ "updated_at": null
+}
+ledger updated

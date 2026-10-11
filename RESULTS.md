@@ -2811,3 +2811,103 @@ Further bank items (twin, VAL-100, 1 epoch from the star2 refit; control = star 
 
 **v81d_starall2 graded (#334948): 3.3200317352723394e-09, NEW BEST**, raw 1.883284035386623e-08, 100 clean.
 −1.31 % vs v81c (3.3642e-09), −8.35 % vs v80. +0.35 % vs the FRESH-A projection 3.3085e-09.
+
+## Plan rev 22 — Lane P5 (2026-10-10)
+
+Handoff `docs/HANDOFF_2026-10-10_LANE_P5.md`; plan `docs/research/2026-10-10_pivot_rev22.md`.
+Cost model `docs/research/2026-10-10_flopmodel/` (run from a copy with the `~/scratch` path line removed).
+
+### P5.0c — v82a (bit-identical billing: `fnp.block` reassembly + `nan_to_num` closure guards)
+- Interpreter on the exact file: 382,927,736,337 FLOPs, 24,283 ops (−1.222 % F, −1,458 ops vs v81d).
+  **Real meter (`_cost_worker`, DEV 0): 382,927,736,337 / 24,283 — identical to the FLOP.**
+- Bit-identical to v81d on DEV nets 0–2 (max |Δ| = 0.0) ⇒ no FRESH-A needed (handoff).
+- **Predictions before the canary.** Strategist: −1.17 % −0.045 % F, raw unchanged (≈ 3.28e-9).
+  Worker: graded F/B 0.174135 exactly (the server bills `block` as 0.12.1 does), raw = v81d's graded
+  1.883284e-08 to ≤ 0.01 % ⇒ **3.2795e-09** (−1.22 %). If the graded F differs, the server bills `block` differently.
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-10 | `estimator_k3_v82a_block.py` | `b65a70a6` | DEV 0–2 bit-identical to v81d | = v81d | 0.17414 | 24,283 | local A/B on DEV net 3 (×2) v82a/v81d = **0.934** | VmPeak 6,152 MiB (WSL PASS 23/23 on the 3rd run; 2 runs before tripped the known "settled growth" allocator-noise check, VmPeak 6,157) | **3.2795e-09** (v81d graded raw × F/B) | **3.2794636795053282e-09** | bit-identical | — | residual projected 24,283 × 11.2 µs = 0.272 s. setup 0.001 s. Package `025fcbcb…8ac2`, inner = source. First canary of UTC Oct 10. |
+
+**v82a_block graded (#335165): 3.2794636795053282e-09, NEW BEST**, raw 1.883284035386623e-08 (= v81d's graded
+raw to every digit), 100 clean. −1.22 % vs v81d = the FLOP cut exactly; projection 3.2795e-09 hit to 4 digits.
+**The server bills `fnp.block` as flopscope 0.12.1 does** (the interpreter's F on the exact file is the graded F).
+
+### P5.2 step 1 + P5.1 item 6 — twin, VAL-100 unrefit (`experiments/2026-10-10_p5/d2/`)
+Base = v81d's twin arm (control reproduces 1.945887e-08 exactly). ρ_ℓ = d21e energy all/kept columns on kept
+rows, 1/σ⁴-weighted, FIT-100 control chain: 1.00 (L0–2), 1.12, 1.13, 1.24, 1.33, 1.34, 1.43, 1.52, 1.52, 1.60,
+1.61, 1.66, 1.68 (`rho.json`). Predictions in `experiments/2026-10-10_p5/PREDICTIONS.md`.
+
+| arm | VAL raw | vs control | worse on | strategist | worker |
+|---|---:|---:|---:|---|---|
+| control (Dz rows-only) | 1.945887e-08 | — | — | | |
+| D2 (rows+cols, unscaled d21e) | 2.113223e-08 | +8.60 % | 97/100 | ≈ +10 % | +7 to +10 % |
+| **D2 + ρ (= V8b, columns-only)** | **1.942682e-08** | **−0.16 %** | 38/100 | +1 to +4 % | +2 to +5 % |
+| D2c (diagnostic: corrector reads unmasked d21e) | 1.948220e-08 | +0.12 % | 62/100 | | +0.4 to +1.2 % |
+| D2 + ρ + Dleg (= V8, full two-sided) | 3.000652e-08 | **+54.2 %** | 100/100 | | +2.5 to +5.5 % |
+| Dz + Dleg ((ii)+(iii) alone) | 3.222216e-08 | **+65.6 %** | 100/100 | | +0.1 to +0.6 % |
+| item 6: C on prev D set (C=3) | 2.416543e-08 | +24.2 % | 97/100 | +0–0.5 % | |
+| item 6: same, dropped variances kept (C=4) | 2.164981e-08 | +11.3 % | 99/100 | | |
+
+Reading:
+- **The d21e loss was the whole cost of two-sided D**, and one scalar per layer repairs it (the calibrated
+  feature even beats the control slightly). V8b (D21 columns on the D set, legs untouched; interpreter −3.55 % F on
+  v81d) goes ahead without a refit gate; the refit batch R1 still runs it vs a matched control.
+- **Leg output rows on the D set (V8's (ii)+(iii)) is closed**: zeroing dead rows of the transported legs
+  (so D3 / star-D4 / births' diagonal of dead neurons vanish) costs +66 % on its own. Dead neurons' κ3 readouts are
+  not negligible to the chain. V8 (−8.84 %) is replaced by V8b (−3.55 %).
+- **Item 6 (covariance input pruning) is closed**, consistent with P2.4.2 (alive-block covariance ×13 / ×3.2).
+
+### P5.1 — the bundle, item by item (real flopscope; DEV nets 0–9 paired vs v82a; `experiments/2026-10-10_p5/v82/`)
+Builder `tools/build_v82.py` (items as exact text patches on v82a). F from the interpreter = real meter.
+
+| item | ΔF vs v82a | ops | DEV 0–9 Δraw | verdict |
+|---|---:|---:|---:|---|
+| 1 skip old-tier joins at L14, L15 | −0.90 % | 23,683 | **−1.14 %** (10/10 better) | **in** |
+| 2 last-layer rows K16 = 800 | −0.78 % | 24,293 | **+6.77 %** (9/9 worse; net 7 lost to a local OOM) | **closed** |
+| 3 old rebuild on D-kept rows | −1.26 % | 24,292 | **+10.63 %** (10/10 worse) | **closed** |
+| 4 fused `_advance` products | −0.39 % | 22,351 | reassociation | in |
+| 5 two-level sandwich split | −0.23 % | 24,838 | reassociation (exact symmetry) | in |
+| 6 covariance input pruning | −1.24 % | 24,319 | twin +24 % | closed (above) |
+| 7 V8b (D21 columns on D + ρ d21e) | −3.59 % | 24,352 | twin −0.16 % | **in** |
+| **v82b = 1, 4, 5, 7** | **−5.20 % (F/B 0.16508)** | **22,375** | **−1.29 %** (10/10 better) | candidate |
+
+Items 2, 3 and V8's leg rows all zero dead neurons' κ3 readouts (D3 / old-tier rows), and all three cost +7 to +66 %:
+**dead rows' D3 is not negligible** (their means sit in the tail, where the κ3 correction is first order). The
+interpreter's variant of item 5 had a transposition bug (`t2[:, :q].T` for `t2[:, q:].T`), harmless to a
+shape-only model; the builder uses the exact one. Twin VAL-100 unrefit (pod, R1 init evals): control 1.945850e-08,
+V8b 1.942720e-08 (−0.16 %), v82b-arm (V8b + J=2) 1.928571e-08 (−0.89 %).
+v82b gates so far: meter 363,022,283,745 FLOPs = interpreter; WSL PASS 23/23 VmPeak 6,026 MiB; wall A/B on DEV
+net 3 (×2) v82b/v82a = 0.953; twin(file) vs real DEV 0–9 raw-mean 2.7e-4 (per-net ≤ 2.2e-3, same as v81d's own).
+
+Twin parity (pod): v82b file in the twin, DEV-100 raw 1.891745e-08 vs the v82b arm (V8b + J=2) 1.891697e-08 = 2.5e-5.
+Twin VAL-100 unrefit: J=2 alone 1.931729e-08 (−0.73 % vs control), v82b arm 1.928571e-08 (−0.89 %).
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-10 | `estimator_k3_v82b_bundle.py` | `a358fb45` | FRESH-A | 1.968635e-08 (floor-free 1.893870e-08; −0.93 % vs v81d's 1.987150e-08) | 0.16508 | 22,375 | local A/B on DEV net 3 (×2) v82b/v82a = **0.953** (v82a/v81d 0.934) → below v81d's ~101 s noisy-implied; law 76.5 / 90.0 s | VmPeak 6,026 MiB (WSL PASS 23/23, same hash) | **3.0682e-09** (realistic ≈ 3.08e-09 at the usual +0.4 %) | **3.0716825837413753e-09** | **1.0779× vs v81d** (Δ +2.533e-10, t95 [+2.446e-10, +2.619e-10]) | 100/100 | items 1,4,5 + V8b (`tools/build_v82.py --items 1,4,5,7`). Meter = interpreter. residual 0.248 s. parity file↔arm 2.5e-5. Package `81afa05a…2085`, inner = source. Second canary of UTC Oct 10. Predictions: strategist −4 to −5 % F, Δraw ±0.5 %; worker ≈ 3.07e-9. |
+
+**v82b_bundle graded (#335227): 3.0716825837413753e-09, NEW BEST**, raw 1.8606850780145122e-08 (−1.20 % vs v81d/v82a's
+graded raw), 100 clean. −6.34 % vs v82a, −7.48 % vs v81d. +0.11 % vs the FRESH-A projection 3.0682e-09.
+`tools/ev.py --best-graded` updated.
+| 2026-10-10 | `estimator_k3_v82b_bundlews.py` | `7148e22a` | FRESH-A | 1.968655e-08 | 0.16895 | 20,269 | local A/B on DEV net 3 (×2) vs v81b_star2ws = **0.916** → ≈ 78 s noisy-implied (B ≤ 95 s); law 77.3 / 90.9 s | VmPeak 6,017 MiB (WSL PASS 23/23, same hash) | 3.1401e-09 | **3.1432860023588976e-09** | **1.0997× vs v81b_star2ws** (Δ +3.317e-10, t95 [+3.186e-10, +3.447e-10]) | 100/100 | v82b at Strassen block 40 (B twin). residual 0.225 s. Package `34c6b688…edb8`, inner = source. **Oct 10 A/B slot**, replacing the handoff's v81d_ws: v82b_ws is the ws build of the new A and projects 3.14e-9 vs v81d_ws's ≈ 3.40e-9 (two v81d_ws FRESH-A runs lost nets to local commit-limit OOMs; logs `v81dws_fresh_a_try*`). |
+
+**v82b_bundlews graded (#335250): 3.1432860023588976e-09, NEW wall-safe B**, raw 1.860451757096371e-08 (= v82b's graded raw
+to 0.01 %), 100 clean. −9.4 % vs v81b_star2ws; +0.10 % vs the FRESH-A projection.
+
+### R1 (pod, P5.2 step 2) — 2-epoch refits from refit_starall2, S2ts, lr 1e-4, VAL-100 every 28 steps
+| arm | init | step 84 | best (step) | vs control |
+|---|---:|---:|---:|---|
+| control (Dz) | 1.945850e-08 | 1.947256e-08 | 1.945850e-08 (init; early-stopped at 84 by patience 3) | — |
+| V8b (D2 + ρ) | 1.942720e-08 | 1.936620e-08 | 1.927886e-08 (224) | −0.55 % at step 84; −0.92 % at end |
+| v82b arm (V8b + J=2) | 1.928571e-08 | 1.925307e-08 | **1.912189e-08** (224) | −1.13 % at step 84; −1.73 % at end |
+Kill rule (> +1.5 % vs control) not triggered; two-sided D (as V8b) stays. The control's early stop means the
+end-of-run comparison is not epoch-matched; the step-84 numbers are. R2 (pod): v82b arm continued 2 epochs,
+patience off (step 84: 1.915192e-08, not yet below R1's best).
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-10 | `estimator_k3_v82c_r1.py` | `66f3ee4a` | FRESH-A | 1.952520e-08 (floor-free 1.877755e-08) | 0.16508 | 22,375 | same code as v82b (constants only) | VmPeak 6,024 MiB (WSL PASS 23/23, same hash) | **3.0421e-09** | **3.0464210089351763e-09** | **1.0083× vs v82b** (Δ +2.660e-11, t95 [+2.407e-11, +2.913e-11]) | 99/100 | v82b + the R1 v82b-arm refit baked (`build_star --all` on v80_hyg, then `build_v82 --items 0,1,4,5,7`; the same pipeline rebuilds v81d and v82b byte for byte). Twin parity file↔arm DEV 1.7e-4. residual 0.248 s. Package `162f605a…78c6`, inner = source. Third canary of UTC Oct 10. Prediction (worker): −0.8 to −1.2 % raw on FRESH-A. |
+
+**v82c_r1 graded (#335253): 3.0464210089351763e-09, NEW BEST**, raw 1.8453827692610502e-08, 100 clean. −0.82 % vs v82b,
+−8.24 % vs v81d (−7.1 % vs v82a). +0.14 % vs the FRESH-A projection 3.0421e-09. `tools/ev.py --best-graded` updated.

@@ -118,6 +118,17 @@ def stack(seq, axis=0):
     return _t.stack(list(seq), dim=axis)
 
 
+def block(arrays):
+    """numpy.block for nested lists of depth <= 2 (rows of column blocks), as the
+    chain uses it: inner lists join on the last axis, the outer on the one before."""
+    if not isinstance(arrays, (list, tuple)):
+        return arrays
+    if not any(isinstance(r, (list, tuple)) for r in arrays):
+        return _t.cat(list(arrays), dim=-1)
+    rows = [r if not isinstance(r, (list, tuple)) else _t.cat(list(r), dim=-1) for r in arrays]
+    return _t.cat(rows, dim=-2)
+
+
 def reshape(x, shape):
     return x.reshape(shape)
 
@@ -163,6 +174,10 @@ def isfinite(x):
     return _t.isfinite(x)
 
 
+def nan_to_num(x, nan=0.0, posinf=None, neginf=None):
+    return _t.nan_to_num(x, nan=nan, posinf=posinf, neginf=neginf)
+
+
 def divide(a, b):
     return _t.div(_tens(a, b), b)
 
@@ -202,3 +217,22 @@ class linalg:
     @staticmethod
     def inv(a):
         return _t.linalg.inv(a)
+
+    # P6.1 (iii) / M6.2: flopscope 0.12.1's `svd` (with top-k `k=`) and `eigh`. Always the
+    # economy SVD (the estimator only uses the top-k slice). The basis (U, Vh / eigenvectors)
+    # is DETACHED: its gradient blows up at near-degenerate spectra, and the refits treat the
+    # join basis as a fixed projection. Singular values / eigenvalues keep their (stable) gradient.
+    @staticmethod
+    def svd(a, full_matrices=True, compute_uv=True, hermitian=False, k=None):
+        if not compute_uv:
+            s = _t.linalg.svdvals(a)
+            return s if k is None else s[..., :k]
+        u, s, vh = _t.linalg.svd(a, full_matrices=False)
+        if k is not None:
+            u, s, vh = u[..., :k], s[..., :k], vh[..., :k, :]
+        return u.detach(), s, vh.detach()
+
+    @staticmethod
+    def eigh(a, UPLO="L"):
+        w, v = _t.linalg.eigh(a, UPLO=UPLO)
+        return w, v.detach()

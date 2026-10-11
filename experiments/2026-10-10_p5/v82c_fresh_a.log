@@ -1,0 +1,33 @@
+[ev] estimator_k3_v82c_r1.py on FRESH_A n=100
+[ev] cost: 363,022,283,745 FLOPs, 22,375 ops, peak RSS 4.08 GiB -> budget 10.2 GiB/worker
+  [mem] 27.6 GiB free, 10.2 GiB per worker -> 2 workers, not 4
+  2 workers x 2 BLAS threads over 100 nets ...
+[ev] accuracy: 2891.7 s, raw MSE 1.952520e-08
+
+  raw MSE            1.952520e-08   (our N = 1e8 labels; mean floor 7.476e-10)
+  raw MSE floor-free 1.877755e-08
+  FLOPs / MLP        363,022,283,745   = 0.16508 x 2^41
+  op calls           22,375
+  materializations   0
+  adjusted (panel)   3.099863e-09
+  per-net score CV   0.122
+  PROJECTED PUBLIC   3.042063e-09   (÷ 1.019)
+  paired vs estimator_k3_v82b_bundle:  gain 1.0083×, Δ +2.6603e-11, t95 [+2.4074e-11, +2.9133e-11], wins 99/100
+    (geometric 1.0082× — diagnostic only, no authority over an outcome)
+
+  PLAN §5 gates
+    PASS  panel projected vs best graded   better than 3.0717e-09             3.0421e-09 = 0.96% better
+    PASS  op calls                         ≤ 26,000                           22,375
+    ok    projected server wall (noisy day, A policy) ≤ 115 s                            90.0 s (quiet day 76.5 s)
+    PASS  setup                            < 2 s                              0.00 s
+    PASS  scalar materializations          0                                  0
+    PASS  failed nets on panel             0                                  0
+    PASS  projected server residual        ≤ 0.33 s (D7 finals bound)         0.248 s (1.61× headroom vs the 0.4 s cliff)
+    PASS  full acceptance panel            fresh_a (or dev), n = 100          fresh_a, n = 100
+    PASS  paired vs incumbent              --baseline given                   estimator_k3_v82b_bundle
+    FAIL  WSL RLIMIT_AS 8 GiB gate         PASS on candidate SHA256 (--mem)   NOT RUN
+
+  NOT ACCEPTED — gated or incomplete; not submittable
+
+  RESULTS.md row:
+  | 2026-10-10 | `estimator_k3_v82c_r1.py` | `66f3ee4a` | FRESH-A | 1.952520e-08 | 0.16508 | 22,375 | 44.735 s (local) → 76.5 s proj | 4182 MiB | **3.0421e-09** | PENDING | 1.0083× vs estimator_k3_v82b_bundle (Δ +2.660e-11, t95 [+2.407e-11, +2.913e-11]) | 99/100 |  |

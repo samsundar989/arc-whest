@@ -1,5 +1,38 @@
 # DESIGNATION — current A and B (maintained by the worker; designating is Samuel's)
 
+## Recommendation — 2026-10-11 (Lane P6, plan rev 23; no nomination/designation made)
+
+| role | file | sha8 | submission | score | raw | F/B | wall evidence | VmPeak |
+|---|---|---|---|---:|---:|---:|---|---|
+| **A (recommended)** | `estimator_k3_v82c_r1.py` | `66f3ee4a` | #335253 | **3.0464210089351763e-9** | 1.8454e-8 | 0.16508 | same code as v82b (constants only): A/B 0.953 vs v82a; law 76.5 / 90.0 s | 6,024 MiB |
+| **B (recommended)** | `estimator_k3_v82b_bundlews.py` | `7148e22a` | #335250 | **3.1432860023588976e-9** | 1.8605e-8 | 0.16895 | A/B 0.916 vs v81b_ws → ≈ 78 s noisy-implied | 6,017 MiB |
+
+B stays v82b_ws until the ws twin of the current A grades (P6.0c A/B slot). In flight: v82c_r2 (R2 refit, VAL −0.46 %
+vs R1, constants only) on FRESH-A paired vs v82c_r1. **Samuel designates.**
+
+## Recommendation — 2026-10-10 evening (Lane P5; no nomination/designation made)
+
+| role | file | sha8 | submission | score | raw | F/B | wall evidence | VmPeak |
+|---|---|---|---|---:|---:|---:|---|---|
+| **A (recommended)** | `estimator_k3_v82b_bundle.py` | `a358fb45` | #335227 | **3.0716825837413753e-9** | 1.8607e-8 | 0.16508 | local A/B 0.953 vs v82a (0.934 vs v81d) → below v81d's ~101 s noisy-implied; law 76.5 / 90.0 s | 6,026 MiB |
+| **B (recommended)** | `estimator_k3_v82b_bundlews.py` | `7148e22a` | #335250 | **3.1432860023588976e-9** | 1.8605e-8 | 0.16895 | A/B 0.916 vs v81b_ws → ≈ 78 s noisy-implied | 6,017 MiB |
+
+**Update: v82c_r1 graded 3.0464210089351763e-9 (#335253) and is now the recommended A** (same code as v82b, refit
+constants only; VmPeak 6,024 MiB; wall = v82b's). Its ws twin `estimator_k3_v82c_r1ws.py` is built but not gated.
+**Samuel designates.**
+
+## Recommendation — 2026-10-10 (Lane P5, plan rev 22; no nomination/designation made)
+
+| role | file | sha8 | submission | score | raw | F/B | wall evidence | VmPeak |
+|---|---|---|---|---:|---:|---:|---|---|
+| **A (recommended)** | `estimator_k3_v81d_starall2.py` | `b7efb0f5` | #334948 | **3.3200317352723394e-9** | 1.883284e-8 | 0.17629 | same code as v81c (A/B 0.95 vs v81b; v81 ≈ v80's ~101 s noisy-implied); server wall max 90.0 s (Oct 10 board read) | 6,144 MiB |
+| **B (recommended)** | `estimator_k3_v81d_starall2ws.py` once graded (Oct 10 A/B slot); until then `estimator_k3_v81b_star2ws.py` | `1a586019` / `512c33ec` | — / #334918 | — / 3.4711270541038904e-9 | — / 1.9265e-8 | 0.18030 / 0.18018 | block-40 twins (~85 s noisy-implied) | 6,166 MiB (v81b_ws) |
+
+A = best graded score; B = its wall- and memory-safe twin (Strassen block 40). v82a (#335165,
+bit-identical to v81d at −1.22 % F) replaces A here if it grades as projected (3.2795e-9).
+Final A/B are decided on FRESH-LOCK (≤ 3 reads) plus wall/residual margins on Oct 16–17.
+**Samuel designates.**
+
 ## Evidence update — 2026-10-06 night (no nomination/designation made)
 
 | role | file | sha8 | submission | score | raw | F/B | wall evidence | VmPeak |

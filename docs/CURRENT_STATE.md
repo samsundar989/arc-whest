@@ -1,9 +1,21 @@
-# CURRENT_STATE — 2026-10-10 (plan rev 22, Lane P5)
+# CURRENT_STATE — 2026-10-11 (plan rev 23, Lane P6)
+
+Plan rev 23 = `docs/research/2026-10-10_evening_review.md` (§0, §2, §5, §6), on PLAN rev 18 §5 gates.
+**Lane P5 and Lane M5 are COMPLETE.** Active: Lane P6 (main) per `docs/HANDOFF_2026-10-11_LANE_P6.md`;
+Lane M6 (branch `lane-m`) per `docs/HANDOFF_2026-10-11_LANE_M6.md`. Exact pricing tool:
+`docs/research/2026-10-11_p6price/`. Next: P6.0b (merge lane-m), P6.0c (v82c_r1ws B slot), P6.0d (R2), P6.1 (v83).
+
+# (history) CURRENT_STATE — 2026-10-10 (plan rev 22, Lane P5)
 
 Plan rev 22 = `docs/research/2026-10-10_pivot_rev22.md` (§3–§6), on top of PLAN rev 18 §5 gates.
 Lane P5 (main) per `docs/HANDOFF_2026-10-10_LANE_P5.md`; Lane M5 (branch `lane-m`) per
 `docs/HANDOFF_2026-10-10_LANE_M5.md`. **`HANDOFF_2026-10-10_LANE_P4.md` and `..._M4.md` are
 SUPERSEDED (never started); do not execute them.** Exact cost model: `docs/research/2026-10-10_flopmodel/`.
+
+**Oct 10 end of day:** A = v82c_r1 #335253 3.0464e-9; B = v82b_bundlews #335250 3.1433e-9. Builder
+`tools/build_v82.py` (items 0,1,4,5,7 live; 2,3,6 closed). Two-sided D ships as V8b (columns + ρ d21e);
+leg-row / dead-row D3 pruning is closed. Pod `acc7entl4kttqk` RUNNING with R2 (v82b-arm, 2 more epochs) in
+`/workspace/p5/r2`; twin on the pod: `cd /workspace/p5/arc && python3 -u tools/twin/twin.py ...`. Next: P5.3.
 
 # (history) CURRENT_STATE — 2026-10-08 (PLAN rev 20, Lane P3)
 
@@ -21,13 +33,17 @@ vs the incumbent** (`tools/ev.py --panel fresh_a --baseline <incumbent>`); lane-
 
 | role | source / SHA8 | submission | score | F/B |
 |---|---|---|---:|---:|
-| **best A** | `estimator_k3_v81d_starall2.py` / `b7efb0f5` | #334948 | **3.3200317352723394e-9** (raw 1.8833e-8) | 0.17629 |
+| **best A** | `estimator_k3_v82c_r1.py` / `66f3ee4a` | #335253 | **3.0464210089351763e-9** (raw 1.8454e-8) | 0.16508 |
+| A (prev.) | `estimator_k3_v82b_bundle.py` / `a358fb45` | #335227 | 3.0716825837413753e-9 (raw 1.8607e-8) | 0.16508 |
+| A (prev.) | `estimator_k3_v82a_block.py` / `b65a70a6` | #335165 | 3.2794636795053282e-9 (raw 1.8833e-8) | 0.17414 |
+| A (prev.) | `estimator_k3_v81d_starall2.py` / `b7efb0f5` | #334948 | 3.3200317352723394e-9 (raw 1.8833e-8) | 0.17629 |
 | A (prev.) | `estimator_k3_v81c_starall.py` / `71b5e991` | #334926 | 3.364228068774433e-9 (raw 1.9084e-8) | 0.17629 |
 | A (prev.) | `estimator_k3_v81b_star2.py` / `09ecbf95` | #334855 | 3.393934944659043e-9 (raw 1.9266e-8) | 0.17616 |
 | A (prev.) | `estimator_k3_v81_star.py` / `376ae1c5` | #334848 | 3.4983524381277624e-9 (raw 1.9859e-8) | 0.17616 |
 | A (prev.) | `estimator_k3_v80_hyg.py` / `73b2c19c` | #334659 | 3.6223815250878947e-9 (raw 2.0579e-8) | 0.17602 |
 | A (prev.) | `estimator_k3_v79_dress.py` / `2cf3acf4` | #334576 | 3.7025275784494673e-9 (raw 2.0580e-8) | 0.17991 |
-| **B** (wall-safe) | `estimator_k3_v81b_star2ws.py` / `512c33ec` | #334918 | **3.4711270541038904e-9** (raw 1.9265e-8) | 0.18018 |
+| **B** (wall-safe) | `estimator_k3_v82b_bundlews.py` / `7148e22a` | #335250 | **3.1432860023588976e-9** (raw 1.8605e-8) | 0.16895 |
+| B (prev.) | `estimator_k3_v81b_star2ws.py` / `512c33ec` | #334918 | 3.4711270541038904e-9 (raw 1.9265e-8) | 0.18018 |
 | B (prev.) | `estimator_k3_v80_hygws.py` / `dd82721c` | #334781 | 3.705600144458426e-9 (raw 2.0582e-8) | 0.18004 |
 | B (prev.) | `estimator_k3_v78_kashws.py` / `6b3db2a5` | #334545 | 4.249585835999417e-9 (raw 2.2023e-8) | 0.19296 |
 | A (prev.) | `estimator_k3_v77_kash.py` / `4ff8018f` | #334487 | 3.959571663492616e-9 | 0.17981 |
