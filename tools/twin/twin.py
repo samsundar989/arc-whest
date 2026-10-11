@@ -694,12 +694,15 @@ ARMS["bank"] = [
 ARMS["bank"] += [
     ("    metric = float(init_scale)\n",
      "    if _BANK is not None and _BANK.get('avar') and _TWG is not None:\n"
-     "        var = var * (1.0 + _TWG['va'][layer_index] * ((mu_pre * mu_pre) / var))\n"
+     "        # alpha^2 bounded at 9 (|alpha| <= 3, the kink region): ALPHA_CAP is 40, and an\n"
+     "        # unbounded alpha^2 <= 1600 made both gains unstable (jobs 2641, 2650)\n"
+     "        var = var * (1.0 + _TWG['va'][layer_index]\n"
+     "                     * fnp.minimum((mu_pre * mu_pre) / var, 9.0))\n"
      "    metric = float(init_scale)\n"),
     ("             (3,): D3, (4,): D4, (2, 2): D22}\n",
      "             (3,): D3, (4,): D4, (2, 2): D22}\n"
      "        if _BANK is not None and _BANK.get('acov') and _TWG is not None:\n"
-     "            _fa = 1.0 + _TWG['ab'][layer_index] * (alpha * alpha)\n"
+     "            _fa = 1.0 + _TWG['ab'][layer_index] * fnp.minimum(alpha * alpha, 9.0)\n"
      "            S[(2, 1)] = D21 * _fa[:, None]\n"
      "            S[(1, 2)] = S[(2, 1)].T\n"
      "            S[(2, 2)] = D22 * ((_fa[:, None] + _fa[None, :]) * 0.5)\n"),

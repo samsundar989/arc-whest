@@ -158,6 +158,14 @@ def maximum(a, b):
     return _t.maximum(a, b)
 
 
+def minimum(a, b):
+    if not isinstance(b, _t.Tensor):
+        return _t.clamp_max(a, b)
+    if not isinstance(a, _t.Tensor):
+        return _t.clamp_max(b, a)
+    return _t.minimum(a, b)
+
+
 def clip(a, lo, hi):
     return _t.clamp(a, lo, hi)
 

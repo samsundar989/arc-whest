@@ -144,3 +144,12 @@ d√0 = ∞, so the first backward step produces a NaN gradient and a NaN head.
 
 Unit test: the old normaliser's gradient is non-finite and the new one, √(mean + 1e-12), is
 finite. Fixed in twin.py and requeued. The tanh bound and lr-mult 1 stay.
+
+## acov root cause (~12:10 local): unbounded α²
+
+Rerun 2650 at lr-mult 100 still read 2.0976e-8 at step 28 (+13 % vs ctl at step 28); cancelled.
+ALPHA_CAP is 40, so α² ≤ 1600 in both gains: a 1e-4 step moves a dead neuron's variance by 16 %,
+and α depends on var (feedback).
+
+Fix: both gains read min(α², 9) (|α| ≤ 3, the kink region). Shim `minimum` added. Rerun at
+lr-mult 100, after an inertness re-check. Same prediction.
