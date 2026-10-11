@@ -90,3 +90,18 @@ both repair the same thing: the old-tier compression error at join time. Predict
 
 **Take jsvd only if age 6 is rejected** on wall time or memory. age 6 alone has the larger net
 (−1.54 % refit vs −0.43 %).
+
+## Joint age6 + J3 (unrefit VAL-100, R2)
+
+| arm | raw MSE | F/B | vs fold+age6: Δraw / ΔF / net | wins |
+|---|---:|---:|---|---:|
+| fold+age6+J3 | 1.76880e-8 | 0.17416 | −0.26 % / +0.36 % / **+0.10 %** | 74/100 |
+
+J3 mostly substitutes for age 6 too: both keep late lineages exact. The marginal net is neutral
+(predicted −0.1 to +0.2 %). **On an age-6 build, skip J3. Without age 6, J3 alone is net −0.40 %
+unrefit**; its refit is still queued, as the fallback.
+
+**M6.2 conclusion:**
+- age 6 is the one spend lever to take.
+- jsvd and J3 are fallbacks for an age-6 rejection. They overlap each other too, so pick jsvd
+  first: refit net −0.43 %, vs J3's −0.40 % unrefit.

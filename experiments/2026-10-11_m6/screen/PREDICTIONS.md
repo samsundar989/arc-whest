@@ -71,3 +71,9 @@ Both change the old tier. Alone, unrefit on fold: age6 −5.86 % at +4.83 % F; j
 +1.07 % F. Prediction for the joint arm: ΔF ≈ +5.9 % (near-additive). Δraw −6.5 to −7.2 %; the
 gains are sub-additive because age 6 leaves fewer joins for jsvd to improve. Net −1.0 to −1.6 %,
 so jsvd adds −0.0 to −0.3 % on top of age 6.
+
+## Addendum: joint age6 + J3 (recorded BEFORE the run)
+
+J3 skips the old-tier join at the last 3 non-final layers, which also keeps late lineages exact,
+so it may substitute for age 6 the way jsvd did. Prediction: on top of age6, J3 gives −0.1 to
+−0.4 % raw for about +0.3 % F, a marginal net of −0.1 to +0.2 %.

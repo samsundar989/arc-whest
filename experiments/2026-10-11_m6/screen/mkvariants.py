@@ -23,6 +23,7 @@ for lever, patch in (("J3", price.J(3)), ("J4", price.J(4)), ("age6", price.age(
                      ("jsvd", price.join_svd), ("p2svd", price.p2svd)):
     V.setdefault(f"fold+{lever}", [price.fold, patch])
 V.setdefault("fold+age6+jsvd", [price.fold, price.age(6), price.join_svd])
+V.setdefault("fold+age6+J3", [price.fold, price.age(6), price.J(3)])
 names = sys.argv[1].split(",")
 out = price.OUT / "prices_m6.json"
 res = json.loads(out.read_text()) if out.exists() else {}
