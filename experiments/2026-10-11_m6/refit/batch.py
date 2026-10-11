@@ -64,7 +64,9 @@ def refit(name):
     cmd = TW + ["train", "--cand", cand, "--mask", mask, *COMMON, *bank(name), "--init", P_R3,
                 "--epochs", "1",
                 "--accum", "8", "--lr", "1e-4", "--eval-every", "28", "--patience", "3",
-                "--hold-panel", "hold100", "--stage", "S2tsfa" if name == "acov" else "S2tsf", "--out", str(HERE / f"refit_{name}")]
+                "--hold-panel", "hold100", "--stage", "S2tsfa" if name == "acov" else "S2tsf",
+                # zero-init gains step at lr x zero_scale (1e-6) unless multiplied (M5 froze so)
+                *(["--lr-mult", "gain/ab=1000,gain/va=1000"] if name == "acov" else []), "--out", str(HERE / f"refit_{name}")]
     sys.exit(subprocess.run(cmd).returncode)
 
 

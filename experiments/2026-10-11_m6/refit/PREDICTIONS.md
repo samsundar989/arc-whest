@@ -59,6 +59,7 @@ Both start at zero gain. Stage S2tsfa = S2tsf + gain/ab + gain/va. The recipe an
 the same as the M6.2 refits (`refit_ctl`). ΔF = 0, because the gains fold into existing products
 when built.
 
+- Step size: zero-init leaves step at lr × zero_scale = 1e-6, so ab and va get `--lr-mult 1000` (about 1e-3 per step). Job 2633 was cancelled before it started for this reason.
 - Inertness: with zero gains, the first 10 VAL nets must equal `ctl` bit for bit (`inert` batch).
 - Refit prediction vs ctl: −0.3 to −1.2 % raw. Handoff: −0.5 to −2 % (with features). Kill if
   it beats ctl by less than 0.3 %.
