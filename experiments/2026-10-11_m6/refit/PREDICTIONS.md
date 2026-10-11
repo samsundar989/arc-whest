@@ -48,3 +48,18 @@ Unrefit on R3 params, against ctl 1.850971e-8:
 - J3: 1.836513e-8 (−0.78 %);
 - age6: 1.738215e-8 (−6.09 %);
 - jsvd: 1.822418e-8 (−1.54 %).
+
+## M6.3a `acov`: α-dependent covariance and variance gains (recorded BEFORE any run)
+
+Twin bank keys `acov` and `avar`:
+- `acov`: S-block D21/D22 row factor (1 + ab_ℓ α²);
+- `avar`: var × (1 + va_ℓ α²).
+
+Both start at zero gain. Stage S2tsfa = S2tsf + gain/ab + gain/va. The recipe and the control are
+the same as the M6.2 refits (`refit_ctl`). ΔF = 0, because the gains fold into existing products
+when built.
+
+- Inertness: with zero gains, the first 10 VAL nets must equal `ctl` bit for bit (`inert` batch).
+- Refit prediction vs ctl: −0.3 to −1.2 % raw. Handoff: −0.5 to −2 % (with features). Kill if
+  it beats ctl by less than 0.3 %.
+- Learned va_ℓ should be largest in |value| for layers 12–15 (anatomy band).

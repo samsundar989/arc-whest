@@ -56,3 +56,11 @@ Prediction, unrefit on fold (age6 everywhere gave −5.86 %, at +4.83 % F):
 
 Rationale: the anatomy puts the κ3 error late, so the gain per FLOP should rise as the cut moves
 later.
+
+## Addendum, ~04:30 UTC: age 6 everywhere + age 7 late (recorded BEFORE pricing and screen)
+
+These are `fold+age6+late7_{11,13}`: age 6 everywhere, and the bar rises to 7 from layer L0.
+Under J=2, L0 = 13 may again be nearly a no-op. Reference: fold+age6, −5.86 %, net −1.31 %.
+
+Prediction against fold+age6 (marginal): late7_11 costs +1.0 to +1.5 % F for −1.0 to −2.0 % raw,
+a marginal net of −0.2 to −0.6 %. late7_13 is about 0.

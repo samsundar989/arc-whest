@@ -686,6 +686,24 @@ ARMS["bank"] = [
     ("def _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n",
      "_BANK = None\n\n\ndef _layer(W, state, table, dtype, const, init_scale, last_layer, gens,\n"),
 ]
+# HANDOFF 2026-10-11 Lane M6, M6.3: alpha-dependent covariance gains (bank keys, zero-init =
+# exact identity). `acov`: the D21 / D22 S-blocks the bivariate (covariance) terms read get the
+# row factor (1 + gain/ab[l] alpha_a^2) (D22 symmetrised as the row/column mean); the tower
+# births keep reading the raw D21. `avar`: the variance consumed at layer l times
+# (1 + gain/va[l] alpha^2), alpha^2 = mu_pre^2 / var (M6.1: var in band 12-15 is 19 % of error).
+ARMS["bank"] += [
+    ("    metric = float(init_scale)\n",
+     "    if _BANK is not None and _BANK.get('avar') and _TWG is not None:\n"
+     "        var = var * (1.0 + _TWG['va'][layer_index] * ((mu_pre * mu_pre) / var))\n"
+     "    metric = float(init_scale)\n"),
+    ("             (3,): D3, (4,): D4, (2, 2): D22}\n",
+     "             (3,): D3, (4,): D4, (2, 2): D22}\n"
+     "        if _BANK is not None and _BANK.get('acov') and _TWG is not None:\n"
+     "            _fa = 1.0 + _TWG['ab'][layer_index] * (alpha * alpha)\n"
+     "            S[(2, 1)] = D21 * _fa[:, None]\n"
+     "            S[(1, 2)] = S[(2, 1)].T\n"
+     "            S[(2, 2)] = D22 * ((_fa[:, None] + _fa[None, :]) * 0.5)\n"),
+]
 TRAINABLE["S2tv"] = TRAINABLE["S2t"] + ("gain/vg",)
 TRAINABLE["S2ts"] = TRAINABLE["S2t"] + ("gain/sg",)
 TRAINABLE["S2tsp"] = TRAINABLE["S2t"] + ("gain/sg", "gain/pg")
@@ -697,6 +715,7 @@ import k4x_arm  # noqa: E402
 ARMS["fold"] = list(k4x_arm.PATCHES[:6])
 ARMS["rad"] = [k4x_arm.PATCHES[0]] + list(k4x_arm.PATCHES[6:])
 TRAINABLE["S2tsf"] = TRAINABLE["S2ts"] + ("gain/fg",)
+TRAINABLE["S2tsfa"] = TRAINABLE["S2tsf"] + ("gain/ab", "gain/va")   # M6.3
 TRAINABLE["S2tsr"] = TRAINABLE["S2ts"] + ("gain/rq", "gain/r22", "gain/r4")
 TRAINABLE["S2tsfr"] = TRAINABLE["S2tsf"] + ("gain/rq", "gain/r22", "gain/r4")
 ARMS["qx"] = list(k4x_arm.QX_PATCHES)
@@ -881,6 +900,8 @@ class Twin:
         self.base["gain"]["sg"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
         self.base["gain"]["pg"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
         self.base["gain"]["fg"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
+        self.base["gain"]["ab"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
+        self.base["gain"]["va"] = torch.zeros((depth,), dtype=torch.float32, device=DEV)
         _vp = torch.tensor(k4x_arm.vprime(depth), dtype=torch.float32, device=DEV)
         for _k in ("rq", "r22", "r4"):
             self.base["gain"][_k] = _vp.clone()

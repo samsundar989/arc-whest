@@ -19,8 +19,12 @@ RHO = f"{MAIN}/experiments/2026-10-10_p5/d2/rho.json"
 P_R2 = f"{MAIN}/experiments/2026-10-10_p5/r2/v82b/params_best.npz"
 P_R3 = f"{MAIN}/experiments/2026-10-11_p6/r3/fold/params_best.npz"
 BASE_CAND = "experiments/2026-09-27_gates/estimator_k3_v62_gb.py"
-COMMON = ["--dress", "all", "--bank", "star,starall", "--arm", "mask+dress+bank+fold",
-          "--fold", "tau=2,mode=rec"]
+COMMON = ["--dress", "all", "--arm", "mask+dress+bank+fold", "--fold", "tau=2,mode=rec"]
+
+
+def bank(name):
+    """M6.3 `acov` = the alpha-dependent covariance and variance gains (zero-init, stage S2tsfa)."""
+    return ["--bank", "star,starall,acov,avar" if name == "acov" else "star,starall"]
 TW = [sys.executable, "-u", str(HERE / "tw.py")]
 
 
@@ -31,7 +35,7 @@ def arm(name):
     return cand, f"R=2.0,Hd=2.5,D2=2.5,rho={RHO},J={j},K={K}"
 
 
-def ev(tag, name, params, panel="hold100"):
+def ev(tag, name, params, panel="hold100", n=None):
     out = HERE / "val" / f"{tag}.json"
     if out.exists():
         return
@@ -39,7 +43,8 @@ def ev(tag, name, params, panel="hold100"):
     cand, mask = arm(name)
     print(">>", tag, flush=True)
     r = subprocess.run(TW + ["eval", "--cand", cand, "--mask", mask, "--params", params,
-                             "--panel", panel, *COMMON, "--json", str(out)])
+                             "--panel", panel, *(["--n", str(n)] if n else []), *COMMON,
+                             *bank(name), "--json", str(out)])
     if r.returncode:
         print(f"!! {tag} failed ({r.returncode})", flush=True)
 
@@ -56,11 +61,18 @@ def parity():
 
 def refit(name):
     cand, mask = arm(name)
-    cmd = TW + ["train", "--cand", cand, "--mask", mask, *COMMON, "--init", P_R3, "--epochs", "1",
+    cmd = TW + ["train", "--cand", cand, "--mask", mask, *COMMON, *bank(name), "--init", P_R3,
+                "--epochs", "1",
                 "--accum", "8", "--lr", "1e-4", "--eval-every", "28", "--patience", "3",
-                "--hold-panel", "hold100", "--stage", "S2tsf", "--out", str(HERE / f"refit_{name}")]
+                "--hold-panel", "hold100", "--stage", "S2tsfa" if name == "acov" else "S2tsf", "--out", str(HERE / f"refit_{name}")]
     sys.exit(subprocess.run(cmd).returncode)
 
 
+def inert():
+    """acov,avar with zero gains must reproduce r3_ctl (first 10 VAL nets) exactly."""
+    ev("r3_acov_inert10", "acov", P_R3, n=10)
+    ev("r3_ctl10", "ctl", P_R3, n=10)
+
+
 if __name__ == "__main__":
-    {"parity": parity, "refit": lambda: refit(sys.argv[2])}[sys.argv[1]]()
+    {"parity": parity, "inert": inert, "refit": lambda: refit(sys.argv[2])}[sys.argv[1]]()

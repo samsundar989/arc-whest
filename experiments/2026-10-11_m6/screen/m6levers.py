@@ -14,11 +14,12 @@ def _rep(s, a, b, count=1):
     return s.replace(a, b)
 
 
-def lateage(L0):
+def lateage(L0, base=5):
+    """`base` = the file's _SHARED_AGE (6 after price.age(6), giving age 7 late)."""
     def p(s):
-        s = _rep(s, "_SHARED_AGE = 5\n",
-                 "_SHARED_AGE = 5\n"
-                 "#: M6.4: late lineages stay exact one generation longer (bar 6 from this layer on).\n"
+        s = _rep(s, f"_SHARED_AGE = {base}\n",
+                 f"_SHARED_AGE = {base}\n"
+                 "#: M6.4: late lineages stay exact one generation longer (bar +1 from this layer on).\n"
                  f"_AGE6_FROM = {int(L0)}\n\n\n"
                  "def _age_bar():\n"
                  "    return _SHARED_AGE + 1 if _CUR_LAYER >= _AGE6_FROM else _SHARED_AGE\n")
