@@ -2972,3 +2972,7 @@ Wall A/B, DEV net 3, ×2 alternating (`tools/wall_ab.py`, `experiments/2026-10-1
 fold 41.72 s (1.012), **od12 51.50 s (1.250 → ≈ 112.5 s noisy-implied: FAIL, closed)**, **od16 46.67 s (1.133 →
 ≈ 101.9 s, passes A ≤ 105 s with 3 % margin)**. od16 DEV-100 paired vs fold: score 1.0065×, 98/100; raw
 1.854382e-08 vs 1.853757e-08 = **+0.034 %** (gate ±0.2 %) → buildable on v83 (−0.68 % F, ops 24,688). Not for B.
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-11 | `estimator_k3_v83_fold.py` | `c1adefbd` | FRESH-A | 1.888349e-08 (floor-free 1.813584e-08; −2.84 % vs v82c_r2) | 0.16554 | 22,618 | wall A/B DEV net 3 ×2: 1.012× v82c_r2 → ≈ 91 s noisy-implied (A ≤ 105 s) | VmPeak 6,148 MiB (WSL PASS run 2, same hash; run 1 failed only the settled-growth check at VmPeak 6,130) | **2.9462e-09** | PENDING #335365 | **1.0264× vs v82c_r2** (Δ +8.257e-11, t95 [+6.686e-11, +9.828e-11]) | 86/100 | v82c_r2 + M5.1 fold (rec, τ2) with the R3 fold-arm refit baked (`tools/build_v83.py --variant fold`; `_FOLD_GAIN` from gain__fg). Parity file↔arm DEV 3.2e-4 (pod). residual 0.251 s. Package `7ea8add2…b59b`, inner = source. Second canary of UTC Oct 11. Predictions: worker −2.3 to −2.8 % raw, ≈ 2.96–2.97e-09. |
