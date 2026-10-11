@@ -118,3 +118,9 @@ Retry:
 - inertness is unaffected (zero head ⇒ identity).
 
 Prediction unchanged (−0.1 to −0.6 %); kill if < 0.3 %.
+
+## J3 full refit cancelled (job 2642, unstarted)
+
+age6+J3 is neutral (+0.10 % marginal), so J3 matters only if age 6 is rejected. Its unrefit
+evidence (net −0.40 %) and the p3 refit read (−0.78 % at matched step 84) cover that case. The GPU
+time goes to M6.3.
