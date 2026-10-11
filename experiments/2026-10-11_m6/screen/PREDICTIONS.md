@@ -64,3 +64,10 @@ Under J=2, L0 = 13 may again be nearly a no-op. Reference: fold+age6, −5.86 %,
 
 Prediction against fold+age6 (marginal): late7_11 costs +1.0 to +1.5 % F for −1.0 to −2.0 % raw,
 a marginal net of −0.2 to −0.6 %. late7_13 is about 0.
+
+## Addendum: joint age6 + jsvd (recorded BEFORE pricing and screen)
+
+Both change the old tier. Alone, unrefit on fold: age6 −5.86 % at +4.83 % F; jsvd −1.54 % at
++1.07 % F. Prediction for the joint arm: ΔF ≈ +5.9 % (near-additive). Δraw −6.5 to −7.2 %; the
+gains are sub-additive because age 6 leaves fewer joins for jsvd to improve. Net −1.0 to −1.6 %,
+so jsvd adds −0.0 to −0.3 % on top of age 6.

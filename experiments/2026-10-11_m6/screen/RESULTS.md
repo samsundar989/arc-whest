@@ -77,3 +77,16 @@ Hand-over: price.py names `fold+Habs+age6`, `fold+Habs+jsvd`, `fold+Habs+J3`.
   stays flat and is non-monotone.
 - Caveat for P: the lifecycle check failed in 1 of 2 runs, so age 6 sits near that gate's noise.
 - Fallbacks with less memory are lateage9 / lateage11 (net −0.80 % / −0.61 %).
+
+## Joint age6 + jsvd (job 2647, unrefit VAL-100, R2)
+
+| arm | raw MSE | F/B | vs fold: Δraw / net | vs fold+age6: Δraw / ΔF / net | wins vs age6 |
+|---|---:|---:|---|---|---:|
+| fold+age6+jsvd | 1.77087e-8 | 0.17507 | −5.99 % / −0.58 % | −0.14 % / +0.88 % / **+0.74 %** | 54/100 |
+
+**The two are substitutes.** On top of age 6, jsvd adds almost nothing (−0.14 % raw), because
+both repair the same thing: the old-tier compression error at join time. Prediction: −6.5 to
+−7.2 % joint; measured −5.99 %, more sub-additive than predicted.
+
+**Take jsvd only if age 6 is rejected** on wall time or memory. age 6 alone has the larger net
+(−1.54 % refit vs −0.43 %).

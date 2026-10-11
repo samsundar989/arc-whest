@@ -29,11 +29,13 @@ detached; only the singular values carry a gradient.
 - **Wall time is not measured.** The strategist estimated +1–2 s per MLP for the exact SVD. Ops
   fall by 864, which offsets some of that. `tools/wall_ab.py` decides.
 
-## Stacking with age 6: not measured
+## Stacking with age 6: measured; do NOT stack
 
-Both levers change the old tier: age 6 changes when a lineage joins, and jsvd changes the basis it
-joins into. The two gains need not add. If both pass their gates, a joint unrefit screen
-(`fold+age6+jsvd`, one price.py line) is cheap; I can run it on request.
+Joint unrefit screen (job 2647): fold+age6+jsvd gives 1.77087e-8 at F/B 0.17507. Against fold+age6
+that is −0.14 % raw for +0.88 % F, a **+0.74 % marginal net (worse)**, with 54/100 wins. Both
+levers repair the old-tier compression error at join time, so they are substitutes.
+
+**Use jsvd only as the fallback if age 6 fails its wall-time or memory gate.**
 
 ## Twin note
 
