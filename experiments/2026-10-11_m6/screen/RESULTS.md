@@ -63,3 +63,17 @@ Hand-over: price.py names `fold+Habs+age6`, `fold+Habs+jsvd`, `fold+Habs+J3`.
   v53) fails a gate.
 - Both predictions were in range: lateage9 −2.83 % (predicted −2.5 to −4), lateage11 −1.48 %
   (−1 to −2).
+
+## age 6 memory (WSL `linux_memory_gate.py`, RLIMIT_AS 8 GiB; jobs 2631, 2636)
+
+| file | VmPeak | peak RSS | settled VmSize across repeats | lifecycle |
+|---|---:|---:|---|---|
+| est_fold (control, R2) | 6,424 MB | 4,254 MiB | 2,139 → 2,151 → 2,163 MiB (+25 MB) | PASS |
+| est_fold_age6, 3 repeats | 7,093 MB | 4,894 MiB | 2,060 → 2,072 → 2,683 MiB (+622 MB) | **FAIL** |
+| est_fold_age6, 5 repeats | 6,820 MB | — | 2,444 → 2,456 → 2,468 → 2,520 → 2,491 MiB (+47 MB) | PASS |
+
+- age 6 adds about +400 to +670 MB of VmPeak (v53: ~+700 MiB). Headroom is 1.15–1.20× under 8,192 MB.
+- The +622 MB step in the 3-repeat run is a one-off allocator step, not a leak: the 5-repeat run
+  stays flat and is non-monotone.
+- Caveat for P: the lifecycle check failed in 1 of 2 runs, so age 6 sits near that gate's noise.
+- Fallbacks with less memory are lateage9 / lateage11 (net −0.80 % / −0.61 %).
