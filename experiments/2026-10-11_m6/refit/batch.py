@@ -64,7 +64,7 @@ def refit(name):
     cand, mask = arm(name)
     cmd = TW + ["train", "--cand", cand, "--mask", mask, *COMMON, *bank(name), "--init", P_R3,
                 "--epochs", "1",
-                "--accum", "8", "--lr", "1e-4", "--eval-every", "28", "--patience", "3",
+                "--accum", "8", "--lr", "1e-4", "--eval-every", "28", "--patience", "99",
                 "--hold-panel", "hold100", "--stage", {"acov": "S2tsfa", "cfeat": "S2tsfc"}.get(name, "S2tsf"),
                 # zero-init gains step at lr x zero_scale (1e-6) unless multiplied (M5 froze so)
                 *({"acov": ["--lr-mult", "gain/ab=1000,gain/va=1000"],

@@ -95,3 +95,13 @@ exact first-order gradient through diag(Uᵀ a V). The jsvd patch uses only the 
 
 Parity re-check: `r2_jsvd_gesvd` must equal r2_jsvd (1.854913e-8) to within 0.01 %. Then the
 refit is requeued. The prediction is unchanged.
+
+## Patience fix (~08:20 local)
+
+The batch used M5's `--patience 3`. J3 (job 2627) early-stopped at step 84: the step 28 dip meant
+no eval beat the unrefit start. At matched step 84 it reads 1.836519e-8 vs ctl 1.850907e-8
+(−0.78 %); the log is kept in `refit_J3_p3/`.
+
+ctl ran the full 112 steps (its step 84 eval beat its start by 6e-13). From now on every arm runs
+`--patience 99`, as R4 does, so the epochs match. acov (2634) was cancelled one minute in and
+requeued, and J3 is rerun.
