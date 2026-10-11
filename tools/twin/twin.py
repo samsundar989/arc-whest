@@ -348,6 +348,13 @@ ARMS = {
          "                continue\n"
          "            _k = int(_kt[layer_index]) if layer_index < len(_kt) else n\n"
          "            _m = fnp.where(_rk >= n - _k, dtype(1.0), dtype(0.0))\n"
+         "            if _role == 'H' and _MASK.get('Hrank'):\n"
+         "                # P6.1: keep the K_H SMALLEST scores (abs: alpha^2; asym a,b: max(-alpha/a, alpha/b)),\n"
+         "                # as the estimator's `_kh = argsort(score)[:K_H]` -- drops always-on columns too\n"
+         "                _hr = _MASK['Hrank']\n"
+         "                _sc = (alpha * alpha if _hr[0] == 'abs' else\n"
+         "                       fnp.maximum(alpha * dtype(-1.0 / _hr[1]), alpha * dtype(1.0 / _hr[2])))\n"
+         "                _m = fnp.where(fnp.argsort(fnp.argsort(_sc)) < _k, dtype(1.0), dtype(0.0))\n"
          "            if _role == 'R':\n"
          "                _mR = _m\n"
          "            elif _role == 'H':\n"
@@ -369,6 +376,8 @@ ARMS = {
          "        _mW = {'d': _mS, 's': None}.get(_hm, _mH)\n"
          "        _mC = {'kh': _mS, 'd': _mS, 'w': None, 's': None}.get(_hm, _mH)\n"
          "        _mSl = {'w': None}.get(_hm, _mS)\n"
+         "        if _MASK.get('Hfull'):\n"
+         "            _mSl = _mH       # P6.1: residual rows + S3 dropped on every dropped column (as shipped)\n"
          "    if _MASK is not None and _MASK.get('stats') is not None:\n"
          "        _st = {'l': layer_index}\n"
          "        for _t in (2.0, 2.5, 3.0, 3.5):\n"
@@ -727,6 +736,14 @@ def parse_mask(spec):
             continue
         if k == "J":             # P5.1 item 1: skip the old-tier join at the last J non-final layers
             out["J"] = int(float(v))
+            continue
+        if k == "Hrank":         # P6.1: K-table H ranking 'abs' (alpha^2) or 'asym:a:b' (max(-alpha/a, alpha/b))
+            out["Hrank"] = ("abs",) if v == "abs" else ("asym", *map(float, v.split(":")[1:]))
+            if not (v == "abs" or (v.startswith("asym:") and len(out["Hrank"]) == 3)):
+                raise SystemExit(f"--mask: bad Hrank {v}")
+            continue
+        if k == "Hfull":         # P6.1: _mSl = _mH (residual rows and S3 follow the full H drop)
+            out["Hfull"] = bool(float(v))
             continue
         if k == "Daz":           # always-on rows' corrector: z zero (Dz), f full row, c column
             out["Daz"] = {"0": "z", "1": "f", "2": "c"}.get(v, v)
