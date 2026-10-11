@@ -2986,3 +2986,7 @@ fold 41.72 s (1.012), **od12 51.50 s (1.250 → ≈ 112.5 s noisy-implied: FAIL,
 
 v83_r4 parity file↔arm DEV (pod) 1.811849e-08 vs 1.811565e-08 = **1.6e-4**. `estimator_k3_v83_r4od16.py` (`e20cf029`) =
 R4 constants + od16 (the od16 patch is byte-identical on r4) → FRESH-A paired vs graded v83_fold.
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-11 | `estimator_k3_v83_r4od16.py` | `e20cf029` | FRESH-A | 1.881760e-08 (−0.35 % vs v83_fold) | 0.16441 | 24,688 | od16 wall A/B 1.133× v82c_r2 → ≈ 101.9 s noisy-implied (A ≤ 105 s; thin, A only) | VmPeak 6,129 MiB (WSL PASS, same hash) | **2.9156e-09** | PENDING #335407 | **1.0104× vs v83_fold** (Δ +3.203e-11, t95 [+2.907e-11, +3.499e-11]) | 97/100 | R4 constants + P6.3 od16 (`build_v83.py --variant fold+od16`). Parity file↔R4 arm DEV 2.2e-4 (pod). Package `2acf861b…9d61`, inner = source. Third canary of UTC Oct 11. Predictions: worker ≈ 2.92e-09 (−1.0 % score). |
