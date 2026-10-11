@@ -8,7 +8,8 @@
 | **B (recommended)** | `estimator_k3_v82b_bundlews.py` | `7148e22a` | #335250 | **3.1432860023588976e-9** | 1.8605e-8 | 0.16895 | A/B 0.916 vs v81b_ws → ≈ 78 s noisy-implied | 6,017 MiB |
 
 **Update 03:10 UTC: v82c_r2 graded 3.032324364499572e-9 (#335298) and is now the recommended A** (`a648ba07`,
-constants only vs v82c_r1; VmPeak 6,027 MiB). B stays v82b_ws until the ws twin of the current A grades (P6.0c A/B slot). In flight: v82c_r2 (R2 refit, VAL −0.46 %
+constants only vs v82c_r1; VmPeak 6,027 MiB). **B: v82c_r2ws graded 3.1017860563938384e-9 (#335319) and is now the recommended B** (`1c48dfb4`, VmPeak 6,022 MiB,
+≈ 78 s noisy-implied). In flight: v82c_r2 (R2 refit, VAL −0.46 %
 vs R1, constants only) on FRESH-A paired vs v82c_r1. **Samuel designates.**
 
 ## Recommendation — 2026-10-10 evening (Lane P5; no nomination/designation made)

@@ -2954,4 +2954,21 @@ carries one `hcols`) — a structural change, handed to the strategist. **v83 = 
 **v82c_r2 graded (#335298): 3.032324364499572e-09, NEW BEST**, raw 1.8368436656146515e-08, 100 clean. −0.46 % vs v82c_r1
 (raw −0.46 %, exactly the FRESH-A paired gain), −8.67 % vs v81d. +0.16 % vs the FRESH-A projection 3.0275e-09.
 `tools/ev.py --best-graded` updated.
-| 2026-10-11 | `estimator_k3_v82c_r2ws.py` | `1c48dfb4` | FRESH-A | 1.943451e-08 (floor-free 1.868686e-08) | 0.16895 | 20,269 | same code as v82b_ws (constants only): A/B 0.916 vs v81b_ws → ≈ 78 s noisy-implied (B ≤ 95 s) | VmPeak 6,022 MiB (WSL PASS, same hash) | **3.0983e-09** | PENDING #335319 | **1.0130× vs v82b_bundlews** (Δ +4.258e-11, t95 [+3.889e-11, +4.628e-11]) | 100/100 | P6.0c A/B slot. **Deviation:** r2ws instead of the handoff's r1ws (r2 dominates r1 by 0.46 % graded). "vs best graded" gate N/A for a B (as v82b_ws). residual 0.225 s. Package `6fc8de61…af2e`, inner = source. Predictions: worker ≈ 3.10e-09; strategist (r1ws) ≈ 3.12e-09. |
+| 2026-10-11 | `estimator_k3_v82c_r2ws.py` | `1c48dfb4` | FRESH-A | 1.943451e-08 (floor-free 1.868686e-08) | 0.16895 | 20,269 | same code as v82b_ws (constants only): A/B 0.916 vs v81b_ws → ≈ 78 s noisy-implied (B ≤ 95 s) | VmPeak 6,022 MiB (WSL PASS, same hash) | **3.0983e-09** | **3.1017860563938384e-09** (#335319) | **1.0130× vs v82b_bundlews** (Δ +4.258e-11, t95 [+3.889e-11, +4.628e-11]) | 100/100 | P6.0c A/B slot. **Deviation:** r2ws instead of the handoff's r1ws (r2 dominates r1 by 0.46 % graded). "vs best graded" gate N/A for a B (as v82b_ws). residual 0.225 s. Package `6fc8de61…af2e`, inner = source. Predictions: worker ≈ 3.10e-09; strategist (r1ws) ≈ 3.12e-09. |
+
+**v82c_r2ws graded (#335319): 3.1017860563938384e-09, NEW wall-safe B**, raw 1.8358887210467854e-08, 100 clean. −1.32 % vs
+v82b_ws; +0.11 % vs the FRESH-A projection 3.0983e-09.
+
+### R3 (pod, P6.1 step 3) — 2 epochs from R2, lr 1e-4 cosine, VAL-100 every 28 steps, patience off
+| arm | init | step 140 | step 224 (best) | vs ctl, matched |
+|---|---:|---:|---:|---|
+| ctl (v82b arm, S2ts) | 1.903403e-08 | 1.906598e-08 | 1.892640e-08 | — |
+| fold (rec, τ2, S2tsf) | 1.884012e-08 | 1.853091e-08 | **1.851037e-08** | −2.81 % at 140; **−2.20 % at 224** (M5: −2.58 %) |
+| fold+Habs | 3.152721e-08 | killed at init (screen +65 %) | | |
+Baked as `estimator_k3_v83_fold.py` (`tools/build_v83.py --variant fold`, `c1adefbd`). R4 = fold continued 2 epochs (pod).
+
+### P6.3 — per-shape Strassen depth on the fold stack
+Wall A/B, DEV net 3, ×2 alternating (`tools/wall_ab.py`, `experiments/2026-10-11_p6/od_wall_ab.txt`): v82c_r2 41.21 s,
+fold 41.72 s (1.012), **od12 51.50 s (1.250 → ≈ 112.5 s noisy-implied: FAIL, closed)**, **od16 46.67 s (1.133 →
+≈ 101.9 s, passes A ≤ 105 s with 3 % margin)**. od16 DEV-100 paired vs fold: score 1.0065×, 98/100; raw
+1.854382e-08 vs 1.853757e-08 = **+0.034 %** (gate ±0.2 %) → buildable on v83 (−0.68 % F, ops 24,688). Not for B.

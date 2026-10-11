@@ -16,3 +16,9 @@ then `build_v82 --items 0,1,4,5,7` (the same pipeline rebuilds v82c_r1 byte for 
 - worker: FRESH-A raw ≈ v82c_r2's (block 40 changes float32 rounding only; v82bws/v82b raw ratio 1.0000);
   paired vs v82b_bundlews ≈ 1.012×; F/B 0.16895, ops 20,269; graded ≈ 3.10e-09 (3.1433e-09 × 0.9873).
 - strategist: (for r1ws) ≈ 3.12e-09.
+
+## 2026-10-11 ~07:30 UTC — v83_fold = v82c_r2 + fold (R3 fold arm baked)
+R3 matched end (step 224): fold 1.851037e-08 vs ctl 1.892640e-08 = −2.20 % (ctl itself −0.56 % vs R2 init).
+- strategist: (v83 with H, not applicable) fold+H joint −1.3 %, refit −0.5 %; nothing for fold alone.
+- worker: FRESH-A raw −2.3 to −2.8 % vs v82c_r2 (fold −1.03 % unrefit + refit; R3 fold vs R2 init −2.75 % VAL),
+  F +0.27 % → score ≈ −2.1 to −2.5 %, graded ≈ 2.96–2.97e-09.
