@@ -153,3 +153,11 @@ and α depends on var (feedback).
 
 Fix: both gains read min(α², 9) (|α| ≤ 3, the kink region). Shim `minimum` added. Rerun at
 lr-mult 100, after an inertness re-check. Same prediction.
+
+## cfeat at lr-mult 1 (job 2651): underpowered, rerun at 10
+
+VAL 1.846790e-8 vs ctl 1.848205e-8 (−0.077 %). But the learned |cf| max is 5.3e-6 (rms 2.3e-6),
+an effect of ≈ 1.5e-5 on the mean against an error rms of ≈ 1.3e-4, with signs flipping by layer.
+The head barely moved, so this is not a verdict. The earlier lr-mult 10 blow-up was the √0 NaN
+gradient, now fixed. Rerun at lr-mult 10 (1e-5 per step); log kept in `refit_cfeat_lr1/`. The
+kill rule stands.

@@ -68,7 +68,7 @@ def refit(name):
                 "--hold-panel", "hold100", "--stage", {"acov": "S2tsfa", "cfeat": "S2tsfc"}.get(name, "S2tsf"),
                 # zero-init gains step at lr x zero_scale (1e-6) unless multiplied (M5 froze so)
                 *({"acov": ["--lr-mult", "gain/ab=100,gain/va=100"],
-                   "cfeat": ["--lr-mult", "gain/cf=1"]}.get(name, [])), "--out", str(HERE / f"refit_{name}")]
+                   "cfeat": ["--lr-mult", "gain/cf=10"]}.get(name, [])), "--out", str(HERE / f"refit_{name}")]
     sys.exit(subprocess.run(cmd).returncode)
 
 
