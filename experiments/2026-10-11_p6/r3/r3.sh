@@ -10,6 +10,10 @@ mkdir -p /workspace/p6/r3
 for arm in "$@"; do
   case $arm in
     ctl)      X="--mask $M,K=$K --arm mask+dress+bank --stage S2ts";;
+    fold)     X="--mask $M,K=$K --arm mask+dress+bank+fold --fold tau=2,mode=rec --stage S2tsf";;
+    fhd20)    X="--mask $M,K=$KS/K_hd20.json --arm mask+dress+bank+fold --fold tau=2,mode=rec --stage S2tsf";;
+    fhd175)   X="--mask $M,K=$KS/K_hd175.json --arm mask+dress+bank+fold --fold tau=2,mode=rec --stage S2tsf";;
+    fhd15)    X="--mask $M,K=$KS/K_hd15.json --arm mask+dress+bank+fold --fold tau=2,mode=rec --stage S2tsf";;
     fhabs)    X="--mask $M,K=$KS/K_habs25.json,Hrank=abs,Hfull=1 --arm mask+dress+bank+fold --fold tau=2,mode=rec --stage S2tsf";;
     fhasym2030) X="--mask $M,K=$KS/K_asym2030.json,Hrank=asym:2.0:3.0,Hfull=1 --arm mask+dress+bank+fold --fold tau=2,mode=rec --stage S2tsf";;
     fhasym2025) X="--mask $M,K=$KS/K_asym2025.json,Hrank=asym:2.0:2.5,Hfull=1 --arm mask+dress+bank+fold --fold tau=2,mode=rec --stage S2tsf";;

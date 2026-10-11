@@ -2911,3 +2911,38 @@ patience off (step 84: 1.915192e-08, not yet below R1's best).
 
 **v82c_r1 graded (#335253): 3.0464210089351763e-09, NEW BEST**, raw 1.8453827692610502e-08, 100 clean. −0.82 % vs v82b,
 −8.24 % vs v81d (−7.1 % vs v82a). +0.14 % vs the FRESH-A projection 3.0421e-09. `tools/ev.py --best-graded` updated.
+
+## P6 (Lane P6, plan rev 23) — 2026-10-11
+
+### P6.0 — merge, ρ check, R2
+lane-m merged (480dc74). Post-merge `compute_rho.py` on the FIT-100 `--mask-stats` control chain reproduces
+`experiments/2026-10-10_p5/d2/rho.json` exactly (max |Δρ| = 0; FIT raw 1.864088e-08 = P5's), so the hook survived.
+**R2** (v82b arm, 2 more epochs from R1, patience off): VAL-100 best **1.903403e-08** at step 224 vs R1 1.912189e-08
+= **−0.46 %** (≥ 0.3 % bar) → baked as `estimator_k3_v82c_r2.py` (`a648ba07`; ws `1c48dfb4`), constants only, same
+pipeline that rebuilds v82c_r1 byte for byte. Twin parity file↔arm DEV-100 **1.62e-4** (file 1.867381e-08, arm
+1.867683e-08). Predictions in `experiments/2026-10-11_p6/PREDICTIONS.md`.
+
+### P6.1 step 2 — unrefit VAL-100 screen (`experiments/2026-10-11_p6/screen/`), base = v82c_r2 constants
+Files = `price.py` variants rebuilt from v82c_r2 (meter = strategist table to the FLOP); arms = twin mask
+(`Hrank`, `Hfull=1`) with R2 params. File↔arm parity ≤ 0.016 % on every row.
+
+| variant | F/B | ΔF | VAL raw (file) | Δraw vs base | score Δ | strategist (raw) |
+|---|---:|---:|---:|---:|---:|---|
+| base (v82c_r2) | 0.16508 | — | 1.903319e-08 | — | — | |
+| fold | 0.16554 | +0.27 % | 1.883751e-08 | **−1.03 %** | **−0.76 %** | (M5: −1.23 % unrefit) |
+| fold+Habs (τ2.5 count, α²) | 0.15577 | −5.64 % | 3.152837e-08 | **+65.65 %** | +56.3 % | −1.3 % joint before refit tilt |
+| fold+Hasym2030 | 0.15362 | −6.95 % | 2.750591e-08 | +44.52 % | +34.5 % | better than Habs |
+| fold+Hasym2025 | 0.15062 | −8.76 % | 3.263140e-08 | +71.44 % | +56.4 % | +0.5 to +2 % vs Habs |
+| fold+Habs20 | 0.14555 | −11.83 % | 4.564756e-08 | +139.83 % | +111 % | +2 to +5 % vs Habs |
+| fold+Hd20 (dead-only, count keep τ2.0) | 0.15995 | −3.11 % | 1.995869e-08 | +4.86 % | +1.60 % | (salvage, worker) |
+| fold+Hd175 (dead-only, keep τ1.75) | 0.15663 | −5.12 % | 2.205051e-08 | +15.85 % | +9.9 % | |
+| fold+Hd15 (dead-only, keep τ1.5) | 0.15301 | −7.31 % | 2.718875e-08 | +42.85 % | +32.4 % | |
+
+**Decomposition (arms, vs the fold arm 1.884030e-08):** M5's threshold H2.5 literal (A_L/w2b/hubs off on
+|α| > 2.5; residual rows + S3 off on dead columns only) **+1.22 %**; the same + `Hfull=1` (residual rows + S3 off on
+every dropped column — what the estimator's single `_kh` gather ships) **+65.12 %**; Hd2.5 by threshold −0.10 %.
+→ **The P2 residual rows and S3 of the always-on columns carry the chain**; count vs threshold ranking is
+irrelevant (Habs +67.3 % ≈ lit+full +65.1 %). Every habs/hasym variant is **closed** as specified. Deeper dead-only
+cuts are not free either (τ2.0 +5.95 % vs fold, unrefit) — fail the marginal rule by ~3×; not refit.
+Shipping H-literal needs two column sets in the lineage (A_L/w2b/hubs on one, Lb/sb on another: today `_append`
+carries one `hcols`) — a structural change, handed to the strategist. **v83 = v82c_r2 + fold** (R3 `fold` arm).

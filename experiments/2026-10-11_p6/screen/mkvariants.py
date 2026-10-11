@@ -10,6 +10,19 @@ sys.path.insert(0, str(TOOL))
 import price  # noqa: E402
 
 price.SRC = R / "estimator_k3_v82c_r2.py"
+# Oct 11 salvage: dead-only H by count (current alpha ranking, no always-on drop), H row = kink keep(tau)
+KEEP20 = [1024, 1024, 992, 960, 928, 896, 896, 864, 832, 832, 800, 768, 768, 768, 736, 736]
+
+
+def hdead(table):
+    return lambda s: price.rep(s, price.H_OLD, f'          "H": {table!r}}}')
+
+
+KEEP175 = [1024, 1024, 992, 928, 896, 864, 832, 832, 800, 800, 768, 768, 736, 736, 704, 704]
+KEEP15 = [1024, 1024, 960, 896, 864, 832, 800, 800, 768, 768, 736, 736, 704, 704, 672, 672]
+price.VARIANTS["fold+Hd20"] = [price.fold, hdead(KEEP20)]
+price.VARIANTS["fold+Hd175"] = [price.fold, hdead(KEEP175)]
+price.VARIANTS["fold+Hd15"] = [price.fold, hdead(KEEP15)]
 price.OUT = Path(__file__).resolve().parent / "variants"
 names = sys.argv[1].split(",")
 res = {}
@@ -18,4 +31,7 @@ for nm in names:
     F, ops = price.price(fn)
     res[nm] = {"file": fn.name, "flops": F, "F/B": F / price.B, "ops": ops}
     print(f"{nm:20s} F {F:16,d}  F/B {F / price.B:.5f}  ops {ops:6,d}", flush=True)
-(price.OUT / "prices_r2.json").write_text(json.dumps(res, indent=1))
+pj = price.OUT / "prices_r2.json"
+old = json.loads(pj.read_text()) if pj.exists() else {}
+old.update(res)
+pj.write_text(json.dumps(old, indent=1))
