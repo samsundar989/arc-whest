@@ -3033,3 +3033,8 @@ unmeasured. Exact prices on the v83 stack: fold+age6 F/B 0.17354 (22,113 ops); *
 fold+age6 **0.931× → ≈ 94.9 s (A ok)**; fold+age6+od16 **1.033× → ≈ 105.3 s (A FAIL)**; age6 ws vs r7ws **1.055× → ≈ 82 s
 (B ok)**. → v84 = fold + age6 (no od16): +5.55 % F vs v83_r7od16, needs ≥ −5.3 % raw. R8 unrefit from R7: age6 1.716054e-08 vs
 ctl 1.828031e-08 = −6.13 %.
+
+**P6.2 memory (WSL RLIMIT_AS 8 GiB):** fold+age6 (A) **PASS**, 5 repeats, VmPeak 6,773 MB, settled +47 MB. age6 ws (B, block 40):
+5 repeats FAIL on the settled-growth check (+476 MB, VmPeak 6,809 MiB); 15 repeats +172 MB total, VmPeak 6,917 MB (1.18×) —
+non-monotone (allocator steps, not a per-predict leak) but the check still FAILs → **B stays age-free (v83_r7ws)**; age6 is an
+A-only lever. `experiments/2026-10-11_p6/mem_wall_age6*.{json,log}`. R8 at step 56: age6 1.721218e-08 vs ctl 1.833626e-08 (−6.13 %).
