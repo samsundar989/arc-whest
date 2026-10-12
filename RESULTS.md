@@ -2997,7 +2997,7 @@ R4 constants + od16 (the od16 patch is byte-identical on r4) → FRESH-A paired 
 **R5** (fold continued 2 epochs from R4): VAL-100 best **1.836956e-08** (step 224) vs R4 1.843113e-08 = **−0.33 %** (≥ 0.3 %).
 
 R5 parity file↔arm DEV (pod, `estimator_k3_v83_r5od16.py` vs R5 arm): 1.805451e-08 vs 1.804997e-08 = **2.5e-4**.
-| 2026-10-11 | `estimator_k3_v83_r5ws.py` | `b9e64076` | FRESH-A | 1.874278e-08 (−3.56 % vs v82c_r2ws) | 0.16941 | 20,512 | wall A/B 1.0028× v82c_r2ws (r4ws, same code) → ≈ 78 s noisy-implied (B ≤ 95 s) | VmPeak 6,127 MiB (WSL PASS, same hash) | **2.9917e-09** | PENDING #335461 (Oct 12 A/B slot; `355f6c65…a675`, inner = source) | **1.0341× vs v82c_r2ws** (Δ +1.084e-10, t95 [+9.180e-11, +1.249e-10]) | 90/100 | B twin of the v83 line: fold + R5 constants at block 40 (no od16 for B). "vs best graded" N/A for B. Prediction (worker) 1.036×, ≈ 2.99e-09. v83_r4ws FRESH-A was stopped part-way (superseded). |
+| 2026-10-11 | `estimator_k3_v83_r5ws.py` | `b9e64076` | FRESH-A | 1.874278e-08 (−3.56 % vs v82c_r2ws) | 0.16941 | 20,512 | wall A/B 1.0028× v82c_r2ws (r4ws, same code) → ≈ 78 s noisy-implied (B ≤ 95 s) | VmPeak 6,127 MiB (WSL PASS, same hash) | **2.9917e-09** | **2.9952404444999084e-09** (#335461, Oct 12 A/B slot; `355f6c65…a675`, inner = source) | **1.0341× vs v82c_r2ws** (Δ +1.084e-10, t95 [+9.180e-11, +1.249e-10]) | 90/100 | B twin of the v83 line: fold + R5 constants at block 40 (no od16 for B). "vs best graded" N/A for B. Prediction (worker) 1.036×, ≈ 2.99e-09. v83_r4ws FRESH-A was stopped part-way (superseded). |
 | 2026-10-11 | `estimator_k3_v83_r5od16.py` | `1d19eb78` | FRESH-A | 1.874828e-08 (−0.37 % vs v83_r4od16) | 0.16441 | 24,688 | constants only vs r4od16 → ≈ 101.9 s noisy-implied | VmPeak 6,132 MiB (WSL PASS, same hash) | **2.9044e-09** | **2.908247724225528e-09** (#335455) | **1.0037× vs v83_r4od16** (Δ +1.140e-11, t95 [+8.79e-12, +1.401e-11]) | 82/100 | R5 constants (VAL −0.33 % vs R4). Parity 2.5e-4. First FRESH-A attempt died silently (no process, partial log); rerun clean. Package `b7e7cc68…99ce`, inner = source. Fourth canary of UTC Oct 11. Prediction (worker) raw −0.2 to −0.35 %. |
 
 **R6** (fold continued from R5): VAL-100 best **1.832094e-08** (224) vs R5 1.836956e-08 = **−0.26 %** (< 0.3 %: first sub-bar restart).
@@ -3011,3 +3011,6 @@ R7 (last allowed by the restart rule) running on the pod.
 Built `estimator_k3_v83_r7od16.py` (`852ccf04`) and `estimator_k3_v83_r7ws.py` (`0f52db6f`). Parity file↔R7 arm DEV (pod)
 1.796417e-08 vs 1.795150e-08 = **7.1e-4** (passes ≤ 1e-3 but 3× the R3–R5 values; watch the graded/projected ratio).
 Pod `acc7entl4kttqk` **stopped** (Oct 12 ~02:50 UTC; nothing queued; R3–R7 outputs pulled to `experiments/2026-10-11_p6/r*/`).
+
+**v83_r5ws graded (#335461): 2.9952404444999084e-09, NEW wall-safe B**, raw 1.7680776629447338e-08, 100 clean. −3.43 % vs v82c_r2ws;
++0.12 % vs the FRESH-A projection 2.9917e-09.

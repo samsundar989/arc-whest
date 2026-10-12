@@ -1,0 +1,24 @@
+21:30:35  335461  submitted  score=None  secondary=None
+21:32:36  335461  submitted  score=None  secondary=None
+21:34:36  335461  submitted  score=None  secondary=None
+21:36:37  335461  submitted  score=None  secondary=None
+21:38:37  335461  submitted  score=None  secondary=None
+21:40:38  335461  submitted  score=None  secondary=None
+21:42:38  335461  submitted  score=None  secondary=None
+21:44:39  335461  submitted  score=None  secondary=None
+21:46:39  335461  submitted  score=None  secondary=None
+21:48:40  335461  submitted  score=None  secondary=None
+21:50:40  335461  submitted  score=None  secondary=None
+21:52:41  335461  submitted  score=None  secondary=None
+21:54:41  335461  submitted  score=None  secondary=None
+21:56:42  335461  graded  score=2.9952404444999084e-09  secondary=1.7680776629447338e-08
+{
+ "id": 335461,
+ "grading_status_cd": "graded",
+ "score": 2.9952404444999084e-09,
+ "score_secondary": 1.7680776629447338e-08,
+ "grading_message": "<p>Graded successfully</p>\n",
+ "created_at": "2026-10-12T02:30:19.753Z",
+ "updated_at": null
+}
+ledger updated

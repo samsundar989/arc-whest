@@ -9,7 +9,8 @@
 
 **Update 03:10 UTC: v82c_r2 graded 3.032324364499572e-9 (#335298) and is now the recommended A** (`a648ba07`,
 constants only vs v82c_r1; VmPeak 6,027 MiB). **Update Oct 12 02:30 UTC: v83_r5od16 graded 2.908247724225528e-9 (#335455) and is now the recommended A** (`1d19eb78`,
-VmPeak 6,132 MiB, wall ≈ 101.9 s noisy-implied). B candidate v83_r5ws submitted #335461 (pending).
+VmPeak 6,132 MiB, wall ≈ 101.9 s noisy-implied). **B: v83_r5ws graded 2.9952404444999084e-9 (#335461) and is now the recommended B** (`b9e64076`, VmPeak 6,127 MiB,
+≈ 78 s noisy-implied).
 **Update Oct 11 19:05 UTC: v83_r4od16 graded 2.91912543907686e-9 (#335407) and is now the recommended A** (`e20cf029`,
 VmPeak 6,129 MiB; wall ≈ 101.9 s noisy-implied, inside A ≤ 105 s but the thinnest margin we have shipped — B covers it).
 **Update 13:20 UTC: v83_fold graded 2.9483303409388216e-9 (#335365) and is now the recommended A** (`c1adefbd`,
