@@ -1,0 +1,33 @@
+23:37:43  335484  submitted  score=None  secondary=None
+23:39:44  335484  submitted  score=None  secondary=None
+23:41:44  335484  submitted  score=None  secondary=None
+23:43:45  335484  submitted  score=None  secondary=None
+23:45:45  335484  submitted  score=None  secondary=None
+23:47:45  335484  submitted  score=None  secondary=None
+23:49:46  335484  submitted  score=None  secondary=None
+23:51:46  335484  submitted  score=None  secondary=None
+23:53:47  335484  submitted  score=None  secondary=None
+23:55:47  335484  submitted  score=None  secondary=None
+23:57:48  335484  submitted  score=None  secondary=None
+23:59:48  335484  submitted  score=None  secondary=None
+00:01:49  335484  submitted  score=None  secondary=None
+00:03:49  335484  submitted  score=None  secondary=None
+00:05:50  335484  submitted  score=None  secondary=None
+00:07:50  335484  submitted  score=None  secondary=None
+00:09:51  335484  submitted  score=None  secondary=None
+00:11:51  335484  submitted  score=None  secondary=None
+00:13:52  335484  submitted  score=None  secondary=None
+00:15:52  335484  submitted  score=None  secondary=None
+00:17:53  335484  submitted  score=None  secondary=None
+00:19:53  335484  submitted  score=None  secondary=None
+00:21:54  335484  graded  score=2.8941891502782363e-09  secondary=1.7602973407804257e-08
+{
+ "id": 335484,
+ "grading_status_cd": "graded",
+ "score": 2.8941891502782363e-09,
+ "score_secondary": 1.7602973407804257e-08,
+ "grading_message": "<p>Graded successfully</p>\n",
+ "created_at": "2026-10-12T04:37:29.059Z",
+ "updated_at": null
+}
+ledger updated

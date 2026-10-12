@@ -3017,9 +3017,19 @@ Pod `acc7entl4kttqk` **stopped** (Oct 12 ~02:50 UTC; nothing queued; R3–R7 out
 
 | date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
 |---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
-| 2026-10-12 | `estimator_k3_v83_r7od16.py` | `852ccf04` | FRESH-A | 1.865898e-08 (−0.48 % vs v83_r5od16) | 0.16441 | 24,688 | constants only → ≈ 101.9 s noisy-implied | VmPeak 6,135 MiB (WSL PASS, same hash) | **2.8900e-09** | PENDING #335484 | **1.0048× vs v83_r5od16** (Δ +1.468e-11, t95 [+1.167e-11, +1.770e-11]) | 81/100 | R7 constants (final fold refit; recipe stopped). Parity 7.1e-4. Package `eecbdea4…dcb2`, inner = source. First canary of UTC Oct 12. Prediction (worker) −0.3 to −0.5 % raw, ≈ 2.895e-09. |
+| 2026-10-12 | `estimator_k3_v83_r7od16.py` | `852ccf04` | FRESH-A | 1.865898e-08 (−0.48 % vs v83_r5od16) | 0.16441 | 24,688 | constants only → ≈ 101.9 s noisy-implied | VmPeak 6,135 MiB (WSL PASS, same hash) | **2.8900e-09** | **2.8941891502782363e-09** (#335484) | **1.0048× vs v83_r5od16** (Δ +1.468e-11, t95 [+1.167e-11, +1.770e-11]) | 81/100 | R7 constants (final fold refit; recipe stopped). Parity 7.1e-4. Package `eecbdea4…dcb2`, inner = source. First canary of UTC Oct 12. Prediction (worker) −0.3 to −0.5 % raw, ≈ 2.895e-09. |
 
 ### P6.2 — age 6 (Lane M6 hand-over `experiments/2026-10-11_m6/HANDOVER_M6_age6.md`, on lane-m)
 M6: refit 1 epoch from R3 fold vs matched ctl **−6.07 %** raw (99/100), +4.83 % F → net −1.54 %; VmPeak +400–670 MB; wall
 unmeasured. Exact prices on the v83 stack: fold+age6 F/B 0.17354 (22,113 ops); **fold+age6+od16 0.17251** (24,075 ops;
 +4.93 % F vs v83_r7od16); fold+age6+od12 0.17148. **R8** (pod): age6 vs matched ctl, 1 epoch each from R7.
+
+**v83_r7od16 graded (#335484): 2.8941891502782363e-09, NEW BEST**, raw 1.7602973407804257e-08, 100 clean. −0.48 % vs v83_r5od16;
++0.14 % vs the FRESH-A projection 2.8900e-09 (the 7.1e-4 parity did not show up in the grade). `--best-graded` updated.
+
+| 2026-10-12 | `estimator_k3_v83_r7ws.py` | `0f52db6f` | FRESH-A | 1.864502e-08 | 0.16941 | 20,512 | constants only vs r5ws (≈ 78 s) | VmPeak 6,138 MiB (WSL PASS) | **2.9754e-09** | held for the Oct 13 A/B slot | **1.0052× vs v83_r5ws** (Δ +1.656e-11, t95 [+1.409e-11, +1.903e-11]) | 90/100 | R7 constants at block 40. |
+
+**P6.2 wall A/B** (DEV net 3, ×2, `experiments/2026-10-11_p6/age6_wall_ab.txt`; scaled to r7od16 ≈ 101.9 s noisy-implied):
+fold+age6 **0.931× → ≈ 94.9 s (A ok)**; fold+age6+od16 **1.033× → ≈ 105.3 s (A FAIL)**; age6 ws vs r7ws **1.055× → ≈ 82 s
+(B ok)**. → v84 = fold + age6 (no od16): +5.55 % F vs v83_r7od16, needs ≥ −5.3 % raw. R8 unrefit from R7: age6 1.716054e-08 vs
+ctl 1.828031e-08 = −6.13 %.
