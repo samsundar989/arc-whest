@@ -238,7 +238,6 @@ CASES = [
      ALLOW, "LOG entry discussing HUMAN_MODEL allowed"),
     (dict(command="rg HUMAN_MODEL docs/"), ALLOW, "searching for HUMAN_MODEL allowed"),
     (dict(command="cat docs/HUMAN_MODEL.md"), ALLOW, "reading HUMAN_MODEL allowed"),
-    (dict(command="uv run whest submit --estimator estimator.py"), ASK, "submit asks"),
     (dict(command="python local_sim/vault.py evaluate --label v"), ASK, "vault touch asks"),
     (dict(path="docs/CURRENT_STATE.md"), ALLOW, "ordinary doc allowed"),
     (dict(path="estimator.py"), ALLOW, "estimator edit allowed (gated by protocol, not hook)"),
@@ -268,6 +267,26 @@ def check_policy() -> None:
         want = {ALLOW: 0, DENY: 1, ASK: 2}[expected]
         check(out.returncode == want, "codex adapter agrees: %s" % label,
               "expected exit %d, got %d" % (want, out.returncode))
+
+    # `whest submit` depends on today's slot ledger, so it is checked against a
+    # stubbed ledger rather than the live one: free above the reserve, ask in it.
+    import guard_paths
+    real = guard_paths._slot_ledger
+    submit = "uv run whest submit pkg.tar.gz"
+    reserve = guard_paths.SUBMIT_RESERVED_SLOTS
+    try:
+        for left, expected, label in [
+            (reserve + 1, ALLOW, "submit with free slots allowed"),
+            (reserve, ASK, "submit into a reserved slot asks"),
+            (0, ASK, "submit with no slots asks"),
+            (None, ASK, "submit with unknown ledger asks"),
+        ]:
+            guard_paths._slot_ledger = lambda left=left: (left, "stub")
+            got = decide(command=submit).verdict
+            check(got == expected, "policy: %s" % label,
+                  "expected %s, got %s" % (expected, got))
+    finally:
+        guard_paths._slot_ledger = real
 
 
 # --- 8. session-start's branch is mechanical and works -------------------------

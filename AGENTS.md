@@ -31,9 +31,15 @@ on fresh MLPs**. Public board rank is not the target. A second, co-equal objecti
 2. **Evaluate with `tools/ev.py`. Record one row per candidate in `RESULTS.md`.**
    Never write to the old experiment log (`archive/2026-09-21/experiments/LOG.md`);
    `RESULTS.md` carries the column schema and the live calibration constants.
-3. **Submit under PLAN §5.** Samuel has given standing approval for **non-designated
-   canary submissions, at most 5 per day**, for any candidate passing every §5 gate.
-   An agent may run `whest submit` for those. An agent may **never** designate or
+3. **Submit when it is better.** Samuel has given standing approval (2026-10-12) for an
+   agent to run `whest submit` on any **non-designated** candidate it judges better than
+   the current best, without asking, **while more than 3 of today's 10 slots remain**.
+   The **last 3 slots per UTC day are reserved**: `scripts/guard_paths.py` asks for
+   Samuel's approval there, and also whenever the ledger cannot be read. Record every
+   submission in `experiments/submissions.jsonl`
+   (`python local_sim/submission_ledger.py --record ...`) immediately — the reserve is
+   counted from that file, so an unrecorded submission silently spends Samuel's slots.
+   An agent may **never** designate or
    nominate a final entry, contact the organizers, post on the forum, or reply to a
    forum request addressed to AI agents.
 4. **Own code only.** `external/504aldo/` is a local oracle for parity and diagnostics.
@@ -161,7 +167,7 @@ failed to record something — a documentation defect, not a reason to read a tr
 |---|---|---|
 | `docs/HUMAN_MODEL.md` is never written by an agent | `scripts/guard_paths.py` | `.claude/hooks/`, `.codex/hooks/`, `scripts/git-hooks/pre-commit` |
 | the vault seal is moved only by `vault.py` | `scripts/guard_paths.py` | same three |
-| `whest submit` requires explicit confirmation | `scripts/guard_paths.py` | both agent hooks |
+| `whest submit` into the last 3 daily slots requires explicit confirmation | `scripts/guard_paths.py` | both agent hooks |
 | the harness stays agent-swappable | `scripts/verify_portability.py` | run after any harness edit |
 
 New invariants go into `scripts/guard_paths.py`, where both agents get them at once —

@@ -20,7 +20,7 @@ Identical to the Claude adapter, because it is the same implementation:
 | write to `docs/HUMAN_MODEL.md` | **deny** — Samuel-owned |
 | write to `experiments/vault/manifest.json` or `touch_log.jsonl` | **deny** — the seal moves only via `vault.py` |
 | a shell command that redirects/copies/moves onto any of the above | **deny** |
-| `whest submit` | **ask** — irreversible, needs Samuel's explicit approval |
+| `whest submit` | **allow** while >3 of today's slots remain; **ask** for the last 3 or an unreadable ledger |
 | `vault.py evaluate` | **ask** — spends one of three permitted holdout touches |
 
 ## Contract this adapter honours
@@ -40,7 +40,7 @@ Verify it by hand at any time — this needs no Codex installed:
 
 ```bash
 python .codex/hooks/guard_hook.py --path docs/HUMAN_MODEL.md          # exit 1, deny
-python .codex/hooks/guard_hook.py --command "uv run whest submit"     # exit 2, ask
+python .codex/hooks/guard_hook.py --command "uv run whest submit"     # exit 0 or 2, by slots left
 python .codex/hooks/guard_hook.py --path docs/CURRENT_STATE.md        # exit 0, allow
 ```
 
@@ -78,7 +78,7 @@ It refuses to let a protected path be committed *quietly*.
 `ARC_WHEST_PROTECTED_OK=1` is the conscious human override — Samuel needs it when
 committing his own `HUMAN_MODEL.md` or a logged vault touch.
 
-Without the pre-tool hook you lose the two **ask** prompts (`whest submit`,
+Without the pre-tool hook you lose the two **ask** prompts (`whest submit` into a reserved slot,
 `vault.py evaluate`), which are advisory confirmations rather than integrity
 invariants; they remain prose rules in `AGENTS.md` § *Hard rules* and in
 `ai/workflows/routine.md`'s escalation table. Record in `experiments/LOG.md` that the

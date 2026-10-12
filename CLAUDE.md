@@ -38,9 +38,10 @@ implementation (Codex and the git pre-commit backstop call the same file). The
 Do not add project rules to `settings.json` or to the hook shims. New invariants go into
 `scripts/guard_paths.py`, where both agents get them at once.
 
-`whest submit` trips an **ask** in the guard. Under `AGENTS.md` rule 3 a non-designated
-canary that passes every PLAN §5 gate is pre-approved; confirm the gate table from
-`RESULTS.md`, then proceed.
+`whest submit` runs freely while more than 3 of today's slots remain, and trips an
+**ask** in the guard for the last 3 (or when the ledger is unreadable). Under `AGENTS.md`
+rule 3 those reserved slots are Samuel's — surface the ask to him, do not self-approve.
+Record each submission in the ledger straight away.
 
 ### Tooling notes for this environment
 
