@@ -3014,3 +3014,7 @@ Pod `acc7entl4kttqk` **stopped** (Oct 12 ~02:50 UTC; nothing queued; R3–R7 out
 
 **v83_r5ws graded (#335461): 2.9952404444999084e-09, NEW wall-safe B**, raw 1.7680776629447338e-08, 100 clean. −3.43 % vs v82c_r2ws;
 +0.12 % vs the FRESH-A projection 2.9917e-09.
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-12 | `estimator_k3_v83_r7od16.py` | `852ccf04` | FRESH-A | 1.865898e-08 (−0.48 % vs v83_r5od16) | 0.16441 | 24,688 | constants only → ≈ 101.9 s noisy-implied | VmPeak 6,135 MiB (WSL PASS, same hash) | **2.8900e-09** | PENDING #335484 | **1.0048× vs v83_r5od16** (Δ +1.468e-11, t95 [+1.167e-11, +1.770e-11]) | 81/100 | R7 constants (final fold refit; recipe stopped). Parity 7.1e-4. Package `eecbdea4…dcb2`, inner = source. First canary of UTC Oct 12. Prediction (worker) −0.3 to −0.5 % raw, ≈ 2.895e-09. |
