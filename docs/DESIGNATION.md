@@ -8,7 +8,9 @@
 | **B (recommended)** | `estimator_k3_v82b_bundlews.py` | `7148e22a` | #335250 | **3.1432860023588976e-9** | 1.8605e-8 | 0.16895 | A/B 0.916 vs v81b_ws → ≈ 78 s noisy-implied | 6,017 MiB |
 
 **Update 03:10 UTC: v82c_r2 graded 3.032324364499572e-9 (#335298) and is now the recommended A** (`a648ba07`,
-constants only vs v82c_r1; VmPeak 6,027 MiB). **Update Oct 12 05:30 UTC: v83_r7od16 graded 2.8941891502782363e-9 (#335484) and is now the recommended A** (`852ccf04`,
+constants only vs v82c_r1; VmPeak 6,027 MiB). **Update Oct 12 15:15 UTC: v84_age6 graded 2.849755454236018e-9 (#335562) and is now the recommended A** (`c1b098c0`,
+VmPeak 6,768 MiB, ≈ 94.9 s noisy-implied). B: v83_r5ws #335461 (2.9952e-9); v83_r7ws gated for the Oct 13 A/B slot.
+**Update Oct 12 05:30 UTC: v83_r7od16 graded 2.8941891502782363e-9 (#335484) and is now the recommended A** (`852ccf04`,
 VmPeak 6,135 MiB, ≈ 101.9 s noisy-implied).
 **Update Oct 12 02:30 UTC: v83_r5od16 graded 2.908247724225528e-9 (#335455) and is now the recommended A** (`1d19eb78`,
 VmPeak 6,132 MiB, wall ≈ 101.9 s noisy-implied). **B: v83_r5ws graded 2.9952404444999084e-9 (#335461) and is now the recommended B** (`b9e64076`, VmPeak 6,127 MiB,

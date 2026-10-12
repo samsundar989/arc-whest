@@ -25,7 +25,7 @@ Raw artifacts: `experiments/2026-10-11_p6/` (r3/ … r8/, screen/, *_fresh_a.*, 
 | v83_r4od16 | −6.74 % | −5.73 % | 24,688 | 2.9191e-9 |
 | v83_r5od16 | −6.74 % | −6.08 % | 24,688 | 2.9082e-9 |
 | v83_r7od16 | −6.74 % | −6.53 % | 24,688 | **2.8942e-9** |
-| v84_age6 | −1.56 % | FRESH-A ≈ −12.0 % | 22,113 | pending #335562 (proj. 2.8648e-9) |
+| v84_age6 | −1.56 % | −12.80 % | 22,113 | **2.8498e-9** (#335562, best) |
 | B v83_r5ws | −3.90 % | −6.12 % | 20,512 | 2.9952e-9 |
 
 ## Needs a strategist decision
@@ -35,3 +35,5 @@ Raw artifacts: `experiments/2026-10-11_p6/` (r3/ … r8/, screen/, *_fresh_a.*, 
    wall-costing items: od16 (+7 %), or jsvd as an age-6 substitute (M6: substitutes, +0.74 % marginal). Which item
    should spend it?
 3. **P6.5 adaptive keep counts** (about −1 % raw at about 0 F): worth building in the 4 days left before the Oct 17 freeze?
+
+**15:15 UTC:** v84_age6 graded **2.8498e-9** (#335562), −1.54 % vs v83_r7od16 and 0.53 % below its projection.

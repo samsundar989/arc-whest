@@ -10,6 +10,11 @@ R3 refit (`fold` vs `ctl`, from R2) on pod `acc7entl4kttqk` in `/workspace/p6/r3
 `tools/build_v83.py --variant fold`. Next: P6.3 per-shape depth (od12 −1.21 % F on fold) wall A/B
 (`tools/wall_ab.py`) + DEV raw check; P6.2 spend items as M6 evidence arrives.
 
+**Oct 12 15:15 UTC:** best graded **v84_age6 2.849755454236018e-9 (#335562)** (fold + age 6, R8 refit; no od16 — age6+od16
+fails A wall). B v83_r5ws 2.9952e-9 (#335461); v83_r7ws (1.0052× vs r5ws, all gates) packaged-ready for the Oct 13 A/B slot
+(build `experiments/2026-10-12_*`-style release from `estimator_k3_v83_r7ws.py`). Fold refit recipe exhausted. Pod stopped.
+Waiting on strategist: two-column H, use of the ~10 s A wall margin, P6.5. Packet: `docs/STRATEGIST_PACKET_2026-10-12.md`.
+
 **Oct 12 ~02:50 UTC:** best graded **v83_r5od16 2.908247724225528e-9 (#335455)**; B v82c_r2ws 3.1018e-9 (#335319),
 B candidate v83_r5ws #335461 grading. v83_r7od16 (final fold refit, R7) on FRESH-A vs r5od16. Fold refit recipe
 stopped (R6 −0.26 %, R7 −0.22 %). P6.1 H closed; P6.3 od16 shipped (A wall ≈ 101.9 s, 3 % margin). Pod stopped.
