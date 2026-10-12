@@ -3005,3 +3005,9 @@ R7 (last allowed by the restart rule) running on the pod.
 
 **v83_r5od16 graded (#335455): 2.908247724225528e-09, NEW BEST**, raw 1.7688480156152764e-08, 100 clean. −0.37 % vs v83_r4od16;
 +0.13 % vs the FRESH-A projection 2.9044e-09. `tools/ev.py --best-graded` updated. v83_r5ws submitted #335461 (Oct 12 A/B slot).
+
+**R7** (fold continued from R6): VAL-100 best **1.828031e-08** vs R6 1.832094e-08 = **−0.22 %**. Second consecutive restart
+< 0.3 % → **the fold refit recipe is stopped** (P6.4 rule). R3→R7 cumulative on VAL: 1.851037 → 1.828031e-08 (−1.24 %).
+Built `estimator_k3_v83_r7od16.py` (`852ccf04`) and `estimator_k3_v83_r7ws.py` (`0f52db6f`). Parity file↔R7 arm DEV (pod)
+1.796417e-08 vs 1.795150e-08 = **7.1e-4** (passes ≤ 1e-3 but 3× the R3–R5 values; watch the graded/projected ratio).
+Pod `acc7entl4kttqk` **stopped** (Oct 12 ~02:50 UTC; nothing queued; R3–R7 outputs pulled to `experiments/2026-10-11_p6/r*/`).

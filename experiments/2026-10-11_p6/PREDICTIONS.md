@@ -39,3 +39,6 @@ R3 matched end (step 224): fold 1.851037e-08 vs ctl 1.892640e-08 = −2.20 % (ct
 ## 2026-10-11 19:15 UTC — R5 builds (R5 VAL −0.33 % vs R4). v83_r4ws FRESH-A stopped (superseded by r5ws).
 - v83_r5ws vs v82c_r2ws: worker ≈ 1.036× (fold −2.84 %, R4+R5 ≈ −0.7 %, F +0.27 %); graded ≈ 2.99e-09.
 - v83_r5od16 vs v83_r4od16: worker raw −0.2 to −0.35 %, same F; graded ≈ 2.91e-09.
+
+## 2026-10-12 02:40 UTC — v83_r7od16 (R7 constants; R6 −0.26 %, R7 −0.22 % VAL; recipe now stopped by the restart rule)
+- worker: FRESH-A raw −0.3 to −0.5 % vs v83_r5od16, same F; graded ≈ 2.895e-09.

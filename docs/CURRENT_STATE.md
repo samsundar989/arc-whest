@@ -10,6 +10,11 @@ R3 refit (`fold` vs `ctl`, from R2) on pod `acc7entl4kttqk` in `/workspace/p6/r3
 `tools/build_v83.py --variant fold`. Next: P6.3 per-shape depth (od12 −1.21 % F on fold) wall A/B
 (`tools/wall_ab.py`) + DEV raw check; P6.2 spend items as M6 evidence arrives.
 
+**Oct 12 ~02:50 UTC:** best graded **v83_r5od16 2.908247724225528e-9 (#335455)**; B v82c_r2ws 3.1018e-9 (#335319),
+B candidate v83_r5ws #335461 grading. v83_r7od16 (final fold refit, R7) on FRESH-A vs r5od16. Fold refit recipe
+stopped (R6 −0.26 %, R7 −0.22 %). P6.1 H closed; P6.3 od16 shipped (A wall ≈ 101.9 s, 3 % margin). Pod stopped.
+Open: P6.2 spend items need M6 twin evidence; two-column-set H needs a strategist go/no-go.
+
 # (history) CURRENT_STATE — 2026-10-10 (plan rev 22, Lane P5)
 
 Plan rev 22 = `docs/research/2026-10-10_pivot_rev22.md` (§3–§6), on top of PLAN rev 18 §5 gates.
