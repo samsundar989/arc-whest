@@ -3038,3 +3038,7 @@ ctl 1.828031e-08 = −6.13 %.
 5 repeats FAIL on the settled-growth check (+476 MB, VmPeak 6,809 MiB); 15 repeats +172 MB total, VmPeak 6,917 MB (1.18×) —
 non-monotone (allocator steps, not a per-predict leak) but the check still FAILs → **B stays age-free (v83_r7ws)**; age6 is an
 A-only lever. `experiments/2026-10-11_p6/mem_wall_age6*.{json,log}`. R8 at step 56: age6 1.721218e-08 vs ctl 1.833626e-08 (−6.13 %).
+
+**R8** (P6.2, 1 epoch from R7, matched): age6 **1.716023e-08** vs ctl 1.828454e-08 = **−6.15 %** (ctl +0.02 % vs R7: polish is
+exhausted). Built `estimator_k3_v84_age6.py` (`c1b098c0`, `build_v83.py --variant fold+age6`, F/B 0.17354, 22,113 ops).
+Parity file↔arm DEV (pod) 1.682262e-08 vs 1.682542e-08 = **1.7e-4**. FRESH-A vs v83_r7od16 running. Pod stopped again (~07:45 UTC).

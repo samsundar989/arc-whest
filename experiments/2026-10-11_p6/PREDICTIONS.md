@@ -42,3 +42,9 @@ R3 matched end (step 224): fold 1.851037e-08 vs ctl 1.892640e-08 = −2.20 % (ct
 
 ## 2026-10-12 02:40 UTC — v83_r7od16 (R7 constants; R6 −0.26 %, R7 −0.22 % VAL; recipe now stopped by the restart rule)
 - worker: FRESH-A raw −0.3 to −0.5 % vs v83_r5od16, same F; graded ≈ 2.895e-09.
+
+## 2026-10-12 07:20 UTC — v84_age6 = fold + age6 (R8 age6 arm baked; no od16, wall ≈ 94.9 s)
+R8 matched (1 epoch from R7): age6 1.716023e-08 vs ctl 1.828454e-08 = −6.15 %.
+- strategist (P6 handoff): break-even −4.65 %; v53 measured −5.53 %.
+- worker: FRESH-A raw −6.0 to −6.6 % vs v83_r7od16 (R8 ctl +0.02 % vs R7 ⇒ no polish credit), F +5.55 % →
+  score ≈ −0.8 to −1.4 %; graded ≈ 2.86–2.87e-09.
