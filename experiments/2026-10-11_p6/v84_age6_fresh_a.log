@@ -1,0 +1,33 @@
+[ev] estimator_k3_v84_age6.py on FRESH_A n=100
+[ev] cost: 381,613,795,475 FLOPs, 22,113 ops, peak RSS 4.79 GiB -> budget 12.0 GiB/worker
+  [mem] 28.3 GiB free, 12.0 GiB per worker -> 1 workers, not 4
+  1 workers x 2 BLAS threads over 100 nets ...
+[ev] accuracy: 4118.0 s, raw MSE 1.756928e-08
+
+  raw MSE            1.756928e-08   (our N = 1e8 labels; mean floor 7.476e-10)
+  raw MSE floor-free 1.682163e-08
+  FLOPs / MLP        381,613,795,475   = 0.17354 x 2^41
+  op calls           22,113
+  materializations   0
+  adjusted (panel)   2.919190e-09
+  per-net score CV   0.128
+  PROJECTED PUBLIC   2.864759e-09   (÷ 1.019)
+  paired vs estimator_k3_v83_r7od16:  gain 1.0062×, Δ +1.8877e-11, t95 [+1.5951e-12, +3.6158e-11], wins 53/100
+    (geometric 1.0067× — diagnostic only, no authority over an outcome)
+
+  PLAN §5 gates
+    PASS  panel projected vs best graded   better than 2.8942e-09             2.8648e-09 = 1.02% better
+    PASS  op calls                         ≤ 26,000                           22,113
+    ok    projected server wall (noisy day, A policy) ≤ 115 s                            93.9 s (quiet day 79.9 s)
+    PASS  setup                            < 2 s                              0.00 s
+    PASS  scalar materializations          0                                  0
+    PASS  failed nets on panel             0                                  0
+    PASS  projected server residual        ≤ 0.33 s (D7 finals bound)         0.245 s (1.63× headroom vs the 0.4 s cliff)
+    PASS  full acceptance panel            fresh_a (or dev), n = 100          fresh_a, n = 100
+    PASS  paired vs incumbent              --baseline given                   estimator_k3_v83_r7od16
+    PASS  WSL RLIMIT_AS 8 GiB gate         PASS on candidate SHA256 (--mem)   PASS VmPeak 6768 MiB; source hash matches
+
+  ALL CHECKABLE GATES PASS (PLAN rev 15 §5 items 3-7) — still needs validate, parity, manual PLAN §5.8 wall evidence, validate-package + source hash, ledger
+
+  RESULTS.md row:
+  | 2026-10-12 | `estimator_k3_v84_age6.py` | `c1b098c0` | FRESH-A | 1.756928e-08 | 0.17354 | 22,113 | 47.737 s (local) → 79.9 s proj | 4907 MiB | **2.8648e-09** | PENDING | 1.0062× vs estimator_k3_v83_r7od16 (Δ +1.888e-11, t95 [+1.595e-12, +3.616e-11]) | 53/100 |  |
