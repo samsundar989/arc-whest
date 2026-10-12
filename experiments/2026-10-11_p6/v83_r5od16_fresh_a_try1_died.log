@@ -1,0 +1,4 @@
+[ev] estimator_k3_v83_r5od16.py on FRESH_A n=100
+[ev] cost: 361,551,945,041 FLOPs, 24,688 ops, peak RSS 4.20 GiB -> budget 10.5 GiB/worker
+  [mem] 28.0 GiB free, 10.5 GiB per worker -> 2 workers, not 4
+  2 workers x 2 BLAS threads over 100 nets ...
