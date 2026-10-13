@@ -92,6 +92,9 @@ def patch(src: str, leaf: int, cap: int, lam: int) -> str:
 
 
 def arm(leaf: int, arg: str):
-    """'lam' or 'lam/cap', e.g. '1.2e6/6'."""
-    lam, _, cap = arg.partition("/")
-    return lambda src, z: patch(src, leaf, int(cap) if cap else 6, int(float(lam)))
+    """'lam', 'lam/cap' or 'lam/cap/leaf' (the last overrides the atom's leaf floor), e.g. '1.2e6/5', '1.2e6/6/12'."""
+    parts = arg.split("/")
+    lam = int(float(parts[0]))
+    cap = int(parts[1]) if len(parts) > 1 and parts[1] else 6
+    leaf = int(parts[2]) if len(parts) > 2 and parts[2] else leaf
+    return lambda src, z: patch(src, leaf, cap, lam)
