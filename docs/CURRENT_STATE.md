@@ -8,7 +8,7 @@ same-shape `out=` allowed; ops gate becomes "projected residual ≤ 0.33 s at v8
 - **K** (branch `lane-k`): `docs/HANDOFF_2026-10-12_LANE_K.md` — pruning v2 with analytic gain replacement (K0–K4, K5 optional).
 - **O** (branch `lane-m`, follows M6): `docs/HANDOFF_2026-10-12_LANE_O.md` — old tier and spend items.
 
-Best graded A: **v84_age6 2.849755454236018e-9 (#335562)**; **v85_sb2 2.71494812074391e-9 (#335697) = NEW BEST A** (bit-identical to v84, F/B 0.16533). Telemetry read: wall 68.6/75.7 s, residual 0.289/0.311 s = 12.64 µs/op worst ⇒ **ops gate ≤ 26,100** (RESULTS § P7.1).
+Best graded A: **v86_d16 2.688690927584011e-9 (#335769)** (v85_sb2 2.71494812e-9 #335697; v84_age6 2.8498e-9) (bit-identical to v84, F/B 0.16533). Telemetry read: wall 68.6/75.7 s, residual 0.289/0.311 s = 12.64 µs/op worst ⇒ **ops gate ≤ 26,100** (RESULTS § P7.1).
 B: **v83_r7ws 2.98079315443596e-9 (#335688)**, Oct 13 A/B slot (projected 2.9754e-9; was v83_r5ws 2.9952e-9).
 B candidate for the Oct 14 A/B slot: **`estimator_k3_v85_trimws.py`** (`3208b2f3`, age6 + sb2 + sbtrim at block 40, F/B 0.16943,
 21,361 ops); WSL gate workerq 2678, FRESH-A vs r7ws workerq 2679 (`experiments/2026-10-13_v85_trimws/`).

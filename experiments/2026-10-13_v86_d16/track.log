@@ -1,0 +1,40 @@
+06:49:32  335769  submitted  score=None  secondary=None
+06:51:33  335769  submitted  score=None  secondary=None
+06:53:33  335769  submitted  score=None  secondary=None
+06:55:34  335769  submitted  score=None  secondary=None
+06:57:34  335769  submitted  score=None  secondary=None
+06:59:35  335769  submitted  score=None  secondary=None
+07:01:36  335769  submitted  score=None  secondary=None
+07:03:36  335769  submitted  score=None  secondary=None
+07:05:37  335769  submitted  score=None  secondary=None
+07:07:37  335769  submitted  score=None  secondary=None
+07:09:38  335769  submitted  score=None  secondary=None
+07:11:38  335769  submitted  score=None  secondary=None
+07:13:39  335769  submitted  score=None  secondary=None
+07:15:39  335769  submitted  score=None  secondary=None
+07:17:40  335769  submitted  score=None  secondary=None
+07:19:40  335769  submitted  score=None  secondary=None
+07:21:41  335769  submitted  score=None  secondary=None
+07:23:41  335769  submitted  score=None  secondary=None
+07:25:42  335769  submitted  score=None  secondary=None
+07:27:42  335769  submitted  score=None  secondary=None
+07:29:43  335769  submitted  score=None  secondary=None
+07:31:43  335769  submitted  score=None  secondary=None
+07:33:44  335769  submitted  score=None  secondary=None
+07:35:44  335769  submitted  score=None  secondary=None
+07:37:45  335769  submitted  score=None  secondary=None
+07:39:45  335769  submitted  score=None  secondary=None
+07:41:46  335769  submitted  score=None  secondary=None
+07:43:46  335769  submitted  score=None  secondary=None
+07:45:47  335769  submitted  score=None  secondary=None
+07:47:47  335769  graded  score=2.688690927584011e-09  secondary=1.642486083142103e-08
+{
+ "id": 335769,
+ "grading_status_cd": "graded",
+ "score": 2.688690927584011e-09,
+ "score_secondary": 1.642486083142103e-08,
+ "grading_message": "<p>Graded successfully</p>\n",
+ "created_at": "2026-10-13T11:49:10.511Z",
+ "updated_at": null
+}
+ledger updated

@@ -3119,4 +3119,13 @@ Final params ~12:00 UTC on lane-k.
 ### P7.2 — v86 = v85 + sbtrim + depth16 (Lane S S2, lane-s 09fd0f5; `experiments/2026-10-13_v86_d16/`)
 | date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
 |---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
-| 2026-10-13 | `estimator_k3_v86_d16.py` | `7453e9c4` | FRESH-A | 1.757096e-08 (+0.01 % vs v84/v85's 1.756928e-08) | 0.16370 | 23,891 | A/B 1.073× sb2 (lane-s, quiet queue) → 67.7 × 1.073 × 1.24 ≈ 90 s noisy-implied | VmPeak 4,954 MB (WSL 23/23 PASS, same sha, lane-s) | **≈ 2.689e-09** (v85 graded ÷ 1.0099) | PENDING (#335769) | **1.0099× vs v85_sb2** (Δ +2.840e-11, t95 [+2.645e-11, +3.036e-11]) | **100/100** | sbtrim (bit-identical, −1,025 ops) + λ-priced per-site depth, leaf ≥ 16. Residual worst 0.302 s at v85's rate. depth8 held (1.31–1.33× wall ⇒ ≈ 110 s). ev.py's own projection 2.7026e-09 uses ÷1.019 on FRESH-A; the paired ratio vs graded v85 is the sharper number. Package `34ae9605…42f7`, inner = source. Second canary of UTC Oct 13. Predictions: worker 2.689e-9, strategist 2.57–2.64e-9 (assumed leaf ≥ 8). |
+| 2026-10-13 | `estimator_k3_v86_d16.py` | `7453e9c4` | FRESH-A | 1.757096e-08 (+0.01 % vs v84/v85's 1.756928e-08) | 0.16370 | 23,891 | A/B 1.073× sb2 (lane-s, quiet queue) → 67.7 × 1.073 × 1.24 ≈ 90 s noisy-implied | VmPeak 4,954 MB (WSL 23/23 PASS, same sha, lane-s) | **≈ 2.689e-09** (v85 graded ÷ 1.0099) | **2.688690927584011e-09** (#335769) | **1.0099× vs v85_sb2** (Δ +2.840e-11, t95 [+2.645e-11, +3.036e-11]) | **100/100** | sbtrim (bit-identical, −1,025 ops) + λ-priced per-site depth, leaf ≥ 16. Residual worst 0.302 s at v85's rate. depth8 held (1.31–1.33× wall ⇒ ≈ 110 s). ev.py's own projection 2.7026e-09 uses ÷1.019 on FRESH-A; the paired ratio vs graded v85 is the sharper number. Package `34ae9605…42f7`, inner = source. Second canary of UTC Oct 13. Predictions: worker 2.689e-9, strategist 2.57–2.64e-9 (assumed leaf ≥ 8). |
+
+**v86_d16 graded (#335769): 2.688690927584011e-09, NEW BEST**, raw 1.642486083142103e-08 (+0.020 % vs v85), 100 clean. −0.97 % vs
+v85; = the projection (2.689e-9). `--best-graded` updated.
+**Server telemetry (#335769, 100 MLPs, Chrome):** predict wall mean 75.54 s, median 75.71, max 80.74 (v85 67.69 / 75.66);
+kernel mean 65.33 s (v85 58.52); overhead 9.92 s; residual mean 0.2918 s, max 0.3042 s (12.21 / 12.73 µs/op at 23,891 ops).
+**Depth wall transfer:** server median ratio v86/v85 = **1.118×** vs local A/B 1.073× ⇒ deeper recursion costs **×1.042 more on the
+server than the local A/B shows** (it is all kernel time: 1.117×). Rule from now on: noisy-implied = 67.69 s × A/B(vs sb2) × 1.042 × 1.24.
+**v87 depth decision:** stack B + depth8 (A/B 1.206×) ⇒ 105.5 s > 105 **FAIL**; stack B + **d12c6** (1.070×) ⇒ 93.6 s **PASS** (F/B
+0.14422, 24,371 ops); depth16 (1.034×) ⇒ 90.4 s. ⇒ **v87 = sb2+sbtrim+d12c6+k0+k1:2.5_3.0+k2:3.0+k3.**
