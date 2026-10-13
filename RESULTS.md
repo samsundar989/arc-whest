@@ -3133,4 +3133,12 @@ server than the local A/B shows** (it is all kernel time: 1.117×). Rule from no
 ### P7.3 — v87_B = v86-family + K stack B (Lane K R1 refit; `experiments/2026-10-13_v87/`)
 | date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
 |---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
-| 2026-10-13 | `estimator_k3_v87_B.py` | `6e1d4862` | FRESH-A | 1.774908e-08 (+1.01 % vs v86; floor-free 1.700143e-08) | 0.14422 | 24,371 | A/B 1.070× sb2 on stack B (lane-s #2704) → 67.69 × 1.070 × 1.042 × 1.24 ≈ 93.6 s noisy-implied | VmPeak 5,889 MB (WSL 23/23 PASS, workerq 2720) | **≈ 2.393e-09** (v86 graded ÷ 1.1237) | PENDING (#335809) | **1.1237× vs v86_d16** (Δ +3.166e-10, t95 [+2.992e-10, +3.340e-10]) | **100/100** | `sb2+sbtrim+depth8:1.2e6/6/12+k0+k1:2.5_3.0+k2:3.0+k3`, R1 B params (VAL +1.48 % vs R8, +1.77 % vs matched ctl). Residual worst 0.308 s. File↔arm parity +7.1e-5 (lane-k 2731 vs 2716; max per-net 0.80 %). Package `03985ea8…7604`, inner = source. Third canary of UTC Oct 13. Predictions: worker 2.40e-9 (raw +1.2–1.9 %), strategist 2.25–2.40e-9. |
+| 2026-10-13 | `estimator_k3_v87_B.py` | `6e1d4862` | FRESH-A | 1.774908e-08 (+1.01 % vs v86; floor-free 1.700143e-08) | 0.14422 | 24,371 | A/B 1.070× sb2 on stack B (lane-s #2704) → 67.69 × 1.070 × 1.042 × 1.24 ≈ 93.6 s noisy-implied | VmPeak 5,889 MB (WSL 23/23 PASS, workerq 2720) | **≈ 2.393e-09** (v86 graded ÷ 1.1237) | **2.416897696479148e-09** (#335809) | **1.1237× vs v86_d16** (Δ +3.166e-10, t95 [+2.992e-10, +3.340e-10]) | **100/100** | `sb2+sbtrim+depth8:1.2e6/6/12+k0+k1:2.5_3.0+k2:3.0+k3`, R1 B params (VAL +1.48 % vs R8, +1.77 % vs matched ctl). Residual worst 0.308 s. File↔arm parity +7.1e-5 (lane-k 2731 vs 2716; max per-net 0.80 %). Package `03985ea8…7604`, inner = source. Third canary of UTC Oct 13. Predictions: worker 2.40e-9 (raw +1.2–1.9 %), strategist 2.25–2.40e-9. |
+
+**v87_B graded (#335809): 2.416897696479148e-09, NEW BEST**, raw 1.675879541807035e-08 (+2.03 % vs v86 graded; FRESH-A said +1.01 %),
+100 clean. −10.11 % vs v86, −15.2 % vs v84. **+1.00 % vs the projection** 2.393e-9 (inside the 2 % stop rule; the graded raw
+penalty is ~1 pt larger than FRESH-A's — watch it on v88). `--best-graded` updated.
+**Server telemetry (#335809, Chrome):** predict wall mean 72.87 s, median 72.97, max 75.06; kernel 62.75 s; overhead 9.82 s;
+residual mean 0.2923 s, max 0.3009 s ⇒ **11.99 / 12.35 µs/op** at 24,371 ops. Wall/v85 median 1.078× vs local A/B 1.070× (extra
+×1.0075 this time; v86 showed ×1.042 — keep ×1.042 as the conservative rule). Noisy-implied 72.97 × 1.24 = **90.5 s**.
+Materialization clause (≤ 0.30 s worst) at 12.35 µs/op ⇒ **ops ≤ 24,290** for any build with materializations (K5).
