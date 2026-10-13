@@ -15,3 +15,6 @@ Why now: age6's B twin failed the WSL settled-growth check on Oct 12 (+476 MB, V
 | wall vs r7ws (A/B, DEV 3) | 0.85–1.0× (sb2 −22 % vs age6 +5.5 %) ⇒ ≤ 78 s noisy-implied, B gate ≤ 95 s |
 
 Stop rule: WSL FAIL twice, or FRESH-A not better than r7ws ⇒ B stays r7ws.
+
+**06:35 UTC result:** WSL 8 GiB ×5 (workerq 2678) **23/23 PASS, VmPeak 4,947 MB, settled +45 MB** — the Oct 12 age6-ws growth
+failure is gone (prediction ✓). FRESH-A (2679) queued.
