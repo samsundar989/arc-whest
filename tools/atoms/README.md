@@ -26,7 +26,7 @@ def make(arg: str):                   # optional; used for --atoms <name>:<arg>,
 ## Slots
 | lane | atoms |
 |---|---|
-| S | `sb2`, `depth16`, `depth8`, `sbks` |
+| S | `sb2`, `sbtrim`, `depth16`, `depth8`, `sbks` (order sb2 → sbtrim → depth) |
 | K | `k0`, `k1`, `k2`, `k3`, `k4`, `k5` |
 | O | `o1`, `o2`, `o3`, `o4` |
 
