@@ -3087,3 +3087,19 @@ v85 base: **depth16** default (leaf 16, cap 6, λ 8e5) F/B 0.16370 (−5.67 % vs
 worst; **depth8** default (leaf 8, cap 6, λ 1.2e6) F/B 0.15972 (−7.96 %), **25,201 ops** ⇒ 0.3185 s worst. Both pass the
 ≤ 26,100 gate; depth8:1e6/6 (0.15930, 26,051 ops, 0.3293 s) is at the edge and not shipped. DEV-100 ±0.3 % (workerq #2663),
 wall and WSL still pending.
+
+**P7 build prices (exact; Lane K's out=-aware costfloor interpreter, which reproduces the real meter on sb2 to the FLOP;
+lane-k `experiments/2026-10-13_k/meter/sbtrim_prices.txt`; order sb2+sbtrim+depthX then k atoms; ops gate ≤ 26,100):**
+
+| build | F/B | ΔF vs v85 | ops |
+|---|---:|---:|---:|
+| v85 = sb2 | 0.16533 | — | 24,576 |
+| sb2+sbtrim (bit-identical) | 0.16533 | 0 | 23,551 |
+| **v86 candidate** sb2+sbtrim+depth8 | 0.15965 | −3.44 % | 24,331 |
+| sb2+sbtrim+depth8+A (k0+k1:2.5_3.0+k2:3.0) | 0.14677 | −11.23 % | 25,030 |
+| **v87 candidate** sb2+sbtrim+depth8+B (A+k3) | **0.14250** | **−13.81 %** | 25,211 |
+| sb2+sbtrim+depth8+C+k3 (k1:2.5) | 0.13956 | −15.59 % | 25,187 |
+| sb2+sbtrim+depth16+B | 0.14489 | −12.36 % | 24,971 |
+
+Accuracy is NOT in this table: depth8 needs DEV-100 within ±0.3 % (Lane S, on the exact trimmed build); the K stacks need the
+pod-2 refit vs matched control (ETA ~13:00 UTC). Marginal rule: −13.81 % F pays for raw up to +16.0 %.
