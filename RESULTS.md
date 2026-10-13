@@ -3108,3 +3108,10 @@ pod-2 refit vs matched control (ETA ~13:00 UTC). Marginal rule: −13.81 % F pay
 | date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
 |---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
 | 2026-10-13 | `estimator_k3_v85_trimws.py` | `3208b2f3` | FRESH-A | 1.756482e-08 (≈ v84's FRESH-A 1.756928e-08) | 0.16943 | 21,361 | wall A/B vs r7ws pending (workerq 2701; law 77.9 / 91.6 s over-projects block 40) | VmPeak 4,947 MB (WSL 23/23 PASS, +45 MB settled; workerq 2678) | **2.7962e-09** | — (Oct 14 A/B slot) | **1.0614× vs v83_r7ws** (Δ +1.826e-10, t95 [+1.653e-10, +2.000e-10]) | **100/100** | B twin = v84_age6 (R8) at block 40 + sb2 + sbtrim. Fixes the Oct 12 age6-ws memory-growth FAIL. Residual proj 0.270 s at v85's 12.64 µs/op (B ≤ 0.30). Predictions (worker): 1.05–1.07×, 2.77–2.80e-9 ✓. ev.py "FAILED" = A-only gate (vs best graded A) + WSL run separately. |
+
+**Lane K refit (pod 2, R9-K: 2 epochs from R8, R8 recipe, matched ctl) — interim at step 140/224 (plateau since 84), VAL-100:**
+ctl 1.716888e-08 · stack A (k0+k1:2.5_3.0+k2:3.0) 1.712477e-08 (**−0.26 %**) · stack B (A+k3) 1.744324e-08 (**+1.60 %**).
+Unrefit gaps were +0.96 % / +3.02 %. Parity file↔arm DEV-100 (lane-k): A +5.9e-5, k2 −5.3e-5, k3 +1.2e-4. On the P7 price table:
+sb2+sbtrim+depth16+B F/B 0.14489 ⇒ projected ≈ 2.7149e-9 × 1.016 × 0.14489/0.16533 ≈ **2.42e-9** (−11 % vs v85); +A ≈ 2.44e-9.
+**v87 = sb2+sbtrim+depth16+k0+k1:2.5_3.0+k2:3.0+k3 with B's final params** (depth8 only if its wall clears on the K stack).
+Final params ~12:00 UTC on lane-k.
