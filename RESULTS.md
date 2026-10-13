@@ -3142,3 +3142,8 @@ penalty is ~1 pt larger than FRESH-A's — watch it on v88). `--best-graded` upd
 residual mean 0.2923 s, max 0.3009 s ⇒ **11.99 / 12.35 µs/op** at 24,371 ops. Wall/v85 median 1.078× vs local A/B 1.070× (extra
 ×1.0075 this time; v86 showed ×1.042 — keep ×1.042 as the conservative rule). Noisy-implied 72.97 × 1.24 = **90.5 s**.
 Materialization clause (≤ 0.30 s worst) at 12.35 µs/op ⇒ **ops ≤ 24,290** for any build with materializations (K5).
+
+### P7.5 — B twin v87_Bws (Lane S; `experiments/2026-10-13_v87ws/`)
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-13 | `estimator_k3_v87_Bws.py` | `e5e4585e` | FRESH-A | 1.775877e-08 | 0.14494 | 23,241 | A/B 1.050× sb2 (lane-s #2726) → 67.69 × 1.050 × 1.042 × 1.24 ≈ 91.8 s (B ≤ 95) | VmPeak@100 predicts 6,490 MiB (interim gate ≤ 7,200, lane-s #2765); 250-predict retention w/ harness accumulator reset: #2766 running | **≈ 2.429e-09** (r7ws graded ÷ 1.2272) | — (Oct 14 A/B slot) | **1.2272× vs v83_r7ws** (Δ +5.847e-10, t95 [+5.604e-10, +6.091e-10]) | **100/100** | `sb2+sbtrim+sbfree+depth8:1.5e6/6/12+k0+k1:2.5_3.0+k2:3.0+k3 --ws`, R1 B params. Residual worst 0.296 s at 12.73 µs/op (≤ 0.30). Supersedes v85_trimws as the Oct 14 B candidate. |
