@@ -54,8 +54,8 @@ on fresh MLPs**. Public board rank is not the target. A second, co-equal objecti
    and seed blocks are retired.
 6. **Process is minimal.** No pre-registered contracts, no prediction requests, no seed
    blocks, no SINGLE_USE/DECIDE tiers, no dispatch-plan commits, no producer sidecars, no
-   instrument preflight, no per-experiment Skeptic, no `workerq`/`gpuq` for evaluations,
-   no 2× gate. One evaluator, one results table, one decision rule (PLAN §4). Skeptic
+   instrument preflight, no per-experiment Skeptic, no 2× gate. **Every heavy job goes through
+   `workerq`, evaluations included** (Samuel, 2026-10-13; see Commands). One evaluator, one results table, one decision rule (PLAN §4). Skeptic
    review is kept **only** for the two designated finals and for write-up numbers, and
    only when Samuel asks.
 7. **Commits** are small, frequent and descriptive. One commit per candidate or result.
@@ -137,9 +137,15 @@ its checks are still correct; it is simply not a gate any more.
 **Run `whest` from PowerShell**, or set `PYTHONIOENCODING=utf-8` in a POSIX shell — the
 CLI's box-drawing output kills a cp1252 console inside its own error printer.
 
-Heavy *training / fitting* workloads still go through `workerq` per the machine policy;
-**candidate evaluations do not** (rule 6) — they run directly, because the queue bypasses
-`scripts/guard_paths.py` and because the loop has to be fast.
+**All heavy work goes through `workerq`** per the machine policy — training, fitting **and**
+candidate evaluations (`tools/ev.py` panels, twin evals, anatomy, wall A/Bs, the WSL gate).
+Samuel, 2026-10-13: with several lanes running, directly launched evaluations consumed the box
+while the queue showed nothing running. (This replaces the Sep 21 "evaluations run directly"
+rule.) Submit from the main checkout with absolute paths: `workerq submit` from a lane worktree
+is refused (`docs/GOTCHAS.md`). The queue bypasses `scripts/guard_paths.py`, so `whest submit`
+itself stays a direct, foreground command; a wall A/B declares enough `--cpus` to keep the
+machine quiet around it. Small CPU-only commands (`whest validate`, builders, single-net
+`_cost_worker.py` checks) may still run directly.
 
 ## Continuity — no agent may depend on another agent's chat history
 
