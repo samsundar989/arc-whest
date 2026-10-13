@@ -36,3 +36,11 @@ raw o2_192x256
 raw o2_256x256
 {"panel": "hold100", "arm": "", "n": 100, "raw_mse": 1.712925057574429e-08, "dress": null, "gm": null, "k4l": null, "shared_rank": 256, "fold": null, "rad": null}
 raw o3_8
+{"panel": "hold100", "arm": "", "n": 100, "raw_mse": 1.099082216984497e-07, "dress": null, "gm": null, "k4l": null, "shared_rank": 256, "fold": null, "rad": null}
+raw o3_9
+{"panel": "hold100", "arm": "", "n": 100, "raw_mse": 6.89507073923993e-08, "dress": null, "gm": null, "k4l": null, "shared_rank": 256, "fold": null, "rad": null}
+raw o3_7
+{"panel": "hold100", "arm": "", "n": 100, "raw_mse": 1.737761742575501e-07, "dress": null, "gm": null, "k4l": null, "shared_rank": 256, "fold": null, "rad": null}
+raw o3_6
+{"panel": "hold100", "arm": "", "n": 100, "raw_mse": 2.711193962837306e-07, "dress": null, "gm": null, "k4l": null, "shared_rank": 256, "fold": null, "rad": null}
+ALL_DONE
