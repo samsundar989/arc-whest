@@ -3064,4 +3064,10 @@ main's file: 4,256 writes, 0 shape/bill mismatches, bit-identical and NaN-free o
 
 | date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
 |---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
-| 2026-10-13 | `estimator_k3_v85_sb2.py` | `d3359e48` | bit-identical to v84 (DEV 0–4) | = v84 | 0.16533 | 24,576 | A/B 0.783× v84 → ≈ 74 s noisy-implied | VmPeak 4,953 MB (WSL PASS) | **2.7150e-09** | PENDING (#335697) | — (bit-identical: no FRESH-A) | — | Strassen variant B glue (pooled `out=` views, fused last level), same depths. Package `74fe2714…ac82`, inner = source. First canary of UTC Oct 13. Predictions: strategist 2.713e-9 ± 0.2 %, worker 2.7150e-9 (`PREDICTIONS.md`). |
+| 2026-10-13 | `estimator_k3_v85_sb2.py` | `d3359e48` | bit-identical to v84 (DEV 0–4) | = v84 | 0.16533 | 24,576 | A/B 0.783× v84 → ≈ 74 s noisy-implied | VmPeak 4,953 MB (WSL PASS) | **2.7150e-09** | **2.71494812074391e-09** (#335697) | — (bit-identical: no FRESH-A) | — | Strassen variant B glue (pooled `out=` views, fused last level), same depths. Package `74fe2714…ac82`, inner = source. First canary of UTC Oct 13. Predictions: strategist 2.713e-9 ± 0.2 %, worker 2.7150e-9 (`PREDICTIONS.md`). |
+
+**v85_sb2 graded (#335697): 2.71494812074391e-09, NEW BEST**, raw 1.642151991276819e-08 (= #335562 to every digit: bit-identity
+holds on the graded nets), 100 clean. −4.73 % vs v84_age6 (= the F ratio); −0.002 % vs the projection 2.7150e-09. `ev.py
+--best-graded` updated. **Server telemetry (wall mean/max, residual max, per-op residual) NOT collected**: the API returns only
+score/raw and the result page needs a logged-in browser (Chrome tools disconnected). Until it is read, the ops gate stays
+≤ 26,000 (handoff rule), which blocks depth16 (26,875) and depth8 (~30,000).
