@@ -16,3 +16,6 @@ VAL-100 (Lane K): B 1.741472e-8 vs ctl 1.711219e-8 (+1.77 %); vs R8 1.716023e-8 
 
 Stop rules: FRESH-A not better than v86 ⇒ fall back to stack A (r1_A_params, drop +k3); file↔arm parity > 1e-3 ⇒ stop;
 graded > 2 % worse than projected ⇒ stop the line.
+
+**13:23 UTC:** WSL ×5 (workerq 2720) **23/23 PASS, VmPeak 5,889 MB, settled +51 MB** (prediction 4.9–5.4 GB ✗ high but PASS;
+d12c6's deeper buffers, fix = Lane S sbfree for v88).
