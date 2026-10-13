@@ -8,7 +8,12 @@ same-shape `out=` allowed; ops gate becomes "projected residual ≤ 0.33 s at v8
 - **K** (branch `lane-k`): `docs/HANDOFF_2026-10-12_LANE_K.md` — pruning v2 with analytic gain replacement (K0–K4, K5 optional).
 - **O** (branch `lane-m`, follows M6): `docs/HANDOFF_2026-10-12_LANE_O.md` — old tier and spend items.
 
-Best graded A: **v84_age6 2.849755454236018e-9 (#335562)**. B: v83_r5ws 2.9952e-9 (#335461); v83_r7ws → Oct 13 A/B slot.
+Best graded A: **v84_age6 2.849755454236018e-9 (#335562)**. B: v83_r5ws 2.9952e-9 (#335461); v83_r7ws submitted
+**#335688** (Oct 13 A/B slot, projected 2.9754e-9).
+
+**Oct 13 03:40 UTC — pods: pod 1 `acc7entl4kttqk` no longer exists (404; the account lists no pods).** Its `/workspace`
+(R-series refit setup) must be assumed lost. Pod 2 (P7.0d) and any replacement pod 1 need new pods + re-provisioning;
+waiting on Samuel's go (billable). R3–R8 outputs are local under `experiments/2026-10-11_p6/r*/`.
 
 # (history) CURRENT_STATE — 2026-10-11 (plan rev 23, Lane P6)
 
