@@ -42,13 +42,36 @@ worse than +10 %) needs 98.1 % recovery of the drop's error; age 5 measured 71 %
 (16–23 % of energy) caps recovery near 80 %. The arithmetic is in `O3/RESULTS.md`. Overrule if you want the
 measurement anyway (about half a day).
 
-**Still open:**
-- O5 (anatomy on v84) is running. It is slow because the 5090 is shared at 99 % utilisation with full VRAM;
-  this packet will be updated when it lands.
-- O4 waits for Lane K's first pruned stack.
+## Oct 13, day 1 continued: O5 and O4
 
-**Atoms delivered:** `tools/atoms/o1.py` (`o1`, `o1:<r>`), `o2.py` (`o2:<rA>/<rM>`), `o3.py` (`o3:<A>`). All
-are documented, none recommended. `o1` remains the age-6-rejection fallback.
+**O5, anatomy on v84** (`experiments/2026-10-13_o/O5/RESULTS.md`), chain 1.6179e-8:
+- Age 6's gain came out of κ3, whose error fell 44 % in absolute terms (share 35.2 % → 22.0 %), and out of the old
+  tier, whose error fell 77 % (making it exact now removes only 1.9 %, from 7.4 %).
+- The covariance error fell only with the chain. **At 42.7 %, cov is now the dominant channel:** var in layers
+  12–15 is 18.1 points (still the "19 points") and C_off in 7–11 is 12.2. κ4 is unchanged at 8.7 %.
+- **Strategist question:** the late covariance is the one large attackable chunk left, and it is outside Lane O's
+  scope. M6.3's learned var gain (acov) did nothing, so it needs a structural look at how cov_pre propagates late.
+
+**O4, spend items on Lane K's pruned stack** (v87 = stack B on sb2/sbtrim/depth8):
+
+| arm | Δraw | ΔF | net | ops |
+|---|---:|---:|---:|---:|
+| **J3** | −0.27 % (75/100, 5 se) | +0.04 % | **−0.22 %** | **−431** |
+| age 7 | −1.74 % | +3.75 % | +1.94 % | −735 |
+| J4 | −0.54 % | +0.88 % | +0.33 % | −902 |
+| SVD join | −0.20 % | +1.51 % | +1.30 % | −1,429 |
+
+**J3 is handed to Lane P** as atom `o4` (`experiments/2026-10-13_o/O4/HANDOVER_O4_J3.md`). It is nearly free on the
+pruned stack (it was +0.36 % F on v84), and it widens the ops margin under the 26,100 gate from 889 to 1,320.
+Recommendation: include it as a matched arm in Lane K's stack refit. Age 7 fails because O5 shows age 6 left little
+for a 7th generation to repair.
+
+**Lane O status:** O1–O5 are all done. The one winner (J3, net −0.22 % unrefit) is handed over. Nothing else on the
+handoff is open; the next move is the strategist's.
+
+**Atoms delivered:**
+- `tools/atoms/o4.py` (J3, recommended).
+- `o1.py`, `o2.py`, `o3.py`: documented, not recommended. `o1` remains the age-6-rejection fallback.
 
 **Infrastructure note:** `workerq submit` from a worktree is refused ("passthrough 'cache/hf' escapes the
 repository", because the worktree's cache/hf is a junction). Submit from the main tree with absolute paths.

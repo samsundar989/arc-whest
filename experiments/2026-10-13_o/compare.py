@@ -7,11 +7,17 @@ import sys
 from pathlib import Path
 
 O = Path(__file__).resolve().parent
-ctl = json.loads((O / "O1/val_raw_v84.json").read_text())
-c = ctl["per_net"]
-F0 = json.loads((O / "O1/variants/prices.json").read_text())["v84"]["flops"]
 step = O / sys.argv[1]
-prices = json.loads((step / "variants/prices.json").read_text())
+if len(sys.argv) > 3:                      # O4: control = a tag in the same step, prices from Lane K's meter text
+    ctl = json.loads((step / f"val_raw_{sys.argv[3]}.json").read_text())
+    prices = {ln.split(" | ")[0].strip(): {"flops": int(ln.split("TOTAL ")[1].split()[0])}
+              for ln in (step / "variants/prices.txt").read_text().splitlines() if "TOTAL" in ln}
+    F0 = prices[sys.argv[3]]["flops"]
+else:
+    ctl = json.loads((O / "O1/val_raw_v84.json").read_text())
+    F0 = json.loads((O / "O1/variants/prices.json").read_text())["v84"]["flops"]
+    prices = json.loads((step / "variants/prices.json").read_text())
+c = ctl["per_net"]
 print(f"control v84 raw {ctl['raw_mse']:.6e} (n {ctl['n']})\n")
 print("| arm | raw MSE | Δraw | break-even | ΔF | **net score** | per-net Δ ± se | wins |")
 print("|---|---:|---:|---:|---:|---:|---:|---:|")
