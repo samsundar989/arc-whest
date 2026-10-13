@@ -8,7 +8,8 @@ PREDICTIONS.md per step, with predictions committed before each run).
 - Accuracy: unrefit VAL-100, twin `--raw` on each built file, paired per net against the v84 file (1.716117e-8;
   R8 recorded 1.716023e-8).
 - Prices: exact interpreter.
-- Screens ran directly (AGENTS rule 6), not through workerq: the queue's free-RAM gate was below 8 GiB all evening.
+- The day-1 screens ran directly under AGENTS rule 6. Samuel has since ruled (Oct 13) that **all** jobs, evaluations
+  included, go through workerq, and O5 was moved into the queue (job 2661).
 
 ## Oct 12–13, day 1
 
