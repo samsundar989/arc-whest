@@ -22,6 +22,7 @@ RUNNING, 300 GB `/workspace`, image `runpod/pytorch:1.0.2-cu1281-torch280-ubuntu
 Provisioned by a git bundle of main (runpodctl send, ~30 MB/s) + `provision.sh` (data venv `/workspace/venv-data` with
 whestbench 0.16.1; `tools/twin/export_weights.py` from HF into `/workspace/arc/cache/twin`). Twin = system python3.
 Not on the pods: `cache/twin_labels`, `cache/d8b`. Stop each pod as soon as its outputs are pulled.
+**04:40 UTC:** both provisioned (full 1000/1000 + mini 100 exported, twin imports on CUDA, 161 GB free). **p1 STOPPED** (EXITED); p2 RUNNING with Lane K's stack refit in `/workspace/k/arc` (Lane K stops it after pulling outputs).
 
 # (history) CURRENT_STATE — 2026-10-11 (plan rev 23, Lane P6)
 
