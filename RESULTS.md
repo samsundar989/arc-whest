@@ -3080,3 +3080,10 @@ call, not less (the plan assumed less). **Ops gate (Samuel's decision 3): projec
 ops ≤ 26,100** (at the mean rate 28,100). Consequences: depth16 (26,875 ops ⇒ 0.340 s) FAILS by 3 %; depth8 (~30,000 ⇒ 0.379 s)
 FAILS; per-site depth and the S2 ops trim ("+2 ops per level instead of +3") are the only depth routes left; every K/O atom
 must now report ops and keep the stack ≤ 26,100. Residual worst/mean 1.076.
+
+**Correction (same day):** the "depth16 / depth8 FAIL" consequence above used the λ = 0 (pure-FLOP) depth points. Lane S's
+atoms price each op at λ FLOPs inside the per-site depth choice (lane-s `experiments/2026-10-13_s/s2_lambda_scan.log`). On the
+v85 base: **depth16** default (leaf 16, cap 6, λ 8e5) F/B 0.16370 (−5.67 % vs v84), **24,875 ops** (meter-confirmed) ⇒ 0.3144 s
+worst; **depth8** default (leaf 8, cap 6, λ 1.2e6) F/B 0.15972 (−7.96 %), **25,201 ops** ⇒ 0.3185 s worst. Both pass the
+≤ 26,100 gate; depth8:1e6/6 (0.15930, 26,051 ops, 0.3293 s) is at the edge and not shipped. DEV-100 ±0.3 % (workerq #2663),
+wall and WSL still pending.
