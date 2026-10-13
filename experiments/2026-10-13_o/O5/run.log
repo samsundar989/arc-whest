@@ -1,0 +1,10 @@
+whestbench: downloading 'full' split from hf://aicrowd/arc-whestbench-public-2026@v2-phase2
+{
+ "net": 0,
+ "loop_bit_identical": true,
+ "recording_bit_identical": true,
+ "self_substitution_max_abs": 0.0,
+ "ref_final_mse_vs_split_truth": 1.3145157838885364e-08
+}
+whestbench: downloading 'full' split from hf://aicrowd/arc-whestbench-public-2026@v2-phase2
+[anatomy2] net 0 devin-stout: final chain MSE 1.3083e-08 (x-est 1.3168e-08) in 847.6 s, total 862 s
