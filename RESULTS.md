@@ -3115,3 +3115,8 @@ Unrefit gaps were +0.96 % / +3.02 %. Parity file↔arm DEV-100 (lane-k): A +5.9e
 sb2+sbtrim+depth16+B F/B 0.14489 ⇒ projected ≈ 2.7149e-9 × 1.016 × 0.14489/0.16533 ≈ **2.42e-9** (−11 % vs v85); +A ≈ 2.44e-9.
 **v87 = sb2+sbtrim+depth16+k0+k1:2.5_3.0+k2:3.0+k3 with B's final params** (depth8 only if its wall clears on the K stack).
 Final params ~12:00 UTC on lane-k.
+
+### P7.2 — v86 = v85 + sbtrim + depth16 (Lane S S2, lane-s 09fd0f5; `experiments/2026-10-13_v86_d16/`)
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-13 | `estimator_k3_v86_d16.py` | `7453e9c4` | FRESH-A | 1.757096e-08 (+0.01 % vs v84/v85's 1.756928e-08) | 0.16370 | 23,891 | A/B 1.073× sb2 (lane-s, quiet queue) → 67.7 × 1.073 × 1.24 ≈ 90 s noisy-implied | VmPeak 4,954 MB (WSL 23/23 PASS, same sha, lane-s) | **≈ 2.689e-09** (v85 graded ÷ 1.0099) | PENDING (#335769) | **1.0099× vs v85_sb2** (Δ +2.840e-11, t95 [+2.645e-11, +3.036e-11]) | **100/100** | sbtrim (bit-identical, −1,025 ops) + λ-priced per-site depth, leaf ≥ 16. Residual worst 0.302 s at v85's rate. depth8 held (1.31–1.33× wall ⇒ ≈ 110 s). ev.py's own projection 2.7026e-09 uses ÷1.019 on FRESH-A; the paired ratio vs graded v85 is the sharper number. Package `34ae9605…42f7`, inner = source. Second canary of UTC Oct 13. Predictions: worker 2.689e-9, strategist 2.57–2.64e-9 (assumed leaf ≥ 8). |

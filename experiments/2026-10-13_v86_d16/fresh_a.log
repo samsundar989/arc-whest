@@ -1,0 +1,42 @@
+worker-q: job #2702 starting at 2026-10-13T09:16:14.581916+00:00
+worker-q: cwd=C:\Users\samsu\.local\state\gpuq\snapshots\2702\job-2702
+worker-q: snapshot=git 5a9ce9280fd661bfad8b5274964411282f5440b7
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['uv', 'run', 'python', 'C:\\Users\\samsu\\Documents\\arc-whest\\tools\\ev.py', 'C:\\Users\\samsu\\Documents\\arc-whest\\estimator_k3_v86_d16.py', '--panel', 'fresh_a', '--baseline', 'C:\\Users\\samsu\\Documents\\arc-whest\\estimator_k3_v85_sb2.py', '--jobs', '2', '--json', 'C:\\Users\\samsu\\Documents\\arc-whest\\experiments\\2026-10-13_v86_d16\\fresh_a.json']
+worker-q: ------------------------------------------------------------
+[ev] estimator_k3_v86_d16.py on FRESH_A n=100
+[ev] cost: 359,972,237,349 FLOPs, 23,891 ops, peak RSS 3.00 GiB -> budget 7.5 GiB/worker
+  [mem] 19.3 GiB free, 7.5 GiB per worker -> 1 workers, not 2
+  1 workers x 2 BLAS threads over 100 nets ...
+[ev] accuracy: 5638.3 s, raw MSE 1.757096e-08
+  2 workers x 2 BLAS threads over 100 nets ...
+
+  raw MSE            1.757096e-08   (our N = 1e8 labels; mean floor 7.476e-10)
+  raw MSE floor-free 1.682331e-08
+  FLOPs / MLP        359,972,237,349   = 0.16370 x 2^41
+  op calls           23,891
+  materializations   0
+  adjusted (panel)   2.753915e-09
+  per-net score CV   0.127
+  PROJECTED PUBLIC   2.702566e-09   (÷ 1.019)
+  paired vs estimator_k3_v85_sb2:  gain 1.0099×, Δ +2.8403e-11, t95 [+2.6447e-11, +3.0359e-11], wins 100/100
+    (geometric 1.0099× — diagnostic only, no authority over an outcome)
+
+  PLAN §5 gates
+    PASS  panel projected vs best graded   better than 2.7149e-09             2.7026e-09 = 0.46% better
+    PASS  op calls                         ≤ 26,100                           23,891
+    ok    projected server wall (noisy day, A policy) ≤ 115 s                            90.0 s (quiet day 76.6 s)
+    PASS  setup                            < 2 s                              0.00 s
+    PASS  scalar materializations          0                                  0
+    PASS  failed nets on panel             0                                  0
+    PASS  projected server residual        ≤ 0.33 s (D7 finals bound)         0.302 s (1.32× headroom vs the 0.4 s cliff)
+    PASS  full acceptance panel            fresh_a (or dev), n = 100          fresh_a, n = 100
+    PASS  paired vs incumbent              --baseline given                   estimator_k3_v85_sb2
+    FAIL  WSL RLIMIT_AS 8 GiB gate         PASS on candidate SHA256 (--mem)   NOT RUN
+
+  NOT ACCEPTED — gated or incomplete; not submittable
+
+  RESULTS.md row:
+  | 2026-10-13 | `estimator_k3_v86_d16.py` | `7453e9c4` | FRESH-A | 1.757096e-08 | 0.16370 | 23,891 | 78.593 s (local) → 76.6 s proj | 3076 MiB | **2.7026e-09** | PENDING | 1.0099× vs estimator_k3_v85_sb2 (Δ +2.840e-11, t95 [+2.645e-11, +3.036e-11]) | 100/100 |  |
+worker-q: ------------------------------------------------------------
+worker-q: job #2702 FAILED (exit code 2) at 2026-10-13T11:39:58.737310+00:00
