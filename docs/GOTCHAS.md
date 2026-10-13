@@ -1948,3 +1948,7 @@ back from there, or write to an absolute repo path (`C:\Users\samsu\Documents\ar
    CPUs AND holds every later job behind it, even ones that would fit. Submit wall A/Bs only when the queue is otherwise
    empty, or cancel and resubmit them. Fix an over-declared job in place with `workerq requests <id> --ram/--cpus`
    (sb2-era candidates peak ≈ 3 GiB per `ev.py` worker, not 7.5). Pass `--gpus 0` for CPU-only jobs (default is 1 GPU).
+5. **`linux_memory_gate.py --repeats 250` never runs the candidate with default flags:** the retaining lifecycle control
+   keeps `--lifecycle-control-mib` (96) per repeat, so 250 × 96 MiB ≈ 8 GiB trips the cap and the gate refuses. Pass
+   `--lifecycle-control-mib 16` (4 GB over 250 — still far above the 64 MB detection band). Also: a wrapper script around
+   a gate must exit non-zero when its child fails, or workerq reports SUCCEEDED for a run that never happened (Lane S #2727).
