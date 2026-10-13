@@ -1,9 +1,41 @@
-# CURRENT_STATE — 2026-10-11 (plan rev 23, Lane P6)
+# CURRENT_STATE — 2026-10-13 (plan rev 24, Lane P7)
+
+Plan rev 24 = `docs/research/2026-10-12_deep_review.md` §6 (on PLAN rev 18 §5 gates, with Samuel's Oct 12 decisions:
+same-shape `out=` allowed; ops gate becomes "projected residual ≤ 0.33 s at v85's measured per-op rate" once v85 is graded,
+≤ 26,000 until then). **Lane P6 and Lane M6 are COMPLETE.** Active lanes:
+- **P7** (main, this file's owner): `docs/HANDOFF_2026-10-12_LANE_P7.md` — integrate, refit, canary, harden. Builder `tools/build_v85.py`.
+- **S** (branch `lane-s`): `docs/HANDOFF_2026-10-12_LANE_S.md` — Strassen v2 (`sb2` → depth → variant C → tables on 64).
+- **K** (branch `lane-k`): `docs/HANDOFF_2026-10-12_LANE_K.md` — pruning v2 with analytic gain replacement (K0–K4, K5 optional).
+- **O** (branch `lane-m`, follows M6): `docs/HANDOFF_2026-10-12_LANE_O.md` — old tier and spend items.
+
+Best graded A: **v84_age6 2.849755454236018e-9 (#335562)**. B: v83_r5ws 2.9952e-9 (#335461); v83_r7ws submitted
+**#335688** (Oct 13 A/B slot, projected 2.9754e-9).
+
+**Oct 13 03:40 UTC — pods: pod 1 `acc7entl4kttqk` no longer exists (404; the account lists no pods).** Its `/workspace`
+(R-series refit setup) must be assumed lost. Pod 2 (P7.0d) and any replacement pod 1 need new pods + re-provisioning;
+waiting on Samuel's go (billable). R3–R8 outputs are local under `experiments/2026-10-11_p6/r*/`.
+
+# (history) CURRENT_STATE — 2026-10-11 (plan rev 23, Lane P6)
 
 Plan rev 23 = `docs/research/2026-10-10_evening_review.md` (§0, §2, §5, §6), on PLAN rev 18 §5 gates.
 **Lane P5 and Lane M5 are COMPLETE.** Active: Lane P6 (main) per `docs/HANDOFF_2026-10-11_LANE_P6.md`;
 Lane M6 (branch `lane-m`) per `docs/HANDOFF_2026-10-11_LANE_M6.md`. Exact pricing tool:
-`docs/research/2026-10-11_p6price/`. Next: P6.0b (merge lane-m), P6.0c (v82c_r1ws B slot), P6.0d (R2), P6.1 (v83).
+`docs/research/2026-10-11_p6price/`. **Oct 11 ~03:30 UTC:** lane-m merged (480dc74; ρ reproduces exactly). v82c_r2 (R2 refit, FRESH-A −0.46 % vs r1,
+96/100) submitted **#335298**, projected 3.0275e-9; v82c_r2ws (A/B slot) on FRESH-A. **P6.1 kink-active H CLOSED**
+(Hfull +65 % unrefit: always-on residual rows + S3 carry the chain; RESULTS § P6) → **v83 = v82c_r2 + fold**,
+R3 refit (`fold` vs `ctl`, from R2) on pod `acc7entl4kttqk` in `/workspace/p6/r3`, ETA ≈ 07:00 UTC; build with
+`tools/build_v83.py --variant fold`. Next: P6.3 per-shape depth (od12 −1.21 % F on fold) wall A/B
+(`tools/wall_ab.py`) + DEV raw check; P6.2 spend items as M6 evidence arrives.
+
+**Oct 12 15:15 UTC:** best graded **v84_age6 2.849755454236018e-9 (#335562)** (fold + age 6, R8 refit; no od16 — age6+od16
+fails A wall). B v83_r5ws 2.9952e-9 (#335461); v83_r7ws (1.0052× vs r5ws, all gates) packaged-ready for the Oct 13 A/B slot
+(build `experiments/2026-10-12_*`-style release from `estimator_k3_v83_r7ws.py`). Fold refit recipe exhausted. Pod stopped.
+Waiting on strategist: two-column H, use of the ~10 s A wall margin, P6.5. Packet: `docs/STRATEGIST_PACKET_2026-10-12.md`.
+
+**Oct 12 ~02:50 UTC:** best graded **v83_r5od16 2.908247724225528e-9 (#335455)**; B v82c_r2ws 3.1018e-9 (#335319),
+B candidate v83_r5ws #335461 grading. v83_r7od16 (final fold refit, R7) on FRESH-A vs r5od16. Fold refit recipe
+stopped (R6 −0.26 %, R7 −0.22 %). P6.1 H closed; P6.3 od16 shipped (A wall ≈ 101.9 s, 3 % margin). Pod stopped.
+Open: P6.2 spend items need M6 twin evidence; two-column-set H needs a strategist go/no-go.
 
 # (history) CURRENT_STATE — 2026-10-10 (plan rev 22, Lane P5)
 

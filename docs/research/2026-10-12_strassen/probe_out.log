@@ -1,0 +1,61 @@
+flopscope 0.12.1+np2.2.6
+numel = 144
+summary_dict keys: ['flop_budget', 'flops_used', 'flops_remaining', 'operations', 'wall_time_s', 'flopscope_backend_time_s', 'flopscope_overhead_time_s', 'residual_wall_time_s']
+OK   a + b                                                      flops=      144 ops={'add': (1, 144)}
+OK   fnp.empty((3,8,6),f32)                                     flops=        0 ops={'empty': (1, 0)}
+OK   fnp.zeros((3,8,6),f32)                                     flops=        0 ops={'zeros': (1, 0)}
+OK   (a) add(a,b,out=buf)                                       flops=      144 ops={'add': (1, 144)}
+     returns buf itself: True  equal: True
+OK   (b) add(a,b,out=big[3:6])  [batch-slice view]              flops=      144 ops={'add': (1, 144)}
+     read-back ok: True  rest zero: 0.0 0.0
+OK   (b) add(a,b,out=quad[:, :m, k:]) [non-contig quadrant]     flops=      144 ops={'add': (1, 144)}
+     read-back ok: True  others zero: 0.0 0.0
+OK   (b) add(a,b,out=quad[:, m:, :k]) second quadrant           flops=      144 ops={'add': (1, 144)}
+OK   (c) subtract(a,b,out=big[0:3])                             flops=      144 ops={'subtract': (1, 144)}
+     ok: True
+OK   (c) multiply(a,b,out=big[6:9])                             flops=      144 ops={'multiply': (1, 144)}
+     ok: True
+OK   (c) add(al, b, out=al)  [aliasing in-place]                flops=      144 ops={'add': (1, 144)}
+     ok: True
+OK       add(big[3:6], big[0:3]) reading written views          flops=      144 ops={'add': (1, 144)}
+     ok: True
+expected batched matmul 5*8*10*(2*6-1) = 4400
+OK   (d) A @ B batched                                          flops=     4400 ops={'matmul': (1, 4400)}
+OK   (d) matmul(A,B,out=mo[2:7])                                flops=     4400 ops={'matmul': (1, 4400)}
+     ok: True  rest zero: 0.0
+OK   (d) matmul(A,B,out=mq[:, 8:, :10]) quadrant view           flops=     4400 ops={'matmul': (1, 4400)}
+     ok: True
+expected 49*8*10*11 = 43120
+OK   (d) 4-D batch A4 @ B4 (7,7,8,6)@(7,7,6,10)                 flops=    43120 ops={'matmul': (1, 43120)}
+OK   (d) strided-view operands A4[:, :4] @ B4[:, :4]            flops=    24640 ops={'matmul': (1, 24640)}
+OK   (d) transposed-view operand A4.transpose(1,0,2,3) @ B4     flops=    43120 ops={'matmul': (1, 43120)}
+OK   (e) copyto(big[9:12], a)                                   flops=      144 ops={'copyto': (1, 144)}
+     ok: True
+OK   (e) add(a, 0, out=big[12:15])                              flops=      144 ops={'add': (1, 144)}
+OK   (e) positive(a, out=big[15:18])                            flops=      144 ops={'positive': (1, 144)}
+     ok: True
+OK   (e) concatenate([a,b],axis=0,out=big[0:6])                 flops=      288 ops={'concatenate': (1, 288)}
+OK   (e) stack([a,b],axis=0, out=view)                          flops=      288 ops={'zeros': (1, 0), 'stack': (1, 288)}
+FAIL     big[0:3] = a  (slice assignment)                       TypeError: flopscope arrays are immutable, so item assignment (arr[i] = ...) and indexed in-place updates (arr[i] += ...)
+FAIL     view += a                                              TypeError: in-place add (arr += x) is not supported; flopscope arrays are immutable. Use arr = fnp.add(arr, x) instead.
+OK       a[:, :4, :3] slice                                     flops=        0 ops={}
+OK       a[None]                                                flops=        0 ops={}
+OK       a[::-1] negative-step view                             flops=        0 ops={}
+OK       a.transpose(0,2,1)                                     flops=        0 ops={}
+OK       fnp.transpose(a,(0,2,1))                               flops=        0 ops={'transpose': (1, 0)}
+OK       fnp.swapaxes(a,1,2)                                    flops=        0 ops={'swapaxes': (1, 0)}
+OK       fnp.moveaxis(a,0,2)                                    flops=        0 ops={'moveaxis': (1, 0)}
+OK       a.reshape(3,2,4,6) method                              flops=      144 ops={'reshape': (1, 144)}
+OK       fnp.reshape(a,(3,2,4,6))                               flops=      144 ops={'reshape': (1, 144)}
+OK       a.view() / a.T                                         flops=        0 ops={}
+OK       fnp.expand_dims(a,0)                                   flops=        0 ops={'expand_dims': (1, 0)}
+OK       fnp.split(a,3,axis=0)                                  flops=        0 ops={'split': (1, 0)}
+OK       fnp.block([[q,q],[q,q]])                               flops=      576 ops={'block': (1, 576)}
+OK       fnp.broadcast_to(a,(2,3,8,6))                          flops=        0 ops={'broadcast_to': (1, 0)}
+FAIL     as_strided                                             AttributeError: flopscope.numpy does not provide 'lib'. See https://github.com/AIcrowd/flopscope for supported operations.
+OK       fnp.negative(a, out=big[18:21])                        flops=      144 ops={'negative': (1, 144)}
+OK       [#275] add(a[0], b[0], out=buf) out larger than inputs flops=       48 ops={'add': (1, 48)}
+FAIL     add(a,b,out=big[0:2]) wrong shape                      ValueError: operands could not be broadcast together with shapes (3,8,6) (3,8,6) (2,8,6) 
+OK       add(a,b,out=float64 buf)                               flops=      288 ops={'zeros': (1, 0), 'add': (1, 288)}
+OK       3-term: add(add(a,b),a,out=..)                         flops=      288 ops={'add': (2, 288)}
+type of big[3:6]: FlopscopeArray  writeable flag: True  base is big: True

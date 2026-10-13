@@ -23,7 +23,10 @@ The invariants, and why each is mechanical rather than prose:
 
   `whest submit`
       Outward-facing, consumes a daily slot, and a failed MLP scores as zeros.
-      Never without Samuel's explicit approval.
+      Since 2026-10-12 agents may submit freely while more than
+      SUBMIT_RESERVED_SLOTS of today's slots remain (per the ledger); the last
+      ones -- or any submit when the ledger cannot be read -- need Samuel's
+      approval.  Designating a final entry stays forbidden (AGENTS.md rule 3).
 
   `vault.py evaluate`
       Spends one of three permitted holdout evaluations and increments a counter
@@ -140,12 +143,15 @@ def _write_targets(command: str) -> list[str]:
 
 # --- irreversible commands ----------------------------------------------------
 
+# The last N daily slots are Samuel's: an agent submit asks once this few remain.
+SUBMIT_RESERVED_SLOTS = 3
+
 SUBMIT_REASON = (
-    "SUBMISSION. This is outward-facing and cannot be undone: it consumes a daily "
-    "submission slot and a failed MLP scores as zeros. Project rule: never submit "
-    "without Samuel's explicit approval, and only after `whest validate` plus a "
-    "clean mini run with n_failed_mlps=0. Confirm the file, the version, and that "
-    "Samuel has approved this specific submission."
+    "SUBMISSION INTO A RESERVED SLOT. Agents may submit freely only while more "
+    f"than {SUBMIT_RESERVED_SLOTS} of today's slots remain; the last "
+    f"{SUBMIT_RESERVED_SLOTS} (or any submit when the ledger cannot be read) need "
+    "Samuel's explicit approval. Confirm the file, the version, and that Samuel "
+    "has approved this specific submission."
 )
 
 VAULT_TOUCH_REASON = (
@@ -156,17 +162,17 @@ VAULT_TOUCH_REASON = (
     "measured, cancel."
 )
 
-def _slot_ledger_line() -> str:
-    """Today's slot usage, read from `experiments/submissions.jsonl`.
+def _slot_ledger() -> tuple[Optional[int], str]:
+    """(slots remaining today or None if unknown, one-line status).
 
-    Ten submissions per team per UTC day. On 2026-09-05 seven of them went to
-    one defect and the running count lived only in a chat transcript -- state
-    that `AGENTS.md` says must live in the repository, because the driving agent
-    changes and chat history does not transfer. Putting it in the confirmation
-    prompt puts it in front of whoever approves, at the moment they approve.
+    Read from `experiments/submissions.jsonl`. Ten submissions per team per UTC
+    day. On 2026-09-05 seven of them went to one defect and the running count
+    lived only in a chat transcript -- state that `AGENTS.md` says must live in
+    the repository, because the driving agent changes and chat history does not
+    transfer.
 
-    Never raises and never blocks: a guard that can fail closed on a missing
-    optional file is a worse guard than one that says it does not know.
+    Never raises: an unreadable or empty ledger reports None (unknown), and the
+    caller treats unknown as reserved -- it asks rather than assuming ten free.
     """
     try:
         here = os.path.dirname(os.path.abspath(__file__))
@@ -174,14 +180,18 @@ def _slot_ledger_line() -> str:
         if local_sim not in sys.path:
             sys.path.append(local_sim)
         import submission_ledger  # noqa: PLC0415
-        return "  " + submission_ledger.status_line()
+        line = "  " + submission_ledger.status_line()
+        if not submission_ledger.load():
+            return None, line
+        return submission_ledger.remaining(), line
     except Exception as exc:  # pragma: no cover - advisory only
-        return (f"  SLOT LEDGER unavailable ({type(exc).__name__}); slot usage "
-                f"is UNKNOWN, not zero.")
+        return None, (f"  SLOT LEDGER unavailable ({type(exc).__name__}); slot "
+                      f"usage is UNKNOWN, not zero.")
 
+
+SUBMIT_COMMAND = re.compile(r"whest\s+submit", re.IGNORECASE)
 
 CONFIRM_COMMANDS = [
-    ("submit", re.compile(r"whest\s+submit", re.IGNORECASE), SUBMIT_REASON),
     ("vault-touch", re.compile(r"vault\.py\s+evaluate", re.IGNORECASE), VAULT_TOUCH_REASON),
 ]
 
@@ -236,10 +246,13 @@ def check_command(command: str) -> Optional[Decision]:
                     rule,
                 )
 
+    if SUBMIT_COMMAND.search(command):
+        left, line = _slot_ledger()
+        if left is None or left <= SUBMIT_RESERVED_SLOTS:
+            return Decision(ASK, SUBMIT_REASON + chr(10) + line, "submit")
+
     for rule, pattern, reason in CONFIRM_COMMANDS:
         if pattern.search(command):
-            if rule == "submit":
-                reason = reason + chr(10) + _slot_ledger_line()
             return Decision(ASK, reason, rule)
     return None
 

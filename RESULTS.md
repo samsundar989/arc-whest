@@ -2911,3 +2911,140 @@ patience off (step 84: 1.915192e-08, not yet below R1's best).
 
 **v82c_r1 graded (#335253): 3.0464210089351763e-09, NEW BEST**, raw 1.8453827692610502e-08, 100 clean. −0.82 % vs v82b,
 −8.24 % vs v81d (−7.1 % vs v82a). +0.14 % vs the FRESH-A projection 3.0421e-09. `tools/ev.py --best-graded` updated.
+
+## P6 (Lane P6, plan rev 23) — 2026-10-11
+
+### P6.0 — merge, ρ check, R2
+lane-m merged (480dc74). Post-merge `compute_rho.py` on the FIT-100 `--mask-stats` control chain reproduces
+`experiments/2026-10-10_p5/d2/rho.json` exactly (max |Δρ| = 0; FIT raw 1.864088e-08 = P5's), so the hook survived.
+**R2** (v82b arm, 2 more epochs from R1, patience off): VAL-100 best **1.903403e-08** at step 224 vs R1 1.912189e-08
+= **−0.46 %** (≥ 0.3 % bar) → baked as `estimator_k3_v82c_r2.py` (`a648ba07`; ws `1c48dfb4`), constants only, same
+pipeline that rebuilds v82c_r1 byte for byte. Twin parity file↔arm DEV-100 **1.62e-4** (file 1.867381e-08, arm
+1.867683e-08). Predictions in `experiments/2026-10-11_p6/PREDICTIONS.md`.
+
+### P6.1 step 2 — unrefit VAL-100 screen (`experiments/2026-10-11_p6/screen/`), base = v82c_r2 constants
+Files = `price.py` variants rebuilt from v82c_r2 (meter = strategist table to the FLOP); arms = twin mask
+(`Hrank`, `Hfull=1`) with R2 params. File↔arm parity ≤ 0.016 % on every row.
+
+| variant | F/B | ΔF | VAL raw (file) | Δraw vs base | score Δ | strategist (raw) |
+|---|---:|---:|---:|---:|---:|---|
+| base (v82c_r2) | 0.16508 | — | 1.903319e-08 | — | — | |
+| fold | 0.16554 | +0.27 % | 1.883751e-08 | **−1.03 %** | **−0.76 %** | (M5: −1.23 % unrefit) |
+| fold+Habs (τ2.5 count, α²) | 0.15577 | −5.64 % | 3.152837e-08 | **+65.65 %** | +56.3 % | −1.3 % joint before refit tilt |
+| fold+Hasym2030 | 0.15362 | −6.95 % | 2.750591e-08 | +44.52 % | +34.5 % | better than Habs |
+| fold+Hasym2025 | 0.15062 | −8.76 % | 3.263140e-08 | +71.44 % | +56.4 % | +0.5 to +2 % vs Habs |
+| fold+Habs20 | 0.14555 | −11.83 % | 4.564756e-08 | +139.83 % | +111 % | +2 to +5 % vs Habs |
+| fold+Hd20 (dead-only, count keep τ2.0) | 0.15995 | −3.11 % | 1.995869e-08 | +4.86 % | +1.60 % | (salvage, worker) |
+| fold+Hd175 (dead-only, keep τ1.75) | 0.15663 | −5.12 % | 2.205051e-08 | +15.85 % | +9.9 % | |
+| fold+Hd15 (dead-only, keep τ1.5) | 0.15301 | −7.31 % | 2.718875e-08 | +42.85 % | +32.4 % | |
+
+**Decomposition (arms, vs the fold arm 1.884030e-08):** M5's threshold H2.5 literal (A_L/w2b/hubs off on
+|α| > 2.5; residual rows + S3 off on dead columns only) **+1.22 %**; the same + `Hfull=1` (residual rows + S3 off on
+every dropped column — what the estimator's single `_kh` gather ships) **+65.12 %**; Hd2.5 by threshold −0.10 %.
+→ **The P2 residual rows and S3 of the always-on columns carry the chain**; count vs threshold ranking is
+irrelevant (Habs +67.3 % ≈ lit+full +65.1 %). Every habs/hasym variant is **closed** as specified. Deeper dead-only
+cuts are not free either (τ2.0 +5.95 % vs fold, unrefit) — fail the marginal rule by ~3×; not refit.
+Shipping H-literal needs two column sets in the lineage (A_L/w2b/hubs on one, Lb/sb on another: today `_append`
+carries one `hcols`) — a structural change, handed to the strategist. **v83 = v82c_r2 + fold** (R3 `fold` arm).
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-11 | `estimator_k3_v82c_r2.py` | `a648ba07` | FRESH-A | 1.943554e-08 (floor-free 1.868790e-08; −0.46 % vs v82c_r1) | 0.16508 | 22,375 | same code as v82c_r1/v82b (constants only) | VmPeak 6,027 MiB (WSL PASS, same hash) | **3.0275e-09** | **3.032324364499572e-09** (#335298) | **1.0046× vs v82c_r1** (Δ +1.480e-11, t95 [+1.310e-11, +1.650e-11]) | 96/100 | R2 refit baked (`build_star --all` + `build_v82 --items 0,1,4,5,7`). Parity file↔arm DEV 1.62e-4. residual 0.248 s. Package `cf1b2464…8d03`, inner = source. First canary of UTC Oct 11. Predictions: worker −0.25 to −0.5 % raw, ≈ 3.03e-09; strategist none specific. |
+
+**v82c_r2 graded (#335298): 3.032324364499572e-09, NEW BEST**, raw 1.8368436656146515e-08, 100 clean. −0.46 % vs v82c_r1
+(raw −0.46 %, exactly the FRESH-A paired gain), −8.67 % vs v81d. +0.16 % vs the FRESH-A projection 3.0275e-09.
+`tools/ev.py --best-graded` updated.
+| 2026-10-11 | `estimator_k3_v82c_r2ws.py` | `1c48dfb4` | FRESH-A | 1.943451e-08 (floor-free 1.868686e-08) | 0.16895 | 20,269 | same code as v82b_ws (constants only): A/B 0.916 vs v81b_ws → ≈ 78 s noisy-implied (B ≤ 95 s) | VmPeak 6,022 MiB (WSL PASS, same hash) | **3.0983e-09** | **3.1017860563938384e-09** (#335319) | **1.0130× vs v82b_bundlews** (Δ +4.258e-11, t95 [+3.889e-11, +4.628e-11]) | 100/100 | P6.0c A/B slot. **Deviation:** r2ws instead of the handoff's r1ws (r2 dominates r1 by 0.46 % graded). "vs best graded" gate N/A for a B (as v82b_ws). residual 0.225 s. Package `6fc8de61…af2e`, inner = source. Predictions: worker ≈ 3.10e-09; strategist (r1ws) ≈ 3.12e-09. |
+
+**v82c_r2ws graded (#335319): 3.1017860563938384e-09, NEW wall-safe B**, raw 1.8358887210467854e-08, 100 clean. −1.32 % vs
+v82b_ws; +0.11 % vs the FRESH-A projection 3.0983e-09.
+
+### R3 (pod, P6.1 step 3) — 2 epochs from R2, lr 1e-4 cosine, VAL-100 every 28 steps, patience off
+| arm | init | step 140 | step 224 (best) | vs ctl, matched |
+|---|---:|---:|---:|---|
+| ctl (v82b arm, S2ts) | 1.903403e-08 | 1.906598e-08 | 1.892640e-08 | — |
+| fold (rec, τ2, S2tsf) | 1.884012e-08 | 1.853091e-08 | **1.851037e-08** | −2.81 % at 140; **−2.20 % at 224** (M5: −2.58 %) |
+| fold+Habs | 3.152721e-08 | killed at init (screen +65 %) | | |
+Baked as `estimator_k3_v83_fold.py` (`tools/build_v83.py --variant fold`, `c1adefbd`). R4 = fold continued 2 epochs (pod).
+
+### P6.3 — per-shape Strassen depth on the fold stack
+Wall A/B, DEV net 3, ×2 alternating (`tools/wall_ab.py`, `experiments/2026-10-11_p6/od_wall_ab.txt`): v82c_r2 41.21 s,
+fold 41.72 s (1.012), **od12 51.50 s (1.250 → ≈ 112.5 s noisy-implied: FAIL, closed)**, **od16 46.67 s (1.133 →
+≈ 101.9 s, passes A ≤ 105 s with 3 % margin)**. od16 DEV-100 paired vs fold: score 1.0065×, 98/100; raw
+1.854382e-08 vs 1.853757e-08 = **+0.034 %** (gate ±0.2 %) → buildable on v83 (−0.68 % F, ops 24,688). Not for B.
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-11 | `estimator_k3_v83_fold.py` | `c1adefbd` | FRESH-A | 1.888349e-08 (floor-free 1.813584e-08; −2.84 % vs v82c_r2) | 0.16554 | 22,618 | wall A/B DEV net 3 ×2: 1.012× v82c_r2 → ≈ 91 s noisy-implied (A ≤ 105 s) | VmPeak 6,148 MiB (WSL PASS run 2, same hash; run 1 failed only the settled-growth check at VmPeak 6,130) | **2.9462e-09** | **2.9483303409388216e-09** (#335365) | **1.0264× vs v82c_r2** (Δ +8.257e-11, t95 [+6.686e-11, +9.828e-11]) | 86/100 | v82c_r2 + M5.1 fold (rec, τ2) with the R3 fold-arm refit baked (`tools/build_v83.py --variant fold`; `_FOLD_GAIN` from gain__fg). Parity file↔arm DEV 3.2e-4 (pod). residual 0.251 s. Package `7ea8add2…b59b`, inner = source. Second canary of UTC Oct 11. Predictions: worker −2.3 to −2.8 % raw, ≈ 2.96–2.97e-09. |
+
+**R4** (fold arm continued 2 epochs from R3, same recipe): VAL-100 best **1.843113e-08** (step 224) vs R3 1.851037e-08 =
+**−0.43 %** (≥ 0.3 %) → `estimator_k3_v83_r4.py` (`9ce6745f`, constants only vs v83_fold). R5 (2 more epochs) on the pod.
+
+**v83_fold graded (#335365): 2.9483303409388216e-09, NEW BEST**, raw 1.781068188932977e-08, 100 clean. −2.77 % vs v82c_r2
+(raw −3.04 %), −11.2 % vs v81d. +0.07 % vs the FRESH-A projection 2.9462e-09. `tools/ev.py --best-graded` updated.
+| 2026-10-11 | `estimator_k3_v83_od16.py` | `776b2bc2` | FRESH-A | 1.889759e-08 (+0.075 % vs v83_fold) | 0.16441 | 24,688 | wall A/B 1.133× v82c_r2 → ≈ 101.9 s noisy-implied (A ≤ 105 s, thin) | VmPeak 6,120 MiB (WSL PASS, same hash) | **2.9285e-09** | — (not submitted; folded into v83_r4od16) | **1.0061× vs v83_fold** (Δ +1.888e-11, t95 [+1.718e-11, +2.057e-11]) | 99/100 | P6.3 od16 on v83_fold (R3 constants). |
+
+v83_r4 parity file↔arm DEV (pod) 1.811849e-08 vs 1.811565e-08 = **1.6e-4**. `estimator_k3_v83_r4od16.py` (`e20cf029`) =
+R4 constants + od16 (the od16 patch is byte-identical on r4) → FRESH-A paired vs graded v83_fold.
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-11 | `estimator_k3_v83_r4od16.py` | `e20cf029` | FRESH-A | 1.881760e-08 (−0.35 % vs v83_fold) | 0.16441 | 24,688 | od16 wall A/B 1.133× v82c_r2 → ≈ 101.9 s noisy-implied (A ≤ 105 s; thin, A only) | VmPeak 6,129 MiB (WSL PASS, same hash) | **2.9156e-09** | **2.91912543907686e-09** (#335407) | **1.0104× vs v83_fold** (Δ +3.203e-11, t95 [+2.907e-11, +3.499e-11]) | 97/100 | R4 constants + P6.3 od16 (`build_v83.py --variant fold+od16`). Parity file↔R4 arm DEV 2.2e-4 (pod). Package `2acf861b…9d61`, inner = source. Third canary of UTC Oct 11. Predictions: worker ≈ 2.92e-09 (−1.0 % score). |
+
+**v83_r4od16 graded (#335407): 2.91912543907686e-09, NEW BEST**, raw 1.7754640353473407e-08, 100 clean. −0.99 % vs v83_fold
+(raw −0.32 %), −12.1 % vs v81d. +0.12 % vs the FRESH-A projection 2.9156e-09. `tools/ev.py --best-graded` updated.
+
+**R5** (fold continued 2 epochs from R4): VAL-100 best **1.836956e-08** (step 224) vs R4 1.843113e-08 = **−0.33 %** (≥ 0.3 %).
+
+R5 parity file↔arm DEV (pod, `estimator_k3_v83_r5od16.py` vs R5 arm): 1.805451e-08 vs 1.804997e-08 = **2.5e-4**.
+| 2026-10-11 | `estimator_k3_v83_r5ws.py` | `b9e64076` | FRESH-A | 1.874278e-08 (−3.56 % vs v82c_r2ws) | 0.16941 | 20,512 | wall A/B 1.0028× v82c_r2ws (r4ws, same code) → ≈ 78 s noisy-implied (B ≤ 95 s) | VmPeak 6,127 MiB (WSL PASS, same hash) | **2.9917e-09** | **2.9952404444999084e-09** (#335461, Oct 12 A/B slot; `355f6c65…a675`, inner = source) | **1.0341× vs v82c_r2ws** (Δ +1.084e-10, t95 [+9.180e-11, +1.249e-10]) | 90/100 | B twin of the v83 line: fold + R5 constants at block 40 (no od16 for B). "vs best graded" N/A for B. Prediction (worker) 1.036×, ≈ 2.99e-09. v83_r4ws FRESH-A was stopped part-way (superseded). |
+| 2026-10-11 | `estimator_k3_v83_r5od16.py` | `1d19eb78` | FRESH-A | 1.874828e-08 (−0.37 % vs v83_r4od16) | 0.16441 | 24,688 | constants only vs r4od16 → ≈ 101.9 s noisy-implied | VmPeak 6,132 MiB (WSL PASS, same hash) | **2.9044e-09** | **2.908247724225528e-09** (#335455) | **1.0037× vs v83_r4od16** (Δ +1.140e-11, t95 [+8.79e-12, +1.401e-11]) | 82/100 | R5 constants (VAL −0.33 % vs R4). Parity 2.5e-4. First FRESH-A attempt died silently (no process, partial log); rerun clean. Package `b7e7cc68…99ce`, inner = source. Fourth canary of UTC Oct 11. Prediction (worker) raw −0.2 to −0.35 %. |
+
+**R6** (fold continued from R5): VAL-100 best **1.832094e-08** (224) vs R5 1.836956e-08 = **−0.26 %** (< 0.3 %: first sub-bar restart).
+R7 (last allowed by the restart rule) running on the pod.
+
+**v83_r5od16 graded (#335455): 2.908247724225528e-09, NEW BEST**, raw 1.7688480156152764e-08, 100 clean. −0.37 % vs v83_r4od16;
++0.13 % vs the FRESH-A projection 2.9044e-09. `tools/ev.py --best-graded` updated. v83_r5ws submitted #335461 (Oct 12 A/B slot).
+
+**R7** (fold continued from R6): VAL-100 best **1.828031e-08** vs R6 1.832094e-08 = **−0.22 %**. Second consecutive restart
+< 0.3 % → **the fold refit recipe is stopped** (P6.4 rule). R3→R7 cumulative on VAL: 1.851037 → 1.828031e-08 (−1.24 %).
+Built `estimator_k3_v83_r7od16.py` (`852ccf04`) and `estimator_k3_v83_r7ws.py` (`0f52db6f`). Parity file↔R7 arm DEV (pod)
+1.796417e-08 vs 1.795150e-08 = **7.1e-4** (passes ≤ 1e-3 but 3× the R3–R5 values; watch the graded/projected ratio).
+Pod `acc7entl4kttqk` **stopped** (Oct 12 ~02:50 UTC; nothing queued; R3–R7 outputs pulled to `experiments/2026-10-11_p6/r*/`).
+
+**v83_r5ws graded (#335461): 2.9952404444999084e-09, NEW wall-safe B**, raw 1.7680776629447338e-08, 100 clean. −3.43 % vs v82c_r2ws;
++0.12 % vs the FRESH-A projection 2.9917e-09.
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-12 | `estimator_k3_v83_r7od16.py` | `852ccf04` | FRESH-A | 1.865898e-08 (−0.48 % vs v83_r5od16) | 0.16441 | 24,688 | constants only → ≈ 101.9 s noisy-implied | VmPeak 6,135 MiB (WSL PASS, same hash) | **2.8900e-09** | **2.8941891502782363e-09** (#335484) | **1.0048× vs v83_r5od16** (Δ +1.468e-11, t95 [+1.167e-11, +1.770e-11]) | 81/100 | R7 constants (final fold refit; recipe stopped). Parity 7.1e-4. Package `eecbdea4…dcb2`, inner = source. First canary of UTC Oct 12. Prediction (worker) −0.3 to −0.5 % raw, ≈ 2.895e-09. |
+
+### P6.2 — age 6 (Lane M6 hand-over `experiments/2026-10-11_m6/HANDOVER_M6_age6.md`, on lane-m)
+M6: refit 1 epoch from R3 fold vs matched ctl **−6.07 %** raw (99/100), +4.83 % F → net −1.54 %; VmPeak +400–670 MB; wall
+unmeasured. Exact prices on the v83 stack: fold+age6 F/B 0.17354 (22,113 ops); **fold+age6+od16 0.17251** (24,075 ops;
++4.93 % F vs v83_r7od16); fold+age6+od12 0.17148. **R8** (pod): age6 vs matched ctl, 1 epoch each from R7.
+
+**v83_r7od16 graded (#335484): 2.8941891502782363e-09, NEW BEST**, raw 1.7602973407804257e-08, 100 clean. −0.48 % vs v83_r5od16;
++0.14 % vs the FRESH-A projection 2.8900e-09 (the 7.1e-4 parity did not show up in the grade). `--best-graded` updated.
+
+| 2026-10-12 | `estimator_k3_v83_r7ws.py` | `0f52db6f` | FRESH-A | 1.864502e-08 | 0.16941 | 20,512 | constants only vs r5ws (≈ 78 s) | VmPeak 6,138 MiB (WSL PASS) | **2.9754e-09** | held for the Oct 13 A/B slot | **1.0052× vs v83_r5ws** (Δ +1.656e-11, t95 [+1.409e-11, +1.903e-11]) | 90/100 | R7 constants at block 40. |
+
+**P6.2 wall A/B** (DEV net 3, ×2, `experiments/2026-10-11_p6/age6_wall_ab.txt`; scaled to r7od16 ≈ 101.9 s noisy-implied):
+fold+age6 **0.931× → ≈ 94.9 s (A ok)**; fold+age6+od16 **1.033× → ≈ 105.3 s (A FAIL)**; age6 ws vs r7ws **1.055× → ≈ 82 s
+(B ok)**. → v84 = fold + age6 (no od16): +5.55 % F vs v83_r7od16, needs ≥ −5.3 % raw. R8 unrefit from R7: age6 1.716054e-08 vs
+ctl 1.828031e-08 = −6.13 %.
+
+**P6.2 memory (WSL RLIMIT_AS 8 GiB):** fold+age6 (A) **PASS**, 5 repeats, VmPeak 6,773 MB, settled +47 MB. age6 ws (B, block 40):
+5 repeats FAIL on the settled-growth check (+476 MB, VmPeak 6,809 MiB); 15 repeats +172 MB total, VmPeak 6,917 MB (1.18×) —
+non-monotone (allocator steps, not a per-predict leak) but the check still FAILs → **B stays age-free (v83_r7ws)**; age6 is an
+A-only lever. `experiments/2026-10-11_p6/mem_wall_age6*.{json,log}`. R8 at step 56: age6 1.721218e-08 vs ctl 1.833626e-08 (−6.13 %).
+
+**R8** (P6.2, 1 epoch from R7, matched): age6 **1.716023e-08** vs ctl 1.828454e-08 = **−6.15 %** (ctl +0.02 % vs R7: polish is
+exhausted). Built `estimator_k3_v84_age6.py` (`c1b098c0`, `build_v83.py --variant fold+age6`, F/B 0.17354, 22,113 ops).
+Parity file↔arm DEV (pod) 1.682262e-08 vs 1.682542e-08 = **1.7e-4**. FRESH-A vs v83_r7od16 running. Pod stopped again (~07:45 UTC).
+
+| 2026-10-12 | `estimator_k3_v84_age6.py` | `c1b098c0` | FRESH-A | 1.756928e-08 (−5.84 % vs v83_r7od16) | 0.17354 | 22,113 | wall A/B 0.931× r7od16 → ≈ 94.9 s noisy-implied (more margin than v83) | VmPeak 6,768 MiB (WSL PASS; 5-repeat lifecycle PASS) | **2.8648e-09** | **2.849755454236018e-09** (#335562) | **1.0062× vs v83_r7od16** (Δ +1.888e-11, t95 [+1.60e-12, +3.62e-11]) | **53/100** | P6.2 age 6 (M6 hand-over) on the fold stack, R8 refit; od16 dropped (age6+od16 fails wall at ≈ 105.3 s). Net gain is real on average but per-net it is a coin flip (raw −5.8 % vs F +5.55 %). Ran single-worker (12 GiB/worker budget). Parity 1.7e-4. Package `c656b74d…4232`, inner = source. Second canary of UTC Oct 12. Prediction (worker) ≈ 2.86–2.87e-09. |
+
+**v84_age6 graded (#335562): 2.849755454236018e-09, NEW BEST**, raw 1.642151991276819e-08, 100 clean. −1.54 % vs v83_r7od16
+(graded raw −6.71 %, vs FRESH-A −5.84 %); **−0.53 % vs the FRESH-A projection** 2.8648e-09 (first graded row below projection
+since the calibration; recheck the ÷1.019 constant if the next one repeats it). −14.2 % vs v81d. `--best-graded` updated.

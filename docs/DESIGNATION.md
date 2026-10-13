@@ -7,7 +7,20 @@
 | **A (recommended)** | `estimator_k3_v82c_r1.py` | `66f3ee4a` | #335253 | **3.0464210089351763e-9** | 1.8454e-8 | 0.16508 | same code as v82b (constants only): A/B 0.953 vs v82a; law 76.5 / 90.0 s | 6,024 MiB |
 | **B (recommended)** | `estimator_k3_v82b_bundlews.py` | `7148e22a` | #335250 | **3.1432860023588976e-9** | 1.8605e-8 | 0.16895 | A/B 0.916 vs v81b_ws → ≈ 78 s noisy-implied | 6,017 MiB |
 
-B stays v82b_ws until the ws twin of the current A grades (P6.0c A/B slot). In flight: v82c_r2 (R2 refit, VAL −0.46 %
+**Update 03:10 UTC: v82c_r2 graded 3.032324364499572e-9 (#335298) and is now the recommended A** (`a648ba07`,
+constants only vs v82c_r1; VmPeak 6,027 MiB). **Update Oct 12 15:15 UTC: v84_age6 graded 2.849755454236018e-9 (#335562) and is now the recommended A** (`c1b098c0`,
+VmPeak 6,768 MiB, ≈ 94.9 s noisy-implied). B: v83_r5ws #335461 (2.9952e-9); v83_r7ws gated for the Oct 13 A/B slot.
+**Update Oct 12 05:30 UTC: v83_r7od16 graded 2.8941891502782363e-9 (#335484) and is now the recommended A** (`852ccf04`,
+VmPeak 6,135 MiB, ≈ 101.9 s noisy-implied).
+**Update Oct 12 02:30 UTC: v83_r5od16 graded 2.908247724225528e-9 (#335455) and is now the recommended A** (`1d19eb78`,
+VmPeak 6,132 MiB, wall ≈ 101.9 s noisy-implied). **B: v83_r5ws graded 2.9952404444999084e-9 (#335461) and is now the recommended B** (`b9e64076`, VmPeak 6,127 MiB,
+≈ 78 s noisy-implied).
+**Update Oct 11 19:05 UTC: v83_r4od16 graded 2.91912543907686e-9 (#335407) and is now the recommended A** (`e20cf029`,
+VmPeak 6,129 MiB; wall ≈ 101.9 s noisy-implied, inside A ≤ 105 s but the thinnest margin we have shipped — B covers it).
+**Update 13:20 UTC: v83_fold graded 2.9483303409388216e-9 (#335365) and is now the recommended A** (`c1adefbd`,
+VmPeak 6,148 MiB, wall 1.012× v82c_r2 ≈ 91 s noisy-implied). Its ws twin is not yet built; B stays v82c_r2ws.
+**B: v82c_r2ws graded 3.1017860563938384e-9 (#335319) and is now the recommended B** (`1c48dfb4`, VmPeak 6,022 MiB,
+≈ 78 s noisy-implied). In flight: v82c_r2 (R2 refit, VAL −0.46 %
 vs R1, constants only) on FRESH-A paired vs v82c_r1. **Samuel designates.**
 
 ## Recommendation — 2026-10-10 evening (Lane P5; no nomination/designation made)

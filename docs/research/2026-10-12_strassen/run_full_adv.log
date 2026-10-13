@@ -1,0 +1,4 @@
+
+=== (1024,832)@(832,10592)  dense=18037243904  plain f32 rel.err=3.67e-07
+ d=5 ks    flops=    9669108978 frac_dense=0.5361 glue=   590102034 ( 6.1%) ops= 111 relerr=1.32e-05 ( 35.9x) wall=  0.31s MODEL=METER
+ d=5 fused flops=    9748669840 frac_dense=0.5405 glue=   669662896 ( 6.9%) ops= 111 relerr=1.34e-05 ( 36.6x) wall=  0.49s MODEL=METER

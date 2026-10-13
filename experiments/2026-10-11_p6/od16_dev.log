@@ -1,0 +1,34 @@
+[ev] est_fold_od16.py on DEV n=100
+[ev] cost: 361,551,945,041 FLOPs, 24,688 ops, peak RSS 4.20 GiB -> budget 10.5 GiB/worker
+  [mem] 30.6 GiB free, 10.5 GiB per worker -> 2 workers, not 4
+  2 workers x 2 BLAS threads over 100 nets ...
+[ev] accuracy: 3418.0 s, raw MSE 1.854382e-08
+  [mem] 25.0 GiB free, 10.5 GiB per worker -> 1 workers, not 4
+  1 workers x 2 BLAS threads over 100 nets ...
+
+  raw MSE            1.854382e-08   (label noise floor at layer 16 ~7.7e-11)
+  FLOPs / MLP        361,551,945,041   = 0.16441 x 2^41
+  op calls           24,688
+  materializations   0
+  adjusted (panel)   3.048878e-09
+  per-net score CV   0.135
+  PROJECTED PUBLIC   2.937262e-09   (÷ 1.038)
+  paired vs est_fold:  gain 1.0065×, Δ +1.9762e-11, t95 [+1.7753e-11, +2.1771e-11], wins 98/100
+    (geometric 1.0064× — diagnostic only, no authority over an outcome)
+
+  PLAN §5 gates
+    PASS  panel projected vs best graded   better than 3.0323e-09             2.9373e-09 = 3.13% better
+    PASS  op calls                         ≤ 26,000                           24,688
+    ok    projected server wall (noisy day, A policy) ≤ 115 s                            90.7 s (quiet day 77.2 s)
+    PASS  setup                            < 2 s                              0.00 s
+    PASS  scalar materializations          0                                  0
+    PASS  failed nets on panel             0                                  0
+    PASS  projected server residual        ≤ 0.33 s (D7 finals bound)         0.274 s (1.46× headroom vs the 0.4 s cliff)
+    PASS  full acceptance panel            fresh_a (or dev), n = 100          dev, n = 100
+    PASS  paired vs incumbent              --baseline given                   est_fold
+    FAIL  WSL RLIMIT_AS 8 GiB gate         PASS on candidate SHA256 (--mem)   NOT RUN
+
+  NOT ACCEPTED — gated or incomplete; not submittable
+
+  RESULTS.md row:
+  | 2026-10-11 | `est_fold_od16.py` | `f8d59d18` | DEV | 1.854382e-08 | 0.16441 | 24,688 | 46.480 s (local) → 77.2 s proj | 4296 MiB | **2.9373e-09** | PENDING | 1.0065× vs est_fold (Δ +1.976e-11, t95 [+1.775e-11, +2.177e-11]) | 98/100 |  |

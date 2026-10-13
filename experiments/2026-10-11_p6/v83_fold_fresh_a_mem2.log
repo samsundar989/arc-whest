@@ -1,0 +1,31 @@
+[ev] estimator_k3_v83_fold.py on FRESH_A n=100
+[ev] cost: 364,020,145,441 FLOPs, 22,618 ops, peak RSS 4.19 GiB -> budget 10.5 GiB/worker
+[ev] accuracy: cache hit, raw MSE 1.888349e-08
+
+  raw MSE            1.888349e-08   (our N = 1e8 labels; mean floor 7.476e-10)
+  raw MSE floor-free 1.813584e-08
+  FLOPs / MLP        364,020,145,441   = 0.16554 x 2^41
+  op calls           22,618
+  materializations   0
+  adjusted (panel)   3.002156e-09
+  per-net score CV   0.123
+  PROJECTED PUBLIC   2.946178e-09   (÷ 1.019)
+  paired vs estimator_k3_v82c_r2:  gain 1.0264×, Δ +8.2567e-11, t95 [+6.6857e-11, +9.8277e-11], wins 86/100
+    (geometric 1.0265× — diagnostic only, no authority over an outcome)
+
+  PLAN §5 gates
+    PASS  panel projected vs best graded   better than 3.0323e-09             2.9462e-09 = 2.84% better
+    PASS  op calls                         ≤ 26,000                           22,618
+    ok    projected server wall (noisy day, A policy) ≤ 115 s                            90.3 s (quiet day 76.8 s)
+    PASS  setup                            < 2 s                              0.00 s
+    PASS  scalar materializations          0                                  0
+    PASS  failed nets on panel             0                                  0
+    PASS  projected server residual        ≤ 0.33 s (D7 finals bound)         0.251 s (1.60× headroom vs the 0.4 s cliff)
+    PASS  full acceptance panel            fresh_a (or dev), n = 100          fresh_a, n = 100
+    PASS  paired vs incumbent              --baseline given                   estimator_k3_v82c_r2
+    PASS  WSL RLIMIT_AS 8 GiB gate         PASS on candidate SHA256 (--mem)   PASS VmPeak 6148 MiB; source hash matches
+
+  ALL CHECKABLE GATES PASS (PLAN rev 15 §5 items 3-7) — still needs validate, parity, manual PLAN §5.8 wall evidence, validate-package + source hash, ledger
+
+  RESULTS.md row:
+  | 2026-10-11 | `estimator_k3_v83_fold.py` | `c1adefbd` | FRESH-A | 1.888349e-08 | 0.16554 | 22,618 | 45.760 s (local) → 76.8 s proj | 4295 MiB | **2.9462e-09** | PENDING | 1.0264× vs estimator_k3_v82c_r2 (Δ +8.257e-11, t95 [+6.686e-11, +9.828e-11]) | 86/100 |  |

@@ -1,0 +1,14 @@
+
+=== (1024,1024)@(1024,1024)  dense=2146435072  plain f32 rel.err=3.41e-07
+ d=4 ref   flops=    1345626112 frac_dense=0.6269 glue=    96645120 ( 7.2%) ops=  73 relerr=7.26e-06 ( 21.3x) wall=  0.06s MODEL=METER
+ d=4 out   flops=    1310482432 frac_dense=0.6105 glue=    61501440 ( 4.7%) ops=  86 relerr=7.26e-06 ( 21.3x) wall=  0.04s MODEL=METER
+ d=4 fused flops=    1302052864 frac_dense=0.6066 glue=    53071872 ( 4.1%) ops=  90 relerr=7.26e-06 ( 21.3x) wall=  0.04s MODEL=METER
+ d=4 ks    flops=    1299329024 frac_dense=0.6053 glue=    50348032 ( 3.9%) ops=  91 relerr=7.20e-06 ( 21.1x) wall=  0.03s MODEL=METER
+ d=5 ref   flops=    1262032896 frac_dense=0.5880 glue=   177779712 (14.1%) ops=  91 relerr=1.43e-05 ( 42.0x) wall=  0.10s MODEL=METER
+ d=5 out   flops=    1197385728 frac_dense=0.5578 glue=   113132544 ( 9.4%) ops= 107 relerr=1.43e-05 ( 42.0x) wall=  0.09s MODEL=METER
+ d=5 fused flops=    1182633984 frac_dense=0.5510 glue=    98380800 ( 8.3%) ops= 111 relerr=1.43e-05 ( 42.0x) wall=  0.08s MODEL=METER
+ d=5 ks    flops=    1166201856 frac_dense=0.5433 glue=    81948672 ( 7.0%) ops= 111 relerr=1.41e-05 ( 41.4x) wall=  0.06s MODEL=METER
+ d=6 ref   flops=    1253427712 frac_dense=0.5840 glue=   319765248 (25.5%) ops= 109 relerr=2.91e-05 ( 85.2x) wall=  1.33s MODEL=METER
+ d=6 out   flops=    1137149440 frac_dense=0.5298 glue=   203486976 (17.9%) ops= 128 relerr=2.91e-05 ( 85.2x) wall=  0.18s MODEL=METER
+ d=6 fused flops=    1111333888 frac_dense=0.5178 glue=   177671424 (16.0%) ops= 132 relerr=2.91e-05 ( 85.2x) wall=  0.18s MODEL=METER
+ d=6 ks    flops=    1069339392 frac_dense=0.4982 glue=   135676928 (12.7%) ops= 131 relerr=2.83e-05 ( 83.0x) wall=  0.10s MODEL=METER
