@@ -185,7 +185,10 @@ def projected_server_wall_s(flops: float, ops: float, cls: tuple = (32, True),
 #: The rate FALLS as ops rise and is not even monotone between F21 and v31, so it
 #: is a mix-dependent cost and three points do not define a line. Quote the WORST
 #: rate: the cliff FAILS the MLP outright, so over-projecting is free.
-US_PER_OP = (0.236255e6 / 23421, 0.156232e6 / 14091)
+#:     v85  24,576 ops -> 0.310586 s   12.638 us/op worst (0.288644 s mean, 11.745 us/op), #335697,
+#:     2026-10-13: Strassen v2's pooled out= calls cost MORE residual per call. It is the worst rate
+#:     on record and now the one quoted.
+US_PER_OP = (0.236255e6 / 23421, 0.310586e6 / 24576)
 
 #: The per-MLP residual cliff. Exceeding it FAILS the MLP, which scores it as
 #: zeros -- about 0.9 against a good score of 6e-9. There is no partial credit.
@@ -204,7 +207,9 @@ RESIDUAL_GATE_S = 0.33
 #: 1.39x headroom against the cliff and inside D7's 0.33 s bound. At C10's own
 #: measured rate it is 0.262 s. The residual gate above is the binding
 #: constraint; this ceiling is the cheap proxy that catches a regression early.
-OP_CEILING = 26_000
+#: 2026-10-13 (Samuel's decision 3, plan rev 24): the ceiling is now derived from the residual
+#: gate at the worst measured rate -- 0.33 s / 12.638 us = 26,111 -> 26,100.
+OP_CEILING = 26_100
 
 #: Prediction workers. Bounded by free RAM: one worker holds ~3.8 GiB of chain
 #: at width 1024, and this box has 16 logical / 8 physical cores but only ~30
@@ -619,18 +624,23 @@ def _fmt(x, spec=".4g"):
     return "—" if x is None or (isinstance(x, float) and math.isnan(x)) else format(x, spec)
 
 
+def _int_or_dash(x) -> str:
+    """`--no-cost` leaves ops/materializations NaN; format them instead of crashing."""
+    return "—" if x is None or (isinstance(x, float) and math.isnan(x)) else f"{int(x):,}"
+
+
 def results_row(r: Dict) -> str:
     p = r["paired"]
     gain = (f"{p['arithmetic_gain']:.4f}× vs {r['baseline_name']} "
             f"(Δ {p['mean_difference']:+.3e}, t95 [{p['t95_lo']:+.3e}, {p['t95_hi']:+.3e}])"
             if p else "—")
     wins = f"{p['wins']}/{p['n']}" if p else "—"
-    return ("| {date} | `{file}` | `{sha8}` | {panel} | {raw:.6e} | {fb:.5f} | {ops:,} | "
+    return ("| {date} | `{file}` | `{sha8}` | {panel} | {raw:.6e} | {fb:.5f} | {ops} | "
             "{wall:.3f} s (local) → {swall:.1f} s proj | {rss} | **{proj:.4e}** | {graded} | "
             "{gain} | {wins} | {note} |").format(
         date=r["date"], file=r["file"], sha8=r["sha8"],
         panel=r.get("panel_label") or r["panel"].upper(),
-        raw=r["raw_mse"], fb=r["multiplier"], ops=int(r["ops"]),
+        raw=r["raw_mse"], fb=r["multiplier"], ops=_int_or_dash(r["ops"]),
         wall=r["worst_wall_local_s"], swall=r["projected_server_wall_s"],
         rss=(f"{r['peak_rss_mib']:.0f} MiB" if r.get("peak_rss_mib") else "—"),
         proj=r["projected_public"], graded=r.get("graded", "PENDING"),
@@ -650,7 +660,7 @@ def gate_table(r: Dict, best_graded: float) -> List[tuple]:
         # over the best graded score qualifies; the 3% margin is retired.
         ("panel projected vs best graded", f"better than {best_graded:.4e}",
          f"{proj:.4e} = {better * 100:.2f}% better", better > 0.0),
-        ("op calls", f"≤ {OP_CEILING:,}", f"{int(r['ops']):,}", r["ops"] <= OP_CEILING),
+        ("op calls", f"≤ {OP_CEILING:,}", _int_or_dash(r["ops"]), r["ops"] <= OP_CEILING),
         # This absolute wall model is advisory only. PLAN rev 15 §5.8 also
         # requires manual code-path/parent evidence: data-only A <= ~115 s,
         # new-code-path A <= 105 s, B <= 95 s. This row cannot certify that.
@@ -659,7 +669,7 @@ def gate_table(r: Dict, best_graded: float) -> List[tuple]:
          f"{r['projected_server_wall_s']:.1f} s)",
          r.get("projected_server_wall_noisy_s", float("nan")) <= 115),
         ("setup", "< 2 s", f"{r['setup_s']:.2f} s", r["setup_s"] < 2.0),
-        ("scalar materializations", "0", f"{int(r['materializations'])}",
+        ("scalar materializations", "0", _int_or_dash(r["materializations"]),
          r["materializations"] == 0),
         ("failed nets on panel", "0", f"{len(r['failed_nets'])}", not r["failed_nets"]),
         # A REAL GATE, not advisory. The cliff FAILS the MLP outright and a
