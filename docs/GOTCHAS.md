@@ -1944,3 +1944,7 @@ back from there, or write to an absolute repo path (`C:\Users\samsu\Documents\ar
 2. **RunPod pods can disappear.** `acc7entl4kttqk` and every other pod on the account were gone on Oct 13 (404).
    Never keep the only copy of a result on a pod: pull outputs before stopping. Current pods: `docs/CURRENT_STATE.md`.
 3. A tar made on Windows exits non-zero on the pod (chown warnings) even though it extracted: use `--no-same-owner`.
+4. **workerq is head-of-line within a priority:** a job declaring many `--cpus` (a quiet-box wall A/B) waits for the
+   CPUs AND holds every later job behind it, even ones that would fit. Submit wall A/Bs only when the queue is otherwise
+   empty, or cancel and resubmit them. Fix an over-declared job in place with `workerq requests <id> --ram/--cpus`
+   (sb2-era candidates peak ≈ 3 GiB per `ev.py` worker, not 7.5). Pass `--gpus 0` for CPU-only jobs (default is 1 GPU).
