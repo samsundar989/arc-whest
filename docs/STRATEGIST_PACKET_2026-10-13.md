@@ -42,3 +42,16 @@ K (arc-whest-52), O (arc-whest-43) ran in parallel all day; this packet is the i
 ## Next (Lane P)
 v87 grading → telemetry (wall/residual) → recalibrate the ×1.042 factor. B: v87 twin gates + FRESH-A, Oct 14 A/B slot.
 K: K4/K5 screens (Lane K). v88 = whichever of K4/K5 passes + any refit polish.
+
+## Addendum (late Oct 13) — memory grows per prediction inside flopscope (Lane S, lane-s `experiments/2026-10-13_s/probe_opgrowth.*`)
+- Settled VmSize grows **≈ +14 MB per predict in one process**, every build incl. pre-sb2 (v84 +11.5, r7ws +10.5, r7od16 +13.5).
+  Cause: flopscope's module-level `_accumulator` (`_budget.py:2266`) keeps every exited BudgetContext's op log (~404 B/op call,
+  ≈ 9.4 MB of the 14.2 at ~23k ops). The estimator must not call `budget_reset()` (it also rebases the grader's live meter).
+- v87's B twin hit the 8 GiB cap at predict 244/250 ⇒ PLAN's B gate "VmPeak ≤ 7,800 MiB at 250 predicts" is unmeetable at this size.
+- **Rerun risk (decision-relevant):** whestbench's subprocess_worker loops over stdin and never resets the accumulator, so a worker
+  that serves N MLPs carries ≈ N × 14 MB. 100/100 graded runs pass today; if the private rerun pushes many more MLPs through one
+  worker, every ~23k-op entry (ours and the leaders') nears the cap around N ≈ 180–200. Fewer ops per predict is our only lever.
+- Interim B memory gate (worker, conservative): VmPeak at 100 predicts ≤ 7,200 MiB (12 % margin) **and** ≈ 0 MB/predict
+  candidate retention measured with the accumulator cleared in the harness only.
+**Decision for Samuel:** (1) adopt the interim gate (or another); (2) whether to ask the organizers how many MLPs a rerun worker
+serves — agents may not contact them (AGENTS rule 3); Rules §5.5 lets a participant rely on a written answer.
