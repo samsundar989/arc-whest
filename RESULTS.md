@@ -3129,3 +3129,8 @@ kernel mean 65.33 s (v85 58.52); overhead 9.92 s; residual mean 0.2918 s, max 0.
 server than the local A/B shows** (it is all kernel time: 1.117×). Rule from now on: noisy-implied = 67.69 s × A/B(vs sb2) × 1.042 × 1.24.
 **v87 depth decision:** stack B + depth8 (A/B 1.206×) ⇒ 105.5 s > 105 **FAIL**; stack B + **d12c6** (1.070×) ⇒ 93.6 s **PASS** (F/B
 0.14422, 24,371 ops); depth16 (1.034×) ⇒ 90.4 s. ⇒ **v87 = sb2+sbtrim+d12c6+k0+k1:2.5_3.0+k2:3.0+k3.**
+
+### P7.3 — v87_B = v86-family + K stack B (Lane K R1 refit; `experiments/2026-10-13_v87/`)
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-13 | `estimator_k3_v87_B.py` | `6e1d4862` | FRESH-A | 1.774908e-08 (+1.01 % vs v86; floor-free 1.700143e-08) | 0.14422 | 24,371 | A/B 1.070× sb2 on stack B (lane-s #2704) → 67.69 × 1.070 × 1.042 × 1.24 ≈ 93.6 s noisy-implied | VmPeak 5,889 MB (WSL 23/23 PASS, workerq 2720) | **≈ 2.393e-09** (v86 graded ÷ 1.1237) | PENDING | **1.1237× vs v86_d16** (Δ +3.166e-10, t95 [+2.992e-10, +3.340e-10]) | **100/100** | `sb2+sbtrim+depth8:1.2e6/6/12+k0+k1:2.5_3.0+k2:3.0+k3`, R1 B params (VAL +1.48 % vs R8, +1.77 % vs matched ctl). Residual worst 0.308 s. File↔arm parity: Lane K workerq 2731 (pending). Predictions: worker 2.40e-9 (raw +1.2–1.9 %), strategist 2.25–2.40e-9. |
