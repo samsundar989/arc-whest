@@ -1,0 +1,4129 @@
+{
+  "artifact": "linux_memory_gate",
+  "artifact_version": 5,
+  "candidate": "experiments/2026-10-13_s/estimator_k3_v87B.py",
+  "candidate_sha256": "e5e4585e0cf176c405e7f27301b08a7097bf2c1858d6e395092641d36ac8d0c4",
+  "instrument": "local_sim/linux_memory_gate.py",
+  "instrument_sha256": "120befec39ea8d4922fae58369858b8007ed25ef320ff119bfadb54d7d87c799",
+  "instrument_policy": "current-source-sha256",
+  "limit_mb": 8192,
+  "width": 1024,
+  "depth": 16,
+  "budget": 2199023255552,
+  "seed": 90000000101,
+  "suite_n_mlps": 100,
+  "weights_mode": "f64_readonly",
+  "repeats": 250,
+  "host_platform": "win32",
+  "generated_utc": "2026-10-13T18:12:19Z",
+  "linux_kind": "wsl",
+  "linux_note": "WSL2 Ubuntu, official stack in $HOME/.arcwhest-linux",
+  "negative_control": {
+    "limit_mb": 8192,
+    "request_gib": 9.0,
+    "cap_applied": true,
+    "allocated": false,
+    "survived": false,
+    "error": "MemoryError: "
+  },
+  "positive_control": {
+    "limit_mb": 0,
+    "request_gib": 9.0,
+    "cap_applied": false,
+    "allocated": true,
+    "survived": true
+  },
+  "lifecycle_controls": {
+    "growth_threshold_bytes": 67108864,
+    "stateless": {
+      "completed": true,
+      "retain": false,
+      "allocation_mib": 16,
+      "repeats": 250,
+      "rows": [
+        {
+          "i": 0,
+          "vm_size_settled_bytes": 16080896
+        },
+        {
+          "i": 1,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 2,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 3,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 4,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 5,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 6,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 7,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 8,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 9,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 10,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 11,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 12,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 13,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 14,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 15,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 16,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 17,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 18,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 19,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 20,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 21,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 22,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 23,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 24,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 25,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 26,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 27,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 28,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 29,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 30,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 31,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 32,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 33,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 34,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 35,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 36,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 37,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 38,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 39,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 40,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 41,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 42,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 43,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 44,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 45,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 46,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 47,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 48,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 49,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 50,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 51,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 52,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 53,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 54,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 55,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 56,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 57,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 58,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 59,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 60,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 61,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 62,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 63,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 64,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 65,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 66,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 67,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 68,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 69,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 70,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 71,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 72,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 73,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 74,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 75,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 76,
+          "vm_size_settled_bytes": 32886784
+        },
+        {
+          "i": 77,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 78,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 79,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 80,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 81,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 82,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 83,
+          "vm_size_settled_bytes": 16113664
+        },
+        {
+          "i": 84,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 85,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 86,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 87,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 88,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 89,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 90,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 91,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 92,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 93,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 94,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 95,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 96,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 97,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 98,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 99,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 100,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 101,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 102,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 103,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 104,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 105,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 106,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 107,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 108,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 109,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 110,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 111,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 112,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 113,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 114,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 115,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 116,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 117,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 118,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 119,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 120,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 121,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 122,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 123,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 124,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 125,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 126,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 127,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 128,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 129,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 130,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 131,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 132,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 133,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 134,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 135,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 136,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 137,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 138,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 139,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 140,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 141,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 142,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 143,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 144,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 145,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 146,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 147,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 148,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 149,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 150,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 151,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 152,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 153,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 154,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 155,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 156,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 157,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 158,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 159,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 160,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 161,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 162,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 163,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 164,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 165,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 166,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 167,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 168,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 169,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 170,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 171,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 172,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 173,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 174,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 175,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 176,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 177,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 178,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 179,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 180,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 181,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 182,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 183,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 184,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 185,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 186,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 187,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 188,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 189,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 190,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 191,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 192,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 193,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 194,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 195,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 196,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 197,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 198,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 199,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 200,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 201,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 202,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 203,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 204,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 205,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 206,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 207,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 208,
+          "vm_size_settled_bytes": 49668096
+        },
+        {
+          "i": 209,
+          "vm_size_settled_bytes": 16113664
+        },
+        {
+          "i": 210,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 211,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 212,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 213,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 214,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 215,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 216,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 217,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 218,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 219,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 220,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 221,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 222,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 223,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 224,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 225,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 226,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 227,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 228,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 229,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 230,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 231,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 232,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 233,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 234,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 235,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 236,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 237,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 238,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 239,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 240,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 241,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 242,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 243,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 244,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 245,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 246,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 247,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 248,
+          "vm_size_settled_bytes": 32890880
+        },
+        {
+          "i": 249,
+          "vm_size_settled_bytes": 32890880
+        }
+      ],
+      "growth_bytes": 16809984,
+      "error": "",
+      "cap_applied": true
+    },
+    "retaining": {
+      "completed": true,
+      "retain": true,
+      "allocation_mib": 16,
+      "repeats": 250,
+      "rows": [
+        {
+          "i": 0,
+          "vm_size_settled_bytes": 32862208
+        },
+        {
+          "i": 1,
+          "vm_size_settled_bytes": 49643520
+        },
+        {
+          "i": 2,
+          "vm_size_settled_bytes": 66424832
+        },
+        {
+          "i": 3,
+          "vm_size_settled_bytes": 83206144
+        },
+        {
+          "i": 4,
+          "vm_size_settled_bytes": 99987456
+        },
+        {
+          "i": 5,
+          "vm_size_settled_bytes": 116768768
+        },
+        {
+          "i": 6,
+          "vm_size_settled_bytes": 133550080
+        },
+        {
+          "i": 7,
+          "vm_size_settled_bytes": 150331392
+        },
+        {
+          "i": 8,
+          "vm_size_settled_bytes": 167112704
+        },
+        {
+          "i": 9,
+          "vm_size_settled_bytes": 183894016
+        },
+        {
+          "i": 10,
+          "vm_size_settled_bytes": 200675328
+        },
+        {
+          "i": 11,
+          "vm_size_settled_bytes": 217456640
+        },
+        {
+          "i": 12,
+          "vm_size_settled_bytes": 234237952
+        },
+        {
+          "i": 13,
+          "vm_size_settled_bytes": 251019264
+        },
+        {
+          "i": 14,
+          "vm_size_settled_bytes": 267800576
+        },
+        {
+          "i": 15,
+          "vm_size_settled_bytes": 284581888
+        },
+        {
+          "i": 16,
+          "vm_size_settled_bytes": 301363200
+        },
+        {
+          "i": 17,
+          "vm_size_settled_bytes": 318144512
+        },
+        {
+          "i": 18,
+          "vm_size_settled_bytes": 334925824
+        },
+        {
+          "i": 19,
+          "vm_size_settled_bytes": 351707136
+        },
+        {
+          "i": 20,
+          "vm_size_settled_bytes": 368488448
+        },
+        {
+          "i": 21,
+          "vm_size_settled_bytes": 385269760
+        },
+        {
+          "i": 22,
+          "vm_size_settled_bytes": 402051072
+        },
+        {
+          "i": 23,
+          "vm_size_settled_bytes": 418832384
+        },
+        {
+          "i": 24,
+          "vm_size_settled_bytes": 435613696
+        },
+        {
+          "i": 25,
+          "vm_size_settled_bytes": 452395008
+        },
+        {
+          "i": 26,
+          "vm_size_settled_bytes": 469176320
+        },
+        {
+          "i": 27,
+          "vm_size_settled_bytes": 485957632
+        },
+        {
+          "i": 28,
+          "vm_size_settled_bytes": 502738944
+        },
+        {
+          "i": 29,
+          "vm_size_settled_bytes": 519520256
+        },
+        {
+          "i": 30,
+          "vm_size_settled_bytes": 536301568
+        },
+        {
+          "i": 31,
+          "vm_size_settled_bytes": 553082880
+        },
+        {
+          "i": 32,
+          "vm_size_settled_bytes": 569864192
+        },
+        {
+          "i": 33,
+          "vm_size_settled_bytes": 586645504
+        },
+        {
+          "i": 34,
+          "vm_size_settled_bytes": 603426816
+        },
+        {
+          "i": 35,
+          "vm_size_settled_bytes": 620208128
+        },
+        {
+          "i": 36,
+          "vm_size_settled_bytes": 636989440
+        },
+        {
+          "i": 37,
+          "vm_size_settled_bytes": 653770752
+        },
+        {
+          "i": 38,
+          "vm_size_settled_bytes": 670552064
+        },
+        {
+          "i": 39,
+          "vm_size_settled_bytes": 687333376
+        },
+        {
+          "i": 40,
+          "vm_size_settled_bytes": 704114688
+        },
+        {
+          "i": 41,
+          "vm_size_settled_bytes": 720896000
+        },
+        {
+          "i": 42,
+          "vm_size_settled_bytes": 737677312
+        },
+        {
+          "i": 43,
+          "vm_size_settled_bytes": 754458624
+        },
+        {
+          "i": 44,
+          "vm_size_settled_bytes": 771239936
+        },
+        {
+          "i": 45,
+          "vm_size_settled_bytes": 788021248
+        },
+        {
+          "i": 46,
+          "vm_size_settled_bytes": 804802560
+        },
+        {
+          "i": 47,
+          "vm_size_settled_bytes": 821583872
+        },
+        {
+          "i": 48,
+          "vm_size_settled_bytes": 838365184
+        },
+        {
+          "i": 49,
+          "vm_size_settled_bytes": 855146496
+        },
+        {
+          "i": 50,
+          "vm_size_settled_bytes": 871927808
+        },
+        {
+          "i": 51,
+          "vm_size_settled_bytes": 888709120
+        },
+        {
+          "i": 52,
+          "vm_size_settled_bytes": 905490432
+        },
+        {
+          "i": 53,
+          "vm_size_settled_bytes": 922271744
+        },
+        {
+          "i": 54,
+          "vm_size_settled_bytes": 939053056
+        },
+        {
+          "i": 55,
+          "vm_size_settled_bytes": 955834368
+        },
+        {
+          "i": 56,
+          "vm_size_settled_bytes": 972615680
+        },
+        {
+          "i": 57,
+          "vm_size_settled_bytes": 989396992
+        },
+        {
+          "i": 58,
+          "vm_size_settled_bytes": 1006178304
+        },
+        {
+          "i": 59,
+          "vm_size_settled_bytes": 1022959616
+        },
+        {
+          "i": 60,
+          "vm_size_settled_bytes": 1039740928
+        },
+        {
+          "i": 61,
+          "vm_size_settled_bytes": 1056522240
+        },
+        {
+          "i": 62,
+          "vm_size_settled_bytes": 1073303552
+        },
+        {
+          "i": 63,
+          "vm_size_settled_bytes": 1090084864
+        },
+        {
+          "i": 64,
+          "vm_size_settled_bytes": 1106866176
+        },
+        {
+          "i": 65,
+          "vm_size_settled_bytes": 1123647488
+        },
+        {
+          "i": 66,
+          "vm_size_settled_bytes": 1140428800
+        },
+        {
+          "i": 67,
+          "vm_size_settled_bytes": 1157210112
+        },
+        {
+          "i": 68,
+          "vm_size_settled_bytes": 1173991424
+        },
+        {
+          "i": 69,
+          "vm_size_settled_bytes": 1190772736
+        },
+        {
+          "i": 70,
+          "vm_size_settled_bytes": 1207554048
+        },
+        {
+          "i": 71,
+          "vm_size_settled_bytes": 1224335360
+        },
+        {
+          "i": 72,
+          "vm_size_settled_bytes": 1241116672
+        },
+        {
+          "i": 73,
+          "vm_size_settled_bytes": 1257897984
+        },
+        {
+          "i": 74,
+          "vm_size_settled_bytes": 1274679296
+        },
+        {
+          "i": 75,
+          "vm_size_settled_bytes": 1291460608
+        },
+        {
+          "i": 76,
+          "vm_size_settled_bytes": 1308241920
+        },
+        {
+          "i": 77,
+          "vm_size_settled_bytes": 1325023232
+        },
+        {
+          "i": 78,
+          "vm_size_settled_bytes": 1341804544
+        },
+        {
+          "i": 79,
+          "vm_size_settled_bytes": 1358585856
+        },
+        {
+          "i": 80,
+          "vm_size_settled_bytes": 1375367168
+        },
+        {
+          "i": 81,
+          "vm_size_settled_bytes": 1392148480
+        },
+        {
+          "i": 82,
+          "vm_size_settled_bytes": 1408929792
+        },
+        {
+          "i": 83,
+          "vm_size_settled_bytes": 1425711104
+        },
+        {
+          "i": 84,
+          "vm_size_settled_bytes": 1442492416
+        },
+        {
+          "i": 85,
+          "vm_size_settled_bytes": 1459273728
+        },
+        {
+          "i": 86,
+          "vm_size_settled_bytes": 1476055040
+        },
+        {
+          "i": 87,
+          "vm_size_settled_bytes": 1492836352
+        },
+        {
+          "i": 88,
+          "vm_size_settled_bytes": 1509617664
+        },
+        {
+          "i": 89,
+          "vm_size_settled_bytes": 1526398976
+        },
+        {
+          "i": 90,
+          "vm_size_settled_bytes": 1543180288
+        },
+        {
+          "i": 91,
+          "vm_size_settled_bytes": 1559961600
+        },
+        {
+          "i": 92,
+          "vm_size_settled_bytes": 1576742912
+        },
+        {
+          "i": 93,
+          "vm_size_settled_bytes": 1593524224
+        },
+        {
+          "i": 94,
+          "vm_size_settled_bytes": 1610305536
+        },
+        {
+          "i": 95,
+          "vm_size_settled_bytes": 1627086848
+        },
+        {
+          "i": 96,
+          "vm_size_settled_bytes": 1643868160
+        },
+        {
+          "i": 97,
+          "vm_size_settled_bytes": 1660649472
+        },
+        {
+          "i": 98,
+          "vm_size_settled_bytes": 1677430784
+        },
+        {
+          "i": 99,
+          "vm_size_settled_bytes": 1694212096
+        },
+        {
+          "i": 100,
+          "vm_size_settled_bytes": 1710993408
+        },
+        {
+          "i": 101,
+          "vm_size_settled_bytes": 1727774720
+        },
+        {
+          "i": 102,
+          "vm_size_settled_bytes": 1744556032
+        },
+        {
+          "i": 103,
+          "vm_size_settled_bytes": 1761337344
+        },
+        {
+          "i": 104,
+          "vm_size_settled_bytes": 1778118656
+        },
+        {
+          "i": 105,
+          "vm_size_settled_bytes": 1794899968
+        },
+        {
+          "i": 106,
+          "vm_size_settled_bytes": 1811681280
+        },
+        {
+          "i": 107,
+          "vm_size_settled_bytes": 1828462592
+        },
+        {
+          "i": 108,
+          "vm_size_settled_bytes": 1845243904
+        },
+        {
+          "i": 109,
+          "vm_size_settled_bytes": 1862025216
+        },
+        {
+          "i": 110,
+          "vm_size_settled_bytes": 1878806528
+        },
+        {
+          "i": 111,
+          "vm_size_settled_bytes": 1895587840
+        },
+        {
+          "i": 112,
+          "vm_size_settled_bytes": 1912369152
+        },
+        {
+          "i": 113,
+          "vm_size_settled_bytes": 1929150464
+        },
+        {
+          "i": 114,
+          "vm_size_settled_bytes": 1945931776
+        },
+        {
+          "i": 115,
+          "vm_size_settled_bytes": 1962713088
+        },
+        {
+          "i": 116,
+          "vm_size_settled_bytes": 1979494400
+        },
+        {
+          "i": 117,
+          "vm_size_settled_bytes": 1996275712
+        },
+        {
+          "i": 118,
+          "vm_size_settled_bytes": 2013057024
+        },
+        {
+          "i": 119,
+          "vm_size_settled_bytes": 2029838336
+        },
+        {
+          "i": 120,
+          "vm_size_settled_bytes": 2046619648
+        },
+        {
+          "i": 121,
+          "vm_size_settled_bytes": 2063400960
+        },
+        {
+          "i": 122,
+          "vm_size_settled_bytes": 2080182272
+        },
+        {
+          "i": 123,
+          "vm_size_settled_bytes": 2096963584
+        },
+        {
+          "i": 124,
+          "vm_size_settled_bytes": 2113744896
+        },
+        {
+          "i": 125,
+          "vm_size_settled_bytes": 2130526208
+        },
+        {
+          "i": 126,
+          "vm_size_settled_bytes": 2147307520
+        },
+        {
+          "i": 127,
+          "vm_size_settled_bytes": 2164088832
+        },
+        {
+          "i": 128,
+          "vm_size_settled_bytes": 2180870144
+        },
+        {
+          "i": 129,
+          "vm_size_settled_bytes": 2197651456
+        },
+        {
+          "i": 130,
+          "vm_size_settled_bytes": 2214432768
+        },
+        {
+          "i": 131,
+          "vm_size_settled_bytes": 2231214080
+        },
+        {
+          "i": 132,
+          "vm_size_settled_bytes": 2247995392
+        },
+        {
+          "i": 133,
+          "vm_size_settled_bytes": 2264776704
+        },
+        {
+          "i": 134,
+          "vm_size_settled_bytes": 2281558016
+        },
+        {
+          "i": 135,
+          "vm_size_settled_bytes": 2298339328
+        },
+        {
+          "i": 136,
+          "vm_size_settled_bytes": 2315120640
+        },
+        {
+          "i": 137,
+          "vm_size_settled_bytes": 2331901952
+        },
+        {
+          "i": 138,
+          "vm_size_settled_bytes": 2348683264
+        },
+        {
+          "i": 139,
+          "vm_size_settled_bytes": 2365464576
+        },
+        {
+          "i": 140,
+          "vm_size_settled_bytes": 2382245888
+        },
+        {
+          "i": 141,
+          "vm_size_settled_bytes": 2399027200
+        },
+        {
+          "i": 142,
+          "vm_size_settled_bytes": 2415808512
+        },
+        {
+          "i": 143,
+          "vm_size_settled_bytes": 2432589824
+        },
+        {
+          "i": 144,
+          "vm_size_settled_bytes": 2449371136
+        },
+        {
+          "i": 145,
+          "vm_size_settled_bytes": 2466152448
+        },
+        {
+          "i": 146,
+          "vm_size_settled_bytes": 2482933760
+        },
+        {
+          "i": 147,
+          "vm_size_settled_bytes": 2499715072
+        },
+        {
+          "i": 148,
+          "vm_size_settled_bytes": 2516496384
+        },
+        {
+          "i": 149,
+          "vm_size_settled_bytes": 2533277696
+        },
+        {
+          "i": 150,
+          "vm_size_settled_bytes": 2550059008
+        },
+        {
+          "i": 151,
+          "vm_size_settled_bytes": 2566840320
+        },
+        {
+          "i": 152,
+          "vm_size_settled_bytes": 2583621632
+        },
+        {
+          "i": 153,
+          "vm_size_settled_bytes": 2600402944
+        },
+        {
+          "i": 154,
+          "vm_size_settled_bytes": 2617184256
+        },
+        {
+          "i": 155,
+          "vm_size_settled_bytes": 2633965568
+        },
+        {
+          "i": 156,
+          "vm_size_settled_bytes": 2650746880
+        },
+        {
+          "i": 157,
+          "vm_size_settled_bytes": 2667528192
+        },
+        {
+          "i": 158,
+          "vm_size_settled_bytes": 2684309504
+        },
+        {
+          "i": 159,
+          "vm_size_settled_bytes": 2701090816
+        },
+        {
+          "i": 160,
+          "vm_size_settled_bytes": 2717872128
+        },
+        {
+          "i": 161,
+          "vm_size_settled_bytes": 2734653440
+        },
+        {
+          "i": 162,
+          "vm_size_settled_bytes": 2751434752
+        },
+        {
+          "i": 163,
+          "vm_size_settled_bytes": 2768216064
+        },
+        {
+          "i": 164,
+          "vm_size_settled_bytes": 2784997376
+        },
+        {
+          "i": 165,
+          "vm_size_settled_bytes": 2801778688
+        },
+        {
+          "i": 166,
+          "vm_size_settled_bytes": 2818560000
+        },
+        {
+          "i": 167,
+          "vm_size_settled_bytes": 2835341312
+        },
+        {
+          "i": 168,
+          "vm_size_settled_bytes": 2852122624
+        },
+        {
+          "i": 169,
+          "vm_size_settled_bytes": 2868903936
+        },
+        {
+          "i": 170,
+          "vm_size_settled_bytes": 2885685248
+        },
+        {
+          "i": 171,
+          "vm_size_settled_bytes": 2902466560
+        },
+        {
+          "i": 172,
+          "vm_size_settled_bytes": 2919247872
+        },
+        {
+          "i": 173,
+          "vm_size_settled_bytes": 2936029184
+        },
+        {
+          "i": 174,
+          "vm_size_settled_bytes": 2952810496
+        },
+        {
+          "i": 175,
+          "vm_size_settled_bytes": 2969591808
+        },
+        {
+          "i": 176,
+          "vm_size_settled_bytes": 2986373120
+        },
+        {
+          "i": 177,
+          "vm_size_settled_bytes": 3003154432
+        },
+        {
+          "i": 178,
+          "vm_size_settled_bytes": 3019935744
+        },
+        {
+          "i": 179,
+          "vm_size_settled_bytes": 3036717056
+        },
+        {
+          "i": 180,
+          "vm_size_settled_bytes": 3053498368
+        },
+        {
+          "i": 181,
+          "vm_size_settled_bytes": 3070279680
+        },
+        {
+          "i": 182,
+          "vm_size_settled_bytes": 3087060992
+        },
+        {
+          "i": 183,
+          "vm_size_settled_bytes": 3103842304
+        },
+        {
+          "i": 184,
+          "vm_size_settled_bytes": 3120623616
+        },
+        {
+          "i": 185,
+          "vm_size_settled_bytes": 3137404928
+        },
+        {
+          "i": 186,
+          "vm_size_settled_bytes": 3154186240
+        },
+        {
+          "i": 187,
+          "vm_size_settled_bytes": 3170967552
+        },
+        {
+          "i": 188,
+          "vm_size_settled_bytes": 3187748864
+        },
+        {
+          "i": 189,
+          "vm_size_settled_bytes": 3204530176
+        },
+        {
+          "i": 190,
+          "vm_size_settled_bytes": 3221311488
+        },
+        {
+          "i": 191,
+          "vm_size_settled_bytes": 3238092800
+        },
+        {
+          "i": 192,
+          "vm_size_settled_bytes": 3254874112
+        },
+        {
+          "i": 193,
+          "vm_size_settled_bytes": 3271655424
+        },
+        {
+          "i": 194,
+          "vm_size_settled_bytes": 3288436736
+        },
+        {
+          "i": 195,
+          "vm_size_settled_bytes": 3305218048
+        },
+        {
+          "i": 196,
+          "vm_size_settled_bytes": 3321999360
+        },
+        {
+          "i": 197,
+          "vm_size_settled_bytes": 3338780672
+        },
+        {
+          "i": 198,
+          "vm_size_settled_bytes": 3355561984
+        },
+        {
+          "i": 199,
+          "vm_size_settled_bytes": 3372343296
+        },
+        {
+          "i": 200,
+          "vm_size_settled_bytes": 3389124608
+        },
+        {
+          "i": 201,
+          "vm_size_settled_bytes": 3405905920
+        },
+        {
+          "i": 202,
+          "vm_size_settled_bytes": 3422687232
+        },
+        {
+          "i": 203,
+          "vm_size_settled_bytes": 3439468544
+        },
+        {
+          "i": 204,
+          "vm_size_settled_bytes": 3456249856
+        },
+        {
+          "i": 205,
+          "vm_size_settled_bytes": 3473031168
+        },
+        {
+          "i": 206,
+          "vm_size_settled_bytes": 3489812480
+        },
+        {
+          "i": 207,
+          "vm_size_settled_bytes": 3506593792
+        },
+        {
+          "i": 208,
+          "vm_size_settled_bytes": 3523375104
+        },
+        {
+          "i": 209,
+          "vm_size_settled_bytes": 3540156416
+        },
+        {
+          "i": 210,
+          "vm_size_settled_bytes": 3556937728
+        },
+        {
+          "i": 211,
+          "vm_size_settled_bytes": 3573719040
+        },
+        {
+          "i": 212,
+          "vm_size_settled_bytes": 3590500352
+        },
+        {
+          "i": 213,
+          "vm_size_settled_bytes": 3607281664
+        },
+        {
+          "i": 214,
+          "vm_size_settled_bytes": 3624062976
+        },
+        {
+          "i": 215,
+          "vm_size_settled_bytes": 3640844288
+        },
+        {
+          "i": 216,
+          "vm_size_settled_bytes": 3657625600
+        },
+        {
+          "i": 217,
+          "vm_size_settled_bytes": 3674406912
+        },
+        {
+          "i": 218,
+          "vm_size_settled_bytes": 3691188224
+        },
+        {
+          "i": 219,
+          "vm_size_settled_bytes": 3707969536
+        },
+        {
+          "i": 220,
+          "vm_size_settled_bytes": 3724750848
+        },
+        {
+          "i": 221,
+          "vm_size_settled_bytes": 3741532160
+        },
+        {
+          "i": 222,
+          "vm_size_settled_bytes": 3758313472
+        },
+        {
+          "i": 223,
+          "vm_size_settled_bytes": 3775094784
+        },
+        {
+          "i": 224,
+          "vm_size_settled_bytes": 3791876096
+        },
+        {
+          "i": 225,
+          "vm_size_settled_bytes": 3808657408
+        },
+        {
+          "i": 226,
+          "vm_size_settled_bytes": 3825438720
+        },
+        {
+          "i": 227,
+          "vm_size_settled_bytes": 3842220032
+        },
+        {
+          "i": 228,
+          "vm_size_settled_bytes": 3859001344
+        },
+        {
+          "i": 229,
+          "vm_size_settled_bytes": 3875782656
+        },
+        {
+          "i": 230,
+          "vm_size_settled_bytes": 3892563968
+        },
+        {
+          "i": 231,
+          "vm_size_settled_bytes": 3909345280
+        },
+        {
+          "i": 232,
+          "vm_size_settled_bytes": 3926126592
+        },
+        {
+          "i": 233,
+          "vm_size_settled_bytes": 3942907904
+        },
+        {
+          "i": 234,
+          "vm_size_settled_bytes": 3959689216
+        },
+        {
+          "i": 235,
+          "vm_size_settled_bytes": 3976470528
+        },
+        {
+          "i": 236,
+          "vm_size_settled_bytes": 3993251840
+        },
+        {
+          "i": 237,
+          "vm_size_settled_bytes": 4010033152
+        },
+        {
+          "i": 238,
+          "vm_size_settled_bytes": 4026814464
+        },
+        {
+          "i": 239,
+          "vm_size_settled_bytes": 4043595776
+        },
+        {
+          "i": 240,
+          "vm_size_settled_bytes": 4060377088
+        },
+        {
+          "i": 241,
+          "vm_size_settled_bytes": 4077158400
+        },
+        {
+          "i": 242,
+          "vm_size_settled_bytes": 4093939712
+        },
+        {
+          "i": 243,
+          "vm_size_settled_bytes": 4110721024
+        },
+        {
+          "i": 244,
+          "vm_size_settled_bytes": 4127502336
+        },
+        {
+          "i": 245,
+          "vm_size_settled_bytes": 4144283648
+        },
+        {
+          "i": 246,
+          "vm_size_settled_bytes": 4161064960
+        },
+        {
+          "i": 247,
+          "vm_size_settled_bytes": 4177846272
+        },
+        {
+          "i": 248,
+          "vm_size_settled_bytes": 4194627584
+        },
+        {
+          "i": 249,
+          "vm_size_settled_bytes": 4211408896
+        }
+      ],
+      "growth_bytes": 4178546688,
+      "error": "",
+      "cap_applied": true
+    }
+  },
+  "candidate_run": {
+    "stage": "done",
+    "limit_mb": 8192,
+    "setrlimit_raised": null,
+    "soft_limit_bytes": 8589934592,
+    "hard_limit_bytes": 8589934592,
+    "cap_requested_bytes": 8589934592,
+    "cap_applied": true,
+    "whestbench_file": "/home/samsu/.arcwhest-linux/lib/python3.12/site-packages/whestbench/__init__.py",
+    "flopscope_file": "/home/samsu/.arcwhest-linux/lib/python3.12/site-packages/flopscope/__init__.py",
+    "numpy_version": "2.4.6",
+    "whestbench_version": "0.16.1",
+    "flopscope_version": "0.12.1",
+    "stack_version_source": "importlib.metadata.version",
+    "python_version": "3.12.3",
+    "weights_mode": "f64_readonly",
+    "repeats": 250,
+    "suite_n_mlps": 100,
+    "weight_dtype": "float64",
+    "weight_writeable": false,
+    "setup_raised": null,
+    "setup_s": 0.014382339002622757,
+    "predict_s": 68.05696788700152,
+    "predict_error": "",
+    "shape": [
+      16,
+      1024
+    ],
+    "finite": true,
+    "dtype": "float32",
+    "largest_array_bytes": 65536,
+    "reset_accumulator": true,
+    "repeat_runs": [
+      {
+        "i": 0,
+        "vm_peak_bytes": 5452935168,
+        "vm_size_settled_bytes": 2563940352,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 1,
+        "vm_peak_bytes": 5452935168,
+        "vm_size_settled_bytes": 2672431104,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 2,
+        "vm_peak_bytes": 5452935168,
+        "vm_size_settled_bytes": 2655653888,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 3,
+        "vm_peak_bytes": 5452935168,
+        "vm_size_settled_bytes": 2707283968,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 4,
+        "vm_peak_bytes": 5463068672,
+        "vm_size_settled_bytes": 2655653888,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 5,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2655653888,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 6,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2680483840,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 7,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2655653888,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 8,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2655653888,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 9,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2655653888,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 10,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2718945280,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 11,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2655653888,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 12,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2655653888,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 13,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2655653888,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 14,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2704801792,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 15,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2655653888,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 16,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2655653888,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 17,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2655653888,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 18,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2655653888,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 19,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2685014016,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 20,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2718580736,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 21,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2685014016,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 22,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2707648512,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 23,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 24,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 25,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 26,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2668990464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 27,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 28,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 29,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 30,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2700595200,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 31,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2675060736,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 32,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2714816512,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 33,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 34,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2663813120,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 35,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2684620800,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 36,
+        "vm_peak_bytes": 5464887296,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 37,
+        "vm_peak_bytes": 5468041216,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 38,
+        "vm_peak_bytes": 5468041216,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 39,
+        "vm_peak_bytes": 5468041216,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 40,
+        "vm_peak_bytes": 5468041216,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 41,
+        "vm_peak_bytes": 5468041216,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 42,
+        "vm_peak_bytes": 5468041216,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 43,
+        "vm_peak_bytes": 5468041216,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 44,
+        "vm_peak_bytes": 5480108032,
+        "vm_size_settled_bytes": 2702520320,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 45,
+        "vm_peak_bytes": 5480108032,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 46,
+        "vm_peak_bytes": 5480108032,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 47,
+        "vm_peak_bytes": 5480108032,
+        "vm_size_settled_bytes": 2708332544,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 48,
+        "vm_peak_bytes": 5480108032,
+        "vm_size_settled_bytes": 2694434816,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 49,
+        "vm_peak_bytes": 5480108032,
+        "vm_size_settled_bytes": 2685771776,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 50,
+        "vm_peak_bytes": 5482070016,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 51,
+        "vm_peak_bytes": 5482070016,
+        "vm_size_settled_bytes": 2674413568,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 52,
+        "vm_peak_bytes": 5482070016,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 53,
+        "vm_peak_bytes": 5482070016,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 54,
+        "vm_peak_bytes": 5482070016,
+        "vm_size_settled_bytes": 2716884992,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 55,
+        "vm_peak_bytes": 5482070016,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 56,
+        "vm_peak_bytes": 5482070016,
+        "vm_size_settled_bytes": 2656702464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 57,
+        "vm_peak_bytes": 5482070016,
+        "vm_size_settled_bytes": 2701303808,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 58,
+        "vm_peak_bytes": 5482070016,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 59,
+        "vm_peak_bytes": 5482070016,
+        "vm_size_settled_bytes": 2690232320,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 60,
+        "vm_peak_bytes": 5482070016,
+        "vm_size_settled_bytes": 2724651008,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 61,
+        "vm_peak_bytes": 5482070016,
+        "vm_size_settled_bytes": 2698186752,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 62,
+        "vm_peak_bytes": 5482070016,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 63,
+        "vm_peak_bytes": 5482070016,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 64,
+        "vm_peak_bytes": 5482070016,
+        "vm_size_settled_bytes": 2739867648,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 65,
+        "vm_peak_bytes": 5482070016,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 66,
+        "vm_peak_bytes": 5482070016,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 67,
+        "vm_peak_bytes": 5482070016,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 68,
+        "vm_peak_bytes": 5482070016,
+        "vm_size_settled_bytes": 2739855360,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 69,
+        "vm_peak_bytes": 5496508416,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 70,
+        "vm_peak_bytes": 5496508416,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 71,
+        "vm_peak_bytes": 5496508416,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 72,
+        "vm_peak_bytes": 5496508416,
+        "vm_size_settled_bytes": 2732232704,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 73,
+        "vm_peak_bytes": 5496508416,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 74,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 75,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2737762304,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 76,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2736828416,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 77,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2738933760,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 78,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 79,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2738503680,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 80,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2734055424,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 81,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2726342656,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 82,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 83,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 84,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2680131584,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 85,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 86,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 87,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 88,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2698186752,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 89,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2736107520,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 90,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2736107520,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 91,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2707443712,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 92,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2736427008,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 93,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 94,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 95,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 96,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 97,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 98,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 99,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 100,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 101,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2734493696,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 102,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 103,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 104,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 105,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2707443712,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 106,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2721419264,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 107,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2690797568,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 108,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2733281280,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 109,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 110,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2693992448,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 111,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 112,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 113,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2693992448,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 114,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 115,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2702381056,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 116,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2688942080,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 117,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 118,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2729807872,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 119,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2685603840,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 120,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 121,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 122,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 123,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2736934912,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 124,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 125,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 126,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2739802112,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 127,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 128,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 129,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2690232320,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 130,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2698186752,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 131,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2689634304,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 132,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2723508224,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 133,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2735902720,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 134,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2724651008,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 135,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 136,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2713784320,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 137,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 138,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 139,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2737987584,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 140,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2735869952,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 141,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 142,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2737123328,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 143,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 144,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 145,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2673020928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 146,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2722824192,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 147,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 148,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 149,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 150,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2736820224,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 151,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 152,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2698555392,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 153,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 154,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 155,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2689568768,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 156,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2736140288,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 157,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2687438848,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 158,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2739900416,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 159,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2739257344,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 160,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2701758464,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 161,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2699235328,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 162,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 163,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2722844672,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 164,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2733215744,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 165,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 166,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2687406080,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 167,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 168,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 169,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 170,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 171,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2739245056,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 172,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2713784320,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 173,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2736984064,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 174,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2695041024,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 175,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2708492288,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 176,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2732789760,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 177,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2737475584,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 178,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 179,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2735542272,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 180,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2733977600,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 181,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 182,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 183,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2738204672,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 184,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 185,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2678263808,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 186,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2705272832,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 187,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 188,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 189,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 190,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2713849856,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 191,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 192,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 193,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2740330496,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 194,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 195,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2730856448,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 196,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2736918528,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 197,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2678263808,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 198,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 199,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 200,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 201,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 202,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 203,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2730594304,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 204,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 205,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2737106944,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 206,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2737278976,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 207,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 208,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 209,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2690846720,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 210,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2690846720,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 211,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2738171904,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 212,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2709262336,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 213,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 214,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 215,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2739113984,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 216,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2720219136,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 217,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2702675968,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 218,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2734460928,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 219,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2737983488,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 220,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2702675968,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 221,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2730856448,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 222,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2736984064,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 223,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2686652416,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 224,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2702675968,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 225,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 226,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2724749312,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 227,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2695794688,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 228,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2736984064,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 229,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 230,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2690846720,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 231,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 232,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 233,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 234,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 235,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2740252672,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 236,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2678263808,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 237,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2709852160,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 238,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 239,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2691780608,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 240,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2736984064,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 241,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 242,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 243,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2691780608,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 244,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2738032640,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 245,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2740883456,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 246,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 247,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2739326976,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 248,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2726203392,
+        "flops_used": 318714455823.0,
+        "error": ""
+      },
+      {
+        "i": 249,
+        "vm_peak_bytes": 5512404992,
+        "vm_size_settled_bytes": 2674069504,
+        "flops_used": 318714455823.0,
+        "error": ""
+      }
+    ],
+    "repeat_error": "",
+    "repeat_vm_size_growth_bytes": 110129152,
+    "repeat_flops_identical": true,
+    "repeat_flops_observed": [
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0,
+      318714455823.0
+    ],
+    "flops_used": 318714455823.0,
+    "residual_wall_time_s": 1.0016428082381026,
+    "wall_time_s": 68.05695757699868,
+    "multiplier": 0.14493455447473025,
+    "peak_rss_bytes": 2782650368,
+    "vm_peak_bytes": 5512404992,
+    "vm_hwm_bytes": 2782650368,
+    "ok": true
+  },
+  "child_stderr": {
+    "negative": "",
+    "positive": "",
+    "lifecycle_stateless": "",
+    "lifecycle_retaining": "",
+    "candidate": ""
+  },
+  "child_stderr_tail": "",
+  "stack": {
+    "whestbench": "0.16.1",
+    "flopscope": "0.12.1",
+    "numpy": "2.4.6",
+    "python": "3.12.3",
+    "source": "importlib.metadata.version"
+  },
+  "status": "FAIL",
+  "checks_total": 23,
+  "checks_failed": [
+    "C: ...and SETTLED address space did not GROW across them"
+  ]
+}

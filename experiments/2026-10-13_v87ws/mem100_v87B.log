@@ -1,0 +1,48 @@
+Linux 8-GiB enforcement gate
+  candidate   experiments\2026-10-13_s\estimator_k3_v87B.py
+  cap         8192 MB   shape 1024x16   B = 2,199,023,255,552
+  linux       wsl -- WSL2 Ubuntu, official stack in $HOME/.arcwhest-linux
+
+N  the cap is in force -- controls first, so a pass below means something
+  PASS  N: the negative-control child reported                        json returned
+  PASS  N: the negative-control child wrote no stderr                 
+  PASS  N: the cap was APPLIED in that child (soft == requested)      True
+  PASS  N: requesting 9.0 GiB under a 8192 MB cap DIES                MemoryError: 
+  PASS  P: the positive-control child wrote no stderr                 
+  PASS  P: the SAME allocation with NO cap succeeds                   so the death above is the cap, not the machine
+
+L  repeated-worker lifecycle controls
+  PASS  L: stateless allocations settle below the growth threshold    +16.0 MB
+  PASS  L: deliberately retained allocations exceed the threshold     +1584.4 MB
+  PASS  L: lifecycle-control children wrote no stderr                 
+
+C  the candidate's own predict(), under the real cap
+  PASS  C: the child reported                                         stage=done
+  PASS  C: the candidate child wrote no stderr                        
+  PASS  C: the cap was applied to the candidate's process too         soft=8589934592 requested=8589934592
+  PASS  C: the REAL packages loaded, not local_sim's shims            ython3.12/site-packages/whestbench/__init__.py
+  PASS  C: installed distribution metadata names both package versionswhestbench='0.16.1', flopscope='0.12.1'
+  PASS  C: setup() raised nothing                                     0.0055 s
+  PASS  C: predict() completed under the cap                          67.399 s
+  PASS  C: the output has the right shape                             [16, 1024]
+  PASS  C: every value is finite                                      float32
+  PASS  C: peak address space is under the cap                        VmPeak 6490.1 MB of 8192 MB -> 1.26x headroom
+  PASS  C: the weights were the DEPLOYMENT representation             f64_readonly / dtype float64 / writeable False
+  PASS  C: repeated predictions in the SAME worker all completed      100 runs
+  FAIL  C: ...and SETTLED address space did not GROW across them      +1520.9 MB over 100 predictions
+      repeated FLOPs  318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823, 318,714,455,823 (identical)
+  PASS  C: the single largest returned array is under 4 GiB           0.062 MB
+
+  counted FLOPs   318,714,455,823
+  multiplier      0.144935
+  peak RSS        3815.8 MB
+  VmPeak          6490.1 MB (address space -- THE quantity RLIMIT_AS caps)
+  VmHWM           3815.8 MB
+
+  SCOPE: this is a Linux kernel applying the installed package's own
+  default. It is not the grading server, whose `memory_limit_mb` appears in
+  no run_config and no graded report this repository holds. No absolute
+  second measured here transfers either.
+  report -> C:\Users\samsu\Documents\arc-whest-lane-s\experiments\2026-10-13_s\mem100_v87B.json
+
+FAILED 1: C: ...and SETTLED address space did not GROW across them
