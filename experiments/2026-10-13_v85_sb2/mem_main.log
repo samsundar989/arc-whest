@@ -1,0 +1,48 @@
+Linux 8-GiB enforcement gate
+  candidate   estimator_k3_v85_sb2.py
+  cap         8192 MB   shape 1024x16   B = 2,199,023,255,552
+  linux       wsl -- WSL2 Ubuntu, official stack in $HOME/.arcwhest-linux
+
+N  the cap is in force -- controls first, so a pass below means something
+  PASS  N: the negative-control child reported                        json returned
+  PASS  N: the negative-control child wrote no stderr                 
+  PASS  N: the cap was APPLIED in that child (soft == requested)      True
+  PASS  N: requesting 9.0 GiB under a 8192 MB cap DIES                MemoryError: 
+  PASS  P: the positive-control child wrote no stderr                 
+  PASS  P: the SAME allocation with NO cap succeeds                   so the death above is the cap, not the machine
+
+L  repeated-worker lifecycle controls
+  PASS  L: stateless allocations settle below the growth threshold    +0.0 MB
+  PASS  L: deliberately retained allocations exceed the threshold     +384.0 MB
+  PASS  L: lifecycle-control children wrote no stderr                 
+
+C  the candidate's own predict(), under the real cap
+  PASS  C: the child reported                                         stage=done
+  PASS  C: the candidate child wrote no stderr                        
+  PASS  C: the cap was applied to the candidate's process too         soft=8589934592 requested=8589934592
+  PASS  C: the REAL packages loaded, not local_sim's shims            ython3.12/site-packages/whestbench/__init__.py
+  PASS  C: installed distribution metadata names both package versionswhestbench='0.16.1', flopscope='0.12.1'
+  PASS  C: setup() raised nothing                                     0.0502 s
+  PASS  C: predict() completed under the cap                          116.086 s
+  PASS  C: the output has the right shape                             [16, 1024]
+  PASS  C: every value is finite                                      float32
+  PASS  C: peak address space is under the cap                        VmPeak 4953.1 MB of 8192 MB -> 1.65x headroom
+  PASS  C: the weights were the DEPLOYMENT representation             f64_readonly / dtype float64 / writeable False
+  PASS  C: repeated predictions in the SAME worker all completed      5 runs
+  PASS  C: ...and SETTLED address space did not GROW across them      +51.0 MB over 5 predictions
+      repeated FLOPs  363,561,601,589, 363,561,601,589, 363,561,601,589, 363,561,601,589, 363,561,601,589 (identical)
+  PASS  C: the single largest returned array is under 4 GiB           0.062 MB
+
+  counted FLOPs   363,561,601,589
+  multiplier      0.165329
+  peak RSS        3082.0 MB
+  VmPeak          4953.1 MB (address space -- THE quantity RLIMIT_AS caps)
+  VmHWM           3082.0 MB
+
+  SCOPE: this is a Linux kernel applying the installed package's own
+  default. It is not the grading server, whose `memory_limit_mb` appears in
+  no run_config and no graded report this repository holds. No absolute
+  second measured here transfers either.
+  report -> experiments/2026-10-13_v85_sb2/mem_main.json
+
+23/23 checks passed

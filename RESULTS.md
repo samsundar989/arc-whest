@@ -3048,3 +3048,20 @@ Parity file↔arm DEV (pod) 1.682262e-08 vs 1.682542e-08 = **1.7e-4**. FRESH-A v
 **v84_age6 graded (#335562): 2.849755454236018e-09, NEW BEST**, raw 1.642151991276819e-08, 100 clean. −1.54 % vs v83_r7od16
 (graded raw −6.71 %, vs FRESH-A −5.84 %); **−0.53 % vs the FRESH-A projection** 2.8648e-09 (first graded row below projection
 since the calibration; recheck the ÷1.019 constant if the next one repeats it). −14.2 % vs v81d. `--best-graded` updated.
+
+## P7 (HANDOFF 2026-10-12 Lane P7) — integrate S / K / O
+
+**v83_r7ws graded (#335688, Oct 13 A/B slot): 2.98079315443596e-09, NEW wall-safe B**, raw 1.7595494892219675e-08, 100 clean.
+−0.48 % vs v83_r5ws; +0.18 % vs the FRESH-A projection 2.9754e-09.
+
+### P7.1 — v85 = v84 + `sb2` (Lane S S1, lane-s 6d7e71e; checks reproduced on main in `experiments/2026-10-13_v85_sb2/`)
+Build `tools/build_v85.py --params experiments/2026-10-11_p6/r8/age6/params_best.npz --atoms sb2` → `d3359e48` (= lane-s build).
+(1) **bit-identical** to v84_age6 on DEV 0–4 under real flopscope f64 read-only (`array_equal`, max |Δ| 0; `bitid_main.txt`;
+v84's first net-2 run failed transiently under memory load, rerun alone clean); (2) meter **F/B 0.165329** (363,561,601,589),
+**24,576 ops** on every net and every WSL repeat; (3) WSL 8 GiB **23/23 PASS, VmPeak 4,953 MB** (v84 6,768), settled +51 MB / 5;
+(4) wall A/B DEV net 3 ×3 (machine loaded) **0.783×** v84 (Lane S, quiet: 0.753×) → ≈ 74 s noisy-implied; (5) `out=` audit on
+main's file: 4,256 writes, 0 shape/bill mismatches, bit-identical and NaN-free on poisoned buffers. No `where=`.
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-13 | `estimator_k3_v85_sb2.py` | `d3359e48` | bit-identical to v84 (DEV 0–4) | = v84 | 0.16533 | 24,576 | A/B 0.783× v84 → ≈ 74 s noisy-implied | VmPeak 4,953 MB (WSL PASS) | **2.7150e-09** | PENDING (#335697) | — (bit-identical: no FRESH-A) | — | Strassen variant B glue (pooled `out=` views, fused last level), same depths. Package `74fe2714…ac82`, inner = source. First canary of UTC Oct 13. Predictions: strategist 2.713e-9 ± 0.2 %, worker 2.7150e-9 (`PREDICTIONS.md`). |
