@@ -3103,3 +3103,8 @@ lane-k `experiments/2026-10-13_k/meter/sbtrim_prices.txt`; order sb2+sbtrim+dept
 
 Accuracy is NOT in this table: depth8 needs DEV-100 within ±0.3 % (Lane S, on the exact trimmed build); the K stacks need the
 pod-2 refit vs matched control (ETA ~13:00 UTC). Marginal rule: −13.81 % F pays for raw up to +16.0 %.
+
+### P7.5 (early) — B twin v85_trimws (`experiments/2026-10-13_v85_trimws/`)
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-13 | `estimator_k3_v85_trimws.py` | `3208b2f3` | FRESH-A | 1.756482e-08 (≈ v84's FRESH-A 1.756928e-08) | 0.16943 | 21,361 | wall A/B vs r7ws pending (workerq 2701; law 77.9 / 91.6 s over-projects block 40) | VmPeak 4,947 MB (WSL 23/23 PASS, +45 MB settled; workerq 2678) | **2.7962e-09** | — (Oct 14 A/B slot) | **1.0614× vs v83_r7ws** (Δ +1.826e-10, t95 [+1.653e-10, +2.000e-10]) | **100/100** | B twin = v84_age6 (R8) at block 40 + sb2 + sbtrim. Fixes the Oct 12 age6-ws memory-growth FAIL. Residual proj 0.270 s at v85's 12.64 µs/op (B ≤ 0.30). Predictions (worker): 1.05–1.07×, 2.77–2.80e-9 ✓. ev.py "FAILED" = A-only gate (vs best graded A) + WSL run separately. |
