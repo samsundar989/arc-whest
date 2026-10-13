@@ -8,12 +8,21 @@ same-shape `out=` allowed; ops gate becomes "projected residual ≤ 0.33 s at v8
 - **K** (branch `lane-k`): `docs/HANDOFF_2026-10-12_LANE_K.md` — pruning v2 with analytic gain replacement (K0–K4, K5 optional).
 - **O** (branch `lane-m`, follows M6): `docs/HANDOFF_2026-10-12_LANE_O.md` — old tier and spend items.
 
-Best graded A: **v84_age6 2.849755454236018e-9 (#335562)**. B: v83_r5ws 2.9952e-9 (#335461); v83_r7ws submitted
-**#335688** (Oct 13 A/B slot, projected 2.9754e-9).
+Best graded A: **v84_age6 2.849755454236018e-9 (#335562)**; **v85_sb2 2.71494812074391e-9 (#335697) = NEW BEST A** (bit-identical to v84, F/B 0.16533). Telemetry read: wall 68.6/75.7 s, residual 0.289/0.311 s = 12.64 µs/op worst ⇒ **ops gate ≤ 26,100** (RESULTS § P7.1).
+B: **v83_r7ws 2.98079315443596e-9 (#335688)**, Oct 13 A/B slot (projected 2.9754e-9; was v83_r5ws 2.9952e-9).
 
 **Oct 13 03:40 UTC — pods: pod 1 `acc7entl4kttqk` no longer exists (404; the account lists no pods).** Its `/workspace`
-(R-series refit setup) must be assumed lost. Pod 2 (P7.0d) and any replacement pod 1 need new pods + re-provisioning;
-waiting on Samuel's go (billable). R3–R8 outputs are local under `experiments/2026-10-11_p6/r*/`.
+(R-series refit setup) must be assumed lost. R3–R8 outputs are local under `experiments/2026-10-11_p6/r*/`.
+**Samuel (03:45 UTC): workerq restarted; make the pods, stop them once done.** New pods (community RTX PRO 5000, $0.82/hr
+RUNNING, 300 GB `/workspace`, image `runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404`):
+| pod | id | SSH user (`ssh -i ~/.ssh/arc3_devbox -o IdentitiesOnly=yes -tt <user>@ssh.runpod.io`) | owner |
+|---|---|---|---|
+| arc-whest-p1 | `ktwgodxu8gwjof` | `ktwgodxu8gwjof-64410ffd` | Lane P (refits, R9+) |
+| arc-whest-p2 | `59wg4bhfb13p8u` | `59wg4bhfb13p8u-64412253` | Lanes K + O (K first Oct 13–14) |
+Provisioned by a git bundle of main (runpodctl send, ~30 MB/s) + `provision.sh` (data venv `/workspace/venv-data` with
+whestbench 0.16.1; `tools/twin/export_weights.py` from HF into `/workspace/arc/cache/twin`). Twin = system python3.
+Not on the pods: `cache/twin_labels`, `cache/d8b`. Stop each pod as soon as its outputs are pulled.
+**04:40 UTC:** both provisioned (full 1000/1000 + mini 100 exported, twin imports on CUDA, 161 GB free). **p1 STOPPED** (EXITED); p2 RUNNING with Lane K's stack refit in `/workspace/k/arc` (Lane K stops it after pulling outputs).
 
 # (history) CURRENT_STATE — 2026-10-11 (plan rev 23, Lane P6)
 

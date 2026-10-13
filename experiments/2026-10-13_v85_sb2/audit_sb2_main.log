@@ -1,0 +1,8 @@
+(256, 256, 256, 5) CC/FC/CF/FF x poison: done
+(128, 104, 1312, 3) CC/FC/CF/FF x poison: done
+(216, 2784, 216, 3) CC/FC/CF/FF x poison: done
+(256, 64, 1408, 4) CC/FC/CF/FF x poison: done
+(512, 448, 320, 5) CC/FC/CF/FF x poison: done
+(1024, 1024, 1056, 5) CC/FC/CF/FF x poison: done
+(800, 1984, 256, 3) CC/FC/CF/FF x poison: done
+out= writes checked: 4256; shape or bill != expected: 0; bit-identical and NaN-free on all cases: True

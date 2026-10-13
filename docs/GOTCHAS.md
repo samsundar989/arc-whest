@@ -1936,3 +1936,11 @@ back from there, or write to an absolute repo path (`C:\Users\samsu\Documents\ar
    materializations. Scatter-back = zero-pad + `take` (never assign into an array).
 4. **The `wall_class` law classes any block < 64 as leaf 32.** Block 40 builds are over-projected
    by ~45 %. Use a local alternating A/B against a parent with a measured server median.
+
+## Lane worktrees and pods (2026-10-13)
+
+1. **`workerq submit` from a lane worktree (`../arc-whest-lane-*`) is refused**: "passthrough 'cache/hf' escapes the
+   repository". Submit from the main checkout with absolute paths to the worktree's files (Lane O, Oct 13).
+2. **RunPod pods can disappear.** `acc7entl4kttqk` and every other pod on the account were gone on Oct 13 (404).
+   Never keep the only copy of a result on a pod: pull outputs before stopping. Current pods: `docs/CURRENT_STATE.md`.
+3. A tar made on Windows exits non-zero on the pod (chown warnings) even though it extracted: use `--no-same-owner`.

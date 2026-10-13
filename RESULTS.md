@@ -3048,3 +3048,58 @@ Parity file↔arm DEV (pod) 1.682262e-08 vs 1.682542e-08 = **1.7e-4**. FRESH-A v
 **v84_age6 graded (#335562): 2.849755454236018e-09, NEW BEST**, raw 1.642151991276819e-08, 100 clean. −1.54 % vs v83_r7od16
 (graded raw −6.71 %, vs FRESH-A −5.84 %); **−0.53 % vs the FRESH-A projection** 2.8648e-09 (first graded row below projection
 since the calibration; recheck the ÷1.019 constant if the next one repeats it). −14.2 % vs v81d. `--best-graded` updated.
+
+## P7 (HANDOFF 2026-10-12 Lane P7) — integrate S / K / O
+
+**v83_r7ws graded (#335688, Oct 13 A/B slot): 2.98079315443596e-09, NEW wall-safe B**, raw 1.7595494892219675e-08, 100 clean.
+−0.48 % vs v83_r5ws; +0.18 % vs the FRESH-A projection 2.9754e-09.
+
+### P7.1 — v85 = v84 + `sb2` (Lane S S1, lane-s 6d7e71e; checks reproduced on main in `experiments/2026-10-13_v85_sb2/`)
+Build `tools/build_v85.py --params experiments/2026-10-11_p6/r8/age6/params_best.npz --atoms sb2` → `d3359e48` (= lane-s build).
+(1) **bit-identical** to v84_age6 on DEV 0–4 under real flopscope f64 read-only (`array_equal`, max |Δ| 0; `bitid_main.txt`;
+v84's first net-2 run failed transiently under memory load, rerun alone clean); (2) meter **F/B 0.165329** (363,561,601,589),
+**24,576 ops** on every net and every WSL repeat; (3) WSL 8 GiB **23/23 PASS, VmPeak 4,953 MB** (v84 6,768), settled +51 MB / 5;
+(4) wall A/B DEV net 3 ×3 (machine loaded) **0.783×** v84 (Lane S, quiet: 0.753×) → ≈ 74 s noisy-implied; (5) `out=` audit on
+main's file: 4,256 writes, 0 shape/bill mismatches, bit-identical and NaN-free on poisoned buffers. No `where=`.
+
+| date | file | sha8 | panel | raw MSE | F/B | ops | wall | RSS | projected | graded | paired gain | wins/N | notes |
+|---|---|---|---|---:|---:|---:|---|---|---:|---:|---|---|---|
+| 2026-10-13 | `estimator_k3_v85_sb2.py` | `d3359e48` | bit-identical to v84 (DEV 0–4) | = v84 | 0.16533 | 24,576 | A/B 0.783× v84 → ≈ 74 s noisy-implied | VmPeak 4,953 MB (WSL PASS) | **2.7150e-09** | **2.71494812074391e-09** (#335697) | — (bit-identical: no FRESH-A) | — | Strassen variant B glue (pooled `out=` views, fused last level), same depths. Package `74fe2714…ac82`, inner = source. First canary of UTC Oct 13. Predictions: strategist 2.713e-9 ± 0.2 %, worker 2.7150e-9 (`PREDICTIONS.md`). |
+
+**v85_sb2 graded (#335697): 2.71494812074391e-09, NEW BEST**, raw 1.642151991276819e-08 (= #335562 to every digit: bit-identity
+holds on the graded nets), 100 clean. −4.73 % vs v84_age6 (= the F ratio); −0.002 % vs the projection 2.7150e-09. `ev.py
+--best-graded` updated. **Server telemetry (wall mean/max, residual max, per-op residual) NOT collected**: the API returns only
+score/raw and the result page needs a logged-in browser (Chrome tools disconnected). Until it is read, the ops gate stays
+≤ 26,000 (handoff rule), which blocks depth16 (26,875) and depth8 (~30,000).
+
+**v85 server telemetry (#335697, 100/100 MLPs, read from the result page; `experiments/2026-10-13_v85_sb2/telemetry_335697.json`).**
+predict wall mean **68.6 s**, max **75.7 s** (v84 82 / 86 s: ×0.84 / ×0.88; strategist 62–70 ✓, worker 60–66 ✗); kernel 58.5 s,
+overhead 9.8 s; setup 0.037 s. **Residual mean 0.2886 s, max 0.3106 s** (prediction ≤ 0.27 s ✗; v84 max 0.240 s). Per op
+**11.75 µs mean, 12.64 µs worst** at 24,576 ops — **+16 % vs v84's 10.85 µs**: the pooled `out=` ops cost *more* residual per
+call, not less (the plan assumed less). **Ops gate (Samuel's decision 3): projected worst residual ≤ 0.33 s at 12.64 µs/op ⇒
+ops ≤ 26,100** (at the mean rate 28,100). Consequences: depth16 (26,875 ops ⇒ 0.340 s) FAILS by 3 %; depth8 (~30,000 ⇒ 0.379 s)
+FAILS; per-site depth and the S2 ops trim ("+2 ops per level instead of +3") are the only depth routes left; every K/O atom
+must now report ops and keep the stack ≤ 26,100. Residual worst/mean 1.076.
+
+**Correction (same day):** the "depth16 / depth8 FAIL" consequence above used the λ = 0 (pure-FLOP) depth points. Lane S's
+atoms price each op at λ FLOPs inside the per-site depth choice (lane-s `experiments/2026-10-13_s/s2_lambda_scan.log`). On the
+v85 base: **depth16** default (leaf 16, cap 6, λ 8e5) F/B 0.16370 (−5.67 % vs v84), **24,875 ops** (meter-confirmed) ⇒ 0.3144 s
+worst; **depth8** default (leaf 8, cap 6, λ 1.2e6) F/B 0.15972 (−7.96 %), **25,201 ops** ⇒ 0.3185 s worst. Both pass the
+≤ 26,100 gate; depth8:1e6/6 (0.15930, 26,051 ops, 0.3293 s) is at the edge and not shipped. DEV-100 ±0.3 % (workerq #2663),
+wall and WSL still pending.
+
+**P7 build prices (exact; Lane K's out=-aware costfloor interpreter, which reproduces the real meter on sb2 to the FLOP;
+lane-k `experiments/2026-10-13_k/meter/sbtrim_prices.txt`; order sb2+sbtrim+depthX then k atoms; ops gate ≤ 26,100):**
+
+| build | F/B | ΔF vs v85 | ops |
+|---|---:|---:|---:|
+| v85 = sb2 | 0.16533 | — | 24,576 |
+| sb2+sbtrim (bit-identical) | 0.16533 | 0 | 23,551 |
+| **v86 candidate** sb2+sbtrim+depth8 | 0.15965 | −3.44 % | 24,331 |
+| sb2+sbtrim+depth8+A (k0+k1:2.5_3.0+k2:3.0) | 0.14677 | −11.23 % | 25,030 |
+| **v87 candidate** sb2+sbtrim+depth8+B (A+k3) | **0.14250** | **−13.81 %** | 25,211 |
+| sb2+sbtrim+depth8+C+k3 (k1:2.5) | 0.13956 | −15.59 % | 25,187 |
+| sb2+sbtrim+depth16+B | 0.14489 | −12.36 % | 24,971 |
+
+Accuracy is NOT in this table: depth8 needs DEV-100 within ±0.3 % (Lane S, on the exact trimmed build); the K stacks need the
+pod-2 refit vs matched control (ETA ~13:00 UTC). Marginal rule: −13.81 % F pays for raw up to +16.0 %.

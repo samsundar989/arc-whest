@@ -9,7 +9,8 @@ Pipeline:
   2. the '+'-joined `--atoms`, applied in the order given, each from `tools/atoms/<name>.py`.
 
 Atom slots (owner lane, handoff step):
-  S: sb2 (S1 variant B, bit-identical) · depth16 / depth8 (S2) · sbks (S3 variant C)
+  S: sb2 (S1 variant B, bit-identical) · sbtrim (op trim, bit-identical; after sb2, before depth) · depth16 / depth8 (S2)
+     · sbks (S3 variant C). Order: sb2+sbtrim+depthX; k atoms anywhere after sb2.
   K: k0 (gain-fill dropped D21 rows) · k1 (kink-only D21 rows) · k2 (leg output rows) · k3 (two-column H) · k4 (last-layer
      transport) · k5 (adaptive counts, optional)
   O: o1 (SVD join / smaller rank) · o2 (split leg ranks) · o3 (ages / no old tier) · o4 (spend items)
