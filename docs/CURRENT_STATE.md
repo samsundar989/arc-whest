@@ -8,7 +8,7 @@ same-shape `out=` allowed; ops gate becomes "projected residual ≤ 0.33 s at v8
 - **K** (branch `lane-k`): `docs/HANDOFF_2026-10-12_LANE_K.md` — pruning v2 with analytic gain replacement (K0–K4, K5 optional).
 - **O** (branch `lane-m`, follows M6): `docs/HANDOFF_2026-10-12_LANE_O.md` — old tier and spend items.
 
-Best graded A: **v84_age6 2.849755454236018e-9 (#335562)**; **v85_sb2 2.71494812074391e-9 (#335697) = NEW BEST A** (bit-identical to v84, F/B 0.16533). Server telemetry for #335697 still to be read (needs Chrome/Samuel); ops gate ≤ 26,000 until then.
+Best graded A: **v84_age6 2.849755454236018e-9 (#335562)**; **v85_sb2 2.71494812074391e-9 (#335697) = NEW BEST A** (bit-identical to v84, F/B 0.16533). Telemetry read: wall 68.6/75.7 s, residual 0.289/0.311 s = 12.64 µs/op worst ⇒ **ops gate ≤ 26,100** (RESULTS § P7.1).
 B: **v83_r7ws 2.98079315443596e-9 (#335688)**, Oct 13 A/B slot (projected 2.9754e-9; was v83_r5ws 2.9952e-9).
 
 **Oct 13 03:40 UTC — pods: pod 1 `acc7entl4kttqk` no longer exists (404; the account lists no pods).** Its `/workspace`

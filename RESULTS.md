@@ -3071,3 +3071,12 @@ holds on the graded nets), 100 clean. −4.73 % vs v84_age6 (= the F ratio); −
 --best-graded` updated. **Server telemetry (wall mean/max, residual max, per-op residual) NOT collected**: the API returns only
 score/raw and the result page needs a logged-in browser (Chrome tools disconnected). Until it is read, the ops gate stays
 ≤ 26,000 (handoff rule), which blocks depth16 (26,875) and depth8 (~30,000).
+
+**v85 server telemetry (#335697, 100/100 MLPs, read from the result page; `experiments/2026-10-13_v85_sb2/telemetry_335697.json`).**
+predict wall mean **68.6 s**, max **75.7 s** (v84 82 / 86 s: ×0.84 / ×0.88; strategist 62–70 ✓, worker 60–66 ✗); kernel 58.5 s,
+overhead 9.8 s; setup 0.037 s. **Residual mean 0.2886 s, max 0.3106 s** (prediction ≤ 0.27 s ✗; v84 max 0.240 s). Per op
+**11.75 µs mean, 12.64 µs worst** at 24,576 ops — **+16 % vs v84's 10.85 µs**: the pooled `out=` ops cost *more* residual per
+call, not less (the plan assumed less). **Ops gate (Samuel's decision 3): projected worst residual ≤ 0.33 s at 12.64 µs/op ⇒
+ops ≤ 26,100** (at the mean rate 28,100). Consequences: depth16 (26,875 ops ⇒ 0.340 s) FAILS by 3 %; depth8 (~30,000 ⇒ 0.379 s)
+FAILS; per-site depth and the S2 ops trim ("+2 ops per level instead of +3") are the only depth routes left; every K/O atom
+must now report ops and keep the stack ≤ 26,100. Residual worst/mean 1.076.
