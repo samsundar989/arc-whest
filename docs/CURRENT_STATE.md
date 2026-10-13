@@ -1,4 +1,16 @@
-# CURRENT_STATE — 2026-10-11 (plan rev 23, Lane P6)
+# CURRENT_STATE — 2026-10-13 (plan rev 24, Lane P7)
+
+Plan rev 24 = `docs/research/2026-10-12_deep_review.md` §6 (on PLAN rev 18 §5 gates, with Samuel's Oct 12 decisions:
+same-shape `out=` allowed; ops gate becomes "projected residual ≤ 0.33 s at v85's measured per-op rate" once v85 is graded,
+≤ 26,000 until then). **Lane P6 and Lane M6 are COMPLETE.** Active lanes:
+- **P7** (main, this file's owner): `docs/HANDOFF_2026-10-12_LANE_P7.md` — integrate, refit, canary, harden. Builder `tools/build_v85.py`.
+- **S** (branch `lane-s`): `docs/HANDOFF_2026-10-12_LANE_S.md` — Strassen v2 (`sb2` → depth → variant C → tables on 64).
+- **K** (branch `lane-k`): `docs/HANDOFF_2026-10-12_LANE_K.md` — pruning v2 with analytic gain replacement (K0–K4, K5 optional).
+- **O** (branch `lane-m`, follows M6): `docs/HANDOFF_2026-10-12_LANE_O.md` — old tier and spend items.
+
+Best graded A: **v84_age6 2.849755454236018e-9 (#335562)**. B: v83_r5ws 2.9952e-9 (#335461); v83_r7ws → Oct 13 A/B slot.
+
+# (history) CURRENT_STATE — 2026-10-11 (plan rev 23, Lane P6)
 
 Plan rev 23 = `docs/research/2026-10-10_evening_review.md` (§0, §2, §5, §6), on PLAN rev 18 §5 gates.
 **Lane P5 and Lane M5 are COMPLETE.** Active: Lane P6 (main) per `docs/HANDOFF_2026-10-11_LANE_P6.md`;

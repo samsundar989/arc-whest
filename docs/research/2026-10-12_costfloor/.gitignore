@@ -1,0 +1,4 @@
+*.npz
+res/
+variants/
+__pycache__/
