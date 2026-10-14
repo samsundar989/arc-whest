@@ -3151,3 +3151,9 @@ Materialization clause (≤ 0.30 s worst) at 12.35 µs/op ⇒ **ops ≤ 24,290**
 **v87_Bws graded (#335891): 2.4298860529998687e-09, NEW wall-safe B**, raw 1.676542323636454e-08 (= v87_B's graded raw +0.04 %),
 100 clean. −18.5 % vs v83_r7ws; +0.04 % vs projection. B sits 0.54 % behind A (v87_B 2.41690e-9) with margins ≥ 12 % on wall
 (≈ 91.8 s ≤ 95), residual (0.296 s ≤ 0.30) and memory (VmPeak@100 6,490 MiB ≤ 7,200).
+
+### P7.4 — v88_k5 (v87 + K5 adaptive counts, depth λ 1.5e6) — **NOT ACCEPTED** (`experiments/2026-10-14_v88/`)
+FRESH-A raw 1.765749e-08 vs v87_B 1.774908e-08 = **−0.52 %** (DEV-100 had −1.62 %, twin VAL −1.42 %). Mean F (Lane K, 20 nets)
+0.14550 vs 0.14422 = +0.89 % ⇒ score ratio ≈ 0.9948 × 1.0089 = **1.004 (≈ 0.4 % worse)**. ev.py's own paired ratio (0.9771×,
+20/100) is biased: it bills every net at net 0's F (0.14836) — invalid for per-net-F builds. WSL ×5 VmPeak 6,094 MB (growth row
++367 MB, advisory). Stop rule (FRESH-A not better than v87) ⇒ **not submitted**. K5's DEV/VAL gain did not transfer to FRESH-A.

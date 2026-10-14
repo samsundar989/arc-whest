@@ -1952,3 +1952,6 @@ back from there, or write to an absolute repo path (`C:\Users\samsu\Documents\ar
    keeps `--lifecycle-control-mib` (96) per repeat, so 250 × 96 MiB ≈ 8 GiB trips the cap and the gate refuses. Pass
    `--lifecycle-control-mib 16` (4 GB over 250 — still far above the 64 MB detection band). Also: a wrapper script around
    a gate must exit non-zero when its child fails, or workerq reports SUCCEEDED for a run that never happened (Lane S #2727).
+6. **`tools/ev.py` bills every net at ONE net's FLOPs** (its cost step meters net 0). For builds whose FLOPs vary per net
+   (K5 adaptive counts) the paired score is biased by (F_net0 / F_mean); recompute the score ratio from raw × mean F over
+   ≥ 20 nets (v88_k5: ev said 0.977×, true ≈ 0.996×).
