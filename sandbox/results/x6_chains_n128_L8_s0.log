@@ -1,0 +1,8 @@
+full   t=  16.5s  MSE vs MC 1.073e-05  ratio to full 1.000
+age2   t=  13.4s  MSE vs MC 3.068e-05  ratio to full 2.861
+age3   t=  13.1s  MSE vs MC 2.003e-05  ratio to full 1.868
+age4   t=  12.4s  MSE vs MC 1.398e-05  ratio to full 1.303
+ind3   t=  12.1s  MSE vs MC 1.770e-05  ratio to full 1.650
+dp     t=   2.3s  MSE vs MC 2.204e-05  ratio to full 2.055
+gate   t=  12.4s  MSE vs MC 1.115e-05  ratio to full 1.040
+k2     t=   0.0s  MSE vs MC 1.180e-04  ratio to full 11.003

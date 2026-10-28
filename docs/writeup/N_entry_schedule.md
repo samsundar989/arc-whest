@@ -1,0 +1,51 @@
+# N — Birth-layer-dependent entry schedule E(s) for the exact κ3 tier (sandbox, Oct 21 11:10 UTC) — VERDICT: no new lever; it is per-layer E in disguise, and at equal cost it buys nothing
+
+**Question.** The exact tier keeps every hub-star lineage for a uniform E = 6 ages whatever its birth layer s. Since the final-layer error is dominated by readouts at layers 11–15, would an entry schedule E(s) that keeps late-born lineages longer (E = 4 for s ≤ 4, 8 for s ≥ 5, and variants 3/9, 5/7, 2/10, ramps 3 + s/2, 2 + s/2; reverse 8/4 as control) lower the late-layer κ3 error at equal cost?
+
+**Method** (`/home/claude/sandbox/entry_schedule.py`; results `results/entry_schedule_n{128,256}.json`, diagnostics `…_refkas.json`, `…_r0.14.json`; logs beside them). Same machinery as K (`pooled_carrier.py`, unmodified): random He nets, x ~ N(0, I), n = 128 and 256, depth 16, seeds 1, 2; exact Gaussian chain; every first-order hub-star lineage built explicitly and transported by G_l = W_{l+1}diag(Φ_l); legs built once per (n, seed) and all schedules evaluated on the same legs. Lineage s is exact at layer l if age l − s ≤ E(s) (KAS hubs |α| < 2.5); older lineages are projected on the best rank-r basis of their stacked legs at l, r = 0.28 n fixed. Readouts D3 / D21 vs the full lineage sum at layers 4–15, sensitivity-weighted ((αφ/σ²)², (φ_iφ_k)²). Cost per layer = 4·(exact hub columns alive) + 6r, quoted in n³ units per layer (÷ n), averaged over layers 9–15; also the per-layer profile, the per-layer maximum (the real chain's wall cap binds per layer, not on the mean) and the late share = Σ_{l=11..15} cost / Σ_{l=9..15} cost (U6: 68–70 %). Errors = rms over layers 9–15 (and over 11–15 separately), seeds pooled. Each schedule is compared with U6 and with the uniform E of equal *mean* cost (E_eq; error log-linearly interpolated along the uniform E = 2…12 curve). Runtime 16 s (n = 128) / 58 s (n = 256) per configuration.
+
+**Cost accounting first.** The premise "E(s) = 4/8 costs the same as E = 6" is false for the band that matters: 4/8 split at s = 5 has 4, 5, 6, 7, 8, 8, 8 exact ages alive at layers 9…15, i.e. mean cost +9 % over layers 9–15 and the per-layer maximum +21 % (27.8 vs 23.0 at n = 128), with 79 % of the cost in layers 11–15 vs 70 % for U6. Every forward schedule shifts cost to the late layers. The mean-cost-matched versions are the splits at s = 6 (S4/8@6, S3/9@6, S5/7@6: mean cost −1 % vs U6, but max per layer +7…+30 %).
+
+**The structural finding.** For any non-decreasing E(s), the exact set at layer l is exactly the k(l) *youngest* ages (age ≤ E(s) ⇔ s ≥ some threshold), so the schedule is, layer by layer, *identical to uniform E = k(l)*: at every layer the error and the cost of S4/8 agree with those of U_{k(l)} to all printed digits (checked for all schedules, both n, both references). Birth-layer-dependent entry is therefore not a new degree of freedom — it is a layer-dependent uniform E, E_eff(l) = k(l), reparametrised. The only schedule that is *not* of this form is the reverse control S8/4 (keeps old lineages exact and drops young ones): at the same k it is 2–3× worse than U_k with the floor removed (e.g. layer 11, n = 256: 0.0208 vs 0.0059), confirming that the youngest ages carry the content and that any schedule that is not "youngest-first" is strictly dominated.
+
+**Main table** (r = 0.28 n, reference = full lineage sum; cost n³/layer; e3w/e21w rms over layers 9–15; E_eq = uniform E at the schedule's mean cost, e3w_eq/e21w_eq its errors; gain = 1 − err/err_eq, positive = schedule better; last three columns = D3 error over layers 11–15 only, schedule vs equal-mean-cost uniform).
+
+n = 128 (r = 36; KAS floor e3w = 0.0245, e21w = 0.0217)
+
+| schedule | mean cost | Δ vs U6 | max/layer | late share | e3w | e21w | E_eq | e3w_eq | e21w_eq | gain3 | gain21 | e3w 11–15 | eq | gain |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| U6 | 21.3 | +0% | 23.0 | 70% | 0.0248 | 0.0226 | 6.00 | 0.0248 | 0.0226 | 0% | 0% | 0.0272 | 0.0272 | 0% |
+| S4/8@6 | 21.1 | −1% | 27.1 | 79% | 0.0264 | 0.0256 | 5.94 | 0.0248 | 0.0227 | −6% | −13% | 0.0274 | 0.0273 | −0% |
+| S3/9@6 | 21.0 | −1% | 29.9 | 82% | 0.0278 | 0.0286 | 5.93 | 0.0248 | 0.0227 | −12% | −26% | 0.0274 | 0.0273 | −0% |
+| S5/7@6 | 21.1 | −1% | 24.2 | 75% | 0.0252 | 0.0234 | 5.96 | 0.0248 | 0.0226 | −1% | −3% | 0.0274 | 0.0273 | −0% |
+| S4/8 | 23.1 | +9% | 27.8 | 79% | 0.0256 | 0.0240 | 6.51 | 0.0246 | 0.0223 | −4% | −8% | 0.0271 | 0.0272 | +0% |
+| S3/9 | 24.1 | +13% | 30.7 | 80% | 0.0256 | 0.0240 | 6.78 | 0.0246 | 0.0221 | −4% | −8% | 0.0271 | 0.0271 | +0% |
+| S5/7 | 22.2 | +4% | 24.9 | 76% | 0.0249 | 0.0228 | 6.24 | 0.0247 | 0.0224 | −1% | −2% | 0.0271 | 0.0272 | +0% |
+| S2/10 | 24.6 | +16% | 33.5 | 80% | 0.0256 | 0.0239 | 6.93 | 0.0245 | 0.0220 | −4% | −9% | 0.0271 | 0.0271 | +0% |
+| R3+s/2 | 20.2 | −5% | 23.1 | 73% | 0.0253 | 0.0236 | 5.68 | 0.0251 | 0.0232 | −1% | −2% | 0.0276 | 0.0276 | +0% |
+| R2+s/2 | 17.7 | −17% | 20.3 | 75% | 0.0269 | 0.0262 | 4.96 | 0.0262 | 0.0249 | −3% | −5% | 0.0281 | 0.0286 | +2% |
+| S4/8@7 | 19.2 | −10% | 26.5 | 77% | 0.0272 | 0.0270 | 5.39 | 0.0255 | 0.0238 | −6% | −13% | 0.0285 | 0.0280 | −2% |
+| S8/4 (reverse) | 19.9 | −6% | 31.0 | 59% | 0.0293 | 0.0289 | 5.60 | 0.0252 | 0.0234 | −16% | −24% | 0.0327 | 0.0277 | −18% |
+
+n = 256 (r = 72; KAS floor e3w = 0.0259, e21w = 0.0237)
+
+| schedule | mean cost | Δ vs U6 | max/layer | late share | e3w | e21w | E_eq | e3w_eq | e21w_eq | gain3 | gain21 | e3w 11–15 | eq | gain |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| U6 | 19.8 | +0% | 22.3 | 68% | 0.0266 | 0.0250 | 6.00 | 0.0266 | 0.0250 | 0% | 0% | 0.0286 | 0.0286 | 0% |
+| S4/8@6 | 19.6 | −1% | 24.7 | 79% | 0.0288 | 0.0284 | 5.93 | 0.0268 | 0.0252 | −8% | −12% | 0.0291 | 0.0288 | −1% |
+| S3/9@6 | 19.6 | −1% | 27.1 | 81% | 0.0305 | 0.0321 | 5.93 | 0.0268 | 0.0253 | −14% | −27% | 0.0291 | 0.0288 | −1% |
+| S5/7@6 | 19.6 | −1% | 22.4 | 73% | 0.0274 | 0.0258 | 5.95 | 0.0267 | 0.0252 | −2% | −3% | 0.0290 | 0.0287 | −1% |
+| S4/8 | 21.6 | +9% | 25.9 | 78% | 0.0274 | 0.0264 | 6.51 | 0.0263 | 0.0246 | −4% | −8% | 0.0282 | 0.0283 | +0% |
+| S3/9 | 22.6 | +14% | 28.2 | 79% | 0.0274 | 0.0264 | 6.80 | 0.0262 | 0.0243 | −5% | −9% | 0.0282 | 0.0282 | −0% |
+| S5/7 | 20.7 | +4% | 23.3 | 75% | 0.0268 | 0.0252 | 6.24 | 0.0265 | 0.0248 | −1% | −1% | 0.0283 | 0.0285 | +1% |
+| S2/10 | 23.1 | +17% | 30.7 | 80% | 0.0274 | 0.0264 | 6.94 | 0.0261 | 0.0242 | −5% | −9% | 0.0282 | 0.0281 | −0% |
+| R3+s/2 | 18.7 | −6% | 20.5 | 72% | 0.0274 | 0.0261 | 5.67 | 0.0274 | 0.0261 | −0% | −0% | 0.0291 | 0.0294 | +1% |
+| R2+s/2 | 16.3 | −18% | 18.0 | 74% | 0.0296 | 0.0298 | 4.95 | 0.0292 | 0.0286 | −1% | −4% | 0.0301 | 0.0314 | +4% |
+| S4/8@7 | 17.6 | −11% | 23.7 | 76% | 0.0298 | 0.0303 | 5.35 | 0.0281 | 0.0271 | −6% | −12% | 0.0304 | 0.0302 | −1% |
+| S8/4 (reverse) | 18.6 | −6% | 30.3 | 57% | 0.0329 | 0.0341 | 5.63 | 0.0275 | 0.0262 | −20% | −30% | 0.0362 | 0.0295 | −23% |
+
+Per-layer cost profile, layers 9…15 (n³/layer, n = 256; n = 128 has the same shape, ×1.03–1.07): U6 22.3 21.5 20.7 19.7 19.0 18.0 17.4 (flat, slowly falling as fewer hubs pass KAS) · S4/8 15.0 17.9 20.7 23.3 25.9 24.7 23.7 · S4/8@6 15.0 14.4 17.1 19.7 22.4 24.7 23.7 · S3/9@6 11.4 14.4 17.1 19.7 22.4 24.7 27.2 · S5/7@6 18.6 17.9 17.1 19.7 22.4 21.3 20.5 · R3+s/2 18.6 17.9 17.1 19.7 19.0 18.0 20.5 · S8/4 30.3 25.6 21.0 16.7 12.6 12.0 11.7. Every forward schedule moves the bill into layers 12–15, where the uniform tier's bill is lowest; under a per-layer wall cap the binding number is the maximum, and at matched maximum S4/8 (27.8) is simply U7 (27.0) at layers 13–15 and worse than U7 everywhere else.
+
+**Diagnostics** (same schedules; full tables in the `_refkas` / `_r0.14` logs). (a) *Floor removed* — reference = KAS-pruned lineage sum, so the number is the pure exact-vs-band error, no longer masked by the 0.025 hub-pruning floor that every representation shares: U6 e3w = 0.0051 / 0.0063 (n = 128 / 256) and the uniform curve falls ≈ ×1.8 per extra age. At equal mean cost the mean-matched schedules are 2× worse over layers 9–15 (S4/8@6: 0.0106 vs 0.0053; 0.0125 vs 0.0066) and at best level over layers 11–15 (−2 % / +6 %); the dearer S4/8 (+9 % mean, +21 % max) is 23 % / 29 % better than the equal-*mean*-cost uniform over layers 11–15 — because at those layers it *is* U8 — and 2× worse over 9–10. (b) *Lossy band*, r = 0.14 n (reference full): the same picture with larger numbers — mean-matched S4/8@6 is −25 % / −18 % over layers 9–15 and +5 % / +13 % over layers 11–15; nothing better than taking the extra ages at the late layers outright.
+
+**Reading.** Birth-layer-dependent entry does not buy a lower late-layer κ3 error at equal cost, at either width. The reason is structural, not statistical: for any schedule that keeps late-born lineages longer, the exact set at layer l is the k(l) youngest ages, so the schedule is exactly uniform E = k(l) at that layer — same error, same cost, to every digit — and the "knob" collapses to choosing E per layer. Spending the exact budget where the sensitivity sits (k = 8 at layers 13–15, k = 4 at layer 9) then lowers the 11–15 error by up to 20–30 % *only* when measured against a uniform E of equal *mean* cost, and that mean hides an +18–33 % rise in the per-layer maximum, i.e. precisely the late-layer bill the wall cap binds on; at matched per-layer cost the schedule is the uniform tier with that many ages and gains nothing. Mean-cost-matched versions (S4/8@6, S3/9@6, S5/7@6) are level (within ±1 %) at layers 11–15 and 1–27 % worse over 9–15 at r = 0.28 n (2× worse with the floor removed), and the ramps sit on the uniform curve. The ordering is identical at n = 128 and 256 and at r = 0.14 n and 0.28 n; the reverse control (old lineages kept, young dropped) is 16–30 % worse at equal cost, which pins the mechanism: content lives in the youngest ages, so "youngest-first" is the optimal order and uniform E already is youngest-first. At r = 0.28 n, moreover, U6 is within 1–3 % of the KAS floor at both widths, so there is no late-layer error left for any entry rule to recover; the only remaining κ3 levers are the hub set (KAS threshold) and, under a per-layer cap, the per-layer E itself, which the real chain already sets by the wall cap. No build; nothing to carry into today's runs.

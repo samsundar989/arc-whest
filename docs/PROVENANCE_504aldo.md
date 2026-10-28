@@ -286,3 +286,31 @@ this repository does not get to blur that.
   block), a lagged variant (`"lag"`) of our own, and REF calibrated on our FIT
   panel by `tools/adlam_calib.py` (`experiments/2026-09-26_adlam/ref_fit100.json`).
   No 504aldo REF or β values are used.
+
+## 2026-10-17 — coherent scale and reference-birth research
+
+- **Published mechanism reviewed:** jointly carrying a harmonic fourth core and
+  extracting a common multiplicative scale contribution from covariance, third
+  and fourth cumulants. Source: public [topic 18248](https://discourse.aicrowd.com/t/18248)
+  and its 17-page paper, especially pp. 4–5. The paper's approximations and fitted
+  on/off comparison are not represented as exact identities or our own discovery.
+- **Independent own checks:**
+  `experiments/2026-10-17_p11/scale_tensor_identity_check.py` derives all entries
+  from a finite independent scale/base law and checks exact cumulants through
+  fourth order. It separately identifies the first-order terms omitted in the
+  published production simplification. No participant estimator was imported,
+  copied or executed in this work.
+- **Reference budget3 births:**
+  `experiments/2026-10-17_p11/budget3_tensor_identity_check.py` independently
+  expands the public ARC hypertree leg definition and verifies its collapsed
+  matrix form, repeated-face subtraction and scalar-metric fourth-to-third feed.
+  The source formula was inspected in the ARC reference
+  `mlp_kprop/factor_k3.py`, section 3.2 (approximately lines 372–465 of the local
+  upstream checkout), not copied from `external/504aldo`. Both inclusion and
+  explicit paper-style omission of the K22 leg are tested. Non-tree diagrams
+  remain absent from that reference expansion.
+- **Status:** algebra/research only. The new joint reference in the research
+  worktree is own code and has not been submitted. Its current-AUGMENT equations
+  reuse our already-audited frozen coefficient program. Any later practical
+  generalized-hub representation, approximation, fit or submitted adaptation
+  must retain these attributions and its own source-bound evidence.

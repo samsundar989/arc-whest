@@ -1,5 +1,18 @@
 # arc-whest — Samuel's entry, ARC White-Box Estimation Challenge 2026
 
+## Phase 2 write-up (submission #337601) — start here
+
+- **Write-up (PDF):** [`docs/arc-whestbench-phase2-writeup-337601-neopok919.pdf`](docs/arc-whestbench-phase2-writeup-337601-neopok919.pdf) (source: `docs/writeup/writeup_source.md`). Graded entry **#337601**: adjusted 1.8751e-9, raw final-layer MSE 1.4035e-8 at 13.4 % of budget, 0/100 failures.
+- **Graded source:** [`experiments/2026-10-21_L7/release_a5s_soupbc368/estimator.py`](experiments/2026-10-21_L7/release_a5s_soupbc368/estimator.py) — sha256 `180e488bfb2e…`, byte-identical to what was graded; the submitted package is `experiments/2026-10-21_L7/a5s-soupbc368-lam35-180e488b.tar.gz` (sha256 `2ee01ae90fe5…`). Depends only on `numpy`, `flopscope` 0.12.3 and the standard library.
+- **Every number in the PDF, with its source file and line:** [`docs/writeup_datapack.md`](docs/writeup_datapack.md). Full ledger: `docs/WRITEUP_LEDGER_2026-10-21.md`. Nominee verification and rerun margins: `docs/DESIGNATION.md`. Per-experiment `RESULT.md` files under `experiments/2026-10-20_*` and `experiments/2026-10-21_*`; graded reports under `experiments/run_reports/`. Math notes: `docs/F_math.md`; architecture census and lever table: `docs/writeup/A_architecture.md`, `docs/writeup/B_levers.md`; sandbox reports (pooled carrier, coupling, split frontier, entry schedule, rank-k state, covariance faces, κ4 ceiling) and pre-registration specs: `docs/writeup/`; sandbox code and JSON results: `sandbox/`.
+- **Reproduce the bill:** `python tools/bill_meter.py experiments/2026-10-21_L7/release_a5s_soupbc368/estimator.py` → 293,790,066,123 F / 20,991 ops (flopscope 0.12.3, numpy 2.2.6). FRESH panel tools: `tools/fresh/`; nominee verifier: `tools/verify_nominee.py`. `whest evaluate` on the public panel reproduces the graded score.
+- **Provenance:** two mechanisms were re-implemented from 504aldo's public V29 (MIT) with our own fits — see `docs/PROVENANCE_504aldo.md` and PDF §8; the young-tree κ4 reader follows the physics in forum 18249; kai's two-term Q31 law is used as published. No third-party code is copied into this repository.
+- **LLM use:** planning, analysis and the write-up text were produced with Anthropic's Claude (Cowork, Fable 5.1); code by Claude Code (Opus 5) and the author, who takes responsibility for every claim. Every change was gated by a pre-registered prediction, a byte-identical zero control, paired VAL/FRESH panels and a graded canary.
+- **Branch note:** `writeup-337601` carries the release files on top of the public `main`; the full local development history (≈ 900 further commits) is being pushed to `main` separately.
+- **Licence:** MIT (`LICENSE`).
+
+---
+
 **Challenge**: estimate every neuron's expected activation of a random Phase-2
 `1024 x 16` ReLU MLP under `N(0,I)` inputs, from the weights, under a FLOP budget.
 Lower `final_layer_MSE × max(0.1, FLOPs/2**41)` wins. **Phase 2 is live and closes

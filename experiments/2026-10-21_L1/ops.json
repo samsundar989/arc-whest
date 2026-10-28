@@ -1,0 +1,616 @@
+{
+ "331317": {
+  "ops": 13037,
+  "flops": 661961618994,
+  "source": "experiments/2026-09-16_slice7_canary/v31-canary.tar.gz pkg 50d24ee5",
+  "evidence": "experiments/submissions.jsonl:15 note \"13,037 ops\"",
+  "confidence": "high"
+ },
+ "331816": {
+  "ops": 23421,
+  "flops": 480850933121,
+  "source": "experiments/2026-09-21_c10_canary/c10-canary.tar.gz pkg 1d476ab2",
+  "evidence": "experiments/submissions.jsonl:16 note \"23,421 op calls\"",
+  "confidence": "high"
+ },
+ "331863": {
+  "ops": 25728,
+  "flops": null,
+  "source": "experiments/2026-09-22_v50_canary/v50-canary.tar.gz pkg 38d18509",
+  "evidence": "experiments/submissions.jsonl:17 note \"25,728 ops\"",
+  "confidence": "high"
+ },
+ "331880": {
+  "ops": 25140,
+  "flops": null,
+  "source": "experiments/2026-09-22_v53_canary/v53-canary.tar.gz pkg None",
+  "evidence": "experiments/submissions.jsonl:18 note \"25,140 ops\"",
+  "confidence": "high"
+ },
+ "331939": {
+  "ops": 25728,
+  "flops": null,
+  "source": "experiments/2026-09-22_v50_canary/v50-canary.tar.gz pkg 38d18509",
+  "evidence": "RESULTS.md:278 v50_safe f9cb9439 row #331939 ops 25,728 (identical bytes to #331863)",
+  "confidence": "high"
+ },
+ "331967": {
+  "ops": 23645,
+  "flops": null,
+  "source": "experiments/2026-09-23_v55_canary/v55-canary.tar.gz pkg ff18a7c2",
+  "evidence": "experiments/submissions.jsonl:20 note \"23,645 ops\"",
+  "confidence": "high"
+ },
+ "331980": {
+  "ops": 23645,
+  "flops": null,
+  "source": "experiments/2026-09-23_v55_canary/v55-canary.tar.gz pkg ff18a7c2",
+  "evidence": "RESULTS.md:281 v55_p2r4 aac641b4 row #331980 ops 23,645",
+  "confidence": "high"
+ },
+ "331989": {
+  "ops": 25728,
+  "flops": null,
+  "source": "experiments/2026-09-22_v50_canary/v50-canary.tar.gz pkg 38d18509",
+  "evidence": "RESULTS.md:282 v50_safe row #331989 ops 25,728",
+  "confidence": "high"
+ },
+ "332063": {
+  "ops": 19804,
+  "flops": null,
+  "source": "experiments/2026-09-24_v56b_canary/v56b-canary.tar.gz pkg 820ed94c",
+  "evidence": "RESULTS.md:285 estimator_k3_v56b_wallsafe.py b401ad75 GRADED sub #332063, ops 19,804",
+  "confidence": "high"
+ },
+ "332088": {
+  "ops": 22978,
+  "flops": 485566756073,
+  "source": "experiments/2026-09-24_tr64_canary/tr64-canary.tar.gz pkg 71b05016",
+  "evidence": "experiments/submissions.jsonl:24 note \"22,978 ops\"",
+  "confidence": "high"
+ },
+ "332129": {
+  "ops": 24186,
+  "flops": 475550316409,
+  "source": "experiments/2026-09-24_v57_canary/v57-canary.tar.gz pkg 9deb048d",
+  "evidence": "experiments/submissions.jsonl:25 note \"24,186 ops\"",
+  "confidence": "high"
+ },
+ "332223": {
+  "ops": 20345,
+  "flops": 510179282809,
+  "source": "experiments/2026-09-25_v60ws_canary/v60ws-canary.tar.gz pkg fb067224",
+  "evidence": "experiments/submissions.jsonl:26 note \"20,345 ops\"",
+  "confidence": "high"
+ },
+ "332232": {
+  "ops": 24186,
+  "flops": null,
+  "source": "experiments/2026-09-25_v59_canary/v59-canary.tar.gz pkg 5b7e5213",
+  "evidence": "experiments/submissions.jsonl:27 note \"ops 24,186\"",
+  "confidence": "high"
+ },
+ "332313": {
+  "ops": 24186,
+  "flops": null,
+  "source": "experiments/2026-09-25_v62s1_canary/v62s1-canary.tar.gz pkg d7eb139d",
+  "evidence": "experiments/submissions.jsonl:28 note \"ops 24,186\"",
+  "confidence": "high"
+ },
+ "332350": {
+  "ops": 24186,
+  "flops": null,
+  "source": "experiments/2026-09-25_v64s2_canary/v64s2-canary.tar.gz pkg c776d9e2",
+  "evidence": "experiments/submissions.jsonl:29 note \"ops 24,186\"",
+  "confidence": "high"
+ },
+ "332364": {
+  "ops": 20345,
+  "flops": null,
+  "source": "experiments/2026-09-26_v64ws_canary/v64ws-canary.tar.gz pkg 660870e7",
+  "evidence": "experiments/submissions.jsonl:30 note \"ops 20,345\"",
+  "confidence": "high"
+ },
+ "332393": {
+  "ops": 24438,
+  "flops": null,
+  "source": "experiments/2026-09-26_v65s2t_canary/v65s2t-canary.tar.gz pkg 6349c616",
+  "evidence": "experiments/submissions.jsonl:31 note \"ops 24,438\"",
+  "confidence": "high"
+ },
+ "332409": {
+  "ops": 24438,
+  "flops": null,
+  "source": "experiments/2026-09-26_v66_canary/v66-canary.tar.gz pkg 27f90e7d",
+  "evidence": "experiments/submissions.jsonl:32 note \"ops 24,438\"",
+  "confidence": "high"
+ },
+ "332440": {
+  "ops": 24648,
+  "flops": null,
+  "source": "experiments/2026-09-26_v67_canary/v67-canary.tar.gz pkg abe77785",
+  "evidence": "experiments/submissions.jsonl:33 note \"ops 24,648\"",
+  "confidence": "high"
+ },
+ "332478": {
+  "ops": 22701,
+  "flops": null,
+  "source": "experiments/2026-09-26_v68_canary/v68-canary.tar.gz pkg 034f8547",
+  "evidence": "experiments/submissions.jsonl:34 note \"ops 22,701\"",
+  "confidence": "high",
+  "fb": 0.21473
+ },
+ "332544": {
+  "ops": 19361,
+  "flops": null,
+  "source": "experiments/2026-09-27_v68ws_canary/v68ws-canary.tar.gz pkg 8e380cc0",
+  "evidence": "RESULTS.md:308 estimator_k3_v68_ws.py 0db9afba sub #332544, ops 19,361; also RESULTS.md:558",
+  "confidence": "high"
+ },
+ "332737": {
+  "ops": 22701,
+  "flops": null,
+  "source": "experiments/2026-09-27_v70/v70-canary.tar.gz pkg 073b58f4",
+  "evidence": "experiments/submissions.jsonl note \"F/B 0.21473, ops 22,701\"; RESULTS.md:310 estimator_k3_v70_s2t3.py 45f26986 ops 22,701",
+  "confidence": "high",
+  "fb": 0.21473
+ },
+ "332753": {
+  "ops": 22701,
+  "flops": null,
+  "source": "experiments/2026-09-27_v71/v71-canary.tar.gz pkg ece5f82d",
+  "evidence": "experiments/submissions.jsonl:37 note \"ops 22,701\"",
+  "confidence": "high"
+ },
+ "332766": {
+  "ops": 22992,
+  "flops": null,
+  "source": "experiments/2026-09-28_v72/v72-canary.tar.gz pkg 1da5ca8f",
+  "evidence": "experiments/submissions.jsonl:38 note \"ops 22,992\"",
+  "confidence": "high"
+ },
+ "332893": {
+  "ops": 23007,
+  "flops": null,
+  "source": "experiments/2026-09-28_v73gb/v73-canary.tar.gz pkg 11100ac0",
+  "evidence": "experiments/submissions.jsonl:39 note \"ops 23,007\"",
+  "confidence": "high"
+ },
+ "334434": {
+  "ops": 19667,
+  "flops": 508582322041,
+  "source": "experiments/2026-10-06_v74ws/v74ws-canary.tar.gz pkg 2bad853c",
+  "evidence": "experiments/submissions.jsonl:40 note \"ops 19,667\"",
+  "confidence": "high"
+ },
+ "334464": {
+  "ops": 23511,
+  "flops": 418252736377,
+  "source": "experiments/2026-10-06_v75kas/v75-canary.tar.gz pkg 31bf52e8",
+  "evidence": "experiments/submissions.jsonl:41 note \"ops 23,511\"",
+  "confidence": "high"
+ },
+ "334474": {
+  "ops": 19951,
+  "flops": 448958664569,
+  "source": "experiments/2026-10-06_v76kasws/v76-canary.tar.gz pkg b368c90c",
+  "evidence": "experiments/submissions.jsonl:42 note \"ops 19,951\"",
+  "confidence": "high"
+ },
+ "334487": {
+  "ops": 24642,
+  "flops": 395412204457,
+  "source": "experiments/2026-10-06_v77kash/v77-canary.tar.gz pkg d881eb60",
+  "evidence": "experiments/submissions.jsonl:43 note \"ops 24,642\"",
+  "confidence": "high"
+ },
+ "334545": {
+  "ops": 21082,
+  "flops": null,
+  "source": "experiments/2026-10-06_v78kashws/v78-canary.tar.gz pkg 726a97c2",
+  "evidence": "experiments/submissions.jsonl:44 note \"ops 21,082\"",
+  "confidence": "high",
+  "fb": 0.19296
+ },
+ "334576": {
+  "ops": 24852,
+  "flops": 395632405417,
+  "source": "experiments/2026-10-07_v79dress/v79-canary.tar.gz pkg b6a5b248",
+  "evidence": "experiments/submissions.jsonl:45 note \"ops 24,852\"",
+  "confidence": "high"
+ },
+ "334659": {
+  "ops": 25631,
+  "flops": 387079927313,
+  "source": "experiments/2026-10-07_v80hyg/v80-canary.tar.gz pkg 98977960",
+  "evidence": "experiments/submissions.jsonl:46 note \"ops 25,631\"",
+  "confidence": "high"
+ },
+ "334781": {
+  "ops": 23071,
+  "flops": null,
+  "source": "experiments/2026-10-07_v80hygws/v80ws-canary.tar.gz pkg cd5b3ea3",
+  "evidence": "experiments/submissions.jsonl:47 note \"ops 23,071\"",
+  "confidence": "high",
+  "fb": 0.18004
+ },
+ "334848": {
+  "ops": 25741,
+  "flops": null,
+  "source": "experiments/2026-10-08_v81star/v81-canary.tar.gz pkg 09ddd63f",
+  "evidence": "experiments/submissions.jsonl:48 note \"ops 25,741\"",
+  "confidence": "high",
+  "fb": 0.17616
+ },
+ "334855": {
+  "ops": 25741,
+  "flops": null,
+  "source": "experiments/2026-10-08_v81b/v81b-canary.tar.gz pkg ede7bcb1",
+  "evidence": "experiments/submissions.jsonl:49 note \"ops 25,741\"",
+  "confidence": "high",
+  "fb": 0.17616
+ },
+ "334918": {
+  "ops": 23181,
+  "flops": null,
+  "source": "experiments/2026-10-08_v81bws/v81bws-canary.tar.gz pkg 88a97a75",
+  "evidence": "experiments/submissions.jsonl:50 note \"ops 23,181\"",
+  "confidence": "high",
+  "fb": 0.18018
+ },
+ "334926": {
+  "ops": 25741,
+  "flops": null,
+  "source": "experiments/2026-10-09_v81c/v81c-canary.tar.gz pkg 422d99a9",
+  "evidence": "experiments/submissions.jsonl:51 note \"ops 25,741\"",
+  "confidence": "high",
+  "fb": 0.17629
+ },
+ "334948": {
+  "ops": 25741,
+  "flops": null,
+  "source": "experiments/2026-10-09_v81d/v81d-canary.tar.gz pkg 8b6eeaf7",
+  "evidence": "experiments/submissions.jsonl:52 note \"ops 25,741\"",
+  "confidence": "high",
+  "fb": 0.17629
+ },
+ "335165": {
+  "ops": 24283,
+  "flops": null,
+  "source": "experiments/2026-10-10_v82a/v82a-canary.tar.gz pkg 025fcbcb",
+  "evidence": "experiments/submissions.jsonl:53 note \"ops 24,283\"",
+  "confidence": "high",
+  "fb": 0.174135
+ },
+ "335227": {
+  "ops": 22375,
+  "flops": null,
+  "source": "experiments/2026-10-10_v82b/v82b-canary.tar.gz pkg 81afa05a",
+  "evidence": "experiments/submissions.jsonl:54 note \"ops 22,375\"",
+  "confidence": "high",
+  "fb": 0.16508
+ },
+ "335250": {
+  "ops": 20269,
+  "flops": null,
+  "source": "experiments/2026-10-10_v82bws/v82bws-canary.tar.gz pkg 34c6b688",
+  "evidence": "experiments/submissions.jsonl:55 note \"ops 20,269\"",
+  "confidence": "high",
+  "fb": 0.16895
+ },
+ "335253": {
+  "ops": 22375,
+  "flops": null,
+  "source": "experiments/2026-10-10_v82c/v82c-canary.tar.gz pkg 162f605a",
+  "evidence": "experiments/submissions.jsonl:56 note \"ops 22,375\"",
+  "confidence": "high",
+  "fb": 0.16508
+ },
+ "335298": {
+  "ops": 22375,
+  "flops": null,
+  "source": "experiments/2026-10-11_v82c_r2/v82c_r2-canary.tar.gz pkg cf1b2464",
+  "evidence": "experiments/submissions.jsonl:57 note \"ops 22,375\"",
+  "confidence": "high",
+  "fb": 0.16508
+ },
+ "335319": {
+  "ops": 20269,
+  "flops": null,
+  "source": "experiments/2026-10-11_v82c_r2ws/v82c_r2ws-ab.tar.gz pkg 6fc8de61",
+  "evidence": "experiments/submissions.jsonl:58 note \"ops 20,269\"",
+  "confidence": "high",
+  "fb": 0.16895
+ },
+ "335365": {
+  "ops": 22618,
+  "flops": null,
+  "source": "experiments/2026-10-11_v83_fold/v83_fold-canary.tar.gz pkg 7ea8add2",
+  "evidence": "experiments/submissions.jsonl:59 note \"ops 22,618\"",
+  "confidence": "high",
+  "fb": 0.16554
+ },
+ "335407": {
+  "ops": 24688,
+  "flops": null,
+  "source": "experiments/2026-10-11_v83_r4od16/v83_r4od16-canary.tar.gz pkg 2acf861b",
+  "evidence": "experiments/submissions.jsonl:60 note \"ops 24,688\"",
+  "confidence": "high",
+  "fb": 0.16441
+ },
+ "335455": {
+  "ops": 24688,
+  "flops": null,
+  "source": "experiments/2026-10-11_v83_r5od16/v83_r5od16-canary.tar.gz pkg b7e7cc68",
+  "evidence": "experiments/submissions.jsonl:61 note \"ops 24,688\"",
+  "confidence": "high",
+  "fb": 0.16441
+ },
+ "335461": {
+  "ops": 20512,
+  "flops": null,
+  "source": "experiments/2026-10-12_v83_r5ws/v83_r5ws-ab.tar.gz pkg 355f6c65",
+  "evidence": "experiments/submissions.jsonl:62 note \"ops 20,512\"",
+  "confidence": "high",
+  "fb": 0.16941
+ },
+ "335484": {
+  "ops": 24688,
+  "flops": null,
+  "source": "experiments/2026-10-12_v83_r7od16/v83_r7od16-canary.tar.gz pkg eecbdea4",
+  "evidence": "experiments/submissions.jsonl:63 note \"ops 24,688\"",
+  "confidence": "high",
+  "fb": 0.16441
+ },
+ "335562": {
+  "ops": 22113,
+  "flops": null,
+  "source": "experiments/2026-10-12_v84_age6/v84_age6-canary.tar.gz pkg c656b74d",
+  "evidence": "experiments/submissions.jsonl:64 note \"ops 22,113\"",
+  "confidence": "high",
+  "fb": 0.17354
+ },
+ "335688": {
+  "ops": 20512,
+  "flops": null,
+  "source": "estimator_k3_v83_r7ws.py | experiments/2026-10-13_v83_r7ws/v83_r7ws-ab.tar.gz pkg 7a6f87cd",
+  "evidence": "experiments/submissions.jsonl:65 note \"ops 20,512\"",
+  "confidence": "high",
+  "fb": 0.16941
+ },
+ "335697": {
+  "ops": 24576,
+  "flops": null,
+  "source": "estimator_k3_v85_sb2.py | experiments/2026-10-13_v85_sb2/v85_sb2-canary.tar.gz pkg 74fe2714",
+  "evidence": "experiments/submissions.jsonl:66 note \"ops 24,576\"",
+  "confidence": "high",
+  "fb": 0.165329
+ },
+ "335769": {
+  "ops": 23891,
+  "flops": null,
+  "source": "estimator_k3_v86_d16.py | experiments/2026-10-13_v86_d16/v86_d16-canary.tar.gz pkg 34ae9605",
+  "evidence": "experiments/submissions.jsonl:67 note \"ops 23,891\"",
+  "confidence": "high",
+  "fb": 0.163696
+ },
+ "335809": {
+  "ops": 24371,
+  "flops": null,
+  "source": "estimator_k3_v87_B.py | experiments/2026-10-13_v87/v87_B-canary.tar.gz pkg 03985ea8",
+  "evidence": "experiments/submissions.jsonl:68 note \"ops 24,371\"",
+  "confidence": "high",
+  "fb": 0.14422
+ },
+ "335891": {
+  "ops": 23241,
+  "flops": null,
+  "source": "estimator_k3_v87_Bws.py | experiments/2026-10-13_v87ws/v87_Bws-ab.tar.gz pkg 652af402",
+  "evidence": "experiments/submissions.jsonl:69 note \"ops 23,241\"",
+  "confidence": "high",
+  "fb": 0.14494
+ },
+ "336083": {
+  "ops": 24780,
+  "flops": null,
+  "source": "estimator_k3_v89_r2.py | experiments/2026-10-14_p8/v89_r2/v89_r2-canary.tar.gz pkg 550225ee",
+  "evidence": "experiments/submissions.jsonl:70 note \"ops 24,780\"",
+  "confidence": "high",
+  "fb": 0.14256
+ },
+ "336099": {
+  "ops": 24652,
+  "flops": null,
+  "source": "lane-s experiments/2026-10-14_s8/estimator_v89r2_sbkst2.py dc481446 | experiments/2026-10-14_s8_v89sbkst2/v89_sbkst2-canary.tar.gz pkg dc0c415c",
+  "evidence": "experiments/2026-10-14_s8_v89sbkst2/PREDICTIONS.md:19 \"24,652 ops x 12.91 us\" (fix array_equal/same FLOPs to d7023e86, RESULTS.md:3279 ops 24,652)",
+  "confidence": "high"
+ },
+ "336107": {
+  "ops": 24756,
+  "flops": null,
+  "source": "lane-m experiments/2026-10-14_o7/build/est_C_o7.py 0e27e7e1 | lane-m:experiments/2026-10-14_o7/est_C_o7-canary.tar.gz pkg ca9072ae",
+  "evidence": "experiments/submissions.jsonl:73 note \"ops 24,756\"",
+  "confidence": "high",
+  "fb": 0.13958
+ },
+ "336124": {
+  "ops": 24628,
+  "flops": 301530384085,
+  "source": "estimator_k3_v90a.py | experiments/2026-10-14_p8/v90/v90a-canary.tar.gz pkg b51ad545",
+  "evidence": "experiments/submissions.jsonl:74 note \"ops 24,628\"",
+  "confidence": "high"
+ },
+ "336142": {
+  "ops": 24864,
+  "flops": null,
+  "source": "estimator_k3_v90b_dw.py | experiments/2026-10-14_p8/v90/v90b_dw-canary.tar.gz pkg b58ebb28",
+  "evidence": "experiments/submissions.jsonl:75 note \"ops 24,864\"",
+  "confidence": "high",
+  "fb": 0.136761
+ },
+ "336147": {
+  "ops": 22704,
+  "flops": null,
+  "source": "lane-s estimator_v90a_Bws_l1.5e6.py d5e966e1 | experiments/2026-10-14_s8_v90aBws/v90a_Bws-ab.tar.gz pkg 51fa5e9a",
+  "evidence": "experiments/submissions.jsonl:76 note \"ops 22,704\"",
+  "confidence": "high",
+  "fb": 0.139811
+ },
+ "336198": {
+  "ops": 22831,
+  "flops": 300605000743,
+  "source": "lane-m experiments/2026-10-15_o8/est_o83b_svdjf.py 4ce122ff | lane-m:experiments/2026-10-15_o8/o83b-canary.tar.gz pkg 311fa7ee",
+  "evidence": "experiments/submissions.jsonl:77 note \"ops 22,831\"",
+  "confidence": "high"
+ },
+ "336217": {
+  "ops": 22831,
+  "flops": 300604562108,
+  "source": "lane-m:experiments/2026-10-15_o8/o83c-canary.tar.gz pkg 5bba2fa3",
+  "evidence": "RESULTS.md:3376 est_o83c_svdjf.py 19e9f52d #336217 ops 22,831; rig 300,604,562,108 F",
+  "confidence": "high"
+ },
+ "336253": {
+  "ops": 22846,
+  "flops": 300604577468,
+  "source": "estimator_k3_v92_o83c_dg90.py | experiments/2026-10-15_p9/v92/v92-canary.tar.gz pkg 5e7b6954",
+  "evidence": "experiments/submissions.jsonl:79 note \"ops ~22,846\"",
+  "confidence": "medium"
+ },
+ "336282": {
+  "ops": 22566,
+  "flops": 295732880763,
+  "source": "estimator_k3_v93_pad1024.py | experiments/2026-10-15_p9/v93/v93-canary.tar.gz pkg a1b266e2",
+  "evidence": "experiments/submissions.jsonl:80 note \"ops 22,566\"",
+  "confidence": "high"
+ },
+ "336312": {
+  "ops": 21326,
+  "flops": 296841236151,
+  "source": "estimator_k3_v93r_l11e6.py | experiments/2026-10-15_p9/v93r/v93r-canary.tar.gz pkg dc4530e1",
+  "evidence": "experiments/submissions.jsonl:81 note \"ops 21,326\"",
+  "confidence": "high"
+ },
+ "336358": {
+  "ops": 19526,
+  "flops": null,
+  "source": "experiments/2026-10-15_s9_Bv92/v92_Bws-ab.tar.gz pkg 1c6d9781",
+  "evidence": "experiments/submissions.jsonl:82 note \"ops 19,526\"",
+  "confidence": "high",
+  "fb": 0.13923
+ },
+ "336413": {
+  "ops": 21952,
+  "flops": 296161068270,
+  "source": "estimator_k3_v94_k92f_cl.py | experiments/2026-10-16_p10/v94/v94-canary.tar.gz pkg dded77bb",
+  "evidence": "experiments/submissions.jsonl:83 note \"ops 21,952\"",
+  "confidence": "high"
+ },
+ "336438": {
+  "ops": 21639,
+  "flops": null,
+  "source": "experiments/2026-10-16_p10/B2b/B2b-ab.tar.gz pkg a69a7c00",
+  "evidence": "experiments/submissions.jsonl:84 note \"ops 21,639\"",
+  "confidence": "high",
+  "fb": 0.139412
+ },
+ "336453": {
+  "ops": 22504,
+  "flops": 297626487034,
+  "source": "estimator_k3_v96_k94b_cl.py | experiments/2026-10-16_p10/v96/v96-canary.tar.gz pkg eb61bf95",
+  "evidence": "experiments/submissions.jsonl:85 note \"ops 22,504\"",
+  "confidence": "high"
+ },
+ "336470": {
+  "ops": 22504,
+  "flops": 297626487034,
+  "source": "estimator_k3_v96b_k94b_cl.py | experiments/2026-10-16_p10/v96b/v96b-canary.tar.gz pkg 657eee84",
+  "evidence": "experiments/submissions.jsonl:86 note \"ops 22,504\"",
+  "confidence": "high"
+ },
+ "336495": {
+  "ops": 20349,
+  "flops": null,
+  "source": "experiments/2026-10-16_p10/B2e/B2e-ab.tar.gz pkg 4e1c9ac0",
+  "evidence": "experiments/submissions.jsonl:87 note \"20,349 ops\"",
+  "confidence": "high",
+  "fb": 0.143035
+ },
+ "336508": {
+  "ops": 22121,
+  "flops": 302144186313,
+  "source": "estimator_k3_v97_nosvd_l3e6.py | experiments/2026-10-16_p10/v97/v97-canary.tar.gz pkg 9feb65cd",
+  "evidence": "experiments/submissions.jsonl:88 note \"ops 22,121\"",
+  "confidence": "high"
+ },
+ "336617": {
+  "ops": 21930,
+  "flops": 304896854738,
+  "source": "experiments/2026-10-16_p10/young_f853/young-f853b430-fs0123-canary.tar.gz pkg 457edcd0",
+  "evidence": "RESULTS.md:3706 \"New f853 ... actual304896854738F/21930calls\"",
+  "confidence": "high"
+ },
+ "336626": {
+  "ops": 21930,
+  "flops": 304896854738,
+  "source": "experiments/2026-10-17_p11/owned_sks_9fad/owned-sks-9fad96e3-fs0123-canary.tar.gz pkg 3fc24a64",
+  "evidence": "RESULTS.md:3858 \"9fad96e3 ... both304896854738F/21930ops\"",
+  "confidence": "high"
+ },
+ "336665": {
+  "ops": 21930,
+  "flops": 304896854738,
+  "source": "experiments/2026-10-17_p11/f2b7_selected369/selected369-f2b70fab-fs0123-canary.tar.gz pkg a1f6ff04",
+  "evidence": "RESULTS.md:4128 f2b70fab \"same304896854738F/21930ops\"; graded RESULTS.md:4216 304896447264F,21930ops",
+  "confidence": "high"
+ },
+ "336756": {
+  "ops": 22196,
+  "flops": 305072549138,
+  "source": "experiments/2026-10-17_p11/hub_selected84/hub84-474e7052-fs0123-diagnostic.tar.gz pkg 2076ec37",
+  "evidence": "RESULTS.md:4266 \"hub84/source474e7052 ... 305072549138F,22196ops\"",
+  "confidence": "high"
+ },
+ "336783": {
+  "ops": 22232,
+  "flops": 305081343250,
+  "source": "experiments/2026-10-17_p11/hub_even_b636/hub-even-b6367185-fs0123-diagnostic.tar.gz pkg 4fe45147",
+  "evidence": "RESULTS.md:5535 \"b636, genuine0.12.3 DEV0/2 each305081343250F/22232ops\"",
+  "confidence": "high"
+ },
+ "336993": {
+  "ops": 22235,
+  "flops": 286868957368,
+  "source": "C:/Users/samsu/.codex/worktrees/final-push-research/arc-whest/experiments/2026-10-16_finalpush/architecture_next/r1_actual_a4_deployment_packets/release/r1-actual-a4-8be40031-fs0123.tar.gz pkg bf5805db",
+  "evidence": "experiments/submissions.jsonl:94 note \"22235ops\"",
+  "confidence": "high"
+ },
+ "337456": {
+  "ops": 22633,
+  "flops": 286123309398,
+  "source": "experiments/2026-10-20_L2/a1-r3s736-lam06-7d381fc5.tar.gz pkg 4c5ca48e",
+  "evidence": "experiments/submissions.jsonl:95 note \"22,633 ops\"",
+  "confidence": "high"
+ },
+ "337462": {
+  "ops": 18943,
+  "flops": 306840769522,
+  "source": "experiments/2026-10-20_L3/b-young-r3s736-7a146f84.tar.gz pkg bfba72f7",
+  "evidence": "experiments/2026-10-20_L3/RESULT.md:196 verify_nominee on final B 7a146f84 \"meter exact 306,840,769,522 / 18,943\"; docs/DESIGNATION.md:34",
+  "confidence": "high"
+ },
+ "337470": {
+  "ops": 22235,
+  "flops": 286868957368,
+  "source": "cand_r3s736_lam10.py 73321458 | twin-r3s736-lam10-73321458.tar.gz pkg 08927fdc",
+  "evidence": "experiments/2026-10-21_L1/verify_lam10/verify.md meter ops == 22,235",
+  "confidence": "high"
+ },
+ "337481": {
+  "ops": 20630,
+  "flops": 290939253612,
+  "source": "cand_r3s736_lam30.py e823d62f | a1s-r3s736-lam30-e823d62f.tar.gz pkg 14f94773",
+  "evidence": "experiments/2026-10-21_L1/verify_lam30/verify.md meter ops == 20,630",
+  "confidence": "high"
+ }
+}

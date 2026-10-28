@@ -1,0 +1,69 @@
+# X6 analysis  n=256 L=8 seed=0  truncated chain = age4  reference = full
+MSE vs MC: age4 7.143e-06  full 4.717e-06  ratio 1.514
+
+## A. sizes.  rms(dvar_l) = rms of diag(dC_l); split of the energy of dvar_{l+1} into diagonal channel (W*W)dVarh_l and off-diagonal channel diag(W O_l W^T)
+l   rms(var_l)  rms(dvar_l)  ||dC_l||_F  rms(offdiag dC_l)  | next-layer split of ||dvar_{l+1}||^2: diag-ch  off-ch  cross   [noise energy frac if MC]
+1   2.005e+00  0.000e+00  0.000e+00  0.000e+00   |    nan     nan    +nan
+2   1.377e+00  0.000e+00  0.000e+00  0.000e+00   |    nan     nan    +nan
+3   9.970e-01  0.000e+00  0.000e+00  0.000e+00   |    nan     nan    +nan
+4   8.257e-01  0.000e+00  0.000e+00  0.000e+00   |    nan     nan    +nan
+5   6.522e-01  0.000e+00  0.000e+00  0.000e+00   |    nan     nan    +nan
+6   5.378e-01  0.000e+00  0.000e+00  0.000e+00   |  0.062   0.930  +0.008
+7   4.459e-01  1.531e-03  2.688e-01  1.048e-03   |  0.062   0.951  -0.013
+8   3.773e-01  2.542e-03  4.428e-01  1.726e-03
+
+## B. rank of the off-diagonal post-ReLU covariance error O_l and the fraction of the induced next-layer variance error it reproduces
+For each l: eigen-decompose O_l (sorted by |lambda|).  frobK = fraction of ||O_l||_F^2 in top-k;  R2K = R^2 of diag(W T_k W^T) against dvar^off_{l+1} = diag(W O_l W^T)
+(R2K-nd = same with the diagonal of T_k removed, i.e. pure off-diagonal readout).  GOE / scr = same numbers for a GOE matrix / sign-scrambled O_l (coherence baseline).
+l   PR    fro1   fro2   fro4   fro8   fro16  fro32  fro64  fro128 | R2_1   R2_2   R2_4   R2_8   R2_16  R2_32  R2_64  R2_128 | nd1   nd2   nd4   nd8   nd16  nd32  nd64  nd128
+1    (dC = 0)
+2    (dC = 0)
+3    (dC = 0)
+4    (dC = 0)
+5    (dC = 0)
+6     4.0  0.424  0.685  0.736  0.803  0.876  0.942  0.984  0.999 |  0.098  0.646  0.708  0.773  0.833  0.931  0.983  0.999 |  0.328  0.668  0.721  0.791  0.889  0.953  0.987  0.999
+    GOE 128.5  0.015  0.030  0.058  0.111  0.208  0.374  0.622  0.893 |  0.002  0.007  0.003  0.079  0.178  0.346  0.584  0.887
+    scr  72.1  0.031  0.061  0.114  0.208  0.361  0.580  0.821  0.980 |  0.011  0.039  0.101  0.180  0.309  0.576  0.818  0.981
+7     3.7  0.467  0.687  0.754  0.821  0.892  0.955  0.988  0.999 |  0.298  0.723  0.767  0.823  0.880  0.942  0.984  0.999 |  0.545  0.740  0.786  0.843  0.913  0.970  0.991  0.999
+    GOE 127.7  0.015  0.030  0.059  0.113  0.211  0.377  0.624  0.894 | -0.008  0.027  0.044  0.110  0.211  0.399  0.603  0.890
+    scr  60.6  0.041  0.080  0.142  0.250  0.416  0.635  0.854  0.984 |  0.044  0.097  0.162  0.268  0.445  0.676  0.856  0.984
+
+## B2. pre-activation dC_l itself: frobK and R^2 of diag(T_k) against dvar_l = diag(dC_l) (the in-layer quadratic readout of a rank-k state that represents dC_l)
+l   PR    fro1   fro2   fro4   fro8   fro16  fro32  fro64  fro128 | R2_1   R2_2   R2_4   R2_8   R2_16  R2_32  R2_64  R2_128
+7     4.2  0.404  0.665  0.743  0.818  0.899  0.964  0.995  1.000 |  0.293  0.681  0.726  0.819  0.912  0.972  0.995  1.000
+8     3.4  0.481  0.724  0.791  0.860  0.924  0.975  0.997  1.000 |  0.508  0.737  0.777  0.845  0.919  0.976  0.995  1.000
+
+## C. transport persistence from l0 = 7: top-k eigenpairs of dC_l0 transported as U <- W_(l+1) (gate_l * U) (and sqrtT2);
+    pure = R^2 of diag(U_l Lam U_l^T) on dvar_l (no innovation);  span = ||Q^T dC_l Q||_F^2/||dC_l||_F^2 (Q = orth(U_l));  core = R^2 of diag(Q (Q^T dC_l Q) Q^T) on dvar_l (oracle k x k core refit);
+    fullT = R^2 on dvar_l of the FULL-RANK transported dC_l0 (gate-linearised, no innovation) = how much of the later error is transported at all;  eigK = R^2 of the in-layer top-k truncation of dC_l (ceiling from B2).
+  transport = gate
+  l   pure4   pure16  pure32  pure64  | span4   span16  span32  span64  | core4   core16  core32  core64  |  fullT   eig16  eig32 
+  8     0.193   0.275   0.298   0.305 |   0.268   0.356   0.410   0.606 |   0.248   0.348   0.441   0.705 |   0.300   0.919  0.976
+  transport = sqrtT2
+  l   pure4   pure16  pure32  pure64  | span4   span16  span32  span64  | core4   core16  core32  core64  |  fullT   eig16  eig32 
+  8     0.175   0.261   0.288   0.291 |   0.246   0.335   0.396   0.582 |   0.210   0.347   0.435   0.669 |   0.283   0.919  0.976
+
+## D. innovation I_l = dC_l - W G dC_{l-1} G W^T (gate-linearised transport of the previous error; Iex = exact one-step propagation through cov_relu at mu_ref).
+    |I|/|dC| = ||I_l||_F^2/||dC_l||_F^2;  diag share = ||diag I_l||^2/||dvar_l||^2;  R2tr = R^2 of diag(transported dC_{l-1}) on dvar_l (= 1 - residual, the "transported share");  PR, frobK of I_l; sandR2K = R^2 of rank-k I_l sandwich at l+1
+l   |I|/|dC|  |Iex|/|dC|  diagI/dvar  R2tr   R2tr_ex   PR_I  fro4   fro16  fro32  fro64  | sR2_4   sR2_16  sR2_32  sR2_64    GOE_PR
+7      1.000      1.000      1.000   0.000    0.000    4.2   0.743  0.899  0.964  0.995 |   0.837   0.936   0.980   0.998   127.8
+8      0.711      0.710      0.700   0.300    0.303    3.3   0.796  0.922  0.973  0.996 |     nan     nan     nan     nan   128.2
+
+## D2. oracle-innovation, rank-k state: S_l = Trunc_k[ transport(S_{l-1}) + I_l ]  (perfect per-layer innovation, but the carried state is re-truncated to rank k every layer).
+    R^2 of diag(S_l) on dvar_l.  This is the ceiling of what an X6 state of rank k can reproduce of the variance error, whatever the MLP learns.
+l   k=4    k=8    k=16   k=32   k=64   k=128 
+7    0.726  0.819  0.912  0.972  0.995  1.000
+8    0.769  0.835  0.910  0.974  0.994  1.000
+
+## E. what per-neuron / diagonal messages explain of dvar_{l+1} (OLS R^2 with intercept):
+    fdiag = (W*W) dVarh_l (exact diagonal channel);  g2 = (W*W)(g_l^2 dvar_l) (X1-type message from the pre-act diagonal error);  loc = [var, mu, mu^2, g, phi] at l+1;  all = fdiag+loc
+l+1  R2(fdiag)  R2(g2)  R2(loc)  R2(all)   | off-channel share of ||dvar_{l+1}||^2  (from A)
+7       0.078    0.032    0.111    0.153   |  0.930
+8       0.056    0.056    0.386    0.386   |  0.951
+
+## F. coherent part of O_l: least-squares fit of the off-diagonal entries of O_l on the templates m_h m_h^T and Covh_ref (scale-mixture directions);
+    cos2(u1,m_h) = squared cosine of the top eigenvector of O_l with the post-ReLU mean;  tpl = fraction of ||O_l||_F^2 explained by the 2 templates;
+    remainder R_l = O_l - fit:  offE = ||diag(W R W^T)||^2/||diag(W O W^T)||^2 (share of the off-channel variance error that is NOT template);  PR, fro16/32, sandwich R2_16/32 of R_l, with GOE/scrambled baselines.
+l   cos2(u1,m_h) cos2(u1,mu)  tpl   a_mm      b_C     | offE   PR_R  fro16  fro32  R2_16  R2_32 | GOE16 GOE32 | scr16 scr32
+6      0.602       0.138     0.124 -2.97e-04 -3.79e-04 |  0.947   5.0  0.855  0.933  0.868  0.935 | 0.211 0.392 | 0.347 0.601
+7      0.752       0.258     0.229 -6.51e-04 -7.40e-05 |  0.692   5.3  0.860  0.941  0.871  0.938 | 0.252 0.410 | 0.382 0.616

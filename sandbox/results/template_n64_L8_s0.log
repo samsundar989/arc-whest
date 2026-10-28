@@ -1,0 +1,6 @@
+full tower MSE 8.162e-05  (floor 3.9e-09)
+A diag-born, gate                    gauss 2.929e-04 | +radius tmpl 2.585e-04 | +oracle tmpl 2.953e-03 | sphere(face sqrtT2) 2.887e-04 sphere(face g) 2.692e-04 sphere(full face) 2.652e-04 | n*eps_fit by layer [3.56, 6.34, 9.72, 12.08, 12.73, 12.57, 13.97]
+B diag+pair, gate                    gauss 1.363e-04 | +radius tmpl 5.551e-04 | +oracle tmpl 5.368e-04 | sphere(face sqrtT2) 1.198e-04 sphere(face g) 1.151e-04 sphere(full face) 1.149e-04 | n*eps_fit by layer [0.46, 2.75, 4.4, 4.25, 3.45, 1.74, 1.8]
+C diag+pair+hub, gate                gauss 9.419e-05 | +radius tmpl 5.262e-04 | +oracle tmpl 3.254e-04 | sphere(face sqrtT2) 7.754e-05 sphere(face g) 7.588e-05 sphere(full face) 7.298e-05 | n*eps_fit by layer [-0.01, 2.18, 3.39, 3.22, 2.73, 1.13, -0.2]
+D diag+pair+hub, exact transport     gauss 1.041e-04 | +radius tmpl 4.692e-04 | +oracle tmpl 2.708e-04 | sphere(face sqrtT2) 8.686e-05 sphere(face g) 8.417e-05 sphere(full face) 8.585e-05 | n*eps_fit by layer [-0.01, 1.54, 2.64, 2.88, 3.09, 2.32, 1.3]
+full tower, sphere formulation (full k4 tensor incl. face): 6.138e-05;  gaussian full k4 + face carrier: 6.388e-05
